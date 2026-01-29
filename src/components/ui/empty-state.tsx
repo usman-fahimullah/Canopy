@@ -1,0 +1,270 @@
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import {
+  Inbox,
+  Search,
+  FileX,
+  Users,
+  Briefcase,
+  AlertCircle,
+  Plus,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+/**
+ * EmptyState component for no-data illustrations
+ *
+ * Uses semantic tokens:
+ * - foreground-muted for text
+ * - background-muted for icon backgrounds
+ */
+
+const emptyStateVariants = cva(
+  "flex flex-col items-center justify-center text-center",
+  {
+    variants: {
+      size: {
+        sm: "py-8 gap-3",
+        md: "py-12 gap-4",
+        lg: "py-16 gap-6",
+      },
+    },
+    defaultVariants: {
+      size: "md",
+    },
+  }
+);
+
+const iconContainerVariants = cva(
+  "flex items-center justify-center rounded-full bg-background-muted",
+  {
+    variants: {
+      size: {
+        sm: "h-12 w-12",
+        md: "h-16 w-16",
+        lg: "h-20 w-20",
+      },
+    },
+    defaultVariants: {
+      size: "md",
+    },
+  }
+);
+
+const iconVariants = cva("text-foreground-muted", {
+  variants: {
+    size: {
+      sm: "h-6 w-6",
+      md: "h-8 w-8",
+      lg: "h-10 w-10",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+
+// Preset icons for common empty states
+const presetIcons = {
+  inbox: Inbox,
+  search: Search,
+  file: FileX,
+  users: Users,
+  jobs: Briefcase,
+  error: AlertCircle,
+};
+
+export interface EmptyStateProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof emptyStateVariants> {
+  /** Preset icon type */
+  preset?: keyof typeof presetIcons;
+  /** Custom icon */
+  icon?: React.ReactNode;
+  /** Title text */
+  title: string;
+  /** Description text */
+  description?: string;
+  /** Primary action button */
+  action?: {
+    label: string;
+    onClick: () => void;
+    icon?: React.ReactNode;
+  };
+  /** Secondary action button */
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
+  (
+    {
+      className,
+      size,
+      preset,
+      icon,
+      title,
+      description,
+      action,
+      secondaryAction,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const IconComponent = preset ? presetIcons[preset] : null;
+
+    return (
+      <div
+        ref={ref}
+        className={cn(emptyStateVariants({ size }), "animate-fade-in", className)}
+        {...props}
+      >
+        {/* Icon with pulse animation */}
+        {(icon || IconComponent) && (
+          <div
+            className={cn(
+              iconContainerVariants({ size }),
+              "animate-scale-in transition-all duration-normal",
+              "hover:scale-105 hover:shadow-sm"
+            )}
+          >
+            {icon || (
+              IconComponent && (
+                <IconComponent
+                  className={cn(
+                    iconVariants({ size }),
+                    "transition-transform duration-slow",
+                    preset === "search" && "animate-[bounce_2s_ease-in-out_infinite]",
+                    preset === "inbox" && "animate-[pulse_2s_ease-in-out_infinite]"
+                  )}
+                />
+              )
+            )}
+          </div>
+        )}
+
+        {/* Text with staggered animation */}
+        <div className="space-y-1.5 max-w-sm">
+          <h3
+            className={cn(
+              "font-medium text-foreground-default animate-fade-in",
+              size === "sm" && "text-body-sm",
+              size === "md" && "text-body",
+              size === "lg" && "text-heading-sm"
+            )}
+            style={{ animationDelay: "100ms" }}
+          >
+            {title}
+          </h3>
+          {description && (
+            <p
+              className={cn(
+                "text-foreground-muted animate-fade-in",
+                size === "sm" && "text-caption-sm",
+                size === "md" && "text-caption",
+                size === "lg" && "text-body-sm"
+              )}
+              style={{ animationDelay: "200ms" }}
+            >
+              {description}
+            </p>
+          )}
+        </div>
+
+        {/* Actions with staggered animation */}
+        {(action || secondaryAction || children) && (
+          <div
+            className="flex flex-col sm:flex-row items-center gap-2 animate-fade-in"
+            style={{ animationDelay: "300ms" }}
+          >
+            {action && (
+              <Button
+                onClick={action.onClick}
+                className="transition-all duration-fast hover:scale-105 active:scale-95"
+              >
+                {action.icon || <Plus className="mr-2 h-4 w-4 transition-transform duration-fast group-hover:rotate-90" />}
+                {action.label}
+              </Button>
+            )}
+            {secondaryAction && (
+              <Button
+                variant="ghost"
+                onClick={secondaryAction.onClick}
+                className="transition-all duration-fast hover:scale-105 active:scale-95"
+              >
+                {secondaryAction.label}
+              </Button>
+            )}
+            {children}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+EmptyState.displayName = "EmptyState";
+
+// Preset empty states for common ATS scenarios
+const EmptyStateNoCandidates = (props: Partial<EmptyStateProps>) => (
+  <EmptyState
+    preset="users"
+    title="No candidates yet"
+    description="Candidates will appear here once they apply to your jobs or you add them manually."
+    {...props}
+  />
+);
+
+const EmptyStateNoJobs = (props: Partial<EmptyStateProps>) => (
+  <EmptyState
+    preset="jobs"
+    title="No jobs posted"
+    description="Create your first job posting to start receiving applications."
+    action={{
+      label: "Create Job",
+      onClick: () => {},
+    }}
+    {...props}
+  />
+);
+
+const EmptyStateNoResults = (props: Partial<EmptyStateProps>) => (
+  <EmptyState
+    preset="search"
+    title="No results found"
+    description="Try adjusting your search or filter criteria."
+    {...props}
+  />
+);
+
+const EmptyStateNoActivity = (props: Partial<EmptyStateProps>) => (
+  <EmptyState
+    preset="inbox"
+    title="No activity yet"
+    description="Activity and updates will appear here."
+    {...props}
+  />
+);
+
+const EmptyStateError = (props: Partial<EmptyStateProps>) => (
+  <EmptyState
+    preset="error"
+    title="Something went wrong"
+    description="We couldn't load this content. Please try again."
+    {...props}
+  />
+);
+
+export {
+  EmptyState,
+  EmptyStateNoCandidates,
+  EmptyStateNoJobs,
+  EmptyStateNoResults,
+  EmptyStateNoActivity,
+  EmptyStateError,
+  emptyStateVariants,
+};

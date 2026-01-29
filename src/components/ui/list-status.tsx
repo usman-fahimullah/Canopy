@@ -1,0 +1,160 @@
+"use client";
+
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import {
+  CheckCircle,
+  Warning,
+  Star,
+  BookmarkSimple,
+} from "@phosphor-icons/react";
+
+/**
+ * ListStatus component based on Figma Design System (1281:4500)
+ *
+ * A circular status indicator badge with an icon, used to show different states
+ * like critical alerts, favorites, success, BIPOC-owned businesses, or bookmarks.
+ *
+ * This is a standalone version of the badge used in Avatar components.
+ *
+ * Figma Specs:
+ * - Size: 20px diameter (default)
+ * - Border: 2px white
+ * - Border radius: full (24px in Figma, but we use rounded-full)
+ * - Icon: 14px (fits within 14px inner area after border)
+ *
+ * Variants:
+ * - Critical: red-100 bg (#FFEBF4), red-500 icon (#FF5C5C), Warning icon
+ * - Favorite: yellow-100 bg (#FFF7D6), yellow-400 icon (#FFCE47), Star icon
+ * - Success: green-200 bg (#DCFAC8), green-600 icon (#3BA36F), CheckCircle icon
+ * - BIPOC Owned: purple-200 bg (#F1E0FF), purple-600 icon (#5B1DB8), CheckCircle icon
+ * - Bookmark: blue-100 bg (#E5F1FF), blue-500 icon (#3369FF), Bookmark icon
+ */
+
+export type ListStatusVariant = "critical" | "favorite" | "success" | "bipoc" | "bookmark";
+
+const listStatusConfig: Record<
+  ListStatusVariant,
+  { bg: string; iconColor: string; label: string; icon: React.ElementType }
+> = {
+  critical: {
+    bg: "bg-[var(--primitive-red-100)]",
+    iconColor: "text-[var(--primitive-red-500)]",
+    label: "Critical",
+    icon: Warning,
+  },
+  favorite: {
+    bg: "bg-[var(--primitive-yellow-100)]",
+    iconColor: "text-[var(--primitive-yellow-400)]",
+    label: "Favorite",
+    icon: Star,
+  },
+  success: {
+    bg: "bg-[var(--primitive-green-200)]",
+    iconColor: "text-[var(--primitive-green-600)]",
+    label: "Success",
+    icon: CheckCircle,
+  },
+  bipoc: {
+    bg: "bg-[var(--primitive-purple-200)]",
+    iconColor: "text-[var(--primitive-purple-600)]",
+    label: "BIPOC Owned",
+    icon: CheckCircle,
+  },
+  bookmark: {
+    bg: "bg-[var(--primitive-blue-100)]",
+    iconColor: "text-[var(--primitive-blue-500)]",
+    label: "Bookmarked",
+    icon: BookmarkSimple,
+  },
+};
+
+const listStatusVariants = cva(
+  [
+    "inline-flex items-center justify-center",
+    "rounded-full",
+    "border-2 border-white",
+    // Shadow for better visibility on light backgrounds
+    "shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
+  ],
+  {
+    variants: {
+      size: {
+        xs: "size-3", // 12px
+        sm: "size-4", // 16px
+        default: "size-5", // 20px (Figma default)
+        lg: "size-6", // 24px
+        xl: "size-7", // 28px
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+);
+
+const iconSizeMap: Record<NonNullable<VariantProps<typeof listStatusVariants>["size"]>, string> = {
+  xs: "size-2", // 8px
+  sm: "size-2.5", // 10px
+  default: "size-3.5", // 14px
+  lg: "size-4", // 16px
+  xl: "size-5", // 20px
+};
+
+export interface ListStatusProps
+  extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children">,
+    VariantProps<typeof listStatusVariants> {
+  /** The status variant to display */
+  variant: ListStatusVariant;
+  /** Custom icon to override the default icon for the variant */
+  icon?: React.ReactNode;
+  /** Whether to show the border (default: true) */
+  bordered?: boolean;
+}
+
+const ListStatus = React.forwardRef<HTMLSpanElement, ListStatusProps>(
+  (
+    {
+      className,
+      variant,
+      size = "default",
+      icon,
+      bordered = true,
+      ...props
+    },
+    ref
+  ) => {
+    const config = listStatusConfig[variant];
+    const IconComponent = config.icon;
+    const iconSize = iconSizeMap[size || "default"];
+
+    return (
+      <span
+        ref={ref}
+        role="status"
+        aria-label={config.label}
+        title={config.label}
+        className={cn(
+          listStatusVariants({ size }),
+          config.bg,
+          !bordered && "border-0 shadow-none",
+          className
+        )}
+        {...props}
+      >
+        {icon || (
+          <IconComponent
+            weight="fill"
+            className={cn(iconSize, config.iconColor)}
+            aria-hidden="true"
+          />
+        )}
+      </span>
+    );
+  }
+);
+
+ListStatus.displayName = "ListStatus";
+
+export { ListStatus, listStatusVariants, listStatusConfig };

@@ -1,0 +1,2531 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ============================================
+       TRAILS DESIGN SYSTEM - Design Tokens
+       Green Jobs Board / Canopy ATS
+
+       Token Hierarchy:
+       1. PRIMITIVE - Raw color values (100-800 scales)
+       2. SEMANTIC  - Intent-based (background, foreground, border, surface)
+       3. COMPONENT - Component-specific tokens
+       ============================================ */
+
+    /* ============================================
+       TIER 1: PRIMITIVE TOKENS
+       Raw color values - 100-800 scales
+       ============================================ */
+
+    /* Green Scale (Brand/Primary) */
+    --primitive-green-100: #EAFFE0;
+    --primitive-green-200: #DCFAC8;
+    --primitive-green-300: #BCEBB2;
+    --primitive-green-400: #8EE07E;
+    --primitive-green-500: #5ECC70;
+    --primitive-green-600: #3BA36F;
+    --primitive-green-700: #0E5249;
+    --primitive-green-800: #0A3D2C;
+
+    /* Neutral Scale */
+    --primitive-neutral-0: #FFFFFF;
+    --primitive-neutral-100: #FAF9F7;
+    --primitive-neutral-200: #F2EDE9;
+    --primitive-neutral-300: #E5DFD8;
+    --primitive-neutral-400: #CCC6C0;
+    --primitive-neutral-500: #A39D96;
+    --primitive-neutral-600: #7A7671;
+    --primitive-neutral-700: #3D3A37;
+    --primitive-neutral-800: #1F1D1C;
+    --primitive-neutral-900: #000000;
+
+    /* Blue Scale (Info) */
+    --primitive-blue-100: #E5F1FF;
+    --primitive-blue-200: #CCE4FF;
+    --primitive-blue-300: #99C9FF;
+    --primitive-blue-400: #408CFF;
+    --primitive-blue-500: #3369FF;
+    --primitive-blue-600: #0D3EC7;
+    --primitive-blue-700: #00217A;
+    --primitive-blue-800: #001652;
+
+    /* Red Scale (Error/Destructive) */
+    --primitive-red-100: #FFEBF4;
+    --primitive-red-200: #FFD6E9;
+    --primitive-red-300: #FFADCE;
+    --primitive-red-400: #FF8599;
+    --primitive-red-500: #FF5C5C;
+    --primitive-red-600: #E90000;
+    --primitive-red-700: #AE0101;
+    --primitive-red-800: #5C0000;
+
+    /* Orange Scale (Warning) */
+    --primitive-orange-100: #FFEDE0;
+    --primitive-orange-200: #FFDAC2;
+    --primitive-orange-300: #FFAD85;
+    --primitive-orange-400: #FF8547;
+    --primitive-orange-500: #F5580A;
+    --primitive-orange-600: #B83D00;
+    --primitive-orange-700: #7A2900;
+    --primitive-orange-800: #521B00;
+
+    /* Yellow Scale (Caution/Highlight) */
+    --primitive-yellow-100: #FFF7D6;
+    --primitive-yellow-200: #FFEFAD;
+    --primitive-yellow-300: #FFDA75;
+    --primitive-yellow-400: #FFCE47;
+    --primitive-yellow-500: #E5B225;
+    --primitive-yellow-600: #B88A1D;
+    --primitive-yellow-700: #665510;
+    --primitive-yellow-800: #3D330A;
+
+    /* Purple Scale (Accent/Interview) */
+    --primitive-purple-100: #F7F2FF;
+    --primitive-purple-200: #F1E0FF;
+    --primitive-purple-300: #E2C2FF;
+    --primitive-purple-400: #C285FF;
+    --primitive-purple-500: #9C59FF;
+    --primitive-purple-600: #5B1DB8;
+    --primitive-purple-700: #31007A;
+    --primitive-purple-800: #1B0043;
+
+    /* Candid Brand Color (Mentorship Platform) */
+    --candid-dark: #072924;
+    --candid-dark-hover: #0a3d35;
+
+    /* ============================================
+       GRADIENTS - Trails Design System
+       Multi-color directional gradients from Figma
+       All use primitive color tokens for consistency
+       ============================================ */
+
+    /* --- GREEN GRADIENTS --- */
+    /* Green family endings with different color starts */
+
+    --gradient-green-100: linear-gradient(135deg, var(--primitive-blue-100) 0%, var(--primitive-blue-300) 30.5%, var(--primitive-green-600) 65.5%, var(--primitive-green-700) 100%);
+    --gradient-green-200: linear-gradient(135deg, var(--primitive-purple-200) 0%, var(--primitive-purple-300) 33.5%, var(--primitive-green-600) 66.5%, var(--primitive-green-700) 100%);
+    --gradient-green-300: linear-gradient(135deg, var(--primitive-red-200) 0%, var(--primitive-red-300) 33%, var(--primitive-green-600) 65.5%, var(--primitive-green-700) 100%);
+    --gradient-green-400: linear-gradient(135deg, var(--primitive-orange-100) 0%, var(--primitive-orange-300) 33.5%, var(--primitive-green-600) 68.5%, var(--primitive-green-700) 100%);
+    --gradient-green-500: linear-gradient(135deg, var(--primitive-yellow-100) 0%, var(--primitive-yellow-300) 33.5%, var(--primitive-green-600) 67.5%, var(--primitive-green-700) 100%);
+
+    /* --- BLUE GRADIENTS --- */
+    /* Blue family endings with different color starts */
+
+    --gradient-blue-100: linear-gradient(135deg, var(--primitive-green-800) 0%, var(--primitive-green-700) 34%, var(--primitive-blue-400) 74%, var(--primitive-blue-200) 100%);
+    --gradient-blue-200: linear-gradient(135deg, var(--primitive-purple-300) 0%, var(--primitive-purple-500) 31.5%, var(--primitive-blue-500) 66.5%, var(--primitive-blue-400) 100%);
+    --gradient-blue-300: linear-gradient(135deg, var(--primitive-red-200) 0%, var(--primitive-red-400) 31.5%, var(--primitive-blue-500) 66.5%, var(--primitive-blue-400) 100%);
+    --gradient-blue-400: linear-gradient(135deg, var(--primitive-orange-200) 0%, var(--primitive-orange-400) 31.5%, var(--primitive-blue-400) 79%, var(--primitive-blue-500) 100%);
+    --gradient-blue-500: linear-gradient(135deg, var(--primitive-yellow-300) 0%, var(--primitive-yellow-100) 33%, var(--primitive-blue-300) 66.5%, var(--primitive-blue-400) 100%);
+
+    /* --- PURPLE GRADIENTS --- */
+    /* Purple family endings with different color starts */
+
+    --gradient-purple-100: linear-gradient(135deg, var(--primitive-green-400) 0%, var(--primitive-green-600) 31.5%, var(--primitive-purple-400) 69.5%, var(--primitive-purple-300) 100%);
+    --gradient-purple-200: linear-gradient(135deg, var(--primitive-blue-500) 0%, var(--primitive-blue-400) 36%, var(--primitive-purple-400) 69.5%, var(--primitive-purple-500) 100%);
+    --gradient-purple-300: linear-gradient(135deg, var(--primitive-red-300) 0%, var(--primitive-red-500) 36%, var(--primitive-purple-500) 69.5%, var(--primitive-purple-400) 100%);
+    --gradient-purple-400: linear-gradient(135deg, var(--primitive-orange-200) 0%, var(--primitive-orange-400) 36%, var(--primitive-purple-600) 69.5%, var(--primitive-purple-700) 100%);
+    --gradient-purple-500: linear-gradient(135deg, var(--primitive-yellow-200) 0%, var(--primitive-yellow-300) 32.5%, var(--primitive-purple-500) 69.5%, var(--primitive-purple-600) 100%);
+
+    /* --- RED GRADIENTS --- */
+    /* Red family endings with different color starts */
+
+    --gradient-red-100: linear-gradient(135deg, var(--primitive-green-300) 0%, var(--primitive-green-600) 31.5%, var(--primitive-red-500) 68%, var(--primitive-red-400) 100%);
+    --gradient-red-200: linear-gradient(135deg, var(--primitive-blue-200) 0%, var(--primitive-blue-300) 30.5%, var(--primitive-red-400) 67.5%, var(--primitive-red-500) 100%);
+    --gradient-red-300: linear-gradient(135deg, var(--primitive-purple-200) 0%, var(--primitive-purple-400) 35.35%, var(--primitive-red-700) 69.73%, var(--primitive-red-800) 100%);
+    --gradient-red-400: linear-gradient(135deg, var(--primitive-orange-300) 0%, var(--primitive-orange-400) 34.5%, var(--primitive-red-500) 69.73%, var(--primitive-red-600) 100%);
+    --gradient-red-500: linear-gradient(135deg, var(--primitive-yellow-100) 0%, var(--primitive-yellow-200) 32%, var(--primitive-red-400) 69%, var(--primitive-red-500) 100%);
+
+    /* --- YELLOW GRADIENTS --- */
+    /* Yellow family endings with different color starts */
+
+    --gradient-yellow-100: linear-gradient(135deg, var(--primitive-green-400) 0%, var(--primitive-green-300) 25%, var(--primitive-yellow-200) 67.5%, var(--primitive-yellow-300) 100%);
+    --gradient-yellow-200: linear-gradient(135deg, var(--primitive-blue-400) 0%, var(--primitive-blue-300) 31.5%, var(--primitive-yellow-300) 67.5%, var(--primitive-yellow-300) 100%);
+    --gradient-yellow-300: linear-gradient(135deg, var(--primitive-purple-400) 0%, var(--primitive-purple-300) 37.5%, var(--primitive-yellow-300) 67.5%, var(--primitive-yellow-400) 100%);
+    --gradient-yellow-400: linear-gradient(135deg, var(--primitive-red-400) 0%, var(--primitive-red-300) 36%, var(--primitive-yellow-300) 67.5%, var(--primitive-yellow-400) 100%);
+    --gradient-yellow-500: linear-gradient(135deg, var(--primitive-orange-400) 0%, var(--primitive-orange-500) 0.01%, var(--primitive-orange-300) 36%, var(--primitive-yellow-300) 67.5%, var(--primitive-yellow-400) 100%);
+
+    /* --- ORANGE GRADIENTS --- */
+    /* Orange family endings with different color starts */
+
+    --gradient-orange-100: linear-gradient(135deg, var(--primitive-green-700) 0%, var(--primitive-green-800) 33.5%, var(--primitive-orange-500) 68.5%, var(--primitive-orange-300) 100%);
+    --gradient-orange-200: linear-gradient(134.94deg, var(--primitive-blue-300) 15.25%, var(--primitive-blue-400) 42.97%, var(--primitive-orange-600) 70.69%, var(--primitive-orange-500) 84.54%);
+    --gradient-orange-300: linear-gradient(135deg, var(--primitive-purple-300) 0%, var(--primitive-purple-400) 40%, var(--primitive-orange-500) 80%, var(--primitive-orange-600) 100%);
+    --gradient-orange-400: linear-gradient(134.94deg, var(--primitive-red-300) 16.07%, var(--primitive-red-500) 43.75%, var(--primitive-orange-500) 71.42%, var(--primitive-orange-500) 85.26%);
+    --gradient-orange-500: linear-gradient(134.94deg, var(--primitive-yellow-300) 16.07%, var(--primitive-yellow-400) 43.75%, var(--primitive-orange-400) 71.42%, var(--primitive-orange-500) 85.26%);
+
+    /* --- RAINBOW GRADIENTS --- */
+    /* Multi-color horizontal gradients (98.15deg angle) */
+
+    --gradient-rainbow-100: linear-gradient(98.15deg, var(--primitive-green-100) 0%, var(--primitive-blue-100) 19.79%, var(--primitive-purple-100) 38.54%, var(--primitive-red-100) 57.81%, var(--primitive-orange-100) 78.65%, var(--primitive-yellow-100) 100%);
+    --gradient-rainbow-200: linear-gradient(98.15deg, var(--primitive-green-200) 0%, var(--primitive-blue-200) 19.79%, var(--primitive-purple-200) 38.54%, var(--primitive-red-200) 57.81%, var(--primitive-orange-200) 78.65%, var(--primitive-yellow-100) 100%);
+    --gradient-rainbow-300: linear-gradient(98.15deg, var(--primitive-green-300) 0%, var(--primitive-blue-300) 19.79%, var(--primitive-purple-300) 38.54%, var(--primitive-red-300) 57.81%, var(--primitive-orange-300) 78.65%, var(--primitive-yellow-300) 100%);
+    --gradient-rainbow-400: linear-gradient(98.15deg, var(--primitive-green-400) 0%, var(--primitive-blue-400) 19.79%, var(--primitive-purple-400) 38.54%, var(--primitive-red-400) 57.81%, var(--primitive-orange-400) 78.65%, var(--primitive-yellow-400) 100%);
+
+    /* --- HELPER GRADIENTS --- */
+    /* For UI patterns (overlays, subtle backgrounds) */
+
+    --gradient-cover-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 100%);
+    --gradient-subtle-green: linear-gradient(180deg, var(--primitive-green-100) 0%, var(--primitive-neutral-0) 100%);
+    --gradient-subtle-blue: linear-gradient(180deg, var(--primitive-blue-100) 0%, var(--primitive-neutral-0) 100%);
+    --gradient-subtle-purple: linear-gradient(180deg, var(--primitive-purple-100) 0%, var(--primitive-neutral-0) 100%);
+
+    /* ============================================
+       TIER 2: SEMANTIC TOKENS
+       Intent-based naming for consistent usage
+       ============================================ */
+
+    /* --- BACKGROUNDS --- */
+
+    /* App backgrounds */
+    --background-default: var(--primitive-neutral-0);
+    --background-subtle: var(--primitive-neutral-100);
+    --background-muted: var(--primitive-neutral-200);
+    --background-emphasized: var(--primitive-neutral-300);
+    --background-inverse: var(--primitive-neutral-800);
+
+    /* Brand backgrounds */
+    --background-brand: var(--primitive-green-600);
+    --background-brand-subtle: var(--primitive-green-100);
+    --background-brand-muted: var(--primitive-green-200);
+    --background-brand-emphasis: var(--primitive-green-700);
+
+    /* Interactive backgrounds */
+    --background-interactive-default: var(--primitive-neutral-0);
+    --background-interactive-hover: var(--primitive-neutral-200);
+    --background-interactive-active: var(--primitive-neutral-300);
+    --background-interactive-selected: var(--primitive-green-100);
+    --background-interactive-disabled: var(--primitive-neutral-200);
+
+    /* Status backgrounds */
+    --background-success: var(--primitive-green-100);
+    --background-success-emphasis: var(--primitive-green-600);
+    --background-warning: var(--primitive-orange-100);
+    --background-warning-emphasis: var(--primitive-orange-500);
+    --background-error: var(--primitive-red-100);
+    --background-error-emphasis: var(--primitive-red-600);
+    --background-info: var(--primitive-blue-100);
+    --background-info-emphasis: var(--primitive-blue-500);
+
+    /* --- FOREGROUND (Text & Icons) --- */
+
+    /* Primary text hierarchy */
+    --foreground-default: var(--primitive-neutral-800);
+    --foreground-muted: var(--primitive-neutral-700);
+    --foreground-subtle: var(--primitive-neutral-600);
+    --foreground-disabled: var(--primitive-neutral-500);
+    --foreground-inverse: var(--primitive-neutral-0);
+    --foreground-on-emphasis: #FFFFFF;
+
+    /* Brand text */
+    --foreground-brand: var(--primitive-green-700);
+    --foreground-brand-emphasis: var(--primitive-green-800);
+
+    /* Status text */
+    --foreground-success: var(--primitive-green-700);
+    --foreground-warning: var(--primitive-orange-700);
+    --foreground-error: var(--primitive-red-700);
+    --foreground-info: var(--primitive-blue-700);
+
+    /* Link colors */
+    --foreground-link: var(--primitive-blue-600);
+    --foreground-link-hover: var(--primitive-blue-700);
+    --foreground-link-visited: var(--primitive-purple-600);
+
+    /* --- BORDERS --- */
+
+    /* Default borders */
+    --border-default: var(--primitive-neutral-400);
+    --border-muted: var(--primitive-neutral-300);
+    --border-emphasis: var(--primitive-neutral-500);
+    --border-strong: var(--primitive-neutral-600);
+    --border-inverse: var(--primitive-neutral-0);
+    --border-disabled: var(--primitive-neutral-300);
+
+    /* Brand borders */
+    --border-brand: var(--primitive-green-400);
+    --border-brand-emphasis: var(--primitive-green-500);
+
+    /* Interactive borders */
+    --border-interactive-default: var(--primitive-neutral-400);
+    --border-interactive-hover: var(--primitive-neutral-500);
+    --border-interactive-focus: var(--primitive-green-500);
+    --border-interactive-active: var(--primitive-green-600);
+
+    /* Status borders */
+    --border-success: var(--primitive-green-400);
+    --border-warning: var(--primitive-orange-400);
+    --border-error: var(--primitive-red-400);
+    --border-info: var(--primitive-blue-400);
+
+    /* --- SURFACES (Elevated layers) --- */
+    --surface-default: var(--primitive-neutral-0);
+    --surface-raised: var(--primitive-neutral-0);
+    --surface-overlay: var(--primitive-neutral-0);
+    --surface-sunken: var(--primitive-neutral-100);
+    --surface-inset: var(--primitive-neutral-200);
+
+    /* ============================================
+       TIER 3: COMPONENT TOKENS
+       Component-specific semantic tokens
+       ============================================ */
+
+    /* --- BUTTON --- */
+    /* Primary Button - Figma: bg #0A3D2C (green-800), hover #0e5249 (green-700), text #e5f1ff (blue-100) */
+    --button-primary-background: var(--primitive-green-800);
+    --button-primary-background-hover: var(--primitive-green-700);
+    --button-primary-background-active: var(--primitive-green-900);
+    --button-primary-foreground: var(--primitive-blue-100);
+
+    /* Secondary Button - Figma: bg #cce4ff (blue-200), hover #99c9ff (blue-300), text #0A3D2C (green-800) */
+    --button-secondary-background: var(--primitive-blue-200);
+    --button-secondary-background-hover: var(--primitive-blue-300);
+    --button-secondary-background-active: var(--primitive-blue-400);
+    --button-secondary-foreground: var(--primitive-green-800);
+
+    /* Tertiary Button - Figma: bg #f2ede9 (neutral-200), hover #e5dfd8 (neutral-300), text #0A3D2C (green-800) */
+    --button-tertiary-background: var(--primitive-neutral-200);
+    --button-tertiary-background-hover: var(--primitive-neutral-300);
+    --button-tertiary-background-active: var(--primitive-neutral-400);
+    --button-tertiary-foreground: var(--primitive-green-800);
+
+    /* Inverse Button - Figma: bg white, hover #eaffe0 (green-100), text #0A3D2C (green-800) */
+    --button-inverse-background: var(--primitive-neutral-0);
+    --button-inverse-background-hover: var(--primitive-green-100);
+    --button-inverse-background-active: var(--primitive-green-200);
+    --button-inverse-foreground: var(--primitive-green-800);
+
+    --button-outline-background: transparent;
+    --button-outline-background-hover: var(--primitive-neutral-200);
+    --button-outline-background-active: var(--primitive-neutral-300);
+    --button-outline-foreground: var(--primitive-neutral-800);
+    --button-outline-border: var(--primitive-neutral-400);
+
+    --button-ghost-background: transparent;
+    --button-ghost-background-hover: var(--primitive-neutral-200);
+    --button-ghost-background-active: var(--primitive-neutral-300);
+    --button-ghost-foreground: var(--primitive-neutral-700);
+
+    /* Destructive Button - Figma: bg #ff5c5c (red-500), hover #e90000 (red-600), text white */
+    --button-destructive-background: var(--primitive-red-500);
+    --button-destructive-background-hover: var(--primitive-red-600);
+    --button-destructive-background-active: var(--primitive-red-700);
+    --button-destructive-foreground: #FFFFFF;
+
+    --button-disabled-background: var(--primitive-neutral-200);
+    --button-disabled-foreground: var(--primitive-neutral-500);
+
+    /* --- INPUT / TEXTAREA / SEARCH --- */
+    --input-background: var(--primitive-neutral-100);
+    --input-background-hover: var(--primitive-neutral-200);
+    --input-background-focus: var(--primitive-neutral-0);
+    --input-background-disabled: var(--primitive-neutral-200);
+    --input-foreground: var(--primitive-neutral-800);
+    --input-foreground-placeholder: var(--primitive-neutral-500);
+    --input-border: var(--primitive-neutral-200);
+    --input-border-hover: var(--primitive-neutral-300);
+    --input-border-focus: var(--primitive-green-500);
+    --input-border-error: var(--primitive-red-500);
+    --input-border-success: var(--primitive-green-500);
+
+    /* --- SELECT / DROPDOWN --- */
+    /* Figma spec (33:15667): neutral-100 bg, neutral-200 border, 8px radius */
+    --select-background: var(--primitive-neutral-100);
+    --select-background-open: var(--primitive-neutral-0);
+    --select-border: var(--primitive-neutral-200);
+    --select-border-hover: var(--primitive-neutral-300);
+    --select-border-focus: var(--primitive-green-500);
+    --select-border-success: var(--primitive-green-500);
+    --select-border-error: var(--primitive-red-500);
+    --select-foreground: var(--primitive-green-800);
+    --select-foreground-placeholder: var(--primitive-neutral-600);
+    --select-foreground-error: var(--primitive-red-500);
+    --select-icon: var(--primitive-green-800);
+    /* Dropdown content */
+    --select-content-background: var(--primitive-neutral-0);
+    --select-content-shadow: 1px 2px 16px 0px rgba(31, 29, 28, 0.08);
+    /* Item states */
+    --select-item-background-hover: var(--primitive-neutral-100);
+    --select-item-background-selected: var(--primitive-neutral-100);
+    --select-item-foreground: var(--primitive-green-800);
+    --select-item-foreground-selected: var(--primitive-blue-500);
+    --select-item-checkmark: var(--primitive-blue-500);
+
+    /* --- SELECTION --- */
+    --selection-background: var(--primitive-green-200);
+    --selection-foreground: var(--primitive-green-800);
+
+    /* --- CARD --- */
+    --card-background: var(--primitive-neutral-0);
+    --card-background-hover: var(--primitive-neutral-100);
+    --card-background-active: var(--primitive-neutral-200);
+    --card-background-selected: var(--primitive-green-100);
+    --card-background-feature: var(--primitive-green-800);
+    --card-foreground: var(--primitive-neutral-800);
+    --card-foreground-muted: var(--primitive-neutral-700);
+    --card-foreground-feature: var(--primitive-neutral-0);
+    --card-foreground-feature-muted: var(--primitive-neutral-400);
+    --card-border: var(--primitive-neutral-300);
+    --card-border-hover: var(--primitive-neutral-400);
+
+    /* --- BADGE --- */
+    --badge-neutral-background: var(--primitive-neutral-200);
+    --badge-neutral-foreground: var(--primitive-neutral-700);
+    --badge-neutral-border: var(--primitive-neutral-400);
+
+    --badge-primary-background: var(--primitive-green-100);
+    --badge-primary-foreground: var(--primitive-green-700);
+    --badge-primary-border: var(--primitive-green-300);
+
+    --badge-success-background: var(--primitive-green-100);
+    --badge-success-foreground: var(--primitive-green-700);
+    --badge-success-border: var(--primitive-green-300);
+
+    --badge-warning-background: var(--primitive-orange-100);
+    --badge-warning-foreground: var(--primitive-orange-700);
+    --badge-warning-border: var(--primitive-orange-300);
+
+    --badge-error-background: var(--primitive-red-100);
+    --badge-error-foreground: var(--primitive-red-700);
+    --badge-error-border: var(--primitive-red-300);
+
+    --badge-info-background: var(--primitive-blue-100);
+    --badge-info-foreground: var(--primitive-blue-700);
+    --badge-info-border: var(--primitive-blue-300);
+
+    --badge-accent-background: var(--primitive-purple-100);
+    --badge-accent-foreground: var(--primitive-purple-700);
+    --badge-accent-border: var(--primitive-purple-300);
+
+    /* --- NAVIGATION --- */
+    --nav-background: var(--primitive-green-800);
+    --nav-foreground: var(--primitive-neutral-0);
+    --nav-foreground-muted: var(--primitive-neutral-400);
+    --nav-item-background-hover: var(--primitive-green-700);
+    --nav-item-background-active: var(--primitive-green-700);
+    --nav-item-foreground-active: var(--primitive-neutral-0);
+    --nav-border: var(--primitive-green-700);
+
+    /* --- TABLE --- */
+    --table-background: var(--primitive-neutral-0);
+    --table-background-header: var(--primitive-neutral-0);
+    --table-background-row-hover: var(--primitive-neutral-100);
+    --table-background-row-selected: var(--primitive-neutral-100);
+    --table-background-row-stripe: var(--primitive-neutral-100);
+    --table-foreground: var(--primitive-neutral-800);
+    --table-foreground-header: var(--primitive-neutral-600);
+    --table-border: var(--primitive-neutral-200);
+    --table-border-header: var(--primitive-neutral-300);
+
+    /* --- TOOLTIP --- */
+    --tooltip-background: var(--primitive-neutral-800);
+    --tooltip-foreground: var(--primitive-neutral-0);
+    --tooltip-border: var(--primitive-neutral-800);
+
+    /* --- POPOVER / DROPDOWN --- */
+    --popover-background: var(--primitive-neutral-0);
+    --popover-foreground: var(--primitive-neutral-800);
+    --popover-border: var(--primitive-neutral-300);
+    --popover-item-background-hover: var(--primitive-neutral-200);
+    --popover-item-background-active: var(--primitive-neutral-300);
+    --popover-item-background-selected: var(--primitive-green-100);
+    --popover-separator: var(--primitive-neutral-300);
+
+    /* --- MODAL / DIALOG --- */
+    --modal-background: var(--primitive-neutral-0);
+    --modal-foreground: var(--primitive-neutral-800);
+    --modal-border: var(--primitive-neutral-300);
+    --modal-header-background: var(--primitive-neutral-100);
+    --modal-footer-background: var(--primitive-neutral-100);
+
+    /* --- ALERT --- */
+    /* Feature alert - promotional/new features */
+    --alert-feature-background: var(--primitive-blue-100);
+    --alert-feature-foreground: var(--primitive-blue-800);
+    --alert-feature-border: var(--primitive-blue-400);
+    --alert-feature-icon: var(--primitive-blue-600);
+
+    /* Critical alert - errors, failures */
+    --alert-critical-background: var(--primitive-red-100);
+    --alert-critical-foreground: var(--primitive-red-800);
+    --alert-critical-border: var(--primitive-red-500);
+    --alert-critical-icon: var(--primitive-red-600);
+
+    /* Warning alert - caution, attention needed */
+    --alert-warning-background: var(--primitive-orange-100);
+    --alert-warning-foreground: var(--primitive-orange-800);
+    --alert-warning-border: var(--primitive-orange-500);
+    --alert-warning-icon: var(--primitive-orange-600);
+
+    /* Success alert - confirmations, completions */
+    --alert-success-background: var(--primitive-green-100);
+    --alert-success-foreground: var(--primitive-green-800);
+    --alert-success-border: var(--primitive-green-500);
+    --alert-success-icon: var(--primitive-green-600);
+
+    /* Info alert - neutral information */
+    --alert-info-background: var(--primitive-neutral-200);
+    --alert-info-foreground: var(--primitive-neutral-800);
+    --alert-info-border: var(--primitive-neutral-500);
+    --alert-info-icon: var(--primitive-neutral-600);
+
+    /* Alert dismiss button */
+    --alert-dismiss-background: transparent;
+    --alert-dismiss-background-hover: rgba(0, 0, 0, 0.06);
+    --alert-dismiss-background-active: rgba(0, 0, 0, 0.1);
+
+    /* --- BANNER --- */
+    /* Banners use BOLD solid backgrounds with light text for high visibility */
+    /* Feature banner - Blue solid */
+    --banner-feature-background: var(--primitive-blue-600);
+    --banner-feature-foreground: #FFFFFF;
+    --banner-feature-icon: #FFFFFF;
+
+    /* Critical banner - Red solid */
+    --banner-critical-background: var(--primitive-red-600);
+    --banner-critical-foreground: #FFFFFF;
+    --banner-critical-icon: #FFFFFF;
+
+    /* Warning banner - Orange solid */
+    --banner-warning-background: var(--primitive-orange-500);
+    --banner-warning-foreground: #FFFFFF;
+    --banner-warning-icon: #FFFFFF;
+
+    /* Success banner - Green solid */
+    --banner-success-background: var(--primitive-green-600);
+    --banner-success-foreground: #FFFFFF;
+    --banner-success-icon: #FFFFFF;
+
+    /* Info banner - Dark neutral solid */
+    --banner-info-background: var(--primitive-neutral-700);
+    --banner-info-foreground: #FFFFFF;
+    --banner-info-icon: var(--primitive-neutral-300);
+
+    /* Banner dismiss button (for bold style) */
+    --banner-dismiss-background: transparent;
+    --banner-dismiss-background-hover: rgba(255, 255, 255, 0.15);
+    --banner-dismiss-background-active: rgba(255, 255, 255, 0.25);
+
+    /* Banner themed action buttons (for bold style) */
+    /* Feature - white button with blue text */
+    --banner-feature-action-background: rgba(255, 255, 255, 0.95);
+    --banner-feature-action-background-hover: #FFFFFF;
+    --banner-feature-action-foreground: var(--primitive-blue-700);
+
+    /* Critical - white button with red text */
+    --banner-critical-action-background: rgba(255, 255, 255, 0.95);
+    --banner-critical-action-background-hover: #FFFFFF;
+    --banner-critical-action-foreground: var(--primitive-red-700);
+
+    /* Warning - dark button with white text (better contrast on orange) */
+    --banner-warning-action-background: rgba(0, 0, 0, 0.15);
+    --banner-warning-action-background-hover: rgba(0, 0, 0, 0.25);
+    --banner-warning-action-foreground: #FFFFFF;
+
+    /* Success - white button with green text */
+    --banner-success-action-background: rgba(255, 255, 255, 0.95);
+    --banner-success-action-background-hover: #FFFFFF;
+    --banner-success-action-foreground: var(--primitive-green-700);
+
+    /* Info - light button with dark text */
+    --banner-info-action-background: rgba(255, 255, 255, 0.15);
+    --banner-info-action-background-hover: rgba(255, 255, 255, 0.25);
+    --banner-info-action-foreground: #FFFFFF;
+
+    /* --- BANNER SUBTLE --- */
+    /* Subtle banners use tinted backgrounds with dark text for less visual intensity */
+    /* Feature banner subtle - Blue tinted */
+    --banner-subtle-feature-background: var(--primitive-blue-100);
+    --banner-subtle-feature-foreground: var(--primitive-blue-700);
+    --banner-subtle-feature-icon: var(--primitive-blue-600);
+
+    /* Critical banner subtle - Red tinted */
+    --banner-subtle-critical-background: var(--primitive-red-100);
+    --banner-subtle-critical-foreground: var(--primitive-red-700);
+    --banner-subtle-critical-icon: var(--primitive-red-600);
+
+    /* Warning banner subtle - Orange tinted */
+    --banner-subtle-warning-background: var(--primitive-orange-100);
+    --banner-subtle-warning-foreground: var(--primitive-orange-700);
+    --banner-subtle-warning-icon: var(--primitive-orange-600);
+
+    /* Success banner subtle - Green tinted */
+    --banner-subtle-success-background: var(--primitive-green-100);
+    --banner-subtle-success-foreground: var(--primitive-green-700);
+    --banner-subtle-success-icon: var(--primitive-green-600);
+
+    /* Info banner subtle - Neutral tinted */
+    --banner-subtle-info-background: var(--primitive-neutral-200);
+    --banner-subtle-info-foreground: var(--primitive-neutral-700);
+    --banner-subtle-info-icon: var(--primitive-neutral-600);
+
+    /* Banner dismiss button (for subtle style) */
+    --banner-subtle-dismiss-background: transparent;
+    --banner-subtle-dismiss-background-hover: rgba(0, 0, 0, 0.08);
+    --banner-subtle-dismiss-background-active: rgba(0, 0, 0, 0.12);
+
+    /* Banner themed action buttons (for subtle style) */
+    /* Feature subtle - solid blue button for high contrast */
+    --banner-subtle-feature-action-background: var(--primitive-blue-500);
+    --banner-subtle-feature-action-background-hover: var(--primitive-blue-600);
+    --banner-subtle-feature-action-foreground: #FFFFFF;
+
+    /* Critical subtle - solid red button */
+    --banner-subtle-critical-action-background: var(--primitive-red-500);
+    --banner-subtle-critical-action-background-hover: var(--primitive-red-600);
+    --banner-subtle-critical-action-foreground: #FFFFFF;
+
+    /* Warning subtle - solid orange button */
+    --banner-subtle-warning-action-background: var(--primitive-orange-500);
+    --banner-subtle-warning-action-background-hover: var(--primitive-orange-600);
+    --banner-subtle-warning-action-foreground: #FFFFFF;
+
+    /* Success subtle - solid green button */
+    --banner-subtle-success-action-background: var(--primitive-green-600);
+    --banner-subtle-success-action-background-hover: var(--primitive-green-700);
+    --banner-subtle-success-action-foreground: #FFFFFF;
+
+    /* Info subtle - neutral button with good contrast */
+    --banner-subtle-info-action-background: var(--primitive-neutral-700);
+    --banner-subtle-info-action-background-hover: var(--primitive-neutral-800);
+    --banner-subtle-info-action-foreground: #FFFFFF;
+
+    /* --- TOAST --- */
+    --toast-background: var(--primitive-neutral-800);
+    --toast-foreground: var(--primitive-neutral-0);
+    --toast-border: var(--primitive-neutral-700);
+    --toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    /* Toast variants */
+    --toast-success-background: var(--primitive-green-600);
+    --toast-success-foreground: #FFFFFF;
+    --toast-success-icon: #FFFFFF;
+
+    --toast-warning-background: var(--primitive-orange-500);
+    --toast-warning-foreground: #FFFFFF;
+    --toast-warning-icon: #FFFFFF;
+
+    --toast-critical-background: var(--primitive-red-600);
+    --toast-critical-foreground: #FFFFFF;
+    --toast-critical-icon: #FFFFFF;
+
+    --toast-info-background: var(--primitive-neutral-800);
+    --toast-info-foreground: var(--primitive-neutral-0);
+    --toast-info-icon: var(--primitive-neutral-400);
+
+    /* Toast dismiss */
+    --toast-dismiss-background: transparent;
+    --toast-dismiss-background-hover: rgba(255, 255, 255, 0.15);
+
+    /* --- INLINE MESSAGE --- */
+    --inline-message-info-foreground: var(--primitive-neutral-600);
+    --inline-message-info-icon: var(--primitive-neutral-500);
+
+    --inline-message-success-foreground: var(--primitive-green-700);
+    --inline-message-success-icon: var(--primitive-green-600);
+
+    --inline-message-warning-foreground: var(--primitive-orange-700);
+    --inline-message-warning-icon: var(--primitive-orange-500);
+
+    --inline-message-critical-foreground: var(--primitive-red-700);
+    --inline-message-critical-icon: var(--primitive-red-600);
+
+    /* --- TABS --- */
+    --tabs-background: transparent;
+    --tabs-foreground: var(--primitive-neutral-700);
+    --tabs-foreground-active: var(--primitive-neutral-800);
+    --tabs-border: var(--primitive-neutral-300);
+    --tabs-indicator: var(--primitive-green-600);
+    --tabs-item-background-hover: var(--primitive-neutral-200);
+
+    /* --- SWITCH --- */
+    /* Figma spec (2778:6790): neutral-400 off, blue-500 on */
+    --switch-background: var(--primitive-neutral-400);
+    --switch-background-hover: var(--primitive-neutral-500);
+    --switch-background-checked: var(--primitive-blue-500);
+    --switch-background-checked-hover: var(--primitive-blue-600);
+    --switch-background-disabled: var(--primitive-neutral-300);
+    --switch-thumb: var(--primitive-neutral-0);
+    --switch-thumb-border: var(--primitive-neutral-400);
+    --switch-thumb-border-checked: var(--primitive-blue-500);
+    --switch-thumb-disabled: var(--primitive-neutral-400);
+
+    /* --- CHECKBOX --- */
+    --checkbox-background: var(--primitive-neutral-0);
+    --checkbox-background-hover: var(--primitive-neutral-100);
+    --checkbox-background-checked: var(--primitive-blue-500);
+    --checkbox-background-checked-hover: var(--primitive-blue-600);
+    --checkbox-background-disabled: var(--primitive-neutral-200);
+    --checkbox-background-error: var(--primitive-red-100);
+    --checkbox-border: var(--primitive-neutral-400);
+    --checkbox-border-hover: var(--primitive-neutral-500);
+    --checkbox-border-checked: var(--primitive-blue-500);
+    --checkbox-border-error: var(--primitive-red-500);
+    --checkbox-foreground: #FFFFFF;
+    --checkbox-foreground-disabled: var(--primitive-neutral-500);
+
+    /* --- RADIO --- */
+    --radio-background: var(--primitive-neutral-0);
+    --radio-background-hover: var(--primitive-neutral-100);
+    --radio-background-checked: var(--primitive-blue-500);
+    --radio-background-checked-hover: var(--primitive-blue-600);
+    --radio-background-disabled: var(--primitive-neutral-200);
+    --radio-background-error: var(--primitive-red-100);
+    --radio-border: var(--primitive-neutral-400);
+    --radio-border-hover: var(--primitive-neutral-500);
+    --radio-border-checked: var(--primitive-blue-500);
+    --radio-border-error: var(--primitive-red-500);
+    --radio-dot: #FFFFFF;
+    --radio-dot-disabled: var(--primitive-neutral-500);
+
+    /* --- CALENDAR / DATE PICKER --- */
+    /* Day cell states - Figma spec: blue for selection, neutral for today */
+    --calendar-day-size: 40px;
+    --calendar-day-radius: 16px;
+    --calendar-selected-background: var(--primitive-blue-400);
+    --calendar-selected-foreground: var(--primitive-neutral-0);
+    --calendar-today-background: var(--primitive-neutral-200);
+    --calendar-today-foreground: var(--foreground-default);
+    --calendar-range-background: var(--primitive-blue-100);
+    --calendar-range-foreground: var(--primitive-blue-700);
+    --calendar-outside-foreground: var(--primitive-neutral-500);
+    --calendar-disabled-foreground: var(--primitive-neutral-400);
+    --calendar-hover-background: var(--primitive-neutral-200);
+    /* Navigation buttons */
+    --calendar-nav-background: var(--primitive-neutral-200);
+    --calendar-nav-background-hover: var(--primitive-neutral-300);
+    --calendar-nav-foreground: var(--foreground-default);
+    /* Header */
+    --calendar-header-foreground: var(--foreground-default);
+    --calendar-weekday-foreground: var(--primitive-neutral-800);
+
+    /* --- CALENDAR ATTENDEE COLOR PALETTE --- */
+    /* Muted, harmonious colors for multi-person scheduling views */
+    /* Sage - Attendee 1 */
+    --calendar-attendee-1-background: #E8F4F2;
+    --calendar-attendee-1-foreground: #1D6B5C;
+    --calendar-attendee-1-border: #A8D5CC;
+    /* Terracotta - Attendee 2 */
+    --calendar-attendee-2-background: #FDF2E9;
+    --calendar-attendee-2-foreground: #9A5B2F;
+    --calendar-attendee-2-border: #E8C9A8;
+    /* Slate - Attendee 3 */
+    --calendar-attendee-3-background: #EEF0F8;
+    --calendar-attendee-3-foreground: #4A5490;
+    --calendar-attendee-3-border: #B8C0E0;
+    /* Orchid - Attendee 4 */
+    --calendar-attendee-4-background: #F5EEF8;
+    --calendar-attendee-4-foreground: #7A4A8C;
+    --calendar-attendee-4-border: #D4B8E0;
+    /* Rose - Attendee 5 */
+    --calendar-attendee-5-background: #FEF3F2;
+    --calendar-attendee-5-foreground: #A84D4D;
+    --calendar-attendee-5-border: #E8B8B8;
+    /* Fern - Attendee 6 */
+    --calendar-attendee-6-background: #F0F6EE;
+    --calendar-attendee-6-foreground: #4A7A42;
+    --calendar-attendee-6-border: #B8D4B0;
+    /* Wheat - Attendee 7 */
+    --calendar-attendee-7-background: #FDF8E8;
+    --calendar-attendee-7-foreground: #8A7A2F;
+    --calendar-attendee-7-border: #E0D4A0;
+    /* Steel - Attendee 8 */
+    --calendar-attendee-8-background: #F2F4F8;
+    --calendar-attendee-8-foreground: #5A6A7A;
+    --calendar-attendee-8-border: #C0C8D4;
+
+    /* Calendar grid tokens */
+    --calendar-grid-line: var(--primitive-neutral-200);
+    --calendar-time-label: var(--primitive-neutral-500);
+    --calendar-today-highlight: var(--primitive-blue-50);
+    --calendar-weekend-background: var(--primitive-neutral-50);
+
+    /* Tentative event modifier */
+    --calendar-event-tentative-opacity: 0.5;
+
+    /* --- SLIDER --- */
+    --slider-track-background: var(--primitive-neutral-300);
+    --slider-track-background-active: var(--primitive-green-200);
+    --slider-thumb-background: var(--primitive-neutral-0);
+    --slider-thumb-border: var(--primitive-green-600);
+
+    /* --- PROGRESS --- */
+    --progress-background: var(--primitive-neutral-300);
+    --progress-foreground: var(--primitive-green-600);
+    --progress-foreground-success: var(--primitive-green-600);
+    --progress-foreground-warning: var(--primitive-orange-500);
+    --progress-foreground-error: var(--primitive-red-600);
+
+    /* --- SKELETON --- */
+    --skeleton-background: var(--primitive-neutral-300);
+    --skeleton-shine: var(--primitive-neutral-200);
+
+    /* ============================================
+       ATS-SPECIFIC COMPONENT TOKENS
+       Pipeline stages, match scores, etc.
+       ============================================ */
+
+    /* Pipeline Stages */
+    --stage-new-background: var(--primitive-neutral-200);
+    --stage-new-foreground: var(--primitive-neutral-700);
+    --stage-new-border: var(--primitive-neutral-400);
+
+    --stage-applied-background: var(--primitive-blue-100);
+    --stage-applied-foreground: var(--primitive-blue-700);
+    --stage-applied-border: var(--primitive-blue-300);
+
+    --stage-screening-background: var(--primitive-green-100);
+    --stage-screening-foreground: var(--primitive-green-700);
+    --stage-screening-border: var(--primitive-green-300);
+
+    --stage-interview-background: var(--primitive-purple-100);
+    --stage-interview-foreground: var(--primitive-purple-700);
+    --stage-interview-border: var(--primitive-purple-300);
+
+    --stage-offer-background: var(--primitive-yellow-100);
+    --stage-offer-foreground: var(--primitive-yellow-700);
+    --stage-offer-border: var(--primitive-yellow-300);
+
+    --stage-hired-background: var(--primitive-green-200);
+    --stage-hired-foreground: var(--primitive-green-800);
+    --stage-hired-border: var(--primitive-green-400);
+
+    --stage-rejected-background: var(--primitive-red-100);
+    --stage-rejected-foreground: var(--primitive-red-700);
+    --stage-rejected-border: var(--primitive-red-300);
+
+    --stage-withdrawn-background: var(--primitive-neutral-200);
+    --stage-withdrawn-foreground: var(--primitive-neutral-600);
+    --stage-withdrawn-border: var(--primitive-neutral-400);
+
+    /* Match Scores */
+    --match-high-background: var(--primitive-green-100);
+    --match-high-foreground: var(--primitive-green-700);
+    --match-high-accent: var(--primitive-green-600);
+
+    --match-medium-background: var(--primitive-yellow-100);
+    --match-medium-foreground: var(--primitive-yellow-700);
+    --match-medium-accent: var(--primitive-yellow-500);
+
+    --match-low-background: var(--primitive-orange-100);
+    --match-low-foreground: var(--primitive-orange-700);
+    --match-low-accent: var(--primitive-orange-500);
+
+    /* Scorecard Ratings */
+    --rating-empty: var(--primitive-neutral-300);
+    --rating-filled: var(--primitive-yellow-400);
+    --rating-hover: var(--primitive-yellow-300);
+
+    /* Kanban Board */
+    --kanban-column-background: var(--primitive-neutral-100);
+    --kanban-column-border: var(--primitive-neutral-300);
+    --kanban-card-background: var(--primitive-neutral-0);
+    --kanban-card-background-hover: var(--primitive-neutral-100);
+    --kanban-card-background-dragging: var(--primitive-neutral-0);
+    --kanban-card-border: var(--primitive-neutral-300);
+    --kanban-card-border-dragging: var(--primitive-green-400);
+    --kanban-dropzone-background: var(--primitive-green-100);
+    --kanban-dropzone-border: var(--primitive-green-300);
+
+    /* --- AVATAR --- */
+    /* Avatar initials color palette - Option B: Vibrant Mid-tones */
+    /* All colors meet WCAG AA contrast requirements (4.5:1+) */
+
+    /* Green avatar: 7.1:1 contrast */
+    --avatar-green-background: var(--primitive-green-300);
+    --avatar-green-foreground: var(--primitive-green-800);
+
+    /* Blue avatar: 8.4:1 contrast */
+    --avatar-blue-background: var(--primitive-blue-300);
+    --avatar-blue-foreground: var(--primitive-blue-800);
+
+    /* Purple avatar: 10.2:1 contrast */
+    --avatar-purple-background: var(--primitive-purple-300);
+    --avatar-purple-foreground: var(--primitive-purple-800);
+
+    /* Red avatar: 6.8:1 contrast */
+    --avatar-red-background: var(--primitive-red-300);
+    --avatar-red-foreground: var(--primitive-red-800);
+
+    /* Orange avatar: 6.1:1 contrast */
+    --avatar-orange-background: var(--primitive-orange-300);
+    --avatar-orange-foreground: var(--primitive-orange-800);
+
+    /* Yellow avatar: 7.2:1 contrast */
+    --avatar-yellow-background: var(--primitive-yellow-300);
+    --avatar-yellow-foreground: var(--primitive-yellow-800);
+
+    /* Neutral avatar (default fallback) */
+    --avatar-neutral-background: var(--primitive-neutral-300);
+    --avatar-neutral-foreground: var(--primitive-neutral-800);
+
+    /* Avatar soft/muted variant - lighter backgrounds */
+    --avatar-green-background-soft: var(--primitive-green-100);
+    --avatar-blue-background-soft: var(--primitive-blue-100);
+    --avatar-purple-background-soft: var(--primitive-purple-100);
+    --avatar-red-background-soft: var(--primitive-red-100);
+    --avatar-orange-background-soft: var(--primitive-orange-100);
+    --avatar-yellow-background-soft: var(--primitive-yellow-100);
+    --avatar-neutral-background-soft: var(--primitive-neutral-200);
+
+    /* Avatar outlined variant - border colors */
+    --avatar-green-border: var(--primitive-green-500);
+    --avatar-blue-border: var(--primitive-blue-500);
+    --avatar-purple-border: var(--primitive-purple-500);
+    --avatar-red-border: var(--primitive-red-500);
+    --avatar-orange-border: var(--primitive-orange-500);
+    --avatar-yellow-border: var(--primitive-yellow-500);
+    --avatar-neutral-border: var(--primitive-neutral-500);
+
+    /* Avatar high contrast variant - for accessibility */
+    --avatar-high-contrast-background: var(--primitive-neutral-800);
+    --avatar-high-contrast-foreground: var(--primitive-neutral-0);
+
+    /* Avatar border and shadow */
+    --avatar-border: var(--primitive-neutral-200);
+    --avatar-ring: var(--primitive-green-500);
+    --avatar-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --avatar-shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+    /* --- TAGS / CHIPS --- */
+    /* Figma spec (1451:13463): Job Category Tags */
+    --tag-category-background: var(--primitive-neutral-200);
+    --tag-category-foreground: var(--primitive-neutral-800);
+
+    /* Info Tags (cream background with dismissible option) */
+    --tag-info-background: var(--primitive-neutral-200);
+    --tag-info-foreground: var(--primitive-neutral-700);
+    --tag-info-dismiss-background: var(--primitive-neutral-600);
+    --tag-info-dismiss-foreground: var(--primitive-neutral-0);
+    --tag-info-dismiss-background-hover: var(--primitive-neutral-700);
+
+    /* --- CHIP / REMOVABLE TAG --- */
+    /* Base chip styles */
+    --chip-height-sm: 1.75rem;   /* 28px */
+    --chip-height-md: 2rem;      /* 32px */
+    --chip-height-lg: 2.5rem;    /* 40px */
+    --chip-radius: 9999px;       /* pill shape */
+
+    /* Neutral chip (default) */
+    --chip-neutral-background: var(--primitive-neutral-300);
+    --chip-neutral-background-hover: var(--primitive-neutral-400);
+    --chip-neutral-foreground: var(--primitive-neutral-700);
+    --chip-neutral-close-background-hover: var(--primitive-neutral-400);
+
+    /* Primary chip (green/brand) */
+    --chip-primary-background: var(--primitive-green-100);
+    --chip-primary-background-hover: var(--primitive-green-200);
+    --chip-primary-foreground: var(--primitive-green-800);
+    --chip-primary-close-background-hover: var(--primitive-green-300);
+
+    /* Blue chip */
+    --chip-blue-background: var(--primitive-blue-100);
+    --chip-blue-background-hover: var(--primitive-blue-200);
+    --chip-blue-foreground: var(--primitive-blue-700);
+    --chip-blue-close-background-hover: var(--primitive-blue-300);
+
+    /* Red chip */
+    --chip-red-background: var(--primitive-red-100);
+    --chip-red-background-hover: var(--primitive-red-200);
+    --chip-red-foreground: var(--primitive-red-700);
+    --chip-red-close-background-hover: var(--primitive-red-300);
+
+    /* Orange chip */
+    --chip-orange-background: var(--primitive-orange-100);
+    --chip-orange-background-hover: var(--primitive-orange-200);
+    --chip-orange-foreground: var(--primitive-orange-700);
+    --chip-orange-close-background-hover: var(--primitive-orange-300);
+
+    /* Yellow chip */
+    --chip-yellow-background: var(--primitive-yellow-100);
+    --chip-yellow-background-hover: var(--primitive-yellow-200);
+    --chip-yellow-foreground: var(--primitive-yellow-700);
+    --chip-yellow-close-background-hover: var(--primitive-yellow-300);
+
+    /* Purple chip */
+    --chip-purple-background: var(--primitive-purple-100);
+    --chip-purple-background-hover: var(--primitive-purple-200);
+    --chip-purple-foreground: var(--primitive-purple-700);
+    --chip-purple-close-background-hover: var(--primitive-purple-300);
+
+    /* Selected chip state (for filter chips) */
+    --chip-selected-background: var(--primitive-green-600);
+    --chip-selected-background-hover: var(--primitive-green-700);
+    --chip-selected-foreground: var(--primitive-neutral-0);
+    --chip-selected-close-background-hover: var(--primitive-green-500);
+
+    /* Disabled chip */
+    --chip-disabled-background: var(--primitive-neutral-200);
+    --chip-disabled-foreground: var(--primitive-neutral-500);
+
+    /* Add chip button (dashed border) */
+    --chip-add-border: var(--primitive-neutral-400);
+    --chip-add-border-hover: var(--primitive-neutral-500);
+    --chip-add-foreground: var(--primitive-neutral-600);
+    --chip-add-foreground-hover: var(--primitive-neutral-700);
+    --chip-add-background-hover: var(--primitive-neutral-200);
+
+    /* ============================================
+       LEGACY ALIASES
+       For backwards compatibility with old token names
+       ============================================ */
+
+    /* Color scale aliases for Tailwind classes */
+    --color-primary-100: var(--primitive-green-100);
+    --color-primary-200: var(--primitive-green-200);
+    --color-primary-300: var(--primitive-green-300);
+    --color-primary-400: var(--primitive-green-400);
+    --color-primary-500: var(--primitive-green-500);
+    --color-primary-600: var(--primitive-green-600);
+    --color-primary-700: var(--primitive-green-700);
+    --color-primary-800: var(--primitive-green-800);
+
+    --color-neutral-white: var(--primitive-neutral-0);
+    --color-neutral-100: var(--primitive-neutral-100);
+    --color-neutral-200: var(--primitive-neutral-200);
+    --color-neutral-300: var(--primitive-neutral-300);
+    --color-neutral-400: var(--primitive-neutral-400);
+    --color-neutral-500: var(--primitive-neutral-500);
+    --color-neutral-600: var(--primitive-neutral-600);
+    --color-neutral-700: var(--primitive-neutral-700);
+    --color-neutral-800: var(--primitive-neutral-800);
+    --color-neutral-black: var(--primitive-neutral-900);
+
+    --color-blue-100: var(--primitive-blue-100);
+    --color-blue-200: var(--primitive-blue-200);
+    --color-blue-300: var(--primitive-blue-300);
+    --color-blue-400: var(--primitive-blue-400);
+    --color-blue-500: var(--primitive-blue-500);
+    --color-blue-600: var(--primitive-blue-600);
+    --color-blue-700: var(--primitive-blue-700);
+    --color-blue-800: var(--primitive-blue-800);
+
+    --color-red-100: var(--primitive-red-100);
+    --color-red-200: var(--primitive-red-200);
+    --color-red-300: var(--primitive-red-300);
+    --color-red-400: var(--primitive-red-400);
+    --color-red-500: var(--primitive-red-500);
+    --color-red-600: var(--primitive-red-600);
+    --color-red-700: var(--primitive-red-700);
+    --color-red-800: var(--primitive-red-800);
+
+    --color-orange-100: var(--primitive-orange-100);
+    --color-orange-200: var(--primitive-orange-200);
+    --color-orange-300: var(--primitive-orange-300);
+    --color-orange-400: var(--primitive-orange-400);
+    --color-orange-500: var(--primitive-orange-500);
+    --color-orange-600: var(--primitive-orange-600);
+    --color-orange-700: var(--primitive-orange-700);
+    --color-orange-800: var(--primitive-orange-800);
+
+    --color-yellow-100: var(--primitive-yellow-100);
+    --color-yellow-200: var(--primitive-yellow-200);
+    --color-yellow-300: var(--primitive-yellow-300);
+    --color-yellow-400: var(--primitive-yellow-400);
+    --color-yellow-500: var(--primitive-yellow-500);
+    --color-yellow-600: var(--primitive-yellow-600);
+    --color-yellow-700: var(--primitive-yellow-700);
+    --color-yellow-800: var(--primitive-yellow-800);
+
+    --color-purple-100: var(--primitive-purple-100);
+    --color-purple-200: var(--primitive-purple-200);
+    --color-purple-300: var(--primitive-purple-300);
+    --color-purple-400: var(--primitive-purple-400);
+    --color-purple-500: var(--primitive-purple-500);
+    --color-purple-600: var(--primitive-purple-600);
+    --color-purple-700: var(--primitive-purple-700);
+    --color-purple-800: var(--primitive-purple-800);
+
+    --color-success: var(--primitive-green-600);
+    --color-warning: var(--primitive-orange-500);
+    --color-error: var(--primitive-red-600);
+    --color-info: var(--primitive-blue-500);
+
+    /* Legacy component semantics */
+    --color-nav-bg: var(--nav-background);
+    --color-nav-text: var(--nav-foreground);
+    --color-nav-text-muted: var(--nav-foreground-muted);
+    --color-nav-active-bg: var(--nav-item-background-active);
+    --color-card-bg: var(--card-background);
+    --color-card-feature-bg: var(--card-background-feature);
+    --color-card-feature-text: var(--card-foreground-feature);
+    --color-card-border: var(--card-border);
+    --color-selected-bg: var(--background-interactive-selected);
+    --color-selected-text: var(--foreground-brand-emphasis);
+    --color-hover-bg: var(--background-interactive-hover);
+    --color-active-bg: var(--background-interactive-active);
+    --color-table-header-bg: var(--table-background-header);
+    --color-table-row-hover: var(--table-background-row-hover);
+    --color-table-border: var(--table-border);
+    --color-badge-default-bg: var(--badge-neutral-background);
+    --color-badge-default-text: var(--badge-neutral-foreground);
+    --color-badge-primary-bg: var(--badge-primary-background);
+    --color-badge-primary-text: var(--badge-primary-foreground);
+    --color-badge-info-bg: var(--badge-info-background);
+    --color-badge-info-text: var(--badge-info-foreground);
+
+    /* ============================================
+       TYPOGRAPHY
+       ============================================ */
+
+    /* Font Family */
+    --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+    /* Type Scale */
+    --text-display: 4.5rem;
+    --leading-display: 4.5rem;
+
+    --text-heading-lg: 3rem;
+    --leading-heading-lg: 3rem;
+
+    --text-heading-md: 2.25rem;
+    --leading-heading-md: 3rem;
+
+    --text-heading-sm: 1.5rem;
+    --leading-heading-sm: 2rem;
+
+    --text-body-strong: 1.125rem;
+    --leading-body-strong: 1.5rem;
+
+    --text-body: 1.125rem;
+    --leading-body: 1.5rem;
+
+    --text-body-sm: 1rem;
+    --leading-body-sm: 1.5rem;
+
+    --text-caption-strong: 0.875rem;
+    --leading-caption-strong: 1.25rem;
+
+    --text-caption: 0.875rem;
+    --leading-caption: 1.25rem;
+
+    --text-caption-sm: 0.75rem;
+    --leading-caption-sm: 1rem;
+
+    /* Font Weights */
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-normal: var(--font-regular);
+
+    /* Letter Spacing */
+    --tracking-tighter: -0.03em;
+    --tracking-tight: -0.02em;
+    --tracking-normal: 0;
+    --tracking-wide: 0.02em;
+
+    /* ============================================
+       SPACING
+       ============================================ */
+
+    --space-0: 0;
+    --space-0-5: 0.125rem;
+    --space-1: 0.25rem;
+    --space-1-5: 0.375rem;
+    --space-2: 0.5rem;
+    --space-2-5: 0.625rem;
+    --space-3: 0.75rem;
+    --space-3-5: 0.875rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-7: 1.75rem;
+    --space-8: 2rem;
+    --space-9: 2.25rem;
+    --space-10: 2.5rem;
+    --space-11: 2.75rem;
+    --space-12: 3rem;
+    --space-14: 3.5rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+    --space-28: 7rem;
+    --space-32: 8rem;
+    --space-36: 9rem;
+    --space-40: 10rem;
+
+    /* ============================================
+       BORDERS
+       ============================================ */
+
+    --radius-none: 0;
+    --radius-xs: 0.125rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-full: 9999px;
+
+    /* Semantic radius */
+    --radius-card: var(--radius-xl);
+    --radius-button: var(--radius-lg);
+    --radius-input: var(--radius-md);
+    --radius-badge: var(--radius-full);
+    --radius-chip: var(--radius-lg);
+    --radius-avatar: var(--radius-full);
+    --radius-tooltip: var(--radius-md);
+    --radius-popover: var(--radius-lg);
+    --radius-modal: var(--radius-xl);
+
+    /* ============================================
+       SHADOWS
+       ============================================ */
+
+    --shadow-none: none;
+    --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.08);
+    --shadow-sm: 0 1px 4px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.14), 0 2px 4px -2px rgb(0 0 0 / 0.10);
+    --shadow-lg: 0 10px 20px -3px rgb(0 0 0 / 0.16), 0 4px 8px -4px rgb(0 0 0 / 0.10);
+    --shadow-xl: 0 20px 32px -5px rgb(0 0 0 / 0.18), 0 8px 14px -6px rgb(0 0 0 / 0.12);
+    --shadow-2xl: 0 25px 56px -12px rgb(0 0 0 / 0.28);
+    --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.10);
+
+    /* Component shadows — key (tight/directional) + ambient (soft/diffused) */
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 2px 6px -1px rgb(0 0 0 / 0.08);
+    --shadow-card-hover: 0 2px 4px 0 rgb(0 0 0 / 0.08), 0 6px 16px -2px rgb(0 0 0 / 0.14);
+    --shadow-elevated: 0 2px 4px 0 rgb(0 0 0 / 0.08), 0 6px 20px -2px rgb(0 0 0 / 0.16);
+    --shadow-dropdown: 0 2px 6px 0 rgb(0 0 0 / 0.08), 0 10px 24px -4px rgb(0 0 0 / 0.18);
+    --shadow-modal: 0 4px 10px 0 rgb(0 0 0 / 0.10), 0 28px 64px -12px rgb(0 0 0 / 0.28);
+    --shadow-tooltip: 0 2px 4px 0 rgb(0 0 0 / 0.10), 0 6px 20px -2px rgb(0 0 0 / 0.18);
+    --shadow-button: 0 1px 3px 0 rgb(0 0 0 / 0.10);
+    --shadow-button-active: inset 0 2px 4px 0 rgb(0 0 0 / 0.16);
+    --shadow-focus: 0 0 0 2px var(--primitive-neutral-0), 0 0 0 4px var(--primitive-green-500);
+
+    /* ============================================
+       FOCUS RING
+       ============================================ */
+
+    --ring-color: var(--primitive-green-500);
+    --ring-color-error: var(--primitive-red-500);
+    --ring-color-success: var(--primitive-green-500);
+    --ring-color-inverse: var(--primitive-neutral-0);
+    --ring-offset: 2px;
+    --ring-width: 2px;
+
+    /* ============================================
+       MOTION
+       Inspired by Material Design 3 & Apple HIG
+       ============================================ */
+
+    /* Duration Scale - based on interaction type */
+    --duration-instant: 0ms;
+    --duration-fastest: 50ms;      /* Micro-interactions: checkboxes, toggles */
+    --duration-fast: 100ms;        /* Hover states, button feedback */
+    --duration-normal: 150ms;      /* Standard transitions */
+    --duration-moderate: 200ms;    /* Card interactions, focus states */
+    --duration-slow: 300ms;        /* Modals, drawers entering */
+    --duration-slower: 400ms;      /* Complex animations, page transitions */
+    --duration-slowest: 500ms;     /* Full-screen transitions */
+
+    /* Easing Curves - perceptually smooth motion */
+    --ease-linear: linear;
+    --ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);        /* Standard - slightly snappier */
+    --ease-in: cubic-bezier(0.42, 0, 1, 1);                  /* Accelerate - elements leaving */
+    --ease-out: cubic-bezier(0, 0, 0.58, 1);                 /* Decelerate - elements entering */
+    --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);           /* Standard symmetric */
+    --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);           /* Dramatic deceleration */
+    --ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15); /* Dramatic exit */
+    --ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1); /* Dramatic enter */
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);  /* Subtle overshoot */
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);   /* Playful bounce */
+    --ease-elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6);     /* Strong elastic feel */
+
+    /* Motion Distance - consistent displacement */
+    --motion-distance-xs: 2px;
+    --motion-distance-sm: 4px;
+    --motion-distance-md: 8px;
+    --motion-distance-lg: 16px;
+    --motion-distance-xl: 24px;
+    --motion-distance-2xl: 32px;
+
+    /* Semantic Transitions - use these for common patterns */
+    --transition-colors: color var(--duration-fast) var(--ease-default),
+                         background-color var(--duration-fast) var(--ease-default),
+                         border-color var(--duration-fast) var(--ease-default);
+    --transition-opacity: opacity var(--duration-normal) var(--ease-default);
+    --transition-transform: transform var(--duration-normal) var(--ease-default);
+    --transition-shadow: box-shadow var(--duration-normal) var(--ease-default);
+    --transition-all-fast: all var(--duration-fast) var(--ease-default);
+    --transition-all-normal: all var(--duration-normal) var(--ease-default);
+
+    /* Component-specific transitions */
+    --transition-button: background-color var(--duration-fast) var(--ease-default),
+                         transform var(--duration-fastest) var(--ease-out),
+                         box-shadow var(--duration-fast) var(--ease-default);
+    --transition-input: background-color var(--duration-fast) var(--ease-default),
+                        border-color var(--duration-fast) var(--ease-default),
+                        box-shadow var(--duration-normal) var(--ease-out);
+    --transition-card: transform var(--duration-normal) var(--ease-out),
+                       box-shadow var(--duration-normal) var(--ease-out);
+    --transition-modal-enter: transform var(--duration-slow) var(--ease-emphasized-decelerate),
+                              opacity var(--duration-moderate) var(--ease-out);
+    --transition-modal-exit: transform var(--duration-moderate) var(--ease-emphasized-accelerate),
+                             opacity var(--duration-fast) var(--ease-in);
+    --transition-dropdown: transform var(--duration-normal) var(--ease-out),
+                           opacity var(--duration-fast) var(--ease-out);
+    --transition-tooltip: opacity var(--duration-fast) var(--ease-out),
+                          transform var(--duration-fast) var(--ease-out);
+    --transition-toggle: transform var(--duration-normal) var(--ease-spring);
+    --transition-focus: box-shadow var(--duration-fast) var(--ease-out),
+                        outline var(--duration-fast) var(--ease-out);
+
+    /* Legacy aliases for backwards compatibility */
+    --transition-fast: var(--duration-fast) var(--ease-default);
+    --transition-normal: var(--duration-normal) var(--ease-default);
+    --transition-slow: var(--duration-slow) var(--ease-default);
+    --transition-enter: var(--duration-normal) var(--ease-out);
+    --transition-exit: var(--duration-fast) var(--ease-in);
+    --transition-spring: var(--duration-slow) var(--ease-spring);
+
+    /* Motion scalar for reduced motion - multiply durations by this */
+    --motion-scalar: 1;
+
+    /* ============================================
+       OVERLAYS
+       ============================================ */
+
+    --overlay-subtle: rgba(0, 0, 0, 0.3);
+    --overlay-default: rgba(0, 0, 0, 0.5);
+    --overlay-heavy: rgba(0, 0, 0, 0.7);
+    --overlay-blur: 8px;
+
+    /* ============================================
+       OPACITY
+       ============================================ */
+
+    --opacity-0: 0;
+    --opacity-5: 0.05;
+    --opacity-10: 0.1;
+    --opacity-20: 0.2;
+    --opacity-30: 0.3;
+    --opacity-40: 0.4;
+    --opacity-50: 0.5;
+    --opacity-60: 0.6;
+    --opacity-70: 0.7;
+    --opacity-80: 0.8;
+    --opacity-90: 0.9;
+    --opacity-100: 1;
+
+    --opacity-disabled: 0.5;
+    --opacity-muted: 0.7;
+    --opacity-subtle: 0.9;
+    --opacity-backdrop: 0.5;
+    --opacity-loading: 0.6;
+
+    /* ============================================
+       Z-INDEX
+       ============================================ */
+
+    --z-behind: -1;
+    --z-base: 0;
+    --z-raised: 1;
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-toast: 1080;
+    --z-max: 9999;
+
+    /* ============================================
+       BREAKPOINTS
+       ============================================ */
+
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+
+    /* ============================================
+       LAYOUT
+       ============================================ */
+
+    --header-height: 4rem;
+    --sidebar-width: 16rem;
+    --sidebar-collapsed: 4.5rem;
+    --max-content-width: 1280px;
+    --max-form-width: 640px;
+
+    /* ============================================
+       CANDID - MENTORSHIP PLATFORM TOKENS
+       Uses existing primitives with blue-focused palette
+       ============================================ */
+
+    /* Candid brand backgrounds */
+    --candid-background-brand: var(--candid-dark);
+    --candid-background-brand-hover: var(--candid-dark-hover);
+    --candid-background-subtle: var(--primitive-blue-100);
+    --candid-background-muted: var(--primitive-blue-200);
+    --candid-background-accent: var(--primitive-blue-300);
+
+    /* Candid foreground colors */
+    --candid-foreground-brand: var(--candid-dark);
+    --candid-foreground-on-brand: var(--primitive-neutral-0);
+    --candid-foreground-muted: var(--candid-dark);
+
+    /* Candid borders */
+    --candid-border-default: var(--primitive-blue-200);
+    --candid-border-subtle: var(--primitive-blue-100);
+    --candid-border-accent: var(--primitive-blue-300);
+    --candid-border-focus: var(--candid-dark);
+
+    /* Candid buttons */
+    --candid-button-primary-background: var(--candid-dark);
+    --candid-button-primary-background-hover: var(--candid-dark-hover);
+    --candid-button-primary-foreground: var(--primitive-neutral-0);
+    --candid-button-secondary-background: var(--primitive-blue-100);
+    --candid-button-secondary-background-hover: var(--primitive-blue-200);
+    --candid-button-secondary-foreground: var(--candid-dark);
+
+    /* Candid cards */
+    --candid-card-background: var(--primitive-neutral-0);
+    --candid-card-background-hover: var(--primitive-blue-100);
+    --candid-card-background-featured: var(--primitive-blue-100);
+    --candid-card-border: var(--border-default);
+    --candid-card-border-hover: var(--primitive-blue-300);
+
+    /* Candid badges */
+    --candid-badge-mentor-background: var(--primitive-blue-100);
+    --candid-badge-mentor-foreground: var(--candid-dark);
+    --candid-badge-coach-background: var(--primitive-blue-200);
+    --candid-badge-coach-foreground: var(--candid-dark);
+    --candid-badge-founding-background: var(--candid-dark);
+    --candid-badge-founding-foreground: var(--primitive-neutral-0);
+
+    /* Candid navigation */
+    --candid-nav-background: var(--primitive-neutral-0);
+    --candid-nav-border: var(--border-default);
+    --candid-nav-item-hover: var(--primitive-blue-100);
+    --candid-nav-item-active: var(--primitive-blue-200);
+
+    /* ============================================
+       DENSITY
+       ============================================ */
+
+    --density-factor: 1;
+    --density-row-height: calc(48px * var(--density-factor));
+    --density-input-height: calc(40px * var(--density-factor));
+    --density-padding-y: calc(12px * var(--density-factor));
+    --density-padding-x: calc(16px * var(--density-factor));
+    --density-gap: calc(16px * var(--density-factor));
+    --density-icon-size: calc(20px * var(--density-factor));
+  }
+
+  /* ============================================
+     COMPACT DENSITY MODE
+     ============================================ */
+  [data-density="compact"] {
+    --density-factor: 0.75;
+  }
+
+  /* ============================================
+     DARK MODE
+     GJB v3.1 - Green-tinted backgrounds
+     ============================================ */
+  .dark,
+  [data-theme="dark"] {
+    /* Neutral Scale - Green-tinted dark backgrounds */
+    --primitive-neutral-0: #0F1512;
+    --primitive-neutral-100: #171E1B;
+    --primitive-neutral-200: #1E2623;
+    --primitive-neutral-300: #263330;
+    --primitive-neutral-400: #344440;
+    --primitive-neutral-500: #4A5C57;
+    --primitive-neutral-600: #6B7A75;
+    --primitive-neutral-700: #95A39E;
+    --primitive-neutral-800: #C5CEC9;
+    --primitive-neutral-900: #FFFFFF;
+
+    /* Green Scale (Dark mode) */
+    --primitive-green-100: #0D2920;
+    --primitive-green-200: #134030;
+    --primitive-green-300: #1B5A45;
+    --primitive-green-400: #2A7A5A;
+    --primitive-green-500: #3D9E70;
+    --primitive-green-600: #5ECC70;
+    --primitive-green-700: #8EE07E;
+    --primitive-green-800: #DCFAC8;
+
+    /* Blue Scale (Dark mode) */
+    --primitive-blue-100: #0D1F3D;
+    --primitive-blue-200: #0D2D5A;
+    --primitive-blue-300: #1A4A8A;
+    --primitive-blue-400: #3369FF;
+    --primitive-blue-500: #408CFF;
+    --primitive-blue-600: #6AAFFF;
+    --primitive-blue-700: #99C9FF;
+    --primitive-blue-800: #CCE4FF;
+
+    /* Red Scale (Dark mode) */
+    --primitive-red-100: #3D1520;
+    --primitive-red-200: #5A1F2E;
+    --primitive-red-300: #8A2F45;
+    --primitive-red-400: #D44545;
+    --primitive-red-500: #FF5C5C;
+    --primitive-red-600: #FF8585;
+    --primitive-red-700: #FFB3B3;
+    --primitive-red-800: #FFD6E9;
+
+    /* Orange Scale (Dark mode) */
+    --primitive-orange-100: #3D2010;
+    --primitive-orange-200: #5A3018;
+    --primitive-orange-300: #8A4A28;
+    --primitive-orange-400: #D46A30;
+    --primitive-orange-500: #F5580A;
+    --primitive-orange-600: #FF8547;
+    --primitive-orange-700: #FFAD85;
+    --primitive-orange-800: #FFDAC2;
+
+    /* Yellow Scale (Dark mode) */
+    --primitive-yellow-100: #3D3010;
+    --primitive-yellow-200: #5A4818;
+    --primitive-yellow-300: #8A7028;
+    --primitive-yellow-400: #D4A830;
+    --primitive-yellow-500: #E5B225;
+    --primitive-yellow-600: #FFCE47;
+    --primitive-yellow-700: #FFDA75;
+    --primitive-yellow-800: #FFEFAD;
+
+    /* Purple Scale (Dark mode) */
+    --primitive-purple-100: #1F1535;
+    --primitive-purple-200: #2D1F50;
+    --primitive-purple-300: #452F7A;
+    --primitive-purple-400: #7040B8;
+    --primitive-purple-500: #9C59FF;
+    --primitive-purple-600: #C285FF;
+    --primitive-purple-700: #E2C2FF;
+    --primitive-purple-800: #F1E0FF;
+
+    /* Semantic Backgrounds */
+    --background-default: var(--primitive-neutral-0);
+    --background-subtle: var(--primitive-neutral-100);
+    --background-muted: var(--primitive-neutral-200);
+    --background-emphasized: var(--primitive-neutral-300);
+    --background-inverse: var(--primitive-neutral-800);
+
+    --background-brand: var(--primitive-green-500);
+    --background-brand-subtle: var(--primitive-green-100);
+    --background-brand-muted: var(--primitive-green-200);
+    --background-brand-emphasis: var(--primitive-green-600);
+
+    --background-interactive-default: var(--primitive-neutral-100);
+    --background-interactive-hover: var(--primitive-neutral-300);
+    --background-interactive-active: var(--primitive-neutral-400);
+    --background-interactive-selected: var(--primitive-green-200);
+    --background-interactive-disabled: var(--primitive-neutral-200);
+
+    --background-success: var(--primitive-green-200);
+    --background-success-emphasis: var(--primitive-green-500);
+    --background-warning: var(--primitive-orange-200);
+    --background-warning-emphasis: var(--primitive-orange-500);
+    --background-error: var(--primitive-red-200);
+    --background-error-emphasis: var(--primitive-red-500);
+    --background-info: var(--primitive-blue-200);
+    --background-info-emphasis: var(--primitive-blue-500);
+
+    /* Semantic Foreground */
+    --foreground-default: var(--primitive-neutral-800);
+    --foreground-muted: var(--primitive-neutral-700);
+    --foreground-subtle: var(--primitive-neutral-600);
+    --foreground-disabled: var(--primitive-neutral-500);
+    --foreground-inverse: var(--primitive-neutral-0);
+    --foreground-on-emphasis: #FFFFFF;
+
+    --foreground-brand: var(--primitive-green-600);
+    --foreground-brand-emphasis: var(--primitive-green-700);
+
+    --foreground-success: var(--primitive-green-600);
+    --foreground-warning: var(--primitive-orange-600);
+    --foreground-error: var(--primitive-red-600);
+    --foreground-info: var(--primitive-blue-600);
+
+    --foreground-link: var(--primitive-blue-500);
+    --foreground-link-hover: var(--primitive-blue-600);
+    --foreground-link-visited: var(--primitive-purple-500);
+
+    /* Semantic Borders */
+    --border-default: var(--primitive-neutral-400);
+    --border-muted: var(--primitive-neutral-300);
+    --border-emphasis: var(--primitive-neutral-500);
+    --border-strong: var(--primitive-neutral-600);
+    --border-inverse: var(--primitive-neutral-800);
+    --border-disabled: var(--primitive-neutral-300);
+
+    --border-brand: var(--primitive-green-400);
+    --border-brand-emphasis: var(--primitive-green-500);
+
+    --border-interactive-default: var(--primitive-neutral-400);
+    --border-interactive-hover: var(--primitive-neutral-500);
+    --border-interactive-focus: var(--primitive-green-500);
+    --border-interactive-active: var(--primitive-green-600);
+
+    --border-success: var(--primitive-green-400);
+    --border-warning: var(--primitive-orange-400);
+    --border-error: var(--primitive-red-400);
+    --border-info: var(--primitive-blue-400);
+
+    /* Semantic Surfaces */
+    --surface-default: var(--primitive-neutral-100);
+    --surface-raised: var(--primitive-neutral-200);
+    --surface-overlay: var(--primitive-neutral-200);
+    --surface-sunken: var(--primitive-neutral-0);
+    --surface-inset: var(--primitive-neutral-300);
+
+    /* Button Components (Dark Mode) */
+    --button-primary-background: var(--primitive-green-500);
+    --button-primary-background-hover: var(--primitive-green-600);
+    --button-primary-background-active: var(--primitive-green-700);
+    --button-primary-foreground: var(--primitive-neutral-0);
+
+    --button-secondary-background: rgba(51, 105, 255, 0.15);
+    --button-secondary-background-hover: rgba(51, 105, 255, 0.25);
+    --button-secondary-background-active: rgba(51, 105, 255, 0.35);
+    --button-secondary-foreground: var(--primitive-blue-400);
+
+    --button-tertiary-background: var(--primitive-neutral-300);
+    --button-tertiary-background-hover: var(--primitive-neutral-400);
+    --button-tertiary-background-active: var(--primitive-neutral-500);
+    --button-tertiary-foreground: var(--primitive-neutral-0);
+
+    --button-inverse-background: var(--primitive-neutral-800);
+    --button-inverse-background-hover: var(--primitive-green-700);
+    --button-inverse-background-active: var(--primitive-green-600);
+    --button-inverse-foreground: var(--primitive-neutral-0);
+
+    --button-outline-background: transparent;
+    --button-outline-background-hover: var(--primitive-neutral-300);
+    --button-outline-background-active: var(--primitive-neutral-400);
+    --button-outline-foreground: var(--primitive-neutral-800);
+    --button-outline-border: var(--primitive-neutral-500);
+
+    --button-ghost-background: transparent;
+    --button-ghost-background-hover: var(--primitive-neutral-300);
+    --button-ghost-background-active: var(--primitive-neutral-400);
+    --button-ghost-foreground: var(--primitive-neutral-700);
+
+    --button-destructive-background: var(--primitive-red-500);
+    --button-destructive-background-hover: var(--primitive-red-600);
+    --button-destructive-background-active: var(--primitive-red-700);
+    --button-destructive-foreground: #FFFFFF;
+
+    --button-disabled-background: var(--primitive-neutral-300);
+    --button-disabled-foreground: var(--primitive-neutral-500);
+
+    /* Input Components */
+    --input-background: var(--primitive-neutral-200);
+    --input-background-hover: var(--primitive-neutral-300);
+    --input-background-focus: var(--primitive-neutral-100);
+    --input-background-disabled: var(--primitive-neutral-300);
+    --input-foreground: var(--primitive-neutral-800);
+    --input-foreground-placeholder: var(--primitive-neutral-600);
+    --input-border: var(--primitive-neutral-300);
+    --input-border-hover: var(--primitive-neutral-400);
+    --input-border-focus: var(--primitive-green-500);
+    --input-border-error: var(--primitive-red-500);
+    --input-border-success: var(--primitive-green-500);
+
+    /* Select / Dropdown */
+    --select-background: var(--primitive-neutral-200);
+    --select-background-open: var(--primitive-neutral-100);
+    --select-border: var(--primitive-neutral-300);
+    --select-border-hover: var(--primitive-neutral-400);
+    --select-border-focus: var(--primitive-green-500);
+    --select-border-success: var(--primitive-green-500);
+    --select-border-error: var(--primitive-red-500);
+    --select-foreground: var(--primitive-neutral-800);
+    --select-foreground-placeholder: var(--primitive-neutral-600);
+    --select-foreground-error: var(--primitive-red-500);
+    --select-icon: var(--primitive-neutral-800);
+    --select-content-background: var(--primitive-neutral-100);
+    --select-content-shadow: 1px 2px 16px 0px rgba(0, 0, 0, 0.3);
+    --select-item-background-hover: var(--primitive-neutral-200);
+    --select-item-background-selected: var(--primitive-neutral-200);
+    --select-item-foreground: var(--primitive-neutral-800);
+    --select-item-foreground-selected: var(--primitive-blue-500);
+    --select-item-checkmark: var(--primitive-blue-500);
+
+    /* Selection */
+    --selection-background: var(--primitive-green-300);
+    --selection-foreground: var(--primitive-green-800);
+
+    /* Card Components */
+    --card-background: var(--primitive-neutral-100);
+    --card-background-hover: var(--primitive-neutral-200);
+    --card-background-active: var(--primitive-neutral-300);
+    --card-background-selected: var(--primitive-green-200);
+    --card-background-feature: var(--primitive-green-200);
+    --card-foreground: var(--primitive-neutral-800);
+    --card-foreground-muted: var(--primitive-neutral-700);
+    --card-foreground-feature: var(--primitive-neutral-800);
+    --card-foreground-feature-muted: var(--primitive-neutral-700);
+    --card-border: var(--primitive-neutral-400);
+    --card-border-hover: var(--primitive-neutral-500);
+
+    /* Badge Components */
+    --badge-neutral-background: var(--primitive-neutral-300);
+    --badge-neutral-foreground: var(--primitive-neutral-700);
+    --badge-neutral-border: var(--primitive-neutral-500);
+
+    --badge-primary-background: var(--primitive-green-200);
+    --badge-primary-foreground: var(--primitive-green-600);
+    --badge-primary-border: var(--primitive-green-400);
+
+    --badge-success-background: var(--primitive-green-200);
+    --badge-success-foreground: var(--primitive-green-600);
+    --badge-success-border: var(--primitive-green-400);
+
+    --badge-warning-background: var(--primitive-orange-200);
+    --badge-warning-foreground: var(--primitive-orange-600);
+    --badge-warning-border: var(--primitive-orange-400);
+
+    --badge-error-background: var(--primitive-red-200);
+    --badge-error-foreground: var(--primitive-red-600);
+    --badge-error-border: var(--primitive-red-400);
+
+    --badge-info-background: var(--primitive-blue-200);
+    --badge-info-foreground: var(--primitive-blue-600);
+    --badge-info-border: var(--primitive-blue-400);
+
+    --badge-accent-background: var(--primitive-purple-200);
+    --badge-accent-foreground: var(--primitive-purple-600);
+    --badge-accent-border: var(--primitive-purple-400);
+
+    /* Navigation */
+    --nav-background: var(--primitive-neutral-100);
+    --nav-foreground: var(--primitive-neutral-800);
+    --nav-foreground-muted: var(--primitive-neutral-600);
+    --nav-item-background-hover: var(--primitive-neutral-300);
+    --nav-item-background-active: var(--primitive-green-200);
+    --nav-item-foreground-active: var(--primitive-green-600);
+    --nav-border: var(--primitive-neutral-400);
+
+    /* Table */
+    --table-background: var(--primitive-neutral-0);
+    --table-background-header: var(--primitive-neutral-0);
+    --table-background-row-hover: var(--primitive-neutral-100);
+    --table-background-row-selected: var(--primitive-neutral-200);
+    --table-background-row-stripe: var(--primitive-neutral-100);
+    --table-foreground: var(--primitive-neutral-800);
+    --table-foreground-header: var(--primitive-neutral-600);
+    --table-border: var(--primitive-neutral-300);
+    --table-border-header: var(--primitive-neutral-400);
+
+    /* Tooltip */
+    --tooltip-background: var(--primitive-neutral-300);
+    --tooltip-foreground: var(--primitive-neutral-800);
+    --tooltip-border: var(--primitive-neutral-400);
+
+    /* Popover / Dropdown */
+    --popover-background: var(--primitive-neutral-100);
+    --popover-foreground: var(--primitive-neutral-800);
+    --popover-border: var(--primitive-neutral-400);
+    --popover-item-background-hover: var(--primitive-neutral-300);
+    --popover-item-background-active: var(--primitive-neutral-400);
+    --popover-item-background-selected: var(--primitive-green-200);
+    --popover-separator: var(--primitive-neutral-400);
+
+    /* Modal / Dialog */
+    --modal-background: var(--primitive-neutral-100);
+    --modal-foreground: var(--primitive-neutral-800);
+    --modal-border: var(--primitive-neutral-400);
+    --modal-header-background: var(--primitive-neutral-200);
+    --modal-footer-background: var(--primitive-neutral-200);
+
+    /* Alert (Dark Mode) */
+    --alert-feature-background: var(--primitive-blue-200);
+    --alert-feature-foreground: var(--primitive-blue-700);
+    --alert-feature-border: var(--primitive-blue-500);
+    --alert-feature-icon: var(--primitive-blue-500);
+
+    --alert-critical-background: var(--primitive-red-200);
+    --alert-critical-foreground: var(--primitive-red-700);
+    --alert-critical-border: var(--primitive-red-500);
+    --alert-critical-icon: var(--primitive-red-500);
+
+    --alert-warning-background: var(--primitive-orange-200);
+    --alert-warning-foreground: var(--primitive-orange-700);
+    --alert-warning-border: var(--primitive-orange-500);
+    --alert-warning-icon: var(--primitive-orange-500);
+
+    --alert-success-background: var(--primitive-green-200);
+    --alert-success-foreground: var(--primitive-green-700);
+    --alert-success-border: var(--primitive-green-500);
+    --alert-success-icon: var(--primitive-green-500);
+
+    --alert-info-background: var(--primitive-neutral-300);
+    --alert-info-foreground: var(--primitive-neutral-700);
+    --alert-info-border: var(--primitive-neutral-500);
+    --alert-info-icon: var(--primitive-neutral-600);
+
+    --alert-dismiss-background: transparent;
+    --alert-dismiss-background-hover: rgba(255, 255, 255, 0.1);
+    --alert-dismiss-background-active: rgba(255, 255, 255, 0.15);
+
+    /* Banner (Dark Mode) - Keep bold solid backgrounds */
+    --banner-feature-background: var(--primitive-blue-500);
+    --banner-feature-foreground: #FFFFFF;
+    --banner-feature-icon: #FFFFFF;
+
+    --banner-critical-background: var(--primitive-red-500);
+    --banner-critical-foreground: #FFFFFF;
+    --banner-critical-icon: #FFFFFF;
+
+    --banner-warning-background: var(--primitive-orange-500);
+    --banner-warning-foreground: #FFFFFF;
+    --banner-warning-icon: #FFFFFF;
+
+    --banner-success-background: var(--primitive-green-500);
+    --banner-success-foreground: #FFFFFF;
+    --banner-success-icon: #FFFFFF;
+
+    --banner-info-background: var(--primitive-neutral-600);
+    --banner-info-foreground: #FFFFFF;
+    --banner-info-icon: var(--primitive-neutral-300);
+
+    --banner-dismiss-background: transparent;
+    --banner-dismiss-background-hover: rgba(255, 255, 255, 0.15);
+    --banner-dismiss-background-active: rgba(255, 255, 255, 0.25);
+
+    /* Toast (Dark Mode) */
+    --toast-background: var(--primitive-neutral-200);
+    --toast-foreground: var(--primitive-neutral-800);
+    --toast-border: var(--primitive-neutral-400);
+    --toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    --toast-success-background: var(--primitive-green-500);
+    --toast-success-foreground: #FFFFFF;
+    --toast-success-icon: #FFFFFF;
+
+    --toast-warning-background: var(--primitive-orange-500);
+    --toast-warning-foreground: #FFFFFF;
+    --toast-warning-icon: #FFFFFF;
+
+    --toast-critical-background: var(--primitive-red-500);
+    --toast-critical-foreground: #FFFFFF;
+    --toast-critical-icon: #FFFFFF;
+
+    --toast-info-background: var(--primitive-neutral-300);
+    --toast-info-foreground: var(--primitive-neutral-800);
+    --toast-info-icon: var(--primitive-neutral-600);
+
+    --toast-dismiss-background: transparent;
+    --toast-dismiss-background-hover: rgba(0, 0, 0, 0.15);
+
+    /* Inline Message (Dark Mode) */
+    --inline-message-info-foreground: var(--primitive-neutral-700);
+    --inline-message-info-icon: var(--primitive-neutral-600);
+
+    --inline-message-success-foreground: var(--primitive-green-600);
+    --inline-message-success-icon: var(--primitive-green-500);
+
+    --inline-message-warning-foreground: var(--primitive-orange-600);
+    --inline-message-warning-icon: var(--primitive-orange-500);
+
+    --inline-message-critical-foreground: var(--primitive-red-600);
+    --inline-message-critical-icon: var(--primitive-red-500);
+
+    /* Tabs */
+    --tabs-background: transparent;
+    --tabs-foreground: var(--primitive-neutral-700);
+    --tabs-foreground-active: var(--primitive-neutral-800);
+    --tabs-border: var(--primitive-neutral-400);
+    --tabs-indicator: var(--primitive-green-500);
+    --tabs-item-background-hover: var(--primitive-neutral-300);
+
+    /* Switch */
+    --switch-background: var(--primitive-neutral-500);
+    --switch-background-hover: var(--primitive-neutral-600);
+    --switch-background-checked: var(--primitive-blue-500);
+    --switch-background-checked-hover: var(--primitive-blue-600);
+    --switch-background-disabled: var(--primitive-neutral-300);
+    --switch-thumb: var(--primitive-neutral-0);
+    --switch-thumb-border: var(--primitive-neutral-500);
+    --switch-thumb-border-checked: var(--primitive-blue-500);
+    --switch-thumb-disabled: var(--primitive-neutral-600);
+
+    /* Checkbox */
+    --checkbox-background: var(--primitive-neutral-100);
+    --checkbox-background-hover: var(--primitive-neutral-200);
+    --checkbox-background-checked: var(--primitive-blue-500);
+    --checkbox-background-checked-hover: var(--primitive-blue-400);
+    --checkbox-background-disabled: var(--primitive-neutral-300);
+    --checkbox-background-error: var(--primitive-red-200);
+    --checkbox-border: var(--primitive-neutral-500);
+    --checkbox-border-hover: var(--primitive-neutral-600);
+    --checkbox-border-checked: var(--primitive-blue-500);
+    --checkbox-border-error: var(--primitive-red-500);
+    --checkbox-foreground: #FFFFFF;
+    --checkbox-foreground-disabled: var(--primitive-neutral-600);
+
+    /* Radio */
+    --radio-background: var(--primitive-neutral-100);
+    --radio-background-hover: var(--primitive-neutral-200);
+    --radio-background-checked: var(--primitive-blue-500);
+    --radio-background-checked-hover: var(--primitive-blue-400);
+    --radio-background-disabled: var(--primitive-neutral-300);
+    --radio-background-error: var(--primitive-red-200);
+    --radio-border: var(--primitive-neutral-500);
+    --radio-border-hover: var(--primitive-neutral-600);
+    --radio-border-checked: var(--primitive-blue-500);
+    --radio-border-error: var(--primitive-red-500);
+    --radio-dot: #FFFFFF;
+    --radio-dot-disabled: var(--primitive-neutral-600);
+
+    /* Slider */
+    --slider-track-background: var(--primitive-neutral-400);
+    --slider-track-background-active: var(--primitive-green-300);
+    --slider-thumb-background: var(--primitive-neutral-800);
+    --slider-thumb-border: var(--primitive-green-500);
+
+    /* Calendar / Date Picker */
+    --calendar-selected-background: var(--primitive-blue-500);
+    --calendar-selected-foreground: var(--primitive-neutral-0);
+    --calendar-today-background: var(--primitive-neutral-300);
+    --calendar-today-foreground: var(--foreground-default);
+    --calendar-range-background: var(--primitive-blue-200);
+    --calendar-range-foreground: var(--primitive-blue-600);
+    --calendar-outside-foreground: var(--primitive-neutral-600);
+    --calendar-disabled-foreground: var(--primitive-neutral-500);
+    --calendar-hover-background: var(--primitive-neutral-300);
+    --calendar-nav-background: var(--primitive-neutral-300);
+    --calendar-nav-background-hover: var(--primitive-neutral-400);
+    --calendar-nav-foreground: var(--foreground-default);
+    --calendar-header-foreground: var(--foreground-default);
+    --calendar-weekday-foreground: var(--primitive-neutral-700);
+
+    /* Calendar Attendee Color Palette (Dark mode) */
+    /* Sage */
+    --calendar-attendee-1-background: #1A3D35;
+    --calendar-attendee-1-foreground: #8ECFBC;
+    --calendar-attendee-1-border: #2D5A4E;
+    /* Terracotta */
+    --calendar-attendee-2-background: #3D2A1A;
+    --calendar-attendee-2-foreground: #E8B88A;
+    --calendar-attendee-2-border: #5A4030;
+    /* Slate */
+    --calendar-attendee-3-background: #252840;
+    --calendar-attendee-3-foreground: #A8B0D8;
+    --calendar-attendee-3-border: #3A4060;
+    /* Orchid */
+    --calendar-attendee-4-background: #35253D;
+    --calendar-attendee-4-foreground: #C8A0D8;
+    --calendar-attendee-4-border: #4A3858;
+    /* Rose */
+    --calendar-attendee-5-background: #3D2528;
+    --calendar-attendee-5-foreground: #E8A0A0;
+    --calendar-attendee-5-border: #5A3840;
+    /* Fern */
+    --calendar-attendee-6-background: #253520;
+    --calendar-attendee-6-foreground: #A0D090;
+    --calendar-attendee-6-border: #3A4A32;
+    /* Wheat */
+    --calendar-attendee-7-background: #3D3520;
+    --calendar-attendee-7-foreground: #D8C880;
+    --calendar-attendee-7-border: #5A4A30;
+    /* Steel */
+    --calendar-attendee-8-background: #2A3035;
+    --calendar-attendee-8-foreground: #A8B8C0;
+    --calendar-attendee-8-border: #404850;
+
+    /* Calendar grid tokens (Dark mode) */
+    --calendar-grid-line: var(--primitive-neutral-300);
+    --calendar-time-label: var(--primitive-neutral-600);
+    --calendar-today-highlight: var(--primitive-blue-200);
+    --calendar-weekend-background: var(--primitive-neutral-100);
+
+    /* Progress */
+    --progress-background: var(--primitive-neutral-300);
+    --progress-foreground: var(--primitive-green-500);
+    --progress-foreground-success: var(--primitive-green-500);
+    --progress-foreground-warning: var(--primitive-orange-500);
+    --progress-foreground-error: var(--primitive-red-500);
+
+    /* Skeleton */
+    --skeleton-background: var(--primitive-neutral-300);
+    --skeleton-shine: var(--primitive-neutral-400);
+
+    /* ATS Pipeline Stages */
+    --stage-new-background: var(--primitive-neutral-300);
+    --stage-new-foreground: var(--primitive-neutral-700);
+    --stage-new-border: var(--primitive-neutral-500);
+
+    --stage-applied-background: var(--primitive-blue-200);
+    --stage-applied-foreground: var(--primitive-blue-600);
+    --stage-applied-border: var(--primitive-blue-400);
+
+    --stage-screening-background: var(--primitive-green-200);
+    --stage-screening-foreground: var(--primitive-green-600);
+    --stage-screening-border: var(--primitive-green-400);
+
+    --stage-interview-background: var(--primitive-purple-200);
+    --stage-interview-foreground: var(--primitive-purple-600);
+    --stage-interview-border: var(--primitive-purple-400);
+
+    --stage-offer-background: var(--primitive-yellow-200);
+    --stage-offer-foreground: var(--primitive-yellow-600);
+    --stage-offer-border: var(--primitive-yellow-400);
+
+    --stage-hired-background: var(--primitive-green-300);
+    --stage-hired-foreground: var(--primitive-green-700);
+    --stage-hired-border: var(--primitive-green-500);
+
+    --stage-rejected-background: var(--primitive-red-200);
+    --stage-rejected-foreground: var(--primitive-red-600);
+    --stage-rejected-border: var(--primitive-red-400);
+
+    --stage-withdrawn-background: var(--primitive-neutral-300);
+    --stage-withdrawn-foreground: var(--primitive-neutral-600);
+    --stage-withdrawn-border: var(--primitive-neutral-500);
+
+    /* Match Scores */
+    --match-high-background: var(--primitive-green-200);
+    --match-high-foreground: var(--primitive-green-600);
+    --match-high-accent: var(--primitive-green-500);
+
+    --match-medium-background: var(--primitive-yellow-200);
+    --match-medium-foreground: var(--primitive-yellow-600);
+    --match-medium-accent: var(--primitive-yellow-500);
+
+    --match-low-background: var(--primitive-orange-200);
+    --match-low-foreground: var(--primitive-orange-600);
+    --match-low-accent: var(--primitive-orange-500);
+
+    /* Kanban */
+    --kanban-column-background: var(--primitive-neutral-100);
+    --kanban-column-border: var(--primitive-neutral-300);
+    --kanban-card-background: var(--primitive-neutral-200);
+    --kanban-card-background-hover: var(--primitive-neutral-300);
+    --kanban-card-background-dragging: var(--primitive-neutral-200);
+    --kanban-card-border: var(--primitive-neutral-400);
+    --kanban-card-border-dragging: var(--primitive-green-400);
+    --kanban-dropzone-background: var(--primitive-green-200);
+    --kanban-dropzone-border: var(--primitive-green-400);
+
+    /* Tags / Chips (Dark mode) */
+    --tag-category-background: var(--primitive-neutral-300);
+    --tag-category-foreground: var(--primitive-neutral-800);
+
+    --tag-info-background: var(--primitive-neutral-300);
+    --tag-info-foreground: var(--primitive-neutral-800);
+    --tag-info-dismiss-background: var(--primitive-neutral-500);
+    --tag-info-dismiss-foreground: var(--primitive-neutral-0);
+    --tag-info-dismiss-background-hover: var(--primitive-neutral-600);
+
+    /* Shadows (stronger in dark mode — ~2.5x light mode opacity) */
+    --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.22);
+    --shadow-sm: 0 1px 4px 0 rgb(0 0 0 / 0.26), 0 1px 2px -1px rgb(0 0 0 / 0.20);
+    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.32), 0 2px 4px -2px rgb(0 0 0 / 0.24);
+    --shadow-lg: 0 10px 20px -3px rgb(0 0 0 / 0.38), 0 4px 8px -4px rgb(0 0 0 / 0.26);
+    --shadow-xl: 0 20px 32px -5px rgb(0 0 0 / 0.42), 0 8px 14px -6px rgb(0 0 0 / 0.30);
+    --shadow-2xl: 0 25px 56px -12px rgb(0 0 0 / 0.56);
+    --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.26);
+
+    /* Component shadows — key + ambient (dark mode) */
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.18), 0 2px 6px -1px rgb(0 0 0 / 0.22);
+    --shadow-card-hover: 0 2px 4px 0 rgb(0 0 0 / 0.22), 0 6px 16px -2px rgb(0 0 0 / 0.32);
+    --shadow-elevated: 0 2px 4px 0 rgb(0 0 0 / 0.22), 0 6px 20px -2px rgb(0 0 0 / 0.36);
+    --shadow-dropdown: 0 2px 6px 0 rgb(0 0 0 / 0.22), 0 10px 24px -4px rgb(0 0 0 / 0.40);
+    --shadow-modal: 0 4px 10px 0 rgb(0 0 0 / 0.26), 0 28px 64px -12px rgb(0 0 0 / 0.56);
+    --shadow-tooltip: 0 2px 4px 0 rgb(0 0 0 / 0.26), 0 6px 20px -2px rgb(0 0 0 / 0.40);
+    --shadow-button: 0 1px 3px 0 rgb(0 0 0 / 0.26);
+    --shadow-button-active: inset 0 2px 4px 0 rgb(0 0 0 / 0.36);
+    --shadow-focus: 0 0 0 2px var(--primitive-neutral-800), 0 0 0 4px var(--primitive-green-500);
+
+    /* Overlay */
+    --overlay-subtle: rgba(0, 0, 0, 0.5);
+    --overlay-default: rgba(0, 0, 0, 0.7);
+    --overlay-heavy: rgba(0, 0, 0, 0.85);
+
+    /* Focus Ring */
+    --ring-color: var(--primitive-green-500);
+    --ring-color-error: var(--primitive-red-500);
+    --ring-color-success: var(--primitive-green-500);
+    --ring-color-inverse: var(--primitive-neutral-800);
+  }
+
+  /* ============================================
+     SYSTEM PREFERENCE DETECTION
+     ============================================ */
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="system"] {
+      /* Inherits .dark styles via media query */
+      --background-default: var(--primitive-neutral-0);
+      --background-subtle: var(--primitive-neutral-100);
+      --background-muted: var(--primitive-neutral-200);
+      --foreground-default: var(--primitive-neutral-800);
+      --foreground-muted: var(--primitive-neutral-700);
+      --border-default: var(--primitive-neutral-400);
+      --surface-default: var(--primitive-neutral-100);
+    }
+  }
+
+  /* ============================================
+     REDUCED MOTION
+     ============================================ */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-scalar: 0;
+      --duration-fastest: 0ms;
+      --duration-fast: 0ms;
+      --duration-normal: 0ms;
+      --duration-moderate: 0ms;
+      --duration-slow: 0ms;
+      --duration-slower: 0ms;
+      --duration-slowest: 0ms;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer base {
+  /* Global resets */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: var(--background-default);
+    color: var(--foreground-default);
+  }
+
+  /* Typography base - only set weight and tracking, let utilities handle size */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-medium);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: var(--selection-background);
+    color: var(--selection-foreground);
+  }
+
+  /* Dark mode selection */
+  .dark ::selection,
+  [data-theme="dark"] ::selection {
+    background-color: var(--selection-background);
+    color: var(--selection-foreground);
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    max-width: var(--max-content-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: var(--space-6);
+      padding-right: var(--space-6);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: var(--space-8);
+      padding-right: var(--space-8);
+    }
+  }
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(var(--motion-distance-md));
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Time picker colon blink animation */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Subtle pulse animation for idle state */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Skeleton shimmer effect */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    var(--background-muted) 0%,
+    var(--background-subtle) 50%,
+    var(--background-muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(calc(-1 * var(--motion-distance-md)));
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(var(--motion-distance-sm));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(calc(-1 * var(--motion-distance-sm)));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(calc(-1 * var(--motion-distance-xs)));
+  }
+  40%, 80% {
+    transform: translateX(var(--motion-distance-xs));
+  }
+}
+
+@keyframes check-mark {
+  0% {
+    stroke-dashoffset: 24;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Checkbox stroke animation */
+@keyframes check-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes minus-stroke {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Radio dot scale animation - staggered (waits for outer circle to change first) */
+@keyframes radio-dot-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  /* Hold at 0 for first 30% (creates the stagger delay) */
+  30% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  /* Then pop in with slight overshoot */
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Animation utility classes */
+.animate-fade-in {
+  animation: fade-in var(--duration-normal) var(--ease-out) forwards;
+}
+
+.animate-fade-out {
+  animation: fade-out var(--duration-fast) var(--ease-in) forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-moderate) var(--ease-emphasized-decelerate) forwards;
+}
+
+.animate-scale-out {
+  animation: scale-out var(--duration-fast) var(--ease-emphasized-accelerate) forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up var(--duration-moderate) var(--ease-out) forwards;
+}
+
+.animate-slide-down {
+  animation: slide-down var(--duration-moderate) var(--ease-out) forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right var(--duration-normal) var(--ease-out) forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left var(--duration-normal) var(--ease-out) forwards;
+}
+
+.animate-bounce-in {
+  animation: bounce-in var(--duration-slow) var(--ease-spring) forwards;
+}
+
+.animate-shake {
+  animation: shake var(--duration-slow) var(--ease-default);
+}
+
+.animate-pulse-subtle {
+  animation: pulse var(--duration-slowest) var(--ease-in-out) infinite;
+}
+
+.animate-spin-slow {
+  animation: spin var(--duration-slowest) linear infinite;
+}
+
+/* ============================================
+   AVATAR ANIMATIONS
+   ============================================ */
+
+/* Pulse animation for online status indicator */
+@keyframes avatar-status-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--avatar-status-pulse-color, rgba(59, 163, 111, 0.5));
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--avatar-status-pulse-color, rgba(59, 163, 111, 0));
+  }
+}
+
+.animate-avatar-status-pulse {
+  animation: avatar-status-pulse 2s ease-in-out infinite;
+}
+
+/* Shimmer animation for avatar loading skeleton */
+@keyframes avatar-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-avatar-shimmer {
+  animation: avatar-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Fallback reveal animation - scale + fade in */
+@keyframes avatar-fallback-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-avatar-fallback-reveal {
+  animation: avatar-fallback-reveal 200ms ease-out forwards;
+}
+
+/* Hover scale animation for avatar */
+@keyframes avatar-hover-lift {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    transform: scale(1.05) translateY(-2px);
+  }
+}
+
+/* Press/active feedback animation */
+@keyframes avatar-press {
+  0% {
+    transform: scale(1.05) translateY(-2px);
+  }
+  100% {
+    transform: scale(0.98) translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-in-right,
+  .animate-slide-in-left,
+  .animate-bounce-in,
+  .animate-shake,
+  .animate-pulse-subtle,
+  .animate-spin-slow,
+  .animate-avatar-status-pulse,
+  .animate-avatar-shimmer,
+  .animate-avatar-fallback-reveal {
+    animation: none;
+  }
+}
+
+/* Utility: Hide scrollbar but keep scrolling */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

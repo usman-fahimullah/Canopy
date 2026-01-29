@@ -1,0 +1,146 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { CandidLogo } from "./CandidLogo";
+import { CandidSymbol } from "./CandidSymbol";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  House,
+  MagnifyingGlass,
+  ChatCircle,
+  CalendarBlank,
+  Gear,
+  SignOut,
+  Question,
+  BookOpen,
+  MapTrifold,
+} from "@phosphor-icons/react";
+import { currentUser, getNotificationsForUser, getThreadsForUser } from "@/lib/candid";
+
+const mainNavItems = [
+  { href: "/candid/dashboard", label: "Home", icon: House },
+  { href: "/candid/browse", label: "Browse", icon: MagnifyingGlass },
+  { href: "/candid/sessions", label: "Sessions", icon: CalendarBlank },
+  { href: "/candid/messages", label: "Messages", icon: ChatCircle },
+];
+
+const resourceNavItems = [
+  { href: "/candid/resources", label: "Resources", icon: BookOpen },
+  { href: "/candid/faqs", label: "FAQs", icon: Question },
+  { href: "/candid/careers", label: "Career Paths", icon: MapTrifold },
+];
+
+export function CandidSidebar() {
+  const pathname = usePathname();
+  const threads = getThreadsForUser(currentUser.id);
+  const unreadMessages = threads.reduce((acc, t) => acc + t.unreadCount, 0);
+
+  return (
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-[var(--border-default)] bg-white lg:flex">
+      {/* Logo */}
+      <div className="flex h-16 items-center px-5">
+        <Link href="/candid" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+          <CandidSymbol size={28} />
+          <CandidLogo className="h-5" />
+        </Link>
+      </div>
+
+      {/* User Profile */}
+      <div className="mx-4 mb-4 flex items-center gap-3 rounded-lg bg-[var(--background-subtle)] px-3 py-2.5">
+        <Avatar
+          size="default"
+          src={currentUser.avatar}
+          name={`${currentUser.firstName} ${currentUser.lastName}`}
+          color="green"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-body-sm font-medium text-foreground-default">
+            {currentUser.firstName} {currentUser.lastName}
+          </p>
+          <p className="text-caption text-foreground-muted capitalize">{currentUser.role}</p>
+        </div>
+      </div>
+
+      {/* Main Navigation */}
+      <nav className="flex-1 space-y-1 px-3">
+        {mainNavItems.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const Icon = item.icon;
+          const showBadge = item.href === "/candid/messages" && unreadMessages > 0;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium transition-all duration-150",
+                isActive
+                  ? "bg-[var(--candid-nav-item-active)] text-[var(--candid-foreground-brand)]"
+                  : "text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
+              )}
+            >
+              <Icon size={20} weight={isActive ? "fill" : "regular"} />
+              {item.label}
+              {showBadge && (
+                <Badge variant="error" size="sm" className="ml-auto">
+                  {unreadMessages > 9 ? "9+" : unreadMessages}
+                </Badge>
+              )}
+            </Link>
+          );
+        })}
+
+        {/* Divider */}
+        <div className="my-4 border-t border-[var(--border-default)]" />
+
+        {/* Resources Section */}
+        <p className="px-3 pb-2 text-caption font-medium text-foreground-muted">
+          Resources
+        </p>
+        {resourceNavItems.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium transition-all duration-150",
+                isActive
+                  ? "bg-[var(--candid-nav-item-active)] text-[var(--candid-foreground-brand)]"
+                  : "text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
+              )}
+            >
+              <Icon size={20} weight={isActive ? "fill" : "regular"} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="border-t border-[var(--border-default)] p-3 space-y-1">
+        <Link
+          href="/candid/settings"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium transition-all duration-150",
+            pathname === "/candid/settings"
+              ? "bg-[var(--candid-nav-item-active)] text-[var(--candid-foreground-brand)]"
+              : "text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
+          )}
+        >
+          <Gear size={20} weight={pathname === "/candid/settings" ? "fill" : "regular"} />
+          Settings
+        </Link>
+        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium text-foreground-muted hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)] transition-all duration-150">
+          <SignOut size={20} />
+          Logout
+        </button>
+      </div>
+    </aside>
+  );
+}

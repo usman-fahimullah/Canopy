@@ -1,0 +1,1075 @@
+"use client";
+
+import * as React from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+
+// UI Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/dropdown";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Banner } from "@/components/ui/banner";
+import { SegmentedController } from "@/components/ui/segmented-controller";
+
+// Icons
+import {
+  Buildings,
+  MapPin,
+  Clock,
+  Upload,
+  CheckCircle,
+  ArrowLeft,
+  FloppyDisk,
+  Eye,
+  Pencil,
+} from "@phosphor-icons/react";
+
+// Types
+type FormData = {
+  name: string;
+  email: string;
+  dateOfBirth?: Date;
+  pronouns: string;
+  location: string;
+  currentRole: string;
+  currentCompany: string;
+  yearsExperience: string;
+  linkedIn: string;
+  portfolio: string;
+  resumeFile: File | null;
+  coverLetterFile: File | null;
+  portfolioFile: File | null;
+  questionAnswers: Record<string, string>;
+};
+
+// Mock data - in real app, fetch from API
+const MOCK_JOB_DATA = {
+  id: "1",
+  title: "Senior Renewable Energy Engineer",
+  company: "Solaris Energy Co.",
+  location: "San Francisco, CA",
+  locationType: "Hybrid",
+  employmentType: "Full-time",
+  department: "Engineering",
+  postedDate: "2 days ago",
+  estimatedTime: "5 minutes",
+
+  personalDetails: {
+    name: { visible: true, required: true },
+    email: { visible: true, required: true },
+    dateOfBirth: { visible: true, required: false },
+    pronouns: { visible: true, required: false },
+    location: { visible: true, required: true },
+  },
+
+  careerDetails: {
+    currentRole: { visible: true, required: false },
+    currentCompany: { visible: true, required: false },
+    yearsExperience: { visible: true, required: true },
+    linkedIn: { visible: true, required: false },
+    portfolio: { visible: true, required: false },
+  },
+
+  requiredFiles: {
+    resume: true,
+    coverLetter: true,
+    portfolio: false,
+  },
+
+  questions: [
+    {
+      id: "q1",
+      type: "text" as const,
+      title: "Why are you interested in this role?",
+      required: true,
+      description: "Tell us what excites you about this opportunity"
+    },
+    {
+      id: "q2",
+      type: "yes-no" as const,
+      title: "Do you have experience with renewable energy projects?",
+      required: true
+    },
+    {
+      id: "q3",
+      type: "multiple-choice" as const,
+      title: "What is your preferred work style?",
+      required: false,
+      options: ["Remote", "Hybrid", "On-site"]
+    },
+  ],
+};
+
+export default function ApplyPage() {
+  const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const jobId = params.jobId as string;
+
+  // Check if in preview mode (employer view)
+  const isPreviewMode = searchParams.get('preview') === 'true';
+  const [viewMode, setViewMode] = React.useState<'employer' | 'candidate'>(
+    isPreviewMode ? 'employer' : 'candidate'
+  );
+
+  // Load from localStorage on mount
+  const getInitialFormData = (): FormData => {
+    if (typeof window === 'undefined') {
+      return {
+        name: "",
+        email: "",
+        dateOfBirth: undefined,
+        pronouns: "",
+        location: "",
+        currentRole: "",
+        currentCompany: "",
+        yearsExperience: "",
+        linkedIn: "",
+        portfolio: "",
+        resumeFile: null,
+        coverLetterFile: null,
+        portfolioFile: null,
+        questionAnswers: {},
+      };
+    }
+
+    const saved = localStorage.getItem(`application-draft-${jobId}`);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return {
+        ...parsed,
+        resumeFile: null, // Files can't be saved to localStorage
+        coverLetterFile: null,
+        portfolioFile: null,
+        dateOfBirth: parsed.dateOfBirth ? new Date(parsed.dateOfBirth) : undefined,
+      };
+    }
+
+    return {
+      name: "",
+      email: "",
+      dateOfBirth: undefined,
+      pronouns: "",
+      location: "",
+      currentRole: "",
+      currentCompany: "",
+      yearsExperience: "",
+      linkedIn: "",
+      portfolio: "",
+      resumeFile: null,
+      coverLetterFile: null,
+      portfolioFile: null,
+      questionAnswers: {},
+    };
+  };
+
+  const [formData, setFormData] = React.useState<FormData>(getInitialFormData);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitted, setSubmitted] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+  const [lastSaved, setLastSaved] = React.useState<Date | null>(null);
+
+  // Auto-save to localStorage
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      const dataToSave = {
+        ...formData,
+        resumeFile: null, // Don't save files
+        coverLetterFile: null,
+        portfolioFile: null,
+      };
+      localStorage.setItem(`application-draft-${jobId}`, JSON.stringify(dataToSave));
+      setLastSaved(new Date());
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [formData, jobId]);
+
+  // Calculate progress
+  React.useEffect(() => {
+    let completed = 0;
+    let total = 0;
+
+    // Personal info
+    total += 2; // name, email always required
+    if (formData.name) completed++;
+    if (formData.email) completed++;
+
+    if (MOCK_JOB_DATA.personalDetails.location.required) {
+      total++;
+      if (formData.location) completed++;
+    }
+
+    // Career details
+    if (MOCK_JOB_DATA.careerDetails.yearsExperience.required) {
+      total++;
+      if (formData.yearsExperience) completed++;
+    }
+
+    // Required files
+    if (MOCK_JOB_DATA.requiredFiles.resume) {
+      total++;
+      if (formData.resumeFile) completed++;
+    }
+    if (MOCK_JOB_DATA.requiredFiles.coverLetter) {
+      total++;
+      if (formData.coverLetterFile) completed++;
+    }
+
+    // Required questions
+    MOCK_JOB_DATA.questions.forEach(q => {
+      if (q.required) {
+        total++;
+        if (formData.questionAnswers[q.id]) completed++;
+      }
+    });
+
+    setProgress(total > 0 ? Math.round((completed / total) * 100) : 0);
+  }, [formData]);
+
+  // File upload handlers
+  const handleFileUpload = (field: keyof Pick<FormData, "resumeFile" | "coverLetterFile" | "portfolioFile">) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, [field]: file });
+    }
+  };
+
+  // Validation
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = "Invalid email format";
+
+    if (MOCK_JOB_DATA.personalDetails.location.required && !formData.location.trim()) {
+      newErrors.location = "Location is required";
+    }
+
+    if (MOCK_JOB_DATA.careerDetails.yearsExperience.required && !formData.yearsExperience) {
+      newErrors.yearsExperience = "Years of experience is required";
+    }
+
+    if (MOCK_JOB_DATA.requiredFiles.resume && !formData.resumeFile) {
+      newErrors.resumeFile = "Resume is required";
+    }
+    if (MOCK_JOB_DATA.requiredFiles.coverLetter && !formData.coverLetterFile) {
+      newErrors.coverLetterFile = "Cover letter is required";
+    }
+
+    MOCK_JOB_DATA.questions.forEach((q) => {
+      if (q.required && !formData.questionAnswers[q.id]) {
+        newErrors[`question_${q.id}`] = "This question is required";
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Submit handler
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      const firstError = document.querySelector('[data-error="true"]');
+      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Clear draft from localStorage
+    localStorage.removeItem(`application-draft-${jobId}`);
+
+    setIsSubmitting(false);
+    setSubmitted(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Save draft handler
+  const handleSaveDraft = () => {
+    const dataToSave = {
+      ...formData,
+      resumeFile: null,
+      coverLetterFile: null,
+      portfolioFile: null,
+    };
+    localStorage.setItem(`application-draft-${jobId}`, JSON.stringify(dataToSave));
+    setLastSaved(new Date());
+    alert('Draft saved! You can return to complete your application later.');
+  };
+
+  // Success state
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
+        <div className="max-w-2xl mx-auto px-4 py-16">
+          <div className="bg-white rounded-2xl p-12 text-center border border-[var(--primitive-neutral-300)]">
+            <div className="w-16 h-16 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle weight="fill" className="w-10 h-10 text-[var(--primitive-green-600)]" />
+            </div>
+
+            <h1 className="text-heading-md text-foreground mb-3">
+              Application Submitted!
+            </h1>
+
+            <p className="text-body text-foreground-muted mb-8">
+              Thank you for applying to <span className="font-semibold">{MOCK_JOB_DATA.title}</span> at {MOCK_JOB_DATA.company}.
+              We've received your application and will review it shortly.
+            </p>
+
+            <div className="bg-[var(--primitive-neutral-100)] rounded-xl p-6 mb-8 text-left">
+              <h3 className="text-body-strong text-foreground mb-3">What's Next?</h3>
+              <ul className="space-y-2 text-body-sm text-foreground-muted">
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--primitive-green-600)] mt-1">•</span>
+                  <span>You'll receive a confirmation email within a few minutes</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--primitive-green-600)] mt-1">•</span>
+                  <span>Our team will review your application within 5-7 business days</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--primitive-green-600)] mt-1">•</span>
+                  <span>We'll reach out via email with next steps or updates</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="tertiary"
+                size="lg"
+                leftIcon={<ArrowLeft weight="regular" className="w-5 h-5" />}
+                onClick={() => router.push("/")}
+              >
+                Back to Jobs
+              </Button>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => {
+                  setSubmitted(false);
+                  setFormData({
+                    name: "",
+                    email: "",
+                    dateOfBirth: undefined,
+                    pronouns: "",
+                    location: "",
+                    currentRole: "",
+                    currentCompany: "",
+                    yearsExperience: "",
+                    linkedIn: "",
+                    portfolio: "",
+                    resumeFile: null,
+                    coverLetterFile: null,
+                    portfolioFile: null,
+                    questionAnswers: {},
+                  });
+                }}
+              >
+                Apply to Another Role
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
+      {/* Header */}
+      <header className="bg-white border-b border-[var(--primitive-neutral-300)] sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 className="text-heading-sm text-foreground mb-2">
+                {MOCK_JOB_DATA.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 text-body-sm text-foreground-muted">
+                <div className="flex items-center gap-1">
+                  <Buildings weight="regular" className="w-4 h-4" />
+                  <span>{MOCK_JOB_DATA.company}</span>
+                </div>
+                <span>•</span>
+                <div className="flex items-center gap-1">
+                  <MapPin weight="regular" className="w-4 h-4" />
+                  <span>{MOCK_JOB_DATA.location}</span>
+                </div>
+                <span>•</span>
+                <span>{MOCK_JOB_DATA.locationType}</span>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-2 text-caption text-foreground-muted">
+                <Clock weight="regular" className="w-4 h-4" />
+                <span>~{MOCK_JOB_DATA.estimatedTime}</span>
+              </div>
+              {lastSaved && (
+                <span className="text-caption text-foreground-subtle">
+                  Saved {new Date(lastSaved).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Progress indicator */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-caption text-foreground-muted">
+              <span>Progress</span>
+              <span>{progress}% complete</span>
+            </div>
+            <div className="h-2 bg-[var(--primitive-neutral-200)] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[var(--primitive-green-500)] transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Employer Preview Controls */}
+      {isPreviewMode && (
+        <div className="bg-[var(--primitive-blue-100)] border-b border-[var(--primitive-blue-300)]">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Eye weight="fill" className="w-5 h-5 text-[var(--primitive-blue-600)]" />
+                <div>
+                  <h3 className="text-body-sm font-semibold text-foreground">Preview Mode</h3>
+                  <p className="text-caption text-foreground-muted">
+                    {viewMode === 'employer'
+                      ? 'Viewing as employer - data is interactive but won\'t be saved'
+                      : 'Viewing as candidate - this is exactly what job seekers will see'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <SegmentedController
+                  options={[
+                    { value: "employer", label: "Employer View", icon: <Pencil weight="regular" /> },
+                    { value: "candidate", label: "Candidate View", icon: <Eye weight="regular" /> },
+                  ]}
+                  value={viewMode}
+                  onValueChange={(value) => setViewMode(value as 'employer' | 'candidate')}
+                  className="w-auto"
+                />
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => window.close()}
+                >
+                  Close Preview
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Form */}
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* Employer View Info Banner */}
+        {isPreviewMode && viewMode === 'employer' && (
+          <div className="mb-6">
+            <Banner
+              type="feature"
+              subtle
+              dismissible={false}
+              title="Test the form"
+              description="All fields are interactive. Try filling them out to see how candidates will experience your application form. Changes won't be saved."
+              className="rounded-xl"
+            />
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Personal Info Section */}
+          <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
+            <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
+              <h2 className="text-body-strong text-foreground mb-1">Personal Info</h2>
+              <p className="text-caption text-foreground-muted">
+                Tell us about yourself
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Name */}
+              <div className="space-y-2" data-error={!!errors.name}>
+                <Label>
+                  Name <span className="text-[var(--primitive-red-600)]">*</span>
+                </Label>
+                <Input
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    if (errors.name) setErrors({ ...errors, name: "" });
+                  }}
+                  inputSize="lg"
+                  className="rounded-xl"
+                  error={!!errors.name}
+                />
+                {errors.name && (
+                  <p className="text-caption text-[var(--primitive-red-600)]">
+                    {errors.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="space-y-2" data-error={!!errors.email}>
+                <Label>
+                  Email <span className="text-[var(--primitive-red-600)]">*</span>
+                </Label>
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    if (errors.email) setErrors({ ...errors, email: "" });
+                  }}
+                  inputSize="lg"
+                  className="rounded-xl"
+                  error={!!errors.email}
+                />
+                {errors.email && (
+                  <p className="text-caption text-[var(--primitive-red-600)]">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Date of Birth */}
+                {MOCK_JOB_DATA.personalDetails.dateOfBirth.visible && (
+                  <div className="space-y-2">
+                    <Label>
+                      Date of Birth
+                      {MOCK_JOB_DATA.personalDetails.dateOfBirth.required && (
+                        <span className="text-[var(--primitive-red-600)]"> *</span>
+                      )}
+                    </Label>
+                    <DatePicker
+                      placeholder="Select date"
+                      value={formData.dateOfBirth}
+                      onChange={(date) => setFormData({ ...formData, dateOfBirth: date })}
+                      className="rounded-xl"
+                    />
+                  </div>
+                )}
+
+                {/* Pronouns */}
+                {MOCK_JOB_DATA.personalDetails.pronouns.visible && (
+                  <div className="space-y-2">
+                    <Label>
+                      Pronouns
+                      {MOCK_JOB_DATA.personalDetails.pronouns.required && (
+                        <span className="text-[var(--primitive-red-600)]"> *</span>
+                      )}
+                    </Label>
+                    <Select
+                      value={formData.pronouns}
+                      onValueChange={(value) => setFormData({ ...formData, pronouns: value })}
+                    >
+                      <SelectTrigger className="rounded-xl h-12">
+                        <SelectValue placeholder="Select pronouns" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="he">He/Him</SelectItem>
+                        <SelectItem value="she">She/Her</SelectItem>
+                        <SelectItem value="they">They/Them</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+
+              {/* Location */}
+              {MOCK_JOB_DATA.personalDetails.location.visible && (
+                <div className="space-y-2" data-error={!!errors.location}>
+                  <Label>
+                    Location
+                    {MOCK_JOB_DATA.personalDetails.location.required && (
+                      <span className="text-[var(--primitive-red-600)]"> *</span>
+                    )}
+                  </Label>
+                  <Input
+                    placeholder="City, State/Province, Country"
+                    value={formData.location}
+                    onChange={(e) => {
+                      setFormData({ ...formData, location: e.target.value });
+                      if (errors.location) setErrors({ ...errors, location: "" });
+                    }}
+                    inputSize="lg"
+                    className="rounded-xl"
+                    error={!!errors.location}
+                  />
+                  {errors.location && (
+                    <p className="text-caption text-[var(--primitive-red-600)]">
+                      {errors.location}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Career Details Section */}
+          <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
+            <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
+              <h2 className="text-body-strong text-foreground mb-1">Career Details</h2>
+              <p className="text-caption text-foreground-muted">
+                Share your professional background
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Current Role */}
+                {MOCK_JOB_DATA.careerDetails.currentRole.visible && (
+                  <div className="space-y-2">
+                    <Label>
+                      Current Role
+                      {MOCK_JOB_DATA.careerDetails.currentRole.required && (
+                        <span className="text-[var(--primitive-red-600)]"> *</span>
+                      )}
+                    </Label>
+                    <Input
+                      placeholder="e.g., Software Engineer"
+                      value={formData.currentRole}
+                      onChange={(e) => setFormData({ ...formData, currentRole: e.target.value })}
+                      inputSize="lg"
+                      className="rounded-xl"
+                    />
+                  </div>
+                )}
+
+                {/* Current Company */}
+                {MOCK_JOB_DATA.careerDetails.currentCompany.visible && (
+                  <div className="space-y-2">
+                    <Label>
+                      Current Company
+                      {MOCK_JOB_DATA.careerDetails.currentCompany.required && (
+                        <span className="text-[var(--primitive-red-600)]"> *</span>
+                      )}
+                    </Label>
+                    <Input
+                      placeholder="e.g., Acme Inc."
+                      value={formData.currentCompany}
+                      onChange={(e) => setFormData({ ...formData, currentCompany: e.target.value })}
+                      inputSize="lg"
+                      className="rounded-xl"
+                    />
+                  </div>
+                )}
+
+                {/* Years Experience */}
+                {MOCK_JOB_DATA.careerDetails.yearsExperience.visible && (
+                  <div className="space-y-2" data-error={!!errors.yearsExperience}>
+                    <Label>
+                      Years of Experience
+                      {MOCK_JOB_DATA.careerDetails.yearsExperience.required && (
+                        <span className="text-[var(--primitive-red-600)]"> *</span>
+                      )}
+                    </Label>
+                    <Select
+                      value={formData.yearsExperience}
+                      onValueChange={(value) => {
+                        setFormData({ ...formData, yearsExperience: value });
+                        if (errors.yearsExperience) setErrors({ ...errors, yearsExperience: "" });
+                      }}
+                    >
+                      <SelectTrigger className="rounded-xl h-12">
+                        <SelectValue placeholder="Select years" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0-1">0-1 years</SelectItem>
+                        <SelectItem value="1-3">1-3 years</SelectItem>
+                        <SelectItem value="3-5">3-5 years</SelectItem>
+                        <SelectItem value="5-10">5-10 years</SelectItem>
+                        <SelectItem value="10+">10+ years</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.yearsExperience && (
+                      <p className="text-caption text-[var(--primitive-red-600)]">
+                        {errors.yearsExperience}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* LinkedIn */}
+                {MOCK_JOB_DATA.careerDetails.linkedIn.visible && (
+                  <div className="space-y-2">
+                    <Label>
+                      LinkedIn Profile
+                      {MOCK_JOB_DATA.careerDetails.linkedIn.required && (
+                        <span className="text-[var(--primitive-red-600)]"> *</span>
+                      )}
+                    </Label>
+                    <Input
+                      placeholder="linkedin.com/in/yourprofile"
+                      value={formData.linkedIn}
+                      onChange={(e) => setFormData({ ...formData, linkedIn: e.target.value })}
+                      inputSize="lg"
+                      className="rounded-xl"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Portfolio */}
+              {MOCK_JOB_DATA.careerDetails.portfolio.visible && (
+                <div className="space-y-2">
+                  <Label>
+                    Portfolio
+                    {MOCK_JOB_DATA.careerDetails.portfolio.required && (
+                      <span className="text-[var(--primitive-red-600)]"> *</span>
+                    )}
+                  </Label>
+                  <Input
+                    placeholder="yourportfolio.com"
+                    value={formData.portfolio}
+                    onChange={(e) => setFormData({ ...formData, portfolio: e.target.value })}
+                    inputSize="lg"
+                    className="rounded-xl"
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Required Files Section */}
+          {(MOCK_JOB_DATA.requiredFiles.resume ||
+            MOCK_JOB_DATA.requiredFiles.coverLetter ||
+            MOCK_JOB_DATA.requiredFiles.portfolio) && (
+            <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
+              <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
+                <h2 className="text-body-strong text-foreground mb-1">Required Files</h2>
+                <p className="text-caption text-foreground-muted">
+                  Upload the following documents
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {/* Resume */}
+                {MOCK_JOB_DATA.requiredFiles.resume && (
+                  <div className="space-y-2" data-error={!!errors.resumeFile}>
+                    <Label>
+                      Resume <span className="text-[var(--primitive-red-600)]">*</span>
+                    </Label>
+                    <label className="block">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleFileUpload("resumeFile")}
+                        className="hidden"
+                      />
+                      <div className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+                        formData.resumeFile
+                          ? 'border-[var(--primitive-green-500)] bg-[var(--primitive-green-100)]'
+                          : errors.resumeFile
+                          ? 'border-[var(--primitive-red-500)] bg-[var(--primitive-red-100)]'
+                          : 'border-[var(--primitive-neutral-300)] hover:border-[var(--primitive-neutral-400)]'
+                      }`}>
+                        {formData.resumeFile ? (
+                          <>
+                            <CheckCircle weight="fill" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-green-600)]" />
+                            <p className="text-body-sm text-foreground">
+                              {formData.resumeFile.name}
+                            </p>
+                            <p className="text-caption text-foreground-subtle">
+                              Click to replace
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <Upload weight="regular" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-neutral-500)]" />
+                            <p className="text-body-sm text-foreground-muted">
+                              Click to upload or drag and drop
+                            </p>
+                            <p className="text-caption text-foreground-subtle">
+                              PDF, DOC, DOCX (max 10MB)
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </label>
+                    {errors.resumeFile && (
+                      <p className="text-caption text-[var(--primitive-red-600)]">
+                        {errors.resumeFile}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Cover Letter */}
+                {MOCK_JOB_DATA.requiredFiles.coverLetter && (
+                  <div className="space-y-2" data-error={!!errors.coverLetterFile}>
+                    <Label>
+                      Cover Letter <span className="text-[var(--primitive-red-600)]">*</span>
+                    </Label>
+                    <label className="block">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleFileUpload("coverLetterFile")}
+                        className="hidden"
+                      />
+                      <div className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+                        formData.coverLetterFile
+                          ? 'border-[var(--primitive-green-500)] bg-[var(--primitive-green-100)]'
+                          : errors.coverLetterFile
+                          ? 'border-[var(--primitive-red-500)] bg-[var(--primitive-red-100)]'
+                          : 'border-[var(--primitive-neutral-300)] hover:border-[var(--primitive-neutral-400)]'
+                      }`}>
+                        {formData.coverLetterFile ? (
+                          <>
+                            <CheckCircle weight="fill" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-green-600)]" />
+                            <p className="text-body-sm text-foreground">
+                              {formData.coverLetterFile.name}
+                            </p>
+                            <p className="text-caption text-foreground-subtle">
+                              Click to replace
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <Upload weight="regular" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-neutral-500)]" />
+                            <p className="text-body-sm text-foreground-muted">
+                              Click to upload or drag and drop
+                            </p>
+                            <p className="text-caption text-foreground-subtle">
+                              PDF, DOC, DOCX (max 10MB)
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </label>
+                    {errors.coverLetterFile && (
+                      <p className="text-caption text-[var(--primitive-red-600)]">
+                        {errors.coverLetterFile}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Additional Questions Section */}
+          {MOCK_JOB_DATA.questions.length > 0 && (
+            <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
+              <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
+                <h2 className="text-body-strong text-foreground mb-1">Additional Questions</h2>
+                <p className="text-caption text-foreground-muted">
+                  Help us get to know you better
+                </p>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {MOCK_JOB_DATA.questions.map((question, index) => (
+                  <div key={question.id} className="space-y-2" data-error={!!errors[`question_${question.id}`]}>
+                    <Label>
+                      {index + 1}. {question.title}
+                      {question.required && (
+                        <span className="text-[var(--primitive-red-600)]"> *</span>
+                      )}
+                    </Label>
+                    {question.description && (
+                      <p className="text-caption text-foreground-muted mb-2">
+                        {question.description}
+                      </p>
+                    )}
+
+                    {question.type === "text" && (
+                      <>
+                        <Input
+                          placeholder="Type your answer here..."
+                          value={formData.questionAnswers[question.id] || ""}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              questionAnswers: {
+                                ...formData.questionAnswers,
+                                [question.id]: e.target.value
+                              }
+                            });
+                            if (errors[`question_${question.id}`]) {
+                              const newErrors = { ...errors };
+                              delete newErrors[`question_${question.id}`];
+                              setErrors(newErrors);
+                            }
+                          }}
+                          inputSize="lg"
+                          className="rounded-xl"
+                          error={!!errors[`question_${question.id}`]}
+                        />
+                        {errors[`question_${question.id}`] && (
+                          <p className="text-caption text-[var(--primitive-red-600)]">
+                            {errors[`question_${question.id}`]}
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {question.type === "yes-no" && (
+                      <>
+                        <RadioGroup
+                          value={formData.questionAnswers[question.id] || ""}
+                          onValueChange={(value) => {
+                            setFormData({
+                              ...formData,
+                              questionAnswers: {
+                                ...formData.questionAnswers,
+                                [question.id]: value
+                              }
+                            });
+                            if (errors[`question_${question.id}`]) {
+                              const newErrors = { ...errors };
+                              delete newErrors[`question_${question.id}`];
+                              setErrors(newErrors);
+                            }
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="yes" id={`${question.id}-yes`} />
+                            <Label htmlFor={`${question.id}-yes`} className="font-normal">
+                              Yes
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <RadioGroupItem value="no" id={`${question.id}-no`} />
+                            <Label htmlFor={`${question.id}-no`} className="font-normal">
+                              No
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                        {errors[`question_${question.id}`] && (
+                          <p className="text-caption text-[var(--primitive-red-600)]">
+                            {errors[`question_${question.id}`]}
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {question.type === "multiple-choice" && (
+                      <>
+                        <RadioGroup
+                          value={formData.questionAnswers[question.id] || ""}
+                          onValueChange={(value) => {
+                            setFormData({
+                              ...formData,
+                              questionAnswers: {
+                                ...formData.questionAnswers,
+                                [question.id]: value
+                              }
+                            });
+                            if (errors[`question_${question.id}`]) {
+                              const newErrors = { ...errors };
+                              delete newErrors[`question_${question.id}`];
+                              setErrors(newErrors);
+                            }
+                          }}
+                        >
+                          {question.options?.map((option, optIndex) => (
+                            <div key={optIndex} className="flex items-center gap-2">
+                              <RadioGroupItem
+                                value={option}
+                                id={`${question.id}-${optIndex}`}
+                              />
+                              <Label
+                                htmlFor={`${question.id}-${optIndex}`}
+                                className="font-normal"
+                              >
+                                {option}
+                              </Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                        {errors[`question_${question.id}`] && (
+                          <p className="text-caption text-[var(--primitive-red-600)]">
+                            {errors[`question_${question.id}`]}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Submit Section */}
+          <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] p-6">
+            <div className="flex items-start gap-3 mb-6">
+              <Checkbox id="consent" required />
+              <Label htmlFor="consent" className="font-normal text-caption leading-relaxed">
+                I certify that the information provided in this application is true and complete.
+                I understand that false information may be grounds for not hiring me or for immediate
+                termination of employment at any point in the future.
+              </Label>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              {!isPreviewMode && (
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="lg"
+                  leftIcon={<FloppyDisk weight="regular" className="w-5 h-5" />}
+                  onClick={handleSaveDraft}
+                >
+                  Save as Draft
+                </Button>
+              )}
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={isSubmitting}
+                disabled={isSubmitting || isPreviewMode}
+              >
+                {isPreviewMode
+                  ? "Preview Only - Submit Disabled"
+                  : isSubmitting
+                  ? "Submitting..."
+                  : "Submit Application"}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </main>
+
+      {/* Footer */}
+      <footer className="py-8 text-center">
+        <p className="text-caption text-foreground-muted">
+          Powered by <span className="font-semibold">Canopy ATS</span>
+        </p>
+      </footer>
+    </div>
+  );
+}
