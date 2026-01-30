@@ -84,19 +84,3 @@ export function useAuth(): UseAuthReturn {
   };
 }
 
-/**
- * Hook to get user data on the server side
- * Use this in Server Components
- */
-export async function getServerUser() {
-  const { createClient } = await import("@/lib/supabase/server");
-  const supabase = await createClient();
-
-  const { data: { user }, error } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    return null;
-  }
-
-  return user;
-}

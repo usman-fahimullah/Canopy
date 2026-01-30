@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,14 @@ import { createClient } from "@/lib/supabase/client";
 import { EnvelopeSimple, Lock, GoogleLogo, LinkedinLogo } from "@phosphor-icons/react";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)] animate-pulse h-96" />}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/candid/dashboard";

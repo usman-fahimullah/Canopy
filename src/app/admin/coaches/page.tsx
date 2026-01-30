@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,14 @@ import {
   CaretDown,
   MagnifyingGlass,
 } from "@phosphor-icons/react";
+
+export default function AdminCoachesPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-8"><div className="h-8 bg-[var(--primitive-neutral-200)] rounded w-1/3 mb-4" /><div className="h-64 bg-[var(--primitive-neutral-200)] rounded" /></div>}>
+      <AdminCoachesContent />
+    </Suspense>
+  );
+}
 
 interface Coach {
   id: string;
@@ -48,7 +56,7 @@ const STATUS_TABS = [
   { value: "PAUSED", label: "Paused", color: "default" },
 ];
 
-export default function AdminCoachesPage() {
+function AdminCoachesContent() {
   const searchParams = useSearchParams();
   const initialStatus = searchParams.get("status") || "PENDING";
 

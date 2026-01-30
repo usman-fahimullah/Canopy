@@ -10,4 +10,4 @@ export { useBreakpoint, useBreakpointUp, useBreakpointDown } from "./use-breakpo
 export { useFocusTrap } from "./use-focus-trap";
 export { useClickOutside, useClickOutsideRef } from "./use-click-outside";
 export { useDisclosure, useDisclosureGroup } from "./use-disclosure";
-export { useAuth, getServerUser } from "./use-auth";
+export { useAuth } from "./use-auth";
