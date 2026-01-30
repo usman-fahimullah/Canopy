@@ -105,7 +105,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ coaches: formattedCoaches });
   } catch (error) {
     console.error("Fetch coaches error:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: "Failed to fetch coaches", details: message }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch coaches" }, { status: 500 });
   }
 }
