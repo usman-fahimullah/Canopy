@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const refund = await getStripe().refunds.create({
+    const refund = await stripe.refunds.create({
       payment_intent: booking.stripePaymentIntentId,
       amount: refundAmount,
       reason: "requested_by_customer",

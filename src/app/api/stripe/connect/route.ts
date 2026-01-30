@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Create Stripe Connect account if doesn't exist
     if (!stripeAccountId) {
-      const account = await getStripe().accounts.create({
+      const account = await stripe.accounts.create({
         type: "express",
         country: "US",
         email: user.email,
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create account link for onboarding
-    const accountLink = await getStripe().accountLinks.create({
+    const accountLink = await stripe.accountLinks.create({
       account: stripeAccountId,
       refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/settings/payments?refresh=true`,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/settings/payments?success=true`,
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get account details from Stripe
-    const account = await getStripe().accounts.retrieve(coach.stripeAccountId);
+    const account = await stripe.accounts.retrieve(coach.stripeAccountId);
 
     return NextResponse.json({
       connected: true,

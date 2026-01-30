@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { getStripe } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    event = getStripe().webhooks.constructEvent(
+    event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
