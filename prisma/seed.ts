@@ -10,6 +10,7 @@ import {
   GoalStatus,
   NoteCategory,
   ExperienceLevel,
+  CareerStage,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -33,6 +34,7 @@ async function main() {
   await prisma.workExperience.deleteMany();
   await prisma.collectionJob.deleteMany();
   await prisma.collection.deleteMany();
+  await prisma.seekerPathway.deleteMany();
 
   await prisma.coachProfile.deleteMany();
   await prisma.seekerProfile.deleteMany();
@@ -46,13 +48,18 @@ async function main() {
 
   // ============ ORGANIZATIONS ============
 
+  // Note: We'll update organizations with pathwayId after pathways are created
   const solarisEnergy = await prisma.organization.create({
     data: {
       name: "Solaris Energy Co.",
       slug: "solaris-energy",
       logo: null,
+      description: "Leading provider of commercial solar solutions, dedicated to accelerating the transition to clean energy across North America.",
+      website: "https://solaris-energy.example.com",
+      location: "Austin, TX",
       primaryColor: "#0F766E",
       fontFamily: "DM Sans",
+      onboardingCompleted: true,
     },
   });
 
@@ -61,8 +68,12 @@ async function main() {
       name: "Aurora Climate",
       slug: "aurora-climate",
       logo: null,
+      description: "Climate tech startup building next-generation carbon accounting and climate risk assessment tools for enterprises.",
+      website: "https://aurora-climate.example.com",
+      location: "Denver, CO",
       primaryColor: "#0D9488",
       fontFamily: "DM Sans",
+      onboardingCompleted: true,
     },
   });
 
@@ -332,6 +343,19 @@ async function main() {
 
   console.log("  Pathways: 21 created (matching design system PathwayTag component)");
 
+  // Update organizations with primary pathway
+  await prisma.organization.update({
+    where: { id: solarisEnergy.id },
+    data: { primaryPathwayId: energyPathway.id },
+  });
+
+  await prisma.organization.update({
+    where: { id: auroraClimate.id },
+    data: { primaryPathwayId: technologyPathway.id },
+  });
+
+  console.log("  Organization pathways: linked");
+
   // ============ ACCOUNTS ============
   // Every authenticated person gets an Account (maps 1:1 to Clerk)
 
@@ -343,6 +367,9 @@ async function main() {
       name: "Jordan Rivera",
       location: "Austin, TX",
       timezone: "America/Chicago",
+      pronouns: "they/them",
+      linkedinUrl: "https://linkedin.com/in/jordanrivera",
+      onboardingCompleted: true,
     },
   });
 
@@ -353,6 +380,9 @@ async function main() {
       name: "Alex Chen",
       location: "San Francisco, CA",
       timezone: "America/Los_Angeles",
+      pronouns: "she/her",
+      linkedinUrl: "https://linkedin.com/in/alexchen",
+      onboardingCompleted: true,
     },
   });
 
@@ -363,6 +393,9 @@ async function main() {
       name: "Sam Patel",
       location: "Austin, TX",
       timezone: "America/Chicago",
+      pronouns: "he/him",
+      linkedinUrl: "https://linkedin.com/in/sampatel",
+      onboardingCompleted: true,
     },
   });
 
@@ -373,6 +406,9 @@ async function main() {
       name: "Morgan Walsh",
       location: "Denver, CO",
       timezone: "America/Denver",
+      pronouns: "she/her",
+      linkedinUrl: "https://linkedin.com/in/morganwalsh",
+      onboardingCompleted: true,
     },
   });
 
@@ -385,6 +421,10 @@ async function main() {
       phone: "+1-555-0101",
       location: "Austin, TX",
       timezone: "America/Chicago",
+      pronouns: "she/her",
+      ethnicity: "Black or African American",
+      linkedinUrl: "https://linkedin.com/in/mayathompson",
+      onboardingCompleted: true,
     },
   });
 
@@ -396,6 +436,10 @@ async function main() {
       phone: "+1-555-0102",
       location: "Denver, CO",
       timezone: "America/Denver",
+      pronouns: "he/him",
+      ethnicity: "White",
+      linkedinUrl: "https://linkedin.com/in/ryanoconnor",
+      onboardingCompleted: true,
     },
   });
 
@@ -407,6 +451,10 @@ async function main() {
       phone: "+1-555-0103",
       location: "San Francisco, CA",
       timezone: "America/Los_Angeles",
+      pronouns: "she/her",
+      ethnicity: "Asian",
+      linkedinUrl: "https://linkedin.com/in/priyasharma",
+      onboardingCompleted: true,
     },
   });
 
@@ -418,6 +466,10 @@ async function main() {
       phone: "+1-555-0104",
       location: "Portland, OR",
       timezone: "America/Los_Angeles",
+      pronouns: "he/him",
+      ethnicity: "Hispanic or Latino",
+      linkedinUrl: "https://linkedin.com/in/carlosmendez",
+      onboardingCompleted: true,
     },
   });
 
@@ -430,7 +482,11 @@ async function main() {
       phone: "+1-555-0105",
       location: "New York, NY",
       timezone: "America/New_York",
+      pronouns: "she/her",
+      ethnicity: "White",
+      linkedinUrl: "https://linkedin.com/in/elenavolkov",
       bio: "Finance professional with growing ESG specialization. Also coaching job seekers transitioning into climate finance.",
+      onboardingCompleted: true,
     },
   });
 
@@ -481,8 +537,11 @@ async function main() {
   const mayaSeeker = await prisma.seekerProfile.create({
     data: {
       accountId: mayaAccount.id,
-      linkedinUrl: "https://linkedin.com/in/mayathompson",
       headline: "Senior Solar Engineer | NABCEP Certified | 8 Years in Commercial PV",
+      // Onboarding fields
+      careerStage: CareerStage.SENIOR,
+      motivations: ["finding-job", "career-advancement"],
+      // Skills
       skills: ["Project Management", "AutoCAD", "Electrical Engineering", "Team Leadership"],
       greenSkills: ["Solar PV Design", "NABCEP Certified", "Energy Storage Systems"],
       certifications: ["NABCEP PV Installation Professional", "PMP", "OSHA 30"],
@@ -496,8 +555,11 @@ async function main() {
   const ryanSeeker = await prisma.seekerProfile.create({
     data: {
       accountId: ryanAccount.id,
-      linkedinUrl: "https://linkedin.com/in/ryanoconnor",
       headline: "Data Analyst | ESG Enthusiast | GRI Certified",
+      // Onboarding fields
+      careerStage: CareerStage.CAREER_CHANGER,
+      motivations: ["finding-job", "exploring-options", "learning-skills"],
+      // Skills
       skills: ["Python", "SQL", "Tableau", "Statistical Analysis", "Data Visualization"],
       greenSkills: ["GHG Protocol", "CDP Reporting", "SASB Standards"],
       certifications: ["GRI Certified Sustainability Professional"],
@@ -511,8 +573,11 @@ async function main() {
   const priyaSeeker = await prisma.seekerProfile.create({
     data: {
       accountId: priyaAccount.id,
-      linkedinUrl: "https://linkedin.com/in/priyasharma",
       headline: "Full-Stack Engineer | Climate Tech | Carbon Tracking",
+      // Onboarding fields
+      careerStage: CareerStage.MID_CAREER,
+      motivations: ["finding-job", "career-advancement"],
+      // Skills
       skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "AWS"],
       greenSkills: ["Carbon Accounting Platforms", "Climate Data APIs"],
       certifications: [],
@@ -527,8 +592,11 @@ async function main() {
   const carlosSeeker = await prisma.seekerProfile.create({
     data: {
       accountId: carlosAccount.id,
-      linkedinUrl: "https://linkedin.com/in/carlosmendez",
       headline: "Solar Technician | Aspiring Senior Engineer",
+      // Onboarding fields
+      careerStage: CareerStage.ENTRY_LEVEL,
+      motivations: ["finding-job", "learning-skills", "networking"],
+      // Skills
       skills: ["Solar Installation", "Electrical Wiring", "Safety Compliance"],
       greenSkills: ["Solar PV Installation", "Battery Storage"],
       certifications: ["OSHA 30", "CPR/First Aid"],
@@ -548,8 +616,11 @@ async function main() {
   const elenaSeeker = await prisma.seekerProfile.create({
     data: {
       accountId: elenaAccount.id,
-      linkedinUrl: "https://linkedin.com/in/elenavolkov",
       headline: "Climate Finance Analyst | CFA Candidate | SASB Credentialed",
+      // Onboarding fields
+      careerStage: CareerStage.MID_CAREER,
+      motivations: ["exploring-options", "networking"],
+      // Skills
       skills: ["Financial Analysis", "ESG Integration", "Risk Assessment", "Excel"],
       greenSkills: ["TCFD Reporting", "Climate Risk Assessment", "Green Bond Frameworks"],
       certifications: ["CFA Level II", "SASB FSA Credential"],
@@ -561,6 +632,35 @@ async function main() {
   });
 
   console.log("  Seeker Profiles: 5 (Carlos is also a mentor, Elena is also a coach)");
+
+  // ============ SEEKER PATHWAY INTERESTS ============
+  // Connect seekers to pathways they're interested in
+
+  await prisma.seekerPathway.createMany({
+    data: [
+      // Maya - interested in Energy and Technology
+      { seekerId: mayaSeeker.id, pathwayId: energyPathway.id, priority: 1 },
+      { seekerId: mayaSeeker.id, pathwayId: technologyPathway.id, priority: 2 },
+      { seekerId: mayaSeeker.id, pathwayId: constructionPathway.id, priority: 3 },
+      // Ryan - interested in Finance, Research, and Policy
+      { seekerId: ryanSeeker.id, pathwayId: financePathway.id, priority: 1 },
+      { seekerId: ryanSeeker.id, pathwayId: researchPathway.id, priority: 2 },
+      { seekerId: ryanSeeker.id, pathwayId: policyPathway.id, priority: 3 },
+      // Priya - interested in Technology, Energy, and Research
+      { seekerId: priyaSeeker.id, pathwayId: technologyPathway.id, priority: 1 },
+      { seekerId: priyaSeeker.id, pathwayId: energyPathway.id, priority: 2 },
+      { seekerId: priyaSeeker.id, pathwayId: researchPathway.id, priority: 3 },
+      // Carlos - interested in Energy and Construction
+      { seekerId: carlosSeeker.id, pathwayId: energyPathway.id, priority: 1 },
+      { seekerId: carlosSeeker.id, pathwayId: constructionPathway.id, priority: 2 },
+      { seekerId: carlosSeeker.id, pathwayId: manufacturingPathway.id, priority: 3 },
+      // Elena - interested in Finance and Policy
+      { seekerId: elenaSeeker.id, pathwayId: financePathway.id, priority: 1 },
+      { seekerId: elenaSeeker.id, pathwayId: policyPathway.id, priority: 2 },
+    ],
+  });
+
+  console.log("  Seeker Pathway Interests: 14 connections");
 
   // ============ COACH PROFILES ============
 
@@ -1431,13 +1531,14 @@ Pro tip: Set up alerts so you don't miss new postings!`,
 
   console.log("\n✅ Seed completed successfully!");
   console.log("\n  Summary:");
-  console.log("  ├── Accounts: 9 (4 employer, 5 seeker)");
-  console.log("  ├── Organizations: 2 (Solaris Energy Co., Aurora Climate)");
+  console.log("  ├── Accounts: 9 (4 employer, 5 seeker) - with pronouns, ethnicity, linkedinUrl");
+  console.log("  ├── Organizations: 2 (Solaris Energy, Aurora Climate) - with description, website, location, pathway");
   console.log("  ├── Pathways: 21 (matching design system - 5 green, 4 blue, 4 orange, 3 red, 2 yellow, 3 purple)");
   console.log("  ├── Org Members: 4 (1 owner + 1 recruiter + 1 member + 1 owner)");
-  console.log("  ├── Seeker Profiles: 5 (1 also mentor, 1 also coach)");
+  console.log("  ├── Seeker Profiles: 5 (with careerStage, motivations)");
+  console.log("  ├── Seeker Pathway Interests: 14 connections");
   console.log("  ├── Coach Profiles: 1 (Elena Volkov)");
-  console.log("  ├── Jobs: 6 (5 published, 1 draft)");
+  console.log("  ├── Jobs: 9 (8 published, 1 draft)");
   console.log("  ├── Collections: 4 (with job associations)");
   console.log("  ├── Applications: 5 (with AI match scores)");
   console.log("  ├── Mentor Assignments: 1 (Carlos -> Ryan)");

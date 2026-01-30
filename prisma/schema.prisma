@@ -19,13 +19,22 @@ datasource db {
 model Account {
   id          String   @id @default(cuid())
   supabaseId  String   @unique
-  email     String   @unique
-  name      String?
-  avatar    String?
-  phone     String?
-  location  String?
-  timezone  String?
-  bio       String?  @db.Text
+  email       String   @unique
+  name        String?
+  avatar      String?
+  phone       String?
+  location    String?
+  timezone    String?
+  bio         String?  @db.Text
+
+  // Onboarding fields (shared across roles)
+  pronouns    String?  // e.g., "he/him", "she/her", "they/them"
+  ethnicity   String?  // For diversity reporting
+  linkedinUrl String?  // LinkedIn profile URL
+
+  // Onboarding status
+  onboardingCompleted Boolean @default(false)
+  onboardingStep      Int     @default(0)
 
   // Role profiles (a person can hold multiple)
   orgMemberships OrganizationMember[]
@@ -46,6 +55,11 @@ model Organization {
   slug           String   @unique
   logo           String?
 
+  // Onboarding fields
+  description    String?  @db.Text  // Company description
+  website        String?            // Company website URL
+  location       String?            // Company headquarters location
+
   // Brand kit for career pages
   primaryColor   String   @default("#0F766E")
   secondaryColor String?
@@ -59,6 +73,13 @@ model Organization {
   isBipocOwned   Boolean  @default(false)
   isWomenOwned   Boolean  @default(false)
   isVeteranOwned Boolean  @default(false)
+
+  // Onboarding status
+  onboardingCompleted Boolean @default(false)
+
+  // Primary pathway/industry focus
+  primaryPathwayId String?
+  primaryPathway   Pathway? @relation("OrganizationPrimaryPathway", fields: [primaryPathwayId], references: [id])
 
   members        OrganizationMember[]
   jobs           Job[]
@@ -123,9 +144,15 @@ model SeekerProfile {
   badge           String?  // e.g., "Just Graduated", "Climate Leader"
   summary         String?  @db.Text
 
+  // Onboarding - Career Journey
+  careerStage     CareerStage?  // Entry level, mid-career, career changer, etc.
+  motivations     String[]      // ["finding-job", "exploring-options", "learning-skills", etc.]
+
+  // Onboarding - Pathway interests (many-to-many)
+  interestedPathways SeekerPathway[]
+
   // Professional info
   resumeUrl       String?
-  linkedinUrl     String?
   portfolioUrl    String?
   headline        String?
 
@@ -644,11 +671,14 @@ model Pathway {
   slug         String   @unique
   description  String?  @db.Text
   icon         String?  // Phosphor icon name (e.g., "Leaf", "Tree", "Lightning")
-  color        String?  // Hex color for UI
+  color        String?  // Color family: green, blue, orange, red, yellow, purple
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
 
-  jobs         Job[]
+  // Relations
+  jobs                Job[]
+  interestedSeekers   SeekerPathway[]
+  organizationsPrimary Organization[] @relation("OrganizationPrimaryPathway")
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -828,4 +858,35 @@ enum NoteCategory {
   WRITE_YOUR_STORY // Resume & cover letter tips
   PREP_TALK        // Interview preparation
   THE_SEARCH       // Job search strategies
+}
+
+// =================================================================
+// ONBOARDING ENUMS
+// =================================================================
+
+enum CareerStage {
+  STUDENT           // Currently in school
+  ENTRY_LEVEL       // Just starting career
+  MID_CAREER        // 3-7 years experience
+  SENIOR            // 7+ years experience
+  CAREER_CHANGER    // Transitioning from another field
+  RETURNING         // Returning to workforce
+}
+
+// =================================================================
+// SEEKER PATHWAY — Many-to-many for pathway interests
+// =================================================================
+
+model SeekerPathway {
+  seekerId  String
+  seeker    SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  pathwayId String
+  pathway   Pathway       @relation(fields: [pathwayId], references: [id], onDelete: Cascade)
+
+  // How interested they are (for sorting/matching)
+  priority  Int           @default(0)
+  addedAt   DateTime      @default(now())
+
+  @@id([seekerId, pathwayId])
 }
