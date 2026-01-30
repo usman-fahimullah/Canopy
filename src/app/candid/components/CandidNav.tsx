@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CandidLogo } from "./CandidLogo";
 import { CandidSymbol } from "./CandidSymbol";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/client";
 import {
   House,
   MagnifyingGlass,
@@ -24,11 +25,10 @@ import {
   Question,
   Users,
 } from "@phosphor-icons/react";
-import { currentUser, getNotificationsForUser, getThreadsForUser } from "@/lib/candid";
 
 const navItems = [
   { href: "/candid/dashboard", label: "Dashboard", icon: House },
-  { href: "/candid/browse", label: "Find Mentors", icon: MagnifyingGlass },
+  { href: "/candid/browse", label: "Find Coaches", icon: MagnifyingGlass },
   { href: "/candid/messages", label: "Messages", icon: ChatCircle },
   { href: "/candid/sessions", label: "Sessions", icon: CalendarBlank },
 ];
@@ -40,14 +40,60 @@ const mobileNavItems = [
   { href: "/candid/sessions", label: "Sessions", icon: CalendarBlank },
 ];
 
+interface UserData {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar: string | null;
+}
+
 export function CandidNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const notifications = getNotificationsForUser(currentUser.id);
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const threads = getThreadsForUser(currentUser.id);
-  const unreadMessages = threads.reduce((acc, t) => acc + t.unreadCount, 0);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // For now, hardcode these - will be fetched from API later
+  const unreadCount = 0;
+  const unreadMessages = 0;
+
+  // Fetch user data
+  useEffect(() => {
+    const supabase = createClient();
+
+    const getUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      if (authUser) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email || "",
+          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User",
+          avatar: authUser.user_metadata?.avatar_url || null,
+        });
+      }
+      setLoading(false);
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split("@")[0] || "User",
+          avatar: session.user.user_metadata?.avatar_url || null,
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Handle scroll for header shadow
   useEffect(() => {
@@ -62,6 +108,15 @@ export function CandidNav() {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  const displayName = user?.name || "User";
+  const firstName = displayName.split(" ")[0];
 
   return (
     <>
@@ -131,21 +186,30 @@ export function CandidNav() {
               <Gear size={18} />
             </Link>
 
-            {/* User Menu (Desktop) - Dropdown */}
-            <button
-              className="hidden sm:flex ml-2 items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-[var(--background-subtle)] transition-all duration-200"
-            >
-              <Avatar
-                size="sm"
-                src={currentUser.avatar}
-                name={`${currentUser.firstName} ${currentUser.lastName}`}
-                color="green"
-              />
-              <span className="hidden lg:block text-caption font-medium text-foreground-default">
-                {currentUser.firstName}
-              </span>
-              <CaretDown size={12} className="text-foreground-muted" />
-            </button>
+            {/* User Menu (Desktop) */}
+            {user ? (
+              <button
+                className="hidden sm:flex ml-2 items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-[var(--background-subtle)] transition-all duration-200"
+              >
+                <Avatar
+                  size="sm"
+                  src={user.avatar || undefined}
+                  name={displayName}
+                  color="green"
+                />
+                <span className="hidden lg:block text-caption font-medium text-foreground-default">
+                  {firstName}
+                </span>
+                <CaretDown size={12} className="text-foreground-muted" />
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden sm:flex ml-2 items-center gap-2 rounded-full py-1.5 px-3 bg-[var(--candid-dark)] text-white text-caption font-medium hover:opacity-90 transition-all duration-200"
+              >
+                Sign In
+              </Link>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -175,20 +239,32 @@ export function CandidNav() {
       >
         {/* Menu Header */}
         <div className="flex items-center justify-between border-b border-[var(--border-default)] p-4">
-          <div className="flex items-center gap-3">
-            <Avatar
-              size="default"
-              src={currentUser.avatar}
-              name={`${currentUser.firstName} ${currentUser.lastName}`}
-              color="green"
-            />
-            <div>
-              <p className="font-semibold text-foreground-default">
-                {currentUser.firstName} {currentUser.lastName}
-              </p>
-              <p className="text-caption-sm capitalize text-foreground-muted">{currentUser.role}</p>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <Avatar
+                size="default"
+                src={user.avatar || undefined}
+                name={displayName}
+                color="green"
+              />
+              <div>
+                <p className="font-semibold text-foreground-default">
+                  {displayName}
+                </p>
+                <p className="text-caption-sm text-foreground-muted">{user.email}</p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Avatar size="default" name="Guest" color="green" />
+              <div>
+                <p className="font-semibold text-foreground-default">Guest</p>
+                <Link href="/login" className="text-caption-sm text-[var(--candid-foreground-brand)]">
+                  Sign in
+                </Link>
+              </div>
+            </div>
+          )}
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="rounded-lg p-2 text-foreground-muted hover:bg-[var(--background-subtle)]"
@@ -247,10 +323,23 @@ export function CandidNav() {
 
           {/* Footer */}
           <div className="border-t border-[var(--border-default)] p-4">
-            <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)] transition-colors">
-              <SignOut size={20} />
-              Sign Out
-            </button>
+            {user ? (
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)] transition-colors"
+              >
+                <SignOut size={20} />
+                Sign Out
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 bg-[var(--candid-dark)] text-white text-body-sm font-medium hover:opacity-90 transition-colors"
+              >
+                Sign In
+                <ArrowRight size={16} />
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -1,17 +1,16 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { SECTOR_INFO } from "@/lib/candid/types";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
+import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { ProgressMeterLinear } from "@/components/ui/progress-meter";
-import {
-  currentUser,
-  getSessionsForUser,
-  getUserById,
-} from "@/lib/candid";
+import { Spinner } from "@/components/ui/spinner";
+import { createClient } from "@/lib/supabase/client";
 import {
   CalendarBlank,
   ChatCircle,
@@ -24,21 +23,98 @@ import {
   Briefcase,
 } from "@phosphor-icons/react";
 
+interface UserProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatar: string | null;
+  bio: string | null;
+  location: string | null;
+  cohort: string;
+  targetSectors: string[];
+  goals: string[];
+  matchedCoachId: string | null;
+}
+
+interface Session {
+  id: string;
+  status: string;
+}
+
 export default function MyProfilePage() {
-  const sessions = getSessionsForUser(currentUser.id);
-  const completedSessions = sessions.filter((s) => s.status === "completed");
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [matchedCoach, setMatchedCoach] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const matchedCoach = currentUser.matchedCoachId
-    ? getUserById(currentUser.matchedCoachId)
-    : null;
+  useEffect(() => {
+    const supabase = createClient();
 
-  // Mock progress data for the Candid goals
+    const fetchUserData = async () => {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+
+        if (authUser) {
+          // Get user profile data
+          const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
+
+          setUser({
+            id: authUser.id,
+            firstName: nameParts[0] || "User",
+            lastName: nameParts.slice(1).join(" ") || "",
+            email: authUser.email || "",
+            avatar: authUser.user_metadata?.avatar_url || null,
+            bio: null,
+            location: null,
+            cohort: "Spring 2026",
+            targetSectors: [],
+            goals: ["Land a job in climate tech", "Build my network in sustainability"],
+            matchedCoachId: null,
+          });
+
+          // Fetch sessions
+          const sessionsRes = await fetch("/api/sessions");
+          if (sessionsRes.ok) {
+            const sessionsData = await sessionsRes.json();
+            setSessions(sessionsData.sessions || []);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const completedSessions = sessions.filter((s) => s.status === "COMPLETED");
+
+  // Progress data for goals
   const progressData = {
     sessions: { current: completedSessions.length, total: 6 },
-    actions: { current: 8, total: 10 },
-    skills: { current: 3, total: 5 },
-    milestones: { current: 2, total: 4 },
+    actions: { current: 0, total: 10 },
+    skills: { current: 0, total: 5 },
+    milestones: { current: 0, total: 4 },
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-foreground-muted">Please log in to view your profile.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
@@ -65,8 +141,8 @@ export default function MyProfilePage() {
           <div className="relative">
             <Avatar
               size="xl"
-              src={currentUser.avatar}
-              name={`${currentUser.firstName} ${currentUser.lastName}`}
+              src={user.avatar || undefined}
+              name={`${user.firstName} ${user.lastName}`}
               color="green"
               className="ring-4 ring-white h-24 w-24"
             />
@@ -87,16 +163,16 @@ export default function MyProfilePage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-heading-md font-semibold text-foreground-default">
-                {currentUser.firstName} {currentUser.lastName}
+                {user.firstName} {user.lastName}
               </h1>
               <Chip variant="blue" size="sm">
-                {currentUser.cohort} Cohort
+                {user.cohort} Cohort
               </Chip>
             </div>
-            {currentUser.location && (
+            {user.location && (
               <p className="mt-1 flex items-center gap-1 text-caption text-foreground-muted">
                 <MapPin size={14} />
-                {currentUser.location}
+                {user.location}
               </p>
             )}
           </div>
@@ -110,7 +186,7 @@ export default function MyProfilePage() {
         {/* Social Links */}
         <div className="mt-4 flex items-center gap-2">
           <Chip variant="neutral" size="sm">
-            @{currentUser.firstName.toLowerCase()}{currentUser.lastName.toLowerCase()}
+            @{user.firstName.toLowerCase()}{user.lastName.toLowerCase()}
           </Chip>
           <Button variant="tertiary" size="icon-sm">
             <LinkedinLogo size={18} />
@@ -132,7 +208,7 @@ export default function MyProfilePage() {
             </Button>
           </div>
           <p className="text-body text-foreground-default leading-relaxed">
-            {currentUser.bio || "Add a summary to tell coaches about yourself, your background, and what you're looking for in your climate career journey."}
+            {user.bio || "Add a summary to tell coaches about yourself, your background, and what you're looking for in your climate career journey."}
           </p>
         </div>
 
@@ -145,11 +221,15 @@ export default function MyProfilePage() {
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {currentUser.targetSectors.map((sector) => (
-              <Chip key={sector} variant="neutral" size="sm" removable>
-                {SECTOR_INFO[sector].label}
-              </Chip>
-            ))}
+            {user.targetSectors.length > 0 ? (
+              user.targetSectors.map((sector) => (
+                <Chip key={sector} variant="neutral" size="sm" removable>
+                  {sector}
+                </Chip>
+              ))
+            ) : (
+              <p className="text-caption text-foreground-muted">Add your target sectors</p>
+            )}
           </div>
         </div>
       </div>
@@ -163,8 +243,8 @@ export default function MyProfilePage() {
         <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">My Progress</h2>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Sessions Progress Card (white, shadow) */}
-          <div className="rounded-card bg-white p-4 shadow-card">
+          {/* Sessions Progress Card */}
+          <Card className="p-4">
             <ProgressMeterLinear
               goal="sessions"
               value={(progressData.sessions.current / progressData.sessions.total) * 100}
@@ -173,10 +253,10 @@ export default function MyProfilePage() {
             <p className="text-caption text-foreground-muted mt-1">
               {progressData.sessions.current} of {progressData.sessions.total} completed
             </p>
-          </div>
+          </Card>
 
           {/* Actions Progress Card */}
-          <div className="rounded-card bg-white p-4 shadow-card">
+          <Card className="p-4">
             <ProgressMeterLinear
               goal="actions"
               value={(progressData.actions.current / progressData.actions.total) * 100}
@@ -185,10 +265,10 @@ export default function MyProfilePage() {
             <p className="text-caption text-foreground-muted mt-1">
               {progressData.actions.current} of {progressData.actions.total} completed
             </p>
-          </div>
+          </Card>
 
           {/* Skills Progress Card */}
-          <div className="rounded-card bg-white p-4 shadow-card">
+          <Card className="p-4">
             <ProgressMeterLinear
               goal="skills"
               value={(progressData.skills.current / progressData.skills.total) * 100}
@@ -197,10 +277,10 @@ export default function MyProfilePage() {
             <p className="text-caption text-foreground-muted mt-1">
               {progressData.skills.current} of {progressData.skills.total} developed
             </p>
-          </div>
+          </Card>
 
           {/* Milestones Progress Card */}
-          <div className="rounded-card bg-white p-4 shadow-card">
+          <Card className="p-4">
             <ProgressMeterLinear
               goal="milestones"
               value={(progressData.milestones.current / progressData.milestones.total) * 100}
@@ -209,7 +289,7 @@ export default function MyProfilePage() {
             <p className="text-caption text-foreground-muted mt-1">
               {progressData.milestones.current} of {progressData.milestones.total} achieved
             </p>
-          </div>
+          </Card>
         </div>
       </section>
 
@@ -218,8 +298,8 @@ export default function MyProfilePage() {
         <section className="mt-10 px-6">
           <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">My Coach</h2>
 
-          {/* Coach card (white, shadow) */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          {/* Coach card */}
+          <Card className="p-5">
             <div className="flex items-center gap-4">
               <Avatar
                 size="lg"
@@ -251,7 +331,7 @@ export default function MyProfilePage() {
                 </Button>
               </div>
             </div>
-          </div>
+          </Card>
         </section>
       )}
 
@@ -268,14 +348,18 @@ export default function MyProfilePage() {
 
         {/* Goals list - no cards, clean layout */}
         <div className="space-y-3">
-          {currentUser.goals.map((goal, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
-                <Target size={14} className="text-[var(--primitive-green-800)]" />
+          {user.goals.length > 0 ? (
+            user.goals.map((goal, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
+                  <Target size={14} className="text-[var(--primitive-green-800)]" />
+                </div>
+                <span className="text-body text-foreground-default">{goal}</span>
               </div>
-              <span className="text-body text-foreground-default">{goal}</span>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-caption text-foreground-muted">Add your career goals</p>
+          )}
         </div>
       </section>
 

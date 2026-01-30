@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils";
 import { CoachCard } from "../components";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { ProgressMeterCircular } from "@/components/ui/progress-meter";
+import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
 import { SECTOR_INFO, type Sector, type CandidCoach } from "@/lib/candid/types";
 import {
   CalendarBlank,
@@ -15,7 +18,6 @@ import {
   MagnifyingGlass,
   VideoCamera,
   Clock,
-  Spinner,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow, isSameDay } from "date-fns";
 
@@ -180,7 +182,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spinner size={32} className="animate-spin text-[var(--primitive-green-600)]" />
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -283,15 +285,18 @@ export default function DashboardPage() {
                 })}
               </div>
             ) : (
-              <div className="rounded-card border border-[var(--border-default)] bg-white p-6 text-center">
-                <CalendarBlank size={32} className="mx-auto mb-2 text-foreground-muted" />
-                <p className="text-body-sm text-foreground-muted">No upcoming sessions</p>
-                <Button variant="primary" size="sm" className="mt-3" asChild>
-                  <Link href="/candid/browse">
-                    Book Session
-                  </Link>
-                </Button>
-              </div>
+              <Card className="p-6">
+                <EmptyState
+                  preset="inbox"
+                  size="sm"
+                  title="No upcoming sessions"
+                  description="Book your first session to get started"
+                  action={{
+                    label: "Book Session",
+                    onClick: () => {},
+                  }}
+                />
+              </Card>
             )}
           </section>
 

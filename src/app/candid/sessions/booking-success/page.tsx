@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { CheckCircle, CalendarCheck, VideoCamera, ArrowRight } from "@phosphor-icons/react";
 
 interface SessionDetails {
@@ -16,7 +18,7 @@ interface SessionDetails {
 
 export default function BookingSuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--primitive-green-600)] border-t-transparent" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>}>
       <BookingSuccessContent />
     </Suspense>
   );
@@ -43,83 +45,85 @@ function BookingSuccessContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--primitive-green-600)] border-t-transparent" />
+        <Spinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--primitive-neutral-50)] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-[var(--primitive-neutral-200)] max-w-lg w-full p-8 text-center">
-        {/* Success Icon */}
-        <div className="w-20 h-20 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle size={48} weight="fill" className="text-[var(--primitive-green-600)]" />
-        </div>
+    <div className="min-h-screen bg-[var(--background-subtle)] flex items-center justify-center p-4">
+      <Card className="max-w-lg w-full">
+        <CardContent className="p-8 text-center">
+          {/* Success Icon */}
+          <div className="w-20 h-20 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle size={48} weight="fill" className="text-[var(--primitive-green-600)]" />
+          </div>
 
-        {/* Title */}
-        <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
-          Session Booked!
-        </h1>
-        <p className="text-[var(--primitive-neutral-600)] mb-8">
-          Your coaching session has been confirmed. You&apos;ll receive a confirmation email shortly.
-        </p>
+          {/* Title */}
+          <h1 className="text-heading-md font-bold text-foreground-default mb-2">
+            Session Booked!
+          </h1>
+          <p className="text-body text-foreground-muted mb-8">
+            Your coaching session has been confirmed. You&apos;ll receive a confirmation email shortly.
+          </p>
 
-        {/* Session Details */}
-        <div className="bg-[var(--primitive-neutral-50)] rounded-xl p-6 mb-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <CalendarCheck size={24} className="text-[var(--primitive-green-600)]" />
-              <div className="text-left">
-                <p className="text-sm text-[var(--primitive-neutral-600)]">Date & Time</p>
-                <p className="font-medium">Check your email for session details</p>
+          {/* Session Details */}
+          <div className="bg-[var(--background-subtle)] rounded-xl p-6 mb-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <CalendarCheck size={24} className="text-[var(--primitive-green-600)]" />
+                <div className="text-left">
+                  <p className="text-caption text-foreground-muted">Date & Time</p>
+                  <p className="text-body font-medium text-foreground-default">Check your email for session details</p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <VideoCamera size={24} className="text-[var(--primitive-green-600)]" />
-              <div className="text-left">
-                <p className="text-sm text-[var(--primitive-neutral-600)]">Video Call</p>
-                <p className="font-medium">Link will be in your dashboard</p>
+              <div className="flex items-center gap-3">
+                <VideoCamera size={24} className="text-[var(--primitive-green-600)]" />
+                <div className="text-left">
+                  <p className="text-caption text-foreground-muted">Video Call</p>
+                  <p className="text-body font-medium text-foreground-default">Link will be in your dashboard</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* What's Next */}
-        <div className="text-left mb-8">
-          <h2 className="font-semibold text-[var(--primitive-green-800)] mb-3">
-            What&apos;s Next?
-          </h2>
-          <ul className="space-y-2 text-sm text-[var(--primitive-neutral-600)]">
-            <li className="flex items-start gap-2">
-              <ArrowRight size={16} className="mt-0.5 text-[var(--primitive-green-600)]" />
-              Check your email for confirmation and calendar invite
-            </li>
-            <li className="flex items-start gap-2">
-              <ArrowRight size={16} className="mt-0.5 text-[var(--primitive-green-600)]" />
-              Prepare any questions or topics you want to discuss
-            </li>
-            <li className="flex items-start gap-2">
-              <ArrowRight size={16} className="mt-0.5 text-[var(--primitive-green-600)]" />
-              Join the video call 5 minutes before your session starts
-            </li>
-          </ul>
-        </div>
+          {/* What's Next */}
+          <div className="text-left mb-8">
+            <h2 className="text-body-strong font-semibold text-foreground-default mb-3">
+              What&apos;s Next?
+            </h2>
+            <ul className="space-y-2 text-caption text-foreground-muted">
+              <li className="flex items-start gap-2">
+                <ArrowRight size={16} className="mt-0.5 text-[var(--primitive-green-600)]" />
+                Check your email for confirmation and calendar invite
+              </li>
+              <li className="flex items-start gap-2">
+                <ArrowRight size={16} className="mt-0.5 text-[var(--primitive-green-600)]" />
+                Prepare any questions or topics you want to discuss
+              </li>
+              <li className="flex items-start gap-2">
+                <ArrowRight size={16} className="mt-0.5 text-[var(--primitive-green-600)]" />
+                Join the video call 5 minutes before your session starts
+              </li>
+            </ul>
+          </div>
 
-        {/* Actions */}
-        <div className="space-y-3">
-          <Link href="/candid/sessions">
-            <Button className="w-full">
-              View My Sessions
+          {/* Actions */}
+          <div className="space-y-3">
+            <Button className="w-full" asChild>
+              <Link href="/candid/sessions">
+                View My Sessions
+              </Link>
             </Button>
-          </Link>
-          <Link href="/candid/dashboard">
-            <Button variant="secondary" className="w-full">
-              Go to Dashboard
+            <Button variant="secondary" className="w-full" asChild>
+              <Link href="/candid/dashboard">
+                Go to Dashboard
+              </Link>
             </Button>
-          </Link>
-        </div>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

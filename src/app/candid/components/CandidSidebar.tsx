@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CandidLogo } from "./CandidLogo";
 import { CandidSymbol } from "./CandidSymbol";
@@ -18,8 +19,7 @@ import {
   BookOpen,
   MapTrifold,
 } from "@phosphor-icons/react";
-import { currentUser, getThreadsForUser } from "@/lib/candid";
-import { useAuthContext } from "@/components/providers";
+import { createClient } from "@/lib/supabase/client";
 
 const mainNavItems = [
   { href: "/candid/dashboard", label: "Home", icon: House },
@@ -34,11 +34,66 @@ const resourceNavItems = [
   { href: "/candid/careers", label: "Career Paths", icon: MapTrifold },
 ];
 
+interface UserData {
+  id: string;
+  email: string;
+  name: string;
+  avatar: string | null;
+  role: string;
+}
+
 export function CandidSidebar() {
   const pathname = usePathname();
-  const { signOut } = useAuthContext();
-  const threads = getThreadsForUser(currentUser.id);
-  const unreadMessages = threads.reduce((acc, t) => acc + t.unreadCount, 0);
+  const router = useRouter();
+  const [user, setUser] = useState<UserData | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const getUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      if (authUser) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email || "",
+          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User",
+          avatar: authUser.user_metadata?.avatar_url || null,
+          role: "mentee", // Default role, could be fetched from profile
+        });
+      }
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || "",
+          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split("@")[0] || "User",
+          avatar: session.user.user_metadata?.avatar_url || null,
+          role: "mentee",
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  const displayName = user?.name || "User";
+  const nameParts = displayName.split(" ");
+  const firstName = nameParts[0];
+  const lastName = nameParts.slice(1).join(" ") || "";
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[260px] flex-col border-r border-[var(--border-default)] bg-white lg:flex">
@@ -51,20 +106,22 @@ export function CandidSidebar() {
       </div>
 
       {/* User Profile */}
-      <div className="mx-4 mb-4 flex items-center gap-3 rounded-lg bg-[var(--background-subtle)] px-3 py-2.5">
-        <Avatar
-          size="default"
-          src={currentUser.avatar}
-          name={`${currentUser.firstName} ${currentUser.lastName}`}
-          color="green"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-body-sm font-medium text-foreground-default">
-            {currentUser.firstName} {currentUser.lastName}
-          </p>
-          <p className="text-caption text-foreground-muted capitalize">{currentUser.role}</p>
+      {user && (
+        <div className="mx-4 mb-4 flex items-center gap-3 rounded-lg bg-[var(--background-subtle)] px-3 py-2.5">
+          <Avatar
+            size="default"
+            src={user.avatar || undefined}
+            name={displayName}
+            color="green"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-body-sm font-medium text-foreground-default">
+              {displayName}
+            </p>
+            <p className="text-caption text-foreground-muted capitalize">{user.role}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Navigation */}
       <nav className="flex-1 space-y-1 px-3">
@@ -139,7 +196,7 @@ export function CandidSidebar() {
           Settings
         </Link>
         <button
-          onClick={() => signOut()}
+          onClick={handleSignOut}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium text-foreground-muted hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)] transition-all duration-150"
         >
           <SignOut size={20} />

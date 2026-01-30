@@ -2,21 +2,44 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { MessageThread as MessageThreadType } from "@/lib/candid/types";
-import { getUserById, currentUser } from "@/lib/candid/mock-data";
+import { Avatar } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 
+interface ThreadUser {
+  id: string;
+  name: string;
+  avatar: string | null;
+  role: string;
+  currentRole?: string;
+  currentCompany?: string;
+}
+
+interface Thread {
+  id: string;
+  lastMessage?: {
+    content: string;
+    createdAt: Date;
+    senderId: string;
+  };
+  unreadCount: number;
+  otherUser?: ThreadUser;
+}
+
 interface MessageThreadProps {
-  thread: MessageThreadType;
+  thread: Thread;
+  currentUserId: string;
   isActive?: boolean;
   className?: string;
 }
 
-export function MessageThread({ thread, isActive, className }: MessageThreadProps) {
-  const otherUserId = thread.participantIds.find((id) => id !== currentUser.id);
-  const otherUser = otherUserId ? getUserById(otherUserId) : null;
+export function MessageThread({ thread, currentUserId, isActive, className }: MessageThreadProps) {
+  const otherUser = thread.otherUser;
 
   if (!otherUser) return null;
+
+  const nameParts = otherUser.name.split(" ");
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.slice(1).join(" ") || "";
 
   return (
     <Link
@@ -32,18 +55,13 @@ export function MessageThread({ thread, isActive, className }: MessageThreadProp
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        {otherUser.avatar ? (
-          <img
-            src={otherUser.avatar}
-            alt={`${otherUser.firstName} ${otherUser.lastName}`}
-            className="h-12 w-12 rounded-full object-cover"
-          />
-        ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--candid-background-muted)] text-[var(--candid-foreground-brand)] font-semibold">
-            {otherUser.firstName[0]}
-            {otherUser.lastName[0]}
-          </div>
-        )}
+        <Avatar
+          size="default"
+          src={otherUser.avatar || undefined}
+          name={otherUser.name}
+          color="green"
+          className="h-12 w-12"
+        />
         {/* Role badge */}
         <div
           className={cn(
@@ -68,7 +86,7 @@ export function MessageThread({ thread, isActive, className }: MessageThreadProp
                 : "text-foreground-muted"
             )}
           >
-            {otherUser.firstName} {otherUser.lastName}
+            {otherUser.name}
           </h3>
           {thread.lastMessage && (
             <span className="flex-shrink-0 text-caption-sm text-foreground-muted">
@@ -80,7 +98,7 @@ export function MessageThread({ thread, isActive, className }: MessageThreadProp
         {/* Role & Company */}
         <p className="text-caption-sm text-foreground-muted">
           {otherUser.role === "coach" || otherUser.role === "mentor"
-            ? `${(otherUser as any).currentRole} at ${(otherUser as any).currentCompany}`
+            ? `${otherUser.currentRole || ""} at ${otherUser.currentCompany || ""}`
             : "Seeker"}
         </p>
 
@@ -94,7 +112,7 @@ export function MessageThread({ thread, isActive, className }: MessageThreadProp
                 : "text-foreground-muted"
             )}
           >
-            {thread.lastMessage.senderId === currentUser.id && (
+            {thread.lastMessage.senderId === currentUserId && (
               <span className="text-foreground-muted">You: </span>
             )}
             {thread.lastMessage.content}

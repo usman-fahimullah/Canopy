@@ -8,8 +8,18 @@ import { SECTOR_INFO, type Sector, type CandidCoach, type CandidMentor } from "@
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Avatar } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { SearchInput } from "@/components/ui/search-input";
 import {
-  MagnifyingGlass,
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+  DropdownValue,
+} from "@/components/ui/dropdown";
+import { Spinner, LoadingOverlay } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
   X,
   Star,
   Users,
@@ -18,9 +28,7 @@ import {
   ListDashes,
   MapPin,
   GraduationCap,
-  Handshake,
   Funnel,
-  Spinner,
 } from "@phosphor-icons/react";
 
 type MentorType = "all" | "coach" | "mentor";
@@ -89,13 +97,12 @@ const sectors = Object.entries(SECTOR_INFO).map(([key, value]) => ({
   label: value.label,
 }));
 
-// List view card - white card with shadow (no border)
+// List view card - using Card component
 function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
-  const isCoach = mentor.role === "coach";
   const isTopRated = mentor.rating && mentor.rating >= 4.8;
 
   return (
-    <div className="relative flex items-center gap-4 rounded-card bg-white p-4 shadow-card transition-all hover:shadow-card-hover">
+    <Card className="relative flex items-center gap-4 p-4 transition-all hover:shadow-card-hover">
       {/* Avatar */}
       <div className="relative">
         <Avatar
@@ -103,9 +110,8 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
           src={mentor.avatar}
           name={`${mentor.firstName} ${mentor.lastName}`}
           color="green"
+          status="online"
         />
-        {/* Online indicator */}
-        <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2 border-white bg-[var(--primitive-green-500)]" />
       </div>
 
       {/* Info */}
@@ -153,7 +159,7 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
           View Profile
         </Link>
       </Button>
-    </div>
+    </Card>
   );
 }
 
@@ -266,26 +272,13 @@ export default function BrowsePage() {
       {/* Search & Controls */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <MagnifyingGlass
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted"
-          />
-          <input
-            type="text"
+        <div className="flex-1 max-w-md">
+          <SearchInput
             placeholder="Search by name, expertise, or sector..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border-default)] bg-white py-2.5 pl-10 pr-4 text-body text-foreground-default placeholder:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
+            onValueChange={setSearchQuery}
+            size="compact"
           />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground-default"
-            >
-              <X size={16} />
-            </button>
-          )}
         </div>
 
         {/* Controls */}
@@ -306,14 +299,15 @@ export default function BrowsePage() {
           </Button>
 
           {/* Sort */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="rounded-lg border border-[var(--border-default)] bg-white px-3 py-2 text-caption text-foreground-default focus:border-[var(--primitive-green-800)] focus:outline-none"
-          >
-            <option value="rating">Highest Rated</option>
-            <option value="sessions">Most Sessions</option>
-          </select>
+          <Dropdown value={sortBy} onValueChange={(value) => setSortBy(value as "rating" | "sessions")}>
+            <DropdownTrigger className="min-w-[140px] h-10 px-3 py-2 text-caption">
+              <DropdownValue placeholder="Sort by" />
+            </DropdownTrigger>
+            <DropdownContent>
+              <DropdownItem value="rating">Highest Rated</DropdownItem>
+              <DropdownItem value="sessions">Most Sessions</DropdownItem>
+            </DropdownContent>
+          </Dropdown>
 
           {/* View Toggle */}
           <div className="hidden sm:flex items-center gap-1">
@@ -404,24 +398,25 @@ export default function BrowsePage() {
 
       {/* Loading State */}
       {loading && (
-        <div className="rounded-card bg-white p-12 shadow-card text-center">
-          <Spinner size={32} className="animate-spin mx-auto text-[var(--primitive-green-600)]" />
+        <Card className="p-12 text-center">
+          <Spinner size="lg" className="mx-auto" />
           <p className="mt-4 text-body text-foreground-muted">Loading coaches...</p>
-        </div>
+        </Card>
       )}
 
       {/* Error State */}
       {error && !loading && (
-        <div className="rounded-card bg-white p-12 shadow-card text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-red-100)]">
-            <X size={32} className="text-[var(--primitive-red-600)]" />
-          </div>
-          <h3 className="text-body-strong font-semibold text-foreground-default">Something went wrong</h3>
-          <p className="mt-1 text-caption text-foreground-muted">{error}</p>
-          <Button variant="primary" className="mt-4" onClick={() => window.location.reload()}>
-            Try again
-          </Button>
-        </div>
+        <Card className="p-12">
+          <EmptyState
+            preset="error"
+            title="Something went wrong"
+            description={error}
+            action={{
+              label: "Try again",
+              onClick: () => window.location.reload(),
+            }}
+          />
+        </Card>
       )}
 
       {/* Coach Grid/List */}
@@ -445,22 +440,25 @@ export default function BrowsePage() {
 
       {/* Empty State */}
       {!loading && !error && sortedCoaches.length === 0 && (
-        <div className="rounded-card bg-white p-12 shadow-card text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
-            <Users size={32} className="text-[var(--primitive-green-800)]" />
-          </div>
-          <h3 className="text-body-strong font-semibold text-foreground-default">No coaches found</h3>
-          <p className="mt-1 text-caption text-foreground-muted">
-            {hasActiveFilters
-              ? "Try adjusting your filters or search query"
-              : "Be the first to become a coach!"}
-          </p>
-          {hasActiveFilters && (
-            <Button variant="primary" className="mt-4" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          )}
-        </div>
+        <Card className="p-12">
+          <EmptyState
+            preset="users"
+            title="No coaches found"
+            description={
+              hasActiveFilters
+                ? "Try adjusting your filters or search query"
+                : "Be the first to become a coach!"
+            }
+            action={
+              hasActiveFilters
+                ? {
+                    label: "Clear filters",
+                    onClick: clearFilters,
+                  }
+                : undefined
+            }
+          />
+        </Card>
       )}
     </div>
   );

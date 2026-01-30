@@ -1,19 +1,17 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { MessageThread } from "../components";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { SearchInput } from "@/components/ui/search-input";
+import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import { createClient } from "@/lib/supabase/client";
 import {
-  currentUser,
-  getThreadsForUser,
-  getMessagesForThread,
-  getUserById,
-} from "@/lib/candid";
-import {
-  MagnifyingGlass,
   PaperPlaneRight,
   Paperclip,
   ArrowLeft,
@@ -35,6 +33,30 @@ function formatMessageDate(date: Date): string {
   return format(date, "MMM d, h:mm a");
 }
 
+interface Thread {
+  id: string;
+  participantIds: string[];
+  lastMessage: string;
+  lastMessageAt: Date;
+  unreadCount: number;
+  otherUser?: {
+    id: string;
+    name: string;
+    avatar: string | null;
+    role: string;
+    currentRole?: string;
+    currentCompany?: string;
+  };
+}
+
+interface Message {
+  id: string;
+  content: string;
+  senderId: string;
+  createdAt: Date;
+  readAt: Date | null;
+}
+
 export default function MessagesPage() {
   return (
     <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8" />}>
@@ -49,34 +71,54 @@ function MessagesContent() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [activeMessages, setActiveMessages] = useState<Message[]>([]);
 
-  const threads = getThreadsForUser(currentUser.id);
+  // Get current user
+  useEffect(() => {
+    const supabase = createClient();
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+      setLoading(false);
+    };
+    getUser();
+  }, []);
+
+  // For now, threads and messages would come from an API
+  // This is a placeholder until a messages API is implemented
   const activeThread = threads.find((t) => t.id === activeThreadId);
-  const activeMessages = activeThread ? getMessagesForThread(activeThread.id) : [];
-
-  const otherUserId = activeThread?.participantIds.find((id) => id !== currentUser.id);
-  const otherUser = otherUserId ? getUserById(otherUserId) : null;
+  const otherUser = activeThread?.otherUser || null;
 
   const filteredThreads = threads.filter((thread) => {
     if (!searchQuery) return true;
-    const otherUserId = thread.participantIds.find((id) => id !== currentUser.id);
-    const otherUser = otherUserId ? getUserById(otherUserId) : null;
-    if (!otherUser) return false;
-    const fullName = `${otherUser.firstName} ${otherUser.lastName}`.toLowerCase();
-    return fullName.includes(searchQuery.toLowerCase());
+    if (!thread.otherUser) return false;
+    return thread.otherUser.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
-    // In a real app, this would send the message
+    // TODO: Implement message sending via API
     console.log("Sending message:", newMessage);
     setNewMessage("");
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
-      {/* White card container with shadow */}
-      <div className="h-[calc(100vh-12rem)] overflow-hidden rounded-card bg-white shadow-card">
+      {/* Card container */}
+      <Card className="h-[calc(100vh-12rem)] overflow-hidden">
         <div className="flex h-full">
           {/* Thread List - Left Panel */}
           <div
@@ -88,17 +130,12 @@ function MessagesContent() {
             <div className="border-b border-[var(--border-default)] p-4">
               <h1 className="text-heading-sm font-semibold text-foreground-default">Messages</h1>
               {/* Search */}
-              <div className="relative mt-3">
-                <MagnifyingGlass
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted"
-                />
-                <input
-                  type="text"
+              <div className="mt-3">
+                <SearchInput
                   placeholder="Search conversations..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--background-subtle)] py-2 pl-9 pr-3 text-body placeholder:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
+                  onValueChange={setSearchQuery}
+                  size="compact"
                 />
               </div>
             </div>
@@ -107,11 +144,35 @@ function MessagesContent() {
             <div className="flex-1 overflow-y-auto p-2">
               {filteredThreads.length > 0 ? (
                 filteredThreads.map((thread) => (
-                  <MessageThread
+                  <Link
                     key={thread.id}
-                    thread={thread}
-                    isActive={thread.id === activeThreadId}
-                  />
+                    href={`/candid/messages?thread=${thread.id}`}
+                    className={`flex items-center gap-3 rounded-lg p-3 transition-colors ${
+                      thread.id === activeThreadId
+                        ? "bg-[var(--candid-background-subtle)]"
+                        : "hover:bg-[var(--background-subtle)]"
+                    }`}
+                  >
+                    <Avatar
+                      size="default"
+                      src={thread.otherUser?.avatar || undefined}
+                      name={thread.otherUser?.name || "User"}
+                      color="green"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground-default truncate">
+                        {thread.otherUser?.name || "Unknown User"}
+                      </p>
+                      <p className="text-caption text-foreground-muted truncate">
+                        {thread.lastMessage}
+                      </p>
+                    </div>
+                    {thread.unreadCount > 0 && (
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-[10px] font-bold text-white">
+                        {thread.unreadCount}
+                      </span>
+                    )}
+                  </Link>
                 ))
               ) : (
                 <div className="flex h-full items-center justify-center p-4 text-center">
@@ -144,20 +205,20 @@ function MessagesContent() {
                     </Button>
                     <Avatar
                       size="default"
-                      src={otherUser.avatar}
-                      name={`${otherUser.firstName} ${otherUser.lastName}`}
+                      src={otherUser.avatar || undefined}
+                      name={otherUser.name}
                       color="green"
                     />
                     <div>
                       <Link
-                        href={`/candid/profile/${otherUser.id}`}
+                        href={`/candid/coach/${otherUser.id}`}
                         className="text-body-strong font-semibold text-foreground-default hover:text-[var(--primitive-green-800)]"
                       >
-                        {otherUser.firstName} {otherUser.lastName}
+                        {otherUser.name}
                       </Link>
                       <p className="text-caption text-foreground-muted">
                         {otherUser.role === "coach" || otherUser.role === "mentor"
-                          ? `${(otherUser as any).currentRole} at ${(otherUser as any).currentCompany}`
+                          ? `${otherUser.currentRole || ""} at ${otherUser.currentCompany || ""}`
                           : "Seeker"}
                       </p>
                     </div>
@@ -181,8 +242,7 @@ function MessagesContent() {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {activeMessages.map((message, index) => {
-                    const isOwn = message.senderId === currentUser.id;
-                    const sender = getUserById(message.senderId);
+                    const isOwn = message.senderId === currentUserId;
                     const showAvatar =
                       index === 0 || activeMessages[index - 1].senderId !== message.senderId;
 
@@ -193,11 +253,11 @@ function MessagesContent() {
                       >
                         {/* Avatar */}
                         <div className="w-8 flex-shrink-0">
-                          {showAvatar && !isOwn && sender && (
+                          {showAvatar && !isOwn && otherUser && (
                             <Avatar
                               size="sm"
-                              src={sender.avatar}
-                              name={`${sender.firstName} ${sender.lastName}`}
+                              src={otherUser.avatar || undefined}
+                              name={otherUser.name}
                               color="green"
                             />
                           )}
@@ -237,7 +297,7 @@ function MessagesContent() {
                       <Paperclip size={20} />
                     </Button>
                     <div className="flex-1">
-                      <textarea
+                      <Textarea
                         placeholder="Type a message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
@@ -248,7 +308,7 @@ function MessagesContent() {
                           }
                         }}
                         rows={1}
-                        className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-2.5 text-body placeholder:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
+                        className="resize-none"
                       />
                     </div>
                     <Button
@@ -265,22 +325,16 @@ function MessagesContent() {
             ) : (
               // Empty State
               <div className="flex h-full items-center justify-center">
-                <div className="text-center">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
-                    <ChatCircle size={32} className="text-[var(--primitive-green-800)]" />
-                  </div>
-                  <h3 className="mt-4 text-body-strong font-semibold text-foreground-default">
-                    Select a conversation
-                  </h3>
-                  <p className="mt-2 text-caption text-foreground-muted">
-                    Choose a conversation from the list to start messaging
-                  </p>
-                </div>
+                <EmptyState
+                  preset="inbox"
+                  title="Select a conversation"
+                  description="Choose a conversation from the list to start messaging"
+                />
               </div>
             )}
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

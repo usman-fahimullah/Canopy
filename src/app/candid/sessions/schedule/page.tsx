@@ -1,17 +1,19 @@
 "use client";
 
-import { Suspense, useState, useMemo } from "react";
+import { Suspense, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { coaches, mentors, getUserById } from "@/lib/candid";
-import { type CandidCoach, type CandidMentor, type SessionType, SECTOR_INFO } from "@/lib/candid/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { SearchInput } from "@/components/ui/search-input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import {
   ArrowLeft,
   ArrowRight,
@@ -22,7 +24,6 @@ import {
   Star,
   CheckCircle,
   X,
-  MagnifyingGlass,
   CaretLeft,
   CaretRight,
   Check,
@@ -51,6 +52,23 @@ import {
 } from "date-fns";
 
 type Step = "mentor" | "datetime" | "details" | "confirm";
+
+type SessionType = "coaching" | "mock-interview" | "resume-review" | "career-planning" | "networking";
+
+interface Coach {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatar: string | null;
+  currentRole: string;
+  currentCompany: string;
+  expertise: string[];
+  rating: number | null;
+  reviewCount: number;
+  sessionRate: number;
+  isFoundingMember?: boolean;
+  menteeCount?: number;
+}
 
 const sessionTypes: { value: SessionType; label: string; description: string; duration: number; icon: React.ElementType }[] = [
   {
@@ -125,9 +143,7 @@ function ScheduleSessionContent() {
   const preSelectedMentorId = searchParams.get("mentor");
 
   const [step, setStep] = useState<Step>(preSelectedMentorId ? "datetime" : "mentor");
-  const [selectedMentor, setSelectedMentor] = useState<CandidCoach | CandidMentor | null>(
-    preSelectedMentorId ? (getUserById(preSelectedMentorId) as CandidCoach | CandidMentor) : null
-  );
+  const [selectedMentor, setSelectedMentor] = useState<Coach | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<SessionType | null>(null);
@@ -135,18 +151,46 @@ function ScheduleSessionContent() {
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allMentors = useMemo(() => [...coaches, ...mentors], []);
+  // Fetch coaches from API
+  useEffect(() => {
+    const fetchCoaches = async () => {
+      try {
+        const res = await fetch("/api/coaches");
+        if (res.ok) {
+          const data = await res.json();
+          setCoaches(data.coaches || []);
+
+          // If preselected mentor, find them
+          if (preSelectedMentorId) {
+            const preselected = data.coaches?.find((c: Coach) => c.id === preSelectedMentorId);
+            if (preselected) {
+              setSelectedMentor(preselected);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching coaches:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoaches();
+  }, [preSelectedMentorId]);
+
   const filteredMentors = useMemo(() => {
-    if (!searchQuery) return allMentors;
+    if (!searchQuery) return coaches;
     const query = searchQuery.toLowerCase();
-    return allMentors.filter(
+    return coaches.filter(
       (m) =>
         `${m.firstName} ${m.lastName}`.toLowerCase().includes(query) ||
         m.currentCompany.toLowerCase().includes(query) ||
         m.expertise.some((e) => e.toLowerCase().includes(query))
     );
-  }, [allMentors, searchQuery]);
+  }, [coaches, searchQuery]);
 
   const steps: Step[] = ["mentor", "datetime", "details", "confirm"];
   const currentStepIndex = steps.indexOf(step);
@@ -198,6 +242,14 @@ function ScheduleSessionContent() {
     const unavailable = ["10:00", "10:30", "14:00", "14:30", "15:00"];
     return timeSlots.filter((slot) => !unavailable.includes(slot));
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FAF9F7] to-[#E5F1FF]/30">
@@ -271,17 +323,11 @@ function ScheduleSessionContent() {
             </div>
 
             {/* Search */}
-            <div className="relative mb-6">
-              <MagnifyingGlass
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-muted"
-              />
-              <Input
-                type="text"
+            <div className="mb-6">
+              <SearchInput
                 placeholder="Search by name, company, or expertise..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                onValueChange={setSearchQuery}
               />
             </div>
 
@@ -302,7 +348,7 @@ function ScheduleSessionContent() {
                   >
                     <Avatar
                       size="lg"
-                      src={mentor.avatar}
+                      src={mentor.avatar || undefined}
                       name={`${mentor.firstName} ${mentor.lastName}`}
                       color="green"
                     />
@@ -562,15 +608,12 @@ function ScheduleSessionContent() {
               {/* Notes & Prep */}
               <div className="space-y-6">
                 {/* Notes */}
-                <div>
-                  <label className="block text-body-strong font-semibold text-foreground-default mb-2">
-                    Session Notes <span className="font-normal text-foreground-muted">(optional)</span>
-                  </label>
-                  <textarea
+                <div className="space-y-1.5">
+                  <Label description="(optional)">Session Notes</Label>
+                  <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={4}
-                    className="w-full rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 text-body text-foreground-default placeholder:text-foreground-muted focus:border-[var(--primitive-green-600)] focus:outline-none transition-colors"
                     placeholder="Share what you'd like to focus on during this session..."
                   />
                 </div>
@@ -658,7 +701,7 @@ function ScheduleSessionContent() {
                 <div className="flex items-center gap-4 pb-4 border-b border-[var(--border-default)]">
                   <Avatar
                     size="lg"
-                    src={selectedMentor.avatar}
+                    src={selectedMentor.avatar || undefined}
                     name={`${selectedMentor.firstName} ${selectedMentor.lastName}`}
                     color="green"
                   />

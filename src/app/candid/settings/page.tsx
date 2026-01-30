@@ -1,11 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { currentUser } from "@/lib/candid";
-import { SECTOR_INFO } from "@/lib/candid/types";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import { Chip } from "@/components/ui/chip";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { SwitchWithLabel } from "@/components/ui/switch";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsListVertical,
+  TabsTriggerVertical,
+} from "@/components/ui/tabs";
+import { Spinner } from "@/components/ui/spinner";
 import {
   User,
   Bell,
@@ -20,15 +37,82 @@ import {
 
 type SettingsTab = "profile" | "notifications" | "privacy" | "billing";
 
+interface UserData {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatar: string | null;
+  bio: string | null;
+  location: string | null;
+  targetSectors: string[];
+}
+
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserData | null>(null);
 
   // Form state
-  const [firstName, setFirstName] = useState(currentUser.firstName);
-  const [lastName, setLastName] = useState(currentUser.lastName);
-  const [bio, setBio] = useState(currentUser.bio || "");
-  const [location, setLocation] = useState(currentUser.location || "");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [bio, setBio] = useState("");
+  const [location, setLocation] = useState("");
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const getUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      if (authUser) {
+        const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
+        const userData: UserData = {
+          id: authUser.id,
+          email: authUser.email || "",
+          firstName: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(" ") || "",
+          avatar: authUser.user_metadata?.avatar_url || null,
+          bio: null,
+          location: null,
+          targetSectors: [],
+        };
+
+        setUser(userData);
+        setFirstName(userData.firstName);
+        setLastName(userData.lastName);
+        setBio(userData.bio || "");
+        setLocation(userData.location || "");
+      }
+      setLoading(false);
+    };
+
+    getUser();
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-foreground-muted">Please log in to view settings.</p>
+      </div>
+    );
+  }
 
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -36,7 +120,7 @@ export default function SettingsPage() {
   const [newMessages, setNewMessages] = useState(true);
   const [communityUpdates, setCommunityUpdates] = useState(false);
 
-  const tabs = [
+  const tabItems = [
     { id: "profile" as SettingsTab, label: "Profile", icon: User },
     { id: "notifications" as SettingsTab, label: "Notifications", icon: Bell },
     { id: "privacy" as SettingsTab, label: "Privacy", icon: Shield },
@@ -44,16 +128,18 @@ export default function SettingsPage() {
   ];
 
   const handleSave = () => {
-    // In a real app, this would save to the backend
+    // TODO: Save to backend via API
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     // Reset to original values
-    setFirstName(currentUser.firstName);
-    setLastName(currentUser.lastName);
-    setBio(currentUser.bio || "");
-    setLocation(currentUser.location || "");
+    if (user) {
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
+      setBio(user.bio || "");
+      setLocation(user.location || "");
+    }
     setIsEditing(false);
   };
 
@@ -64,36 +150,31 @@ export default function SettingsPage() {
         Manage your account settings and preferences
       </p>
 
-      <div className="mt-8 flex flex-col gap-8 lg:flex-row">
-        {/* Tabs */}
-        <nav className="flex flex-row gap-1 lg:flex-col lg:w-48">
-          {tabs.map((tab) => {
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as SettingsTab)} className="mt-8 flex flex-col gap-8 lg:flex-row">
+        {/* Vertical Tabs Navigation */}
+        <TabsListVertical className="flex flex-row gap-1 lg:flex-col lg:w-48">
+          {tabItems.map((tab) => {
             const Icon = tab.icon;
             return (
-              <button
+              <TabsTriggerVertical
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-body font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-[var(--primitive-blue-200)] text-[var(--primitive-green-800)]"
-                    : "text-foreground-muted hover:bg-[var(--background-subtle)]"
-                }`}
+                value={tab.id}
+                className="flex items-center gap-3"
               >
                 <Icon size={18} weight={activeTab === tab.id ? "fill" : "regular"} />
                 <span className="hidden lg:inline">{tab.label}</span>
-              </button>
+              </TabsTriggerVertical>
             );
           })}
-        </nav>
+        </TabsListVertical>
 
         {/* Content */}
         <div className="flex-1">
           {/* Profile Tab */}
-          {activeTab === "profile" && (
-            <div className="rounded-card bg-white shadow-card">
-              {/* Header */}
-              <div className="flex items-center justify-between border-b border-[var(--border-default)] p-6">
-                <h2 className="text-heading-sm font-semibold text-foreground-default">Profile Information</h2>
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Profile Information</CardTitle>
                 {!isEditing ? (
                   <Button
                     variant="secondary"
@@ -123,22 +204,26 @@ export default function SettingsPage() {
                     </Button>
                   </div>
                 )}
-              </div>
+              </CardHeader>
 
-              <div className="p-6 space-y-6">
+              <CardContent className="space-y-6">
                 {/* Avatar */}
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <Avatar
                       size="xl"
-                      src={currentUser.avatar}
-                      name={`${currentUser.firstName} ${currentUser.lastName}`}
+                      src={user.avatar || undefined}
+                      name={`${user.firstName} ${user.lastName}`}
                       color="green"
                     />
                     {isEditing && (
-                      <button className="absolute bottom-0 right-0 rounded-full bg-[var(--primitive-green-800)] p-2 text-white shadow-lg">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        className="absolute bottom-0 right-0 rounded-full p-2"
+                      >
                         <Camera size={14} />
-                      </button>
+                      </Button>
                     )}
                   </div>
                   <div>
@@ -151,171 +236,147 @@ export default function SettingsPage() {
 
                 {/* Name */}
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-caption font-medium text-foreground-default">
-                      First Name
-                    </label>
-                    <input
+                  <div className="space-y-1.5">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      id="firstName"
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       disabled={!isEditing}
-                      className="mt-1 w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 text-body text-foreground-default disabled:bg-[var(--background-subtle)] disabled:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
+                      inputSize="sm"
                     />
                   </div>
-                  <div>
-                    <label className="block text-caption font-medium text-foreground-default">
-                      Last Name
-                    </label>
-                    <input
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
                       type="text"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       disabled={!isEditing}
-                      className="mt-1 w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 text-body text-foreground-default disabled:bg-[var(--background-subtle)] disabled:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
+                      inputSize="sm"
                     />
                   </div>
                 </div>
 
                 {/* Email (read-only) */}
-                <div>
-                  <label className="block text-caption font-medium text-foreground-default">
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" description="Contact support to change your email address">
                     Email
-                  </label>
-                  <input
+                  </Label>
+                  <Input
+                    id="email"
                     type="email"
-                    value={currentUser.email}
+                    value={user.email}
                     disabled
-                    className="mt-1 w-full rounded-lg border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-2.5 text-body text-foreground-muted"
+                    inputSize="sm"
                   />
-                  <p className="mt-1 text-caption text-foreground-muted">
-                    Contact support to change your email address
-                  </p>
                 </div>
 
                 {/* Location */}
-                <div>
-                  <label className="block text-caption font-medium text-foreground-default">
-                    Location
-                  </label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     disabled={!isEditing}
                     placeholder="City, Country"
-                    className="mt-1 w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 text-body text-foreground-default placeholder:text-foreground-muted disabled:bg-[var(--background-subtle)] disabled:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
+                    inputSize="sm"
                   />
                 </div>
 
                 {/* Bio */}
-                <div>
-                  <label className="block text-caption font-medium text-foreground-default">
-                    Bio
-                  </label>
-                  <textarea
+                <div className="space-y-1.5">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     disabled={!isEditing}
                     rows={4}
-                    className="mt-1 w-full rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 text-body text-foreground-default disabled:bg-[var(--background-subtle)] disabled:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
                   />
                 </div>
 
                 {/* Sectors */}
-                <div>
-                  <label className="block text-caption font-medium text-foreground-default">
-                    Target Sectors
-                  </label>
+                <div className="space-y-1.5">
+                  <Label>Target Sectors</Label>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {currentUser.targetSectors.map((sector) => (
-                      <Chip key={sector} variant="blue" size="sm">
-                        {SECTOR_INFO[sector].label}
-                      </Chip>
-                    ))}
+                    {user.targetSectors.length > 0 ? (
+                      user.targetSectors.map((sector) => (
+                        <Badge key={sector} variant="info" size="sm">
+                          {sector}
+                        </Badge>
+                      ))
+                    ) : (
+                      <p className="text-caption text-foreground-muted">No sectors selected</p>
+                    )}
                   </div>
                 </div>
-              </div>
-            </div>
-          )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Notifications Tab */}
-          {activeTab === "notifications" && (
-            <div className="rounded-card bg-white shadow-card">
-              <div className="p-6">
-              <h2 className="text-heading-sm font-semibold text-foreground-default">
-                Notification Preferences
-              </h2>
-              <p className="mt-1 text-caption text-foreground-muted">
-                Choose how you want to receive updates
-              </p>
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notification Preferences</CardTitle>
+                <p className="text-caption text-foreground-muted">
+                  Choose how you want to receive updates
+                </p>
+              </CardHeader>
 
-              <div className="mt-6 space-y-4">
-                {[
-                  {
-                    label: "Email Notifications",
-                    description: "Receive important updates via email",
-                    value: emailNotifications,
-                    onChange: setEmailNotifications,
-                  },
-                  {
-                    label: "Session Reminders",
-                    description: "Get reminded before your scheduled sessions",
-                    value: sessionReminders,
-                    onChange: setSessionReminders,
-                  },
-                  {
-                    label: "New Messages",
-                    description: "Be notified when you receive a new message",
-                    value: newMessages,
-                    onChange: setNewMessages,
-                  },
-                  {
-                    label: "Community Updates",
-                    description: "Receive updates about community events and news",
-                    value: communityUpdates,
-                    onChange: setCommunityUpdates,
-                  },
-                ].map((setting) => (
-                  <div
-                    key={setting.label}
-                    className="flex items-center justify-between rounded-lg bg-[var(--background-subtle)] p-4"
-                  >
-                    <div>
-                      <p className="text-body-strong font-medium text-foreground-default">{setting.label}</p>
-                      <p className="text-caption text-foreground-muted">{setting.description}</p>
-                    </div>
-                    <button
-                      onClick={() => setting.onChange(!setting.value)}
-                      className={`relative h-6 w-11 rounded-full transition-colors ${
-                        setting.value ? "bg-[var(--primitive-green-800)]" : "bg-[var(--primitive-neutral-300)]"
-                      }`}
-                    >
-                      <span
-                        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                          setting.value ? "translate-x-5" : ""
-                        }`}
-                      />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              </div>
-            </div>
-          )}
+              <CardContent className="space-y-4">
+                <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+                  <SwitchWithLabel
+                    label="Email Notifications"
+                    helperText="Receive important updates via email"
+                    checked={emailNotifications}
+                    onCheckedChange={setEmailNotifications}
+                  />
+                </div>
+                <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+                  <SwitchWithLabel
+                    label="Session Reminders"
+                    helperText="Get reminded before your scheduled sessions"
+                    checked={sessionReminders}
+                    onCheckedChange={setSessionReminders}
+                  />
+                </div>
+                <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+                  <SwitchWithLabel
+                    label="New Messages"
+                    helperText="Be notified when you receive a new message"
+                    checked={newMessages}
+                    onCheckedChange={setNewMessages}
+                  />
+                </div>
+                <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+                  <SwitchWithLabel
+                    label="Community Updates"
+                    helperText="Receive updates about community events and news"
+                    checked={communityUpdates}
+                    onCheckedChange={setCommunityUpdates}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Privacy Tab */}
-          {activeTab === "privacy" && (
-            <div className="rounded-card bg-white shadow-card">
-              <div className="p-6">
-              <h2 className="text-heading-sm font-semibold text-foreground-default">
-                Privacy Settings
-              </h2>
-              <p className="mt-1 text-caption text-foreground-muted">
-                Control your data and privacy preferences
-              </p>
+          <TabsContent value="privacy">
+            <Card>
+              <CardHeader>
+                <CardTitle>Privacy Settings</CardTitle>
+                <p className="text-caption text-foreground-muted">
+                  Control your data and privacy preferences
+                </p>
+              </CardHeader>
 
-              <div className="mt-6 space-y-6">
+              <CardContent className="space-y-6">
                 <div className="rounded-lg bg-[var(--background-subtle)] p-4">
                   <h3 className="text-body-strong font-medium text-foreground-default">Profile Visibility</h3>
                   <p className="mt-1 text-caption text-foreground-muted">
@@ -338,47 +399,51 @@ export default function SettingsPage() {
                   <p className="mt-1 text-caption text-[var(--primitive-red-600)]">
                     Permanently delete your account and all associated data
                   </p>
-                  <Button variant="ghost" size="sm" className="mt-3 text-[var(--primitive-red-700)] hover:bg-[var(--primitive-red-200)]">
+                  <Button variant="destructive" size="sm" className="mt-3">
                     Delete Account
                   </Button>
                 </div>
-              </div>
-              </div>
-            </div>
-          )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Billing Tab */}
-          {activeTab === "billing" && (
-            <div className="rounded-card bg-white shadow-card">
-              <div className="p-6">
-              <h2 className="text-heading-sm font-semibold text-foreground-default">
-                Billing & Payments
-              </h2>
-              <p className="mt-1 text-caption text-foreground-muted">
-                Manage your payment methods and billing history
-              </p>
-
-              <div className="mt-6 rounded-lg bg-[var(--primitive-blue-200)] p-4">
-                <p className="text-body-strong font-medium text-[var(--primitive-green-800)]">Free Plan</p>
-                <p className="mt-1 text-caption text-[var(--primitive-green-800)]/70">
-                  You're currently on the free tier. Upgrade to access premium features.
+          <TabsContent value="billing">
+            <Card>
+              <CardHeader>
+                <CardTitle>Billing & Payments</CardTitle>
+                <p className="text-caption text-foreground-muted">
+                  Manage your payment methods and billing history
                 </p>
-              </div>
+              </CardHeader>
 
-              <div className="mt-6">
-                <h3 className="text-body-strong font-medium text-foreground-default">Payment History</h3>
-                <p className="mt-2 text-caption text-foreground-muted">No payments yet</p>
-              </div>
-              </div>
-            </div>
-          )}
+              <CardContent className="space-y-6">
+                <div className="rounded-lg bg-[var(--candid-background-subtle)] p-4">
+                  <p className="text-body-strong font-medium text-[var(--candid-foreground-brand)]">Free Plan</p>
+                  <p className="mt-1 text-caption text-[var(--candid-foreground-brand)]/70">
+                    You're currently on the free tier. Upgrade to access premium features.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="text-body-strong font-medium text-foreground-default">Payment History</h3>
+                  <p className="mt-2 text-caption text-foreground-muted">No payments yet</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Sign Out */}
-          <Button variant="ghost" className="mt-6 text-[var(--primitive-red-600)] hover:text-[var(--primitive-red-700)] hover:bg-[var(--primitive-red-100)]" leftIcon={<SignOut size={18} />}>
+          <Button
+            variant="ghost"
+            className="mt-6 text-[var(--primitive-red-600)] hover:text-[var(--primitive-red-700)] hover:bg-[var(--primitive-red-100)]"
+            leftIcon={<SignOut size={18} />}
+            onClick={handleSignOut}
+          >
             Sign Out
           </Button>
         </div>
-      </div>
+      </Tabs>
     </div>
   );
 }

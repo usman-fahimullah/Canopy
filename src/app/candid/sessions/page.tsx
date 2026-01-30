@@ -5,14 +5,18 @@ import Link from "next/link";
 import { SessionCard } from "../components";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
+import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   CalendarBlank,
   CalendarPlus,
   Clock,
   CheckCircle,
   Funnel,
-  Spinner,
   VideoCamera,
   X,
 } from "@phosphor-icons/react";
@@ -46,15 +50,15 @@ function SessionListCard({ session, userRole }: { session: Session; userRole: "s
   const isPast = scheduledAt < new Date();
   const isUpcoming = !isPast && session.status === "SCHEDULED";
 
-  const statusColors: Record<string, string> = {
-    SCHEDULED: "blue",
-    COMPLETED: "green",
-    CANCELLED: "red",
-    NO_SHOW: "orange",
+  const statusVariants: Record<string, "info" | "success" | "critical" | "warning" | "neutral"> = {
+    SCHEDULED: "info",
+    COMPLETED: "success",
+    CANCELLED: "critical",
+    NO_SHOW: "warning",
   };
 
   return (
-    <div className="rounded-card bg-white p-5 shadow-card">
+    <Card className="p-5">
       <div className="flex items-start gap-4">
         <Avatar
           size="lg"
@@ -67,9 +71,9 @@ function SessionListCard({ session, userRole }: { session: Session; userRole: "s
             <h3 className="font-semibold text-foreground-default">
               {session.coach.firstName} {session.coach.lastName}
             </h3>
-            <Chip variant={statusColors[session.status] as any || "neutral"} size="sm">
+            <Badge variant={statusVariants[session.status] || "neutral"} size="sm">
               {session.status.replace("_", " ")}
-            </Chip>
+            </Badge>
           </div>
           <p className="text-caption text-foreground-muted mb-2">
             {session.coach.headline}
@@ -103,7 +107,7 @@ function SessionListCard({ session, userRole }: { session: Session; userRole: "s
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -179,7 +183,7 @@ export default function SessionsPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center py-20">
-          <Spinner size={32} className="animate-spin text-[var(--primitive-green-600)]" />
+          <Spinner size="lg" />
         </div>
       </div>
     );
@@ -288,31 +292,29 @@ export default function SessionsPage() {
             </section>
           )}
 
-          {/* Empty State - white card with shadow */}
+          {/* Empty State */}
           {filteredSessions.length === 0 && (
-            <div className="rounded-card bg-white p-12 shadow-card text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
-                <CalendarBlank size={32} className="text-[var(--primitive-green-800)]" />
-              </div>
-              <h3 className="text-body-strong font-semibold text-foreground-default">
-                No sessions found
-              </h3>
-              <p className="mt-2 text-caption text-foreground-muted">
-                {filterStatus === "all"
-                  ? "Book your first session to get started"
-                  : `No ${filterStatus.toLowerCase()} sessions`}
-              </p>
-              <Button variant="primary" className="mt-4" leftIcon={<CalendarPlus size={16} />} asChild>
-                <Link href="/candid/browse">
-                  Browse Coaches
-                </Link>
-              </Button>
-            </div>
+            <Card className="p-12">
+              <EmptyState
+                preset="inbox"
+                title="No sessions found"
+                description={
+                  filterStatus === "all"
+                    ? "Book your first session to get started"
+                    : `No ${filterStatus.toLowerCase()} sessions`
+                }
+                action={{
+                  label: "Browse Coaches",
+                  onClick: () => {},
+                  icon: <CalendarPlus size={16} />,
+                }}
+              />
+            </Card>
           )}
         </div>
       ) : (
-        // Calendar View - white card with shadow
-        <div className="rounded-card bg-white shadow-card">
+        // Calendar View
+        <Card>
           {/* Calendar Header */}
           <div className="flex items-center justify-between p-4">
             <Button variant="ghost" size="sm" onClick={goToPreviousMonth}>
@@ -411,7 +413,7 @@ export default function SessionsPage() {
               <span className="text-caption text-foreground-muted">Cancelled</span>
             </div>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

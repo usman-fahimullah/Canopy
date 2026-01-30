@@ -2,13 +2,26 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { Session } from "@/lib/candid/types";
-import { getUserById } from "@/lib/candid/mock-data";
 import { buttonVariants } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Avatar } from "@/components/ui/avatar";
 import { VideoCamera, CaretRight } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow } from "date-fns";
+
+interface SessionUser {
+  id: string;
+  name: string;
+  avatar: string | null;
+}
+
+interface Session {
+  id: string;
+  scheduledAt: Date;
+  status: string;
+  meetingLink?: string | null;
+  mentor?: SessionUser;
+  mentee?: SessionUser;
+}
 
 interface SessionCardProps {
   session: Session;
@@ -31,11 +44,10 @@ function formatSessionDate(date: Date): string {
 }
 
 export function SessionCard({ session, userRole, className }: SessionCardProps) {
-  const otherUserId = userRole === "seeker" ? session.mentorId : session.menteeId;
-  const otherUser = getUserById(otherUserId);
+  const otherUser = userRole === "seeker" ? session.mentor : session.mentee;
 
-  const isUpcoming = session.status === "scheduled" && session.scheduledAt > new Date();
-  const isSoon = isToday(session.scheduledAt);
+  const isUpcoming = session.status === "SCHEDULED" && new Date(session.scheduledAt) > new Date();
+  const isSoon = isToday(new Date(session.scheduledAt));
 
   return (
     <Link
@@ -48,8 +60,8 @@ export function SessionCard({ session, userRole, className }: SessionCardProps) 
       {/* Avatar */}
       <Avatar
         size="default"
-        src={otherUser?.avatar}
-        name={otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : ""}
+        src={otherUser?.avatar || undefined}
+        name={otherUser?.name || "Unknown"}
         color="green"
       />
 
@@ -57,14 +69,14 @@ export function SessionCard({ session, userRole, className }: SessionCardProps) 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-body-strong text-foreground-default group-hover:text-[var(--primitive-green-800)] transition-colors">
-            {otherUser?.firstName} {otherUser?.lastName}
+            {otherUser?.name || "Unknown User"}
           </span>
           {isSoon && isUpcoming && (
             <Chip variant="orange" size="sm">Today</Chip>
           )}
         </div>
         <p className="text-caption text-foreground-muted mt-0.5">
-          {formatSessionDate(session.scheduledAt)} · {format(session.scheduledAt, "h:mm a")}
+          {formatSessionDate(new Date(session.scheduledAt))} · {format(new Date(session.scheduledAt), "h:mm a")}
         </p>
       </div>
 

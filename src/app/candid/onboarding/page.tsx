@@ -8,8 +8,12 @@ import { SECTOR_INFO, type Sector, type CandidRole } from "@/lib/candid/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { RadioGroup, RadioGroupCard } from "@/components/ui/radio-group";
 import {
   ArrowRight,
   ArrowLeft,
@@ -287,9 +291,9 @@ export default function OnboardingPage() {
                   { icon: Target, title: "Achieve your goals", desc: "Set clear objectives and track your progress with personalized guidance" },
                   { icon: Leaf, title: "Make an impact", desc: "Join a community dedicated to building a sustainable future" },
                 ].map((item, i) => (
-                  <div
+                  <Card
                     key={i}
-                    className="flex items-start gap-4 rounded-card bg-white p-4 shadow-card transition-all duration-200 hover:shadow-card-hover"
+                    className="flex items-start gap-4 p-4 transition-all duration-200 hover:shadow-card-hover"
                   >
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--primitive-blue-200)]">
                       <item.icon size={20} className="text-[var(--primitive-green-800)]" />
@@ -298,7 +302,7 @@ export default function OnboardingPage() {
                       <h3 className="text-body-strong font-semibold text-foreground-default">{item.title}</h3>
                       <p className="mt-0.5 text-caption text-foreground-muted">{item.desc}</p>
                     </div>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
@@ -422,10 +426,8 @@ export default function OnboardingPage() {
 
               <div className="space-y-5">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-body-sm font-medium text-foreground-default mb-1.5">
-                      First Name <span className="text-[var(--primitive-red-500)]">*</span>
-                    </label>
+                  <div className="space-y-1.5">
+                    <Label required>First Name</Label>
                     <Input
                       type="text"
                       value={firstName}
@@ -434,10 +436,8 @@ export default function OnboardingPage() {
                       inputSize="lg"
                     />
                   </div>
-                  <div>
-                    <label className="block text-body-sm font-medium text-foreground-default mb-1.5">
-                      Last Name <span className="text-[var(--primitive-red-500)]">*</span>
-                    </label>
+                  <div className="space-y-1.5">
+                    <Label required>Last Name</Label>
                     <Input
                       type="text"
                       value={lastName}
@@ -448,10 +448,8 @@ export default function OnboardingPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-body-sm font-medium text-foreground-default mb-1.5">
-                    Email <span className="text-[var(--primitive-red-500)]">*</span>
-                  </label>
+                <div className="space-y-1.5">
+                  <Label required>Email</Label>
                   <Input
                     type="email"
                     value={email}
@@ -461,10 +459,10 @@ export default function OnboardingPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-body-sm font-medium text-foreground-default mb-1.5">
-                    LinkedIn Profile <span className="text-foreground-muted">(optional)</span>
-                  </label>
+                <div className="space-y-1.5">
+                  <Label>
+                    LinkedIn Profile <span className="text-foreground-muted font-normal">(optional)</span>
+                  </Label>
                   <Input
                     type="url"
                     value={linkedIn}
@@ -474,15 +472,14 @@ export default function OnboardingPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-body-sm font-medium text-foreground-default mb-1.5">
-                    Short Bio <span className="text-foreground-muted">(optional)</span>
-                  </label>
-                  <textarea
+                <div className="space-y-1.5">
+                  <Label>
+                    Short Bio <span className="text-foreground-muted font-normal">(optional)</span>
+                  </Label>
+                  <Textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     rows={3}
-                    className="w-full rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 text-lg text-foreground-default placeholder:text-[var(--primitive-neutral-600)] focus:border-[var(--primitive-green-600)] focus:outline-none transition-colors"
                     placeholder="Tell us about your background and what you're looking for..."
                   />
                 </div>
