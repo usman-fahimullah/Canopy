@@ -47,6 +47,12 @@ export default function AdminLayout({
                 Reviews
               </Link>
               <Link
+                href="/admin/analytics"
+                className="text-sm font-medium text-[var(--primitive-neutral-600)] hover:text-[var(--primitive-green-700)]"
+              >
+                Analytics
+              </Link>
+              <Link
                 href="/candid/dashboard"
                 className="text-sm text-[var(--primitive-neutral-500)] hover:text-[var(--primitive-green-700)]"
               >

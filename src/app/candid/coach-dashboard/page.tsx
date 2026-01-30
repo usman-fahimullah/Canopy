@@ -72,31 +72,45 @@ export default function CoachDashboardPage() {
       try {
         setLoading(true);
 
-        // Fetch coach sessions
-        const sessionsRes = await fetch("/api/sessions?role=coach");
+        // Fetch coach sessions, earnings, profile, and reviews in parallel
+        const [sessionsRes, earningsRes, profileRes] = await Promise.all([
+          fetch("/api/sessions?role=coach"),
+          fetch("/api/coach/earnings"),
+          fetch("/api/profile"),
+        ]);
+
         const sessionsData = sessionsRes.ok ? await sessionsRes.json() : { sessions: [] };
+        const earningsData = earningsRes.ok ? await earningsRes.json() : {};
+        const profileData = profileRes.ok ? await profileRes.json() : {};
 
         const allSessions = sessionsData.sessions || [];
         const upcomingSessions = allSessions
           .filter((s: Session) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date())
           .sort((a: Session, b: Session) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
 
-        // Calculate monthly stats
-        const thisMonth = new Date();
-        thisMonth.setDate(1);
-        thisMonth.setHours(0, 0, 0, 0);
+        // Get this month's earnings from breakdown
+        const currentMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+        const monthBreakdown = (earningsData.monthlyBreakdown || []).find(
+          (m: { month: string }) => m.month === currentMonth
+        );
 
-        const completedThisMonth = allSessions.filter(
-          (s: Session) => s.status === "COMPLETED" && new Date(s.scheduledAt) >= thisMonth
-        ).length;
+        // Get recent reviews if coach profile exists
+        let recentReviews: any[] = [];
+        if (profileData.account?.coachProfile?.id) {
+          const reviewsRes = await fetch(`/api/reviews?coachId=${profileData.account.coachProfile.id}`);
+          if (reviewsRes.ok) {
+            const reviewsData = await reviewsRes.json();
+            recentReviews = (reviewsData.reviews || []).slice(0, 5);
+          }
+        }
 
         setData({
-          profile: sessionsData.coachProfile || null,
+          profile: profileData.account?.coachProfile || null,
           upcomingSessions,
-          recentReviews: [],
+          recentReviews,
           monthlyStats: {
-            sessions: completedThisMonth,
-            earnings: 0, // Would calculate from actual session rates
+            sessions: monthBreakdown?.sessions || 0,
+            earnings: monthBreakdown?.earnings || 0,
             newMentees: 0,
           },
         });

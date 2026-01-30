@@ -41,6 +41,13 @@ model Account {
   seekerProfile  SeekerProfile?
   coachProfile   CoachProfile?
 
+  // Messaging
+  conversationParticipants ConversationParticipant[]
+  sentMessages             Message[]                @relation("MessageSender")
+
+  // Notifications
+  notifications Notification[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -483,6 +490,95 @@ model ActionItem {
 enum ActionItemStatus {
   PENDING
   COMPLETED
+}
+
+// =================================================================
+// CONVERSATION — Chat thread container for messaging.
+// =================================================================
+
+model Conversation {
+  id            String   @id @default(cuid())
+  lastMessageAt DateTime?
+
+  participants  ConversationParticipant[]
+  messages      Message[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// =================================================================
+// CONVERSATION PARTICIPANT — Join table (Conversation <-> Account).
+// =================================================================
+
+model ConversationParticipant {
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  accountId      String
+  account        Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  joinedAt       DateTime  @default(now())
+  lastReadAt     DateTime?
+
+  @@id([conversationId, accountId])
+}
+
+// =================================================================
+// MESSAGE — Individual chat message within a conversation.
+// =================================================================
+
+model Message {
+  id             String   @id @default(cuid())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       String
+  sender         Account @relation("MessageSender", fields: [senderId], references: [id])
+
+  content        String  @db.Text
+  attachmentUrls String[]
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+// =================================================================
+// NOTIFICATION — In-app + email notifications.
+// =================================================================
+
+model Notification {
+  id        String           @id @default(cuid())
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  type      NotificationType
+  title     String
+  body      String
+  data      String?          @db.Text // JSON for action URL, entity IDs, etc.
+
+  readAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([accountId, readAt])
+  @@index([accountId, createdAt])
+}
+
+enum NotificationType {
+  SESSION_BOOKED
+  SESSION_REMINDER
+  SESSION_CANCELLED
+  SESSION_COMPLETED
+  REVIEW_REQUEST
+  NEW_MESSAGE
+  COACH_APPROVED
+  COACH_REJECTED
+  PAYMENT_RECEIVED
+  MENTOR_REQUEST
 }
 
 // =================================================================

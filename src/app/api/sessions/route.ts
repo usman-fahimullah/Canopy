@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { createReviewRequestNotification } from "@/lib/notifications";
 
 // GET - List sessions for current user
 export async function GET(request: NextRequest) {
@@ -124,6 +125,18 @@ export async function PATCH(request: NextRequest) {
       where: { id: sessionId },
       data: updateData,
     });
+
+    // Send review request notification on completion
+    if (status === "COMPLETED" && isCoach) {
+      createReviewRequestNotification({
+        id: session.id,
+        scheduledAt: session.scheduledAt,
+        coach: session.coach,
+        mentee: session.mentee,
+      }).catch((err) => {
+        console.error("Failed to send review request notification:", err);
+      });
+    }
 
     return NextResponse.json({ success: true, session: updatedSession });
   } catch (error) {

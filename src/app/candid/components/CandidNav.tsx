@@ -14,7 +14,6 @@ import {
   MagnifyingGlass,
   ChatCircle,
   CalendarBlank,
-  Bell,
   Gear,
   User,
   CaretDown,
@@ -25,6 +24,7 @@ import {
   Question,
   Users,
 } from "@phosphor-icons/react";
+import { NotificationBell } from "./NotificationBell";
 
 const navItems = [
   { href: "/candid/dashboard", label: "Dashboard", icon: House },
@@ -55,9 +55,7 @@ export function CandidNav() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // For now, hardcode these - will be fetched from API later
-  const unreadCount = 0;
-  const unreadMessages = 0;
+  const unreadMessages = 0; // Will be replaced when useConversations is wired globally
 
   // Fetch user data
   useEffect(() => {
@@ -166,17 +164,7 @@ export function CandidNav() {
           {/* Right side */}
           <div className="flex items-center gap-1">
             {/* Notifications */}
-            <Link
-              href="/candid/notifications"
-              className="relative rounded-full p-2 text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default transition-colors duration-200"
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primitive-red-500)] text-[9px] font-bold text-white ring-2 ring-white">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </Link>
+            <NotificationBell />
 
             {/* Settings (Desktop) */}
             <Link

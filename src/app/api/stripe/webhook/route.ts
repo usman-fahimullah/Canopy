@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
+import { createSessionBookedNotifications } from "@/lib/notifications";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -136,6 +137,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   });
 
   console.log(`Created session ${coachingSession.id} and booking for checkout ${session.id}`);
+
+  // Send booking notifications to both parties
+  const fullSession = await prisma.session.findUnique({
+    where: { id: coachingSession.id },
+    include: {
+      coach: { include: { account: true } },
+      mentee: { include: { account: true } },
+    },
+  });
+
+  if (fullSession) {
+    createSessionBookedNotifications({
+      id: fullSession.id,
+      scheduledAt: fullSession.scheduledAt,
+      duration: fullSession.duration,
+      videoLink: fullSession.videoLink,
+      coach: fullSession.coach,
+      mentee: fullSession.mentee,
+    }).catch((err) => {
+      console.error("Failed to send booking notifications:", err);
+    });
+  }
 }
 
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {

@@ -61,6 +61,83 @@ export async function GET(request: NextRequest) {
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
       : 0;
 
+    // Extended analytics if requested
+    const { searchParams } = new URL(request.url);
+    const extended = searchParams.get("extended") === "true";
+
+    let analytics = {};
+    if (extended) {
+      // Monthly session counts (last 6 months)
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+      const [
+        recentSessions,
+        recentBookings,
+        totalSeekers,
+        totalMentors,
+        cancelledSessions,
+        noShowSessions,
+      ] = await Promise.all([
+        prisma.session.findMany({
+          where: { scheduledAt: { gte: sixMonthsAgo } },
+          select: { scheduledAt: true, status: true },
+          orderBy: { scheduledAt: "asc" },
+        }),
+        prisma.booking.findMany({
+          where: { createdAt: { gte: sixMonthsAgo }, status: "PAID" },
+          select: { createdAt: true, amount: true, platformFee: true },
+          orderBy: { createdAt: "asc" },
+        }),
+        prisma.seekerProfile.count(),
+        prisma.seekerProfile.count({ where: { isMentor: true } }),
+        prisma.session.count({ where: { status: "CANCELLED" } }),
+        prisma.session.count({ where: { status: "NO_SHOW" } }),
+      ]);
+
+      // Group sessions by month
+      const sessionsByMonth: Record<string, { total: number; completed: number; cancelled: number }> = {};
+      for (const s of recentSessions) {
+        const key = `${s.scheduledAt.getFullYear()}-${String(s.scheduledAt.getMonth() + 1).padStart(2, "0")}`;
+        if (!sessionsByMonth[key]) sessionsByMonth[key] = { total: 0, completed: 0, cancelled: 0 };
+        sessionsByMonth[key].total++;
+        if (s.status === "COMPLETED") sessionsByMonth[key].completed++;
+        if (s.status === "CANCELLED") sessionsByMonth[key].cancelled++;
+      }
+
+      // Group revenue by month
+      const revenueByMonth: Record<string, { amount: number; fees: number }> = {};
+      for (const b of recentBookings) {
+        const key = `${b.createdAt.getFullYear()}-${String(b.createdAt.getMonth() + 1).padStart(2, "0")}`;
+        if (!revenueByMonth[key]) revenueByMonth[key] = { amount: 0, fees: 0 };
+        revenueByMonth[key].amount += b.amount;
+        revenueByMonth[key].fees += b.platformFee;
+      }
+
+      // Rating distribution
+      const ratingDist = [0, 0, 0, 0, 0]; // index 0 = 1 star, index 4 = 5 stars
+      for (const r of reviews) {
+        if (r.rating >= 1 && r.rating <= 5) {
+          ratingDist[r.rating - 1]++;
+        }
+      }
+
+      // Completion rate
+      const totalNonPending = totalSessions + cancelledSessions + noShowSessions;
+      const completionRate = totalNonPending > 0 ? (totalSessions / totalNonPending) * 100 : 0;
+
+      analytics = {
+        sessionsByMonth,
+        revenueByMonth,
+        ratingDistribution: ratingDist,
+        totalSeekers,
+        totalMentors,
+        cancelledSessions,
+        noShowSessions,
+        completionRate: Math.round(completionRate * 10) / 10,
+      };
+    }
+
     return NextResponse.json({
       pendingApplications,
       activeCoaches,
@@ -69,6 +146,7 @@ export async function GET(request: NextRequest) {
       avgRating,
       totalReviews: reviews.length,
       totalBookings: bookings.length,
+      ...analytics,
     });
   } catch (error) {
     console.error("Fetch metrics error:", error);

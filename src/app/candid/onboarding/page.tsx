@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { CandidLogo, CandidSymbol } from "../components";
 import { SECTOR_INFO, type Sector, type CandidRole } from "@/lib/candid/types";
@@ -108,8 +109,10 @@ const availabilityOptions = [
 ];
 
 export default function OnboardingPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("welcome");
   const [selectedRole, setSelectedRole] = useState<CandidRole | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -128,11 +131,41 @@ export default function OnboardingPage() {
   const currentStepIndex = steps.indexOf(step);
   const progressPercentage = ((currentStepIndex) / (steps.length - 1)) * 100;
 
+  const submitOnboarding = useCallback(async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: selectedRole,
+          firstName,
+          lastName,
+          email,
+          linkedinUrl: linkedIn,
+          bio,
+          sectors: selectedSectors,
+          goals,
+          availability,
+        }),
+      });
+    } catch (err) {
+      console.error("Onboarding submit error:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [submitting, selectedRole, firstName, lastName, email, linkedIn, bio, selectedSectors, goals, availability]);
+
   const goToNextStep = () => {
     setIsAnimating(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       const nextIndex = currentStepIndex + 1;
       if (nextIndex < steps.length) {
+        // If moving to the complete step, submit data first
+        if (steps[nextIndex] === "complete") {
+          await submitOnboarding();
+        }
         setStep(steps[nextIndex]);
       }
       setIsAnimating(false);
@@ -824,16 +857,21 @@ export default function OnboardingPage() {
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
-                <Link href="/candid/dashboard">
-                  <Button size="lg" variant="primary" rightIcon={<ArrowRight size={18} />}>
-                    Go to Dashboard
-                  </Button>
-                </Link>
-                <Link href="/candid/browse">
-                  <Button size="lg" variant="secondary">
-                    Browse {selectedRole === "seeker" ? "Mentors" : "Mentees"}
-                  </Button>
-                </Link>
+                <Button
+                  size="lg"
+                  variant="primary"
+                  rightIcon={<ArrowRight size={18} />}
+                  onClick={() => router.push(selectedRole === "coach" ? "/candid/coach-dashboard" : "/candid/dashboard")}
+                >
+                  Go to Dashboard
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  onClick={() => router.push("/candid/browse")}
+                >
+                  Browse {selectedRole === "seeker" ? "Mentors" : "Mentees"}
+                </Button>
               </div>
             </div>
           )}

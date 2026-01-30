@@ -112,6 +112,7 @@ export default function CoachProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [nextAvailable, setNextAvailable] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCoach = async () => {
@@ -128,6 +129,19 @@ export default function CoachProfilePage() {
         }
         const data = await response.json();
         setCoach(data.coach);
+
+        // Fetch next available slot
+        const from = new Date().toISOString().split("T")[0];
+        const to = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        const slotsRes = await fetch(`/api/availability/${coachId}/slots?from=${from}&to=${to}`);
+        if (slotsRes.ok) {
+          const slotsData = await slotsRes.json();
+          if (slotsData.slots?.length > 0) {
+            const slot = slotsData.slots[0];
+            const slotDate = new Date(`${slot.date}T${slot.startTime}:00`);
+            setNextAvailable(slotDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }));
+          }
+        }
       } catch (err) {
         console.error("Error fetching coach:", err);
         setError("Failed to load coach profile");
@@ -250,6 +264,12 @@ export default function CoachProfilePage() {
                     <span className="flex items-center gap-1.5 text-foreground-muted">
                       <Briefcase size={16} />
                       {coach.yearsInClimate}+ years in climate
+                    </span>
+                  )}
+                  {nextAvailable && (
+                    <span className="flex items-center gap-1.5 text-[var(--primitive-green-600)]">
+                      <Calendar size={16} />
+                      Next: {nextAvailable}
                     </span>
                   )}
                 </div>

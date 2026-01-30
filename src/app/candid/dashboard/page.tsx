@@ -86,6 +86,11 @@ function transformCoach(apiCoach: any): CandidCoach {
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [progressFromApi, setProgressFromApi] = useState<{
+    actions: { current: number; total: number };
+    goals: { current: number; total: number };
+    milestones: { current: number; total: number };
+  } | null>(null);
   const [data, setData] = useState<DashboardData>({
     user: null,
     upcomingSessions: [],
@@ -98,14 +103,16 @@ export default function DashboardPage() {
       try {
         setLoading(true);
 
-        // Fetch sessions and coaches in parallel
-        const [sessionsRes, coachesRes] = await Promise.all([
+        // Fetch sessions, coaches, and goals in parallel
+        const [sessionsRes, coachesRes, goalsRes] = await Promise.all([
           fetch("/api/sessions"),
           fetch("/api/coaches?limit=6"),
+          fetch("/api/goals"),
         ]);
 
         const sessionsData = sessionsRes.ok ? await sessionsRes.json() : { sessions: [] };
         const coachesData = coachesRes.ok ? await coachesRes.json() : { coaches: [] };
+        const goalsData = goalsRes.ok ? await goalsRes.json() : { goals: [] };
 
         const allSessions = sessionsData.sessions || [];
         const upcomingSessions = allSessions
@@ -116,11 +123,31 @@ export default function DashboardPage() {
           (s: Session) => s.status === "COMPLETED"
         ).length;
 
+        // Calculate action items completed from session action items
+        const actionItemsCompleted = allSessions.reduce((count: number, s: any) => {
+          return count + (s.actionItems?.filter((ai: any) => ai.status === "COMPLETED").length || 0);
+        }, 0);
+        const actionItemsTotal = allSessions.reduce((count: number, s: any) => {
+          return count + (s.actionItems?.length || 0);
+        }, 0);
+
+        // Calculate goals/milestones progress
+        const allGoals = goalsData.goals || [];
+        const completedGoals = allGoals.filter((g: any) => g.status === "COMPLETED").length;
+        const allMilestones = allGoals.flatMap((g: any) => g.milestones || []);
+        const completedMilestones = allMilestones.filter((m: any) => m.completed).length;
+
         setData({
           user: null,
           upcomingSessions,
           completedSessionsCount,
           recommendedCoaches: coachesData.coaches || [],
+        });
+
+        setProgressFromApi({
+          actions: { current: actionItemsCompleted, total: Math.max(actionItemsTotal, 1) },
+          goals: { current: completedGoals, total: Math.max(allGoals.length, 1) },
+          milestones: { current: completedMilestones, total: Math.max(allMilestones.length, 1) },
         });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -132,12 +159,11 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, []);
 
-  // Mock progress data - will be updated when we have real progress tracking
   const progressData = {
-    sessions: { current: data.completedSessionsCount, total: 8 },
-    actions: { current: 2, total: 5 },
-    skills: { current: 1, total: 4 },
-    milestones: { current: 0, total: 3 },
+    sessions: { current: data.completedSessionsCount, total: Math.max(data.completedSessionsCount + data.upcomingSessions.length, 1) },
+    actions: progressFromApi?.actions || { current: 0, total: 1 },
+    skills: progressFromApi?.goals || { current: 0, total: 1 },
+    milestones: progressFromApi?.milestones || { current: 0, total: 1 },
   };
 
   // Get time of day greeting

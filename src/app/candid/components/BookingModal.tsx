@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { Spinner } from "@/components/ui/spinner";
 import { Calendar, Clock, CurrencyDollar, X } from "@phosphor-icons/react";
 import { formatCurrency, PLATFORM_FEE_PERCENT } from "@/lib/stripe";
 
@@ -15,6 +16,12 @@ interface Coach {
   sessionDuration: number;
 }
 
+interface AvailableSlot {
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
 interface BookingModalProps {
   coach: Coach;
   onClose: () => void;
@@ -24,19 +31,64 @@ export function BookingModal({ coach, onClose }: BookingModalProps) {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [slotsLoading, setSlotsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [slots, setSlots] = useState<AvailableSlot[]>([]);
 
-  // Mock available times - in production, fetch from coach's availability
-  const availableTimes = [
-    "09:00", "10:00", "11:00", "14:00", "15:00", "16:00"
-  ];
+  // Fetch real available slots from the API
+  useEffect(() => {
+    const fetchSlots = async () => {
+      setSlotsLoading(true);
+      try {
+        const from = new Date();
+        const to = new Date();
+        to.setDate(to.getDate() + 14);
 
-  // Generate next 14 days
-  const availableDates = Array.from({ length: 14 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() + i + 1);
-    return date.toISOString().split("T")[0];
-  });
+        const res = await fetch(
+          `/api/availability/${coach.id}/slots?from=${from.toISOString().split("T")[0]}&to=${to.toISOString().split("T")[0]}`
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          setSlots(data.slots || []);
+        } else {
+          setSlots([]);
+        }
+      } catch {
+        setSlots([]);
+      } finally {
+        setSlotsLoading(false);
+      }
+    };
+
+    fetchSlots();
+  }, [coach.id]);
+
+  // Group slots by date
+  const slotsByDate = useMemo(() => {
+    const grouped = new Map<string, AvailableSlot[]>();
+    for (const slot of slots) {
+      if (!grouped.has(slot.date)) {
+        grouped.set(slot.date, []);
+      }
+      grouped.get(slot.date)!.push(slot);
+    }
+    return grouped;
+  }, [slots]);
+
+  const availableDates = useMemo(() => {
+    return Array.from(slotsByDate.keys()).sort();
+  }, [slotsByDate]);
+
+  const availableTimes = useMemo(() => {
+    if (!selectedDate) return [];
+    return (slotsByDate.get(selectedDate) || []).map((s) => s.startTime);
+  }, [selectedDate, slotsByDate]);
+
+  // Reset time when date changes
+  useEffect(() => {
+    setSelectedTime("");
+  }, [selectedDate]);
 
   const handleBookSession = async () => {
     if (!selectedDate || !selectedTime) {
@@ -66,7 +118,6 @@ export function BookingModal({ coach, onClose }: BookingModalProps) {
         throw new Error(data.error || "Failed to create checkout session");
       }
 
-      // Redirect to Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       }
@@ -80,13 +131,8 @@ export function BookingModal({ coach, onClose }: BookingModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--primitive-neutral-200)]">
@@ -104,19 +150,10 @@ export function BookingModal({ coach, onClose }: BookingModalProps) {
         {/* Coach Info */}
         <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
           <div className="flex items-center gap-4">
-            <Avatar
-              size="lg"
-              src={coach.avatar}
-              name={coach.name}
-              color="green"
-            />
+            <Avatar size="lg" src={coach.avatar} name={coach.name} color="green" />
             <div>
-              <h3 className="font-semibold text-[var(--primitive-green-800)]">
-                {coach.name}
-              </h3>
-              <p className="text-sm text-[var(--primitive-neutral-600)]">
-                {coach.headline}
-              </p>
+              <h3 className="font-semibold text-[var(--primitive-green-800)]">{coach.name}</h3>
+              <p className="text-sm text-[var(--primitive-neutral-600)]">{coach.headline}</p>
             </div>
           </div>
         </div>
@@ -127,52 +164,73 @@ export function BookingModal({ coach, onClose }: BookingModalProps) {
             <Calendar size={18} />
             Select Date
           </label>
-          <div className="grid grid-cols-4 gap-2">
-            {availableDates.slice(0, 8).map((date) => {
-              const d = new Date(date);
-              const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-              const dayNum = d.getDate();
 
-              return (
-                <button
-                  key={date}
-                  onClick={() => setSelectedDate(date)}
-                  className={`p-3 rounded-lg border-2 text-center transition-all ${
-                    selectedDate === date
-                      ? "border-[var(--primitive-green-600)] bg-[var(--primitive-green-50)]"
-                      : "border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-neutral-300)]"
-                  }`}
-                >
-                  <div className="text-xs text-[var(--primitive-neutral-600)]">{dayName}</div>
-                  <div className="text-lg font-semibold">{dayNum}</div>
-                </button>
-              );
-            })}
-          </div>
+          {slotsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Spinner size="md" />
+            </div>
+          ) : availableDates.length > 0 ? (
+            <div className="grid grid-cols-4 gap-2">
+              {availableDates.slice(0, 8).map((date) => {
+                const d = new Date(date + "T12:00:00");
+                const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+                const dayNum = d.getDate();
+                const monthName = d.toLocaleDateString("en-US", { month: "short" });
+
+                return (
+                  <button
+                    key={date}
+                    onClick={() => setSelectedDate(date)}
+                    className={`p-3 rounded-lg border-2 text-center transition-all ${
+                      selectedDate === date
+                        ? "border-[var(--primitive-green-600)] bg-[var(--primitive-green-50)]"
+                        : "border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-neutral-300)]"
+                    }`}
+                  >
+                    <div className="text-xs text-[var(--primitive-neutral-600)]">{dayName}</div>
+                    <div className="text-lg font-semibold">{dayNum}</div>
+                    <div className="text-xs text-[var(--primitive-neutral-500)]">{monthName}</div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-sm text-[var(--primitive-neutral-500)] py-4">
+              No available dates in the next 2 weeks
+            </p>
+          )}
         </div>
 
         {/* Time Selection */}
-        <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
-          <label className="flex items-center gap-2 text-sm font-medium text-[var(--primitive-green-800)] mb-3">
-            <Clock size={18} />
-            Select Time
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {availableTimes.map((time) => (
-              <button
-                key={time}
-                onClick={() => setSelectedTime(time)}
-                className={`p-3 rounded-lg border-2 text-center transition-all ${
-                  selectedTime === time
-                    ? "border-[var(--primitive-green-600)] bg-[var(--primitive-green-50)]"
-                    : "border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-neutral-300)]"
-                }`}
-              >
-                {time}
-              </button>
-            ))}
+        {selectedDate && (
+          <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
+            <label className="flex items-center gap-2 text-sm font-medium text-[var(--primitive-green-800)] mb-3">
+              <Clock size={18} />
+              Select Time
+            </label>
+            {availableTimes.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2">
+                {availableTimes.map((time) => (
+                  <button
+                    key={time}
+                    onClick={() => setSelectedTime(time)}
+                    className={`p-3 rounded-lg border-2 text-center transition-all ${
+                      selectedTime === time
+                        ? "border-[var(--primitive-green-600)] bg-[var(--primitive-green-50)]"
+                        : "border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-neutral-300)]"
+                    }`}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-sm text-[var(--primitive-neutral-500)] py-4">
+                No available times for this date
+              </p>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Pricing */}
         <div className="p-6 border-b border-[var(--primitive-neutral-200)]">

@@ -62,34 +62,51 @@ export default function SettingsPage() {
   const [location, setLocation] = useState("");
 
   useEffect(() => {
-    const supabase = createClient();
-
-    const getUser = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-
-      if (authUser) {
-        const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
-        const userData: UserData = {
-          id: authUser.id,
-          email: authUser.email || "",
-          firstName: nameParts[0] || "",
-          lastName: nameParts.slice(1).join(" ") || "",
-          avatar: authUser.user_metadata?.avatar_url || null,
-          bio: null,
-          location: null,
-          targetSectors: [],
-        };
-
-        setUser(userData);
-        setFirstName(userData.firstName);
-        setLastName(userData.lastName);
-        setBio(userData.bio || "");
-        setLocation(userData.location || "");
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const data = await res.json();
+          const acct = data.account;
+          const nameParts = (acct.name || "").split(" ");
+          const userData: UserData = {
+            id: acct.id,
+            email: acct.email || "",
+            firstName: nameParts[0] || "",
+            lastName: nameParts.slice(1).join(" ") || "",
+            avatar: acct.avatar || null,
+            bio: acct.bio || null,
+            location: acct.location || null,
+            targetSectors: acct.seekerProfile?.targetSectors || [],
+          };
+          setUser(userData);
+          setFirstName(userData.firstName);
+          setLastName(userData.lastName);
+          setBio(userData.bio || "");
+          setLocation(userData.location || "");
+        }
+      } catch {
+        // Fallback to Supabase auth
+        const supabase = createClient();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
+          setUser({
+            id: authUser.id,
+            email: authUser.email || "",
+            firstName: nameParts[0] || "",
+            lastName: nameParts.slice(1).join(" ") || "",
+            avatar: authUser.user_metadata?.avatar_url || null,
+            bio: null,
+            location: null,
+            targetSectors: [],
+          });
+        }
       }
       setLoading(false);
     };
 
-    getUser();
+    fetchProfile();
   }, []);
 
   const handleSignOut = async () => {
@@ -127,8 +144,35 @@ export default function SettingsPage() {
     { id: "billing" as SettingsTab, label: "Billing", icon: CreditCard },
   ];
 
-  const handleSave = () => {
-    // TODO: Save to backend via API
+  const handleSave = async () => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: `${firstName} ${lastName}`.trim(),
+          bio: bio || null,
+          location: location || null,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const acct = data.account;
+        const nameParts = (acct.name || "").split(" ");
+        setUser({
+          id: acct.id,
+          email: acct.email || "",
+          firstName: nameParts[0] || "",
+          lastName: nameParts.slice(1).join(" ") || "",
+          avatar: acct.avatar || null,
+          bio: acct.bio || null,
+          location: acct.location || null,
+          targetSectors: acct.seekerProfile?.targetSectors || [],
+        });
+      }
+    } catch {
+      // Save failed silently
+    }
     setIsEditing(false);
   };
 
