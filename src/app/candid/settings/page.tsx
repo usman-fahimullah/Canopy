@@ -63,6 +63,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      let profileLoaded = false;
+
       try {
         const res = await fetch("/api/profile");
         if (res.ok) {
@@ -84,25 +86,35 @@ export default function SettingsPage() {
           setLastName(userData.lastName);
           setBio(userData.bio || "");
           setLocation(userData.location || "");
+          profileLoaded = true;
         }
       } catch {
-        // Fallback to Supabase auth
-        const supabase = createClient();
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        if (authUser) {
-          const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
-          setUser({
-            id: authUser.id,
-            email: authUser.email || "",
-            firstName: nameParts[0] || "",
-            lastName: nameParts.slice(1).join(" ") || "",
-            avatar: authUser.user_metadata?.avatar_url || null,
-            bio: null,
-            location: null,
-            targetSectors: [],
-          });
+        // API fetch failed, will fall through to Supabase fallback
+      }
+
+      // Fallback to Supabase auth if API didn't return profile data
+      if (!profileLoaded) {
+        try {
+          const supabase = createClient();
+          const { data: { user: authUser } } = await supabase.auth.getUser();
+          if (authUser) {
+            const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
+            setUser({
+              id: authUser.id,
+              email: authUser.email || "",
+              firstName: nameParts[0] || "",
+              lastName: nameParts.slice(1).join(" ") || "",
+              avatar: authUser.user_metadata?.avatar_url || null,
+              bio: null,
+              location: null,
+              targetSectors: [],
+            });
+          }
+        } catch {
+          // Supabase auth also failed
         }
       }
+
       setLoading(false);
     };
 
@@ -125,8 +137,14 @@ export default function SettingsPage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-foreground-muted">Please log in to view settings.</p>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <p className="text-foreground-muted">Unable to load your profile. Please try again.</p>
+        <Button
+          variant="primary"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </Button>
       </div>
     );
   }

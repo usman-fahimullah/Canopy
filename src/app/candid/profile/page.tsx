@@ -49,42 +49,74 @@ export default function MyProfilePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = createClient();
-
     const fetchUserData = async () => {
+      let profileLoaded = false;
+
+      // Try to get rich profile data from API first
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-
-        if (authUser) {
-          // Get user profile data
-          const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
-
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const data = await res.json();
+          const acct = data.account;
+          const nameParts = (acct.name || "").split(" ");
           setUser({
-            id: authUser.id,
+            id: acct.id,
             firstName: nameParts[0] || "User",
             lastName: nameParts.slice(1).join(" ") || "",
-            email: authUser.email || "",
-            avatar: authUser.user_metadata?.avatar_url || null,
-            bio: null,
-            location: null,
+            email: acct.email || "",
+            avatar: acct.avatar || null,
+            bio: acct.bio || null,
+            location: acct.location || null,
             cohort: "Spring 2026",
-            targetSectors: [],
+            targetSectors: acct.seekerProfile?.targetSectors || [],
             goals: ["Land a job in climate tech", "Build my network in sustainability"],
             matchedCoachId: null,
           });
-
-          // Fetch sessions
-          const sessionsRes = await fetch("/api/sessions");
-          if (sessionsRes.ok) {
-            const sessionsData = await sessionsRes.json();
-            setSessions(sessionsData.sessions || []);
-          }
+          profileLoaded = true;
         }
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-      } finally {
-        setLoading(false);
+      } catch {
+        // API fetch failed, will fall through to Supabase fallback
       }
+
+      // Fallback to Supabase auth data if API didn't work
+      if (!profileLoaded) {
+        try {
+          const supabase = createClient();
+          const { data: { user: authUser } } = await supabase.auth.getUser();
+
+          if (authUser) {
+            const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
+            setUser({
+              id: authUser.id,
+              firstName: nameParts[0] || "User",
+              lastName: nameParts.slice(1).join(" ") || "",
+              email: authUser.email || "",
+              avatar: authUser.user_metadata?.avatar_url || null,
+              bio: null,
+              location: null,
+              cohort: "Spring 2026",
+              targetSectors: [],
+              goals: ["Land a job in climate tech", "Build my network in sustainability"],
+              matchedCoachId: null,
+            });
+          }
+        } catch {
+          // Supabase auth also failed
+        }
+      }
+
+      // Fetch sessions separately
+      try {
+        const sessionsRes = await fetch("/api/sessions");
+        if (sessionsRes.ok) {
+          const sessionsData = await sessionsRes.json();
+          setSessions(sessionsData.sessions || []);
+        }
+      } catch {
+        // Sessions fetch failed silently
+      }
+
+      setLoading(false);
     };
 
     fetchUserData();
@@ -110,8 +142,14 @@ export default function MyProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-foreground-muted">Please log in to view your profile.</p>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <p className="text-foreground-muted">Unable to load your profile. Please try again.</p>
+        <Button
+          variant="primary"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </Button>
       </div>
     );
   }
