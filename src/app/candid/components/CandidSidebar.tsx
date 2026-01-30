@@ -18,14 +18,21 @@ import {
   Question,
   BookOpen,
   MapTrifold,
+  Users,
+  Briefcase,
+  Leaf,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 
 const mainNavItems = [
   { href: "/candid/dashboard", label: "Home", icon: House },
-  { href: "/candid/browse", label: "Browse", icon: MagnifyingGlass },
   { href: "/candid/sessions", label: "Sessions", icon: CalendarBlank },
+  { href: "/candid/mentors", label: "Mentors", icon: Users },
   { href: "/candid/messages", label: "Messages", icon: ChatCircle },
+];
+
+const ecosystemNavItems = [
+  { href: "https://greenjobsboard.us", label: "Green Jobs Board", icon: Briefcase, external: true },
 ];
 
 const resourceNavItems = [
@@ -149,6 +156,30 @@ export function CandidSidebar() {
                 </Badge>
               )}
             </Link>
+          );
+        })}
+
+        {/* Divider */}
+        <div className="my-4 border-t border-[var(--border-default)]" />
+
+        {/* Ecosystem Section */}
+        <p className="px-3 pb-2 text-caption font-medium text-foreground-muted">
+          Ecosystem
+        </p>
+        {ecosystemNavItems.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium transition-all duration-150 text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
+            >
+              <Icon size={20} weight="regular" />
+              {item.label}
+            </a>
           );
         })}
 

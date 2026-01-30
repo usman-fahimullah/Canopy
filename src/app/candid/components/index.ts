@@ -15,3 +15,9 @@ export {
   BrowseSkeleton,
 } from "./Skeleton";
 export { EmptyState, InlineEmptyState } from "./EmptyState";
+
+// New MVP components
+export { PageContainer, PageSection } from "./PageContainer";
+export { SaatheStudioCard } from "./SaatheStudioCard";
+export { GettingStartedChecklist } from "./GettingStartedChecklist";
+export { JobMatchesWidget } from "./JobMatchesWidget";

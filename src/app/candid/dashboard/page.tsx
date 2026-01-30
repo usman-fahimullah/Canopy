@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { CoachCard } from "../components";
+import {
+  CoachCard,
+  SaatheStudioCard,
+  GettingStartedChecklist,
+  JobMatchesWidget,
+} from "../components";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
@@ -18,6 +23,7 @@ import {
   MagnifyingGlass,
   VideoCamera,
   Clock,
+  Users,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow, isSameDay } from "date-fns";
 
@@ -229,16 +235,21 @@ export default function DashboardPage() {
 
             {/* Quick Actions */}
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/candid/browse" className={buttonVariants({ variant: "primary" })}>
-                <MagnifyingGlass size={16} weight="fill" />
-                Find a Coach
-              </Link>
-              <Link href="/candid/sessions" className={buttonVariants({ variant: "secondary" })}>
+              <Link href="/candid/sessions/schedule" className={buttonVariants({ variant: "primary" })}>
                 <CalendarBlank size={16} weight="fill" />
-                My Sessions
+                Book Session
+              </Link>
+              <Link href="/candid/mentors" className={buttonVariants({ variant: "secondary" })}>
+                <Users size={16} weight="fill" />
+                Find Mentors
               </Link>
             </div>
           </div>
+
+          {/* Getting Started Checklist - for new users */}
+          <section className="mb-8">
+            <GettingStartedChecklist />
+          </section>
 
           {/* Mobile/Tablet/Small Desktop: Upcoming Sessions Horizontal Scroll */}
           <section className="mb-8 xl:hidden">
@@ -375,34 +386,18 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Recommended Coaches - Horizontal scroll on mobile, grid on larger */}
-          {suggestedCoaches.length > 0 && (
-            <section className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-heading-sm text-foreground-default">Recommended Coaches</h2>
-                <Link href="/candid/browse" className={buttonVariants({ variant: "link" })}>
-                  Browse all
-                  <CaretRight size={14} />
-                </Link>
-              </div>
+          {/* Your Coaching Partner - Saathe Studio */}
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-heading-sm text-foreground-default">Your Coaching Partner</h2>
+            </div>
+            <SaatheStudioCard variant="featured" />
+          </section>
 
-              {/* Mobile: Horizontal scroll */}
-              <div className="sm:hidden flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
-                {suggestedCoaches.map((coach) => (
-                  <div key={coach.id} className="flex-shrink-0 w-[280px] snap-start">
-                    <CoachCard mentor={coach} variant="compact" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Tablet+: Grid */}
-              <div className="hidden sm:grid gap-4 grid-cols-2">
-                {suggestedCoaches.slice(0, 4).map((coach) => (
-                  <CoachCard key={coach.id} mentor={coach} variant="compact" />
-                ))}
-              </div>
-            </section>
-          )}
+          {/* Jobs for You - Green Jobs Board Integration */}
+          <section className="mb-8">
+            <JobMatchesWidget title="Jobs for You" limit={3} />
+          </section>
         </div>
       </div>
 
@@ -494,11 +489,11 @@ export default function DashboardPage() {
                   No upcoming sessions
                 </h3>
                 <p className="text-caption text-foreground-muted mb-4">
-                  Book time with a coach to continue your journey
+                  Book time with Saathe Studio to continue your journey
                 </p>
                 <Button variant="primary" size="sm" asChild>
-                  <Link href="/candid/browse">
-                    Find a Coach
+                  <Link href="/candid/sessions/schedule">
+                    Book Session
                   </Link>
                 </Button>
               </div>

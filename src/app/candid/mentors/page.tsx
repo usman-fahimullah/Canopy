@@ -19,7 +19,6 @@ import {
   Funnel,
   X,
   Briefcase,
-  ArrowLeft,
 } from "@phosphor-icons/react";
 
 interface Mentor {
@@ -233,19 +232,12 @@ export default function MentorsBrowsePage() {
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-8">
-        <Link
-          href="/candid/browse"
-          className="inline-flex items-center gap-2 text-caption text-foreground-muted hover:text-foreground-default mb-4"
-        >
-          <ArrowLeft size={16} />
-          Back to browse
-        </Link>
         <div className="flex items-center gap-3 mb-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
             <GraduationCap size={22} className="text-[var(--primitive-green-700)]" />
           </div>
           <h1 className="text-heading-md font-semibold text-foreground-default">
-            Find a Mentor
+            Climate Mentors
           </h1>
         </div>
         <p className="text-body text-foreground-muted">
