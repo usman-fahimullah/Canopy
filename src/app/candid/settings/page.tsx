@@ -61,6 +61,12 @@ export default function SettingsPage() {
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
 
+  // Notification settings (must be declared before any conditional returns)
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [sessionReminders, setSessionReminders] = useState(true);
+  const [newMessages, setNewMessages] = useState(true);
+  const [communityUpdates, setCommunityUpdates] = useState(false);
+
   useEffect(() => {
     const fetchProfile = async () => {
       let profileLoaded = false;
@@ -148,12 +154,6 @@ export default function SettingsPage() {
       </div>
     );
   }
-
-  // Notification settings
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [sessionReminders, setSessionReminders] = useState(true);
-  const [newMessages, setNewMessages] = useState(true);
-  const [communityUpdates, setCommunityUpdates] = useState(false);
 
   const tabItems = [
     { id: "profile" as SettingsTab, label: "Profile", icon: User },
