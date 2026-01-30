@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CoachCard } from "../components";
-import { coaches, mentors, currentUser } from "@/lib/candid";
 import { SECTOR_INFO, type Sector, type CandidCoach, type CandidMentor } from "@/lib/candid/types";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -21,10 +20,69 @@ import {
   GraduationCap,
   Handshake,
   Funnel,
+  Spinner,
 } from "@phosphor-icons/react";
 
 type MentorType = "all" | "coach" | "mentor";
 type ViewMode = "grid" | "list";
+
+// API Coach type from database
+interface APICoach {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl: string | null;
+  headline: string | null;
+  bio: string | null;
+  expertise: string[];
+  sectors: string[];
+  yearsInClimate: number | null;
+  sessionRate: number;
+  sessionDuration: number;
+  rating: number | null;
+  reviewCount: number;
+  totalSessions: number;
+  isFeatured: boolean;
+  location: string | null;
+  timezone: string | null;
+}
+
+// Transform API coach to component format
+function transformCoach(apiCoach: APICoach): CandidCoach {
+  return {
+    id: apiCoach.id,
+    email: "",
+    firstName: apiCoach.firstName,
+    lastName: apiCoach.lastName,
+    role: "coach",
+    avatar: apiCoach.photoUrl || undefined,
+    bio: apiCoach.bio || undefined,
+    location: apiCoach.location || undefined,
+    timezone: apiCoach.timezone || undefined,
+    createdAt: new Date(),
+    sectors: (apiCoach.sectors || []) as Sector[],
+    currentRole: apiCoach.headline || "Climate Coach",
+    currentCompany: "",
+    previousRoles: [],
+    expertise: apiCoach.expertise || [],
+    sessionTypes: ["coaching", "career-planning"],
+    hourlyRate: apiCoach.sessionRate / 100, // Convert from cents
+    monthlyRate: undefined,
+    availability: {
+      monday: [],
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+      friday: [],
+      saturday: [],
+      sunday: [],
+    },
+    menteeCount: apiCoach.totalSessions,
+    rating: apiCoach.rating || 0,
+    reviewCount: apiCoach.reviewCount,
+    isFeatured: apiCoach.isFeatured,
+  };
+}
 
 const sectors = Object.entries(SECTOR_INFO).map(([key, value]) => ({
   value: key as Sector,
@@ -54,7 +112,7 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <Link
-            href={`/candid/profile/${mentor.id}`}
+            href={`/candid/coach/${mentor.id}`}
             className="text-body-strong font-semibold text-foreground-default hover:text-[var(--primitive-green-800)]"
           >
             {mentor.firstName} {mentor.lastName}
@@ -67,10 +125,10 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
           )}
         </div>
         <p className="text-caption text-foreground-muted">
-          {mentor.currentRole} at {mentor.currentCompany}
+          {mentor.currentRole} {mentor.currentCompany && `at ${mentor.currentCompany}`}
         </p>
         <div className="mt-1.5 flex items-center gap-3 text-caption">
-          {mentor.rating && (
+          {mentor.rating && mentor.rating > 0 && (
             <span className="flex items-center gap-1">
               <Star size={12} weight="fill" className="text-[#F59E0B]" />
               <span className="font-semibold text-foreground-default">{mentor.rating.toFixed(1)}</span>
@@ -78,7 +136,7 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
           )}
           <span className="flex items-center gap-1 text-foreground-muted">
             <Users size={14} />
-            {mentor.menteeCount} mentees
+            {mentor.menteeCount} sessions
           </span>
           {mentor.location && (
             <span className="flex items-center gap-1 text-foreground-muted">
@@ -91,7 +149,7 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
 
       {/* Actions */}
       <Button variant="secondary" size="sm" rightIcon={<CaretRight size={14} />} asChild>
-        <Link href={`/candid/profile/${mentor.id}`}>
+        <Link href={`/candid/coach/${mentor.id}`}>
           View Profile
         </Link>
       </Button>
@@ -100,46 +158,53 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
 }
 
 export default function BrowsePage() {
+  const [coaches, setCoaches] = useState<CandidCoach[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [mentorType, setMentorType] = useState<MentorType>("all");
+  const [mentorType, setMentorType] = useState<MentorType>("coach");
   const [selectedSectors, setSelectedSectors] = useState<Sector[]>([]);
-  const [sortBy, setSortBy] = useState<"rating" | "mentees">("rating");
+  const [sortBy, setSortBy] = useState<"rating" | "sessions">("rating");
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
-  // Combine all mentors
-  const allMentors = useMemo(() => [...coaches, ...mentors], []);
+  // Fetch coaches from API
+  useEffect(() => {
+    const fetchCoaches = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams();
+        if (searchQuery) params.set("search", searchQuery);
+        if (selectedSectors.length > 0) params.set("sectors", selectedSectors.join(","));
+        params.set("sortBy", sortBy);
 
-  // Filter mentors
-  const filteredMentors = useMemo(() => {
-    return allMentors.filter((mentor) => {
-      if (mentorType !== "all" && mentor.role !== mentorType) return false;
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const fullName = `${mentor.firstName} ${mentor.lastName}`.toLowerCase();
-        const company = mentor.currentCompany.toLowerCase();
-        const role = mentor.currentRole.toLowerCase();
-        if (!fullName.includes(query) && !company.includes(query) && !role.includes(query)) {
-          return false;
-        }
-      }
-      if (selectedSectors.length > 0) {
-        if (!mentor.sectors.some((s) => selectedSectors.includes(s))) {
-          return false;
-        }
-      }
-      return true;
-    });
-  }, [allMentors, mentorType, searchQuery, selectedSectors]);
+        const response = await fetch(`/api/coaches?${params.toString()}`);
+        if (!response.ok) throw new Error("Failed to fetch coaches");
 
-  // Sort mentors
-  const sortedMentors = useMemo(() => {
-    return [...filteredMentors].sort((a, b) => {
+        const data = await response.json();
+        const transformedCoaches = (data.coaches || []).map(transformCoach);
+        setCoaches(transformedCoaches);
+      } catch (err) {
+        console.error("Error fetching coaches:", err);
+        setError("Failed to load coaches. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoaches();
+  }, [searchQuery, selectedSectors, sortBy]);
+
+  // Sort coaches locally for immediate UI response
+  const sortedCoaches = useMemo(() => {
+    return [...coaches].sort((a, b) => {
       if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
-      if (sortBy === "mentees") return b.menteeCount - a.menteeCount;
+      if (sortBy === "sessions") return b.menteeCount - a.menteeCount;
       return 0;
     });
-  }, [filteredMentors, sortBy]);
+  }, [coaches, sortBy]);
 
   const toggleSector = (sector: Sector) => {
     setSelectedSectors((prev) =>
@@ -149,19 +214,18 @@ export default function BrowsePage() {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setMentorType("all");
     setSelectedSectors([]);
   };
 
-  const hasActiveFilters = searchQuery || mentorType !== "all" || selectedSectors.length > 0;
+  const hasActiveFilters = searchQuery || selectedSectors.length > 0;
 
   // Featured coaches (top rated)
   const featuredCoaches = useMemo(() => {
-    return [...coaches]
-      .filter((c) => c.rating && c.rating >= 4.8)
+    return coaches
+      .filter((c) => c.isFeatured || (c.rating && c.rating >= 4.8))
       .sort((a, b) => (b.rating || 0) - (a.rating || 0))
       .slice(0, 3);
-  }, []);
+  }, [coaches]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
@@ -175,22 +239,20 @@ export default function BrowsePage() {
         {/* Quick stats */}
         <div className="mt-4 flex flex-wrap gap-4 text-caption text-foreground-muted">
           <span className="flex items-center gap-1.5">
-            <Users size={16} />
-            {coaches.length + mentors.length} mentors
-          </span>
-          <span className="flex items-center gap-1.5">
             <GraduationCap size={16} />
-            {coaches.length} certified coaches
+            {coaches.length} coaches
           </span>
           <span className="flex items-center gap-1.5">
             <Star size={16} weight="fill" className="text-[#F59E0B]" />
-            4.9 avg. rating
+            {coaches.length > 0
+              ? (coaches.reduce((acc, c) => acc + (c.rating || 0), 0) / coaches.length).toFixed(1)
+              : "0.0"} avg. rating
           </span>
         </div>
       </div>
 
       {/* Featured Coaches Section */}
-      {featuredCoaches.length > 0 && !hasActiveFilters && (
+      {featuredCoaches.length > 0 && !hasActiveFilters && !loading && (
         <section className="mb-10">
           <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">Featured Coaches</h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -211,7 +273,7 @@ export default function BrowsePage() {
           />
           <input
             type="text"
-            placeholder="Search by name, company, or role..."
+            placeholder="Search by name, expertise, or sector..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-lg border border-[var(--border-default)] bg-white py-2.5 pl-10 pr-4 text-body text-foreground-default placeholder:text-foreground-muted focus:border-[var(--primitive-green-800)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-800)]/10"
@@ -228,34 +290,6 @@ export default function BrowsePage() {
 
         {/* Controls */}
         <div className="flex items-center gap-3">
-          {/* Type Toggle */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant={mentorType === "all" ? "secondary" : "tertiary"}
-              size="sm"
-              onClick={() => setMentorType("all")}
-            >
-              <Users size={16} className="mr-1.5" />
-              All
-            </Button>
-            <Button
-              variant={mentorType === "coach" ? "secondary" : "tertiary"}
-              size="sm"
-              onClick={() => setMentorType("coach")}
-            >
-              <GraduationCap size={16} className="mr-1.5" />
-              Coaches
-            </Button>
-            <Button
-              variant={mentorType === "mentor" ? "secondary" : "tertiary"}
-              size="sm"
-              onClick={() => setMentorType("mentor")}
-            >
-              <Handshake size={16} className="mr-1.5" />
-              Mentors
-            </Button>
-          </div>
-
           {/* Filter Toggle */}
           <Button
             variant={showFilters || selectedSectors.length > 0 ? "secondary" : "tertiary"}
@@ -278,7 +312,7 @@ export default function BrowsePage() {
             className="rounded-lg border border-[var(--border-default)] bg-white px-3 py-2 text-caption text-foreground-default focus:border-[var(--primitive-green-800)] focus:outline-none"
           >
             <option value="rating">Highest Rated</option>
-            <option value="mentees">Most Mentees</option>
+            <option value="sessions">Most Sessions</option>
           </select>
 
           {/* View Toggle */}
@@ -358,16 +392,40 @@ export default function BrowsePage() {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-heading-sm font-semibold text-foreground-default">
-            {hasActiveFilters ? "Search Results" : "All Mentors"}
+            {hasActiveFilters ? "Search Results" : "All Coaches"}
           </h2>
-          <Chip variant="neutral" size="sm">
-            {sortedMentors.length}
-          </Chip>
+          {!loading && (
+            <Chip variant="neutral" size="sm">
+              {sortedCoaches.length}
+            </Chip>
+          )}
         </div>
       </div>
 
-      {/* Mentor Grid/List */}
-      {sortedMentors.length > 0 ? (
+      {/* Loading State */}
+      {loading && (
+        <div className="rounded-card bg-white p-12 shadow-card text-center">
+          <Spinner size={32} className="animate-spin mx-auto text-[var(--primitive-green-600)]" />
+          <p className="mt-4 text-body text-foreground-muted">Loading coaches...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="rounded-card bg-white p-12 shadow-card text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-red-100)]">
+            <X size={32} className="text-[var(--primitive-red-600)]" />
+          </div>
+          <h3 className="text-body-strong font-semibold text-foreground-default">Something went wrong</h3>
+          <p className="mt-1 text-caption text-foreground-muted">{error}</p>
+          <Button variant="primary" className="mt-4" onClick={() => window.location.reload()}>
+            Try again
+          </Button>
+        </div>
+      )}
+
+      {/* Coach Grid/List */}
+      {!loading && !error && sortedCoaches.length > 0 && (
         <div
           className={cn(
             viewMode === "grid"
@@ -375,26 +433,33 @@ export default function BrowsePage() {
               : "flex flex-col gap-4"
           )}
         >
-          {sortedMentors.map((mentor) =>
+          {sortedCoaches.map((coach) =>
             viewMode === "grid" ? (
-              <CoachCard key={mentor.id} mentor={mentor} />
+              <CoachCard key={coach.id} mentor={coach} />
             ) : (
-              <MentorListItem key={mentor.id} mentor={mentor} />
+              <MentorListItem key={coach.id} mentor={coach} />
             )
           )}
         </div>
-      ) : (
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && sortedCoaches.length === 0 && (
         <div className="rounded-card bg-white p-12 shadow-card text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
             <Users size={32} className="text-[var(--primitive-green-800)]" />
           </div>
-          <h3 className="text-body-strong font-semibold text-foreground-default">No mentors found</h3>
+          <h3 className="text-body-strong font-semibold text-foreground-default">No coaches found</h3>
           <p className="mt-1 text-caption text-foreground-muted">
-            Try adjusting your filters or search query
+            {hasActiveFilters
+              ? "Try adjusting your filters or search query"
+              : "Be the first to become a coach!"}
           </p>
-          <Button variant="primary" className="mt-4" onClick={clearFilters}>
-            Clear filters
-          </Button>
+          {hasActiveFilters && (
+            <Button variant="primary" className="mt-4" onClick={clearFilters}>
+              Clear filters
+            </Button>
+          )}
         </div>
       )}
     </div>

@@ -43,3 +43,12 @@ Thumbs.db
 # prisma
 prisma/*.db
 prisma/*.db-journal
+
+# Audit/data files
+*.csv
+schema_mapping.json
+
+# Non-essential docs
+Green_Jobs_Board_PRD.md
+PLATFORM_STATUS_SUMMARY.md
+remediation_summary.md

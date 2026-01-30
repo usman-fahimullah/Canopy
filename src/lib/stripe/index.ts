@@ -1,0 +1,30 @@
+import Stripe from "stripe";
+
+// Server-side Stripe client
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2024-11-20.acacia",
+  typescript: true,
+});
+
+// Platform fee percentage (18%)
+export const PLATFORM_FEE_PERCENT = 18;
+
+// Calculate platform fee and coach payout
+export function calculateFees(sessionRateInCents: number) {
+  const platformFee = Math.round(sessionRateInCents * (PLATFORM_FEE_PERCENT / 100));
+  const coachPayout = sessionRateInCents - platformFee;
+
+  return {
+    total: sessionRateInCents,
+    platformFee,
+    coachPayout,
+  };
+}
+
+// Format cents to dollars for display
+export function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(cents / 100);
+}

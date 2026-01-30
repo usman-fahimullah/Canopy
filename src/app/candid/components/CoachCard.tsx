@@ -59,7 +59,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
           {/* Info */}
           <div className="mb-4">
             <Link
-              href={`/candid/profile/${mentor.id}`}
+              href={`/candid/coach/${mentor.id}`}
               className="text-xl font-bold text-white hover:underline"
             >
               {mentor.firstName} {mentor.lastName}
@@ -98,7 +98,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
           {/* Actions */}
           <div className="flex gap-2">
             <Link
-              href={`/candid/profile/${mentor.id}`}
+              href={`/candid/coach/${mentor.id}`}
               className={cn(buttonVariants({ variant: "inverse" }), "flex-1")}
             >
               View Profile
@@ -121,7 +121,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
 
     return (
       <Link
-        href={`/candid/profile/${mentor.id}`}
+        href={`/candid/coach/${mentor.id}`}
         className={cn(
           "group block rounded-card bg-white p-5 shadow-card transition-all hover:shadow-card-hover",
           className
@@ -193,7 +193,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
         <div className="flex-1 min-w-0 pt-1">
           <div className="flex items-center gap-2">
             <Link
-              href={`/candid/profile/${mentor.id}`}
+              href={`/candid/coach/${mentor.id}`}
               className="text-body-strong text-foreground-default hover:text-[var(--primitive-green-800)] transition-colors"
             >
               {mentor.firstName} {mentor.lastName}
@@ -265,7 +265,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
       {/* Actions */}
       <div className="mt-4 flex gap-2">
         <Link
-          href={`/candid/profile/${mentor.id}`}
+          href={`/candid/coach/${mentor.id}`}
           className={cn(buttonVariants({ variant: "secondary" }), "flex-1")}
         >
           View Profile

@@ -1,0 +1,152 @@
+import { NextRequest, NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
+import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/db";
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { bookingId, reason } = body;
+
+    if (!bookingId) {
+      return NextResponse.json(
+        { error: "Missing bookingId" },
+        { status: 400 }
+      );
+    }
+
+    // Get booking with session
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        session: true,
+        mentee: {
+          include: { account: true },
+        },
+        coach: {
+          include: { account: true },
+        },
+      },
+    });
+
+    if (!booking) {
+      return NextResponse.json(
+        { error: "Booking not found" },
+        { status: 404 }
+      );
+    }
+
+    // Check if user is the mentee or coach
+    const isMentee = booking.mentee.account.supabaseId === user.id;
+    const isCoach = booking.coach.account.supabaseId === user.id;
+
+    if (!isMentee && !isCoach) {
+      return NextResponse.json(
+        { error: "Not authorized to refund this booking" },
+        { status: 403 }
+      );
+    }
+
+    if (booking.status !== "PAID") {
+      return NextResponse.json(
+        { error: "Booking is not in a refundable state" },
+        { status: 400 }
+      );
+    }
+
+    // Calculate refund amount based on cancellation policy
+    const hoursUntilSession = (booking.session.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
+    let refundPercent = 100;
+    let refundReason = reason || "Cancellation";
+
+    if (isCoach) {
+      // Coach cancellation - always full refund
+      refundPercent = 100;
+      refundReason = "Coach cancelled";
+    } else if (isMentee) {
+      if (hoursUntilSession < 24) {
+        // Less than 24 hours - 50% refund
+        refundPercent = 50;
+        refundReason = "Late cancellation (< 24 hours)";
+      }
+    }
+
+    const refundAmount = Math.round(booking.amount * (refundPercent / 100));
+
+    // Process refund via Stripe
+    if (!booking.stripePaymentIntentId) {
+      return NextResponse.json(
+        { error: "No payment intent found for this booking" },
+        { status: 400 }
+      );
+    }
+
+    const refund = await stripe.refunds.create({
+      payment_intent: booking.stripePaymentIntentId,
+      amount: refundAmount,
+      reason: "requested_by_customer",
+      metadata: {
+        bookingId: booking.id,
+        sessionId: booking.sessionId,
+        cancelledBy: isMentee ? "mentee" : "coach",
+        reason: refundReason,
+      },
+    });
+
+    // Update booking
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        status: refundPercent === 100 ? "REFUNDED" : "PARTIALLY_REFUNDED",
+        refundAmount,
+        refundReason,
+        refundedAt: new Date(),
+      },
+    });
+
+    // Cancel the session
+    await prisma.session.update({
+      where: { id: booking.sessionId },
+      data: {
+        status: "CANCELLED",
+        cancelledBy: isMentee ? "mentee" : "coach",
+        cancellationReason: refundReason,
+        cancelledAt: new Date(),
+      },
+    });
+
+    // Update coach stats
+    const coachPayoutRefund = Math.round(booking.coachPayout * (refundPercent / 100));
+    await prisma.coachProfile.update({
+      where: { id: booking.coachId },
+      data: {
+        totalEarnings: { decrement: coachPayoutRefund },
+        totalSessions: { decrement: 1 },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      refundId: refund.id,
+      refundAmount,
+      refundPercent,
+      reason: refundReason,
+    });
+  } catch (error) {
+    console.error("Refund error:", error);
+    return NextResponse.json(
+      { error: "Failed to process refund" },
+      { status: 500 }
+    );
+  }
+}

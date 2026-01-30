@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
+import { AuthProvider } from "@/components/providers";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -9,9 +10,9 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Trails Design System",
+  title: "Candid - Climate Career Mentorship",
   description:
-    "An Applicant Tracking System built for climate hiring, part of the Green Jobs Board ecosystem.",
+    "The premier marketplace for climate career mentorship - connecting professionals with vetted industry experts.",
 };
 
 export default function RootLayout({
@@ -21,7 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={dmSans.variable}>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }

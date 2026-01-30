@@ -1,17 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CoachCard } from "../components";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { ProgressMeterCircular } from "@/components/ui/progress-meter";
-import {
-  currentUser,
-  coaches,
-  getSessionsForUser,
-  getUserById,
-} from "@/lib/candid";
+import { SECTOR_INFO, type Sector, type CandidCoach } from "@/lib/candid/types";
 import {
   CalendarBlank,
   ChatCircle,
@@ -19,29 +15,124 @@ import {
   MagnifyingGlass,
   VideoCamera,
   Clock,
+  Spinner,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow, isSameDay } from "date-fns";
 
+interface Session {
+  id: string;
+  scheduledAt: string;
+  duration: number;
+  status: string;
+  meetingLink: string | null;
+  coach: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    photoUrl: string | null;
+    headline: string | null;
+  };
+}
+
+interface DashboardData {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  upcomingSessions: Session[];
+  completedSessionsCount: number;
+  recommendedCoaches: any[];
+}
+
+// Transform API coach to component format
+function transformCoach(apiCoach: any): CandidCoach {
+  return {
+    id: apiCoach.id,
+    email: "",
+    firstName: apiCoach.firstName,
+    lastName: apiCoach.lastName,
+    role: "coach",
+    avatar: apiCoach.photoUrl || undefined,
+    bio: apiCoach.bio || undefined,
+    location: apiCoach.location || undefined,
+    timezone: apiCoach.timezone || undefined,
+    createdAt: new Date(),
+    sectors: (apiCoach.sectors || []) as Sector[],
+    currentRole: apiCoach.headline || "Climate Coach",
+    currentCompany: "",
+    previousRoles: [],
+    expertise: apiCoach.expertise || [],
+    sessionTypes: ["coaching", "career-planning"],
+    hourlyRate: apiCoach.sessionRate / 100,
+    monthlyRate: undefined,
+    availability: {
+      monday: [],
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+      friday: [],
+      saturday: [],
+      sunday: [],
+    },
+    menteeCount: apiCoach.totalSessions || 0,
+    rating: apiCoach.rating || 0,
+    reviewCount: apiCoach.reviewCount || 0,
+    isFeatured: apiCoach.isFeatured,
+  };
+}
+
 export default function DashboardPage() {
-  const sessions = getSessionsForUser(currentUser.id);
-  const upcomingSessions = sessions
-    .filter((s) => s.status === "scheduled" && s.scheduledAt > new Date())
-    .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
-  const completedSessions = sessions.filter((s) => s.status === "completed");
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardData>({
+    user: null,
+    upcomingSessions: [],
+    completedSessionsCount: 0,
+    recommendedCoaches: [],
+  });
 
-  const matchedCoach = currentUser.matchedCoachId
-    ? getUserById(currentUser.matchedCoachId)
-    : null;
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
 
-  // Suggested coaches - get more for horizontal scroll
-  const suggestedCoaches = coaches
-    .filter((c) => c.id !== currentUser.matchedCoachId)
-    .filter((c) => c.sectors.some((s) => currentUser.targetSectors.includes(s)))
-    .slice(0, 6);
+        // Fetch sessions and coaches in parallel
+        const [sessionsRes, coachesRes] = await Promise.all([
+          fetch("/api/sessions"),
+          fetch("/api/coaches?limit=6"),
+        ]);
 
-  // Mock progress data
+        const sessionsData = sessionsRes.ok ? await sessionsRes.json() : { sessions: [] };
+        const coachesData = coachesRes.ok ? await coachesRes.json() : { coaches: [] };
+
+        const allSessions = sessionsData.sessions || [];
+        const upcomingSessions = allSessions
+          .filter((s: Session) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date())
+          .sort((a: Session, b: Session) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+
+        const completedSessionsCount = allSessions.filter(
+          (s: Session) => s.status === "COMPLETED"
+        ).length;
+
+        setData({
+          user: null,
+          upcomingSessions,
+          completedSessionsCount,
+          recommendedCoaches: coachesData.coaches || [],
+        });
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Mock progress data - will be updated when we have real progress tracking
   const progressData = {
-    sessions: { current: completedSessions.length, total: 8 },
+    sessions: { current: data.completedSessionsCount, total: 8 },
     actions: { current: 2, total: 5 },
     skills: { current: 1, total: 4 },
     milestones: { current: 0, total: 3 },
@@ -64,9 +155,9 @@ export default function DashboardPage() {
 
   // Group sessions by date for schedule
   const groupSessionsByDate = () => {
-    const groups: { label: string; date: Date; sessions: typeof upcomingSessions }[] = [];
+    const groups: { label: string; date: Date; sessions: Session[] }[] = [];
 
-    upcomingSessions.forEach((session) => {
+    data.upcomingSessions.forEach((session) => {
       const sessionDate = new Date(session.scheduledAt);
       sessionDate.setHours(0, 0, 0, 0);
 
@@ -84,8 +175,15 @@ export default function DashboardPage() {
   };
 
   const sessionGroups = groupSessionsByDate();
-  const nextSession = upcomingSessions[0];
-  const nextSessionCoach = nextSession ? getUserById(nextSession.mentorId) : null;
+  const suggestedCoaches = data.recommendedCoaches.map(transformCoach);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size={32} className="animate-spin text-[var(--primitive-green-600)]" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -95,7 +193,7 @@ export default function DashboardPage() {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-heading-md text-foreground-default">
-              {getGreeting()}, {currentUser.firstName}
+              {getGreeting()}!
             </h1>
             <p className="mt-1 text-body text-foreground-muted">
               Here's what's happening with your climate career journey
@@ -124,12 +222,11 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {upcomingSessions.length > 0 ? (
+            {data.upcomingSessions.length > 0 ? (
               <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
-                {upcomingSessions.slice(0, 5).map((session) => {
-                  const coach = getUserById(session.mentorId);
-                  if (!coach) return null;
-                  const isSessionToday = isToday(session.scheduledAt);
+                {data.upcomingSessions.slice(0, 5).map((session) => {
+                  const sessionDate = new Date(session.scheduledAt);
+                  const isSessionToday = isToday(sessionDate);
 
                   return (
                     <div
@@ -146,7 +243,7 @@ export default function DashboardPage() {
                           "text-caption font-medium",
                           isSessionToday ? "text-[var(--primitive-green-700)]" : "text-foreground-muted"
                         )}>
-                          {formatScheduleDate(session.scheduledAt)}
+                          {formatScheduleDate(sessionDate)}
                         </span>
                         {isSessionToday && (
                           <span className="text-caption-sm text-[var(--primitive-green-600)] bg-[var(--primitive-green-100)] px-1.5 py-0.5 rounded">
@@ -155,22 +252,32 @@ export default function DashboardPage() {
                         )}
                       </div>
                       <p className="text-caption text-foreground-muted mb-2">
-                        {format(session.scheduledAt, "h:mm a")} · {session.duration} min
+                        {format(sessionDate, "h:mm a")} · {session.duration} min
                       </p>
                       <div className="flex items-center gap-2 mb-3">
                         <Avatar
                           size="sm"
-                          src={coach.avatar}
-                          name={`${coach.firstName} ${coach.lastName}`}
+                          src={session.coach.photoUrl || undefined}
+                          name={`${session.coach.firstName} ${session.coach.lastName}`}
                           color="green"
                         />
                         <span className="text-body-sm font-medium text-foreground-default">
-                          {coach.firstName} {coach.lastName}
+                          {session.coach.firstName} {session.coach.lastName}
                         </span>
                       </div>
-                      <Button variant={isSessionToday ? "primary" : "outline"} size="sm" className="w-full">
-                        {isSessionToday ? "Join Session" : "View Details"}
-                      </Button>
+                      {isSessionToday && session.meetingLink ? (
+                        <Button variant="primary" size="sm" className="w-full" asChild>
+                          <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
+                            Join Session
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" className="w-full" asChild>
+                          <Link href={`/candid/sessions`}>
+                            View Details
+                          </Link>
+                        </Button>
+                      )}
                     </div>
                   );
                 })}
@@ -179,73 +286,19 @@ export default function DashboardPage() {
               <div className="rounded-card border border-[var(--border-default)] bg-white p-6 text-center">
                 <CalendarBlank size={32} className="mx-auto mb-2 text-foreground-muted" />
                 <p className="text-body-sm text-foreground-muted">No upcoming sessions</p>
-                <Button variant="primary" size="sm" className="mt-3">
-                  Schedule Session
+                <Button variant="primary" size="sm" className="mt-3" asChild>
+                  <Link href="/candid/browse">
+                    Book Session
+                  </Link>
                 </Button>
               </div>
             )}
           </section>
 
-          {/* My Coach Card */}
-          {matchedCoach && (
-            <section className="mb-8">
-              <h2 className="text-heading-sm text-foreground-default mb-4">My Coach</h2>
-              <div className="rounded-card bg-[var(--primitive-blue-200)] p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <Avatar
-                    size="lg"
-                    src={matchedCoach.avatar}
-                    name={`${matchedCoach.firstName} ${matchedCoach.lastName}`}
-                    color="green"
-                    className="ring-2 ring-white"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/candid/profile/${matchedCoach.id}`}
-                      className="text-body-strong text-foreground-default hover:text-[var(--primitive-green-800)] transition-colors"
-                    >
-                      {matchedCoach.firstName} {matchedCoach.lastName}
-                    </Link>
-                    <p className="text-caption text-foreground-muted mt-0.5">
-                      {(matchedCoach as any).currentRole}
-                    </p>
-                    <p className="text-caption text-[var(--primitive-green-800)] mt-1">
-                      {completedSessions.length} sessions together
-                      {(matchedCoach as any).rating && ` · ⭐ ${(matchedCoach as any).rating?.toFixed(1)}`}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 sm:flex-col">
-                    <Link
-                      href={`/candid/messages?user=${matchedCoach.id}`}
-                      className={buttonVariants({ variant: "secondary", size: "sm" })}
-                    >
-                      <ChatCircle size={16} />
-                      <span className="sm:hidden">Message</span>
-                    </Link>
-                    <Link
-                      href={`/candid/sessions/schedule?mentor=${matchedCoach.id}`}
-                      className={buttonVariants({ variant: "primary", size: "sm" })}
-                    >
-                      <CalendarBlank size={16} />
-                      <span className="sm:hidden">Schedule</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-
           {/* My Progress - Compact, no card */}
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-heading-sm text-foreground-default">My Progress</h2>
-              <Link
-                href="/candid/progress"
-                className={buttonVariants({ variant: "link", size: "sm" })}
-              >
-                View all
-                <CaretRight size={14} />
-              </Link>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:gap-8">
               <div className="text-center">
@@ -358,8 +411,8 @@ export default function DashboardPage() {
                       {/* Sessions for this date */}
                       <div className="space-y-3">
                         {group.sessions.map((session) => {
-                          const coach = getUserById(session.mentorId);
-                          if (!coach) return null;
+                          const sessionDate = new Date(session.scheduledAt);
+                          const endTime = new Date(sessionDate.getTime() + session.duration * 60000);
 
                           return (
                             <div
@@ -373,22 +426,25 @@ export default function DashboardPage() {
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-caption text-foreground-muted">
-                                  {format(session.scheduledAt, "h:mm a")} - {format(
-                                    new Date(session.scheduledAt.getTime() + session.duration * 60000),
-                                    "h:mm a"
-                                  )}
+                                  {format(sessionDate, "h:mm a")} - {format(endTime, "h:mm a")}
                                 </span>
                               </div>
                               <p className="text-body-strong text-foreground-default mb-3">
-                                {coach.firstName} {coach.lastName}
+                                {session.coach.firstName} {session.coach.lastName}
                               </p>
-                              <Button
-                                variant={isGroupToday ? "primary" : "outline"}
-                                size="sm"
-                                className="w-full"
-                              >
-                                {isGroupToday ? "Join Session" : "View Details"}
-                              </Button>
+                              {isGroupToday && session.meetingLink ? (
+                                <Button variant="primary" size="sm" className="w-full" asChild>
+                                  <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
+                                    Join Session
+                                  </a>
+                                </Button>
+                              ) : (
+                                <Button variant="outline" size="sm" className="w-full" asChild>
+                                  <Link href="/candid/sessions">
+                                    View Details
+                                  </Link>
+                                </Button>
+                              )}
                             </div>
                           );
                         })}
@@ -407,16 +463,18 @@ export default function DashboardPage() {
                   No upcoming sessions
                 </h3>
                 <p className="text-caption text-foreground-muted mb-4">
-                  Schedule time with your coach to continue your journey
+                  Book time with a coach to continue your journey
                 </p>
-                <Button variant="primary" size="sm">
-                  Schedule Session
+                <Button variant="primary" size="sm" asChild>
+                  <Link href="/candid/browse">
+                    Find a Coach
+                  </Link>
                 </Button>
               </div>
             )}
 
             {/* View All Sessions Link */}
-            {upcomingSessions.length > 0 && (
+            {data.upcomingSessions.length > 0 && (
               <Link
                 href="/candid/sessions"
                 className={cn(buttonVariants({ variant: "link" }), "w-full justify-center mt-6")}

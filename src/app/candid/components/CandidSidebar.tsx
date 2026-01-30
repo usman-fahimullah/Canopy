@@ -18,7 +18,8 @@ import {
   BookOpen,
   MapTrifold,
 } from "@phosphor-icons/react";
-import { currentUser, getNotificationsForUser, getThreadsForUser } from "@/lib/candid";
+import { currentUser, getThreadsForUser } from "@/lib/candid";
+import { useAuthContext } from "@/components/providers";
 
 const mainNavItems = [
   { href: "/candid/dashboard", label: "Home", icon: House },
@@ -35,6 +36,7 @@ const resourceNavItems = [
 
 export function CandidSidebar() {
   const pathname = usePathname();
+  const { signOut } = useAuthContext();
   const threads = getThreadsForUser(currentUser.id);
   const unreadMessages = threads.reduce((acc, t) => acc + t.unreadCount, 0);
 
@@ -136,7 +138,10 @@ export function CandidSidebar() {
           <Gear size={20} weight={pathname === "/candid/settings" ? "fill" : "regular"} />
           Settings
         </Link>
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium text-foreground-muted hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)] transition-all duration-150">
+        <button
+          onClick={() => signOut()}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-body-sm font-medium text-foreground-muted hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)] transition-all duration-150"
+        >
           <SignOut size={20} />
           Logout
         </button>

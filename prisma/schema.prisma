@@ -12,13 +12,13 @@ datasource db {
 
 // =================================================================
 // ACCOUNT — Shared identity for every authenticated person.
-// Maps 1:1 to a Clerk user. A person can be an employer member,
+// Maps 1:1 to a Supabase Auth user. A person can be an employer member,
 // a job seeker, a coach, or multiple of these simultaneously.
 // =================================================================
 
 model Account {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
+  id          String   @id @default(cuid())
+  supabaseId  String   @unique
   email     String   @unique
   name      String?
   avatar    String?
@@ -55,8 +55,16 @@ model Organization {
   customDomain   String?  @unique
   careerPageJson String?  @db.Text
 
+  // Diversity badges (NEW for Job Seeker Portal)
+  isBipocOwned   Boolean  @default(false)
+  isWomenOwned   Boolean  @default(false)
+  isVeteranOwned Boolean  @default(false)
+
   members        OrganizationMember[]
   jobs           Job[]
+
+  // Sponsor collections (NEW for Job Seeker Portal)
+  sponsoredCollections Collection[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -110,6 +118,11 @@ model SeekerProfile {
   accountId       String   @unique
   account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
+  // Profile display (NEW for Job Seeker Portal)
+  coverImage      String?
+  badge           String?  // e.g., "Just Graduated", "Climate Leader"
+  summary         String?  @db.Text
+
   // Professional info
   resumeUrl       String?
   linkedinUrl     String?
@@ -142,6 +155,19 @@ model SeekerProfile {
   mentorAssignmentsAsMentee MentorAssignment[] @relation("MenteeSide")
   coachAssignmentsAsSeeker  CoachAssignment[]
 
+  // Coaching session relations
+  sessions        Session[]
+  bookings        Booking[]
+  reviews         Review[]
+  actionItems     ActionItem[]
+
+  // Job Seeker Portal relations (NEW)
+  goals           Goal[]
+  savedJobs       SavedJob[]
+  workExperiences WorkExperience[]
+  authoredJobNotes JobNote[]        @relation("JobNoteAuthor")
+  savedJobNotes   JobNoteSave[]
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -156,34 +182,66 @@ model CoachProfile {
   accountId       String   @unique
   account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
+  // Profile info (denormalized for easy access)
+  firstName       String?
+  lastName        String?
+  photoUrl        String?
+  bio             String?  @db.Text
+
   // Professional info
   headline        String?
   expertise       String[]
   sectors         String[]
   sessionTypes    String[]
+  yearsInClimate  Int?
 
   // Pricing (in cents for precision)
+  sessionRate     Int      @default(15000)  // Default $150
+  sessionDuration Int      @default(60)     // minutes
   hourlyRate      Int?
   monthlyRate     Int?
 
   // Availability (JSON: WeeklyAvailability)
   availability    String?  @db.Text
+  bufferTime      Int      @default(15)     // minutes between sessions
+  maxSessionsPerWeek Int?
+  videoLink       String?
+
+  // Stripe Connect
+  stripeAccountId String?
 
   // Stats
   rating          Float?   @default(0)
   reviewCount     Int      @default(0)
+  totalSessions   Int      @default(0)
+  totalEarnings   Int      @default(0)  // in cents
   successStories  Int      @default(0)
 
-  // Visibility
+  // Status
+  status          CoachStatus @default(PENDING)
+  applicationDate DateTime?
+  approvalDate    DateTime?
   isActive        Boolean  @default(true)
   isFeatured      Boolean  @default(false)
 
   // Relations
   coachAssignments CoachAssignment[]
+  sessions         Session[]
+  bookings         Booking[]
+  reviews          Review[]
+  actionItems      ActionItem[]
   notes            Note[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+enum CoachStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVE
+  PAUSED
 }
 
 // =================================================================
@@ -253,7 +311,155 @@ enum CoachingStatus {
 }
 
 // =================================================================
-// JOB — Unchanged. Still owned by Organization.
+// SESSION — Scheduled coaching call between coach and mentee.
+// =================================================================
+
+model Session {
+  id              String        @id @default(cuid())
+
+  coachId         String
+  coach           CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  menteeId        String
+  mentee          SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+
+  scheduledAt     DateTime
+  duration        Int           @default(60)  // minutes
+  status          SessionStatus @default(SCHEDULED)
+
+  videoLink       String?
+  menteeMessage   String?       @db.Text
+  coachNotes      String?       @db.Text
+  sessionNumber   Int?          // e.g., "Session 3 of 8"
+
+  cancellationReason String?
+  cancelledBy        String?    // "mentee" or "coach"
+  cancelledAt        DateTime?
+  completedAt        DateTime?
+
+  // Relations
+  booking         Booking?
+  review          Review?
+  actionItems     ActionItem[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+// =================================================================
+// BOOKING — Payment record for a session.
+// =================================================================
+
+model Booking {
+  id                    String        @id @default(cuid())
+
+  sessionId             String        @unique
+  session               Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  menteeId              String
+  mentee                SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+
+  coachId               String
+  coach                 CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  // Amounts in cents
+  amount                Int           // Total charged
+  platformFee           Int           // Platform's cut (18%)
+  coachPayout           Int           // What coach receives
+  currency              String        @default("usd")
+
+  // Stripe references
+  stripeCheckoutSessionId String?     @unique
+  stripePaymentIntentId   String?     @unique
+  stripeTransferId        String?
+
+  status                BookingStatus @default(PENDING)
+  refundAmount          Int?
+  refundReason          String?
+
+  paidAt                DateTime?
+  refundedAt            DateTime?
+
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  PAID
+  REFUNDED
+  PARTIALLY_REFUNDED
+  FAILED
+}
+
+// =================================================================
+// REVIEW — Post-session feedback from mentee.
+// =================================================================
+
+model Review {
+  id            String        @id @default(cuid())
+
+  sessionId     String        @unique
+  session       Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  menteeId      String
+  mentee        SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+
+  coachId       String
+  coach         CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  rating        Int           // 1-5
+  comment       String?       @db.Text
+  coachResponse String?       @db.Text
+
+  isVisible     Boolean       @default(true)
+  isFlagged     Boolean       @default(false)
+  flagReason    String?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+// =================================================================
+// ACTION ITEM — Tasks assigned after a session.
+// =================================================================
+
+model ActionItem {
+  id            String          @id @default(cuid())
+
+  sessionId     String
+  session       Session         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  menteeId      String
+  mentee        SeekerProfile   @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+
+  coachId       String
+  coach         CoachProfile    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  description   String
+  dueDate       DateTime?
+  status        ActionItemStatus @default(PENDING)
+  completedAt   DateTime?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+enum ActionItemStatus {
+  PENDING
+  COMPLETED
+}
+
+// =================================================================
+// JOB — Extended for Job Seeker Portal features.
 // =================================================================
 
 model Job {
@@ -274,6 +480,12 @@ model Job {
   requiredCerts     String[]
   greenSkills       String[]
 
+  // Job Seeker Portal fields (NEW)
+  pathwayId         String?
+  pathway           Pathway?       @relation(fields: [pathwayId], references: [id])
+  experienceLevel   ExperienceLevel?
+  isFeatured        Boolean        @default(false)
+
   status          JobStatus      @default(DRAFT)
   publishedAt     DateTime?
   closesAt        DateTime?
@@ -285,10 +497,21 @@ model Job {
 
   applications    Application[]
 
+  // Job Seeker Portal relations (NEW)
+  savedBy         SavedJob[]
+  collections     CollectionJob[]
+
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
   @@unique([organizationId, slug])
+}
+
+enum ExperienceLevel {
+  ENTRY
+  INTERMEDIATE
+  SENIOR
+  EXECUTIVE
 }
 
 enum JobStatus {
@@ -405,4 +628,204 @@ enum Recommendation {
   NEUTRAL
   NO
   STRONG_NO
+}
+
+// =================================================================
+// JOB SEEKER PORTAL — New models for job discovery and career tracking
+// =================================================================
+
+// =================================================================
+// PATHWAY — Career pathway categories (Agriculture, Conservation, etc.)
+// =================================================================
+
+model Pathway {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?  @db.Text
+  icon         String?  // Phosphor icon name (e.g., "Leaf", "Tree", "Lightning")
+  color        String?  // Hex color for UI
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+
+  jobs         Job[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// =================================================================
+// COLLECTION — Curated job collections (e.g., "Urban Dwellers")
+// =================================================================
+
+model Collection {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String?  @db.Text
+  backgroundImage String?
+  gradientColors  String?  // JSON array of hex colors, e.g., ["#10B981", "#3B82F6"]
+
+  // Sponsor (optional)
+  sponsorId       String?
+  sponsor         Organization? @relation(fields: [sponsorId], references: [id])
+
+  isFeatured      Boolean  @default(false)
+  displayOrder    Int      @default(0)
+  isActive        Boolean  @default(true)
+
+  // Filter criteria for dynamic collections (JSON)
+  filterCriteria  String?  @db.Text
+
+  jobs            CollectionJob[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Join table for Collection <-> Job (many-to-many)
+model CollectionJob {
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  jobId        String
+  job          Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  displayOrder Int        @default(0)
+  addedAt      DateTime   @default(now())
+
+  @@id([collectionId, jobId])
+}
+
+// =================================================================
+// GOAL — Career goal tracking with milestones
+// =================================================================
+
+model Goal {
+  id          String     @id @default(cuid())
+
+  seekerId    String
+  seeker      SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?    @db.Text
+  icon        String?    // Phosphor icon name
+
+  progress    Int        @default(0) // 0-100
+  targetDate  DateTime?
+  completedAt DateTime?
+  status      GoalStatus @default(ACTIVE)
+
+  milestones  Milestone[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+
+  goalId      String
+  goal        Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  title       String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  order       Int       @default(0)
+
+  createdAt   DateTime  @default(now())
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+// =================================================================
+// SAVED JOB — Jobs bookmarked by seekers
+// =================================================================
+
+model SavedJob {
+  seekerId  String
+  seeker    SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  jobId     String
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  notes     String?       @db.Text
+  savedAt   DateTime      @default(now())
+
+  @@id([seekerId, jobId])
+}
+
+// =================================================================
+// WORK EXPERIENCE — Seeker's work history
+// =================================================================
+
+model WorkExperience {
+  id             String         @id @default(cuid())
+
+  seekerId       String
+  seeker         SeekerProfile  @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  companyName    String
+  companyLogo    String?
+  jobTitle       String
+  employmentType EmploymentType
+  workType       LocationType
+
+  startDate      DateTime
+  endDate        DateTime?
+  isCurrent      Boolean        @default(false)
+
+  description    String?        @db.Text
+  skills         String[]
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+// =================================================================
+// JOB NOTE — Community-contributed resources and tips
+// =================================================================
+
+model JobNote {
+  id          String       @id @default(cuid())
+
+  authorId    String
+  author      SeekerProfile @relation("JobNoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  category    NoteCategory
+  title       String
+  content     String       @db.Text
+
+  savedCount  Int          @default(0)
+  isPublished Boolean      @default(false)
+  isFeatured  Boolean      @default(false)
+
+  saves       JobNoteSave[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// Join table for JobNote saves
+model JobNoteSave {
+  seekerId  String
+  seeker    SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  noteId    String
+  note      JobNote       @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  savedAt   DateTime      @default(now())
+
+  @@id([seekerId, noteId])
+}
+
+enum NoteCategory {
+  BUILDING_PATHS   // Career path discovery
+  WRITE_YOUR_STORY // Resume & cover letter tips
+  PREP_TALK        // Interview preparation
+  THE_SEARCH       // Job search strategies
 }
