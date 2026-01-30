@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candid Power User UX — Wireframes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-800: #234d3d;
+      --green-700: #2d614d;
+      --green-600: #3d7a62;
+      --green-100: #e8f5f0;
+      --green-50: #f4faf8;
+      --blue-600: #2563eb;
+      --blue-100: #dbeafe;
+      --purple-600: #7c3aed;
+      --purple-100: #ede9fe;
+      --neutral-900: #1a1a1a;
+      --neutral-800: #262626;
+      --neutral-700: #404040;
+      --neutral-500: #737373;
+      --neutral-400: #a3a3a3;
+      --neutral-300: #d4d4d4;
+      --neutral-200: #e5e5e5;
+      --neutral-100: #f5f5f5;
+      --neutral-50: #fafafa;
+      --white: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--neutral-900);
+      color: var(--white);
+      line-height: 1.5;
+    }
+
+    .doc-header {
+      background: linear-gradient(135deg, var(--neutral-800), var(--neutral-900));
+      padding: 48px 32px;
+      text-align: center;
+      border-bottom: 1px solid var(--neutral-700);
+    }
+
+    .doc-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--green-600), var(--blue-600));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .doc-header p { font-size: 16px; color: var(--neutral-400); }
+
+    .page-nav {
+      display: flex; gap: 8px; justify-content: center;
+      padding: 24px 32px; background: var(--neutral-800);
+      border-bottom: 1px solid var(--neutral-700);
+      position: sticky; top: 0; z-index: 100;
+      flex-wrap: wrap;
+    }
+
+    .page-nav button {
+      padding: 10px 16px; border: 1px solid var(--neutral-700);
+      background: transparent; font-family: inherit;
+      font-size: 13px; font-weight: 500;
+      color: var(--neutral-400); cursor: pointer;
+      border-radius: 8px; transition: all 0.2s;
+    }
+
+    .page-nav button:hover {
+      background: var(--neutral-700);
+      color: var(--white);
+      border-color: var(--neutral-600);
+    }
+
+    .page-nav button.active {
+      background: var(--green-800);
+      color: var(--white);
+      border-color: var(--green-700);
+    }
+
+    .section {
+      display: none; padding: 48px 32px;
+      max-width: 1000px; margin: 0 auto;
+    }
+
+    .section.active { display: block; }
+
+    .section-title {
+      font-size: 24px; font-weight: 700;
+      margin-bottom: 8px; color: var(--white);
+    }
+
+    .section-desc {
+      font-size: 15px; color: var(--neutral-400);
+      margin-bottom: 32px;
+    }
+
+    .wireframe-container {
+      background: var(--neutral-800);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--neutral-700);
+      margin-bottom: 32px;
+    }
+
+    .wireframe-label {
+      padding: 16px 24px;
+      font-size: 13px; font-weight: 600;
+      background: var(--neutral-700);
+      color: var(--neutral-300);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .wireframe {
+      padding: 24px;
+      background: var(--neutral-900);
+    }
+
+    /* Command Palette Styles */
+    .command-palette {
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-600);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .command-input {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--neutral-700);
+    }
+
+    .command-input input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      color: var(--white);
+      outline: none;
+    }
+
+    .command-input input::placeholder { color: var(--neutral-500); }
+
+    .command-section {
+      padding: 8px;
+    }
+
+    .command-section-title {
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--neutral-500);
+    }
+
+    .command-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .command-item:hover, .command-item.selected {
+      background: var(--neutral-700);
+    }
+
+    .command-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .command-icon {
+      width: 32px; height: 32px;
+      background: var(--neutral-700);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .command-item.selected .command-icon {
+      background: var(--green-800);
+    }
+
+    .command-label { font-size: 14px; color: var(--white); }
+    .command-desc { font-size: 12px; color: var(--neutral-500); }
+
+    .kbd {
+      padding: 4px 8px;
+      background: var(--neutral-700);
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--neutral-400);
+    }
+
+    /* Shortcuts */
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 700px) {
+      .shortcuts-grid { grid-template-columns: 1fr; }
+    }
+
+    .shortcut-group {
+      background: var(--neutral-800);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--neutral-700);
+    }
+
+    .shortcut-group-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--white);
+    }
+
+    .shortcut-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--neutral-700);
+    }
+
+    .shortcut-item:last-child { border-bottom: none; }
+    .shortcut-label { font-size: 13px; color: var(--neutral-300); }
+
+    /* Analytics */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    .stat-card {
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--neutral-500);
+      margin-top: 4px;
+    }
+
+    .chart-placeholder {
+      height: 120px;
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      border-radius: 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 20px;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .chart-bar {
+      width: 24px;
+      background: var(--green-700);
+      border-radius: 4px 4px 0 0;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--neutral-700);
+    }
+
+    .progress-row:last-child { border-bottom: none; }
+
+    .progress-label {
+      flex: 1;
+      font-size: 14px;
+      color: var(--neutral-300);
+    }
+
+    .progress-bar {
+      width: 120px;
+      height: 8px;
+      background: var(--neutral-700);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green-600);
+      border-radius: 4px;
+    }
+
+    .progress-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--white);
+      width: 48px;
+      text-align: right;
+    }
+
+    /* Quick actions */
+    .card {
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card-hover-actions {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover .card-hover-actions {
+      opacity: 1;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary { background: var(--green-700); color: var(--white); }
+    .btn-secondary { background: var(--neutral-700); color: var(--white); }
+    .btn-ghost { background: transparent; color: var(--neutral-400); }
+
+    .annotation {
+      margin-top: 24px;
+      padding: 20px;
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      border-radius: 12px;
+    }
+
+    .annotation-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green-600);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .annotation ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--neutral-400);
+    }
+
+    .annotation li { margin-bottom: 6px; }
+
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .mb-2 { margin-bottom: 8px; }
+    .mb-4 { margin-bottom: 16px; }
+    .text-sm { font-size: 14px; }
+    .text-xs { font-size: 12px; }
+    .text-muted { color: var(--neutral-500); }
+
+    .search-result {
+      padding: 16px;
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .search-highlight {
+      background: var(--purple-600);
+      color: var(--white);
+      padding: 0 4px;
+      border-radius: 2px;
+    }
+
+    .calendar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--neutral-800);
+      border: 1px solid var(--neutral-700);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .calendar-icon {
+      width: 40px; height: 40px;
+      background: var(--neutral-700);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .toggle {
+      width: 44px; height: 24px;
+      background: var(--green-700);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .toggle::after {
+      content: '';
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .toggle.off {
+      background: var(--neutral-600);
+    }
+
+    .toggle.off::after {
+      left: 2px;
+      right: auto;
+    }
+  </style>
+</head>
+<body>
+  <header class="doc-header">
+    <h1>⚡ Power User UX</h1>
+    <p>Speed, efficiency, and depth for advanced Candid users</p>
+  </header>
+
+  <nav class="page-nav">
+    <button class="active" data-page="command">Command Palette</button>
+    <button data-page="shortcuts">Keyboard Shortcuts</button>
+    <button data-page="quick-actions">Quick Actions</button>
+    <button data-page="analytics">Analytics</button>
+    <button data-page="search">Notes Search</button>
+    <button data-page="calendar">Calendar Sync</button>
+  </nav>
+
+  <!-- COMMAND PALETTE -->
+  <section id="command" class="section active">
+    <h2 class="section-title">Command Palette (⌘K)</h2>
+    <p class="section-desc">The #1 power user feature — do anything without navigating</p>
+
+    <div class="wireframe-container">
+      <div class="wireframe-label">
+        <span>Press</span>
+        <span class="kbd">⌘ K</span>
+        <span>to open</span>
+      </div>
+      <div class="wireframe">
+        <div class="command-palette">
+          <div class="command-input">
+            <span style="color: var(--neutral-500);">🔍</span>
+            <input type="text" placeholder="Search or type a command..." autofocus>
+            <span class="kbd">Esc</span>
+          </div>
+
+          <div class="command-section">
+            <div class="command-section-title">Quick Actions</div>
+            <div class="command-item selected">
+              <div class="command-item-left">
+                <div class="command-icon">📅</div>
+                <div>
+                  <div class="command-label">Book a session</div>
+                </div>
+              </div>
+              <span class="kbd">⌘ B</span>
+            </div>
+            <div class="command-item">
+              <div class="command-item-left">
+                <div class="command-icon">💬</div>
+                <div>
+                  <div class="command-label">Open messages</div>
+                </div>
+              </div>
+              <span class="kbd">⌘ M</span>
+            </div>
+            <div class="command-item">
+              <div class="command-item-left">
+                <div class="command-icon">🔍</div>
+                <div>
+                  <div class="command-label">Browse coaches</div>
+                </div>
+              </div>
+              <span class="kbd">⌘ ⇧ B</span>
+            </div>
+            <div class="command-item">
+              <div class="command-item-left">
+                <div class="command-icon">⚙️</div>
+                <div>
+                  <div class="command-label">Open settings</div>
+                </div>
+              </div>
+              <span class="kbd">⌘ ,</span>
+            </div>
+          </div>
+
+          <div class="command-section">
+            <div class="command-section-title">Recent</div>
+            <div class="command-item">
+              <div class="command-item-left">
+                <div class="command-icon">👩</div>
+                <div>
+                  <div class="command-label">Sarah Chen</div>
+                  <div class="command-desc">Last session Jan 28</div>
+                </div>
+              </div>
+            </div>
+            <div class="command-item">
+              <div class="command-item-left">
+                <div class="command-icon">📋</div>
+                <div>
+                  <div class="command-label">Apply to 3 solar companies</div>
+                  <div class="command-desc">Action item · Due Feb 5</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wireframe-container">
+      <div class="wireframe-label">Searching for a coach</div>
+      <div class="wireframe">
+        <div class="command-palette">
+          <div class="command-input">
+            <span style="color: var(--neutral-500);">🔍</span>
+            <input type="text" value="sarah" style="color: var(--white);">
+            <span class="kbd">Esc</span>
+          </div>
+
+          <div class="command-section">
+            <div class="command-section-title">Coaches</div>
+            <div class="command-item selected">
+              <div class="command-item-left">
+                <div class="command-icon">👩</div>
+                <div>
+                  <div class="command-label"><strong>Sarah</strong> Chen</div>
+                  <div class="command-desc">Clean Energy · ⭐ 4.9</div>
+                </div>
+              </div>
+              <span style="color: var(--neutral-500); font-size: 12px;">View profile →</span>
+            </div>
+            <div class="command-item">
+              <div class="command-item-left">
+                <div class="command-icon">👨</div>
+                <div>
+                  <div class="command-label"><strong>Sarah</strong> Martinez</div>
+                  <div class="command-desc">Climate Policy · ⭐ 4.7</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="command-section">
+            <div class="command-section-title">Session Notes</div>
+            <div class="command-item">
+              <div class="command-item-left">
+                <div class="command-icon">📝</div>
+                <div>
+                  <div class="command-label">Session with <strong>Sarah</strong> Chen</div>
+                  <div class="command-desc">Jan 28 · Resume optimization</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-title">⚡ Why Command Palette is Essential</div>
+      <ul>
+        <li><strong>Universal access</strong> — Search coaches, notes, actions from anywhere</li>
+        <li><strong>Keyboard-first</strong> — No mouse needed for power users</li>
+        <li><strong>Fast switching</strong> — Jump between pages instantly</li>
+        <li><strong>Discoverable</strong> — Shows available commands with shortcuts</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- KEYBOARD SHORTCUTS -->
+  <section id="shortcuts" class="section">
+    <h2 class="section-title">Keyboard Shortcuts</h2>
+    <p class="section-desc">Navigate and act without touching the mouse</p>
+
+    <div class="shortcuts-grid">
+      <div class="shortcut-group">
+        <div class="shortcut-group-title">🌐 Global Navigation</div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Command palette</span>
+          <span class="kbd">⌘ K</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Book a session</span>
+          <span class="kbd">⌘ B</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Messages</span>
+          <span class="kbd">⌘ M</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Sessions</span>
+          <span class="kbd">⌘ S</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Settings</span>
+          <span class="kbd">⌘ ,</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Show shortcuts</span>
+          <span class="kbd">⌘ /</span>
+        </div>
+      </div>
+
+      <div class="shortcut-group">
+        <div class="shortcut-group-title">🔍 Browse Page</div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Focus search</span>
+          <span class="kbd">/</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Navigate list</span>
+          <span class="kbd">↑ ↓</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">View profile</span>
+          <span class="kbd">Enter</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Quick book</span>
+          <span class="kbd">B</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Message</span>
+          <span class="kbd">M</span>
+        </div>
+      </div>
+
+      <div class="shortcut-group">
+        <div class="shortcut-group-title">💬 Messages</div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Navigate threads</span>
+          <span class="kbd">↑ ↓</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Open thread</span>
+          <span class="kbd">Enter</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">New message</span>
+          <span class="kbd">N</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Send message</span>
+          <span class="kbd">⌘ Enter</span>
+        </div>
+      </div>
+
+      <div class="shortcut-group">
+        <div class="shortcut-group-title">📅 Sessions</div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Navigate sessions</span>
+          <span class="kbd">↑ ↓</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">View details</span>
+          <span class="kbd">Enter</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Join session</span>
+          <span class="kbd">J</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">Reschedule</span>
+          <span class="kbd">R</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-title">⚡ Implementation Notes</div>
+      <ul>
+        <li>Show shortcuts hint on first few visits: "Press <kbd>⌘/</kbd> for shortcuts"</li>
+        <li>Visual indicator when shortcut is triggered</li>
+        <li>Allow customization in settings for advanced users</li>
+        <li>Shortcuts should not conflict with browser defaults</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- QUICK ACTIONS -->
+  <section id="quick-actions" class="section">
+    <h2 class="section-title">Quick Actions on Hover</h2>
+    <p class="section-desc">Act immediately without opening detail pages</p>
+
+    <div class="wireframe-container">
+      <div class="wireframe-label">Coach Card — Hover to reveal actions</div>
+      <div class="wireframe">
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 56px; height: 56px; background: var(--green-700); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">👩</div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 2px;">Sarah Chen</div>
+            <div class="text-sm text-muted">Clean Energy Expert · ⭐ 4.9</div>
+          </div>
+          <div class="card-hover-actions flex gap-2" style="opacity: 1;">
+            <button class="btn btn-primary">Book</button>
+            <button class="btn btn-secondary">💬</button>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 56px; height: 56px; background: var(--blue-600); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">👨</div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 2px;">Marcus Williams</div>
+            <div class="text-sm text-muted">Climate Policy · ⭐ 4.8</div>
+          </div>
+          <div class="card-hover-actions flex gap-2">
+            <button class="btn btn-primary">Book</button>
+            <button class="btn btn-secondary">💬</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wireframe-container">
+      <div class="wireframe-label">Session Card — Hover to reveal actions</div>
+      <div class="wireframe">
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 48px; height: 48px; background: var(--green-700); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="font-size: 10px; text-transform: uppercase;">Feb</div>
+            <div style="font-size: 18px; font-weight: 700;">4</div>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 2px;">Tomorrow at 2:00 PM</div>
+            <div class="text-sm text-muted">Sarah Chen · 45 min</div>
+          </div>
+          <div class="card-hover-actions flex gap-2" style="opacity: 1;">
+            <button class="btn btn-primary">Join</button>
+            <button class="btn btn-secondary">Reschedule</button>
+            <button class="btn btn-ghost">💬</button>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 48px; height: 48px; background: var(--neutral-600); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="font-size: 10px; text-transform: uppercase;">Feb</div>
+            <div style="font-size: 18px; font-weight: 700;">11</div>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600; margin-bottom: 2px;">Friday at 10:00 AM</div>
+            <div class="text-sm text-muted">Marcus Williams · 30 min</div>
+          </div>
+          <div class="card-hover-actions flex gap-2">
+            <button class="btn btn-secondary">Prepare</button>
+            <button class="btn btn-secondary">Reschedule</button>
+            <button class="btn btn-ghost">💬</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-title">⚡ Reducing Clicks</div>
+      <ul>
+        <li><strong>Before:</strong> Click card → View profile → Click "Book" → 3 clicks</li>
+        <li><strong>After:</strong> Hover → Click "Book" → 1 click</li>
+        <li>For keyboard users: Select with ↑↓, press B to book</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ANALYTICS -->
+  <section id="analytics" class="section">
+    <h2 class="section-title">Analytics Dashboard</h2>
+    <p class="section-desc">Data-driven insights for power users who want to track progress</p>
+
+    <div class="wireframe-container">
+      <div class="wireframe-label">Seeker Analytics — Last 90 Days</div>
+      <div class="wireframe">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">12</div>
+            <div class="stat-label">Sessions Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="color: var(--green-600);">75%</div>
+            <div class="stat-label">Actions Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">4</div>
+            <div class="stat-label">Week Streak 🔥</div>
+          </div>
+        </div>
+
+        <div style="font-weight: 600; margin-bottom: 12px;">Session Activity</div>
+        <div class="chart-placeholder">
+          <div class="chart-bar" style="height: 20%;"></div>
+          <div class="chart-bar" style="height: 35%;"></div>
+          <div class="chart-bar" style="height: 60%;"></div>
+          <div class="chart-bar" style="height: 100%;"></div>
+          <div class="chart-bar" style="height: 80%;"></div>
+          <div class="chart-bar" style="height: 40%;"></div>
+          <div class="chart-bar" style="height: 30%;"></div>
+          <div class="chart-bar" style="height: 55%;"></div>
+          <div class="chart-bar" style="height: 75%;"></div>
+          <div class="chart-bar" style="height: 90%;"></div>
+          <div class="chart-bar" style="height: 50%;"></div>
+          <div class="chart-bar" style="height: 25%;"></div>
+        </div>
+        <div class="flex justify-between text-xs text-muted mb-4">
+          <span>Nov</span>
+          <span>Dec</span>
+          <span>Jan</span>
+        </div>
+
+        <div style="font-weight: 600; margin-bottom: 12px;">Goals Progress</div>
+        <div style="background: var(--neutral-800); border-radius: 12px; padding: 16px;">
+          <div class="progress-row">
+            <span class="progress-label">Land climate tech role</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 80%;"></div>
+            </div>
+            <span class="progress-value">80%</span>
+          </div>
+          <div class="progress-row">
+            <span class="progress-label">Build network</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 60%;"></div>
+            </div>
+            <span class="progress-value">60%</span>
+          </div>
+          <div class="progress-row">
+            <span class="progress-label">Update resume</span>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 100%;"></div>
+            </div>
+            <span class="progress-value">100%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-title">⚡ Why Analytics Matter for Power Users</div>
+      <ul>
+        <li><strong>Accountability</strong> — See trends over time</li>
+        <li><strong>Motivation</strong> — Streaks and progress bars</li>
+        <li><strong>Insights</strong> — What's working, what needs attention</li>
+        <li><strong>Export</strong> — Allow data export for personal tracking</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- NOTES SEARCH -->
+  <section id="search" class="section">
+    <h2 class="section-title">Session Notes Search</h2>
+    <p class="section-desc">Full-text search across all session notes and action items</p>
+
+    <div class="wireframe-container">
+      <div class="wireframe-label">Search results for "solar companies"</div>
+      <div class="wireframe">
+        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+          <div style="flex: 1; background: var(--neutral-800); border: 1px solid var(--neutral-600); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;">
+            <span style="color: var(--neutral-500);">🔍</span>
+            <span style="color: var(--white);">solar companies</span>
+          </div>
+          <button class="btn btn-secondary">Filters</button>
+        </div>
+
+        <div class="text-sm text-muted mb-4">3 results found</div>
+
+        <div class="search-result">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span>📝</span>
+              <span style="font-weight: 600;">Session with Sarah Chen</span>
+            </div>
+            <span class="text-xs text-muted">Jan 28, 2026</span>
+          </div>
+          <p class="text-sm" style="color: var(--neutral-300);">
+            "...Sarah recommended three <span class="search-highlight">solar companies</span> to apply to: SunPower, First Solar, and Enphase. She said my background in..."
+          </p>
+          <button class="btn btn-ghost text-sm" style="margin-top: 8px; padding: 0;">View full session →</button>
+        </div>
+
+        <div class="search-result">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span>📋</span>
+              <span style="font-weight: 600;">Action Item</span>
+            </div>
+            <span class="text-xs text-muted">Due Feb 5</span>
+          </div>
+          <p class="text-sm" style="color: var(--neutral-300);">
+            "Apply to 3 <span class="search-highlight">solar companies</span> Sarah recommended"
+          </p>
+          <button class="btn btn-ghost text-sm" style="margin-top: 8px; padding: 0;">View action →</button>
+        </div>
+
+        <div class="search-result">
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span>📝</span>
+              <span style="font-weight: 600;">Session with Marcus Williams</span>
+            </div>
+            <span class="text-xs text-muted">Jan 14, 2026</span>
+          </div>
+          <p class="text-sm" style="color: var(--neutral-300);">
+            "...discussed the best path to transition from oil & gas to <span class="search-highlight">solar companies</span>. Marcus suggested focusing on transferable skills..."
+          </p>
+          <button class="btn btn-ghost text-sm" style="margin-top: 8px; padding: 0;">View full session →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-title">⚡ Search Capabilities</div>
+      <ul>
+        <li>Search session notes, preparation notes, action items</li>
+        <li>Filter by date range, coach, topic</li>
+        <li>Highlight matching text in results</li>
+        <li>Accessible from Command Palette (⌘K → type to search)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- CALENDAR SYNC -->
+  <section id="calendar" class="section">
+    <h2 class="section-title">Calendar Integration</h2>
+    <p class="section-desc">Sync Candid sessions with your main calendar</p>
+
+    <div class="wireframe-container">
+      <div class="wireframe-label">Calendar Integration Settings</div>
+      <div class="wireframe">
+        <div style="font-weight: 600; margin-bottom: 16px;">Connected Calendars</div>
+
+        <div class="calendar-row">
+          <div class="flex items-center gap-3">
+            <div class="calendar-icon">📅</div>
+            <div>
+              <div style="font-weight: 500;">Google Calendar</div>
+              <div class="text-xs text-muted">jamie@example.com</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span style="color: var(--green-600); font-size: 13px;">Connected ✓</span>
+            <button class="btn btn-ghost text-sm">Manage</button>
+          </div>
+        </div>
+
+        <div class="calendar-row">
+          <div class="flex items-center gap-3">
+            <div class="calendar-icon">📅</div>
+            <div>
+              <div style="font-weight: 500;">Outlook</div>
+              <div class="text-xs text-muted">Not connected</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary">Connect</button>
+        </div>
+
+        <div class="calendar-row">
+          <div class="flex items-center gap-3">
+            <div class="calendar-icon">📅</div>
+            <div>
+              <div style="font-weight: 500;">Apple Calendar</div>
+              <div class="text-xs text-muted">Not connected</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary">Connect</button>
+        </div>
+
+        <div style="font-weight: 600; margin: 24px 0 16px;">Sync Settings</div>
+
+        <div style="background: var(--neutral-800); border-radius: 12px; padding: 16px;">
+          <div class="flex justify-between items-center" style="padding: 12px 0; border-bottom: 1px solid var(--neutral-700);">
+            <div>
+              <div style="font-weight: 500;">Add sessions to calendar automatically</div>
+              <div class="text-xs text-muted">New bookings appear in your calendar</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+
+          <div class="flex justify-between items-center" style="padding: 12px 0; border-bottom: 1px solid var(--neutral-700);">
+            <div>
+              <div style="font-weight: 500;">Include meeting link in event</div>
+              <div class="text-xs text-muted">Join directly from calendar invite</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+
+          <div class="flex justify-between items-center" style="padding: 12px 0; border-bottom: 1px solid var(--neutral-700);">
+            <div>
+              <div style="font-weight: 500;">15-minute prep reminder</div>
+              <div class="text-xs text-muted">Get reminded to prepare before sessions</div>
+            </div>
+            <div class="toggle"></div>
+          </div>
+
+          <div class="flex justify-between items-center" style="padding: 12px 0;">
+            <div>
+              <div style="font-weight: 500;">Block calendar during sessions</div>
+              <div class="text-xs text-muted">Mark as "Busy" in your calendar</div>
+            </div>
+            <div class="toggle off"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="margin-top: 24px;">Save Preferences</button>
+      </div>
+    </div>
+
+    <div class="annotation">
+      <div class="annotation-title">⚡ Why Calendar Sync Matters</div>
+      <ul>
+        <li><strong>No double-booking</strong> — See Candid sessions alongside other events</li>
+        <li><strong>One-click join</strong> — Meeting link right in the calendar event</li>
+        <li><strong>Automatic reminders</strong> — Never miss a session</li>
+        <li><strong>Prep time</strong> — Built-in reminder to prepare</li>
+      </ul>
+    </div>
+  </section>
+
+  <script>
+    const buttons = document.querySelectorAll('.page-nav button');
+    const sections = document.querySelectorAll('.section');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const page = button.dataset.page;
+        buttons.forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        sections.forEach(s => {
+          s.classList.remove('active');
+          if (s.id === page) s.classList.add('active');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

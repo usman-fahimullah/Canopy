@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candid - Climate Career Coaching Wireframes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f4c3a 0%, #1a5d4a 50%, #0d3d2e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 16px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-subtitle {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 24px;
+            font-size: 1rem;
+        }
+
+        .competitor-tag {
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Wireframe Container */
+        .wireframe-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+        }
+
+        /* Sidebar */
+        .app-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 700px;
+        }
+
+        .sidebar {
+            background: #f8faf9;
+            border-right: 1px solid #e5ebe8;
+            padding: 24px 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 8px 24px;
+            border-bottom: 1px solid #e5ebe8;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #1a1a1a;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            color: #6b7280;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #e5ebe8;
+            color: #1a1a1a;
+        }
+
+        .nav-item.active {
+            background: #10b981;
+            color: white;
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            padding: 16px 12px 8px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 32px;
+            background: #f0f4f2;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .greeting {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .subgreeting {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-action {
+            font-size: 0.85rem;
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Climate Sector Navigator */
+        .sector-navigator {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 1px solid #a7f3d0;
+        }
+
+        .sector-intro {
+            color: #065f46;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .sector-intro strong {
+            color: #047857;
+        }
+
+        .sector-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .sector-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .sector-card:hover {
+            border-color: #10b981;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+
+        .sector-card.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .sector-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .sector-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .sector-stats {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .sector-match {
+            display: inline-block;
+            background: #d1fae5;
+            color: #047857;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .sector-tip {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #065f46;
+        }
+
+        /* Transition Timeline */
+        .timeline-card {
+            margin-bottom: 24px;
+        }
+
+        .timeline-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .timeline {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .timeline-track {
+            flex: 1;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 3px;
+        }
+
+        .timeline-markers {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .timeline-marker {
+            text-align: center;
+            flex: 1;
+        }
+
+        .marker-dot {
+            width: 12px;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+        }
+
+        .marker-dot.active {
+            background: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .marker-dot.completed {
+            background: #10b981;
+        }
+
+        .marker-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .marker-label.active {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .current-phase {
+            background: #f0fdf4;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .phase-badge {
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .phase-title {
+            font-weight: 600;
+            color: #065f46;
+        }
+
+        .phase-tasks {
+            list-style: none;
+        }
+
+        .phase-tasks li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .phase-tasks li::before {
+            content: "○";
+            color: #9ca3af;
+        }
+
+        /* Job Matches */
+        .job-matches .card-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 16px;
+        }
+
+        .job-context {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .job-context strong {
+            color: #10b981;
+        }
+
+        .job-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 16px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .job-item:last-child {
+            border-bottom: none;
+        }
+
+        .job-info h4 {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .job-company {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .job-meta {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .job-match-score {
+            background: #d1fae5;
+            color: #047857;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .job-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .job-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .job-btn.primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .job-btn.secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        /* Impact Tracker */
+        .impact-tracker {
+            background: linear-gradient(135deg, #0f4c3a, #1a5d4a);
+            color: white;
+        }
+
+        .impact-tracker .card-title {
+            color: white;
+        }
+
+        .impact-intro {
+            opacity: 0.9;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .impact-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .impact-stat {
+            text-align: center;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+        }
+
+        .impact-stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .impact-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .impact-stat-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .impact-quote {
+            font-style: italic;
+            opacity: 0.9;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .impact-quote-author {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        /* Coach Profile Enhancement */
+        .coach-profile {
+            margin-bottom: 24px;
+        }
+
+        .coach-header {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .coach-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .coach-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .coach-title {
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .coach-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .coach-badge {
+            background: #f0fdf4;
+            color: #047857;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .coach-quote {
+            background: #f9fafb;
+            border-left: 3px solid #10b981;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #4b5563;
+        }
+
+        .coach-stats-row {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        .coach-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .coach-stat-value {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #10b981;
+        }
+
+        .coach-stat-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .success-stories h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .success-story {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .success-story:last-child {
+            border-bottom: none;
+        }
+
+        .story-arrow {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .story-text {
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        /* Community Section */
+        .community-card {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 1px solid #fbbf24;
+        }
+
+        .community-card .card-title {
+            color: #92400e;
+        }
+
+        .community-intro {
+            color: #78350f;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .community-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .community-group {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .community-group:hover {
+            transform: translateX(4px);
+        }
+
+        .group-name {
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .group-members {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .your-sector {
+            padding: 12px 16px;
+            background: #fef3c7;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+
+        .join-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        /* Legend */
+        .legend {
+            margin-top: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 24px;
+            color: white;
+        }
+
+        .legend h3 {
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .legend-icon {
+            font-size: 1.5rem;
+        }
+
+        .legend-text h4 {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .legend-text p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .sector-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-layout {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+            .sector-cards {
+                grid-template-columns: 1fr;
+            }
+            .impact-stats {
+                grid-template-columns: 1fr;
+            }
+            .legend-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🌱 Candid Climate Coaching</h1>
+            <p>UI/UX Features Inspired by Terra.do & Saathe Studio</p>
+            <span class="badge">Climate Career Ecosystem Integration</span>
+        </header>
+
+        <!-- Climate Sector Navigator -->
+        <section class="section">
+            <h2 class="section-title">
+                🧭 Climate Sector Navigator
+                <span class="competitor-tag">Inspired by Terra.do's sector focus</span>
+            </h2>
+            <p class="section-subtitle">Help users discover their best-fit climate sector based on their background</p>
+
+            <div class="wireframe-container">
+                <div class="app-layout">
+                    <aside class="sidebar">
+                        <div class="logo">
+                            <div class="logo-icon">C</div>
+                            <span class="logo-text">Candid</span>
+                        </div>
+                        <nav>
+                            <div class="nav-item active">
+                                <span class="nav-icon">🏠</span>
+                                Dashboard
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">🧭</span>
+                                Explore Sectors
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">👥</span>
+                                Find a Coach
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">📅</span>
+                                Sessions
+                            </div>
+                            <div class="nav-section-title">Ecosystem</div>
+                            <div class="nav-item">
+                                <span class="nav-icon">💼</span>
+                                Green Jobs Board
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">👥</span>
+                                Community
+                            </div>
+                        </nav>
+                    </aside>
+                    <main class="main-content">
+                        <div class="page-header">
+                            <h1 class="greeting">Find Your Climate Path</h1>
+                            <p class="subgreeting">Based on your background in Software Engineering</p>
+                        </div>
+
+                        <div class="card sector-navigator">
+                            <div class="sector-intro">
+                                Based on your <strong>5 years in software engineering</strong>, these climate sectors have the highest demand for your skills. Our coaches specialize in helping people like you make successful transitions.
+                            </div>
+
+                            <div class="sector-cards">
+                                <div class="sector-card selected">
+                                    <div class="sector-icon">🔋</div>
+                                    <div class="sector-name">Clean Energy Tech</div>
+                                    <div class="sector-stats">234 open roles</div>
+                                    <span class="sector-match">89% skill match</span>
+                                </div>
+                                <div class="sector-card">
+                                    <div class="sector-icon">🚗</div>
+                                    <div class="sector-name">Electric Vehicles</div>
+                                    <div class="sector-stats">156 open roles</div>
+                                    <span class="sector-match">76% skill match</span>
+                                </div>
+                                <div class="sector-card">
+                                    <div class="sector-icon">🏠</div>
+                                    <div class="sector-name">Building Efficiency</div>
+                                    <div class="sector-stats">89 open roles</div>
+                                    <span class="sector-match">72% skill match</span>
+                                </div>
+                            </div>
+
+                            <div class="sector-tip">
+                                <span>💡</span>
+                                <div><strong>Tip:</strong> Clean Energy Tech companies are actively hiring engineers with your frontend experience. Our coach Sarah Chen has helped 12 software engineers transition into this sector.</div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transition Timeline -->
+        <section class="section">
+            <h2 class="section-title">
+                📈 Transition Timeline
+                <span class="competitor-tag">Inspired by Saathe's journey focus</span>
+            </h2>
+            <p class="section-subtitle">Show users where they are in their climate career transition journey</p>
+
+            <div class="wireframe-container">
+                <div class="app-layout">
+                    <aside class="sidebar">
+                        <div class="logo">
+                            <div class="logo-icon">C</div>
+                            <span class="logo-text">Candid</span>
+                        </div>
+                        <nav>
+                            <div class="nav-item active">
+                                <span class="nav-icon">🏠</span>
+                                Dashboard
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">🧭</span>
+                                Explore Sectors
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">👥</span>
+                                Find a Coach
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">📅</span>
+                                Sessions
+                            </div>
+                        </nav>
+                    </aside>
+                    <main class="main-content">
+                        <div class="page-header">
+                            <h1 class="greeting">Your Climate Transition</h1>
+                            <p class="subgreeting">Tech → Clean Energy (Average: 4-6 months)</p>
+                        </div>
+
+                        <div class="card timeline-card">
+                            <div class="timeline-label">You're in Month 2 of your journey</div>
+
+                            <div class="timeline">
+                                <div class="timeline-track">
+                                    <div class="timeline-progress"></div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-markers">
+                                <div class="timeline-marker">
+                                    <div class="marker-dot completed"></div>
+                                    <div class="marker-label">Month 1<br>Explore</div>
+                                </div>
+                                <div class="timeline-marker">
+                                    <div class="marker-dot active"></div>
+                                    <div class="marker-label active">Month 2<br>Learn</div>
+                                </div>
+                                <div class="timeline-marker">
+                                    <div class="marker-dot"></div>
+                                    <div class="marker-label">Month 3<br>Network</div>
+                                </div>
+                                <div class="timeline-marker">
+                                    <div class="marker-dot"></div>
+                                    <div class="marker-label">Month 4<br>Apply</div>
+                                </div>
+                                <div class="timeline-marker">
+                                    <div class="marker-dot"></div>
+                                    <div class="marker-label">Month 5<br>Land</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="current-phase">
+                                <div class="phase-header">
+                                    <span class="phase-badge">CURRENT PHASE</span>
+                                    <span class="phase-title">Learning — Building climate sector knowledge</span>
+                                </div>
+                                <ul class="phase-tasks">
+                                    <li>Complete climate sector overview course</li>
+                                    <li>Identify 3 target companies in Clean Energy</li>
+                                    <li>Update resume with climate-relevant framing</li>
+                                    <li>Schedule deep-dive session with Coach Sarah</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- Green Jobs Board Integration -->
+        <section class="section">
+            <h2 class="section-title">
+                💼 Green Jobs Board Integration
+                <span class="competitor-tag">Candid's unique advantage</span>
+            </h2>
+            <p class="section-subtitle">Surface relevant jobs during the coaching journey — seamless ecosystem integration</p>
+
+            <div class="wireframe-container">
+                <div class="app-layout">
+                    <aside class="sidebar">
+                        <div class="logo">
+                            <div class="logo-icon">C</div>
+                            <span class="logo-text">Candid</span>
+                        </div>
+                        <nav>
+                            <div class="nav-item active">
+                                <span class="nav-icon">🏠</span>
+                                Dashboard
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">🧭</span>
+                                Explore Sectors
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">👥</span>
+                                Find a Coach
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">📅</span>
+                                Sessions
+                            </div>
+                            <div class="nav-section-title">Ecosystem</div>
+                            <div class="nav-item">
+                                <span class="nav-icon">💼</span>
+                                Green Jobs Board
+                            </div>
+                        </nav>
+                    </aside>
+                    <main class="main-content">
+                        <div class="page-header">
+                            <h1 class="greeting">Good morning, Usman</h1>
+                            <p class="subgreeting">3 new job matches based on your coaching goals</p>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="card job-matches">
+                                <div class="card-header">
+                                    <span class="card-title">💼 Jobs Matching Your Goals</span>
+                                    <a href="#" class="card-action">See all 23 →</a>
+                                </div>
+
+                                <div class="job-context">
+                                    Based on your sessions with <strong>Coach Sarah</strong>, you're targeting:<br>
+                                    <strong>"Senior Product Manager - Clean Energy"</strong>
+                                </div>
+
+                                <div class="job-item">
+                                    <div class="job-info">
+                                        <h4>Product Lead - Grid Modernization</h4>
+                                        <div class="job-company">Aurora Solar</div>
+                                        <div class="job-meta">San Francisco, CA • $180-220K • Posted 2 days ago</div>
+                                        <div class="job-actions">
+                                            <button class="job-btn primary">View Job</button>
+                                            <button class="job-btn secondary">Discuss with Coach</button>
+                                            <button class="job-btn secondary">Save</button>
+                                        </div>
+                                    </div>
+                                    <span class="job-match-score">94% match</span>
+                                </div>
+
+                                <div class="job-item">
+                                    <div class="job-info">
+                                        <h4>Senior PM - Energy Storage</h4>
+                                        <div class="job-company">Stem, Inc.</div>
+                                        <div class="job-meta">Remote • $160-200K • Posted 3 days ago</div>
+                                        <div class="job-actions">
+                                            <button class="job-btn primary">View Job</button>
+                                            <button class="job-btn secondary">Discuss with Coach</button>
+                                            <button class="job-btn secondary">Save</button>
+                                        </div>
+                                    </div>
+                                    <span class="job-match-score">87% match</span>
+                                </div>
+                            </div>
+
+                            <div class="card impact-tracker">
+                                <div class="card-header">
+                                    <span class="card-title">🌍 Your Potential Impact</span>
+                                </div>
+
+                                <p class="impact-intro">If you land a role in Clean Energy, you could help:</p>
+
+                                <div class="impact-stats">
+                                    <div class="impact-stat">
+                                        <div class="impact-stat-icon">🔋</div>
+                                        <div class="impact-stat-value">234 GWh</div>
+                                        <div class="impact-stat-label">Clean energy deployed/year</div>
+                                    </div>
+                                    <div class="impact-stat">
+                                        <div class="impact-stat-icon">🏠</div>
+                                        <div class="impact-stat-value">50,000</div>
+                                        <div class="impact-stat-label">Homes powered</div>
+                                    </div>
+                                    <div class="impact-stat">
+                                        <div class="impact-stat-icon">🌱</div>
+                                        <div class="impact-stat-value">12,000</div>
+                                        <div class="impact-stat-label">Tons CO₂ avoided/year</div>
+                                    </div>
+                                </div>
+
+                                <div class="impact-quote">
+                                    "The climate crisis needs people like you. Your next role matters."
+                                    <div class="impact-quote-author">— Coach Sarah Chen</div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enhanced Coach Profile -->
+        <section class="section">
+            <h2 class="section-title">
+                👤 Climate-Focused Coach Profiles
+                <span class="competitor-tag">Inspired by Saathe's expertise positioning</span>
+            </h2>
+            <p class="section-subtitle">Showcase coach expertise in specific climate sectors with success stories</p>
+
+            <div class="wireframe-container">
+                <div class="app-layout">
+                    <aside class="sidebar">
+                        <div class="logo">
+                            <div class="logo-icon">C</div>
+                            <span class="logo-text">Candid</span>
+                        </div>
+                        <nav>
+                            <div class="nav-item">
+                                <span class="nav-icon">🏠</span>
+                                Dashboard
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">🧭</span>
+                                Explore Sectors
+                            </div>
+                            <div class="nav-item active">
+                                <span class="nav-icon">👥</span>
+                                Find a Coach
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">📅</span>
+                                Sessions
+                            </div>
+                        </nav>
+                    </aside>
+                    <main class="main-content">
+                        <div class="card coach-profile">
+                            <div class="coach-header">
+                                <div class="coach-avatar">SC</div>
+                                <div class="coach-info">
+                                    <h3>Sarah Chen</h3>
+                                    <div class="coach-title">Climate Career Transition Specialist</div>
+                                    <div class="coach-badges">
+                                        <span class="coach-badge">🔋 Clean Energy</span>
+                                        <span class="coach-badge">💻 Climate Tech</span>
+                                        <span class="coach-badge">🔄 Tech → Climate</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="coach-quote">
+                                "I help software engineers find their place in the climate solution space. Having made the transition myself, I understand both the technical skills you bring and the climate knowledge you'll need."
+                            </div>
+
+                            <div class="coach-stats-row">
+                                <div class="coach-stat">
+                                    <span class="coach-stat-value">47</span>
+                                    <span class="coach-stat-label">Successful transitions</span>
+                                </div>
+                                <div class="coach-stat">
+                                    <span class="coach-stat-value">4.9</span>
+                                    <span class="coach-stat-label">Average rating</span>
+                                </div>
+                                <div class="coach-stat">
+                                    <span class="coach-stat-value">3 mo</span>
+                                    <span class="coach-stat-label">Avg. time to placement</span>
+                                </div>
+                            </div>
+
+                            <div class="success-stories">
+                                <h4>Recent Success Stories</h4>
+                                <div class="success-story">
+                                    <span class="story-arrow">→</span>
+                                    <span class="story-text">PM at Google → Head of Product at Aurora Solar</span>
+                                </div>
+                                <div class="success-story">
+                                    <span class="story-arrow">→</span>
+                                    <span class="story-text">Engineer at Meta → Climate Tech Founder</span>
+                                </div>
+                                <div class="success-story">
+                                    <span class="story-arrow">→</span>
+                                    <span class="story-text">Designer at Airbnb → UX Lead at Watershed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Feature -->
+        <section class="section">
+            <h2 class="section-title">
+                👥 Climate Community Groups
+                <span class="competitor-tag">Inspired by Terra.do's 4,000+ community</span>
+            </h2>
+            <p class="section-subtitle">Connect seekers on similar climate career journeys for peer support</p>
+
+            <div class="wireframe-container">
+                <div class="app-layout">
+                    <aside class="sidebar">
+                        <div class="logo">
+                            <div class="logo-icon">C</div>
+                            <span class="logo-text">Candid</span>
+                        </div>
+                        <nav>
+                            <div class="nav-item">
+                                <span class="nav-icon">🏠</span>
+                                Dashboard
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">🧭</span>
+                                Explore Sectors
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">👥</span>
+                                Find a Coach
+                            </div>
+                            <div class="nav-item">
+                                <span class="nav-icon">📅</span>
+                                Sessions
+                            </div>
+                            <div class="nav-section-title">Ecosystem</div>
+                            <div class="nav-item">
+                                <span class="nav-icon">💼</span>
+                                Green Jobs Board
+                            </div>
+                            <div class="nav-item active">
+                                <span class="nav-icon">👥</span>
+                                Community
+                            </div>
+                        </nav>
+                    </aside>
+                    <main class="main-content">
+                        <div class="page-header">
+                            <h1 class="greeting">Climate Career Community</h1>
+                            <p class="subgreeting">Connect with others on similar journeys</p>
+                        </div>
+
+                        <div class="card community-card">
+                            <div class="card-header">
+                                <span class="card-title">👥 Groups for You</span>
+                            </div>
+
+                            <p class="community-intro">Join conversations with others making the same transition. Share tips, celebrate wins, and support each other.</p>
+
+                            <div class="community-groups">
+                                <div class="community-group">
+                                    <div>
+                                        <div class="group-name">🔋 Energy Transition Seekers</div>
+                                        <div class="group-members">234 members • 12 online now</div>
+                                    </div>
+                                    <span>→</span>
+                                </div>
+                                <div class="community-group">
+                                    <div>
+                                        <div class="group-name">💻 Tech → Climate Pivots</div>
+                                        <div class="group-members">189 members • 8 online now</div>
+                                    </div>
+                                    <span>→</span>
+                                </div>
+                                <div class="community-group">
+                                    <div>
+                                        <div class="group-name">🌿 Sustainability Professionals</div>
+                                        <div class="group-members">156 members • 5 online now</div>
+                                    </div>
+                                    <span>→</span>
+                                </div>
+                            </div>
+
+                            <div class="your-sector">
+                                <strong>Based on your target sector:</strong> Clean Energy
+                            </div>
+
+                            <button class="join-btn">Join the Clean Energy Seekers Group →</button>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- Legend -->
+        <div class="legend">
+            <h3>🔑 Key Patterns from Competitors</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <span class="legend-icon">🎯</span>
+                    <div class="legend-text">
+                        <h4>From Terra.do</h4>
+                        <p>Sector-based navigation, community features, learning + career integration, global scale thinking</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">💚</span>
+                    <div class="legend-text">
+                        <h4>From Saathe Studio</h4>
+                        <p>Warm personal voice, outcome-focused metrics, expert credibility, success story showcasing</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">⚡</span>
+                    <div class="legend-text">
+                        <h4>Candid's Unique Value</h4>
+                        <p>Ecosystem integration (Green Jobs Board, Canopy ATS), seamless discovery → coaching → hiring flow</p>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">🚀</span>
+                    <div class="legend-text">
+                        <h4>Combined Advantage</h4>
+                        <p>Personalized coaching at scale with direct job matching and community support</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
