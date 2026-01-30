@@ -1,10 +1,17 @@
 import Stripe from "stripe";
 
-// Server-side Stripe client
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
-  typescript: true,
-});
+// Server-side Stripe client (lazy init to avoid build-time errors when env var is missing)
+let _stripe: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2025-02-24.acacia",
+      typescript: true,
+    });
+  }
+  return _stripe;
+}
 
 // Platform fee percentage (18%)
 export const PLATFORM_FEE_PERCENT = 18;
