@@ -74,8 +74,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ mentors: result });
   } catch (error) {
     console.error("Error fetching mentors:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to fetch mentors" },
+      { error: "Failed to fetch mentors", details: message },
       { status: 500 }
     );
   }
