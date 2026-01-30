@@ -132,7 +132,7 @@ export default function SessionsPage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 {upcomingSessions.map((session) => (
-                  <SessionCard key={session.id} session={session} userRole="mentee" />
+                  <SessionCard key={session.id} session={session} userRole="seeker" />
                 ))}
               </div>
             </section>
@@ -152,7 +152,7 @@ export default function SessionsPage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 {pastSessions.map((session) => (
-                  <SessionCard key={session.id} session={session} userRole="mentee" />
+                  <SessionCard key={session.id} session={session} userRole="seeker" />
                 ))}
               </div>
             </section>

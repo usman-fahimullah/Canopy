@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { MessageThread } from "../components";
@@ -36,6 +36,14 @@ function formatMessageDate(date: Date): string {
 }
 
 export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8" />}>
+      <MessagesContent />
+    </Suspense>
+  );
+}
+
+function MessagesContent() {
   const searchParams = useSearchParams();
   const activeThreadId = searchParams.get("thread");
 
@@ -148,9 +156,9 @@ export default function MessagesPage() {
                         {otherUser.firstName} {otherUser.lastName}
                       </Link>
                       <p className="text-caption text-foreground-muted">
-                        {otherUser.role === "coach" || otherUser.role === "light-mentor"
+                        {otherUser.role === "coach" || otherUser.role === "mentor"
                           ? `${(otherUser as any).currentRole} at ${(otherUser as any).currentCompany}`
-                          : "Mentee"}
+                          : "Seeker"}
                       </p>
                     </div>
                   </div>

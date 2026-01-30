@@ -79,9 +79,9 @@ export function MessageThread({ thread, isActive, className }: MessageThreadProp
 
         {/* Role & Company */}
         <p className="text-caption-sm text-foreground-muted">
-          {otherUser.role === "coach" || otherUser.role === "light-mentor"
+          {otherUser.role === "coach" || otherUser.role === "mentor"
             ? `${(otherUser as any).currentRole} at ${(otherUser as any).currentCompany}`
-            : "Mentee"}
+            : "Seeker"}
         </p>
 
         {/* Last message preview */}

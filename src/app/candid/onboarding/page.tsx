@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CandidLogo, CandidSymbol } from "../components";
-import { SECTOR_INFO, type Sector, type UserRole } from "@/lib/candid/types";
+import { SECTOR_INFO, type Sector, type CandidRole } from "@/lib/candid/types";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +46,7 @@ type Step = "welcome" | "role" | "profile" | "goals" | "sectors" | "availability
 
 const roleOptions = [
   {
-    value: "mentee" as UserRole,
+    value: "seeker" as CandidRole,
     title: "I'm exploring climate careers",
     description: "Get matched with experienced mentors to guide your climate career journey",
     icon: Rocket,
@@ -55,7 +55,7 @@ const roleOptions = [
     highlight: "Most popular",
   },
   {
-    value: "light-mentor" as UserRole,
+    value: "mentor" as CandidRole,
     title: "I want to guide others",
     description: "Share your experience with those transitioning into climate careers",
     icon: Handshake,
@@ -63,7 +63,7 @@ const roleOptions = [
     color: "var(--primitive-green-100)",
   },
   {
-    value: "coach" as UserRole,
+    value: "coach" as CandidRole,
     title: "I'm a career coach",
     description: "Offer structured coaching and build your climate coaching practice",
     icon: GraduationCap,
@@ -105,7 +105,7 @@ const availabilityOptions = [
 
 export default function OnboardingPage() {
   const [step, setStep] = useState<Step>("welcome");
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<CandidRole | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
   const [availability, setAvailability] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const steps: Step[] = selectedRole === "mentee"
+  const steps: Step[] = selectedRole === "seeker"
     ? ["welcome", "role", "profile", "goals", "sectors", "complete"]
     : ["welcome", "role", "profile", "sectors", "availability", "complete"];
 
@@ -206,7 +206,7 @@ export default function OnboardingPage() {
       subtitle: "Help your mentors understand what you're working towards",
     },
     sectors: {
-      title: selectedRole === "mentee" ? "What sectors interest you?" : "What are your areas of expertise?",
+      title: selectedRole === "seeker" ? "What sectors interest you?" : "What are your areas of expertise?",
       subtitle: "Select up to 5 sectors for better matching",
     },
     availability: {
@@ -787,8 +787,8 @@ export default function OnboardingPage() {
                         {firstName} {lastName}
                       </h3>
                       <p className="text-caption text-foreground-muted">
-                        {selectedRole === "mentee" ? "Climate Career Explorer" :
-                         selectedRole === "light-mentor" ? "Light Mentor" : "Career Coach"}
+                        {selectedRole === "seeker" ? "Climate Career Explorer" :
+                         selectedRole === "mentor" ? "Light Mentor" : "Career Coach"}
                       </p>
                     </div>
                   </div>
@@ -834,7 +834,7 @@ export default function OnboardingPage() {
                 </Link>
                 <Link href="/candid/browse">
                   <Button size="lg" variant="secondary">
-                    Browse {selectedRole === "mentee" ? "Mentors" : "Mentees"}
+                    Browse {selectedRole === "seeker" ? "Mentors" : "Mentees"}
                   </Button>
                 </Link>
               </div>

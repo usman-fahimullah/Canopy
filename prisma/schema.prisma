@@ -1,0 +1,408 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// =================================================================
+// ACCOUNT — Shared identity for every authenticated person.
+// Maps 1:1 to a Clerk user. A person can be an employer member,
+// a job seeker, a coach, or multiple of these simultaneously.
+// =================================================================
+
+model Account {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  avatar    String?
+  phone     String?
+  location  String?
+  timezone  String?
+  bio       String?  @db.Text
+
+  // Role profiles (a person can hold multiple)
+  orgMemberships OrganizationMember[]
+  seekerProfile  SeekerProfile?
+  coachProfile   CoachProfile?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// =================================================================
+// ORGANIZATION — Multi-tenant employer container.
+// =================================================================
+
+model Organization {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  logo           String?
+
+  // Brand kit for career pages
+  primaryColor   String   @default("#0F766E")
+  secondaryColor String?
+  fontFamily     String   @default("Inter")
+
+  // Career page settings
+  customDomain   String?  @unique
+  careerPageJson String?  @db.Text
+
+  members        OrganizationMember[]
+  jobs           Job[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// =================================================================
+// ORGANIZATION MEMBER — Employer-side role within an org.
+// Replaces the old User model. One Account can belong to multiple
+// Organizations. Adds RECRUITER to the role enum.
+// =================================================================
+
+model OrganizationMember {
+  id             String        @id @default(cuid())
+
+  accountId      String
+  account        Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  role           OrgMemberRole @default(MEMBER)
+  title          String?
+
+  // Authored content
+  notes          Note[]
+  scores         Score[]
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([accountId, organizationId])
+}
+
+enum OrgMemberRole {
+  OWNER
+  ADMIN
+  RECRUITER
+  MEMBER
+  VIEWER
+}
+
+// =================================================================
+// SEEKER PROFILE — Job seeker identity. Independent of any org.
+// Replaces the old Candidate model. A seeker can apply across
+// multiple organizations.
+// =================================================================
+
+model SeekerProfile {
+  id              String   @id @default(cuid())
+
+  accountId       String   @unique
+  account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Professional info
+  resumeUrl       String?
+  linkedinUrl     String?
+  portfolioUrl    String?
+  headline        String?
+
+  // Skills & qualifications
+  skills          String[]
+  greenSkills     String[]
+  certifications  String[]
+  yearsExperience Int?
+
+  // AI-enriched data
+  aiSummary       String?  @db.Text
+
+  // Mentorship (peer-to-peer, pro-bono)
+  isMentor        Boolean  @default(false)
+  mentorBio       String?  @db.Text
+  mentorTopics    String[]
+
+  // Sector interests (for matching)
+  targetSectors   String[]
+
+  // Relations
+  applications    Application[]
+  notes           Note[]
+
+  // Mentorship relations
+  mentorAssignmentsAsMentor MentorAssignment[] @relation("MentorSide")
+  mentorAssignmentsAsMentee MentorAssignment[] @relation("MenteeSide")
+  coachAssignmentsAsSeeker  CoachAssignment[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// =================================================================
+// COACH PROFILE — Professional career coach. Paid relationship.
+// =================================================================
+
+model CoachProfile {
+  id              String   @id @default(cuid())
+
+  accountId       String   @unique
+  account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Professional info
+  headline        String?
+  expertise       String[]
+  sectors         String[]
+  sessionTypes    String[]
+
+  // Pricing (in cents for precision)
+  hourlyRate      Int?
+  monthlyRate     Int?
+
+  // Availability (JSON: WeeklyAvailability)
+  availability    String?  @db.Text
+
+  // Stats
+  rating          Float?   @default(0)
+  reviewCount     Int      @default(0)
+  successStories  Int      @default(0)
+
+  // Visibility
+  isActive        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+
+  // Relations
+  coachAssignments CoachAssignment[]
+  notes            Note[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// =================================================================
+// MENTOR ASSIGNMENT — Peer-to-peer seeker-to-seeker mentorship.
+// Mentor = a seeker with isMentor: true who volunteers time.
+// Pro-bono, distinct from paid coaching.
+// =================================================================
+
+model MentorAssignment {
+  id         String           @id @default(cuid())
+
+  mentorId   String
+  mentor     SeekerProfile    @relation("MentorSide", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  menteeId   String
+  mentee     SeekerProfile    @relation("MenteeSide", fields: [menteeId], references: [id], onDelete: Cascade)
+
+  status     MentorshipStatus @default(ACTIVE)
+  startedAt  DateTime         @default(now())
+  endedAt    DateTime?
+  notes      String?          @db.Text
+
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([mentorId, menteeId])
+}
+
+enum MentorshipStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+// =================================================================
+// COACH ASSIGNMENT — Professional coach-to-seeker relationship.
+// =================================================================
+
+model CoachAssignment {
+  id                String         @id @default(cuid())
+
+  coachId           String
+  coach             CoachProfile   @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  seekerId          String
+  seeker            SeekerProfile  @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  status            CoachingStatus @default(ACTIVE)
+  startedAt         DateTime       @default(now())
+  endedAt           DateTime?
+
+  sessionsCompleted Int            @default(0)
+  plan              String?        @db.Text
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@unique([coachId, seekerId])
+}
+
+enum CoachingStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+// =================================================================
+// JOB — Unchanged. Still owned by Organization.
+// =================================================================
+
+model Job {
+  id              String         @id @default(cuid())
+  title           String
+  slug            String
+  description     String         @db.Text
+  location        String?
+  locationType    LocationType   @default(ONSITE)
+  employmentType  EmploymentType @default(FULL_TIME)
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String         @default("USD")
+
+  // Climate-specific fields
+  climateCategory   String?
+  impactDescription String?      @db.Text
+  requiredCerts     String[]
+  greenSkills       String[]
+
+  status          JobStatus      @default(DRAFT)
+  publishedAt     DateTime?
+  closesAt        DateTime?
+
+  stages          String         @default("[{\"id\":\"applied\",\"name\":\"Applied\"},{\"id\":\"screening\",\"name\":\"Screening\"},{\"id\":\"interview\",\"name\":\"Interview\"},{\"id\":\"offer\",\"name\":\"Offer\"},{\"id\":\"hired\",\"name\":\"Hired\"}]")
+
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id])
+
+  applications    Application[]
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([organizationId, slug])
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  PAUSED
+  CLOSED
+}
+
+enum LocationType {
+  ONSITE
+  REMOTE
+  HYBRID
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+// =================================================================
+// APPLICATION — Links SeekerProfile to Job.
+// =================================================================
+
+model Application {
+  id             String   @id @default(cuid())
+
+  seekerId       String
+  seeker         SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  jobId          String
+  job            Job       @relation(fields: [jobId], references: [id])
+
+  stage          String    @default("applied")
+  stageOrder     Int       @default(0)
+
+  formResponses  String?   @db.Text
+  coverLetter    String?   @db.Text
+
+  matchScore     Float?
+  matchReasons   String?   @db.Text
+
+  knockoutPassed Boolean   @default(true)
+
+  source         String?
+
+  scores         Score[]
+
+  rejectedAt     DateTime?
+  hiredAt        DateTime?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([seekerId, jobId])
+}
+
+// =================================================================
+// NOTE — Polymorphic author: OrgMember or Coach.
+// Subject is always a SeekerProfile.
+// =================================================================
+
+model Note {
+  id                 String   @id @default(cuid())
+  content            String   @db.Text
+
+  // Subject: which seeker is this note about
+  seekerId           String
+  seeker             SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+
+  // Author: exactly one of these should be set (enforced at app level)
+  orgMemberAuthorId  String?
+  orgMemberAuthor    OrganizationMember? @relation(fields: [orgMemberAuthorId], references: [id], onDelete: SetNull)
+
+  coachAuthorId      String?
+  coachAuthor        CoachProfile?       @relation(fields: [coachAuthorId], references: [id], onDelete: SetNull)
+
+  // For @mentions (Account IDs)
+  mentions           String[]
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// =================================================================
+// SCORE — Only org members score applications.
+// =================================================================
+
+model Score {
+  id             String             @id @default(cuid())
+
+  applicationId  String
+  application    Application        @relation(fields: [applicationId], references: [id])
+
+  scorerId       String
+  scorer         OrganizationMember @relation(fields: [scorerId], references: [id])
+
+  responses      String             @db.Text
+  overallRating  Int
+  recommendation Recommendation
+  comments       String?            @db.Text
+
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([applicationId, scorerId])
+}
+
+enum Recommendation {
+  STRONG_YES
+  YES
+  NEUTRAL
+  NO
+  STRONG_NO
+}

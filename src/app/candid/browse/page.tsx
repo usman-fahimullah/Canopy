@@ -4,8 +4,8 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { CoachCard } from "../components";
-import { coaches, lightMentors, currentUser } from "@/lib/candid";
-import { SECTOR_INFO, type Sector, type Coach, type LightMentor } from "@/lib/candid/types";
+import { coaches, mentors, currentUser } from "@/lib/candid";
+import { SECTOR_INFO, type Sector, type CandidCoach, type CandidMentor } from "@/lib/candid/types";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Avatar } from "@/components/ui/avatar";
@@ -23,7 +23,7 @@ import {
   Funnel,
 } from "@phosphor-icons/react";
 
-type MentorType = "all" | "coach" | "light-mentor";
+type MentorType = "all" | "coach" | "mentor";
 type ViewMode = "grid" | "list";
 
 const sectors = Object.entries(SECTOR_INFO).map(([key, value]) => ({
@@ -32,7 +32,7 @@ const sectors = Object.entries(SECTOR_INFO).map(([key, value]) => ({
 }));
 
 // List view card - white card with shadow (no border)
-function MentorListItem({ mentor }: { mentor: Coach | LightMentor }) {
+function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
   const isCoach = mentor.role === "coach";
   const isTopRated = mentor.rating && mentor.rating >= 4.8;
 
@@ -108,7 +108,7 @@ export default function BrowsePage() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   // Combine all mentors
-  const allMentors = useMemo(() => [...coaches, ...lightMentors], []);
+  const allMentors = useMemo(() => [...coaches, ...mentors], []);
 
   // Filter mentors
   const filteredMentors = useMemo(() => {
@@ -176,7 +176,7 @@ export default function BrowsePage() {
         <div className="mt-4 flex flex-wrap gap-4 text-caption text-foreground-muted">
           <span className="flex items-center gap-1.5">
             <Users size={16} />
-            {coaches.length + lightMentors.length} mentors
+            {coaches.length + mentors.length} mentors
           </span>
           <span className="flex items-center gap-1.5">
             <GraduationCap size={16} />
@@ -247,9 +247,9 @@ export default function BrowsePage() {
               Coaches
             </Button>
             <Button
-              variant={mentorType === "light-mentor" ? "secondary" : "tertiary"}
+              variant={mentorType === "mentor" ? "secondary" : "tertiary"}
               size="sm"
-              onClick={() => setMentorType("light-mentor")}
+              onClick={() => setMentorType("mentor")}
             >
               <Handshake size={16} className="mr-1.5" />
               Mentors

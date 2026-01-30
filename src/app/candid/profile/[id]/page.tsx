@@ -7,7 +7,7 @@ import { SECTOR_INFO } from "@/lib/candid/types";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Chip } from "@/components/ui/chip";
-import type { Coach, LightMentor, TimeSlot } from "@/lib/candid/types";
+import type { CandidCoach, CandidMentor, TimeSlot } from "@/lib/candid/types";
 import {
   ArrowLeft,
   Star,
@@ -48,8 +48,8 @@ export default function ProfilePage() {
   }
 
   const isCoach = user.role === "coach";
-  const isLightMentor = user.role === "light-mentor";
-  const mentor = user as Coach | LightMentor;
+  const isLightMentor = user.role === "mentor";
+  const mentor = user as CandidCoach | CandidMentor;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
@@ -64,7 +64,7 @@ export default function ProfilePage() {
       <div className="rounded-card bg-white shadow-card overflow-hidden">
         {/* Header with solid Green 800 background */}
         <div className="relative h-32 bg-[var(--primitive-green-800)]">
-          {isCoach && (mentor as Coach).isFeatured && (
+          {isCoach && (mentor as CandidCoach).isFeatured && (
             <Chip variant="yellow" size="sm" className="absolute right-4 top-4">
               <Lightning size={14} weight="fill" className="mr-1" />
               Featured Coach
@@ -114,10 +114,10 @@ export default function ProfilePage() {
                 <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-600)]" />
                 <span>{mentor.menteeCount} mentees</span>
               </div>
-              {isCoach && (mentor as Coach).successStories && (
+              {isCoach && (mentor as CandidCoach).successStories && (
                 <div className="flex items-center gap-1.5 text-caption text-foreground-muted">
                   <GraduationCap size={16} />
-                  <span>{(mentor as Coach).successStories} success stories</span>
+                  <span>{(mentor as CandidCoach).successStories} success stories</span>
                 </div>
               )}
               {mentor.location && (
@@ -194,13 +194,13 @@ export default function ProfilePage() {
           </div>
 
           {/* Previous Roles (Coaches only) */}
-          {isCoach && (mentor as Coach).previousRoles.length > 0 && (
+          {isCoach && (mentor as CandidCoach).previousRoles.length > 0 && (
             <div className="mb-6">
               <h2 className="mb-3 text-caption font-semibold uppercase tracking-wide text-foreground-muted">
                 Experience
               </h2>
               <div className="space-y-3">
-                {(mentor as Coach).previousRoles.map((role, i) => (
+                {(mentor as CandidCoach).previousRoles.map((role, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--background-subtle)]">
                       <Briefcase size={18} className="text-foreground-muted" />
@@ -224,7 +224,7 @@ export default function ProfilePage() {
                 Available For
               </h2>
               <div className="flex flex-wrap gap-2">
-                {(mentor as LightMentor).availableFor.map((activity) => (
+                {(mentor as CandidMentor).availableFor.map((activity) => (
                   <Chip key={activity} variant="primary" size="sm">
                     {activity
                       .split("-")
@@ -237,21 +237,21 @@ export default function ProfilePage() {
           )}
 
           {/* Pricing (Coaches only) */}
-          {isCoach && ((mentor as Coach).hourlyRate || (mentor as Coach).monthlyRate) && (
+          {isCoach && ((mentor as CandidCoach).hourlyRate || (mentor as CandidCoach).monthlyRate) && (
             <div className="rounded-card bg-[var(--background-subtle)] p-5">
               <h2 className="mb-4 text-caption font-semibold uppercase tracking-wide text-foreground-muted">
                 Coaching Rates
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
-                {(mentor as Coach).hourlyRate && (
+                {(mentor as CandidCoach).hourlyRate && (
                   <div className="rounded-lg bg-white p-4 shadow-card">
                     <p className="text-caption text-foreground-muted">Per Session (1 hour)</p>
                     <p className="mt-1 text-heading-sm font-semibold text-[var(--primitive-green-800)]">
-                      ${(mentor as Coach).hourlyRate}
+                      ${(mentor as CandidCoach).hourlyRate}
                     </p>
                   </div>
                 )}
-                {(mentor as Coach).monthlyRate && (
+                {(mentor as CandidCoach).monthlyRate && (
                   <div className="rounded-lg bg-[var(--primitive-blue-200)] p-4">
                     <div className="flex items-center gap-2">
                       <p className="text-caption text-[var(--primitive-green-800)]">Monthly Package</p>
@@ -260,7 +260,7 @@ export default function ProfilePage() {
                       </Chip>
                     </div>
                     <p className="mt-1 text-heading-sm font-semibold text-[var(--primitive-green-800)]">
-                      ${(mentor as Coach).monthlyRate}
+                      ${(mentor as CandidCoach).monthlyRate}
                       <span className="text-caption font-normal text-[var(--primitive-green-800)]/70">/month</span>
                     </p>
                     <p className="mt-1 text-caption text-[var(--primitive-green-800)]/70">
@@ -279,7 +279,7 @@ export default function ProfilePage() {
                 Typical Availability
               </h2>
               <div className="flex flex-wrap gap-2">
-                {Object.entries((mentor as Coach).availability)
+                {Object.entries((mentor as CandidCoach).availability)
                   .filter(([_, slots]) => slots.length > 0)
                   .map(([day, slots]) => (
                     <div

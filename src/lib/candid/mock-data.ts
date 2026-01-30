@@ -1,7 +1,7 @@
 import type {
-  Coach,
-  LightMentor,
-  Mentee,
+  CandidCoach,
+  CandidMentor,
+  CandidSeeker,
   Session,
   Message,
   MessageThread,
@@ -23,7 +23,7 @@ const daysAgo = (days: number) => {
 };
 
 // ============ COACHES ============
-export const coaches: Coach[] = [
+export const coaches: CandidCoach[] = [
   {
     id: "coach-1",
     email: "sarah.chen@climate.vc",
@@ -218,14 +218,14 @@ export const coaches: Coach[] = [
   },
 ];
 
-// ============ LIGHT MENTORS ============
-export const lightMentors: LightMentor[] = [
+// ============ MENTORS ============
+export const mentors: CandidMentor[] = [
   {
-    id: "lm-1",
+    id: "mentor-1",
     email: "jordan.lee@rivian.com",
     firstName: "Jordan",
     lastName: "Lee",
-    role: "light-mentor",
+    role: "mentor",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     bio: "Made the switch from automotive to EV industry 2 years ago. Happy to share my journey and help with resume reviews for anyone looking to break into clean transportation.",
     linkedIn: "https://linkedin.com/in/jordanlee",
@@ -242,11 +242,11 @@ export const lightMentors: LightMentor[] = [
     reviewCount: 12,
   },
   {
-    id: "lm-2",
+    id: "mentor-2",
     email: "priya.sharma@wri.org",
     firstName: "Priya",
     lastName: "Sharma",
-    role: "light-mentor",
+    role: "mentor",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
     bio: "Research analyst at World Resources Institute. I transitioned from academia to think tanks and love helping researchers find impactful climate roles.",
     linkedIn: "https://linkedin.com/in/priyasharma",
@@ -263,11 +263,11 @@ export const lightMentors: LightMentor[] = [
     reviewCount: 8,
   },
   {
-    id: "lm-3",
+    id: "mentor-3",
     email: "alex.thompson@carbonplan.org",
     firstName: "Alex",
     lastName: "Thompson",
-    role: "light-mentor",
+    role: "mentor",
     avatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face",
     bio: "Data scientist focused on carbon removal research. Former software engineer who made the climate pivot. I help tech folks understand where their skills fit in climate.",
     linkedIn: "https://linkedin.com/in/alexthompson",
@@ -285,14 +285,14 @@ export const lightMentors: LightMentor[] = [
   },
 ];
 
-// ============ MENTEES ============
-export const mentees: Mentee[] = [
+// ============ SEEKERS ============
+export const seekers: CandidSeeker[] = [
   {
-    id: "mentee-1",
+    id: "seeker-1",
     email: "jamie.wilson@gmail.com",
     firstName: "Jamie",
     lastName: "Wilson",
-    role: "mentee",
+    role: "seeker",
     avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
     bio: "Marketing professional looking to transition into climate tech. Passionate about using storytelling to drive climate action.",
     location: "Los Angeles, CA",
@@ -307,14 +307,14 @@ export const mentees: Mentee[] = [
     skills: ["Brand strategy", "Content marketing", "Stakeholder communication", "Data analytics"],
     cohort: "January 2025",
     matchedCoachId: "coach-1",
-    matchedLightMentorIds: ["lm-1"],
+    matchedMentorIds: ["mentor-1"],
   },
   {
-    id: "mentee-2",
+    id: "seeker-2",
     email: "michael.chen@outlook.com",
     firstName: "Michael",
     lastName: "Chen",
-    role: "mentee",
+    role: "seeker",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
     bio: "Finance professional with 8 years in investment banking. Ready to apply my skills to climate finance and impact investing.",
     location: "New York, NY",
@@ -331,11 +331,11 @@ export const mentees: Mentee[] = [
     matchedCoachId: "coach-5",
   },
   {
-    id: "mentee-3",
+    id: "seeker-3",
     email: "sofia.martinez@gmail.com",
     firstName: "Sofia",
     lastName: "Martinez",
-    role: "mentee",
+    role: "seeker",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
     bio: "Environmental science graduate looking to break into climate policy. Interned at EPA and passionate about environmental justice.",
     location: "Denver, CO",
@@ -348,19 +348,19 @@ export const mentees: Mentee[] = [
     skills: ["Policy research", "Data analysis", "Technical writing", "Stakeholder engagement"],
     cohort: "January 2025",
     matchedCoachId: "coach-2",
-    matchedLightMentorIds: ["lm-2"],
+    matchedMentorIds: ["mentor-2"],
   },
 ];
 
-// Current user (for demo - logged in as mentee)
-export const currentUser = mentees[0];
+// Current user (for demo - logged in as seeker)
+export const currentUser = seekers[0];
 
 // ============ SESSIONS ============
 export const sessions: Session[] = [
   // Upcoming sessions
   {
     id: "session-1",
-    menteeId: "mentee-1",
+    menteeId: "seeker-1",
     mentorId: "coach-1",
     mentorRole: "coach",
     type: "coaching",
@@ -372,9 +372,9 @@ export const sessions: Session[] = [
   },
   {
     id: "session-2",
-    menteeId: "mentee-1",
-    mentorId: "lm-1",
-    mentorRole: "light-mentor",
+    menteeId: "seeker-1",
+    mentorId: "mentor-1",
+    mentorRole: "mentor",
     type: "resume-review",
     status: "scheduled",
     scheduledAt: daysFromNow(5),
@@ -384,7 +384,7 @@ export const sessions: Session[] = [
   },
   {
     id: "session-3",
-    menteeId: "mentee-2",
+    menteeId: "seeker-2",
     mentorId: "coach-5",
     mentorRole: "coach",
     type: "career-planning",
@@ -396,7 +396,7 @@ export const sessions: Session[] = [
   // Completed sessions
   {
     id: "session-4",
-    menteeId: "mentee-1",
+    menteeId: "seeker-1",
     mentorId: "coach-1",
     mentorRole: "coach",
     type: "coaching",
@@ -413,7 +413,7 @@ export const sessions: Session[] = [
   },
   {
     id: "session-5",
-    menteeId: "mentee-1",
+    menteeId: "seeker-1",
     mentorId: "coach-1",
     mentorRole: "coach",
     type: "mock-interview",
@@ -434,14 +434,14 @@ export const sessions: Session[] = [
 export const messageThreads: MessageThread[] = [
   {
     id: "thread-1",
-    participantIds: ["mentee-1", "coach-1"],
+    participantIds: ["seeker-1", "coach-1"],
     unreadCount: 2,
     createdAt: daysAgo(30),
     updatedAt: daysAgo(0),
   },
   {
     id: "thread-2",
-    participantIds: ["mentee-1", "lm-1"],
+    participantIds: ["seeker-1", "mentor-1"],
     unreadCount: 0,
     createdAt: daysAgo(14),
     updatedAt: daysAgo(2),
@@ -449,7 +449,7 @@ export const messageThreads: MessageThread[] = [
 ];
 
 export const messages: Message[] = [
-  // Thread 1: Mentee-1 with Coach-1
+  // Thread 1: Seeker-1 with Coach-1
   {
     id: "msg-1",
     threadId: "thread-1",
@@ -461,7 +461,7 @@ export const messages: Message[] = [
   {
     id: "msg-2",
     threadId: "thread-1",
-    senderId: "mentee-1",
+    senderId: "seeker-1",
     content: "Hi Sarah! So excited to work with you. I've attached my resume. For companies, I'm looking at: Watershed, Persefoni, Patch, Sylvera, and Climate Arc. Also interested in larger companies with strong sustainability programs.",
     createdAt: daysAgo(8),
     readAt: daysAgo(7),
@@ -488,11 +488,11 @@ export const messages: Message[] = [
     content: "Also, don't forget to update your LinkedIn headline before you start reaching out. We talked about this in our last session!",
     createdAt: daysAgo(0),
   },
-  // Thread 2: Mentee-1 with Light Mentor-1
+  // Thread 2: Seeker-1 with Mentor-1
   {
     id: "msg-6",
     threadId: "thread-2",
-    senderId: "mentee-1",
+    senderId: "seeker-1",
     content: "Hey Jordan! Sarah recommended I reach out to you since you made the switch to Rivian. I'd love to learn about your experience transitioning into the EV space.",
     createdAt: daysAgo(14),
     readAt: daysAgo(14),
@@ -500,7 +500,7 @@ export const messages: Message[] = [
   {
     id: "msg-7",
     threadId: "thread-2",
-    senderId: "lm-1",
+    senderId: "mentor-1",
     content: "Hi Jamie! Happy to help. The transition was definitely a journey but so worth it. I scheduled us for a resume review session next week - looking forward to it!",
     createdAt: daysAgo(13),
     readAt: daysAgo(13),
@@ -508,7 +508,7 @@ export const messages: Message[] = [
   {
     id: "msg-8",
     threadId: "thread-2",
-    senderId: "lm-1",
+    senderId: "mentor-1",
     content: "Just saw your updated resume. Really strong! A few quick thoughts: 1) Lead with impact metrics, 2) Add a 'Climate Interest' section, 3) The Spotify work translates really well to mission-driven companies. Let's discuss more in our session!",
     createdAt: daysAgo(2),
     readAt: daysAgo(2),
@@ -519,7 +519,7 @@ export const messages: Message[] = [
 export const notifications: Notification[] = [
   {
     id: "notif-1",
-    userId: "mentee-1",
+    userId: "seeker-1",
     type: "session-reminder",
     title: "Upcoming Session",
     body: "Your coaching session with Sarah Chen is in 2 days",
@@ -529,7 +529,7 @@ export const notifications: Notification[] = [
   },
   {
     id: "notif-2",
-    userId: "mentee-1",
+    userId: "seeker-1",
     type: "new-message",
     title: "New Message from Sarah Chen",
     body: "I saw that Persefoni just posted a Marketing Manager role...",
@@ -539,7 +539,7 @@ export const notifications: Notification[] = [
   },
   {
     id: "notif-3",
-    userId: "mentee-1",
+    userId: "seeker-1",
     type: "cohort-update",
     title: "January Cohort Update",
     body: "New resources added: 'Breaking into Climate Tech' guide",
@@ -589,20 +589,20 @@ export const resources: Resource[] = [
 ];
 
 // Helper functions
-export function getUserById(id: string): Coach | LightMentor | Mentee | undefined {
-  return [...coaches, ...lightMentors, ...mentees].find((u) => u.id === id);
+export function getUserById(id: string): CandidCoach | CandidMentor | CandidSeeker | undefined {
+  return [...coaches, ...mentors, ...seekers].find((u) => u.id === id);
 }
 
-export function getCoachById(id: string): Coach | undefined {
+export function getCoachById(id: string): CandidCoach | undefined {
   return coaches.find((c) => c.id === id);
 }
 
-export function getLightMentorById(id: string): LightMentor | undefined {
-  return lightMentors.find((lm) => lm.id === id);
+export function getMentorById(id: string): CandidMentor | undefined {
+  return mentors.find((m) => m.id === id);
 }
 
-export function getMenteeById(id: string): Mentee | undefined {
-  return mentees.find((m) => m.id === id);
+export function getSeekerById(id: string): CandidSeeker | undefined {
+  return seekers.find((s) => s.id === id);
 }
 
 export function getSessionsForUser(userId: string): Session[] {

@@ -1,6 +1,6 @@
 // Candid Platform Types
 
-export type UserRole = "mentee" | "light-mentor" | "coach";
+export type CandidRole = "seeker" | "mentor" | "coach";
 
 export type Sector =
   | "climate-tech"
@@ -16,12 +16,12 @@ export type SessionStatus = "scheduled" | "completed" | "cancelled" | "no-show";
 
 export type SessionType = "coaching" | "mock-interview" | "resume-review" | "career-planning" | "networking";
 
-export interface User {
+export interface CandidUser {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  role: CandidRole;
   avatar?: string;
   bio?: string;
   linkedIn?: string;
@@ -31,21 +31,23 @@ export interface User {
   isFoundingMember?: boolean;
 }
 
-export interface Mentee extends User {
-  role: "mentee";
+export interface CandidSeeker extends CandidUser {
+  role: "seeker";
   targetSectors: Sector[];
   currentRole?: string;
   currentCompany?: string;
   yearsExperience: number;
   goals: string[];
   skills: string[];
+  greenSkills?: string[];
+  certifications?: string[];
   cohort?: string;
   matchedCoachId?: string;
-  matchedLightMentorIds?: string[];
+  matchedMentorIds?: string[];
 }
 
-export interface LightMentor extends User {
-  role: "light-mentor";
+export interface CandidMentor extends CandidUser {
+  role: "mentor";
   sectors: Sector[];
   currentRole: string;
   currentCompany: string;
@@ -56,7 +58,7 @@ export interface LightMentor extends User {
   reviewCount?: number;
 }
 
-export interface Coach extends User {
+export interface CandidCoach extends CandidUser {
   role: "coach";
   sectors: Sector[];
   currentRole: string;
@@ -93,7 +95,7 @@ export interface Session {
   id: string;
   menteeId: string;
   mentorId: string;
-  mentorRole: "coach" | "light-mentor";
+  mentorRole: "coach" | "mentor";
   type: SessionType;
   status: SessionStatus;
   scheduledAt: Date;

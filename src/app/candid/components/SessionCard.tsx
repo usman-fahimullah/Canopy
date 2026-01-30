@@ -12,7 +12,7 @@ import { format, isToday, isTomorrow } from "date-fns";
 
 interface SessionCardProps {
   session: Session;
-  userRole: "mentee" | "mentor";
+  userRole: "seeker" | "mentor";
   className?: string;
 }
 
@@ -31,7 +31,7 @@ function formatSessionDate(date: Date): string {
 }
 
 export function SessionCard({ session, userRole, className }: SessionCardProps) {
-  const otherUserId = userRole === "mentee" ? session.mentorId : session.menteeId;
+  const otherUserId = userRole === "seeker" ? session.mentorId : session.menteeId;
   const otherUser = getUserById(otherUserId);
 
   const isUpcoming = session.status === "scheduled" && session.scheduledAt > new Date();

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Suspense, useState, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { coaches, lightMentors, getUserById } from "@/lib/candid";
-import { type Coach, type LightMentor, type SessionType, SECTOR_INFO } from "@/lib/candid/types";
+import { coaches, mentors, getUserById } from "@/lib/candid";
+import { type CandidCoach, type CandidMentor, type SessionType, SECTOR_INFO } from "@/lib/candid/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -113,12 +113,20 @@ const generateTimeSlots = (startHour: number = 9, endHour: number = 18, interval
 const timeSlots = generateTimeSlots();
 
 export default function ScheduleSessionPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#FAF9F7] to-[#E5F1FF]/30" />}>
+      <ScheduleSessionContent />
+    </Suspense>
+  );
+}
+
+function ScheduleSessionContent() {
   const searchParams = useSearchParams();
   const preSelectedMentorId = searchParams.get("mentor");
 
   const [step, setStep] = useState<Step>(preSelectedMentorId ? "datetime" : "mentor");
-  const [selectedMentor, setSelectedMentor] = useState<Coach | LightMentor | null>(
-    preSelectedMentorId ? (getUserById(preSelectedMentorId) as Coach | LightMentor) : null
+  const [selectedMentor, setSelectedMentor] = useState<CandidCoach | CandidMentor | null>(
+    preSelectedMentorId ? (getUserById(preSelectedMentorId) as CandidCoach | CandidMentor) : null
   );
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -128,7 +136,7 @@ export default function ScheduleSessionPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
-  const allMentors = useMemo(() => [...coaches, ...lightMentors], []);
+  const allMentors = useMemo(() => [...coaches, ...mentors], []);
   const filteredMentors = useMemo(() => {
     if (!searchQuery) return allMentors;
     const query = searchQuery.toLowerCase();

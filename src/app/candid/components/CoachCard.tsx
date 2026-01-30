@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { Coach, LightMentor } from "@/lib/candid/types";
+import type { CandidCoach, CandidMentor } from "@/lib/candid/types";
 import { SECTOR_INFO } from "@/lib/candid/types";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -18,7 +18,7 @@ import {
 } from "@phosphor-icons/react";
 
 interface CoachCardProps {
-  mentor: Coach | LightMentor;
+  mentor: CandidCoach | CandidMentor;
   variant?: "default" | "compact" | "featured";
   className?: string;
 }
@@ -253,11 +253,11 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
       )}
 
       {/* Pricing (Coach only) */}
-      {isCoach && (mentor as Coach).monthlyRate && (
+      {isCoach && (mentor as CandidCoach).monthlyRate && (
         <div className="mt-4 flex items-center justify-between rounded-lg bg-[var(--primitive-blue-200)] px-4 py-3">
           <span className="text-caption-strong text-[var(--primitive-green-800)]">Monthly coaching</span>
           <span className="text-body-strong text-[var(--primitive-green-800)]">
-            ${(mentor as Coach).monthlyRate}
+            ${(mentor as CandidCoach).monthlyRate}
           </span>
         </div>
       )}
