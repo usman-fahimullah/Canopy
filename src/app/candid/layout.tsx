@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { CandidNav } from "./components/CandidNav";
-import { CandidSidebar } from "./components/CandidSidebar";
+import { CandidLayoutInner } from "./components/CandidLayoutInner";
 
 export const metadata: Metadata = {
   title: "Candid - Climate Career Mentorship & Coaching",
@@ -13,18 +12,5 @@ export default function CandidLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className="min-h-screen bg-[#FAF9F7]">
-      {/* Desktop: Sidebar Navigation */}
-      <CandidSidebar />
-
-      {/* Mobile/Tablet: Top & Bottom Navigation */}
-      <div className="lg:hidden">
-        <CandidNav />
-      </div>
-
-      {/* Main Content - offset by sidebar on desktop */}
-      <main className="pb-20 lg:pb-0 lg:pl-[360px]">{children}</main>
-    </div>
-  );
+  return <CandidLayoutInner>{children}</CandidLayoutInner>;
 }

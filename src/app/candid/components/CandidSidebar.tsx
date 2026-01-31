@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { CandidLogo } from "./CandidLogo";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useSidebar } from "./SidebarContext";
 import {
   House,
   ChatCircle,
@@ -20,6 +21,8 @@ import {
   Note,
   Certificate,
   Folder,
+  CaretLeft,
+  CaretRight,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -77,6 +80,7 @@ const roleLabels: Record<CandidRole, string> = {
 export function CandidSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { collapsed, toggle } = useSidebar();
   const [user, setUser] = useState<UserData | null>(null);
   const [unreadMessages, setUnreadMessages] = useState(4);
   const [notificationCount, setNotificationCount] = useState(4);
@@ -159,38 +163,55 @@ export function CandidSidebar() {
   const displayName = user?.name || "User";
 
   return (
-    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[360px] flex-col border-r border-[var(--candid-nav-sidebar-border)] bg-white lg:flex">
+    <aside
+      className={cn(
+        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-[var(--candid-nav-sidebar-border)] bg-white transition-[width] duration-200 ease-in-out lg:flex",
+        collapsed ? "w-[72px]" : "w-[280px]"
+      )}
+    >
       {/* Logo */}
-      <div className="flex h-[108px] items-center justify-center border-b border-[var(--primitive-neutral-200)]">
+      <div className={cn(
+        "flex h-[72px] items-center border-b border-[var(--primitive-neutral-200)]",
+        collapsed ? "justify-center px-0" : "justify-center px-6"
+      )}>
         <Link href="/candid" className="transition-opacity hover:opacity-80">
-          <CandidLogo width={127} height={32} />
+          {collapsed ? (
+            <CandidLogo width={32} height={32} />
+          ) : (
+            <CandidLogo width={127} height={32} />
+          )}
         </Link>
       </div>
 
       {/* User Profile */}
       {user && (
-        <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-200)] px-6 py-4">
+        <div className={cn(
+          "flex items-center border-b border-[var(--primitive-neutral-200)]",
+          collapsed ? "justify-center px-0 py-4" : "gap-3 px-5 py-4"
+        )}>
           <Avatar
             size="default"
             src={user.avatar || undefined}
             name={displayName}
             color="green"
-            className="border-[var(--primitive-neutral-300)]"
+            className="shrink-0 border-[var(--primitive-neutral-300)]"
           />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-heading-sm font-medium text-foreground-default">
-              {displayName}
-            </p>
-            <p className="text-caption text-foreground-muted">
-              {roleLabels[user.role]}
-            </p>
-          </div>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-body-sm font-medium text-foreground-default">
+                {displayName}
+              </p>
+              <p className="text-caption text-foreground-muted">
+                {roleLabels[user.role]}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Role Switcher (if user has multiple roles) */}
-      {user && user.roles.length > 1 && (
-        <div className="border-b border-[var(--primitive-neutral-200)] px-6 py-3">
+      {/* Role Switcher (if user has multiple roles) - hidden when collapsed */}
+      {!collapsed && user && user.roles.length > 1 && (
+        <div className="border-b border-[var(--primitive-neutral-200)] px-5 py-3">
           <p className="px-1 pb-2 text-caption font-medium text-foreground-muted">
             Switch View
           </p>
@@ -223,7 +244,10 @@ export function CandidSidebar() {
       {/* Main Navigation */}
       <nav className="flex-1 overflow-y-auto">
         {/* Primary Nav */}
-        <div className="border-b border-[var(--primitive-neutral-200)] px-4 py-3 space-y-1">
+        <div className={cn(
+          "border-b border-[var(--primitive-neutral-200)] py-3 space-y-1",
+          collapsed ? "px-2" : "px-3"
+        )}>
           {mainNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
@@ -236,8 +260,10 @@ export function CandidSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                title={collapsed ? item.label : undefined}
                 className={cn(
-                  "relative flex h-12 items-center gap-3 rounded-lg px-4 py-3 text-body transition-all duration-150",
+                  "relative flex h-11 items-center gap-3 rounded-lg px-3 text-body-sm transition-all duration-150",
+                  collapsed && "justify-center px-0",
                   isActive && isMessages
                     ? "bg-[var(--primitive-blue-100)] font-bold text-[var(--candid-foreground-brand)]"
                     : isActive
@@ -245,17 +271,25 @@ export function CandidSidebar() {
                       : "font-normal text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
                 )}
               >
-                <Icon size={24} weight={isActive ? "fill" : "regular"} />
-                {item.label}
-                {showNotificationBadge && (
-                  <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded px-0.5 bg-[var(--primitive-red-500)] text-[14px] font-bold leading-5 text-white">
-                    {notificationCount > 9 ? "9+" : notificationCount}
-                  </span>
+                <Icon size={22} weight={isActive ? "fill" : "regular"} className="shrink-0" />
+                {!collapsed && (
+                  <>
+                    {item.label}
+                    {showNotificationBadge && (
+                      <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded px-0.5 bg-[var(--primitive-red-500)] text-[12px] font-bold leading-5 text-white">
+                        {notificationCount > 9 ? "9+" : notificationCount}
+                      </span>
+                    )}
+                    {showMessagesBadge && (
+                      <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded px-0.5 bg-[var(--primitive-red-500)] text-[12px] font-bold leading-5 text-white">
+                        {unreadMessages > 9 ? "9+" : unreadMessages}
+                      </span>
+                    )}
+                  </>
                 )}
-                {showMessagesBadge && (
-                  <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded px-0.5 bg-[var(--primitive-red-500)] text-[14px] font-bold leading-5 text-white">
-                    {unreadMessages > 9 ? "9+" : unreadMessages}
-                  </span>
+                {/* Dot indicator when collapsed with badges */}
+                {collapsed && (showNotificationBadge || showMessagesBadge) && (
+                  <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--primitive-red-500)]" />
                 )}
               </Link>
             );
@@ -263,10 +297,15 @@ export function CandidSidebar() {
         </div>
 
         {/* Mentee Tools Section */}
-        <div className="border-b border-[var(--primitive-neutral-200)] px-4 py-3 space-y-1">
-          <p className="px-4 py-2 text-caption-strong font-bold text-foreground-muted">
-            Mentee Tools
-          </p>
+        <div className={cn(
+          "border-b border-[var(--primitive-neutral-200)] py-3 space-y-1",
+          collapsed ? "px-2" : "px-3"
+        )}>
+          {!collapsed && (
+            <p className="px-3 py-2 text-caption-strong font-bold text-foreground-muted">
+              Mentee Tools
+            </p>
+          )}
           {menteeToolsNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
@@ -275,15 +314,17 @@ export function CandidSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                title={collapsed ? item.label : undefined}
                 className={cn(
-                  "flex h-12 items-center gap-3 rounded-lg px-4 py-3 text-body transition-all duration-150",
+                  "flex h-11 items-center gap-3 rounded-lg px-3 text-body-sm transition-all duration-150",
+                  collapsed && "justify-center px-0",
                   isActive
                     ? "bg-[var(--candid-nav-sidebar-item-active)] font-bold text-[var(--candid-foreground-brand)]"
                     : "font-normal text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
                 )}
               >
-                <Icon size={24} weight={isActive ? "fill" : "regular"} />
-                {item.label}
+                <Icon size={22} weight={isActive ? "fill" : "regular"} className="shrink-0" />
+                {!collapsed && item.label}
               </Link>
             );
           })}
@@ -291,25 +332,50 @@ export function CandidSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-3 space-y-1">
+      <div className={cn(
+        "py-3 space-y-1",
+        collapsed ? "px-2" : "px-3"
+      )}>
         <Link
           href="/candid/settings"
+          title={collapsed ? "Settings" : undefined}
           className={cn(
-            "flex h-12 items-center gap-3 rounded-lg px-4 py-3 text-body transition-all duration-150",
+            "flex h-11 items-center gap-3 rounded-lg px-3 text-body-sm transition-all duration-150",
+            collapsed && "justify-center px-0",
             pathname === "/candid/settings" || pathname.startsWith("/candid/settings/")
               ? "bg-[var(--candid-nav-sidebar-item-active)] font-bold text-[var(--candid-foreground-brand)]"
               : "font-normal text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
           )}
         >
-          <Gear size={24} weight={pathname.startsWith("/candid/settings") ? "fill" : "regular"} />
-          Setting
+          <Gear size={22} weight={pathname.startsWith("/candid/settings") ? "fill" : "regular"} className="shrink-0" />
+          {!collapsed && "Settings"}
         </Link>
         <button
           onClick={handleSignOut}
-          className="flex h-12 w-full items-center gap-3 rounded-lg px-4 py-3 text-body font-normal text-[var(--primitive-red-500)] hover:bg-[var(--primitive-red-100)] transition-all duration-150"
+          title={collapsed ? "Log out" : undefined}
+          className={cn(
+            "flex h-11 w-full items-center gap-3 rounded-lg px-3 text-body-sm font-normal text-[var(--primitive-red-500)] hover:bg-[var(--primitive-red-100)] transition-all duration-150",
+            collapsed && "justify-center px-0"
+          )}
         >
-          <SignOut size={24} />
-          Log out
+          <SignOut size={22} className="shrink-0" />
+          {!collapsed && "Log out"}
+        </button>
+
+        {/* Collapse toggle */}
+        <button
+          onClick={toggle}
+          className="flex h-11 w-full items-center gap-3 rounded-lg px-3 text-body-sm font-normal text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default transition-all duration-150 justify-center"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <CaretRight size={18} weight="bold" />
+          ) : (
+            <>
+              <CaretLeft size={18} weight="bold" className="shrink-0" />
+              <span className="text-caption">Collapse</span>
+            </>
+          )}
         </button>
       </div>
     </aside>
