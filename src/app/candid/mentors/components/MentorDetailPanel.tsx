@@ -10,6 +10,9 @@ import {
   ChatCircle,
   Crosshair,
   ClipboardText,
+  BookOpen,
+  Leaf,
+  Lightning,
 } from "@phosphor-icons/react";
 import { MatchBadge } from "./MatchBadge";
 import { WhyItsFit } from "./WhyItsFit";
@@ -102,8 +105,73 @@ export function MentorDetailPanel({
             </div>
           </div>
 
-          {/* Why it's a fit */}
-          <WhyItsFit reasons={mentor.matchReasons} />
+          {/* Why it's a fit — or fallback content */}
+          {mentor.matchReasons.length > 0 ? (
+            <WhyItsFit reasons={mentor.matchReasons} />
+          ) : (
+            <>
+              {/* Can help with — mentor topics */}
+              {mentor.mentorTopics.length > 0 && (
+                <section className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Lightning
+                      size={20}
+                      weight="fill"
+                      className="text-[var(--primitive-yellow-500)]"
+                    />
+                    <h2 className="text-body-strong font-semibold text-foreground-default">
+                      Can help with
+                    </h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {mentor.mentorTopics.map((topic) => (
+                      <span
+                        key={topic}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--primitive-green-100)] px-3 py-1.5 text-caption font-medium text-[var(--primitive-green-700)]"
+                      >
+                        <BookOpen size={14} />
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Skills & expertise */}
+              {(mentor.skills.length > 0 || mentor.greenSkills.length > 0) && (
+                <section className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Leaf
+                      size={20}
+                      weight="fill"
+                      className="text-[var(--primitive-green-600)]"
+                    />
+                    <h2 className="text-body-strong font-semibold text-foreground-default">
+                      Expertise
+                    </h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {mentor.greenSkills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center rounded-lg bg-[var(--primitive-green-100)] px-3 py-1.5 text-caption font-medium text-[var(--primitive-green-700)]"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                    {mentor.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center rounded-lg bg-[var(--primitive-neutral-200)] px-3 py-1.5 text-caption font-medium text-foreground-muted"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
 
           {/* About Section */}
           {mentor.bio && (
