@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { SessionCard } from "../components";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -10,15 +11,18 @@ import { Avatar } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Alert } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   CalendarBlank,
   CalendarPlus,
+  CalendarX,
   Clock,
   CheckCircle,
   Funnel,
   VideoCamera,
   X,
+  ArrowClockwise,
 } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from "date-fns";
 
@@ -112,6 +116,7 @@ function SessionListCard({ session, userRole }: { session: Session; userRole: "s
 }
 
 export default function SessionsPage() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -119,28 +124,29 @@ export default function SessionsPage() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        setLoading(true);
-        const params = new URLSearchParams();
-        if (filterStatus !== "all") params.set("status", filterStatus);
+  const fetchSessions = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams();
+      if (filterStatus !== "all") params.set("status", filterStatus);
 
-        const response = await fetch(`/api/sessions?${params.toString()}`);
-        if (!response.ok) throw new Error("Failed to fetch sessions");
+      const response = await fetch(`/api/sessions?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch sessions");
 
-        const data = await response.json();
-        setSessions(data.sessions || []);
-      } catch (err) {
-        console.error("Error fetching sessions:", err);
-        setError("Failed to load sessions");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSessions();
+      const data = await response.json();
+      setSessions(data.sessions || []);
+    } catch (err) {
+      console.error("Error fetching sessions:", err);
+      setError("Failed to load sessions");
+    } finally {
+      setLoading(false);
+    }
   }, [filterStatus]);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
 
   const filteredSessions = sessions.filter((session) => {
     if (filterStatus === "all") return true;
@@ -208,9 +214,17 @@ export default function SessionsPage() {
 
       {/* Error State */}
       {error && (
-        <div className="mb-6 rounded-lg bg-[var(--primitive-red-50)] p-4 text-[var(--primitive-red-600)]">
-          {error}
-        </div>
+        <Alert
+          variant="critical"
+          title="Couldn't load sessions"
+          actionLabel="Retry"
+          onAction={fetchSessions}
+          dismissible
+          onDismiss={() => setError(null)}
+          className="mb-6"
+        >
+          Check your connection and try again.
+        </Alert>
       )}
 
       {/* Filters & View Toggle */}
@@ -219,34 +233,25 @@ export default function SessionsPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <Funnel size={16} className="text-foreground-muted" />
           {(["all", "SCHEDULED", "COMPLETED", "CANCELLED"] as FilterStatus[]).map((status) => (
-            <Button
+            <Chip
               key={status}
-              variant={filterStatus === status ? "secondary" : "tertiary"}
+              variant={filterStatus === status ? "primary" : "neutral"}
               size="sm"
+              selected={filterStatus === status}
               onClick={() => setFilterStatus(status)}
             >
               {status === "all" ? "All" : status.charAt(0) + status.slice(1).toLowerCase()}
-            </Button>
+            </Chip>
           ))}
         </div>
 
         {/* View Toggle */}
-        <div className="flex items-center gap-1">
-          <Button
-            variant={viewMode === "list" ? "secondary" : "tertiary"}
-            size="sm"
-            onClick={() => setViewMode("list")}
-          >
-            List
-          </Button>
-          <Button
-            variant={viewMode === "calendar" ? "secondary" : "tertiary"}
-            size="sm"
-            onClick={() => setViewMode("calendar")}
-          >
-            Calendar
-          </Button>
-        </div>
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+          <TabsList>
+            <TabsTrigger value="list">List</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {viewMode === "list" ? (
@@ -256,7 +261,7 @@ export default function SessionsPage() {
           {upcomingSessions.length > 0 && (
             <section>
               <div className="mb-4 flex items-center gap-2">
-                <Clock size={18} className="text-[var(--primitive-green-800)]" />
+                <Clock size={18} className="text-foreground-brand" />
                 <h2 className="text-heading-sm font-semibold text-foreground-default">
                   Upcoming Sessions
                 </h2>
@@ -292,22 +297,36 @@ export default function SessionsPage() {
             </section>
           )}
 
-          {/* Empty State */}
-          {filteredSessions.length === 0 && (
+          {/* Empty State - only show if no error */}
+          {filteredSessions.length === 0 && !error && (
             <Card className="p-12">
               <EmptyState
-                preset="inbox"
+                icon={
+                  <CalendarX
+                    size={32}
+                    weight="duotone"
+                    className="text-foreground-muted"
+                  />
+                }
                 title="No sessions found"
                 description={
                   filterStatus === "all"
-                    ? "Book your first session to get started"
-                    : `No ${filterStatus.toLowerCase()} sessions`
+                    ? "Book your first session with a coach to get started on your journey"
+                    : `You don't have any ${filterStatus.toLowerCase()} sessions`
                 }
                 action={{
                   label: "Browse Coaches",
-                  onClick: () => {},
+                  onClick: () => router.push("/candid/browse"),
                   icon: <CalendarPlus size={16} />,
                 }}
+                secondaryAction={
+                  filterStatus !== "all"
+                    ? {
+                        label: "Clear filters",
+                        onClick: () => setFilterStatus("all"),
+                      }
+                    : undefined
+                }
               />
             </Card>
           )}
@@ -359,16 +378,16 @@ export default function SessionsPage() {
                     key={day.toISOString()}
                     className={`relative aspect-square rounded-lg p-1 ${
                       isToday(day)
-                        ? "bg-[var(--primitive-blue-200)]"
+                        ? "bg-background-info"
                         : hasSession
-                        ? "bg-[var(--background-subtle)]"
-                        : "hover:bg-[var(--background-subtle)]"
+                        ? "bg-background-subtle"
+                        : "hover:bg-background-subtle"
                     }`}
                   >
                     <div
                       className={`text-center text-caption ${
                         isToday(day)
-                          ? "font-semibold text-[var(--primitive-green-800)]"
+                          ? "font-semibold text-foreground-brand"
                           : "text-foreground-default"
                       }`}
                     >
@@ -382,10 +401,10 @@ export default function SessionsPage() {
                               key={session.id}
                               className={`h-1.5 w-1.5 rounded-full ${
                                 session.status === "SCHEDULED"
-                                  ? "bg-[var(--primitive-green-800)]"
+                                  ? "bg-background-brand-emphasis"
                                   : session.status === "COMPLETED"
-                                  ? "bg-[var(--primitive-green-500)]"
-                                  : "bg-[var(--primitive-red-500)]"
+                                  ? "bg-background-success-emphasis"
+                                  : "bg-background-error-emphasis"
                               }`}
                             />
                           ))}
@@ -399,17 +418,17 @@ export default function SessionsPage() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center justify-center gap-4 border-t border-[var(--border-default)] p-3">
+          <div className="flex items-center justify-center gap-4 border-t border-border-default p-3">
             <div className="flex items-center gap-1.5">
-              <div className="h-2 w-2 rounded-full bg-[var(--primitive-green-800)]" />
+              <div className="h-2 w-2 rounded-full bg-background-brand-emphasis" />
               <span className="text-caption text-foreground-muted">Scheduled</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-2 w-2 rounded-full bg-[var(--primitive-green-500)]" />
+              <div className="h-2 w-2 rounded-full bg-background-success-emphasis" />
               <span className="text-caption text-foreground-muted">Completed</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-2 w-2 rounded-full bg-[var(--primitive-red-500)]" />
+              <div className="h-2 w-2 rounded-full bg-background-error-emphasis" />
               <span className="text-caption text-foreground-muted">Cancelled</span>
             </div>
           </div>
