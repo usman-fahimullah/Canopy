@@ -173,9 +173,13 @@ model SeekerProfile {
   aiSummary       String?  @db.Text
 
   // Mentorship (peer-to-peer, pro-bono)
-  isMentor        Boolean  @default(false)
-  mentorBio       String?  @db.Text
-  mentorTopics    String[]
+  isMentor          Boolean  @default(false)
+  mentorBio         String?  @db.Text
+  mentorTopics      String[]
+  mentorSpecialty   String?            // Primary expertise area (e.g., "Clean Product Development")
+  mentorBadge       String?            // "top_mentor" | "quick_responder" | "featured"
+  mentorRating      Float?   @default(0)
+  mentorReviewCount Int      @default(0)
 
   // Sector interests (for matching)
   targetSectors   String[]
@@ -187,6 +191,8 @@ model SeekerProfile {
   // Mentorship relations
   mentorAssignmentsAsMentor MentorAssignment[] @relation("MentorSide")
   mentorAssignmentsAsMentee MentorAssignment[] @relation("MenteeSide")
+  mentorReviewsGiven        MentorReview[]     @relation("MentorReviewsByMentee")
+  mentorReviewsReceived     MentorReview[]     @relation("MentorReviewsReceived")
   coachAssignmentsAsSeeker  CoachAssignment[]
 
   // Coaching session relations
@@ -298,6 +304,8 @@ model MentorAssignment {
   endedAt    DateTime?
   notes      String?          @db.Text
 
+  reviews    MentorReview[]
+
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
 
@@ -309,6 +317,30 @@ enum MentorshipStatus {
   ACTIVE
   PAUSED
   COMPLETED
+}
+
+// =================================================================
+// MENTOR REVIEW — Post-mentorship feedback from mentee.
+// =================================================================
+
+model MentorReview {
+  id            String   @id @default(cuid())
+
+  assignmentId  String
+  assignment    MentorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  menteeId      String
+  mentee        SeekerProfile @relation("MentorReviewsByMentee", fields: [menteeId], references: [id], onDelete: Cascade)
+
+  mentorId      String
+  mentor        SeekerProfile @relation("MentorReviewsReceived", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  rating        Int       // 1-5
+  comment       String?   @db.Text
+
+  createdAt     DateTime  @default(now())
+
+  @@unique([assignmentId, menteeId])
 }
 
 // =================================================================
@@ -350,6 +382,7 @@ enum CoachingStatus {
 
 model Session {
   id              String        @id @default(cuid())
+  title           String?       // e.g., "1:1 Overview Session", "Resume Review"
 
   coachId         String
   coach           CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
