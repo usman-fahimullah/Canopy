@@ -19,5 +19,6 @@ export { EmptyState, InlineEmptyState } from "./EmptyState";
 // New MVP components
 export { PageContainer, PageSection } from "./PageContainer";
 export { SaatheStudioCard } from "./SaatheStudioCard";
+export { MyCoachCard } from "./MyCoachCard";
 export { GettingStartedChecklist } from "./GettingStartedChecklist";
 export { JobMatchesWidget } from "./JobMatchesWidget";

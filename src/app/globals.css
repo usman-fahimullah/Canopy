@@ -1406,6 +1406,18 @@
     --candid-nav-item-hover: var(--primitive-blue-100);
     --candid-nav-item-active: var(--primitive-blue-200);
 
+    /* Candid sidebar-specific (Figma node 785:6083) */
+    --candid-nav-sidebar-item-active: var(--primitive-blue-100);
+    --candid-nav-sidebar-border: var(--primitive-neutral-200);
+
+    /* Candid schedule panel (Figma node 785:6238) */
+    --candid-schedule-border: var(--primitive-neutral-200);
+    --candid-schedule-card-today-bg: var(--primitive-green-800);
+    --candid-schedule-card-today-text: var(--primitive-blue-100);
+    --candid-schedule-card-future-bg: var(--primitive-blue-200);
+    --candid-schedule-card-future-text: var(--primitive-green-800);
+    --candid-schedule-card-empty-bg: var(--primitive-neutral-100);
+
     /* ============================================
        DENSITY
        ============================================ */

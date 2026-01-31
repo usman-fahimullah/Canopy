@@ -5,7 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   CoachCard,
-  SaatheStudioCard,
+  MyCoachCard,
   GettingStartedChecklist,
   JobMatchesWidget,
 } from "../components";
@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SECTOR_INFO, type Sector, type CandidCoach } from "@/lib/candid/types";
 import {
   CalendarBlank,
+  CalendarDots,
   ChatCircle,
   CaretRight,
   MagnifyingGlass,
@@ -29,6 +30,7 @@ import { format, isToday, isTomorrow, isSameDay } from "date-fns";
 
 interface Session {
   id: string;
+  title: string | null;
   scheduledAt: string;
   duration: number;
   status: string;
@@ -187,23 +189,52 @@ export default function DashboardPage() {
     return format(date, "EEE, MMM d");
   };
 
-  // Group sessions by date for schedule
+  // Group sessions by date for schedule — fills gaps between days
   const groupSessionsByDate = () => {
-    const groups: { label: string; date: Date; sessions: Session[] }[] = [];
+    const groups: { label: string; date: Date; sessions: Session[]; isToday: boolean }[] = [];
 
+    if (data.upcomingSessions.length === 0) {
+      // No sessions — show today as empty
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return [{ label: "Today", date: today, sessions: [], isToday: true }];
+    }
+
+    // Build a map of date → sessions
+    const sessionMap = new Map<string, Session[]>();
     data.upcomingSessions.forEach((session) => {
-      const sessionDate = new Date(session.scheduledAt);
-      sessionDate.setHours(0, 0, 0, 0);
-
-      const label = formatScheduleDate(sessionDate);
-
-      const existingGroup = groups.find((g) => isSameDay(g.date, sessionDate));
-      if (existingGroup) {
-        existingGroup.sessions.push(session);
-      } else {
-        groups.push({ label, date: sessionDate, sessions: [session] });
-      }
+      const d = new Date(session.scheduledAt);
+      const key = format(d, "yyyy-MM-dd");
+      const existing = sessionMap.get(key) || [];
+      existing.push(session);
+      sessionMap.set(key, existing);
     });
+
+    // Determine date range: today → last session day
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastSessionDate = new Date(
+      data.upcomingSessions[data.upcomingSessions.length - 1].scheduledAt
+    );
+    lastSessionDate.setHours(0, 0, 0, 0);
+
+    // Fill each day from today to the last session date
+    const cursor = new Date(today);
+    while (cursor <= lastSessionDate) {
+      const key = format(cursor, "yyyy-MM-dd");
+      const daySessions = sessionMap.get(key) || [];
+      const dayIsToday = isSameDay(cursor, today);
+
+      groups.push({
+        label: formatScheduleDate(cursor),
+        date: new Date(cursor),
+        sessions: daySessions,
+        isToday: dayIsToday,
+      });
+
+      cursor.setDate(cursor.getDate() + 1);
+    }
 
     return groups;
   };
@@ -386,12 +417,12 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Your Coaching Partner - Saathe Studio */}
+          {/* My Coach */}
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-heading-sm text-foreground-default">Your Coaching Partner</h2>
+              <h2 className="text-heading-sm text-foreground-default">My Coach</h2>
             </div>
-            <SaatheStudioCard variant="featured" />
+            <MyCoachCard />
           </section>
 
           {/* Jobs for You - Green Jobs Board Integration */}
@@ -402,113 +433,112 @@ export default function DashboardPage() {
       </div>
 
       {/* Right Sidebar - Schedule (Large Desktop only) */}
-      <aside className="hidden xl:block w-[320px] flex-shrink-0 border-l border-[var(--border-default)] bg-white">
+      <aside className="hidden xl:block w-[375px] flex-shrink-0 border-l border-[var(--candid-schedule-border)] bg-white">
         <div className="sticky top-0 h-screen overflow-y-auto">
           {/* Schedule Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-default)]">
-            <h2 className="text-heading-sm text-foreground-default">Your Schedule</h2>
-            <Button variant="outline" size="sm">Today</Button>
+          <div className="flex h-[108px] items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6">
+            <h2 className="text-heading-sm font-medium text-foreground-default">Your Schedule</h2>
+            <button className="flex items-center justify-center rounded-[16px] bg-[var(--primitive-neutral-200)] p-2.5 transition-colors hover:bg-[var(--primitive-neutral-300)]">
+              <CalendarDots size={20} weight="regular" />
+            </button>
           </div>
 
           {/* Schedule Content */}
-          <div className="p-5">
-            {sessionGroups.length > 0 ? (
-              <div className="space-y-6">
-                {sessionGroups.map((group) => {
-                  const isGroupToday = group.label === "Today";
-
-                  return (
-                    <div key={group.label}>
-                      {/* Date Header */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className={cn(
-                          "text-body-strong",
-                          isGroupToday ? "text-[var(--primitive-green-700)]" : "text-foreground-default"
-                        )}>
-                          {group.label}
-                        </span>
-                        {isGroupToday && (
-                          <span className="text-caption text-foreground-muted">
-                            {format(new Date(), "MMM d")}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Sessions for this date */}
-                      <div className="space-y-3">
-                        {group.sessions.map((session) => {
-                          const sessionDate = new Date(session.scheduledAt);
-                          const endTime = new Date(sessionDate.getTime() + session.duration * 60000);
-
-                          return (
-                            <div
-                              key={session.id}
-                              className={cn(
-                                "rounded-lg border p-4",
-                                isGroupToday
-                                  ? "border-[var(--primitive-green-300)] bg-[var(--primitive-green-50)]"
-                                  : "border-[var(--border-default)] bg-white"
-                              )}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-caption text-foreground-muted">
-                                  {format(sessionDate, "h:mm a")} - {format(endTime, "h:mm a")}
-                                </span>
-                              </div>
-                              <p className="text-body-strong text-foreground-default mb-3">
-                                {session.coach.firstName} {session.coach.lastName}
-                              </p>
-                              {isGroupToday && session.meetingLink ? (
-                                <Button variant="primary" size="sm" className="w-full" asChild>
-                                  <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
-                                    Join Session
-                                  </a>
-                                </Button>
-                              ) : (
-                                <Button variant="outline" size="sm" className="w-full" asChild>
-                                  <Link href="/candid/sessions">
-                                    View Details
-                                  </Link>
-                                </Button>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              /* Empty State */
-              <div className="text-center py-8">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
-                  <CalendarBlank size={32} className="text-[var(--primitive-green-700)]" />
+          <div>
+            {sessionGroups.map((group) => (
+              <div key={group.label} className="border-b border-[var(--primitive-neutral-200)] px-6 py-3">
+                {/* Date Header */}
+                <div className="mb-4 flex items-center gap-2">
+                  <span className="text-body font-normal text-foreground-default">
+                    {group.isToday ? format(group.date, "EEEE") : group.label}
+                  </span>
+                  {group.isToday && (
+                    <span className="rounded-lg bg-[var(--primitive-neutral-200)] px-2 py-1 text-caption font-medium">
+                      Today
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-body-strong text-foreground-default mb-1">
-                  No upcoming sessions
-                </h3>
-                <p className="text-caption text-foreground-muted mb-4">
-                  Book time with Saathe Studio to continue your journey
-                </p>
-                <Button variant="primary" size="sm" asChild>
-                  <Link href="/candid/sessions/schedule">
-                    Book Session
-                  </Link>
-                </Button>
-              </div>
-            )}
 
-            {/* View All Sessions Link */}
-            {data.upcomingSessions.length > 0 && (
-              <Link
-                href="/candid/sessions"
-                className={cn(buttonVariants({ variant: "link" }), "w-full justify-center mt-6")}
-              >
-                View All Sessions
-                <CaretRight size={14} />
-              </Link>
-            )}
+                {/* Sessions or Empty Card */}
+                {group.sessions.length > 0 ? (
+                  <div className="space-y-4">
+                    {group.sessions.map((session) => {
+                      const sessionDate = new Date(session.scheduledAt);
+                      const endTime = new Date(sessionDate.getTime() + session.duration * 60000);
+                      const roleLabel = session.coach.headline?.toLowerCase().includes("mentor") ? "Mentor" : "Coach";
+
+                      if (group.isToday) {
+                        /* Today's session card — DARK GREEN */
+                        return (
+                          <div
+                            key={session.id}
+                            className="space-y-4 rounded-lg bg-[var(--candid-schedule-card-today-bg)] p-3"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-caption-strong text-[var(--candid-schedule-card-today-text)]">
+                                  {format(sessionDate, "h:mma")} - {format(endTime, "h:mma")}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  <span className="h-2 w-2 rounded-full bg-[var(--primitive-green-400)]" />
+                                  <span className="text-caption text-[var(--candid-schedule-card-today-text)]">
+                                    Your {roleLabel}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-body text-[var(--candid-schedule-card-today-text)]">
+                                {session.title || "1:1 Session"}
+                              </p>
+                            </div>
+                            <Button variant="inverse" className="w-full" asChild>
+                              <a href={session.meetingLink || "#"} target="_blank" rel="noopener noreferrer">
+                                <VideoCamera size={20} weight="fill" />
+                                Join Meeting
+                              </a>
+                            </Button>
+                          </div>
+                        );
+                      }
+
+                      /* Future session card — BLUE */
+                      return (
+                        <div
+                          key={session.id}
+                          className="space-y-4 rounded-lg bg-[var(--candid-schedule-card-future-bg)] p-3"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-caption-strong text-[var(--candid-schedule-card-future-text)]">
+                                {format(sessionDate, "h:mma")} - {format(endTime, "h:mma")}
+                              </span>
+                              <span className="text-caption text-[var(--candid-schedule-card-future-text)]">
+                                {roleLabel}
+                              </span>
+                            </div>
+                            <p className="text-body text-[var(--candid-schedule-card-future-text)]">
+                              {session.title || "1:1 Session"}
+                            </p>
+                          </div>
+                          <Button variant="inverse" className="w-full" asChild>
+                            <a href={session.meetingLink || "#"} target="_blank" rel="noopener noreferrer">
+                              <VideoCamera size={20} weight="fill" />
+                              Join Meeting
+                            </a>
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Empty day card */
+                  <div className="flex h-[240px] items-center justify-center rounded-lg bg-[var(--candid-schedule-card-empty-bg)]">
+                    <p className="text-heading-sm font-medium text-foreground-default">
+                      No sessions today
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </aside>

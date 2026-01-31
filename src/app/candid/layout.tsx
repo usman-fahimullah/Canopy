@@ -24,7 +24,7 @@ export default function CandidLayout({
       </div>
 
       {/* Main Content - offset by sidebar on desktop */}
-      <main className="pb-20 lg:pb-0 lg:pl-[260px]">{children}</main>
+      <main className="pb-20 lg:pb-0 lg:pl-[360px]">{children}</main>
     </div>
   );
 }
