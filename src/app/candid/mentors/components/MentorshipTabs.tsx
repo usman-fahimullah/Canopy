@@ -34,7 +34,6 @@ export function MentorshipTabs({
       options={tabOptions}
       value={activeTab}
       onValueChange={(v) => onTabChange(v as MentorshipTabType)}
-      fullWidth
       aria-label="Mentorship navigation"
     />
   );

@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
         mentorTopics: m.mentorTopics,
         skills: m.skills,
         greenSkills: m.greenSkills,
-        yearsExperience: m.yearsExperience,
+        experienceYears: m.yearsExperience,
         menteeCount: m._count.mentorAssignmentsAsMentor,
         rating: m.mentorRating || 0,
         badge: m.mentorBadge || null,

@@ -127,11 +127,13 @@ function MentorsContent() {
   return (
     <div className="h-[calc(100vh-5rem)] lg:h-screen flex flex-col">
       {/* Page Header */}
-      <div className="px-6 pt-6 pb-4 border-b border-[var(--primitive-neutral-200)] bg-white shrink-0">
-        <h1 className="text-heading-md font-semibold text-foreground-default mb-4">
-          Mentorship
-        </h1>
-        <MentorshipTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="px-6 pt-5 pb-4 border-b border-[var(--primitive-neutral-200)] bg-white shrink-0">
+        <div className="flex items-center gap-6">
+          <h1 className="text-heading-sm font-bold text-foreground-default shrink-0">
+            Mentorship
+          </h1>
+          <MentorshipTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
       </div>
 
       {/* Tab Content */}

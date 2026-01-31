@@ -125,26 +125,21 @@ export function MentorDetailPanel({
           )}
         </div>
 
-        {/* Spacer for sticky CTA */}
-        <div className="h-24" />
       </div>
 
       {/* Sticky CTA */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <div className="h-8 bg-gradient-to-t from-[var(--background-subtle)] to-transparent pointer-events-none" />
-        <div className="bg-[var(--background-subtle)] px-6 pb-6 pt-2">
-          <div className="max-w-2xl mx-auto">
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full bg-[var(--primitive-green-800)] hover:bg-[var(--primitive-green-700)] text-white rounded-xl h-14 text-body font-semibold"
-              onClick={() => onSendIntro(mentor.accountId)}
-              loading={sending}
-            >
-              <ChatCircle size={18} weight="fill" className="mr-2" />
-              Send intro message
-            </Button>
-          </div>
+      <div className="shrink-0 border-t border-border-muted bg-[var(--background-subtle)]">
+        <div className="max-w-2xl mx-auto px-6 py-4">
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full bg-[var(--primitive-green-800)] hover:bg-[var(--primitive-green-700)] text-white rounded-xl h-14 text-body font-semibold"
+            onClick={() => onSendIntro(mentor.accountId)}
+            loading={sending}
+          >
+            <ChatCircle size={18} weight="fill" className="mr-2" />
+            Send intro message
+          </Button>
         </div>
       </div>
     </div>
