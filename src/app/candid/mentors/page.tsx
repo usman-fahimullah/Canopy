@@ -147,7 +147,7 @@ function MentorsContent() {
               }`}
             >
               {/* Search & Filters */}
-              <div className="px-6 py-4 border-b border-[var(--primitive-neutral-200)] space-y-3">
+              <div className="px-6 py-4 border-b border-[var(--primitive-neutral-200)] bg-white space-y-3">
                 <SearchInput
                   placeholder="Search mentors"
                   value={searchQuery}
