@@ -71,13 +71,13 @@ export function GettingStartedChecklist({
     {
       id: "jobs",
       label: "Save jobs that interest you",
-      description: "Explore opportunities on Green Jobs Board",
-      href: "https://greenjobsboard.us",
+      description: "Explore climate job opportunities",
+      href: "/candid/jobs",
       completed: false,
     },
   ]);
 
-  // Check completion status from localStorage or API
+  // Check completion status from API with localStorage fallback
   useEffect(() => {
     const checkCompletion = async () => {
       // Check localStorage for dismissed state
@@ -87,7 +87,39 @@ export function GettingStartedChecklist({
         return;
       }
 
-      // Check localStorage for completed items
+      try {
+        // Fetch actual completion status from API
+        const response = await fetch("/api/checklist");
+        if (response.ok) {
+          const data = await response.json();
+          // Map API response to our items
+          const apiCompletedIds = data.items
+            .filter((item: { completed: boolean }) => item.completed)
+            .map((item: { id: string }) => {
+              // Map API IDs to our component IDs
+              const idMapping: Record<string, string> = {
+                complete_profile: "profile",
+                set_goals: "sectors",
+                book_session: "session",
+                browse_jobs: "jobs",
+                connect_mentor: "mentors",
+              };
+              return idMapping[item.id] || item.id;
+            });
+
+          setItems((prev) =>
+            prev.map((item) => ({
+              ...item,
+              completed: apiCompletedIds.includes(item.id),
+            }))
+          );
+          return;
+        }
+      } catch (error) {
+        console.error("Error fetching checklist from API:", error);
+      }
+
+      // Fallback to localStorage if API fails
       const completedItems = localStorage.getItem("candid-checklist-completed");
       if (completedItems) {
         const completed = JSON.parse(completedItems) as string[];
@@ -98,14 +130,6 @@ export function GettingStartedChecklist({
           }))
         );
       }
-
-      // TODO: Fetch actual completion status from API
-      // const response = await fetch("/api/user/checklist");
-      // const data = await response.json();
-      // setItems(prev => prev.map(item => ({
-      //   ...item,
-      //   completed: data.completed.includes(item.id),
-      // })));
     };
 
     checkCompletion();

@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 
+// Helper function to parse years of experience string into a number
+function parseYearsExperience(yearsExp: string): number | null {
+  const mapping: Record<string, number> = {
+    "less-than-1": 0,
+    "1-3": 2,
+    "3-7": 5,
+    "7-10": 8,
+    "10+": 10,
+  };
+  return mapping[yearsExp] || null;
+}
+
 // POST — create SeekerProfile or CoachProfile based on role, update onboarding status
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +44,14 @@ export async function POST(request: NextRequest) {
       sectors,        // string[]
       goals,          // string[] (seekers)
       availability,   // string (mentors/coaches)
+      jobTitle,       // string (optional, seekers)
+      yearsExperience, // string (optional, seekers)
+      skills,         // string[] (seekers)
+      careerStage,    // string (seekers)
+      roleTypes,      // string[] (seekers)
+      transitionTimeline, // string (seekers)
+      locationPreference, // string (seekers)
+      salaryRange,    // { min?: number, max?: number } (optional, seekers)
     } = body;
 
     if (!role) {
@@ -63,6 +83,9 @@ export async function POST(request: NextRequest) {
             headline: goals?.[0] || null,
             isMentor: role === "mentor",
             mentorTopics: role === "mentor" ? sectors || [] : [],
+            skills: skills || [],
+            careerStage: careerStage || null,
+            yearsExperience: yearsExperience ? parseYearsExperience(yearsExperience) : null,
           },
         });
       } else {
@@ -74,6 +97,9 @@ export async function POST(request: NextRequest) {
             headline: goals?.[0] || account.seekerProfile.headline,
             isMentor: role === "mentor" ? true : account.seekerProfile.isMentor,
             mentorTopics: role === "mentor" ? sectors || [] : account.seekerProfile.mentorTopics,
+            skills: skills || account.seekerProfile.skills,
+            careerStage: careerStage || account.seekerProfile.careerStage,
+            yearsExperience: yearsExperience ? parseYearsExperience(yearsExperience) : account.seekerProfile.yearsExperience,
           },
         });
       }

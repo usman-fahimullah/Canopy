@@ -51,7 +51,7 @@ function MentorListItemSkeleton() {
   return (
     <div className="px-4 py-3 border-l-2 border-l-transparent">
       <div className="flex items-start gap-3">
-        <SkeletonAvatar size="md" animation="shimmer" />
+        <SkeletonAvatar size="md" />
         <div className="flex-1 min-w-0 space-y-2">
           <Skeleton className="h-4 w-3/4" animation="shimmer" />
           <Skeleton className="h-3 w-full" animation="shimmer" />
@@ -269,7 +269,7 @@ function MentorDetailPanel({
                 {mentor.mentorTopics.map((topic) => {
                   const sectorInfo = SECTOR_INFO[topic as Sector];
                   return (
-                    <Chip key={topic} variant="neutral" size="default">
+                    <Chip key={topic} variant="neutral" size="md">
                       {sectorInfo?.label || topic}
                     </Chip>
                   );

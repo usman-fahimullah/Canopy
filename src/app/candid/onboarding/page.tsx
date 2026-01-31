@@ -45,9 +45,10 @@ import {
   Globe,
   Bank,
   Handshake,
+  CaretDown as ChevronDown,
 } from "@phosphor-icons/react";
 
-type Step = "welcome" | "role" | "profile" | "goals" | "sectors" | "availability" | "complete";
+type Step = "welcome" | "role" | "profile" | "career" | "preferences" | "coach" | "goals" | "sectors" | "availability" | "complete";
 
 const roleOptions = [
   {
@@ -108,6 +109,57 @@ const availabilityOptions = [
   { value: "5+", label: "5+ hours/month", description: "Deep involvement" },
 ];
 
+const yearsOfExperienceOptions = [
+  { value: "less-than-1", label: "Less than 1 year" },
+  { value: "1-3", label: "1-3 years" },
+  { value: "3-7", label: "3-7 years" },
+  { value: "7-10", label: "7-10 years" },
+  { value: "10+", label: "10+ years" },
+];
+
+const skillSuggestions = [
+  "Project Management",
+  "Data Analysis",
+  "Python",
+  "Sustainability Reporting",
+  "Carbon Accounting",
+  "ESG",
+  "Policy Analysis",
+  "GIS",
+  "Environmental Science",
+  "Business Development",
+];
+
+const careerStageOptions = [
+  { value: "STUDENT", label: "Student", description: "Currently in school" },
+  { value: "ENTRY_LEVEL", label: "Entry Level", description: "Just starting career" },
+  { value: "MID_CAREER", label: "Mid-Career", description: "3-7 years experience" },
+  { value: "SENIOR", label: "Senior", description: "7+ years experience" },
+  { value: "CAREER_CHANGER", label: "Career Changer", description: "Transitioning from another field" },
+  { value: "RETURNING", label: "Returning", description: "Returning to workforce" },
+];
+
+const roleTypeOptions = [
+  { value: "full-time", label: "Full-time" },
+  { value: "part-time", label: "Part-time" },
+  { value: "contract", label: "Contract" },
+  { value: "internship", label: "Internship" },
+];
+
+const transitionTimelineOptions = [
+  { value: "actively-looking", label: "Actively looking" },
+  { value: "3-months", label: "Within 3 months" },
+  { value: "6-months", label: "Within 6 months" },
+  { value: "exploring", label: "Just exploring" },
+];
+
+const locationPreferenceOptions = [
+  { value: "remote-only", label: "Remote only" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "on-site", label: "On-site" },
+  { value: "no-preference", label: "No preference" },
+];
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("welcome");
@@ -124,8 +176,24 @@ export default function OnboardingPage() {
   const [availability, setAvailability] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // New fields for profile step
+  const [jobTitle, setJobTitle] = useState("");
+  const [yearsExperience, setYearsExperience] = useState<string | null>(null);
+
+  // New fields for career step
+  const [skills, setSkills] = useState<string[]>([]);
+  const [currentSkill, setCurrentSkill] = useState("");
+  const [careerStage, setCareerStage] = useState<string | null>(null);
+
+  // New fields for preferences step
+  const [roleTypes, setRoleTypes] = useState<string[]>([]);
+  const [transitionTimeline, setTransitionTimeline] = useState<string | null>(null);
+  const [locationPreference, setLocationPreference] = useState<string | null>(null);
+  const [salaryMin, setSalaryMin] = useState("");
+  const [salaryMax, setSalaryMax] = useState("");
+
   const steps: Step[] = selectedRole === "seeker"
-    ? ["welcome", "role", "profile", "goals", "sectors", "complete"]
+    ? ["welcome", "role", "profile", "career", "preferences", "goals", "sectors", "coach", "complete"]
     : ["welcome", "role", "profile", "sectors", "availability", "complete"];
 
   const currentStepIndex = steps.indexOf(step);
@@ -148,6 +216,14 @@ export default function OnboardingPage() {
           sectors: selectedSectors,
           goals,
           availability,
+          jobTitle: jobTitle || undefined,
+          yearsExperience,
+          skills,
+          careerStage,
+          roleTypes,
+          transitionTimeline,
+          locationPreference,
+          salaryRange: salaryMin || salaryMax ? { min: salaryMin ? parseInt(salaryMin) : null, max: salaryMax ? parseInt(salaryMax) : null } : undefined,
         }),
       });
     } catch (err) {
@@ -155,7 +231,7 @@ export default function OnboardingPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, selectedRole, firstName, lastName, email, linkedIn, bio, selectedSectors, goals, availability]);
+  }, [submitting, selectedRole, firstName, lastName, email, linkedIn, bio, selectedSectors, goals, availability, jobTitle, yearsExperience, skills, careerStage, roleTypes, transitionTimeline, locationPreference, salaryMin, salaryMax]);
 
   const goToNextStep = () => {
     setIsAnimating(true);
@@ -213,10 +289,16 @@ export default function OnboardingPage() {
         return selectedRole !== null;
       case "profile":
         return firstName.trim() && lastName.trim() && email.trim();
+      case "career":
+        return careerStage !== null;
+      case "preferences":
+        return roleTypes.length > 0 && transitionTimeline !== null && locationPreference !== null;
       case "sectors":
         return selectedSectors.length > 0;
       case "goals":
         return goals.length > 0;
+      case "coach":
+        return true;
       case "availability":
         return availability !== null;
       default:
@@ -238,6 +320,14 @@ export default function OnboardingPage() {
       title: "Let's get to know you",
       subtitle: "This helps us personalize your experience",
     },
+    career: {
+      title: "Tell us about your career",
+      subtitle: "Share your experience and expertise",
+    },
+    preferences: {
+      title: "What are you looking for?",
+      subtitle: "Help us understand your ideal opportunity",
+    },
     goals: {
       title: "What are your goals?",
       subtitle: "Help your mentors understand what you're working towards",
@@ -245,6 +335,10 @@ export default function OnboardingPage() {
     sectors: {
       title: selectedRole === "seeker" ? "What sectors interest you?" : "What are your areas of expertise?",
       subtitle: "Select up to 5 sectors for better matching",
+    },
+    coach: {
+      title: "Accelerate your journey",
+      subtitle: "Get professional coaching from climate career experts",
     },
     availability: {
       title: "How much time can you commit?",
@@ -516,11 +610,374 @@ export default function OnboardingPage() {
                     placeholder="Tell us about your background and what you're looking for..."
                   />
                 </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>
+                      Current Job Title <span className="text-foreground-muted font-normal">(optional)</span>
+                    </Label>
+                    <Input
+                      type="text"
+                      value={jobTitle}
+                      onChange={(e) => setJobTitle(e.target.value)}
+                      placeholder="e.g., Sustainability Manager"
+                      inputSize="lg"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>
+                      Years of Experience <span className="text-foreground-muted font-normal">(optional)</span>
+                    </Label>
+                    <div className="relative">
+                      <select
+                        value={yearsExperience || ""}
+                        onChange={(e) => setYearsExperience(e.target.value || null)}
+                        className="w-full appearance-none rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 text-foreground-default transition-colors hover:border-[var(--border-muted)] focus:border-[var(--primitive-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]/20"
+                      >
+                        <option value="">Select experience level...</option>
+                        {yearsOfExperienceOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        size={18}
+                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Step: Goals (Mentees only) */}
+          {/* Step: Career (Seekers only) */}
+          {step === "career" && (
+            <div>
+              <div className="text-center mb-8">
+                <h1 className="text-display font-semibold text-foreground-default">
+                  {stepContent.career.title}
+                </h1>
+                <p className="mt-2 text-body-lg text-foreground-muted">
+                  {stepContent.career.subtitle}
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Career Stage */}
+                <div>
+                  <h3 className="text-body-strong font-semibold text-foreground-default mb-3">
+                    Career Stage
+                  </h3>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {careerStageOptions.map((option) => {
+                      const isSelected = careerStage === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={() => setCareerStage(option.value)}
+                          className={cn(
+                            "rounded-card p-4 text-left transition-all duration-200",
+                            isSelected
+                              ? "bg-[var(--primitive-blue-200)] border-2 border-[var(--primitive-green-800)]"
+                              : "bg-white shadow-card hover:shadow-card-hover border border-[var(--border-default)]"
+                          )}
+                        >
+                          <h4 className={cn(
+                            "font-semibold",
+                            isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                          )}>
+                            {option.label}
+                          </h4>
+                          <p className="text-caption text-foreground-muted mt-1">{option.description}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Skills */}
+                <div>
+                  <h3 className="text-body-strong font-semibold text-foreground-default mb-3">
+                    Skills & Expertise
+                  </h3>
+                  <div className="flex gap-2 mb-4">
+                    <Input
+                      type="text"
+                      value={currentSkill}
+                      onChange={(e) => setCurrentSkill(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (currentSkill.trim() && !skills.includes(currentSkill.trim())) {
+                            setSkills([...skills, currentSkill.trim()]);
+                            setCurrentSkill("");
+                          }
+                        }
+                      }}
+                      placeholder="Type a skill or select from suggestions..."
+                      inputSize="lg"
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={() => {
+                        if (currentSkill.trim() && !skills.includes(currentSkill.trim())) {
+                          setSkills([...skills, currentSkill.trim()]);
+                          setCurrentSkill("");
+                        }
+                      }}
+                      disabled={!currentSkill.trim() || skills.includes(currentSkill.trim())}
+                      variant="primary"
+                      size="lg"
+                    >
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Skill suggestions */}
+                  <div className="mb-4">
+                    <p className="text-caption text-foreground-muted mb-2">Suggestions:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {skillSuggestions.map((suggestion) => {
+                        const isAdded = skills.includes(suggestion);
+                        return (
+                          <button
+                            key={suggestion}
+                            onClick={() => !isAdded && setSkills([...skills, suggestion])}
+                            disabled={isAdded}
+                            className={cn(
+                              "rounded-full border px-3 py-1.5 text-caption transition-all",
+                              isAdded
+                                ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)]/5 text-[var(--primitive-green-800)] cursor-default"
+                                : "border-[var(--border-default)] bg-white hover:border-[var(--primitive-green-800)] hover:bg-[var(--primitive-blue-200)]"
+                            )}
+                          >
+                            {suggestion}
+                            {isAdded && <CheckCircle size={12} weight="fill" className="inline ml-1" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Added skills */}
+                  {skills.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-caption font-medium text-foreground-default">Your skills ({skills.length}):</p>
+                      <div className="flex flex-wrap gap-2">
+                        {skills.map((skill) => (
+                          <Badge
+                            key={skill}
+                            variant="secondary"
+                            size="default"
+                            className="flex items-center gap-2 pl-3 pr-2 py-2"
+                          >
+                            {skill}
+                            <button
+                              onClick={() => setSkills(skills.filter((s) => s !== skill))}
+                              className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-[var(--primitive-green-800)]/10 text-foreground-muted hover:text-[var(--primitive-green-800)] transition-colors"
+                            >
+                              ×
+                            </button>
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step: Preferences (Seekers only) */}
+          {step === "preferences" && (
+            <div>
+              <div className="text-center mb-8">
+                <h1 className="text-display font-semibold text-foreground-default">
+                  {stepContent.preferences.title}
+                </h1>
+                <p className="mt-2 text-body-lg text-foreground-muted">
+                  {stepContent.preferences.subtitle}
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Role Type - Multiple Select */}
+                <div>
+                  <Label className="block mb-3 font-semibold">Target Role Type</Label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {roleTypeOptions.map((option) => {
+                      const isSelected = roleTypes.includes(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            if (isSelected) {
+                              setRoleTypes(roleTypes.filter((r) => r !== option.value));
+                            } else {
+                              setRoleTypes([...roleTypes, option.value]);
+                            }
+                          }}
+                          className={cn(
+                            "flex items-center gap-3 rounded-card p-4 text-left transition-all duration-200",
+                            isSelected
+                              ? "bg-[var(--primitive-blue-200)]"
+                              : "bg-white shadow-card hover:shadow-card-hover"
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "flex h-10 w-10 items-center justify-center rounded-lg transition-colors duration-200",
+                              isSelected
+                                ? "bg-[var(--primitive-green-800)] text-white"
+                                : "bg-[var(--background-subtle)] text-foreground-muted"
+                            )}
+                          >
+                            <Briefcase size={20} weight={isSelected ? "fill" : "regular"} />
+                          </div>
+                          <span
+                            className={cn(
+                              "flex-1 font-medium transition-colors",
+                              isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                            )}
+                          >
+                            {option.label}
+                          </span>
+                          {isSelected && (
+                            <CheckCircle size={20} weight="fill" className="text-[var(--primitive-green-800)]" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Transition Timeline - Radio */}
+                <div>
+                  <Label className="block mb-3 font-semibold">When are you ready to transition?</Label>
+                  <div className="space-y-3">
+                    {transitionTimelineOptions.map((option) => {
+                      const isSelected = transitionTimeline === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={() => setTransitionTimeline(option.value)}
+                          className={cn(
+                            "w-full flex items-center justify-between rounded-card p-4 text-left transition-all duration-200",
+                            isSelected
+                              ? "bg-[var(--primitive-blue-200)]"
+                              : "bg-white shadow-card hover:shadow-card-hover"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "font-medium",
+                              isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                            )}
+                          >
+                            {option.label}
+                          </span>
+                          <div
+                            className={cn(
+                              "flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all",
+                              isSelected
+                                ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)]"
+                                : "border-[var(--border-default)]"
+                            )}
+                          >
+                            {isSelected && <CheckCircle size={16} weight="fill" className="text-white" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Location Preference - Radio */}
+                <div>
+                  <Label className="block mb-3 font-semibold">Location Preference</Label>
+                  <div className="space-y-3">
+                    {locationPreferenceOptions.map((option) => {
+                      const isSelected = locationPreference === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={() => setLocationPreference(option.value)}
+                          className={cn(
+                            "w-full flex items-center justify-between rounded-card p-4 text-left transition-all duration-200",
+                            isSelected
+                              ? "bg-[var(--primitive-blue-200)]"
+                              : "bg-white shadow-card hover:shadow-card-hover"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "font-medium",
+                              isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                            )}
+                          >
+                            {option.label}
+                          </span>
+                          <div
+                            className={cn(
+                              "flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all",
+                              isSelected
+                                ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)]"
+                                : "border-[var(--border-default)]"
+                            )}
+                          >
+                            {isSelected && <CheckCircle size={16} weight="fill" className="text-white" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Salary Expectations */}
+                <div>
+                  <Label className="block mb-3 font-semibold">
+                    Salary Expectations <span className="text-foreground-muted font-normal">(optional)</span>
+                  </Label>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label className="text-caption">Minimum (optional)</Label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground-muted">$</span>
+                        <Input
+                          type="number"
+                          value={salaryMin}
+                          onChange={(e) => setSalaryMin(e.target.value)}
+                          placeholder="0"
+                          inputSize="lg"
+                          className="flex-1"
+                        />
+                        <span className="text-foreground-muted text-caption">K</span>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-caption">Maximum (optional)</Label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-foreground-muted">$</span>
+                        <Input
+                          type="number"
+                          value={salaryMax}
+                          onChange={(e) => setSalaryMax(e.target.value)}
+                          placeholder="0"
+                          inputSize="lg"
+                          className="flex-1"
+                        />
+                        <span className="text-foreground-muted text-caption">K</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step: Goals (Seekers only) */}
           {step === "goals" && (
             <div>
               <div className="text-center mb-8">
@@ -769,6 +1226,94 @@ export default function OnboardingPage() {
                     You can update your availability anytime
                   </li>
                 </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Step: Coach Intro (Seekers only) */}
+          {step === "coach" && (
+            <div>
+              <div className="text-center mb-8">
+                <h1 className="text-display font-semibold text-foreground-default">
+                  {stepContent.coach.title}
+                </h1>
+                <p className="mt-2 text-body-lg text-foreground-muted">
+                  {stepContent.coach.subtitle}
+                </p>
+              </div>
+
+              <div className="max-w-2xl mx-auto space-y-6">
+                {/* Saathe Studio Coach Card */}
+                <Card className="relative overflow-hidden rounded-card bg-gradient-to-br from-[var(--primitive-blue-100)] to-[var(--primitive-blue-50)] border-2 border-[var(--primitive-green-200)]">
+                  <div className="absolute -right-12 -bottom-12 h-48 w-48 rounded-full bg-[var(--primitive-green-100)]/40" />
+                  <div className="relative p-8">
+                    <div className="flex items-start gap-6">
+                      <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-green-800)] text-white">
+                        <GraduationCap size={32} weight="fill" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-heading-sm font-bold text-foreground-default">
+                          Saathe Studio Professional Coaching
+                        </h3>
+                        <p className="mt-2 text-body text-foreground-muted">
+                          Get one-on-one guidance from experienced climate career coaches. Our certified professionals help you clarify your goals, prepare for interviews, and land your dream climate role.
+                        </p>
+
+                        <ul className="mt-4 space-y-2">
+                          <li className="flex items-center gap-2 text-caption text-foreground-default">
+                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                            Personalized career roadmap
+                          </li>
+                          <li className="flex items-center gap-2 text-caption text-foreground-default">
+                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                            Interview preparation & resume review
+                          </li>
+                          <li className="flex items-center gap-2 text-caption text-foreground-default">
+                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                            Flexible scheduling and video sessions
+                          </li>
+                          <li className="flex items-center gap-2 text-caption text-foreground-default">
+                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                            First intro session is free
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        onClick={() => router.push("/candid/sessions/schedule")}
+                        rightIcon={<ArrowRight size={18} />}
+                      >
+                        Book intro session
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        onClick={goToNextStep}
+                      >
+                        Skip for now
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Testimonial */}
+                <div className="rounded-card bg-[var(--primitive-blue-100)] p-6 text-center">
+                  <div className="flex justify-center gap-1 mb-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star key={i} size={16} weight="fill" className="text-[var(--primitive-yellow-500)]" />
+                    ))}
+                  </div>
+                  <p className="text-body text-foreground-default italic mb-3">
+                    "My coach helped me pivot from traditional energy to renewables. Her guidance on positioning my experience made all the difference in landing interviews."
+                  </p>
+                  <p className="text-caption font-medium text-foreground-muted">
+                    — Jordan M., Climate Career Coach Client
+                  </p>
+                </div>
               </div>
             </div>
           )}

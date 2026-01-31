@@ -12,7 +12,6 @@ import {
   MapPin,
   CaretRight,
   BookmarkSimple,
-  ArrowSquareOut,
   Buildings,
 } from "@phosphor-icons/react";
 
@@ -53,66 +52,36 @@ export function JobMatchesWidget({
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        // TODO: Replace with actual Green Jobs Board API integration
-        // For now, using mock data
-        const mockJobs: Job[] = [
-          {
-            id: "1",
-            title: "Product Manager - Clean Energy",
-            company: "Aurora Solar",
-            location: "San Francisco, CA",
-            salary: "$150K - $180K",
-            postedAt: "2 days ago",
-            matchScore: 94,
-            url: "https://greenjobsboard.us/jobs/1",
-            remote: false,
-          },
-          {
-            id: "2",
-            title: "Senior Software Engineer",
-            company: "Watershed",
-            location: "Remote",
-            salary: "$160K - $200K",
-            postedAt: "3 days ago",
-            matchScore: 89,
-            url: "https://greenjobsboard.us/jobs/2",
-            remote: true,
-          },
-          {
-            id: "3",
-            title: "Sustainability Analyst",
-            company: "Stripe Climate",
-            location: "New York, NY",
-            salary: "$120K - $150K",
-            postedAt: "5 days ago",
-            matchScore: 85,
-            url: "https://greenjobsboard.us/jobs/3",
-            remote: false,
-          },
-          {
-            id: "4",
-            title: "Climate Policy Advisor",
-            company: "RMI",
-            location: "Boulder, CO",
-            salary: "$100K - $130K",
-            postedAt: "1 week ago",
-            matchScore: 82,
-            url: "https://greenjobsboard.us/jobs/4",
-            remote: true,
-          },
-        ];
+        // Fetch matched jobs from API
+        const res = await fetch(`/api/jobs/matches?limit=${limit}`);
+        if (res.ok) {
+          const data = await res.json();
+          const apiJobs = (data.jobs || []).map((job: any) => ({
+            id: job.id,
+            title: job.title,
+            company: job.organization?.name || "Unknown Company",
+            location: job.location || (job.locationType === "REMOTE" ? "Remote" : "Location TBD"),
+            salary: formatJobSalary(job.salaryMin, job.salaryMax, job.salaryCurrency),
+            postedAt: formatJobDate(job.publishedAt),
+            matchScore: job.matchScore,
+            url: `/candid/jobs?job=${job.id}`,
+            remote: job.locationType === "REMOTE",
+          }));
+          setJobs(apiJobs);
 
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setJobs(mockJobs.slice(0, limit));
-
-        // Load saved jobs from localStorage
-        const saved = localStorage.getItem("candid-saved-jobs");
-        if (saved) {
-          setSavedJobs(new Set(JSON.parse(saved)));
+          // Mark saved jobs
+          const savedRes = await fetch("/api/jobs/saved");
+          if (savedRes.ok) {
+            const savedData = await savedRes.json();
+            const savedIds = (savedData.jobs || []).map((j: any) => j.id);
+            setSavedJobs(new Set(savedIds));
+          }
+        } else {
+          throw new Error("Failed to fetch jobs");
         }
       } catch (error) {
         console.error("Error fetching jobs:", error);
+        setJobs([]);
       } finally {
         setLoading(false);
       }
@@ -121,17 +90,78 @@ export function JobMatchesWidget({
     fetchJobs();
   }, [limit]);
 
-  const handleSaveJob = (jobId: string) => {
+  // Helper function to format salary
+  function formatJobSalary(min: number | null, max: number | null, currency: string = "USD"): string {
+    if (!min && !max) return "";
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+      notation: "compact",
+    });
+    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`;
+    if (min) return `${formatter.format(min)}+`;
+    if (max) return `Up to ${formatter.format(max)}`;
+    return "";
+  }
+
+  // Helper function to format date
+  function formatJobDate(dateStr: string | null): string {
+    if (!dateStr) return "Recently";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString();
+  }
+
+  const handleSaveJob = async (jobId: string) => {
+    const isSaved = savedJobs.has(jobId);
+
+    // Optimistic update
     setSavedJobs((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(jobId)) {
+      if (isSaved) {
         newSet.delete(jobId);
       } else {
         newSet.add(jobId);
       }
-      localStorage.setItem("candid-saved-jobs", JSON.stringify(Array.from(newSet)));
       return newSet;
     });
+
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/save`, {
+        method: isSaved ? "DELETE" : "POST",
+      });
+
+      if (!res.ok) {
+        // Revert on error
+        setSavedJobs((prev) => {
+          const newSet = new Set(prev);
+          if (isSaved) {
+            newSet.add(jobId);
+          } else {
+            newSet.delete(jobId);
+          }
+          return newSet;
+        });
+      }
+    } catch (error) {
+      console.error("Error saving job:", error);
+      // Revert on error
+      setSavedJobs((prev) => {
+        const newSet = new Set(prev);
+        if (isSaved) {
+          newSet.add(jobId);
+        } else {
+          newSet.delete(jobId);
+        }
+        return newSet;
+      });
+    }
   };
 
   if (loading) {
@@ -186,13 +216,11 @@ export function JobMatchesWidget({
           </h3>
         </div>
         <Link
-          href="https://greenjobsboard.us"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/candid/jobs"
           className={cn(buttonVariants({ variant: "link", size: "sm" }), "gap-1")}
         >
           View all
-          <ArrowSquareOut size={14} />
+          <CaretRight size={14} />
         </Link>
       </div>
 
@@ -249,9 +277,9 @@ export function JobMatchesWidget({
                   size="sm"
                   asChild
                 >
-                  <a href={job.url} target="_blank" rel="noopener noreferrer">
+                  <Link href={job.url}>
                     View Job
-                  </a>
+                  </Link>
                 </Button>
                 <Button
                   variant={savedJobs.has(job.id) ? "secondary" : "tertiary"}
