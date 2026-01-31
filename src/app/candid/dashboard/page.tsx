@@ -4,27 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
-  CoachCard,
   MyCoachCard,
   GettingStartedChecklist,
-  JobMatchesWidget,
 } from "../components";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
 import { ProgressMeterCircular } from "@/components/ui/progress-meter";
 import { Spinner } from "@/components/ui/spinner";
-import { EmptyState } from "@/components/ui/empty-state";
-import { SECTOR_INFO, type Sector, type CandidCoach } from "@/lib/candid/types";
 import {
-  CalendarBlank,
   CalendarDots,
-  ChatCircle,
-  CaretRight,
-  MagnifyingGlass,
   VideoCamera,
-  Clock,
-  Users,
+  Note,
+  Binoculars,
+  ArrowCircleRight,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow, isSameDay } from "date-fns";
 
@@ -52,44 +44,6 @@ interface DashboardData {
   } | null;
   upcomingSessions: Session[];
   completedSessionsCount: number;
-  recommendedCoaches: any[];
-}
-
-// Transform API coach to component format
-function transformCoach(apiCoach: any): CandidCoach {
-  return {
-    id: apiCoach.id,
-    email: "",
-    firstName: apiCoach.firstName,
-    lastName: apiCoach.lastName,
-    role: "coach",
-    avatar: apiCoach.photoUrl || undefined,
-    bio: apiCoach.bio || undefined,
-    location: apiCoach.location || undefined,
-    timezone: apiCoach.timezone || undefined,
-    createdAt: new Date(),
-    sectors: (apiCoach.sectors || []) as Sector[],
-    currentRole: apiCoach.headline || "Climate Coach",
-    currentCompany: "",
-    previousRoles: [],
-    expertise: apiCoach.expertise || [],
-    sessionTypes: ["coaching", "career-planning"],
-    hourlyRate: apiCoach.sessionRate / 100,
-    monthlyRate: undefined,
-    availability: {
-      monday: [],
-      tuesday: [],
-      wednesday: [],
-      thursday: [],
-      friday: [],
-      saturday: [],
-      sunday: [],
-    },
-    menteeCount: apiCoach.totalSessions || 0,
-    rating: apiCoach.rating || 0,
-    reviewCount: apiCoach.reviewCount || 0,
-    isFeatured: apiCoach.isFeatured,
-  };
 }
 
 export default function DashboardPage() {
@@ -103,7 +57,6 @@ export default function DashboardPage() {
     user: null,
     upcomingSessions: [],
     completedSessionsCount: 0,
-    recommendedCoaches: [],
   });
 
   useEffect(() => {
@@ -112,14 +65,12 @@ export default function DashboardPage() {
         setLoading(true);
 
         // Fetch sessions, coaches, and goals in parallel
-        const [sessionsRes, coachesRes, goalsRes] = await Promise.all([
+        const [sessionsRes, goalsRes] = await Promise.all([
           fetch("/api/sessions"),
-          fetch("/api/coaches?limit=6"),
           fetch("/api/goals"),
         ]);
 
         const sessionsData = sessionsRes.ok ? await sessionsRes.json() : { sessions: [] };
-        const coachesData = coachesRes.ok ? await coachesRes.json() : { coaches: [] };
         const goalsData = goalsRes.ok ? await goalsRes.json() : { goals: [] };
 
         const allSessions = sessionsData.sessions || [];
@@ -149,7 +100,6 @@ export default function DashboardPage() {
           user: null,
           upcomingSessions,
           completedSessionsCount,
-          recommendedCoaches: coachesData.coaches || [],
         });
 
         setProgressFromApi({
@@ -240,8 +190,6 @@ export default function DashboardPage() {
   };
 
   const sessionGroups = groupSessionsByDate();
-  const suggestedCoaches = data.recommendedCoaches.map(transformCoach);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -254,182 +202,177 @@ export default function DashboardPage() {
     <div className="flex min-h-screen">
       {/* Main Content */}
       <div className="flex-1 min-w-0">
-        <div className="px-4 py-6 sm:px-6 lg:px-8 xl:px-10 lg:py-8 max-w-5xl mx-auto xl:mx-0">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-heading-md text-foreground-default">
-              {getGreeting()}!
-            </h1>
-            <p className="mt-1 text-body text-foreground-muted">
-              Here's what's happening with your climate career journey
-            </p>
+        {/* Page Header — 108px white bar */}
+        <div className="flex h-[108px] items-center border-b border-[var(--primitive-neutral-200)] bg-white px-8 lg:px-12">
+          <h1 className="text-heading-md font-medium text-[var(--primitive-green-800)]">Home</h1>
+        </div>
 
-            {/* Quick Actions */}
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/candid/sessions/schedule" className={buttonVariants({ variant: "primary" })}>
-                <CalendarBlank size={16} weight="fill" />
-                Book Session
-              </Link>
-              <Link href="/candid/mentors" className={buttonVariants({ variant: "secondary" })}>
-                <Users size={16} weight="fill" />
-                Find Mentors
-              </Link>
-            </div>
+        {/* Greeting + Quick Actions */}
+        <div className="flex flex-col gap-6 px-8 py-6 lg:px-12">
+          <h2 className="text-heading-md font-medium text-[var(--primitive-green-800)]">
+            {getGreeting()}
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/candid/sessions/schedule"
+              className={cn(
+                buttonVariants({ variant: "primary" }),
+                "rounded-[16px] px-4 py-4 text-body font-bold"
+              )}
+            >
+              <CalendarDots size={20} />
+              Book a session
+            </Link>
+            <Link
+              href="/candid/notes"
+              className={cn(
+                buttonVariants({ variant: "tertiary" }),
+                "rounded-[16px] px-4 py-4 text-body font-bold"
+              )}
+            >
+              <Note size={20} />
+              View Notes
+            </Link>
+            <Link
+              href="/candid/mentors"
+              className={cn(
+                buttonVariants({ variant: "tertiary" }),
+                "rounded-[16px] px-4 py-4 text-body font-bold"
+              )}
+            >
+              <Binoculars size={20} />
+              Find a mentor
+            </Link>
           </div>
+        </div>
 
-          {/* Getting Started Checklist - for new users */}
-          <section className="mb-8">
-            <GettingStartedChecklist />
-          </section>
+        {/* Getting Started Checklist */}
+        <section className="px-8 py-6 lg:px-12">
+          <GettingStartedChecklist />
+        </section>
 
-          {/* Mobile/Tablet/Small Desktop: Upcoming Sessions Horizontal Scroll */}
-          <section className="mb-8 xl:hidden">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-heading-sm text-foreground-default">Upcoming Sessions</h2>
-              <Link href="/candid/sessions" className={buttonVariants({ variant: "link", size: "sm" })}>
-                View all
-                <CaretRight size={14} />
-              </Link>
-            </div>
+        {/* My Progress */}
+        <section className="px-8 py-6 lg:px-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-heading-sm font-medium text-foreground-default">My Progress</h2>
+            <Link
+              href="/candid/profile"
+              className={cn(
+                buttonVariants({ variant: "inverse" }),
+                "rounded-[16px] px-4 py-3.5 text-caption font-bold"
+              )}
+            >
+              View Profile
+              <ArrowCircleRight size={20} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              { goal: "sessions" as const, label: "Sessions", data: progressData.sessions },
+              { goal: "actions" as const, label: "Actions", data: progressData.actions },
+              { goal: "skills" as const, label: "Skills", data: progressData.skills },
+              { goal: "milestones" as const, label: "Milestones", data: progressData.milestones },
+            ].map((item) => (
+              <div
+                key={item.goal}
+                className="flex flex-col items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-4 py-6"
+              >
+                <ProgressMeterCircular
+                  goal={item.goal}
+                  size="lg"
+                  value={(item.data.current / item.data.total) * 100}
+                />
+                <div className="flex flex-col items-center gap-1">
+                  <p className="text-body font-normal text-[var(--primitive-green-800)]">{item.label}</p>
+                  <p className="text-caption font-bold text-[var(--primitive-green-800)]">
+                    {item.data.current}/{item.data.total}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-            {data.upcomingSessions.length > 0 ? (
-              <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory scrollbar-hide">
-                {data.upcomingSessions.slice(0, 5).map((session) => {
-                  const sessionDate = new Date(session.scheduledAt);
-                  const isSessionToday = isToday(sessionDate);
+        {/* Today's Action Items */}
+        <section className="px-8 py-6 lg:px-12">
+          <h2 className="mb-3 text-heading-sm font-medium text-foreground-default">
+            Today&apos;s Action Items
+          </h2>
 
-                  return (
-                    <div
-                      key={session.id}
-                      className={cn(
-                        "flex-shrink-0 w-[260px] snap-start rounded-card border p-4",
-                        isSessionToday
-                          ? "border-[var(--primitive-green-300)] bg-[var(--primitive-green-50)]"
-                          : "border-[var(--border-default)] bg-white"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={cn(
-                          "text-caption font-medium",
-                          isSessionToday ? "text-[var(--primitive-green-700)]" : "text-foreground-muted"
-                        )}>
-                          {formatScheduleDate(sessionDate)}
+          {/* Action items grouped by session */}
+          {data.upcomingSessions.length > 0 ? (
+            <div className="space-y-3">
+              {data.upcomingSessions.slice(0, 3).map((session) => {
+                const sessionDate = new Date(session.scheduledAt);
+                const endTime = new Date(sessionDate.getTime() + session.duration * 60000);
+
+                return (
+                  <div
+                    key={session.id}
+                    className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white"
+                  >
+                    {/* Session header */}
+                    <div className="flex items-center gap-3 px-6 pt-4 pb-2">
+                      <div className="flex flex-1 items-center gap-1 text-body font-medium">
+                        <span className="text-foreground-default">
+                          {session.title || "1:1 Session"}
                         </span>
-                        {isSessionToday && (
-                          <span className="text-caption-sm text-[var(--primitive-green-600)] bg-[var(--primitive-green-100)] px-1.5 py-0.5 rounded">
-                            Today
-                          </span>
-                        )}
+                        <span className="text-foreground-muted">
+                          {format(sessionDate, "MMM d, h:mma")}
+                        </span>
                       </div>
-                      <p className="text-caption text-foreground-muted mb-2">
-                        {format(sessionDate, "h:mm a")} · {session.duration} min
-                      </p>
-                      <div className="flex items-center gap-2 mb-3">
+                    </div>
+
+                    {/* Session meta row */}
+                    <div className="flex items-center gap-2 px-6 pb-2">
+                      <div className="flex items-center gap-1 rounded-lg bg-[var(--primitive-neutral-100)] py-1 pl-1 pr-2">
                         <Avatar
-                          size="sm"
+                          size="xs"
                           src={session.coach.photoUrl || undefined}
                           name={`${session.coach.firstName} ${session.coach.lastName}`}
                           color="green"
                         />
-                        <span className="text-body-sm font-medium text-foreground-default">
+                        <span className="text-caption font-medium text-foreground-default">
                           {session.coach.firstName} {session.coach.lastName}
                         </span>
                       </div>
-                      {isSessionToday && session.meetingLink ? (
-                        <Button variant="primary" size="sm" className="w-full" asChild>
-                          <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
-                            Join Session
-                          </a>
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm" className="w-full" asChild>
-                          <Link href={`/candid/sessions`}>
-                            View Details
-                          </Link>
-                        </Button>
-                      )}
+                      <span className="text-caption font-medium text-foreground-default">
+                        {format(sessionDate, "h:mma")}
+                      </span>
+                      <span className="text-caption font-medium text-foreground-muted">
+                        {session.duration}mins
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <Card className="p-6">
-                <EmptyState
-                  preset="inbox"
-                  size="sm"
-                  title="No upcoming sessions"
-                  description="Book your first session to get started"
-                  action={{
-                    label: "Book Session",
-                    onClick: () => {},
-                  }}
-                />
-              </Card>
-            )}
-          </section>
 
-          {/* My Progress - Compact, no card */}
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-heading-sm text-foreground-default">My Progress</h2>
+                    {/* Action item — placeholder */}
+                    <div className="flex items-center gap-3 border-t border-[var(--primitive-neutral-200)] px-6 py-6">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--primitive-neutral-300)] bg-white">
+                      </div>
+                      <span className="text-body font-medium text-foreground-default">
+                        Send meeting notes to{" "}
+                        <span className="text-[var(--primitive-blue-500)]">
+                          {session.coach.firstName}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:gap-8">
-              <div className="text-center">
-                <ProgressMeterCircular
-                  goal="sessions"
-                  size="sm"
-                  value={(progressData.sessions.current / progressData.sessions.total) * 100}
-                  className="mx-auto"
-                />
-                <p className="mt-2 text-caption font-medium text-foreground-default">Sessions</p>
-                <p className="text-caption-sm text-foreground-muted">{progressData.sessions.current}/{progressData.sessions.total}</p>
-              </div>
-              <div className="text-center">
-                <ProgressMeterCircular
-                  goal="actions"
-                  size="sm"
-                  value={(progressData.actions.current / progressData.actions.total) * 100}
-                  className="mx-auto"
-                />
-                <p className="mt-2 text-caption font-medium text-foreground-default">Actions</p>
-                <p className="text-caption-sm text-foreground-muted">{progressData.actions.current}/{progressData.actions.total}</p>
-              </div>
-              <div className="text-center">
-                <ProgressMeterCircular
-                  goal="skills"
-                  size="sm"
-                  value={(progressData.skills.current / progressData.skills.total) * 100}
-                  className="mx-auto"
-                />
-                <p className="mt-2 text-caption font-medium text-foreground-default">Skills</p>
-                <p className="text-caption-sm text-foreground-muted">{progressData.skills.current}/{progressData.skills.total}</p>
-              </div>
-              <div className="text-center">
-                <ProgressMeterCircular
-                  goal="milestones"
-                  size="sm"
-                  value={(progressData.milestones.current / progressData.milestones.total) * 100}
-                  className="mx-auto"
-                />
-                <p className="mt-2 text-caption font-medium text-foreground-default">Milestones</p>
-                <p className="text-caption-sm text-foreground-muted">{progressData.milestones.current}/{progressData.milestones.total}</p>
-              </div>
+          ) : (
+            <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+              <p className="text-body text-foreground-muted">No action items for today</p>
             </div>
-          </section>
+          )}
+        </section>
 
-          {/* My Coach */}
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-heading-sm text-foreground-default">My Coach</h2>
-            </div>
-            <MyCoachCard />
-          </section>
-
-          {/* Jobs for You - Green Jobs Board Integration */}
-          <section className="mb-8">
-            <JobMatchesWidget title="Jobs for You" limit={3} />
-          </section>
-        </div>
+        {/* My Coach */}
+        <section className="px-8 py-6 lg:px-12">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-heading-sm font-medium text-foreground-default">My Coach</h2>
+          </div>
+          <MyCoachCard />
+        </section>
       </div>
 
       {/* Right Sidebar - Schedule (Large Desktop only) */}
