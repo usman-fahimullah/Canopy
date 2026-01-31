@@ -142,12 +142,12 @@ function MentorsContent() {
           <div className="h-full flex">
             {/* Left Panel - Mentor List */}
             <div
-              className={`w-full lg:w-[400px] flex-shrink-0 bg-background-default border-r border-border-default flex flex-col ${
+              className={`w-full lg:w-[480px] flex-shrink-0 bg-white border-r border-[var(--primitive-neutral-200)] flex flex-col ${
                 selectedMentorId ? "hidden lg:flex" : "flex"
               }`}
             >
               {/* Search & Filters */}
-              <div className="px-5 py-4 border-b border-border-default space-y-3">
+              <div className="px-6 py-4 border-b border-[var(--primitive-neutral-200)] space-y-3">
                 <SearchInput
                   placeholder="Search mentors"
                   value={searchQuery}
@@ -176,13 +176,13 @@ function MentorsContent() {
               {/* Mentor List */}
               <div className="flex-1 overflow-y-auto overscroll-contain">
                 {loading ? (
-                  <div className="divide-y divide-border-muted">
+                  <div>
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                       <MentorListItemSkeleton key={i} />
                     ))}
                   </div>
                 ) : filteredMentors.length > 0 ? (
-                  <div className="divide-y divide-border-muted">
+                  <div>
                     {filteredMentors.map((mentor, index) => (
                       <div
                         key={mentor.id}
@@ -227,7 +227,7 @@ function MentorsContent() {
               </div>
 
               {/* Footer */}
-              <div className="px-5 py-3 border-t border-border-default shrink-0">
+              <div className="px-6 py-3 border-t border-[var(--primitive-neutral-200)] shrink-0">
                 <p className="text-caption text-foreground-muted">
                   {filteredMentors.length} mentor
                   {filteredMentors.length !== 1 ? "s" : ""} available
