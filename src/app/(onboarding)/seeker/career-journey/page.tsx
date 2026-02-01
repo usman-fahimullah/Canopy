@@ -53,13 +53,27 @@ export default function CareerJourneyPage() {
   const [careerStage, setCareerStage] = useState("");
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const handleBack = () => {
     router.push("/seeker/profile");
   };
 
-  const handleContinue = () => {
-    // In a real app, we'd save this data first
+  const handleContinue = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          step: "seeker-career-journey",
+          data: { careerStage, selectedGoals, selectedJobTypes },
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save career journey:", err);
+    }
+    setSaving(false);
     router.push("/seeker/skills-pathways");
   };
 
@@ -164,6 +178,7 @@ export default function CareerJourneyPage() {
         <Button
           onClick={handleContinue}
           disabled={!isFormValid}
+          loading={saving}
           className="flex-1"
           rightIcon={<ArrowRight weight="bold" size={20} />}
         >

@@ -55,13 +55,27 @@ export default function EmployerCompanyPage() {
   const [website, setWebsite] = useState("");
   const [location, setLocation] = useState("");
   const [primaryPathway, setPrimaryPathway] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const handleBack = () => {
     router.push("/role-selection");
   };
 
-  const handleContinue = () => {
-    // In a real app, we'd save this data first
+  const handleContinue = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          step: "employer-company",
+          data: { companyName, description, website, location, primaryPathway },
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save company:", err);
+    }
+    setSaving(false);
     router.push("/employer/your-role");
   };
 
@@ -178,6 +192,7 @@ export default function EmployerCompanyPage() {
         <Button
           onClick={handleContinue}
           disabled={!isFormValid}
+          loading={saving}
           className="flex-1"
           rightIcon={<ArrowRight weight="bold" size={20} />}
         >

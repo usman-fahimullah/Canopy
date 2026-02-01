@@ -95,13 +95,27 @@ export default function SkillsPathwaysPage() {
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [selectedPathways, setSelectedPathways] = useState<PathwayType[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const handleBack = () => {
     router.push("/seeker/career-journey");
   };
 
-  const handleContinue = () => {
-    // In a real app, we'd save this data and redirect to dashboard
+  const handleContinue = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          step: "seeker-skills",
+          data: { skills, selectedPathways },
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save skills:", err);
+    }
+    setSaving(false);
     router.push("/candid/dashboard");
   };
 
@@ -233,6 +247,7 @@ export default function SkillsPathwaysPage() {
         <Button
           onClick={handleContinue}
           disabled={!isFormValid}
+          loading={saving}
           className="flex-1"
           rightIcon={<ArrowRight weight="bold" size={20} />}
         >

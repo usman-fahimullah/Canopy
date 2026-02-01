@@ -22,13 +22,27 @@ export default function EmployerYourRolePage() {
   const [phone, setPhone] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const handleBack = () => {
     router.push("/employer/company");
   };
 
-  const handleContinue = () => {
-    // In a real app, we'd save this data first
+  const handleContinue = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          step: "employer-role",
+          data: { jobTitle, phone, linkedinUrl },
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save role:", err);
+    }
+    setSaving(false);
     router.push("/employer/invite-team");
   };
 
@@ -166,6 +180,7 @@ export default function EmployerYourRolePage() {
         <Button
           onClick={handleContinue}
           disabled={!isFormValid}
+          loading={saving}
           className="flex-1"
           rightIcon={<ArrowRight weight="bold" size={20} />}
         >

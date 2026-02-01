@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   Gear,
   SignOut,
@@ -123,7 +124,11 @@ export function ProfileDropdown({ children }: ProfileDropdownProps) {
 
         {/* Sign out */}
         <DropdownMenuItem
-          onClick={() => router.push(`/${currentShell}/settings`)}
+          onClick={async () => {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            router.push("/login");
+          }}
           className="text-foreground-muted"
         >
           <SignOut size={18} weight="bold" className="mr-2" />
