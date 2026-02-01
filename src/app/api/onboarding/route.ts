@@ -214,11 +214,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (!account) {
-      // Defensive fallback: create account if /auth/redirect didn't create it
-      account = await prisma.account.create({
-        data: {
+      if (!user.email) {
+        return NextResponse.json({ error: "No email on auth user" }, { status: 400 });
+      }
+
+      // Defensive fallback: create account if /auth/redirect didn't create it.
+      // Use upsert to handle race conditions (concurrent requests).
+      account = await prisma.account.upsert({
+        where: { supabaseId: user.id },
+        update: {},
+        create: {
           supabaseId: user.id,
-          email: user.email!,
+          email: user.email,
           name: user.user_metadata?.name || user.user_metadata?.full_name || null,
         },
         include: { seekerProfile: true, coachProfile: true },

@@ -27,38 +27,57 @@ export default async function AuthRedirectPage() {
     redirect("/login");
   }
 
-  const account = await prisma.account.findUnique({
-    where: { supabaseId: user.id },
-    select: {
-      entryIntent: true,
-      primaryRole: true,
-      onboardingProgress: true,
-    },
-  });
+  // If user has no email, can't create an account — send back to login
+  if (!user.email) {
+    redirect("/login");
+  }
 
-  if (!account) {
-    // Account doesn't exist yet — create it from Supabase auth metadata
-    const metadata = user.user_metadata || {};
-    await prisma.account.create({
-      data: {
-        supabaseId: user.id,
-        email: user.email!,
-        name: metadata.name || metadata.full_name || null,
+  try {
+    const account = await prisma.account.findUnique({
+      where: { supabaseId: user.id },
+      select: {
+        entryIntent: true,
+        primaryRole: true,
+        onboardingProgress: true,
       },
     });
+
+    if (!account) {
+      // Account doesn't exist yet — create it from Supabase auth metadata.
+      // Use upsert to handle race conditions (concurrent requests both see null).
+      const metadata = user.user_metadata || {};
+      try {
+        await prisma.account.upsert({
+          where: { supabaseId: user.id },
+          update: {},
+          create: {
+            supabaseId: user.id,
+            email: user.email,
+            name: metadata.name || metadata.full_name || null,
+          },
+        });
+      } catch (error) {
+        console.error("Failed to create account:", error);
+        // Still redirect to onboarding — the /api/onboarding fallback will retry
+      }
+      redirect("/onboarding");
+    }
+
+    const progress = account.onboardingProgress as OnboardingProgress | null;
+    const entryIntent = account.entryIntent as EntryIntent | null;
+
+    // Check if there's incomplete onboarding to finish
+    const onboardingRedirect = getOnboardingRedirect(progress, entryIntent);
+    if (onboardingRedirect) {
+      redirect(onboardingRedirect);
+    }
+
+    // All onboarding complete — go to primary shell's dashboard
+    const primaryRole = account.primaryRole as Shell | null;
+    redirect(getDashboardPath(primaryRole));
+  } catch (error) {
+    console.error("Auth redirect error:", error);
+    // Fallback: send to onboarding rather than crashing
     redirect("/onboarding");
   }
-
-  const progress = account.onboardingProgress as OnboardingProgress | null;
-  const entryIntent = account.entryIntent as EntryIntent | null;
-
-  // Check if there's incomplete onboarding to finish
-  const onboardingRedirect = getOnboardingRedirect(progress, entryIntent);
-  if (onboardingRedirect) {
-    redirect(onboardingRedirect);
-  }
-
-  // All onboarding complete — go to primary shell's dashboard
-  const primaryRole = account.primaryRole as Shell | null;
-  redirect(getDashboardPath(primaryRole));
 }
