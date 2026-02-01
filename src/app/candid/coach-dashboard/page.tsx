@@ -81,7 +81,7 @@ export default function CoachDashboardPage() {
         // Fetch coach sessions, earnings, profile, and reviews in parallel
         const [sessionsRes, earningsRes, profileRes] = await Promise.all([
           fetch("/api/sessions?role=coach"),
-          fetch("/api/coach/earnings"),
+          fetch("/api/candid/coach/earnings"),
           fetch("/api/profile"),
         ]);
 

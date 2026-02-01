@@ -6,13 +6,7 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProgressMeterLinear } from "@/components/ui/progress-meter";
-import {
-  CheckCircle,
-  Circle,
-  Rocket,
-  CaretRight,
-  X,
-} from "@phosphor-icons/react";
+import { CheckCircle, Circle, Rocket, CaretRight, X } from "@phosphor-icons/react";
 import type { Shell } from "@/lib/onboarding/types";
 
 interface ChecklistItem {
@@ -29,35 +23,35 @@ const CHECKLIST_ITEMS: Record<Shell, ChecklistItem[]> = {
       id: "profile",
       label: "Complete your profile",
       description: "Add your background and climate career goals",
-      href: "/talent/profile",
+      href: "/jobs/profile",
       completed: false,
     },
     {
       id: "skills",
       label: "Add skills & sectors",
       description: "Help us find the best job matches for you",
-      href: "/talent/profile",
+      href: "/jobs/profile",
       completed: false,
     },
     {
       id: "preferences",
       label: "Set job preferences",
       description: "Choose role types, locations, and salary range",
-      href: "/talent/profile",
+      href: "/jobs/profile",
       completed: false,
     },
     {
       id: "browse",
       label: "Browse job listings",
       description: "Explore climate roles that match your profile",
-      href: "/talent/jobs",
+      href: "/jobs/search",
       completed: false,
     },
     {
       id: "save",
       label: "Save your first job",
       description: "Bookmark roles you're interested in",
-      href: "/talent/jobs",
+      href: "/jobs/search",
       completed: false,
     },
   ],
@@ -66,35 +60,35 @@ const CHECKLIST_ITEMS: Record<Shell, ChecklistItem[]> = {
       id: "profile",
       label: "Set up your coach profile",
       description: "Add your headline, bio, and expertise",
-      href: "/coach/settings",
+      href: "/candid/coach/settings",
       completed: false,
     },
     {
       id: "availability",
       label: "Set your availability",
       description: "Choose when you're available for sessions",
-      href: "/coach/schedule",
+      href: "/candid/coach/schedule",
       completed: false,
     },
     {
       id: "rate",
       label: "Set your hourly rate",
       description: "Configure your session pricing",
-      href: "/coach/settings",
+      href: "/candid/coach/settings",
       completed: false,
     },
     {
       id: "stripe",
       label: "Connect Stripe for payments",
       description: "Set up payouts to receive earnings",
-      href: "/coach/settings",
+      href: "/candid/coach/settings",
       completed: false,
     },
     {
       id: "verified",
       label: "Get verified",
       description: "Complete verification to start accepting clients",
-      href: "/coach/settings",
+      href: "/candid/coach/settings",
       completed: false,
     },
   ],
@@ -103,35 +97,35 @@ const CHECKLIST_ITEMS: Record<Shell, ChecklistItem[]> = {
       id: "company",
       label: "Add company information",
       description: "Set up your company profile and brand",
-      href: "/employer/settings",
+      href: "/canopy/settings",
       completed: false,
     },
     {
       id: "role",
       label: "Post your first role",
       description: "Create a job listing to start receiving applications",
-      href: "/employer/roles",
+      href: "/canopy/roles",
       completed: false,
     },
     {
       id: "team",
       label: "Invite a team member",
       description: "Collaborate on hiring with your colleagues",
-      href: "/employer/team",
+      href: "/canopy/team",
       completed: false,
     },
     {
       id: "pipeline",
       label: "Set up your pipeline",
       description: "Customize hiring stages for your roles",
-      href: "/employer/roles",
+      href: "/canopy/roles",
       completed: false,
     },
     {
       id: "candidates",
       label: "Review candidates",
       description: "Browse and evaluate applicants",
-      href: "/employer/candidates",
+      href: "/canopy/candidates",
       completed: false,
     },
   ],
@@ -204,9 +198,7 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
 
   const handleItemClick = (itemId: string) => {
     setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, completed: true } : item
-      )
+      prev.map((item) => (item.id === itemId ? { ...item, completed: true } : item))
     );
 
     const completed = items
@@ -224,7 +216,12 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
 
   if (allComplete) {
     return (
-      <Card className={cn("p-4 border-[var(--primitive-green-200)] bg-[var(--primitive-green-100)]", className)}>
+      <Card
+        className={cn(
+          "border-[var(--primitive-green-200)] bg-[var(--primitive-green-100)] p-4",
+          className
+        )}
+      >
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-200)]">
             <CheckCircle size={24} className="text-[var(--primitive-green-600)]" weight="fill" />
@@ -253,9 +250,7 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
             <Rocket size={16} className="text-[var(--primitive-green-700)]" weight="fill" />
           </div>
           <div>
-            <h3 className="text-body-strong font-medium text-foreground-default">
-              Get Started
-            </h3>
+            <h3 className="text-foreground-default text-body-strong font-medium">Get Started</h3>
             <p className="text-caption text-foreground-muted">
               {completedCount} of {totalCount} completed
             </p>
@@ -278,9 +273,7 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
             onClick={() => handleItemClick(item.id)}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-3 transition-all",
-              item.completed
-                ? "opacity-60"
-                : "hover:bg-[var(--background-subtle)]"
+              item.completed ? "opacity-60" : "hover:bg-[var(--background-subtle)]"
             )}
           >
             {item.completed ? (
@@ -290,28 +283,20 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
                 weight="fill"
               />
             ) : (
-              <Circle
-                size={20}
-                className="flex-shrink-0 text-foreground-muted"
-                weight="regular"
-              />
+              <Circle size={20} className="flex-shrink-0 text-foreground-muted" weight="regular" />
             )}
 
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <p
                 className={cn(
                   "text-body-sm font-medium",
-                  item.completed
-                    ? "text-foreground-muted line-through"
-                    : "text-foreground-default"
+                  item.completed ? "text-foreground-muted line-through" : "text-foreground-default"
                 )}
               >
                 {item.label}
               </p>
               {!item.completed && (
-                <p className="text-caption text-foreground-muted truncate">
-                  {item.description}
-                </p>
+                <p className="truncate text-caption text-foreground-muted">{item.description}</p>
               )}
             </div>
 

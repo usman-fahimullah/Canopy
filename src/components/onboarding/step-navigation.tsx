@@ -24,7 +24,7 @@ export function StepNavigation({
   onBack,
   canContinue = true,
   loading = false,
-  continueLabel = "Continue",
+  continueLabel = "Next Step",
   className,
 }: StepNavigationProps) {
   return (

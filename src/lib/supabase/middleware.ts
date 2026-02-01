@@ -3,13 +3,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Paths that require authentication
 const PROTECTED_PREFIXES = [
-  "/talent",
-  "/coach",
-  "/employer",
+  "/jobs",
+  "/candid/coach",
+  "/canopy",
   "/onboarding/profile",
   "/onboarding/coach",
-  "/onboarding/employer",
-  "/onboarding/talent",
+  "/onboarding/canopy",
+  "/onboarding/jobs",
   "/onboarding/complete",
   "/candid/dashboard",
   "/candid/sessions",

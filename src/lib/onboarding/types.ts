@@ -12,28 +12,16 @@ export type EntryIntent = "talent" | "coach" | "employer";
 // ─── Onboarding Steps ──────────────────────────────────────────────
 
 /** Steps in the talent (job seeker) onboarding */
-export type TalentOnboardingStep =
-  | "background"
-  | "skills"
-  | "preferences";
+export type TalentOnboardingStep = "background" | "skills" | "preferences";
 
 /** Steps in the coach onboarding */
-export type CoachOnboardingStep =
-  | "about"
-  | "expertise"
-  | "services"
-  | "availability";
+export type CoachOnboardingStep = "about" | "expertise" | "services" | "availability";
 
 /** Steps in the employer onboarding */
-export type EmployerOnboardingStep =
-  | "company"
-  | "your-role";
+export type EmployerOnboardingStep = "company" | "your-role";
 
 /** Union of all possible onboarding steps */
-export type OnboardingStep =
-  | TalentOnboardingStep
-  | CoachOnboardingStep
-  | EmployerOnboardingStep;
+export type OnboardingStep = TalentOnboardingStep | CoachOnboardingStep | EmployerOnboardingStep;
 
 // ─── Onboarding Progress (stored as JSON on Account) ───────────────
 
@@ -133,6 +121,42 @@ export const STEPS_BY_SHELL: Record<Shell, StepConfig[]> = {
   employer: EMPLOYER_STEPS,
 };
 
+// ─── Shell ↔ URL Mapping ──────────────────────────────────────────
+//
+// Internal Shell types ("talent", "coach", "employer") are stored in the
+// database and must NOT change. URL paths use product-name slugs instead.
+
+/** Maps internal Shell type → URL path segment */
+export const SHELL_URL_SLUGS: Record<Shell, string> = {
+  talent: "jobs",
+  coach: "candid/coach",
+  employer: "canopy",
+};
+
+/** Maps URL slug → internal Shell type */
+export const URL_SLUG_TO_SHELL: Record<string, Shell> = {
+  jobs: "talent",
+  "candid/coach": "coach",
+  canopy: "employer",
+};
+
+/** Maps internal Shell type → onboarding URL segment */
+export const SHELL_ONBOARDING_SLUGS: Record<Shell, string> = {
+  talent: "jobs",
+  coach: "coach", // onboarding stays at /onboarding/coach
+  employer: "canopy",
+};
+
+/** Get the URL-safe slug for a shell */
+export function getShellSlug(shell: Shell): string {
+  return SHELL_URL_SLUGS[shell];
+}
+
+/** Get the shell from a URL slug */
+export function getShellFromSlug(slug: string): Shell | null {
+  return URL_SLUG_TO_SHELL[slug] ?? null;
+}
+
 // ─── Shell Configuration ───────────────────────────────────────────
 
 export interface ShellConfig {
@@ -148,21 +172,21 @@ export const SHELL_CONFIGS: Record<Shell, ShellConfig> = {
     shell: "talent",
     label: "Job Search",
     description: "Find your climate career",
-    dashboardPath: "/talent/dashboard",
+    dashboardPath: "/jobs/dashboard",
     sidebarDefault: "collapsed",
   },
   coach: {
     shell: "coach",
     label: "Coaching",
     description: "Manage your coaching practice",
-    dashboardPath: "/coach/dashboard",
+    dashboardPath: "/candid/coach/dashboard",
     sidebarDefault: "expanded",
   },
   employer: {
     shell: "employer",
     label: "Hiring",
     description: "Hire climate talent",
-    dashboardPath: "/employer/dashboard",
+    dashboardPath: "/canopy/dashboard",
     sidebarDefault: "expanded",
   },
 };
@@ -182,9 +206,7 @@ export function createOnboardingProgress(): OnboardingProgress {
 }
 
 /** Initialize onboarding state for a newly activated role */
-export function createRoleOnboardingState(
-  shell: Shell,
-): RoleOnboardingState {
+export function createRoleOnboardingState(shell: Shell): RoleOnboardingState {
   const steps = STEPS_BY_SHELL[shell];
   return {
     complete: false,
@@ -196,7 +218,7 @@ export function createRoleOnboardingState(
 /** Mark a role's onboarding as complete */
 export function completeRoleOnboarding(
   progress: OnboardingProgress,
-  shell: Shell,
+  shell: Shell
 ): OnboardingProgress {
   return {
     ...progress,
@@ -214,7 +236,7 @@ export function completeRoleOnboarding(
 /** Advance to the next onboarding step for a role */
 export function advanceOnboardingStep(
   progress: OnboardingProgress,
-  shell: Shell,
+  shell: Shell
 ): OnboardingProgress {
   const roleState = progress.roles[shell];
   if (!roleState || roleState.complete) return progress;
@@ -243,7 +265,7 @@ export function advanceOnboardingStep(
 /** Get the next incomplete onboarding URL for a user */
 export function getOnboardingRedirect(
   progress: OnboardingProgress | null,
-  entryIntent: EntryIntent | null,
+  entryIntent: EntryIntent | null
 ): string | null {
   if (!progress) {
     // No progress at all — send to role selection on signup page
@@ -258,7 +280,7 @@ export function getOnboardingRedirect(
   if (entryIntent) {
     const roleState = progress.roles[entryIntent];
     if (roleState && !roleState.complete && roleState.currentStep) {
-      return `/onboarding/${entryIntent}/${roleState.currentStep}`;
+      return `/onboarding/${SHELL_ONBOARDING_SLUGS[entryIntent]}/${roleState.currentStep}`;
     }
   }
 
@@ -266,7 +288,7 @@ export function getOnboardingRedirect(
   for (const shell of ["talent", "coach", "employer"] as Shell[]) {
     const roleState = progress.roles[shell];
     if (roleState && !roleState.complete && roleState.currentStep) {
-      return `/onboarding/${shell}/${roleState.currentStep}`;
+      return `/onboarding/${SHELL_ONBOARDING_SLUGS[shell]}/${roleState.currentStep}`;
     }
   }
 
@@ -281,21 +303,15 @@ export function getDashboardPath(primaryRole: Shell | null): string {
 }
 
 /** Check if a user has completed onboarding for at least one role */
-export function hasCompletedAnyOnboarding(
-  progress: OnboardingProgress | null,
-): boolean {
+export function hasCompletedAnyOnboarding(progress: OnboardingProgress | null): boolean {
   if (!progress) return false;
-  return Object.values(progress.roles).some(
-    (state) => state?.complete === true,
-  );
+  return Object.values(progress.roles).some((state) => state?.complete === true);
 }
 
 /** Get list of shells a user has activated (started or completed onboarding) */
-export function getActiveShells(
-  progress: OnboardingProgress | null,
-): Shell[] {
+export function getActiveShells(progress: OnboardingProgress | null): Shell[] {
   if (!progress) return [];
   return (["talent", "coach", "employer"] as Shell[]).filter(
-    (shell) => progress.roles[shell] !== null,
+    (shell) => progress.roles[shell] !== null
   );
 }

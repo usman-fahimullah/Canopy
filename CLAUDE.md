@@ -2,7 +2,15 @@
 
 ## Project Overview
 
-**Canopy** is an Applicant Tracking System (ATS) built for climate hiring, part of the Green Jobs Board ecosystem. It combines a design-forward career page builder with AI-powered candidate sourcing specifically for the climate/sustainability sector.
+**Green Jobs Board** is a climate recruitment platform with three products:
+
+| Product              | Description           | Target Users              |
+| -------------------- | --------------------- | ------------------------- |
+| **Green Jobs Board** | Job seeker platform   | Climate job seekers       |
+| **Canopy**           | ATS app for employers | Climate-focused employers |
+| **Candid**           | Career coaching app   | Job seekers + coaches     |
+
+**This repo is Canopy** — the ATS for climate hiring. It combines a design-forward career page builder with AI-powered candidate sourcing specifically for the climate/sustainability sector.
 
 **Philosophy:** "Human-first, AI-enabled" — AI assists and suggests, humans decide. Always show reasoning, allow override.
 
@@ -395,158 +403,15 @@ enum Recommendation {
 
 ## Design Tokens
 
-When the user provides Figma designs, extract tokens into this structure:
+**The authoritative token reference is in `.claude/rules/figma-implementation.md`.**
+That file contains the complete 3-tier token system (primitive → semantic → component)
+with all color scales, spacing, typography, radius, shadow, motion, and z-index tokens.
 
-```css
-/* src/app/globals.css */
+Token source files:
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  :root {
-    /* Colors - extract from Figma */
-    --color-primary-50: #f0fdfa;
-    --color-primary-100: #ccfbf1;
-    --color-primary-200: #99f6e4;
-    --color-primary-300: #5eead4;
-    --color-primary-400: #2dd4bf;
-    --color-primary-500: #14b8a6;
-    --color-primary-600: #0d9488;
-    --color-primary-700: #0f766e;
-    --color-primary-800: #115e59;
-    --color-primary-900: #134e4a;
-    --color-primary-950: #042f2e;
-
-    /* Neutral/Gray scale */
-    --color-gray-50: #f9fafb;
-    --color-gray-100: #f3f4f6;
-    --color-gray-200: #e5e7eb;
-    --color-gray-300: #d1d5db;
-    --color-gray-400: #9ca3af;
-    --color-gray-500: #6b7280;
-    --color-gray-600: #4b5563;
-    --color-gray-700: #374151;
-    --color-gray-800: #1f2937;
-    --color-gray-900: #111827;
-    --color-gray-950: #030712;
-
-    /* Semantic */
-    --color-success: #10b981;
-    --color-warning: #f59e0b;
-    --color-error: #ef4444;
-    --color-info: #3b82f6;
-
-    /* Typography */
-    --font-sans: "Inter", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", monospace;
-
-    /* Font sizes */
-    --text-xs: 0.75rem;
-    --text-sm: 0.875rem;
-    --text-base: 1rem;
-    --text-lg: 1.125rem;
-    --text-xl: 1.25rem;
-    --text-2xl: 1.5rem;
-    --text-3xl: 1.875rem;
-    --text-4xl: 2.25rem;
-
-    /* Spacing (4px base) */
-    --space-1: 0.25rem;
-    --space-2: 0.5rem;
-    --space-3: 0.75rem;
-    --space-4: 1rem;
-    --space-5: 1.25rem;
-    --space-6: 1.5rem;
-    --space-8: 2rem;
-    --space-10: 2.5rem;
-    --space-12: 3rem;
-    --space-16: 4rem;
-
-    /* Border radius */
-    --radius-sm: 0.25rem;
-    --radius-md: 0.375rem;
-    --radius-lg: 0.5rem;
-    --radius-xl: 0.75rem;
-    --radius-2xl: 1rem;
-    --radius-full: 9999px;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-
-    /* Component-specific */
-    --header-height: 4rem;
-    --sidebar-width: 16rem;
-    --sidebar-collapsed-width: 4.5rem;
-  }
-
-  .dark {
-    /* Dark mode overrides */
-  }
-}
-```
-
-```typescript
-// tailwind.config.ts
-
-import type { Config } from "tailwindcss";
-
-const config: Config = {
-  darkMode: "class",
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: "var(--color-primary-50)",
-          100: "var(--color-primary-100)",
-          200: "var(--color-primary-200)",
-          300: "var(--color-primary-300)",
-          400: "var(--color-primary-400)",
-          500: "var(--color-primary-500)",
-          600: "var(--color-primary-600)",
-          700: "var(--color-primary-700)",
-          800: "var(--color-primary-800)",
-          900: "var(--color-primary-900)",
-          950: "var(--color-primary-950)",
-        },
-        gray: {
-          50: "var(--color-gray-50)",
-          // ... etc
-        },
-        success: "var(--color-success)",
-        warning: "var(--color-warning)",
-        error: "var(--color-error)",
-        info: "var(--color-info)",
-      },
-      fontFamily: {
-        sans: ["var(--font-sans)"],
-        mono: ["var(--font-mono)"],
-      },
-      borderRadius: {
-        sm: "var(--radius-sm)",
-        md: "var(--radius-md)",
-        lg: "var(--radius-lg)",
-        xl: "var(--radius-xl)",
-        "2xl": "var(--radius-2xl)",
-      },
-      boxShadow: {
-        sm: "var(--shadow-sm)",
-        md: "var(--shadow-md)",
-        lg: "var(--shadow-lg)",
-        xl: "var(--shadow-xl)",
-      },
-    },
-  },
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")],
-};
-
-export default config;
-```
+- `src/app/globals.css` — CSS custom properties (primary source of truth)
+- `src/lib/tokens.ts` — TypeScript access for runtime/animations
+- `tailwind.config.ts` — Tailwind theme extension mapping tokens to utility classes
 
 ---
 
@@ -561,7 +426,7 @@ import { forwardRef } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { SpinnerGap } from "@phosphor-icons/react";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -606,7 +471,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {loading && <SpinnerGap className="mr-2 h-4 w-4 animate-spin" />}
         {children}
       </Comp>
     );
@@ -777,17 +642,39 @@ ImpactMetrics.craft = {
 5. **Transparent AI** — When AI ranks candidates, show why. Always allow override.
 6. **Mobile-responsive** — All views must work on tablet/mobile
 
-### Navigation Structure
+### Multi-Shell Routing Architecture
+
+The app has three independent "shells" — each a separate product with its own layout, navigation, and routes:
+
+| Shell        | Internal Type | URL Prefix        | Product                        |
+| ------------ | ------------- | ----------------- | ------------------------------ |
+| **Jobs**     | `"talent"`    | `/jobs/*`         | Green Jobs Board (job seekers) |
+| **Coach**    | `"coach"`     | `/candid/coach/*` | Candid (coach side)            |
+| **Employer** | `"employer"`  | `/canopy/*`       | Canopy (ATS for employers)     |
+
+**Key decoupling:** Internal Shell types (`"talent"`, `"coach"`, `"employer"`) are stored in the database and MUST NOT change. URL paths use product-name slugs instead. The mapping layer lives in `src/lib/onboarding/types.ts` (`SHELL_URL_SLUGS`, `getShellSlug()`, `getShellFromSlug()`).
+
+**Onboarding routes:**
+
+- `/onboarding/jobs/*` — talent onboarding
+- `/onboarding/coach/*` — coach onboarding
+- `/onboarding/canopy/*` — employer onboarding
+
+**API routes follow the same pattern:**
+
+- `/api/jobs/*` — talent APIs
+- `/api/candid/coach/*` — coach APIs
+- `/api/canopy/*` — employer APIs
+
+**Navigation config:** `src/lib/shell/nav-config.ts` is the single source of truth for all shell sidebar links. The `shell` property uses internal types; `href` values use URL slugs.
+
+### Navigation Structure (Canopy / Employer Shell)
 
 ```
 Sidebar:
 ├── Dashboard (overview)
-├── Jobs
-│   ├── Active Jobs
-│   ├── Drafts
-│   └── Closed
+├── Roles
 ├── Candidates (talent pool)
-├── Career Page (builder)
 ├── Team
 ├── Analytics
 └── Settings
@@ -913,13 +800,30 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 ## Notes for Claude Code
 
-1. **Start with tokens** — Always extract exact values from Figma, don't approximate
-2. **Build incrementally** — One component at a time, validate before moving on
-3. **Accessibility first** — Proper ARIA attributes, keyboard navigation, focus states
-4. **Type everything** — Full TypeScript, no `any` types
-5. **Server Components default** — Only use "use client" when necessary
-6. **Consistent patterns** — Follow the component patterns established in this file
-7. **Phosphor Icons ONLY** — NEVER use Lucide, Heroicons, or any other icon library. Always use Phosphor Icons (`@phosphor-icons/react`). See `src/components/Icons/ICON_MAPPING.md` for the full mapping of icon names to Phosphor equivalents. Import from `@/components/Icons` when using domain-specific aliases (e.g., `Agriculture`, `Energy`) or directly from `@phosphor-icons/react` for standard icons.
+### Engineering Philosophy
+
+**Build for scale, not for speed.** Canopy is a multi-tenant SaaS product.
+Every implementation should work at 100 organizations, 10K jobs, and 100K
+candidates. See `.claude/rules/scale-first-engineering.md` for the full
+engineering standards.
+
+**Build from the design system, not from scratch.** Every screen is composed
+from Trails Design System components. Never bypass the component library with
+raw HTML when a design system component exists. See
+`.claude/rules/design-first-implementation.md` for the mandatory workflow.
+
+### Core Rules
+
+1. **Design system first** — Decompose Figma designs into existing components from `/src/components/ui/` before writing any code. Never use raw `<button>`, `<input>`, `<select>` when a design system component exists.
+2. **Tokens, not hardcoded values** — All colors, spacing, radii, and shadows must reference CSS variable tokens. See `.claude/rules/figma-implementation.md` for the token reference.
+3. **Scale-ready queries** — Always scope by `organizationId`, always paginate, always validate with Zod, never return unbounded result sets.
+4. **All states required** — Every data-driven view must handle: loading (Skeleton/Spinner), empty (EmptyState), error (error boundary), and populated states.
+5. **Accessibility first** — Proper ARIA attributes, keyboard navigation, focus states on every interactive element.
+6. **Type everything** — Full TypeScript, no `any` types.
+7. **Server Components default** — Only use "use client" when interactivity requires it.
+8. **Phosphor Icons ONLY** — NEVER use Lucide, Heroicons, or any other icon library. Always use Phosphor Icons (`@phosphor-icons/react`). See `src/components/Icons/ICON_MAPPING.md` for the full mapping of icon names to Phosphor equivalents. Import from `@/components/Icons` when using domain-specific aliases (e.g., `Agriculture`, `Energy`) or directly from `@phosphor-icons/react` for standard icons.
+9. **Build incrementally** — One component at a time, validate before moving on.
+10. **Consistent patterns** — Follow the component patterns established in this file and in `.claude/rules/`.
 
 ---
 
@@ -929,7 +833,7 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 #### Design System Page (`/src/app/page.tsx`)
 
-A comprehensive, functional design system documentation page has been built. It serves as the source of truth for the Trails Design System used by Green Jobs Board / Candid.
+A comprehensive, functional design system documentation page has been built. It serves as the source of truth for the Trails Design System used across all Green Jobs Board products (Green Jobs Board, Canopy, and Candid).
 
 **Page Structure:**
 
@@ -970,36 +874,20 @@ A comprehensive, functional design system documentation page has been built. It 
 
 #### Dark Mode Implementation
 
-**Critical Pattern:** The CSS variable system inverts neutral colors in dark mode. To achieve proper dark mode styling, use direct hex values instead of CSS variable classes:
+**General rule:** Use semantic CSS variable tokens for dark mode. The token system
+automatically switches values in dark mode, so no manual `dark:` overrides are needed
+in feature code. See `.claude/rules/figma-implementation.md` for token reference.
 
-```tsx
-// CORRECT - Direct hex values for dark mode
-className = "bg-neutral-white dark:bg-[#1A1A1A] border-neutral-200 dark:border-[#3D3D3D]";
+**Legacy exception — Design system documentation pages only:** The design system
+docs pages in `/src/components/design-system/` and `/src/app/page.tsx` use an older
+Tailwind utility class pattern where neutral colors invert unexpectedly. These specific
+files use hardcoded hex values for dark mode as a workaround. **This pattern must NOT
+be used in feature code** — use semantic tokens instead.
 
-// INCORRECT - CSS variable classes (colors invert unexpectedly)
-className = "bg-neutral-white dark:bg-neutral-800";
-```
+Design system docs files with this legacy pattern:
 
-**Dark Mode Color Reference:**
-| Purpose | Light Mode | Dark Mode Hex |
-|---------|------------|---------------|
-| Page background | `bg-neutral-100` | `dark:bg-[#0A0A0A]` |
-| Card background | `bg-neutral-white` | `dark:bg-[#1A1A1A]` |
-| Elevated surfaces | `bg-neutral-100` | `dark:bg-[#121212]` |
-| Borders | `border-neutral-200` | `dark:border-[#3D3D3D]` |
-| Hover states | `hover:bg-neutral-200` | `dark:hover:bg-[#262626]` |
-| Primary text | `text-neutral-800` | `dark:text-[#D4D4D4]` |
-| Secondary text | `text-neutral-600` | `dark:text-neutral-400` |
-
-**Files with dark mode fixes applied:**
-
-- `Header.tsx` - NavLinks, search button, GitHub link
-- `Sidebar.tsx` - Navigation items, section headers, borders
-- `SearchModal.tsx` - Modal container, results, footer, keyboard badges
-- `ComponentSection.tsx` - Section titles, card containers, UsageGuide, AccessibilityInfo
-- `PropsTable.tsx` - Table rows, code highlights
-- `CodeBlock.tsx` - Code container, toggle button
-- `page.tsx` - Page background (`dark:bg-[#0A0A0A]`)
+- `Header.tsx`, `Sidebar.tsx`, `SearchModal.tsx`, `ComponentSection.tsx`
+- `PropsTable.tsx`, `CodeBlock.tsx`, `page.tsx`
 
 #### Navigation System
 
@@ -1050,31 +938,8 @@ Foundations (id="foundations"):
 
 #### Motion Tokens
 
-Comprehensive motion system defined in `globals.css` (lines 712-762):
-
-```css
-/* Durations */
---duration-instant: 0ms;
---duration-fast: 100ms;
---duration-normal: 200ms;
---duration-slow: 300ms;
---duration-slower: 400ms;
---duration-slowest: 500ms;
-
-/* Easings */
---ease-linear: linear;
---ease-default: cubic-bezier(0.4, 0, 0.2, 1);
---ease-in: cubic-bezier(0.4, 0, 1, 1);
---ease-out: cubic-bezier(0, 0, 0.2, 1);
---ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
---ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
---ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  /* All durations set to 0ms */
-}
-```
+See `.claude/rules/figma-implementation.md` for the authoritative motion token
+values (durations, easings, semantic transitions). The source of truth is `globals.css`.
 
 ### UI Components Implemented (`/src/components/ui/`)
 

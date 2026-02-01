@@ -2,12 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import {
-  Gear,
-  SignOut,
-  UserCircle,
-  ArrowsLeftRight,
-} from "@phosphor-icons/react";
+import { Gear, SignOut, UserCircle, ArrowsLeftRight } from "@phosphor-icons/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useShell } from "@/lib/shell/shell-context";
-import { SHELL_CONFIGS } from "@/lib/onboarding/types";
+import { SHELL_CONFIGS, getShellSlug } from "@/lib/onboarding/types";
 import type { Shell } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
 
@@ -41,20 +36,13 @@ export function ProfileDropdown({ children }: ProfileDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent
-        side="right"
-        align="start"
-        sideOffset={8}
-        className="w-64"
-      >
+      <DropdownMenuContent side="right" align="start" sideOffset={8} className="w-64">
         {/* User info */}
         <div className="px-3 py-2.5">
-          <p className="text-body-sm font-semibold text-foreground-default truncate">
+          <p className="text-foreground-default truncate text-body-sm font-semibold">
             {user?.name || "User"}
           </p>
-          <p className="text-caption text-foreground-muted truncate">
-            {user?.email || ""}
-          </p>
+          <p className="truncate text-caption text-foreground-muted">{user?.email || ""}</p>
         </div>
 
         <DropdownMenuSeparator />
@@ -64,7 +52,7 @@ export function ProfileDropdown({ children }: ProfileDropdownProps) {
           <DropdownMenuItem
             onClick={() =>
               router.push(
-                `/${currentShell}/${currentShell === "talent" ? "profile" : "settings"}`
+                `/${getShellSlug(currentShell)}/${currentShell === "talent" ? "profile" : "settings"}`
               )
             }
           >
@@ -75,7 +63,7 @@ export function ProfileDropdown({ children }: ProfileDropdownProps) {
             onClick={() =>
               router.push(
                 SHELL_CONFIGS[currentShell]
-                  ? `/${currentShell}/settings`
+                  ? `/${getShellSlug(currentShell)}/settings`
                   : "/settings"
               )
             }
@@ -110,9 +98,7 @@ export function ProfileDropdown({ children }: ProfileDropdownProps) {
                 >
                   <span className="flex-1">{SHELL_LABELS[shell]}</span>
                   {shell === currentShell && (
-                    <span className="text-caption text-foreground-muted">
-                      Current
-                    </span>
+                    <span className="text-caption text-foreground-muted">Current</span>
                   )}
                 </DropdownMenuItem>
               ))}

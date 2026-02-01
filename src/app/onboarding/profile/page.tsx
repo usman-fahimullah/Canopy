@@ -62,12 +62,7 @@ export default function OnboardingProfilePage() {
     <OnboardingShell
       step={PROFILE_STEP}
       footer={
-        <StepNavigation
-          onBack={() => router.push("/onboarding")}
-          onContinue={handleContinue}
-          canContinue={canContinue}
-          loading={loading}
-        />
+        <StepNavigation onContinue={handleContinue} canContinue={canContinue} loading={loading} />
       }
     >
       <FormCard>

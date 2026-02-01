@@ -24,43 +24,43 @@ import type { ShellNavConfig } from "./types";
 
 export const talentNavConfig: ShellNavConfig = {
   shell: "talent",
-  logoHref: "/talent",
-  settingsHref: "/talent/settings",
-  notificationsHref: "/talent/notifications",
+  logoHref: "/jobs",
+  settingsHref: "/jobs/settings",
+  notificationsHref: "/jobs/notifications",
   sections: [
     {
       id: "main",
       items: [
         {
           id: "home",
-          href: "/talent",
+          href: "/jobs",
           label: "Home",
           icon: HouseSimple,
           iconWeight: "fill",
         },
         {
           id: "jobs",
-          href: "/talent/jobs",
+          href: "/jobs/search",
           label: "Jobs",
           icon: MagnifyingGlass,
           iconWeight: "bold",
         },
         {
           id: "applications",
-          href: "/talent/applications",
+          href: "/jobs/applications",
           label: "Applications",
           icon: Table,
           iconWeight: "fill",
         },
         {
           id: "treehouse",
-          href: "/talent/treehouse",
+          href: "/jobs/treehouse",
           label: "Treehouse",
           customIcon: TreehouseIcon,
         },
         {
           id: "messages",
-          href: "/talent/messages",
+          href: "/jobs/messages",
           label: "Messages",
           icon: ChatCircleDots,
           iconWeight: "fill",
@@ -68,7 +68,7 @@ export const talentNavConfig: ShellNavConfig = {
         },
         {
           id: "profile",
-          href: "/talent/profile",
+          href: "/jobs/profile",
           label: "Profile",
           customIcon: ProfileIcon,
           useProfileImage: true,
@@ -83,14 +83,14 @@ export const talentNavConfig: ShellNavConfig = {
       items: [
         {
           id: "coaching-sessions",
-          href: "/talent/coaching",
+          href: "/jobs/coaching",
           label: "Coaching",
           icon: GraduationCap,
           iconWeight: "fill",
         },
         {
           id: "coach-messages",
-          href: "/talent/coaching/messages",
+          href: "/jobs/coaching/messages",
           label: "Coach Messages",
           icon: ChatTeardropDots,
           iconWeight: "fill",
@@ -105,14 +105,14 @@ export const talentNavConfig: ShellNavConfig = {
       items: [
         {
           id: "mentoring-sessions",
-          href: "/talent/mentoring",
+          href: "/jobs/mentoring",
           label: "Mentoring",
           icon: Handshake,
           iconWeight: "fill",
         },
         {
           id: "mentor-connect",
-          href: "/talent/mentoring/connect",
+          href: "/jobs/mentoring/connect",
           label: "Find Mentors",
           icon: Users,
           iconWeight: "bold",
@@ -123,9 +123,9 @@ export const talentNavConfig: ShellNavConfig = {
   recents: {
     id: "recent-applications",
     label: "Recent Applications",
-    apiEndpoint: "/api/talent/recent-applications",
+    apiEndpoint: "/api/jobs/recent-applications",
     emptyMessage: "No recent applications",
-    itemHrefPrefix: "/talent/applications/",
+    itemHrefPrefix: "/jobs/applications/",
   },
 };
 
@@ -135,51 +135,51 @@ export const talentNavConfig: ShellNavConfig = {
 
 export const coachNavConfig: ShellNavConfig = {
   shell: "coach",
-  logoHref: "/coach",
-  settingsHref: "/coach/settings",
-  notificationsHref: "/coach/notifications",
+  logoHref: "/candid/coach",
+  settingsHref: "/candid/coach/settings",
+  notificationsHref: "/candid/coach/notifications",
   sections: [
     {
       id: "main",
       items: [
         {
           id: "home",
-          href: "/coach",
+          href: "/candid/coach",
           label: "Home",
           icon: HouseSimple,
           iconWeight: "fill",
         },
         {
           id: "clients",
-          href: "/coach/clients",
+          href: "/candid/coach/clients",
           label: "Clients",
           icon: Users,
           iconWeight: "bold",
         },
         {
           id: "sessions",
-          href: "/coach/sessions",
+          href: "/candid/coach/sessions",
           label: "Sessions",
           icon: CalendarDots,
           iconWeight: "fill",
         },
         {
           id: "earnings",
-          href: "/coach/earnings",
+          href: "/candid/coach/earnings",
           label: "Earnings",
           icon: ChartLine,
           iconWeight: "bold",
         },
         {
           id: "schedule",
-          href: "/coach/schedule",
+          href: "/candid/coach/schedule",
           label: "Schedule",
           icon: Clock,
           iconWeight: "fill",
         },
         {
           id: "messages",
-          href: "/coach/messages",
+          href: "/candid/coach/messages",
           label: "Messages",
           icon: ChatCircleDots,
           iconWeight: "fill",
@@ -191,9 +191,9 @@ export const coachNavConfig: ShellNavConfig = {
   recents: {
     id: "recent-conversations",
     label: "Recent Conversations",
-    apiEndpoint: "/api/coach/recent-conversations",
+    apiEndpoint: "/api/candid/coach/recent-conversations",
     emptyMessage: "No recent conversations",
-    itemHrefPrefix: "/coach/messages/",
+    itemHrefPrefix: "/candid/coach/messages/",
   },
 };
 
@@ -204,23 +204,23 @@ export const coachNavConfig: ShellNavConfig = {
 
 export const employerNavConfig: ShellNavConfig = {
   shell: "employer",
-  logoHref: "/employer",
-  settingsHref: "/employer/settings",
-  notificationsHref: "/employer/notifications",
+  logoHref: "/canopy",
+  settingsHref: "/canopy/settings",
+  notificationsHref: "/canopy/notifications",
   sections: [
     {
       id: "main",
       items: [
         {
           id: "home",
-          href: "/employer",
+          href: "/canopy",
           label: "Home",
           icon: HouseSimple,
           iconWeight: "fill",
         },
         {
           id: "roles",
-          href: "/employer/roles",
+          href: "/canopy/roles",
           label: "Roles",
           icon: BriefcaseMetal,
           iconWeight: "fill",
@@ -228,14 +228,14 @@ export const employerNavConfig: ShellNavConfig = {
         },
         {
           id: "candidates",
-          href: "/employer/candidates",
+          href: "/canopy/candidates",
           label: "Candidates",
           icon: Users,
           iconWeight: "bold",
         },
         {
           id: "team",
-          href: "/employer/team",
+          href: "/canopy/team",
           label: "Team",
           icon: UsersFour,
           iconWeight: "bold",
@@ -243,7 +243,7 @@ export const employerNavConfig: ShellNavConfig = {
         },
         {
           id: "analytics",
-          href: "/employer/analytics",
+          href: "/canopy/analytics",
           label: "Analytics",
           icon: ChartDonut,
           iconWeight: "fill",
@@ -255,9 +255,9 @@ export const employerNavConfig: ShellNavConfig = {
   recents: {
     id: "recent-postings",
     label: "Recent Postings",
-    apiEndpoint: "/api/employer/recent-postings",
+    apiEndpoint: "/api/canopy/recent-postings",
     emptyMessage: "No recent postings",
-    itemHrefPrefix: "/employer/roles/",
+    itemHrefPrefix: "/canopy/roles/",
   },
 };
 

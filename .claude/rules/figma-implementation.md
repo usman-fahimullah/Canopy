@@ -1,59 +1,45 @@
-# Figma Design Implementation
+# Figma Token Reference
 
 ---
-trigger: figma, design, implement design, from figma, figma link
----
 
-When implementing any design from Figma, follow this workflow:
+## trigger: figma, design, implement design, from figma, figma link
 
-## 1. Extract Design Specs
+**For the full implementation workflow (component decomposition, anti-patterns,
+checklists), see `design-first-implementation.md`.** This file is the token
+lookup reference used during Phase 3 (Token Reconciliation) of that workflow.
 
-Use the Figma MCP tool to get exact values from the provided Figma link. Extract:
-- Colors (hex values)
-- Spacing (padding, margin, gap)
-- Typography (font-size, line-height, font-weight)
-- Border-radius
-- Shadows
-- Opacity
-- Layout properties (flex, grid)
-- Component variants or states
+## Token Files
 
-## 2. Token Reconciliation
-
-Before writing any component code, reconcile Figma values with existing tokens.
-
-### Token Files
-
-| File | Purpose |
-|------|---------|
+| File                  | Purpose                                         |
+| --------------------- | ----------------------------------------------- |
 | `src/app/globals.css` | CSS custom properties (primary source of truth) |
-| `src/lib/tokens.ts` | TypeScript access for runtime/animations |
+| `src/lib/tokens.ts`   | TypeScript access for runtime/animations        |
 
-### Token Hierarchy (3 Tiers)
+## Token Hierarchy (3 Tiers)
 
 ```
-TIER 1: PRIMITIVE    → Raw color values (--primitive-green-600)
-TIER 2: SEMANTIC     → Intent-based (--background-brand, --foreground-error)
-TIER 3: COMPONENT    → Component-specific (--button-primary-background)
+TIER 3: COMPONENT    → --button-primary-background (preferred)
+TIER 2: SEMANTIC     → --background-brand, --foreground-error
+TIER 1: PRIMITIVE    → --primitive-green-600 (last resort)
 ```
 
 **Always prefer higher tiers.** Use component tokens when available, then semantic, then primitive.
 
 ---
 
-## 3. Token Quick Reference
+## Token Quick Reference
 
 ### Color Primitives
 
-| Scale | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 |
-|-------|-----|-----|-----|-----|-----|-----|-----|-----|
-| **Green** | #EAFFE0 | #DCFAC8 | #BCEBB2 | #8EE07E | #5ECC70 | #3BA36F | #0E5249 | #0A3D2C |
+| Scale       | 100     | 200     | 300     | 400     | 500     | 600     | 700     | 800     |
+| ----------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- |
+| **Green**   | #EAFFE0 | #DCFAC8 | #BCEBB2 | #8EE07E | #5ECC70 | #3BA36F | #0E5249 | #0A3D2C |
 | **Neutral** | #FAF9F7 | #F2EDE9 | #E5DFD8 | #CCC6C0 | #A39D96 | #7A7671 | #3D3A37 | #1F1D1C |
-| **Blue** | #E5F1FF | #CCE4FF | #99C9FF | #408CFF | #3369FF | #0D3EC7 | #00217A | #001652 |
-| **Red** | #FFEBF4 | #FFD6E9 | #FFADCE | #FF8599 | #FF5C5C | #E90000 | #AE0101 | #5C0000 |
-| **Orange** | #FFEDE0 | #FFDAC2 | #FFAD85 | #FF8547 | #F5580A | #B83D00 | #7A2900 | #521B00 |
-| **Yellow** | #FFF7D6 | #FFEFAD | #FFDA75 | #FFCE47 | #E5B225 | #B88A1D | #665510 | #3D330A |
-| **Purple** | #F7F2FF | #F1E0FF | #E2C2FF | #C285FF | #9C59FF | #5B1DB8 | #31007A | #1B0043 |
+| **Blue**    | #E5F1FF | #CCE4FF | #99C9FF | #408CFF | #3369FF | #0D3EC7 | #00217A | #001652 |
+| **Red**     | #FFEBF4 | #FFD6E9 | #FFADCE | #FF8599 | #FF5C5C | #E90000 | #AE0101 | #5C0000 |
+| **Orange**  | #FFEDE0 | #FFDAC2 | #FFAD85 | #FF8547 | #F5580A | #B83D00 | #7A2900 | #521B00 |
+| **Yellow**  | #FFF7D6 | #FFEFAD | #FFDA75 | #FFCE47 | #E5B225 | #B88A1D | #665510 | #3D330A |
+| **Purple**  | #F7F2FF | #F1E0FF | #E2C2FF | #C285FF | #9C59FF | #5B1DB8 | #31007A | #1B0043 |
 
 **Special:** `--primitive-neutral-0: #FFFFFF` and `--primitive-neutral-900: #000000`
 
@@ -288,20 +274,20 @@ TIER 3: COMPONENT    → Component-specific (--button-primary-background)
 
 ```css
 /* Font Family */
---font-sans: 'DM Sans', system-ui, sans-serif;
---font-mono: 'JetBrains Mono', monospace;
+--font-sans: "DM Sans", system-ui, sans-serif;
+--font-mono: "JetBrains Mono", monospace;
 
 /* Type Scale (use text-* utility classes) */
---text-display: 4.5rem;       /* 72px - Hero headlines */
---text-heading-lg: 3rem;      /* 48px - Page titles */
---text-heading-md: 2.25rem;   /* 36px - Section headers */
---text-heading-sm: 1.5rem;    /* 24px - Card headers */
+--text-display: 4.5rem; /* 72px - Hero headlines */
+--text-heading-lg: 3rem; /* 48px - Page titles */
+--text-heading-md: 2.25rem; /* 36px - Section headers */
+--text-heading-sm: 1.5rem; /* 24px - Card headers */
 --text-body-strong: 1.125rem; /* 18px bold - Emphasized body */
---text-body: 1.125rem;        /* 18px - Default body */
---text-body-sm: 1rem;         /* 16px - Secondary body */
+--text-body: 1.125rem; /* 18px - Default body */
+--text-body-sm: 1rem; /* 16px - Secondary body */
 --text-caption-strong: 0.875rem; /* 14px bold - Labels */
---text-caption: 0.875rem;     /* 14px - Captions */
---text-caption-sm: 0.75rem;   /* 12px - Fine print */
+--text-caption: 0.875rem; /* 14px - Captions */
+--text-caption-sm: 0.75rem; /* 12px - Fine print */
 
 /* Font Weights */
 --font-regular: 400;
@@ -314,42 +300,42 @@ TIER 3: COMPONENT    → Component-specific (--button-primary-background)
 
 ```css
 --space-0: 0;
---space-0-5: 0.125rem;  /* 2px */
---space-1: 0.25rem;     /* 4px */
---space-1-5: 0.375rem;  /* 6px */
---space-2: 0.5rem;      /* 8px */
---space-2-5: 0.625rem;  /* 10px */
---space-3: 0.75rem;     /* 12px */
---space-4: 1rem;        /* 16px */
---space-5: 1.25rem;     /* 20px */
---space-6: 1.5rem;      /* 24px */
---space-8: 2rem;        /* 32px */
---space-10: 2.5rem;     /* 40px */
---space-12: 3rem;       /* 48px */
---space-16: 4rem;       /* 64px */
---space-20: 5rem;       /* 80px */
---space-24: 6rem;       /* 96px */
+--space-0-5: 0.125rem; /* 2px */
+--space-1: 0.25rem; /* 4px */
+--space-1-5: 0.375rem; /* 6px */
+--space-2: 0.5rem; /* 8px */
+--space-2-5: 0.625rem; /* 10px */
+--space-3: 0.75rem; /* 12px */
+--space-4: 1rem; /* 16px */
+--space-5: 1.25rem; /* 20px */
+--space-6: 1.5rem; /* 24px */
+--space-8: 2rem; /* 32px */
+--space-10: 2.5rem; /* 40px */
+--space-12: 3rem; /* 48px */
+--space-16: 4rem; /* 64px */
+--space-20: 5rem; /* 80px */
+--space-24: 6rem; /* 96px */
 ```
 
 ### Border Radius Tokens
 
 ```css
 --radius-none: 0;
---radius-xs: 0.125rem;   /* 2px */
---radius-sm: 0.25rem;    /* 4px */
---radius-md: 0.375rem;   /* 6px */
---radius-lg: 0.5rem;     /* 8px */
---radius-xl: 0.75rem;    /* 12px */
---radius-2xl: 1rem;      /* 16px */
---radius-3xl: 1.5rem;    /* 24px */
+--radius-xs: 0.125rem; /* 2px */
+--radius-sm: 0.25rem; /* 4px */
+--radius-md: 0.375rem; /* 6px */
+--radius-lg: 0.5rem; /* 8px */
+--radius-xl: 0.75rem; /* 12px */
+--radius-2xl: 1rem; /* 16px */
+--radius-3xl: 1.5rem; /* 24px */
 --radius-full: 9999px;
 
 /* Semantic Radius */
---radius-card: var(--radius-xl);     /* 12px */
---radius-button: var(--radius-lg);   /* 8px */
---radius-input: var(--radius-md);    /* 6px */
+--radius-card: var(--radius-xl); /* 12px */
+--radius-button: var(--radius-lg); /* 8px */
+--radius-input: var(--radius-md); /* 6px */
 --radius-badge: var(--radius-full);
---radius-chip: var(--radius-lg);     /* 8px */
+--radius-chip: var(--radius-lg); /* 8px */
 --radius-avatar: var(--radius-full);
 --radius-tooltip: var(--radius-md);
 --radius-popover: var(--radius-lg);
@@ -361,21 +347,21 @@ TIER 3: COMPONENT    → Component-specific (--button-primary-background)
 ```css
 --shadow-none: none;
 --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.08);
---shadow-sm: 0 1px 4px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.08);
---shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.14), 0 2px 4px -2px rgb(0 0 0 / 0.10);
---shadow-lg: 0 10px 20px -3px rgb(0 0 0 / 0.16), 0 4px 8px -4px rgb(0 0 0 / 0.10);
+--shadow-sm: 0 1px 4px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+--shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.14), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+--shadow-lg: 0 10px 20px -3px rgb(0 0 0 / 0.16), 0 4px 8px -4px rgb(0 0 0 / 0.1);
 --shadow-xl: 0 20px 32px -5px rgb(0 0 0 / 0.18), 0 8px 14px -6px rgb(0 0 0 / 0.12);
 --shadow-2xl: 0 25px 56px -12px rgb(0 0 0 / 0.28);
---shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.10);
+--shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.1);
 
 /* Component Shadows — key (tight/directional) + ambient (soft/diffused) */
 --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 2px 6px -1px rgb(0 0 0 / 0.08);
 --shadow-card-hover: 0 2px 4px 0 rgb(0 0 0 / 0.08), 0 6px 16px -2px rgb(0 0 0 / 0.14);
 --shadow-elevated: 0 2px 4px 0 rgb(0 0 0 / 0.08), 0 6px 20px -2px rgb(0 0 0 / 0.16);
 --shadow-dropdown: 0 2px 6px 0 rgb(0 0 0 / 0.08), 0 10px 24px -4px rgb(0 0 0 / 0.18);
---shadow-modal: 0 4px 10px 0 rgb(0 0 0 / 0.10), 0 28px 64px -12px rgb(0 0 0 / 0.28);
---shadow-tooltip: 0 2px 4px 0 rgb(0 0 0 / 0.10), 0 6px 20px -2px rgb(0 0 0 / 0.18);
---shadow-button: 0 1px 3px 0 rgb(0 0 0 / 0.10);
+--shadow-modal: 0 4px 10px 0 rgb(0 0 0 / 0.1), 0 28px 64px -12px rgb(0 0 0 / 0.28);
+--shadow-tooltip: 0 2px 4px 0 rgb(0 0 0 / 0.1), 0 6px 20px -2px rgb(0 0 0 / 0.18);
+--shadow-button: 0 1px 3px 0 rgb(0 0 0 / 0.1);
 --shadow-button-active: inset 0 2px 4px 0 rgb(0 0 0 / 0.16);
 --shadow-focus: 0 0 0 2px var(--primitive-neutral-0), 0 0 0 4px var(--primitive-green-500);
 ```
@@ -433,53 +419,31 @@ TIER 3: COMPONENT    → Component-specific (--button-primary-background)
 
 ---
 
-## 4. Implementation Rules
+## Using TypeScript Tokens
 
-1. **Never hardcode values** — Always reference tokens via CSS variables
-2. **Match Figma specs exactly** — Pixel-perfect implementation
-3. **Use existing components** — Check `/src/components/ui/` first
-4. **Prefer semantic tokens** — Use `--foreground-error` not `--primitive-red-700`
-5. **Check dark mode** — Tokens automatically adapt; verify appearance
-
-### Correct Usage Examples
+For runtime calculations, animations, or chart libraries:
 
 ```tsx
-// ✅ CORRECT - Using semantic token
-<div className="bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]">
+import { colors, spacing, motion, shadows } from "@/lib/tokens";
 
-// ✅ CORRECT - Using component token
-<button className="bg-[var(--button-primary-background)] hover:bg-[var(--button-primary-background-hover)]">
+// Framer Motion example
+<motion.div
+  animate={{ y: motion.distance.md }}
+  transition={{
+    duration: motion.duration.normal / 1000,
+    ease: motion.easing.spring,
+  }}
+/>;
 
-// ✅ CORRECT - Using Tailwind with token
-<div className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)]">
-
-// ❌ WRONG - Hardcoded value
-<div className="bg-[#0A3D2C]">
-
-// ❌ WRONG - Using primitive when semantic exists
-<div className="bg-[var(--primitive-green-800)]"> // Use --button-primary-background instead
+// Chart library example
+const chartConfig = {
+  colors: [colors.primary[500], colors.blue[500], colors.purple[500]],
+};
 ```
 
 ---
 
-## 5. Flag Inconsistencies
-
-If Figma contains values that don't align with the token system, pause and ask:
-
-1. **Add as new token?** — If it's a reusable pattern
-2. **Use closest existing token?** — If difference is negligible
-3. **One-off override with comment?** — If truly unique
-
-```tsx
-// Document exceptions clearly
-<div
-  className="bg-[#123456]" // One-off: Figma spec uses non-standard brand blue for promo banner
->
-```
-
----
-
-## 6. Dark Mode Considerations
+## Dark Mode Notes
 
 All semantic and component tokens automatically switch in dark mode. However:
 
@@ -489,40 +453,15 @@ All semantic and component tokens automatically switch in dark mode. However:
 
 ---
 
-## 7. Using TypeScript Tokens
+## Flag Inconsistencies
 
-For runtime calculations, animations, or chart libraries:
+If Figma contains values that don't align with the token system, pause and ask:
 
-```tsx
-import { colors, spacing, motion, shadows } from '@/lib/tokens';
-
-// Framer Motion example
-<motion.div
-  animate={{ y: motion.distance.md }}
-  transition={{
-    duration: motion.duration.normal / 1000,
-    ease: motion.easing.spring
-  }}
-/>
-
-// Chart library example
-const chartConfig = {
-  colors: [colors.primary[500], colors.blue[500], colors.purple[500]]
-};
-```
+1. **Add as new token?** — If it's a reusable pattern
+2. **Use closest existing token?** — If difference is negligible
+3. **One-off override with comment?** — If truly unique
 
 ---
 
-## Checklist
-
-Before submitting Figma implementation:
-
-- [ ] All colors mapped to tokens (no hardcoded hex values)
-- [ ] Spacing uses `--space-*` tokens
-- [ ] Typography uses `--text-*` and `--font-*` tokens
-- [ ] Border radius uses `--radius-*` tokens
-- [ ] Shadows use `--shadow-*` tokens
-- [ ] Interactive states use appropriate hover/active/focus tokens
-- [ ] Dark mode verified
-- [ ] Component tokens used where available (button, input, card, etc.)
-- [ ] Any exceptions documented with comments
+**For the full implementation workflow, component mapping, anti-patterns,
+and pre-commit checklist, see `design-first-implementation.md`.**
