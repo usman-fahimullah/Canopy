@@ -124,7 +124,7 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
         <div className="flex items-center gap-1">
           <ShellNotificationBell shell={config.shell} />
           <ProfileDropdown>
-            <button className="rounded-full p-1.5 hover:bg-[var(--candid-nav-item-hover)] transition-colors">
+            <button className="rounded-full p-1.5 hover:bg-[var(--candid-nav-item-hover)] transition-colors" aria-label="Open profile menu">
               {user?.avatar ? (
                 <Image
                   src={user.avatar}

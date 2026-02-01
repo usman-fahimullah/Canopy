@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       yearsExperience: formData.get("yearsExperience"),
       linkedIn: formData.get("linkedIn"),
       portfolio: formData.get("portfolio"),
-      questionAnswers: JSON.parse(formData.get("questionAnswers") as string || "{}"),
+      questionAnswers: (() => { try { return JSON.parse(formData.get("questionAnswers") as string || "{}"); } catch { return {}; } })(),
       submittedAt: new Date().toISOString(),
     };
 
@@ -33,12 +33,14 @@ export async function POST(request: NextRequest) {
     // 4. Send confirmation email
     // 5. Notify recruiter
 
-    console.log("New application received:", application);
-    console.log("Files:", {
-      resume: resumeFile?.name,
-      coverLetter: coverLetterFile?.name,
-      portfolio: portfolioFile?.name,
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.log("New application received:", application);
+      console.log("Files:", {
+        resume: resumeFile?.name,
+        coverLetter: coverLetterFile?.name,
+        portfolio: portfolioFile?.name,
+      });
+    }
 
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 500));

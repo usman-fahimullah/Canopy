@@ -39,11 +39,13 @@ export async function sendEmail(payload: EmailPayload): Promise<{ success: boole
 
   // Dev mode fallback when Resend is not configured
   if (!client) {
-    console.log("[Email] Resend not configured. Would send:", {
-      to: emailPayload.to,
-      subject: emailPayload.subject,
-      from: emailPayload.from,
-    });
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Email] Resend not configured. Would send:", {
+        to: emailPayload.to,
+        subject: emailPayload.subject,
+        from: emailPayload.from,
+      });
+    }
     return { success: true };
   }
 
@@ -62,7 +64,9 @@ export async function sendEmail(payload: EmailPayload): Promise<{ success: boole
       return { success: false, error: error.message };
     }
 
-    console.log("[Email] Sent successfully:", data?.id);
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Email] Sent successfully:", data?.id);
+    }
     return { success: true };
   } catch (error) {
     console.error("[Email] Error:", error);

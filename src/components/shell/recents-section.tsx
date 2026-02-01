@@ -58,6 +58,8 @@ export function RecentsSection({ config }: RecentsSectionProps) {
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex w-full items-center justify-between px-2 py-1.5 text-caption text-foreground-muted hover:text-foreground-default transition-colors"
+        aria-label={expanded ? `Collapse ${config.label}` : `Expand ${config.label}`}
+        aria-expanded={expanded}
       >
         <span className="font-medium">{config.label}</span>
         {expanded ? (
