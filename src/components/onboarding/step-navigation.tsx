@@ -30,7 +30,7 @@ export function StepNavigation({
   return (
     <footer
       className={cn(
-        "sticky bottom-0 border-t border-[var(--primitive-neutral-200)] bg-white px-4 py-4 sm:px-12",
+        "shrink-0 border-t border-[var(--primitive-neutral-200)] bg-white px-4 py-4 sm:px-12",
         className
       )}
     >

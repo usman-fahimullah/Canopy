@@ -31,6 +31,13 @@ export default function EmployerCompanyPage() {
       step={step}
       currentStepIndex={0}
       totalSteps={EMPLOYER_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/profile")}
+          onContinue={() => router.push("/onboarding/employer/your-role")}
+          canContinue={canContinue}
+        />
+      }
     >
       <div className="space-y-6">
         <FormCard>
@@ -43,7 +50,10 @@ export default function EmployerCompanyPage() {
             />
           </FormField>
 
-          <FormField label="About your company" helpText="A brief description of what your organization does">
+          <FormField
+            label="About your company"
+            helpText="A brief description of what your organization does"
+          >
             <Textarea
               placeholder="Tell candidates about your mission, impact, and what makes your company a great place to work..."
               value={employerData.companyDescription}
@@ -80,7 +90,7 @@ export default function EmployerCompanyPage() {
                   type="button"
                   onClick={() => setEmployerData({ companySize: option.value })}
                   className={cn(
-                    "px-4 py-2 rounded-lg border text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     employerData.companySize === option.value
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
                       : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
@@ -93,12 +103,6 @@ export default function EmployerCompanyPage() {
           </FormField>
         </FormCard>
       </div>
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/profile")}
-        onContinue={() => router.push("/onboarding/employer/your-role")}
-        canContinue={canContinue}
-      />
     </OnboardingShell>
   );
 }

@@ -106,6 +106,15 @@ export default function TalentPreferencesPage() {
       step={step}
       currentStepIndex={2}
       totalSteps={TALENT_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/talent/skills")}
+          onContinue={handleContinue}
+          canContinue={canContinue}
+          loading={loading}
+          continueLabel="Finish setup"
+        />
+      }
     >
       <div className="space-y-6">
         {/* Role types */}
@@ -118,7 +127,7 @@ export default function TalentPreferencesPage() {
                   type="button"
                   onClick={() => toggleRoleType(option.value)}
                   className={cn(
-                    "px-4 py-2 rounded-lg border text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     talentData.roleTypes.includes(option.value)
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
                       : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
@@ -141,7 +150,7 @@ export default function TalentPreferencesPage() {
                   type="button"
                   onClick={() => setTalentData({ transitionTimeline: option.value })}
                   className={cn(
-                    "px-4 py-2 rounded-lg border text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     talentData.transitionTimeline === option.value
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
                       : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
@@ -164,7 +173,7 @@ export default function TalentPreferencesPage() {
                   type="button"
                   onClick={() => setTalentData({ locationPreference: option.value })}
                   className={cn(
-                    "px-4 py-2 rounded-lg border text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     talentData.locationPreference === option.value
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
                       : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
@@ -202,17 +211,7 @@ export default function TalentPreferencesPage() {
         </FormCard>
       </div>
 
-      {error && (
-        <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>
-      )}
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/talent/skills")}
-        onContinue={handleContinue}
-        canContinue={canContinue}
-        loading={loading}
-        continueLabel="Finish setup"
-      />
+      {error && <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>}
     </OnboardingShell>
   );
 }

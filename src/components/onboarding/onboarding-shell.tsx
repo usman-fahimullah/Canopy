@@ -13,6 +13,8 @@ const SHELL_CONTEXT_LABELS: Record<Shell, string> = {
 
 interface OnboardingShellProps {
   children: ReactNode;
+  /** Footer element (StepNavigation) rendered full-width at the bottom */
+  footer?: ReactNode;
   /** Current shell being onboarded (null for intent/profile steps) */
   shell?: Shell | null;
   /** Current step config */
@@ -25,6 +27,7 @@ interface OnboardingShellProps {
 
 export function OnboardingShell({
   children,
+  footer,
   shell,
   step,
   currentStepIndex,
@@ -152,7 +155,7 @@ export function OnboardingShell({
       </header>
 
       {/* ── Content ────────────────────────────────────────────── */}
-      <main className="flex flex-1 flex-col overflow-auto">
+      <main className="flex flex-1 flex-col">
         <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
           {/* Step header */}
           {step && (
@@ -162,10 +165,12 @@ export function OnboardingShell({
             </div>
           )}
 
-          {/* Step content (excludes StepNavigation which renders as sticky footer) */}
           {children}
         </div>
       </main>
+
+      {/* ── Footer (full-width, pinned to bottom) ──────────── */}
+      {footer}
     </div>
   );
 }

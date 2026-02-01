@@ -14,7 +14,11 @@ const careerStageOptions = [
   { value: "ENTRY_LEVEL", label: "Entry Level", description: "0-2 years experience" },
   { value: "MID_CAREER", label: "Mid-Career", description: "3-7 years experience" },
   { value: "SENIOR", label: "Senior", description: "7+ years experience" },
-  { value: "CAREER_CHANGER", label: "Career Changer", description: "Transitioning from another field" },
+  {
+    value: "CAREER_CHANGER",
+    label: "Career Changer",
+    description: "Transitioning from another field",
+  },
   { value: "RETURNING", label: "Returning", description: "Re-entering the workforce" },
 ];
 
@@ -39,28 +43,33 @@ export default function TalentBackgroundPage() {
       step={step}
       currentStepIndex={0}
       totalSteps={TALENT_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/profile")}
+          onContinue={() => router.push("/onboarding/talent/skills")}
+          canContinue={canContinue}
+        />
+      }
     >
       <div className="space-y-6">
         {/* Career stage */}
         <FormCard>
           <FormField label="Where are you in your career?" required>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {careerStageOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => setTalentData({ careerStage: option.value })}
                   className={cn(
-                    "p-4 rounded-xl border-2 text-left transition-all",
+                    "rounded-xl border-2 p-4 text-left transition-all",
                     talentData.careerStage === option.value
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)]"
                       : "border-[var(--primitive-neutral-200)] bg-white hover:border-[var(--primitive-neutral-400)]"
                   )}
                 >
-                  <p className="font-medium text-body-sm text-foreground-default">
-                    {option.label}
-                  </p>
-                  <p className="text-caption-sm text-foreground-muted mt-0.5">
+                  <p className="text-foreground-default text-body-sm font-medium">{option.label}</p>
+                  <p className="mt-0.5 text-caption-sm text-foreground-muted">
                     {option.description}
                   </p>
                 </button>
@@ -79,7 +88,7 @@ export default function TalentBackgroundPage() {
                   type="button"
                   onClick={() => setTalentData({ yearsExperience: option.value })}
                   className={cn(
-                    "px-4 py-2 rounded-lg border text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     talentData.yearsExperience === option.value
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
                       : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
@@ -103,12 +112,6 @@ export default function TalentBackgroundPage() {
           </FormField>
         </FormCard>
       </div>
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/profile")}
-        onContinue={() => router.push("/onboarding/talent/skills")}
-        canContinue={canContinue}
-      />
     </OnboardingShell>
   );
 }

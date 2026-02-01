@@ -63,6 +63,15 @@ export default function EmployerYourRolePage() {
       step={step}
       currentStepIndex={1}
       totalSteps={EMPLOYER_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/employer/company")}
+          onContinue={handleContinue}
+          canContinue={canContinue}
+          loading={loading}
+          continueLabel="Start hiring"
+        />
+      }
     >
       <div className="space-y-6">
         <FormCard>
@@ -76,11 +85,11 @@ export default function EmployerYourRolePage() {
           </FormField>
         </FormCard>
 
-        <div className="p-4 rounded-xl bg-[var(--primitive-blue-100)] border border-[var(--primitive-blue-300)]">
-          <p className="text-caption font-medium text-foreground-default mb-1">
+        <div className="rounded-xl border border-[var(--primitive-blue-300)] bg-[var(--primitive-blue-100)] p-4">
+          <p className="text-foreground-default mb-1 text-caption font-medium">
             What you&apos;ll get
           </p>
-          <ul className="text-caption text-foreground-muted space-y-1">
+          <ul className="space-y-1 text-caption text-foreground-muted">
             <li>Post unlimited climate-focused job roles</li>
             <li>Access AI-powered candidate sourcing</li>
             <li>Manage your hiring pipeline with a design-forward ATS</li>
@@ -89,17 +98,7 @@ export default function EmployerYourRolePage() {
         </div>
       </div>
 
-      {error && (
-        <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>
-      )}
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/employer/company")}
-        onContinue={handleContinue}
-        canContinue={canContinue}
-        loading={loading}
-        continueLabel="Start hiring"
-      />
+      {error && <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>}
     </OnboardingShell>
   );
 }

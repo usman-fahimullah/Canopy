@@ -23,8 +23,7 @@ export default function OnboardingProfilePage() {
   const [error, setError] = useState<string | null>(null);
 
   const canContinue =
-    baseProfile.firstName.trim().length > 0 &&
-    baseProfile.lastName.trim().length > 0;
+    baseProfile.firstName.trim().length > 0 && baseProfile.lastName.trim().length > 0;
 
   async function handleContinue() {
     if (!canContinue) return;
@@ -60,7 +59,17 @@ export default function OnboardingProfilePage() {
   }
 
   return (
-    <OnboardingShell step={PROFILE_STEP}>
+    <OnboardingShell
+      step={PROFILE_STEP}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding")}
+          onContinue={handleContinue}
+          canContinue={canContinue}
+          loading={loading}
+        />
+      }
+    >
       <FormCard>
         <FormRow>
           <FormField label="First name" required>
@@ -82,7 +91,10 @@ export default function OnboardingProfilePage() {
           </FormField>
         </FormRow>
 
-        <FormField label="LinkedIn URL" helpText="Optional, but helps us personalize your experience">
+        <FormField
+          label="LinkedIn URL"
+          helpText="Optional, but helps us personalize your experience"
+        >
           <Input
             placeholder="https://linkedin.com/in/your-profile"
             value={baseProfile.linkedinUrl}
@@ -101,16 +113,7 @@ export default function OnboardingProfilePage() {
         </FormField>
       </FormCard>
 
-      {error && (
-        <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>
-      )}
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding")}
-        onContinue={handleContinue}
-        canContinue={canContinue}
-        loading={loading}
-      />
+      {error && <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>}
     </OnboardingShell>
   );
 }

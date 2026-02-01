@@ -62,6 +62,13 @@ export default function CoachServicesPage() {
       step={step}
       currentStepIndex={2}
       totalSteps={COACH_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/coach/expertise")}
+          onContinue={() => router.push("/onboarding/coach/availability")}
+          canContinue={canContinue}
+        />
+      }
     >
       <div className="space-y-6">
         {/* Session types */}
@@ -76,16 +83,16 @@ export default function CoachServicesPage() {
                     type="button"
                     onClick={() => toggleSessionType(option.value)}
                     className={cn(
-                      "w-full p-4 rounded-xl border-2 text-left transition-all",
+                      "w-full rounded-xl border-2 p-4 text-left transition-all",
                       selected
                         ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)]"
                         : "border-[var(--primitive-neutral-200)] bg-white hover:border-[var(--primitive-neutral-400)]"
                     )}
                   >
-                    <p className="font-medium text-body-sm text-foreground-default">
+                    <p className="text-foreground-default text-body-sm font-medium">
                       {option.label}
                     </p>
-                    <p className="text-caption text-foreground-muted mt-0.5">
+                    <p className="mt-0.5 text-caption text-foreground-muted">
                       {option.description}
                     </p>
                   </button>
@@ -118,12 +125,6 @@ export default function CoachServicesPage() {
           </FormField>
         </FormCard>
       </div>
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/coach/expertise")}
-        onContinue={() => router.push("/onboarding/coach/availability")}
-        canContinue={canContinue}
-      />
     </OnboardingShell>
   );
 }

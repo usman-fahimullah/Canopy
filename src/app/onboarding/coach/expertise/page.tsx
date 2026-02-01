@@ -35,8 +35,7 @@ export default function CoachExpertisePage() {
   const { coachData, setCoachData } = useOnboardingForm();
 
   const step = COACH_STEPS[1]; // expertise
-  const canContinue =
-    coachData.sectors.length > 0 && coachData.expertise.length > 0;
+  const canContinue = coachData.sectors.length > 0 && coachData.expertise.length > 0;
 
   function toggleSector(value: string) {
     const current = coachData.sectors;
@@ -62,15 +61,18 @@ export default function CoachExpertisePage() {
       step={step}
       currentStepIndex={1}
       totalSteps={COACH_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/coach/about")}
+          onContinue={() => router.push("/onboarding/coach/services")}
+          canContinue={canContinue}
+        />
+      }
     >
       <div className="space-y-6">
         {/* Sectors */}
         <FormCard>
-          <FormField
-            label="Which sectors do you coach in?"
-            helpText="Select up to 5"
-            required
-          >
+          <FormField label="Which sectors do you coach in?" helpText="Select up to 5" required>
             <div className="grid grid-cols-2 gap-3">
               {sectorOptions.map((option) => {
                 const selected = coachData.sectors.includes(option.value);
@@ -82,14 +84,14 @@ export default function CoachExpertisePage() {
                     onClick={() => toggleSector(option.value)}
                     disabled={disabled}
                     className={cn(
-                      "p-3 rounded-xl border-2 text-left transition-all",
+                      "rounded-xl border-2 p-3 text-left transition-all",
                       selected
                         ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)]"
                         : "border-[var(--primitive-neutral-200)] bg-white hover:border-[var(--primitive-neutral-400)]",
-                      disabled && "opacity-40 cursor-not-allowed"
+                      disabled && "cursor-not-allowed opacity-40"
                     )}
                   >
-                    <p className="font-medium text-caption text-foreground-default">
+                    <p className="text-foreground-default text-caption font-medium">
                       {option.label}
                     </p>
                   </button>
@@ -109,7 +111,7 @@ export default function CoachExpertisePage() {
                   type="button"
                   onClick={() => toggleExpertise(option.value)}
                   className={cn(
-                    "px-4 py-2 rounded-lg border text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     coachData.expertise.includes(option.value)
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
                       : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
@@ -122,12 +124,6 @@ export default function CoachExpertisePage() {
           </FormField>
         </FormCard>
       </div>
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/coach/about")}
-        onContinue={() => router.push("/onboarding/coach/services")}
-        canContinue={canContinue}
-      />
     </OnboardingShell>
   );
 }

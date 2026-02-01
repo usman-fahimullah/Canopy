@@ -22,9 +22,7 @@ export default function CoachAboutPage() {
   const { coachData, setCoachData } = useOnboardingForm();
 
   const step = COACH_STEPS[0]; // about
-  const canContinue =
-    coachData.headline.trim().length > 0 &&
-    coachData.bio.trim().length > 0;
+  const canContinue = coachData.headline.trim().length > 0 && coachData.bio.trim().length > 0;
 
   return (
     <OnboardingShell
@@ -32,10 +30,21 @@ export default function CoachAboutPage() {
       step={step}
       currentStepIndex={0}
       totalSteps={COACH_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/profile")}
+          onContinue={() => router.push("/onboarding/coach/expertise")}
+          canContinue={canContinue}
+        />
+      }
     >
       <div className="space-y-6">
         <FormCard>
-          <FormField label="Headline" required helpText="How you want to be introduced (e.g. &quot;Climate Career Strategist&quot;)">
+          <FormField
+            label="Headline"
+            required
+            helpText='How you want to be introduced (e.g. "Climate Career Strategist")'
+          >
             <Input
               placeholder="e.g. Climate Career Strategist | Ex-McKinsey"
               value={coachData.headline}
@@ -44,7 +53,11 @@ export default function CoachAboutPage() {
             />
           </FormField>
 
-          <FormField label="Bio" required helpText="Tell potential clients about your background and approach">
+          <FormField
+            label="Bio"
+            required
+            helpText="Tell potential clients about your background and approach"
+          >
             <Textarea
               placeholder="Share your coaching philosophy, background, and what makes you passionate about helping people transition into climate careers..."
               value={coachData.bio}
@@ -55,7 +68,10 @@ export default function CoachAboutPage() {
         </FormCard>
 
         <FormCard>
-          <FormField label="Years in climate / sustainability" helpText="How long you've been working in climate-related fields">
+          <FormField
+            label="Years in climate / sustainability"
+            helpText="How long you've been working in climate-related fields"
+          >
             <div className="flex flex-wrap gap-2">
               {yearsInClimateOptions.map((option) => (
                 <button
@@ -63,7 +79,7 @@ export default function CoachAboutPage() {
                   type="button"
                   onClick={() => setCoachData({ yearsInClimate: option.value })}
                   className={cn(
-                    "px-4 py-2 rounded-lg border text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     coachData.yearsInClimate === option.value
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
                       : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
@@ -76,12 +92,6 @@ export default function CoachAboutPage() {
           </FormField>
         </FormCard>
       </div>
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/profile")}
-        onContinue={() => router.push("/onboarding/coach/expertise")}
-        canContinue={canContinue}
-      />
     </OnboardingShell>
   );
 }

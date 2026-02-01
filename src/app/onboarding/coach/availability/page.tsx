@@ -82,6 +82,15 @@ export default function CoachAvailabilityPage() {
       step={step}
       currentStepIndex={3}
       totalSteps={COACH_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/coach/services")}
+          onContinue={handleContinue}
+          canContinue={canContinue}
+          loading={loading}
+          continueLabel="Submit application"
+        />
+      }
     >
       <div className="space-y-6">
         <FormCard>
@@ -93,47 +102,32 @@ export default function CoachAvailabilityPage() {
                   type="button"
                   onClick={() => setCoachData({ availability: option.value })}
                   className={cn(
-                    "w-full p-4 rounded-xl border-2 text-left transition-all",
+                    "w-full rounded-xl border-2 p-4 text-left transition-all",
                     coachData.availability === option.value
                       ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)]"
                       : "border-[var(--primitive-neutral-200)] bg-white hover:border-[var(--primitive-neutral-400)]"
                   )}
                 >
-                  <p className="font-medium text-body-sm text-foreground-default">
-                    {option.label}
-                  </p>
-                  <p className="text-caption text-foreground-muted mt-0.5">
-                    {option.description}
-                  </p>
+                  <p className="text-foreground-default text-body-sm font-medium">{option.label}</p>
+                  <p className="mt-0.5 text-caption text-foreground-muted">{option.description}</p>
                 </button>
               ))}
             </div>
           </FormField>
         </FormCard>
 
-        <div className="p-4 rounded-xl bg-[var(--primitive-yellow-100)] border border-[var(--primitive-yellow-300)]">
-          <p className="text-caption font-medium text-foreground-default mb-1">
+        <div className="rounded-xl border border-[var(--primitive-yellow-300)] bg-[var(--primitive-yellow-100)] p-4">
+          <p className="text-foreground-default mb-1 text-caption font-medium">
             What happens next?
           </p>
           <p className="text-caption text-foreground-muted">
-            Your coaching profile will be reviewed by our team. Once approved,
-            you&apos;ll appear in client search results and can start accepting
-            bookings.
+            Your coaching profile will be reviewed by our team. Once approved, you&apos;ll appear in
+            client search results and can start accepting bookings.
           </p>
         </div>
       </div>
 
-      {error && (
-        <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>
-      )}
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/coach/services")}
-        onContinue={handleContinue}
-        canContinue={canContinue}
-        loading={loading}
-        continueLabel="Submit application"
-      />
+      {error && <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>}
     </OnboardingShell>
   );
 }

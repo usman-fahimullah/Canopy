@@ -68,9 +68,7 @@ export default function TalentSkillsPage() {
   }
 
   // Filter suggestions to those not already added
-  const availableSuggestions = skillSuggestions.filter(
-    (s) => !talentData.skills.includes(s)
-  );
+  const availableSuggestions = skillSuggestions.filter((s) => !talentData.skills.includes(s));
 
   return (
     <OnboardingShell
@@ -78,6 +76,13 @@ export default function TalentSkillsPage() {
       step={step}
       currentStepIndex={1}
       totalSteps={TALENT_STEPS.length}
+      footer={
+        <StepNavigation
+          onBack={() => router.push("/onboarding/talent/background")}
+          onContinue={() => router.push("/onboarding/talent/preferences")}
+          canContinue={canContinue}
+        />
+      }
     >
       <div className="space-y-6">
         {/* Skills */}
@@ -105,13 +110,13 @@ export default function TalentSkillsPage() {
                   {talentData.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[var(--primitive-green-100)] text-caption font-medium text-[var(--candid-foreground-brand)]"
+                      className="inline-flex items-center gap-1 rounded-lg bg-[var(--primitive-green-100)] px-3 py-1 text-caption font-medium text-[var(--candid-foreground-brand)]"
                     >
                       {skill}
                       <button
                         type="button"
                         onClick={() => removeSkill(skill)}
-                        className="ml-0.5 hover:text-[var(--primitive-red-600)] transition-colors"
+                        className="ml-0.5 transition-colors hover:text-[var(--primitive-red-600)]"
                       >
                         <X size={14} weight="bold" />
                       </button>
@@ -123,14 +128,14 @@ export default function TalentSkillsPage() {
               {/* Suggestions */}
               {availableSuggestions.length > 0 && (
                 <div>
-                  <p className="text-caption-sm text-foreground-muted mb-2">Suggestions:</p>
+                  <p className="mb-2 text-caption-sm text-foreground-muted">Suggestions:</p>
                   <div className="flex flex-wrap gap-2">
                     {availableSuggestions.slice(0, 8).map((skill) => (
                       <button
                         key={skill}
                         type="button"
                         onClick={() => addSkill(skill)}
-                        className="px-3 py-1 rounded-lg border border-dashed border-[var(--primitive-neutral-300)] text-caption text-foreground-muted hover:border-[var(--candid-foreground-brand)] hover:text-[var(--candid-foreground-brand)] transition-colors"
+                        className="rounded-lg border border-dashed border-[var(--primitive-neutral-300)] px-3 py-1 text-caption text-foreground-muted transition-colors hover:border-[var(--candid-foreground-brand)] hover:text-[var(--candid-foreground-brand)]"
                       >
                         + {skill}
                       </button>
@@ -160,14 +165,14 @@ export default function TalentSkillsPage() {
                     onClick={() => toggleSector(sector.value)}
                     disabled={disabled}
                     className={cn(
-                      "p-3 rounded-xl border-2 text-left transition-all",
+                      "rounded-xl border-2 p-3 text-left transition-all",
                       selected
                         ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)]"
                         : "border-[var(--primitive-neutral-200)] bg-white hover:border-[var(--primitive-neutral-400)]",
-                      disabled && "opacity-40 cursor-not-allowed"
+                      disabled && "cursor-not-allowed opacity-40"
                     )}
                   >
-                    <p className="font-medium text-caption text-foreground-default">
+                    <p className="text-foreground-default text-caption font-medium">
                       {sector.label}
                     </p>
                   </button>
@@ -175,19 +180,13 @@ export default function TalentSkillsPage() {
               })}
             </div>
             {talentData.sectors.length > 0 && (
-              <p className="text-caption-sm text-foreground-muted mt-2">
+              <p className="mt-2 text-caption-sm text-foreground-muted">
                 {talentData.sectors.length}/5 selected
               </p>
             )}
           </FormField>
         </FormCard>
       </div>
-
-      <StepNavigation
-        onBack={() => router.push("/onboarding/talent/background")}
-        onContinue={() => router.push("/onboarding/talent/preferences")}
-        canContinue={canContinue}
-      />
     </OnboardingShell>
   );
 }
