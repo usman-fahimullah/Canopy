@@ -87,11 +87,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // ── 3. Onboarding guard for shell routes ──────────────────────
-  // If user is accessing a shell route (talent/coach/employer),
-  // verify they've completed onboarding for that shell.
-  // This is handled at the layout level rather than middleware
-  // to avoid a database call on every request.
+  // ── 3. Shell role authorization ───────────────────────────────
+  // Cross-shell authorization (talent/coach/employer) is enforced
+  // server-side in each shell's layout.tsx via authorizeShell().
+  // This avoids a database call on every middleware invocation.
 
   return supabaseResponse
 }

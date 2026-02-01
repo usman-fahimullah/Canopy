@@ -12,7 +12,9 @@ export default function EmployerError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Employer shell error:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Employer shell error:", error);
+    }
   }, [error]);
 
   return (

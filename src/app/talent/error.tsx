@@ -12,7 +12,9 @@ export default function TalentError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Talent shell error:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Talent shell error:", error);
+    }
   }, [error]);
 
   return (
