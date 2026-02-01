@@ -28,27 +28,34 @@ export function StepNavigation({
   className,
 }: StepNavigationProps) {
   return (
-    <div
+    <footer
       className={cn(
-        "flex items-center pb-4 pt-8",
-        onBack ? "justify-between" : "justify-end",
+        "sticky bottom-0 border-t border-[var(--primitive-neutral-200)] bg-white px-4 py-4 sm:px-12",
         className
       )}
     >
-      {onBack && (
-        <Button type="button" variant="secondary" size="icon" onClick={onBack} aria-label="Go back">
-          <ArrowLeft size={20} weight="bold" />
-        </Button>
-      )}
+      <div className="flex items-center justify-end gap-3">
+        {onBack && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            onClick={onBack}
+            aria-label="Go back"
+          >
+            <ArrowLeft size={24} weight="bold" />
+          </Button>
+        )}
 
-      <Button
-        type="button"
-        onClick={onContinue}
-        disabled={!canContinue || loading}
-        loading={loading}
-      >
-        {continueLabel}
-      </Button>
-    </div>
+        <Button
+          type="button"
+          onClick={onContinue}
+          disabled={!canContinue || loading}
+          loading={loading}
+        >
+          {continueLabel}
+        </Button>
+      </div>
+    </footer>
   );
 }

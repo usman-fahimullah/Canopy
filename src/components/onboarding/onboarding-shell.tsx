@@ -39,23 +39,23 @@ export function OnboardingShell({
     <div className="flex min-h-screen flex-col bg-[var(--primitive-neutral-100)]">
       {/* ── Top bar ────────────────────────────────────────────── */}
       <header className="shrink-0 border-b border-[var(--primitive-neutral-200)] bg-white">
-        <div className="flex items-center justify-between px-4 py-3 sm:px-8">
+        <div className="flex items-center justify-between px-4 py-4 sm:px-12">
           {/* Left: Change account type chip + context label */}
           <div className="flex items-center gap-3">
             <Link
               href="/onboarding"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--primitive-neutral-200)] px-3.5 py-2 text-caption font-medium text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-neutral-300)]"
+              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--primitive-neutral-200)] px-4 py-3.5 text-sm font-bold leading-4 text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-neutral-300)]"
             >
-              <ArrowLeft size={14} weight="bold" />
+              <ArrowLeft size={20} weight="bold" />
               Change account type
             </Link>
-            <span className="hidden text-caption text-foreground-muted sm:inline">
+            <span className="hidden text-sm leading-4 text-[var(--primitive-green-800)] sm:inline">
               {contextLabel}
             </span>
           </div>
 
           {/* Right: GJB logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex shrink-0 items-center py-[15px]">
             <svg
               width="195"
               height="18"
@@ -152,8 +152,8 @@ export function OnboardingShell({
       </header>
 
       {/* ── Content ────────────────────────────────────────────── */}
-      <main className="flex flex-1 flex-col">
-        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-12">
+      <main className="flex flex-1 flex-col overflow-auto">
+        <div className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
           {/* Step header */}
           {step && (
             <div className="mb-8">
@@ -162,8 +162,8 @@ export function OnboardingShell({
             </div>
           )}
 
-          {/* Step content */}
-          <div className="flex-1">{children}</div>
+          {/* Step content (excludes StepNavigation which renders as sticky footer) */}
+          {children}
         </div>
       </main>
     </div>
