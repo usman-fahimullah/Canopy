@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
-    // In production, fetch from database for the authenticated employer org
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // TODO: Fetch from database for the authenticated employer org
     // For now, return mock data matching the RecentItem interface
     const recentPostings = [
       {

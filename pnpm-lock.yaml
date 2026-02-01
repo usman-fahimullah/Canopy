@@ -176,6 +176,9 @@ importers:
       tailwind-merge:
         specifier: ^2.3.0
         version: 2.6.1
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@tailwindcss/forms':
         specifier: ^0.5.7
@@ -3466,6 +3469,9 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
 
@@ -7011,3 +7017,5 @@ snapshots:
   ws@8.19.0: {}
 
   yocto-queue@0.1.0: {}
+
+  zod@4.3.6: {}

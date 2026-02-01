@@ -1,16 +1,100 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import {
   type Shell,
-  type EntryIntent,
   type OnboardingProgress,
   createOnboardingProgress,
   createRoleOnboardingState,
   completeRoleOnboarding,
 } from "@/lib/onboarding/types";
 
-// Helper function to parse years of experience string into a number
+/** Typed shape for Account update — mirrors the Prisma schema fields we touch */
+interface AccountUpdateData {
+  name?: string;
+  linkedinUrl?: string;
+  bio?: string;
+  entryIntent?: string;
+  activeRoles?: string[];
+  primaryRole?: string;
+  onboardingProgress?: OnboardingProgress;
+}
+
+// ─── Zod Schemas ───────────────────────────────────────────────────
+
+const shellEnum = z.enum(["talent", "coach", "employer"]);
+
+const setIntentSchema = z.object({
+  action: z.literal("set-intent"),
+  entryIntent: shellEnum,
+});
+
+const completeProfileSchema = z.object({
+  action: z.literal("complete-profile"),
+  firstName: z.string().min(1).max(100).optional(),
+  lastName: z.string().min(1).max(100).optional(),
+  linkedinUrl: z.string().url().max(500).optional().or(z.literal("")),
+  bio: z.string().max(2000).optional(),
+});
+
+const completeRoleBaseSchema = z.object({
+  action: z.enum(["complete-role", "activate-role"]),
+  shell: shellEnum.optional(),
+
+  // Shared profile fields
+  firstName: z.string().min(1).max(100).optional(),
+  lastName: z.string().min(1).max(100).optional(),
+  linkedinUrl: z.string().url().max(500).optional().or(z.literal("")),
+  bio: z.string().max(2000).optional(),
+
+  // Talent-specific
+  careerStage: z.string().max(100).optional().nullable(),
+  skills: z.array(z.string().max(200)).max(50).optional(),
+  sectors: z.array(z.string().max(200)).max(50).optional(),
+  goals: z.array(z.string().max(500)).max(20).optional(),
+  yearsExperience: z.enum(["less-than-1", "1-3", "3-7", "7-10", "10+"]).optional().nullable(),
+  roleTypes: z.array(z.string().max(100)).max(20).optional(),
+  transitionTimeline: z.string().max(100).optional().nullable(),
+  locationPreference: z.string().max(200).optional().nullable(),
+  salaryRange: z.string().max(100).optional(),
+  jobTitle: z.string().max(200).optional(),
+
+  // Coach-specific
+  headline: z.string().max(500).optional(),
+  expertise: z.array(z.string().max(200)).max(50).optional(),
+  sessionTypes: z.array(z.string().max(200)).max(20).optional(),
+  sessionRate: z.number().int().min(0).max(100000).optional(),
+  yearsInClimate: z.string().max(50).optional().nullable(),
+  availability: z.string().max(200).optional().nullable(),
+
+  // Employer-specific
+  companyName: z.string().min(1).max(300).optional(),
+  companyDescription: z.string().max(5000).optional(),
+  companyWebsite: z.string().url().max(500).optional().or(z.literal("")),
+  companyLocation: z.string().max(300).optional(),
+  companySize: z.string().max(100).optional().nullable(),
+  userTitle: z.string().max(200).optional(),
+
+  // Legacy support
+  role: z.enum(["seeker", "mentor", "coach"]).optional(),
+  email: z.string().email().optional(),
+});
+
+const onboardingBodySchema = z.discriminatedUnion("action", [
+  setIntentSchema,
+  completeProfileSchema,
+  completeRoleBaseSchema,
+]);
+
+/** Legacy body: old Candid onboarding sends "role" without "action" */
+const legacyBodySchema = completeRoleBaseSchema.extend({
+  action: z.enum(["complete-role", "activate-role"]).default("complete-role"),
+  role: z.enum(["seeker", "mentor", "coach"]),
+});
+
+// ─── Helpers ───────────────────────────────────────────────────────
+
 function parseYearsExperience(yearsExp: string): number | null {
   const mapping: Record<string, number> = {
     "less-than-1": 0,
@@ -21,6 +105,28 @@ function parseYearsExperience(yearsExp: string): number | null {
   };
   return mapping[yearsExp] ?? null;
 }
+
+/** Generate a unique slug, appending a random suffix on collision */
+async function generateUniqueOrgSlug(companyName: string): Promise<string> {
+  const baseSlug = companyName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  // Check if base slug is available
+  const existing = await prisma.organization.findUnique({
+    where: { slug: baseSlug },
+    select: { id: true },
+  });
+
+  if (!existing) return baseSlug;
+
+  // Append a random 6-char suffix to avoid collision
+  const suffix = Math.random().toString(36).substring(2, 8);
+  return `${baseSlug}-${suffix}`;
+}
+
+// ─── Route Handler ─────────────────────────────────────────────────
 
 // POST — Handle onboarding submission for any shell
 export async function POST(request: NextRequest) {
@@ -43,87 +149,70 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const {
-      // Action type
-      action, // "set-intent" | "complete-profile" | "complete-role" | "activate-role"
+    // Parse and validate request body
+    const rawBody = await request.json();
 
-      // Intent selection
-      entryIntent, // "talent" | "coach" | "employer"
+    // Try primary schema first (has "action" field); fall back to legacy format
+    // Use a flat validated type for downstream field access
+    type ValidatedBody = Omit<z.infer<typeof completeRoleBaseSchema>, "action"> & {
+      action: "set-intent" | "complete-profile" | "complete-role" | "activate-role";
+      entryIntent?: "talent" | "coach" | "employer";
+    };
 
-      // Base profile fields
-      firstName,
-      lastName,
-      linkedinUrl,
-      bio,
+    let body: ValidatedBody;
+    const primaryResult = onboardingBodySchema.safeParse(rawBody);
+    if (primaryResult.success) {
+      body = primaryResult.data as ValidatedBody;
+    } else {
+      // Legacy Candid onboarding sends "role" without "action"
+      const legacyResult = legacyBodySchema.safeParse(rawBody);
+      if (legacyResult.success) {
+        body = legacyResult.data as ValidatedBody;
+      } else {
+        return NextResponse.json(
+          { error: "Invalid request body", details: primaryResult.error.flatten() },
+          { status: 400 },
+        );
+      }
+    }
 
-      // Role being onboarded
-      shell, // "talent" | "coach" | "employer"
+    // Resolve effective action and shell
+    const effectiveAction = body.action;
 
-      // Talent-specific fields
-      careerStage,
-      skills,
-      sectors,
-      goals,
-      yearsExperience,
-      roleTypes,
-      transitionTimeline,
-      locationPreference,
-      salaryRange,
-      jobTitle,
-
-      // Coach-specific fields
-      headline,
-      expertise,
-      sessionTypes,
-      sessionRate,
-      yearsInClimate,
-      availability,
-
-      // Employer-specific fields
-      companyName,
-      companyDescription,
-      companyWebsite,
-      companyLocation,
-      companySize,
-      userTitle,
-
-      // Legacy support — old candid onboarding sends "role" instead of "shell"
-      role,
-      email,
-    } = body;
-
-    // Handle legacy candid onboarding format
-    const effectiveAction = action || (role ? "complete-role" : undefined);
-    const effectiveShell: Shell | undefined =
-      shell || (role === "seeker" || role === "mentor" ? "talent" : role === "coach" ? "coach" : undefined);
+    let effectiveShell: Shell | undefined;
+    if (body.shell) {
+      effectiveShell = body.shell;
+    } else if (body.role) {
+      effectiveShell =
+        body.role === "seeker" || body.role === "mentor" ? "talent" : body.role === "coach" ? "coach" : undefined;
+    }
 
     // Get or create onboarding progress
     let progress: OnboardingProgress =
       (account.onboardingProgress as OnboardingProgress | null) ||
       createOnboardingProgress();
 
-    const accountUpdate: Record<string, unknown> = {};
+    const accountUpdate: AccountUpdateData = {};
 
     // ── Action: Set entry intent ─────────────────────────────────
-    if (effectiveAction === "set-intent" && entryIntent) {
-      accountUpdate.entryIntent = entryIntent;
+    if (effectiveAction === "set-intent" && body.entryIntent) {
+      const intent = body.entryIntent as Shell;
+
+      accountUpdate.entryIntent = intent;
 
       // Activate the role for onboarding
-      progress.roles[entryIntent as Shell] = createRoleOnboardingState(
-        entryIntent as Shell,
-      );
+      progress.roles[intent] = createRoleOnboardingState(intent);
 
       // Add to active roles if not already there
       const activeRoles = [...(account.activeRoles || [])];
-      if (!activeRoles.includes(entryIntent)) {
-        activeRoles.push(entryIntent);
+      if (!activeRoles.includes(intent)) {
+        activeRoles.push(intent);
       }
       accountUpdate.activeRoles = activeRoles;
 
       // Set as primary if no primary yet
       if (!account.primaryRole) {
-        accountUpdate.primaryRole = entryIntent;
+        accountUpdate.primaryRole = intent;
       }
 
       accountUpdate.onboardingProgress = progress;
@@ -138,6 +227,8 @@ export async function POST(request: NextRequest) {
 
     // ── Action: Complete base profile ────────────────────────────
     if (effectiveAction === "complete-profile") {
+      const { firstName, lastName, linkedinUrl, bio } = body;
+
       if (firstName && lastName) {
         accountUpdate.name = `${firstName} ${lastName}`;
       }
@@ -160,6 +251,8 @@ export async function POST(request: NextRequest) {
       (effectiveAction === "complete-role" || effectiveAction === "activate-role") &&
       effectiveShell
     ) {
+      const { firstName, lastName, linkedinUrl, bio, role } = body;
+
       // Update shared account fields
       if (firstName && lastName) {
         accountUpdate.name = `${firstName} ${lastName}`;
@@ -169,6 +262,8 @@ export async function POST(request: NextRequest) {
 
       // ── Talent / Seeker ────────────────────────────────────────
       if (effectiveShell === "talent") {
+        const { sectors, jobTitle, goals, skills, careerStage, yearsExperience } = body;
+
         if (!account.seekerProfile) {
           await prisma.seekerProfile.create({
             data: {
@@ -212,6 +307,8 @@ export async function POST(request: NextRequest) {
 
       // ── Coach ──────────────────────────────────────────────────
       if (effectiveShell === "coach") {
+        const { headline, sectors, expertise, sessionTypes, sessionRate, yearsInClimate } = body;
+
         if (!account.coachProfile) {
           await prisma.coachProfile.create({
             data: {
@@ -249,48 +346,53 @@ export async function POST(request: NextRequest) {
       }
 
       // ── Employer ───────────────────────────────────────────────
-      if (effectiveShell === "employer" && companyName) {
-        // Create organization and membership
-        const slug = companyName
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "");
+      if (effectiveShell === "employer") {
+        const { companyName, companyDescription, companyWebsite, companyLocation, userTitle } = body;
 
-        const org = await prisma.organization.upsert({
-          where: { slug },
-          create: {
-            name: companyName,
-            slug,
-            description: companyDescription || null,
-            website: companyWebsite || null,
-            location: companyLocation || null,
-          },
-          update: {
-            description: companyDescription || undefined,
-            website: companyWebsite || undefined,
-            location: companyLocation || undefined,
-          },
-        });
+        if (companyName) {
+          // Generate a unique slug to prevent collision / org takeover
+          const slug = await generateUniqueOrgSlug(companyName);
 
-        // Create org membership if not exists
-        const existingMembership = await prisma.organizationMember.findUnique({
-          where: {
-            accountId_organizationId: {
-              accountId: account.id,
-              organizationId: org.id,
-            },
-          },
-        });
-
-        if (!existingMembership) {
-          await prisma.organizationMember.create({
-            data: {
-              accountId: account.id,
-              organizationId: org.id,
-              role: "OWNER",
-              title: userTitle || null,
-            },
+          // Check if user already owns an org (avoid creating duplicates)
+          const existingMembership = await prisma.organizationMember.findFirst({
+            where: { accountId: account.id },
+            include: { organization: true },
           });
+
+          let org;
+          if (existingMembership) {
+            // Update the existing organization instead of creating a new one
+            org = await prisma.organization.update({
+              where: { id: existingMembership.organizationId },
+              data: {
+                name: companyName,
+                description: companyDescription || undefined,
+                website: companyWebsite || undefined,
+                location: companyLocation || undefined,
+              },
+            });
+          } else {
+            // Create new organization with unique slug
+            org = await prisma.organization.create({
+              data: {
+                name: companyName,
+                slug,
+                description: companyDescription || null,
+                website: companyWebsite || null,
+                location: companyLocation || null,
+              },
+            });
+
+            // Create org membership
+            await prisma.organizationMember.create({
+              data: {
+                accountId: account.id,
+                organizationId: org.id,
+                role: "OWNER",
+                title: userTitle || null,
+              },
+            });
+          }
         }
       }
 
