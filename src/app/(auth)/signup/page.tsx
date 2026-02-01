@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input, InputMessage } from "@/components/ui/input";
@@ -50,7 +50,16 @@ const typeOptions: {
 ];
 
 export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [step, setStep] = useState<"type" | "details">("type");
   const [accountType, setAccountType] = useState<AccountType | null>(null);
@@ -61,6 +70,15 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Pre-select account type from URL param (e.g., /signup?intent=talent)
+  useEffect(() => {
+    const intent = searchParams.get("intent");
+    if (intent && ["talent", "coach", "employer"].includes(intent)) {
+      setAccountType(intent as AccountType);
+      setStep("details");
+    }
+  }, [searchParams]);
 
   const handleTypeSelect = (type: AccountType) => {
     setAccountType(type);
@@ -141,16 +159,17 @@ export default function SignupPage() {
   // Success state
   if (success) {
     return (
-      <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
+      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-8 shadow-sm">
         <div className="text-center">
-          <div className="w-16 h-16 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-4">
-            <EnvelopeSimple className="w-8 h-8 text-[var(--primitive-green-600)]" weight="bold" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
+            <EnvelopeSimple className="h-8 w-8 text-[var(--primitive-green-600)]" weight="bold" />
           </div>
-          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
+          <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">
             Check your email
           </h1>
-          <p className="text-[var(--primitive-neutral-600)] mb-6">
-            We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
+          <p className="mb-6 text-[var(--primitive-neutral-600)]">
+            We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to
+            activate your account.
           </p>
           <Button
             variant="secondary"
@@ -174,14 +193,10 @@ export default function SignupPage() {
   // Account type selection
   if (step === "type") {
     return (
-      <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
-            Get started
-          </h1>
-          <p className="text-[var(--primitive-neutral-600)]">
-            What brings you here?
-          </p>
+      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-8 shadow-sm">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">Get started</h1>
+          <p className="text-[var(--primitive-neutral-600)]">What brings you here?</p>
         </div>
 
         <div className="space-y-3">
@@ -191,17 +206,17 @@ export default function SignupPage() {
               <button
                 key={option.value}
                 onClick={() => handleTypeSelect(option.value)}
-                className="w-full p-5 rounded-xl border-2 border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-green-600)] hover:bg-[var(--primitive-green-100)] transition-all text-left group"
+                className="group w-full rounded-xl border-2 border-[var(--primitive-neutral-200)] p-5 text-left transition-all hover:border-[var(--primitive-green-600)] hover:bg-[var(--primitive-green-100)]"
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                     style={{ backgroundColor: option.iconBg }}
                   >
-                    <Icon className="w-5 h-5 text-foreground-default" weight="bold" />
+                    <Icon className="text-foreground-default h-5 w-5" weight="bold" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-[var(--primitive-green-800)] mb-0.5">
+                    <h3 className="mb-0.5 font-semibold text-[var(--primitive-green-800)]">
                       {option.title}
                     </h3>
                     <p className="text-sm text-[var(--primitive-neutral-600)]">
@@ -219,7 +234,7 @@ export default function SignupPage() {
           Already have an account?{" "}
           <Link
             href="/login"
-            className="text-[var(--primitive-green-600)] hover:text-[var(--primitive-green-700)] font-medium"
+            className="font-medium text-[var(--primitive-green-600)] hover:text-[var(--primitive-green-700)]"
           >
             Sign in
           </Link>
@@ -244,23 +259,23 @@ export default function SignupPage() {
         : "Create account";
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
+    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-8 shadow-sm">
+      <div className="mb-8 text-center">
+        <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">
           Create your account
         </h1>
         <p className="text-[var(--primitive-neutral-600)]">{typeLabel}</p>
       </div>
 
       {/* OAuth Buttons */}
-      <div className="space-y-3 mb-6">
+      <div className="mb-6 space-y-3">
         <Button
           type="button"
           variant="outline"
           className="w-full"
           onClick={() => handleOAuthSignup("google")}
           disabled={loading}
-          leftIcon={<GoogleLogo weight="bold" className="w-5 h-5" />}
+          leftIcon={<GoogleLogo weight="bold" className="h-5 w-5" />}
         >
           Continue with Google
         </Button>
@@ -270,7 +285,7 @@ export default function SignupPage() {
           className="w-full"
           onClick={() => handleOAuthSignup("linkedin_oidc")}
           disabled={loading}
-          leftIcon={<LinkedinLogo weight="bold" className="w-5 h-5" />}
+          leftIcon={<LinkedinLogo weight="bold" className="h-5 w-5" />}
         >
           Continue with LinkedIn
         </Button>
@@ -282,7 +297,7 @@ export default function SignupPage() {
           <div className="w-full border-t border-[var(--primitive-neutral-200)]" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-white text-[var(--primitive-neutral-600)]">
+          <span className="bg-white px-4 text-[var(--primitive-neutral-600)]">
             or continue with email
           </span>
         </div>
@@ -323,7 +338,10 @@ export default function SignupPage() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium text-[var(--primitive-green-800)]">
+          <label
+            htmlFor="password"
+            className="text-sm font-medium text-[var(--primitive-green-800)]"
+          >
             Password
           </label>
           <Input
@@ -339,7 +357,10 @@ export default function SignupPage() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="confirmPassword" className="text-sm font-medium text-[var(--primitive-green-800)]">
+          <label
+            htmlFor="confirmPassword"
+            className="text-sm font-medium text-[var(--primitive-green-800)]"
+          >
             Confirm password
           </label>
           <Input
@@ -355,28 +376,16 @@ export default function SignupPage() {
           />
         </div>
 
-        {error && (
-          <InputMessage status="error">{error}</InputMessage>
-        )}
+        {error && <InputMessage status="error">{error}</InputMessage>}
 
-        <Button
-          type="submit"
-          className="w-full"
-          loading={loading}
-          disabled={loading}
-        >
+        <Button type="submit" className="w-full" loading={loading} disabled={loading}>
           {buttonLabel}
         </Button>
       </form>
 
       {/* Back button */}
       <div className="mt-4">
-        <Button
-          type="button"
-          variant="ghost"
-          className="w-full"
-          onClick={() => setStep("type")}
-        >
+        <Button type="button" variant="ghost" className="w-full" onClick={() => setStep("type")}>
           Back
         </Button>
       </div>

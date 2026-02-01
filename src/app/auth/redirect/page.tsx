@@ -37,7 +37,15 @@ export default async function AuthRedirectPage() {
   });
 
   if (!account) {
-    // Account doesn't exist yet — send to onboarding start
+    // Account doesn't exist yet — create it from Supabase auth metadata
+    const metadata = user.user_metadata || {};
+    await prisma.account.create({
+      data: {
+        supabaseId: user.id,
+        email: user.email!,
+        name: metadata.name || metadata.full_name || null,
+      },
+    });
     redirect("/onboarding");
   }
 

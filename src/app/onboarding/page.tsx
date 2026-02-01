@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  MagnifyingGlass,
-  GraduationCap,
-  Buildings,
-} from "@phosphor-icons/react";
+import Link from "next/link";
+import { MagnifyingGlass, GraduationCap, Buildings } from "@phosphor-icons/react";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import type { Shell } from "@/lib/onboarding/types";
 
@@ -39,8 +36,7 @@ const intentOptions: {
   {
     shell: "employer",
     title: "I'm hiring climate talent",
-    description:
-      "Post roles, manage candidates, and build your team with AI-powered sourcing.",
+    description: "Post roles, manage candidates, and build your team with AI-powered sourcing.",
     icon: Buildings,
     features: ["Job posting", "Candidate pipeline", "Team collaboration"],
     iconBg: "var(--primitive-blue-100)",
@@ -66,6 +62,12 @@ export default function OnboardingIntentPage() {
         }),
       });
 
+      if (res.status === 401) {
+        // Not authenticated — redirect to signup with intent
+        router.push(`/signup?intent=${shell}`);
+        return;
+      }
+
       if (!res.ok) {
         const data = await res.json();
         setError(data.error || "Something went wrong");
@@ -83,10 +85,10 @@ export default function OnboardingIntentPage() {
 
   return (
     <OnboardingShell>
-      <div className="max-w-xl mx-auto">
+      <div className="mx-auto max-w-xl">
         {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-heading-sm font-bold text-foreground-default">
+        <div className="mb-10 text-center">
+          <h1 className="text-foreground-default text-heading-sm font-bold">
             Welcome! What brings you here?
           </h1>
           <p className="mt-2 text-body-sm text-foreground-muted">
@@ -103,27 +105,23 @@ export default function OnboardingIntentPage() {
                 key={option.shell}
                 onClick={() => selectIntent(option.shell)}
                 disabled={loading}
-                className="w-full p-6 rounded-2xl border-2 border-[var(--primitive-neutral-200)] bg-white hover:border-[var(--candid-foreground-brand)] hover:shadow-[var(--shadow-card-hover)] transition-all text-left group disabled:opacity-50"
+                className="group w-full rounded-2xl border-2 border-[var(--primitive-neutral-200)] bg-white p-6 text-left transition-all hover:border-[var(--candid-foreground-brand)] hover:shadow-[var(--shadow-card-hover)] disabled:opacity-50"
               >
                 <div className="flex items-start gap-4">
                   <div
-                    className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
                     style={{ backgroundColor: option.iconBg }}
                   >
                     <Icon size={24} weight="bold" className="text-foreground-default" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground-default mb-1">
-                      {option.title}
-                    </h3>
-                    <p className="text-caption text-foreground-muted mb-3">
-                      {option.description}
-                    </p>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-foreground-default mb-1 font-semibold">{option.title}</h3>
+                    <p className="mb-3 text-caption text-foreground-muted">{option.description}</p>
                     <div className="flex flex-wrap gap-2">
                       {option.features.map((feature) => (
                         <span
                           key={feature}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption-sm font-medium bg-[var(--primitive-neutral-100)] text-foreground-muted"
+                          className="inline-flex items-center rounded-full bg-[var(--primitive-neutral-100)] px-2.5 py-0.5 text-caption-sm font-medium text-foreground-muted"
                         >
                           {feature}
                         </span>
@@ -137,10 +135,19 @@ export default function OnboardingIntentPage() {
         </div>
 
         {error && (
-          <p className="mt-4 text-center text-caption text-[var(--primitive-red-600)]">
-            {error}
-          </p>
+          <p className="mt-4 text-center text-caption text-[var(--primitive-red-600)]">{error}</p>
         )}
+
+        {/* Sign in link */}
+        <p className="mt-8 text-center text-caption text-foreground-muted">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="font-medium text-[var(--candid-foreground-brand)] hover:underline"
+          >
+            Sign in
+          </Link>
+        </p>
       </div>
     </OnboardingShell>
   );

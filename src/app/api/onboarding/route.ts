@@ -208,13 +208,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await prisma.account.findUnique({
+    let account = await prisma.account.findUnique({
       where: { supabaseId: user.id },
       include: { seekerProfile: true, coachProfile: true },
     });
 
     if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+      // Defensive fallback: create account if /auth/redirect didn't create it
+      account = await prisma.account.create({
+        data: {
+          supabaseId: user.id,
+          email: user.email!,
+          name: user.user_metadata?.name || user.user_metadata?.full_name || null,
+        },
+        include: { seekerProfile: true, coachProfile: true },
+      });
     }
 
     // Parse and validate request body
