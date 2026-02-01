@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { createClient } from "@/lib/supabase/server";
 import {
   type Shell,
@@ -124,7 +125,7 @@ interface AccountUpdate {
 }
 
 /** Convert OnboardingProgress to a plain JSON object for Prisma's Json field */
-function toJsonValue(progress: OnboardingProgress): unknown {
+function toJsonValue(progress: OnboardingProgress): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(progress));
 }
 
