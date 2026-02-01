@@ -29,7 +29,7 @@ export default function EmployerYourRolePage() {
 
   const handleContinue = () => {
     // In a real app, we'd save this data first
-    router.push("/employer/team");
+    router.push("/employer/invite-team");
   };
 
   const handlePhotoClick = () => {

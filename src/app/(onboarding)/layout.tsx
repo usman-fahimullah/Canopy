@@ -26,7 +26,7 @@ const employerSteps = [
   { path: "/role-selection", label: "Account Type" },
   { path: "/employer/company", label: "Company" },
   { path: "/employer/your-role", label: "Your Role" },
-  { path: "/employer/team", label: "Team" },
+  { path: "/employer/invite-team", label: "Team" },
 ];
 
 export default function OnboardingLayout({
