@@ -126,7 +126,7 @@ export async function GET() {
       id: account.id,
       email: account.email,
       name: account.name || "",
-      avatar: account.avatarUrl || null,
+      avatar: account.avatar || null,
 
       // Legacy
       role: primaryCandidRole,

@@ -33,7 +33,7 @@ const completeProfileSchema = z.object({
 });
 
 const talentFields = {
-  careerStage: z.string().max(100).optional().nullable(),
+  careerStage: z.enum(["STUDENT", "ENTRY_LEVEL", "MID_CAREER", "SENIOR", "CAREER_CHANGER", "RETURNING"]).optional().nullable(),
   skills: z.array(z.string().max(200)).max(50).optional(),
   sectors: z.array(z.string().max(200)).max(50).optional(),
   goals: z.array(z.string().max(500)).max(20).optional(),
