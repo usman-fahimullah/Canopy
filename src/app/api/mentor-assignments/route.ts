@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { standardLimiter } from "@/lib/rate-limit";
 
 // POST — request mentorship (creates MentorAssignment with status PENDING)
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success: rlSuccess } = await standardLimiter.check(5, `mentor-assign-post:${ip}`);
+    if (!rlSuccess) {
+      return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -103,6 +110,12 @@ export async function POST(request: NextRequest) {
 // PATCH — mentor accepts/completes assignment
 export async function PATCH(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success: rlSuccess } = await standardLimiter.check(10, `mentor-assign-patch:${ip}`);
+    if (!rlSuccess) {
+      return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    }
+
     const supabase = await createClient();
     const {
       data: { user },

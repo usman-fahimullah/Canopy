@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { readLimiter, standardLimiter } from "@/lib/rate-limit";
 
 // GET — list notifications for current user
 export async function GET(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success: rlSuccess } = await readLimiter.check(30, `notifications-get:${ip}`);
+    if (!rlSuccess) {
+      return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -54,6 +61,12 @@ export async function GET(request: NextRequest) {
 // PUT — mark all notifications as read
 export async function PUT(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success: rlSuccess } = await standardLimiter.check(10, `notifications-put:${ip}`);
+    if (!rlSuccess) {
+      return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
