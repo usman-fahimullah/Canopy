@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "@phosphor-icons/react";
+import { ArrowLeft } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface StepNavigationProps {
@@ -30,19 +30,14 @@ export function StepNavigation({
   return (
     <div
       className={cn(
-        "flex items-center pt-8 pb-4",
+        "flex items-center pb-4 pt-8",
         onBack ? "justify-between" : "justify-end",
         className
       )}
     >
       {onBack && (
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onBack}
-          leftIcon={<ArrowLeft weight="bold" />}
-        >
-          Back
+        <Button type="button" variant="secondary" size="icon" onClick={onBack} aria-label="Go back">
+          <ArrowLeft size={20} weight="bold" />
         </Button>
       )}
 
@@ -51,7 +46,6 @@ export function StepNavigation({
         onClick={onContinue}
         disabled={!canContinue || loading}
         loading={loading}
-        rightIcon={!loading ? <ArrowRight weight="bold" /> : undefined}
       >
         {continueLabel}
       </Button>

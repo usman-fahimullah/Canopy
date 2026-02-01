@@ -88,7 +88,7 @@ export default function OnboardingIntentPage() {
     <div className="flex min-h-screen flex-col bg-[var(--primitive-neutral-100)]">
       {/* ── Top bar ────────────────────────────────────────── */}
       <header className="shrink-0 border-b border-[var(--primitive-neutral-200)] bg-white">
-        <div className="flex items-center px-12 py-4">
+        <div className="flex items-center justify-between px-4 py-4 sm:px-12">
           <Link href="/" className="flex items-center py-[15px]">
             <svg
               width="195"
@@ -172,6 +172,22 @@ export default function OnboardingIntentPage() {
               />
             </svg>
           </Link>
+
+          {/* Nav links */}
+          <div className="flex items-center gap-4">
+            <Link
+              href="/design-system"
+              className="hover:text-foreground-default hidden text-caption text-foreground-muted transition-colors sm:inline"
+            >
+              Design System
+            </Link>
+            <Link
+              href="/demo"
+              className="hover:text-foreground-default hidden text-caption text-foreground-muted transition-colors sm:inline"
+            >
+              Demos
+            </Link>
+          </div>
         </div>
       </header>
 
