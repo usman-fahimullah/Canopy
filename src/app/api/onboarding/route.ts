@@ -121,7 +121,11 @@ interface AccountUpdate {
   entryIntent?: string;
   activeRoles?: string[];
   primaryRole?: string;
-  onboardingProgress?: OnboardingProgress;
+}
+
+/** Convert OnboardingProgress to a plain JSON object for Prisma's Json field */
+function toJsonValue(progress: OnboardingProgress): unknown {
+  return JSON.parse(JSON.stringify(progress));
 }
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -264,11 +268,12 @@ export async function POST(request: NextRequest) {
         accountUpdate.primaryRole = intent;
       }
 
-      accountUpdate.onboardingProgress = progress;
-
       await prisma.account.update({
         where: { id: account.id },
-        data: accountUpdate,
+        data: {
+          ...accountUpdate,
+          onboardingProgress: toJsonValue(progress),
+        },
       });
 
       return NextResponse.json({ success: true, action: "set-intent" });
@@ -283,11 +288,13 @@ export async function POST(request: NextRequest) {
       if (body.bio) accountUpdate.bio = body.bio;
 
       progress.baseProfileComplete = true;
-      accountUpdate.onboardingProgress = progress;
 
       await prisma.account.update({
         where: { id: account.id },
-        data: accountUpdate,
+        data: {
+          ...accountUpdate,
+          onboardingProgress: toJsonValue(progress),
+        },
       });
 
       return NextResponse.json({ success: true, action: "complete-profile" });
@@ -576,11 +583,12 @@ async function finishRoleOnboarding(
     accountUpdate.primaryRole = shell;
   }
 
-  accountUpdate.onboardingProgress = progress;
-
   await prisma.account.update({
     where: { id: account.id },
-    data: accountUpdate,
+    data: {
+      ...accountUpdate,
+      onboardingProgress: toJsonValue(progress),
+    },
   });
 
   return NextResponse.json({
