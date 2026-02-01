@@ -3,45 +3,45 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { GraduationCap, User, Buildings } from "@phosphor-icons/react";
-import { Button } from "@/components/ui";
-import { Card } from "@/components/ui";
+import { GraduationCap, Buildings } from "@phosphor-icons/react";
+import { ProfileIcon } from "@/components/Icons/profile-icon";
+import { Button, Card } from "@/components/ui";
 import type { Shell } from "@/lib/onboarding/types";
 
 const roleCards: {
   shell: Shell;
   title: string;
   subtitle: string;
-  icon: React.ElementType;
+  renderIcon: () => React.ReactNode;
   iconBg: string;
-  iconColor: string;
   buttonLabel: string;
 }[] = [
   {
     shell: "coach",
     title: "Career Coach",
     subtitle: "I want to coach others",
-    icon: GraduationCap,
+    renderIcon: () => (
+      <GraduationCap size={48} weight="fill" style={{ color: "var(--primitive-green-800)" }} />
+    ),
     iconBg: "var(--primitive-blue-200)",
-    iconColor: "var(--primitive-green-800)",
     buttonLabel: "I\u2019m a Career Coach",
   },
   {
     shell: "talent",
     title: "Job Seeker",
     subtitle: "Finding a job",
-    icon: User,
+    renderIcon: () => <ProfileIcon size={48} className="text-[var(--primitive-neutral-0)]" />,
     iconBg: "var(--primitive-green-800)",
-    iconColor: "var(--primitive-neutral-0)",
     buttonLabel: "I\u2019m a Job Seeker",
   },
   {
     shell: "employer",
     title: "Employer",
     subtitle: "Looking to post a role",
-    icon: Buildings,
+    renderIcon: () => (
+      <Buildings size={48} weight="fill" style={{ color: "var(--primitive-green-800)" }} />
+    ),
     iconBg: "var(--primitive-neutral-200)",
-    iconColor: "var(--primitive-green-800)",
     buttonLabel: "I\u2019m an Employer",
   },
 ];
@@ -183,44 +183,45 @@ export default function OnboardingIntentPage() {
 
         {/* Role cards */}
         <div className="flex w-full max-w-[1098px] flex-col items-center gap-6 md:flex-row md:items-stretch">
-          {roleCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <Card
-                key={card.shell}
-                className="flex w-full max-w-[350px] flex-col items-center justify-between overflow-hidden p-6 md:h-[416px] md:w-[350px]"
-              >
-                {/* Icon + text group */}
-                <div className="flex flex-1 flex-col items-center justify-center gap-6">
-                  {/* Icon badge */}
-                  <div
-                    className="flex items-center rounded-[var(--radius-md)] p-3"
-                    style={{ backgroundColor: card.iconBg }}
-                  >
-                    <Icon size={48} weight="fill" style={{ color: card.iconColor }} />
-                  </div>
-
-                  {/* Title + subtitle */}
-                  <div className="flex w-full flex-col text-center text-[var(--primitive-green-800)]">
-                    <p className="w-full text-heading-md font-medium">{card.title}</p>
-                    <p className="w-full text-body font-normal">{card.subtitle}</p>
-                  </div>
+          {roleCards.map((card, index) => (
+            <Card
+              key={card.shell}
+              className="flex w-full max-w-[350px] animate-slide-in-from-bottom flex-col items-center justify-between overflow-hidden p-6 opacity-0 md:h-[416px] md:w-[350px]"
+              style={{
+                animationDelay: `${index * 100}ms`,
+                animationFillMode: "forwards",
+              }}
+            >
+              {/* Icon + text group */}
+              <div className="flex flex-1 flex-col items-center justify-center gap-6">
+                {/* Icon badge */}
+                <div
+                  className="flex items-center rounded-[var(--radius-md)] p-3"
+                  style={{ backgroundColor: card.iconBg }}
+                >
+                  {card.renderIcon()}
                 </div>
 
-                {/* CTA button */}
-                <Button
-                  variant="tertiary"
-                  size="default"
-                  onClick={() => selectIntent(card.shell)}
-                  disabled={loading}
-                  className="w-full"
-                  aria-label={card.buttonLabel}
-                >
-                  {card.buttonLabel}
-                </Button>
-              </Card>
-            );
-          })}
+                {/* Title + subtitle */}
+                <div className="flex w-full flex-col text-center text-[var(--primitive-green-800)]">
+                  <p className="w-full text-heading-md font-medium">{card.title}</p>
+                  <p className="w-full text-body font-normal">{card.subtitle}</p>
+                </div>
+              </div>
+
+              {/* CTA button */}
+              <Button
+                variant="tertiary"
+                size="default"
+                onClick={() => selectIntent(card.shell)}
+                disabled={loading}
+                className="w-full"
+                aria-label={card.buttonLabel}
+              >
+                {card.buttonLabel}
+              </Button>
+            </Card>
+          ))}
         </div>
 
         {error && (
