@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { readLimiter, standardLimiter } from "@/lib/rate-limit";
 
 // POST - Create a review
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success: rlSuccess } = await standardLimiter.check(5, `reviews-post:${ip}`);
+    if (!rlSuccess) {
+      return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -89,6 +96,12 @@ export async function POST(request: NextRequest) {
 // GET - Get reviews for a coach
 export async function GET(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success: rlSuccess } = await readLimiter.check(30, `reviews-get:${ip}`);
+    if (!rlSuccess) {
+      return NextResponse.json({ error: "Too many requests. Please try again shortly." }, { status: 429 });
+    }
+
     const { searchParams } = new URL(request.url);
     const coachId = searchParams.get("coachId");
 

@@ -100,6 +100,7 @@ export function ShellNotificationBell({ shell }: ShellNotificationBellProps) {
               <button
                 onClick={() => markAllAsRead()}
                 className="flex items-center gap-1 text-caption text-[var(--candid-foreground-brand)] hover:underline"
+                aria-label="Mark all notifications as read"
               >
                 <CheckCircle size={14} />
                 Mark all as read

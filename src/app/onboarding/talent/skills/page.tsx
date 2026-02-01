@@ -112,6 +112,7 @@ export default function TalentSkillsPage() {
                         type="button"
                         onClick={() => removeSkill(skill)}
                         className="ml-0.5 hover:text-[var(--primitive-red-600)] transition-colors"
+                        aria-label={`Remove ${skill}`}
                       >
                         <X size={14} weight="bold" />
                       </button>

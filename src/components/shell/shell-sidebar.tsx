@@ -122,6 +122,7 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
               "hover:bg-[var(--candid-nav-item-hover)] transition-colors",
               collapsed ? "justify-center" : "flex-1 min-w-0"
             )}
+            aria-label="Open profile menu"
           >
             {user?.avatar ? (
               <Image
