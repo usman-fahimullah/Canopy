@@ -77,6 +77,44 @@ async function ensureAuthUser(
   return data.user.id;
 }
 
+// Helper: Generate completed onboarding progress for seed data
+function seedOnboarding(shell: "talent" | "coach" | "employer") {
+  const progress = {
+    baseProfileComplete: true,
+    roles: {
+      talent: null as { complete: boolean; completedAt: string; currentStep: null } | null,
+      coach: null as { complete: boolean; completedAt: string; currentStep: null } | null,
+      employer: null as { complete: boolean; completedAt: string; currentStep: null } | null,
+    },
+  };
+  progress.roles[shell] = { complete: true, completedAt: new Date().toISOString(), currentStep: null };
+  return {
+    activeRoles: [shell],
+    primaryRole: shell,
+    onboardingProgress: progress,
+  };
+}
+
+// Helper: Generate multi-role onboarding progress
+function seedMultiOnboarding(shells: ("talent" | "coach" | "employer")[]) {
+  const progress = {
+    baseProfileComplete: true,
+    roles: {
+      talent: null as { complete: boolean; completedAt: string; currentStep: null } | null,
+      coach: null as { complete: boolean; completedAt: string; currentStep: null } | null,
+      employer: null as { complete: boolean; completedAt: string; currentStep: null } | null,
+    },
+  };
+  for (const shell of shells) {
+    progress.roles[shell] = { complete: true, completedAt: new Date().toISOString(), currentStep: null };
+  }
+  return {
+    activeRoles: shells,
+    primaryRole: shells[0],
+    onboardingProgress: progress,
+  };
+}
+
 async function main() {
   console.log("🌱 Seeding database...\n");
 
@@ -603,7 +641,7 @@ async function main() {
       timezone: "America/Chicago",
       pronouns: "they/them",
       linkedinUrl: "https://linkedin.com/in/jordanrivera",
-      onboardingCompleted: true,
+      ...seedOnboarding("coach"),
     },
   });
 
@@ -616,7 +654,7 @@ async function main() {
       timezone: "America/Los_Angeles",
       pronouns: "she/her",
       linkedinUrl: "https://linkedin.com/in/alexchen",
-      onboardingCompleted: true,
+      ...seedOnboarding("coach"),
     },
   });
 
@@ -629,7 +667,7 @@ async function main() {
       timezone: "America/Chicago",
       pronouns: "he/him",
       linkedinUrl: "https://linkedin.com/in/sampatel",
-      onboardingCompleted: true,
+      ...seedOnboarding("coach"),
     },
   });
 
@@ -642,7 +680,7 @@ async function main() {
       timezone: "America/Denver",
       pronouns: "she/her",
       linkedinUrl: "https://linkedin.com/in/morganwalsh",
-      onboardingCompleted: true,
+      ...seedOnboarding("coach"),
     },
   });
 
@@ -658,7 +696,7 @@ async function main() {
       pronouns: "she/her",
       ethnicity: "Black or African American",
       linkedinUrl: "https://linkedin.com/in/mayathompson",
-      onboardingCompleted: true,
+      ...seedOnboarding("talent"),
     },
   });
 
@@ -673,7 +711,7 @@ async function main() {
       pronouns: "he/him",
       ethnicity: "White",
       linkedinUrl: "https://linkedin.com/in/ryanoconnor",
-      onboardingCompleted: true,
+      ...seedOnboarding("talent"),
     },
   });
 
@@ -688,7 +726,7 @@ async function main() {
       pronouns: "she/her",
       ethnicity: "Asian",
       linkedinUrl: "https://linkedin.com/in/priyasharma",
-      onboardingCompleted: true,
+      ...seedOnboarding("talent"),
     },
   });
 
@@ -703,7 +741,7 @@ async function main() {
       pronouns: "he/him",
       ethnicity: "Hispanic or Latino",
       linkedinUrl: "https://linkedin.com/in/carlosmendez",
-      onboardingCompleted: true,
+      ...seedOnboarding("talent"),
     },
   });
 
@@ -720,135 +758,135 @@ async function main() {
       ethnicity: "White",
       linkedinUrl: "https://linkedin.com/in/elenavolkov",
       bio: "Finance professional with growing ESG specialization. Also coaching job seekers transitioning into climate finance.",
-      onboardingCompleted: true,
+      ...seedMultiOnboarding(["talent", "coach"]),
     },
   });
 
   // New employer accounts
   const danaAccount = await prisma.account.create({
-    data: { supabaseId: danaAuthId, email: "dana@verdant-systems.canopy.co", name: "Dana Flores", location: "Portland, OR", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Hispanic or Latino", onboardingCompleted: true },
+    data: { supabaseId: danaAuthId, email: "dana@verdant-systems.canopy.co", name: "Dana Flores", location: "Portland, OR", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Hispanic or Latino", ...seedOnboarding("employer") },
   });
   const kevinAccount = await prisma.account.create({
-    data: { supabaseId: kevinAuthId, email: "kevin@terrawatt.canopy.co", name: "Kevin Park", location: "Boston, MA", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: kevinAuthId, email: "kevin@terrawatt.canopy.co", name: "Kevin Park", location: "Boston, MA", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Asian", ...seedOnboarding("employer") },
   });
   const rachelAccount = await prisma.account.create({
-    data: { supabaseId: rachelAuthId, email: "rachel@evergreen-tech.canopy.co", name: "Rachel Adams", location: "Denver, CO", timezone: "America/Denver", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: rachelAuthId, email: "rachel@evergreen-tech.canopy.co", name: "Rachel Adams", location: "Denver, CO", timezone: "America/Denver", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("employer") },
   });
   const tomasAccount = await prisma.account.create({
-    data: { supabaseId: tomasAuthId, email: "tomas@canopy.co", name: "Tomas Reyes", location: "Austin, TX", timezone: "America/Chicago", pronouns: "he/him", ethnicity: "Hispanic or Latino", onboardingCompleted: true },
+    data: { supabaseId: tomasAuthId, email: "tomas@canopy.co", name: "Tomas Reyes", location: "Austin, TX", timezone: "America/Chicago", pronouns: "he/him", ethnicity: "Hispanic or Latino", ...seedOnboarding("employer") },
   });
   const ninaAccount = await prisma.account.create({
-    data: { supabaseId: ninaAuthId, email: "nina@terrawatt.canopy.co", name: "Nina Johansson", location: "Boston, MA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: ninaAuthId, email: "nina@terrawatt.canopy.co", name: "Nina Johansson", location: "Boston, MA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("employer") },
   });
   const derekAccount = await prisma.account.create({
-    data: { supabaseId: derekAuthId, email: "derek@evergreen-tech.canopy.co", name: "Derek Osei", location: "Denver, CO", timezone: "America/Denver", pronouns: "he/him", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: derekAuthId, email: "derek@evergreen-tech.canopy.co", name: "Derek Osei", location: "Denver, CO", timezone: "America/Denver", pronouns: "he/him", ethnicity: "Black or African American", ...seedOnboarding("employer") },
   });
 
   // New seeker accounts (35 more)
   const aishaAccount = await prisma.account.create({
-    data: { supabaseId: aishaAuthId, email: "aisha.johnson@canopy.co", name: "Aisha Johnson", phone: "+1-555-0201", location: "Atlanta, GA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: aishaAuthId, email: "aisha.johnson@canopy.co", name: "Aisha Johnson", phone: "+1-555-0201", location: "Atlanta, GA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "Black or African American", ...seedOnboarding("talent") },
   });
   const benAccount = await prisma.account.create({
-    data: { supabaseId: benAuthId, email: "ben.nakamura@canopy.co", name: "Ben Nakamura", phone: "+1-555-0202", location: "Seattle, WA", timezone: "America/Los_Angeles", pronouns: "he/him", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: benAuthId, email: "ben.nakamura@canopy.co", name: "Ben Nakamura", phone: "+1-555-0202", location: "Seattle, WA", timezone: "America/Los_Angeles", pronouns: "he/him", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const chloeAccount = await prisma.account.create({
-    data: { supabaseId: chloeAuthId, email: "chloe.dupont@canopy.co", name: "Chloe Dupont", phone: "+1-555-0203", location: "New Orleans, LA", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: chloeAuthId, email: "chloe.dupont@canopy.co", name: "Chloe Dupont", phone: "+1-555-0203", location: "New Orleans, LA", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const davidAccount = await prisma.account.create({
-    data: { supabaseId: davidAuthId, email: "david.okafor@canopy.co", name: "David Okafor", phone: "+1-555-0204", location: "Houston, TX", timezone: "America/Chicago", pronouns: "he/him", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: davidAuthId, email: "david.okafor@canopy.co", name: "David Okafor", phone: "+1-555-0204", location: "Houston, TX", timezone: "America/Chicago", pronouns: "he/him", ethnicity: "Black or African American", ...seedOnboarding("talent") },
   });
   const fatimaAccount = await prisma.account.create({
-    data: { supabaseId: fatimaAuthId, email: "fatima.hassan@canopy.co", name: "Fatima Hassan", phone: "+1-555-0205", location: "Minneapolis, MN", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "Middle Eastern or North African", onboardingCompleted: true },
+    data: { supabaseId: fatimaAuthId, email: "fatima.hassan@canopy.co", name: "Fatima Hassan", phone: "+1-555-0205", location: "Minneapolis, MN", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "Middle Eastern or North African", ...seedOnboarding("talent") },
   });
   const gabrielAccount = await prisma.account.create({
-    data: { supabaseId: gabrielAuthId, email: "gabriel.santos@canopy.co", name: "Gabriel Santos", phone: "+1-555-0206", location: "Miami, FL", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Hispanic or Latino", onboardingCompleted: true },
+    data: { supabaseId: gabrielAuthId, email: "gabriel.santos@canopy.co", name: "Gabriel Santos", phone: "+1-555-0206", location: "Miami, FL", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Hispanic or Latino", ...seedOnboarding("talent") },
   });
   const hannahAccount = await prisma.account.create({
-    data: { supabaseId: hannahAuthId, email: "hannah.kim@canopy.co", name: "Hannah Kim", phone: "+1-555-0207", location: "Los Angeles, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: hannahAuthId, email: "hannah.kim@canopy.co", name: "Hannah Kim", phone: "+1-555-0207", location: "Los Angeles, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const ianAccount = await prisma.account.create({
-    data: { supabaseId: ianAuthId, email: "ian.macleod@canopy.co", name: "Ian MacLeod", phone: "+1-555-0208", location: "Portland, OR", timezone: "America/Los_Angeles", pronouns: "he/him", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: ianAuthId, email: "ian.macleod@canopy.co", name: "Ian MacLeod", phone: "+1-555-0208", location: "Portland, OR", timezone: "America/Los_Angeles", pronouns: "he/him", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const jasmineAccount = await prisma.account.create({
-    data: { supabaseId: jasmineAuthId, email: "jasmine.patel@canopy.co", name: "Jasmine Patel", phone: "+1-555-0209", location: "Chicago, IL", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: jasmineAuthId, email: "jasmine.patel@canopy.co", name: "Jasmine Patel", phone: "+1-555-0209", location: "Chicago, IL", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const kaiAccount = await prisma.account.create({
-    data: { supabaseId: kaiAuthId, email: "kai.anderson@canopy.co", name: "Kai Anderson", phone: "+1-555-0210", location: "San Francisco, CA", timezone: "America/Los_Angeles", pronouns: "they/them", ethnicity: "Multiracial", onboardingCompleted: true },
+    data: { supabaseId: kaiAuthId, email: "kai.anderson@canopy.co", name: "Kai Anderson", phone: "+1-555-0210", location: "San Francisco, CA", timezone: "America/Los_Angeles", pronouns: "they/them", ethnicity: "Multiracial", ...seedOnboarding("talent") },
   });
   const luciaAccount = await prisma.account.create({
-    data: { supabaseId: luciaAuthId, email: "lucia.martinez@canopy.co", name: "Lucia Martinez", phone: "+1-555-0211", location: "Phoenix, AZ", timezone: "America/Phoenix", pronouns: "she/her", ethnicity: "Hispanic or Latino", onboardingCompleted: true },
+    data: { supabaseId: luciaAuthId, email: "lucia.martinez@canopy.co", name: "Lucia Martinez", phone: "+1-555-0211", location: "Phoenix, AZ", timezone: "America/Phoenix", pronouns: "she/her", ethnicity: "Hispanic or Latino", ...seedOnboarding("talent") },
   });
   const marcusAccount = await prisma.account.create({
-    data: { supabaseId: marcusAuthId, email: "marcus.williams@canopy.co", name: "Marcus Williams", phone: "+1-555-0212", location: "Washington, DC", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: marcusAuthId, email: "marcus.williams@canopy.co", name: "Marcus Williams", phone: "+1-555-0212", location: "Washington, DC", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", ...seedOnboarding("talent") },
   });
   const nadiaAccount = await prisma.account.create({
-    data: { supabaseId: nadiaAuthId, email: "nadia.petrova@canopy.co", name: "Nadia Petrova", phone: "+1-555-0213", location: "New York, NY", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: nadiaAuthId, email: "nadia.petrova@canopy.co", name: "Nadia Petrova", phone: "+1-555-0213", location: "New York, NY", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const omarAccount = await prisma.account.create({
-    data: { supabaseId: omarAuthId, email: "omar.farah@canopy.co", name: "Omar Farah", phone: "+1-555-0214", location: "Columbus, OH", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: omarAuthId, email: "omar.farah@canopy.co", name: "Omar Farah", phone: "+1-555-0214", location: "Columbus, OH", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", ...seedOnboarding("talent") },
   });
   const pennyAccount = await prisma.account.create({
-    data: { supabaseId: pennyAuthId, email: "penny.chen@canopy.co", name: "Penny Chen", phone: "+1-555-0215", location: "San Jose, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: pennyAuthId, email: "penny.chen@canopy.co", name: "Penny Chen", phone: "+1-555-0215", location: "San Jose, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const quinnAccount = await prisma.account.create({
-    data: { supabaseId: quinnAuthId, email: "quinn.taylor@canopy.co", name: "Quinn Taylor", phone: "+1-555-0216", location: "Nashville, TN", timezone: "America/Chicago", pronouns: "they/them", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: quinnAuthId, email: "quinn.taylor@canopy.co", name: "Quinn Taylor", phone: "+1-555-0216", location: "Nashville, TN", timezone: "America/Chicago", pronouns: "they/them", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const rosaAccount = await prisma.account.create({
-    data: { supabaseId: rosaAuthId, email: "rosa.gutierrez@canopy.co", name: "Rosa Gutierrez", phone: "+1-555-0217", location: "Albuquerque, NM", timezone: "America/Denver", pronouns: "she/her", ethnicity: "Hispanic or Latino", onboardingCompleted: true },
+    data: { supabaseId: rosaAuthId, email: "rosa.gutierrez@canopy.co", name: "Rosa Gutierrez", phone: "+1-555-0217", location: "Albuquerque, NM", timezone: "America/Denver", pronouns: "she/her", ethnicity: "Hispanic or Latino", ...seedOnboarding("talent") },
   });
   const sanjayAccount = await prisma.account.create({
-    data: { supabaseId: sanjayAuthId, email: "sanjay.reddy@canopy.co", name: "Sanjay Reddy", phone: "+1-555-0218", location: "Raleigh, NC", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: sanjayAuthId, email: "sanjay.reddy@canopy.co", name: "Sanjay Reddy", phone: "+1-555-0218", location: "Raleigh, NC", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const taraAccount = await prisma.account.create({
-    data: { supabaseId: taraAuthId, email: "tara.obrien@canopy.co", name: "Tara O'Brien", phone: "+1-555-0219", location: "Boston, MA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: taraAuthId, email: "tara.obrien@canopy.co", name: "Tara O'Brien", phone: "+1-555-0219", location: "Boston, MA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const victorAccount = await prisma.account.create({
-    data: { supabaseId: victorAuthId, email: "victor.chang@canopy.co", name: "Victor Chang", phone: "+1-555-0220", location: "Sacramento, CA", timezone: "America/Los_Angeles", pronouns: "he/him", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: victorAuthId, email: "victor.chang@canopy.co", name: "Victor Chang", phone: "+1-555-0220", location: "Sacramento, CA", timezone: "America/Los_Angeles", pronouns: "he/him", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const wendyAccount = await prisma.account.create({
-    data: { supabaseId: wendyAuthId, email: "wendy.adeyemi@canopy.co", name: "Wendy Adeyemi", phone: "+1-555-0221", location: "Dallas, TX", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: wendyAuthId, email: "wendy.adeyemi@canopy.co", name: "Wendy Adeyemi", phone: "+1-555-0221", location: "Dallas, TX", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "Black or African American", ...seedOnboarding("talent") },
   });
   const xavierAccount = await prisma.account.create({
-    data: { supabaseId: xavierAuthId, email: "xavier.moreau@canopy.co", name: "Xavier Moreau", phone: "+1-555-0222", location: "Detroit, MI", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Multiracial", onboardingCompleted: true },
+    data: { supabaseId: xavierAuthId, email: "xavier.moreau@canopy.co", name: "Xavier Moreau", phone: "+1-555-0222", location: "Detroit, MI", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Multiracial", ...seedOnboarding("talent") },
   });
   const yukiAccount = await prisma.account.create({
-    data: { supabaseId: yukiAuthId, email: "yuki.tanaka@canopy.co", name: "Yuki Tanaka", phone: "+1-555-0223", location: "Honolulu, HI", timezone: "Pacific/Honolulu", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: yukiAuthId, email: "yuki.tanaka@canopy.co", name: "Yuki Tanaka", phone: "+1-555-0223", location: "Honolulu, HI", timezone: "Pacific/Honolulu", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const zaraAccount = await prisma.account.create({
-    data: { supabaseId: zaraAuthId, email: "zara.khan@canopy.co", name: "Zara Khan", phone: "+1-555-0224", location: "Philadelphia, PA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: zaraAuthId, email: "zara.khan@canopy.co", name: "Zara Khan", phone: "+1-555-0224", location: "Philadelphia, PA", timezone: "America/New_York", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const amberAccount = await prisma.account.create({
-    data: { supabaseId: amberAuthId, email: "amber.whitfield@canopy.co", name: "Amber Whitfield", phone: "+1-555-0225", location: "Charlotte, NC", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: amberAuthId, email: "amber.whitfield@canopy.co", name: "Amber Whitfield", phone: "+1-555-0225", location: "Charlotte, NC", timezone: "America/New_York", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const brianAccount = await prisma.account.create({
-    data: { supabaseId: brianAuthId, email: "brian.hernandez@canopy.co", name: "Brian Hernandez", phone: "+1-555-0226", location: "San Antonio, TX", timezone: "America/Chicago", pronouns: "he/him", ethnicity: "Hispanic or Latino", onboardingCompleted: true },
+    data: { supabaseId: brianAuthId, email: "brian.hernandez@canopy.co", name: "Brian Hernandez", phone: "+1-555-0226", location: "San Antonio, TX", timezone: "America/Chicago", pronouns: "he/him", ethnicity: "Hispanic or Latino", ...seedOnboarding("talent") },
   });
   const camilleAccount = await prisma.account.create({
-    data: { supabaseId: camilleAuthId, email: "camille.nguyen@canopy.co", name: "Camille Nguyen", phone: "+1-555-0227", location: "Oakland, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: camilleAuthId, email: "camille.nguyen@canopy.co", name: "Camille Nguyen", phone: "+1-555-0227", location: "Oakland, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const danteAccount = await prisma.account.create({
-    data: { supabaseId: danteAuthId, email: "dante.jackson@canopy.co", name: "Dante Jackson", phone: "+1-555-0228", location: "Baltimore, MD", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: danteAuthId, email: "dante.jackson@canopy.co", name: "Dante Jackson", phone: "+1-555-0228", location: "Baltimore, MD", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", ...seedOnboarding("talent") },
   });
   const evaAccount = await prisma.account.create({
-    data: { supabaseId: evaAuthId, email: "eva.lindgren@canopy.co", name: "Eva Lindgren", phone: "+1-555-0229", location: "Minneapolis, MN", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: evaAuthId, email: "eva.lindgren@canopy.co", name: "Eva Lindgren", phone: "+1-555-0229", location: "Minneapolis, MN", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const finnAccount = await prisma.account.create({
-    data: { supabaseId: finnAuthId, email: "finn.oleary@canopy.co", name: "Finn O'Leary", phone: "+1-555-0230", location: "Pittsburgh, PA", timezone: "America/New_York", pronouns: "he/him", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: finnAuthId, email: "finn.oleary@canopy.co", name: "Finn O'Leary", phone: "+1-555-0230", location: "Pittsburgh, PA", timezone: "America/New_York", pronouns: "he/him", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const graceAccount = await prisma.account.create({
-    data: { supabaseId: graceAuthId, email: "grace.wu@canopy.co", name: "Grace Wu", phone: "+1-555-0231", location: "San Diego, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: graceAuthId, email: "grace.wu@canopy.co", name: "Grace Wu", phone: "+1-555-0231", location: "San Diego, CA", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
   const hassanAccount = await prisma.account.create({
-    data: { supabaseId: hassanAuthId, email: "hassan.ali@canopy.co", name: "Hassan Ali", phone: "+1-555-0232", location: "Dearborn, MI", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Middle Eastern or North African", onboardingCompleted: true },
+    data: { supabaseId: hassanAuthId, email: "hassan.ali@canopy.co", name: "Hassan Ali", phone: "+1-555-0232", location: "Dearborn, MI", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Middle Eastern or North African", ...seedOnboarding("talent") },
   });
   const irisAccount = await prisma.account.create({
-    data: { supabaseId: irisAuthId, email: "iris.kowalski@canopy.co", name: "Iris Kowalski", phone: "+1-555-0233", location: "Milwaukee, WI", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "White", onboardingCompleted: true },
+    data: { supabaseId: irisAuthId, email: "iris.kowalski@canopy.co", name: "Iris Kowalski", phone: "+1-555-0233", location: "Milwaukee, WI", timezone: "America/Chicago", pronouns: "she/her", ethnicity: "White", ...seedOnboarding("talent") },
   });
   const jamesAccount = await prisma.account.create({
-    data: { supabaseId: jamesAuthId, email: "james.blackwood@canopy.co", name: "James Blackwood", phone: "+1-555-0234", location: "Asheville, NC", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", onboardingCompleted: true },
+    data: { supabaseId: jamesAuthId, email: "james.blackwood@canopy.co", name: "James Blackwood", phone: "+1-555-0234", location: "Asheville, NC", timezone: "America/New_York", pronouns: "he/him", ethnicity: "Black or African American", ...seedOnboarding("talent") },
   });
   const keikoAccount = await prisma.account.create({
-    data: { supabaseId: keikoAuthId, email: "keiko.sato@canopy.co", name: "Keiko Sato", phone: "+1-555-0235", location: "Portland, OR", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", onboardingCompleted: true },
+    data: { supabaseId: keikoAuthId, email: "keiko.sato@canopy.co", name: "Keiko Sato", phone: "+1-555-0235", location: "Portland, OR", timezone: "America/Los_Angeles", pronouns: "she/her", ethnicity: "Asian", ...seedOnboarding("talent") },
   });
 
   console.log("  Accounts: 50 created (10 employer, 40 seeker)");

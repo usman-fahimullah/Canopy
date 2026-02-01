@@ -49,13 +49,27 @@ export default function SeekerProfilePage() {
   const [ethnicity, setEthnicity] = useState("");
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const handleBack = () => {
     router.push("/role-selection");
   };
 
-  const handleContinue = () => {
-    // In a real app, we'd save this data first
+  const handleContinue = async () => {
+    setSaving(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          step: "seeker-profile",
+          data: { pronouns, ethnicity, phone, location },
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+    }
+    setSaving(false);
     router.push("/seeker/career-journey");
   };
 
@@ -165,6 +179,7 @@ export default function SeekerProfilePage() {
         <Button
           onClick={handleContinue}
           disabled={!isFormValid}
+          loading={saving}
           className="flex-1"
           rightIcon={<ArrowRight weight="bold" size={20} />}
         >
