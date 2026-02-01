@@ -12,7 +12,9 @@ export default function CoachError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Coach shell error:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Coach shell error:", error);
+    }
   }, [error]);
 
   return (

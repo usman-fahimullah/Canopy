@@ -1,16 +1,131 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import {
   type Shell,
-  type EntryIntent,
   type OnboardingProgress,
   createOnboardingProgress,
   createRoleOnboardingState,
   completeRoleOnboarding,
 } from "@/lib/onboarding/types";
 
-// Helper function to parse years of experience string into a number
+// ── Zod Schemas ──────────────────────────────────────────────────
+
+const shellSchema = z.enum(["talent", "coach", "employer"]);
+
+const baseProfileFields = {
+  firstName: z.string().min(1).max(100).optional(),
+  lastName: z.string().min(1).max(100).optional(),
+  linkedinUrl: z.string().url().max(500).optional().or(z.literal("")),
+  bio: z.string().max(2000).optional(),
+};
+
+const setIntentSchema = z.object({
+  action: z.literal("set-intent"),
+  entryIntent: shellSchema,
+});
+
+const completeProfileSchema = z.object({
+  action: z.literal("complete-profile"),
+  ...baseProfileFields,
+});
+
+const talentFields = {
+  careerStage: z.string().max(100).optional().nullable(),
+  skills: z.array(z.string().max(200)).max(50).optional(),
+  sectors: z.array(z.string().max(200)).max(50).optional(),
+  goals: z.array(z.string().max(500)).max(20).optional(),
+  yearsExperience: z
+    .enum(["less-than-1", "1-3", "3-7", "7-10", "10+"])
+    .optional(),
+  roleTypes: z.array(z.string().max(100)).max(20).optional(),
+  transitionTimeline: z.string().max(100).optional(),
+  locationPreference: z.string().max(200).optional(),
+  salaryRange: z.string().max(100).optional(),
+  jobTitle: z.string().max(200).optional(),
+};
+
+const coachFields = {
+  headline: z.string().max(300).optional(),
+  expertise: z.array(z.string().max(200)).max(30).optional(),
+  sessionTypes: z.array(z.string().max(100)).max(20).optional(),
+  sessionRate: z.number().int().min(0).max(1000000).optional(),
+  yearsInClimate: z.number().int().min(0).max(100).optional().nullable(),
+  availability: z.string().max(500).optional(),
+  sectors: z.array(z.string().max(200)).max(50).optional(),
+};
+
+const employerFields = {
+  companyName: z.string().min(1).max(300),
+  companyDescription: z.string().max(5000).optional(),
+  companyWebsite: z.string().url().max(500).optional().or(z.literal("")),
+  companyLocation: z.string().max(300).optional(),
+  companySize: z.string().max(100).optional(),
+  userTitle: z.string().max(200).optional(),
+};
+
+const talentRoleSchema = z.object({
+  action: z.enum(["complete-role", "activate-role"]),
+  shell: z.literal("talent"),
+  ...baseProfileFields,
+  ...talentFields,
+  role: z.enum(["seeker", "mentor"]).optional(),
+});
+
+const coachRoleSchema = z.object({
+  action: z.enum(["complete-role", "activate-role"]),
+  shell: z.literal("coach"),
+  ...baseProfileFields,
+  ...coachFields,
+});
+
+const employerRoleSchema = z.object({
+  action: z.enum(["complete-role", "activate-role"]),
+  shell: z.literal("employer"),
+  ...baseProfileFields,
+  ...employerFields,
+});
+
+// Legacy format: sends "role" instead of "shell"+"action"
+const legacyRoleSchema = z.object({
+  role: z.enum(["seeker", "mentor", "coach"]),
+  ...baseProfileFields,
+  email: z.string().email().max(320).optional(),
+  ...talentFields,
+  ...coachFields,
+});
+
+type SetIntentBody = z.infer<typeof setIntentSchema>;
+type CompleteProfileBody = z.infer<typeof completeProfileSchema>;
+type TalentRoleBody = z.infer<typeof talentRoleSchema>;
+type CoachRoleBody = z.infer<typeof coachRoleSchema>;
+type EmployerRoleBody = z.infer<typeof employerRoleSchema>;
+type LegacyRoleBody = z.infer<typeof legacyRoleSchema>;
+
+const onboardingBodySchema = z.union([
+  setIntentSchema,
+  completeProfileSchema,
+  talentRoleSchema,
+  coachRoleSchema,
+  employerRoleSchema,
+  legacyRoleSchema,
+]);
+
+// ── Type for account updates ─────────────────────────────────────
+
+interface AccountUpdate {
+  name?: string;
+  linkedinUrl?: string;
+  bio?: string;
+  entryIntent?: string;
+  activeRoles?: string[];
+  primaryRole?: string;
+  onboardingProgress?: OnboardingProgress;
+}
+
+// ── Helpers ──────────────────────────────────────────────────────
+
 function parseYearsExperience(yearsExp: string): number | null {
   const mapping: Record<string, number> = {
     "less-than-1": 0,
@@ -22,7 +137,63 @@ function parseYearsExperience(yearsExp: string): number | null {
   return mapping[yearsExp] ?? null;
 }
 
-// POST — Handle onboarding submission for any shell
+/** Generate a unique slug, appending a numeric suffix on collision */
+async function generateUniqueSlug(baseName: string): Promise<string> {
+  const baseSlug = baseName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  const existing = await prisma.organization.findUnique({
+    where: { slug: baseSlug },
+    select: { id: true },
+  });
+
+  if (!existing) return baseSlug;
+
+  for (let i = 2; i <= 100; i++) {
+    const candidate = `${baseSlug}-${i}`;
+    const taken = await prisma.organization.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!taken) return candidate;
+  }
+
+  const random = Math.random().toString(36).substring(2, 8);
+  return `${baseSlug}-${random}`;
+}
+
+function isSetIntent(body: unknown): body is SetIntentBody {
+  return (body as SetIntentBody).action === "set-intent";
+}
+
+function isCompleteProfile(body: unknown): body is CompleteProfileBody {
+  return (body as CompleteProfileBody).action === "complete-profile";
+}
+
+function isTalentRole(body: unknown): body is TalentRoleBody {
+  const b = body as TalentRoleBody;
+  return (b.action === "complete-role" || b.action === "activate-role") && b.shell === "talent";
+}
+
+function isCoachRole(body: unknown): body is CoachRoleBody {
+  const b = body as CoachRoleBody;
+  return (b.action === "complete-role" || b.action === "activate-role") && b.shell === "coach";
+}
+
+function isEmployerRole(body: unknown): body is EmployerRoleBody {
+  const b = body as EmployerRoleBody;
+  return (b.action === "complete-role" || b.action === "activate-role") && b.shell === "employer";
+}
+
+function isLegacy(body: unknown): body is LegacyRoleBody {
+  const b = body as LegacyRoleBody;
+  return "role" in b && !("action" in b);
+}
+
+// ── POST Handler ─────────────────────────────────────────────────
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -43,87 +214,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const {
-      // Action type
-      action, // "set-intent" | "complete-profile" | "complete-role" | "activate-role"
+    // Parse and validate request body
+    let rawBody: unknown;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
 
-      // Intent selection
-      entryIntent, // "talent" | "coach" | "employer"
+    const parsed = onboardingBodySchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsed.error.issues.map((i) => ({
+            path: i.path.join("."),
+            message: i.message,
+          })),
+        },
+        { status: 400 },
+      );
+    }
 
-      // Base profile fields
-      firstName,
-      lastName,
-      linkedinUrl,
-      bio,
+    const body = parsed.data;
 
-      // Role being onboarded
-      shell, // "talent" | "coach" | "employer"
-
-      // Talent-specific fields
-      careerStage,
-      skills,
-      sectors,
-      goals,
-      yearsExperience,
-      roleTypes,
-      transitionTimeline,
-      locationPreference,
-      salaryRange,
-      jobTitle,
-
-      // Coach-specific fields
-      headline,
-      expertise,
-      sessionTypes,
-      sessionRate,
-      yearsInClimate,
-      availability,
-
-      // Employer-specific fields
-      companyName,
-      companyDescription,
-      companyWebsite,
-      companyLocation,
-      companySize,
-      userTitle,
-
-      // Legacy support — old candid onboarding sends "role" instead of "shell"
-      role,
-      email,
-    } = body;
-
-    // Handle legacy candid onboarding format
-    const effectiveAction = action || (role ? "complete-role" : undefined);
-    const effectiveShell: Shell | undefined =
-      shell || (role === "seeker" || role === "mentor" ? "talent" : role === "coach" ? "coach" : undefined);
-
-    // Get or create onboarding progress
     let progress: OnboardingProgress =
       (account.onboardingProgress as OnboardingProgress | null) ||
       createOnboardingProgress();
 
-    const accountUpdate: Record<string, unknown> = {};
+    const accountUpdate: AccountUpdate = {};
 
     // ── Action: Set entry intent ─────────────────────────────────
-    if (effectiveAction === "set-intent" && entryIntent) {
-      accountUpdate.entryIntent = entryIntent;
+    if (isSetIntent(body)) {
+      const intent = body.entryIntent;
+      accountUpdate.entryIntent = intent;
 
-      // Activate the role for onboarding
-      progress.roles[entryIntent as Shell] = createRoleOnboardingState(
-        entryIntent as Shell,
-      );
+      progress.roles[intent] = createRoleOnboardingState(intent);
 
-      // Add to active roles if not already there
       const activeRoles = [...(account.activeRoles || [])];
-      if (!activeRoles.includes(entryIntent)) {
-        activeRoles.push(entryIntent);
+      if (!activeRoles.includes(intent)) {
+        activeRoles.push(intent);
       }
       accountUpdate.activeRoles = activeRoles;
 
-      // Set as primary if no primary yet
       if (!account.primaryRole) {
-        accountUpdate.primaryRole = entryIntent;
+        accountUpdate.primaryRole = intent;
       }
 
       accountUpdate.onboardingProgress = progress;
@@ -137,12 +275,12 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Action: Complete base profile ────────────────────────────
-    if (effectiveAction === "complete-profile") {
-      if (firstName && lastName) {
-        accountUpdate.name = `${firstName} ${lastName}`;
+    if (isCompleteProfile(body)) {
+      if (body.firstName && body.lastName) {
+        accountUpdate.name = `${body.firstName} ${body.lastName}`;
       }
-      if (linkedinUrl) accountUpdate.linkedinUrl = linkedinUrl;
-      if (bio) accountUpdate.bio = bio;
+      if (body.linkedinUrl) accountUpdate.linkedinUrl = body.linkedinUrl;
+      if (body.bio) accountUpdate.bio = body.bio;
 
       progress.baseProfileComplete = true;
       accountUpdate.onboardingProgress = progress;
@@ -155,32 +293,179 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, action: "complete-profile" });
     }
 
-    // ── Action: Complete role onboarding ──────────────────────────
-    if (
-      (effectiveAction === "complete-role" || effectiveAction === "activate-role") &&
-      effectiveShell
-    ) {
-      // Update shared account fields
-      if (firstName && lastName) {
-        accountUpdate.name = `${firstName} ${lastName}`;
+    // ── Action: Complete talent role ─────────────────────────────
+    if (isTalentRole(body)) {
+      if (body.firstName && body.lastName) {
+        accountUpdate.name = `${body.firstName} ${body.lastName}`;
       }
-      if (linkedinUrl) accountUpdate.linkedinUrl = linkedinUrl;
-      if (bio) accountUpdate.bio = bio;
+      if (body.linkedinUrl) accountUpdate.linkedinUrl = body.linkedinUrl;
+      if (body.bio) accountUpdate.bio = body.bio;
 
-      // ── Talent / Seeker ────────────────────────────────────────
+      const legacyRole = body.role;
+
+      if (!account.seekerProfile) {
+        await prisma.seekerProfile.create({
+          data: {
+            accountId: account.id,
+            targetSectors: body.sectors || [],
+            headline: body.jobTitle || body.goals?.[0] || null,
+            isMentor: legacyRole === "mentor",
+            mentorTopics: legacyRole === "mentor" ? body.sectors || [] : [],
+            skills: body.skills || [],
+            careerStage: body.careerStage || null,
+            yearsExperience: body.yearsExperience
+              ? parseYearsExperience(body.yearsExperience)
+              : null,
+          },
+        });
+      } else {
+        await prisma.seekerProfile.update({
+          where: { id: account.seekerProfile.id },
+          data: {
+            targetSectors: body.sectors || account.seekerProfile.targetSectors,
+            headline:
+              body.jobTitle ||
+              body.goals?.[0] ||
+              account.seekerProfile.headline,
+            isMentor: legacyRole === "mentor"
+              ? true
+              : account.seekerProfile.isMentor,
+            mentorTopics: legacyRole === "mentor"
+              ? body.sectors || []
+              : account.seekerProfile.mentorTopics,
+            skills: body.skills || account.seekerProfile.skills,
+            careerStage:
+              body.careerStage || account.seekerProfile.careerStage,
+            yearsExperience: body.yearsExperience
+              ? parseYearsExperience(body.yearsExperience)
+              : account.seekerProfile.yearsExperience,
+          },
+        });
+      }
+
+      return finishRoleOnboarding(account, progress, "talent", accountUpdate, body.action);
+    }
+
+    // ── Action: Complete coach role ──────────────────────────────
+    if (isCoachRole(body)) {
+      if (body.firstName && body.lastName) {
+        accountUpdate.name = `${body.firstName} ${body.lastName}`;
+      }
+      if (body.linkedinUrl) accountUpdate.linkedinUrl = body.linkedinUrl;
+      if (body.bio) accountUpdate.bio = body.bio;
+
+      if (!account.coachProfile) {
+        await prisma.coachProfile.create({
+          data: {
+            accountId: account.id,
+            firstName: body.firstName || null,
+            lastName: body.lastName || null,
+            bio: body.bio || null,
+            headline: body.headline || null,
+            sectors: body.sectors || [],
+            expertise: body.expertise || [],
+            sessionTypes: body.sessionTypes || [],
+            sessionRate: body.sessionRate || 15000,
+            yearsInClimate: body.yearsInClimate || null,
+            status: "PENDING",
+            applicationDate: new Date(),
+          },
+        });
+      } else {
+        await prisma.coachProfile.update({
+          where: { id: account.coachProfile.id },
+          data: {
+            firstName: body.firstName || account.coachProfile.firstName,
+            lastName: body.lastName || account.coachProfile.lastName,
+            bio: body.bio || account.coachProfile.bio,
+            headline: body.headline || account.coachProfile.headline,
+            sectors: body.sectors || account.coachProfile.sectors,
+            expertise: body.expertise || account.coachProfile.expertise,
+            sessionTypes: body.sessionTypes || account.coachProfile.sessionTypes,
+            sessionRate: body.sessionRate || account.coachProfile.sessionRate,
+            yearsInClimate:
+              body.yearsInClimate || account.coachProfile.yearsInClimate,
+          },
+        });
+      }
+
+      return finishRoleOnboarding(account, progress, "coach", accountUpdate, body.action);
+    }
+
+    // ── Action: Complete employer role ───────────────────────────
+    if (isEmployerRole(body)) {
+      if (body.firstName && body.lastName) {
+        accountUpdate.name = `${body.firstName} ${body.lastName}`;
+      }
+      if (body.linkedinUrl) accountUpdate.linkedinUrl = body.linkedinUrl;
+      if (body.bio) accountUpdate.bio = body.bio;
+
+      const slug = await generateUniqueSlug(body.companyName);
+
+      // Check if user already owns an org (prevent creating duplicates)
+      const existingMembership = await prisma.organizationMember.findFirst({
+        where: { accountId: account.id },
+        include: { organization: true },
+      });
+
+      if (existingMembership) {
+        await prisma.organization.update({
+          where: { id: existingMembership.organizationId },
+          data: {
+            name: body.companyName,
+            description: body.companyDescription || undefined,
+            website: body.companyWebsite || undefined,
+            location: body.companyLocation || undefined,
+          },
+        });
+      } else {
+        const org = await prisma.organization.create({
+          data: {
+            name: body.companyName,
+            slug,
+            description: body.companyDescription || null,
+            website: body.companyWebsite || null,
+            location: body.companyLocation || null,
+          },
+        });
+
+        await prisma.organizationMember.create({
+          data: {
+            accountId: account.id,
+            organizationId: org.id,
+            role: "OWNER",
+            title: body.userTitle || null,
+          },
+        });
+      }
+
+      return finishRoleOnboarding(account, progress, "employer", accountUpdate, body.action);
+    }
+
+    // ── Legacy format ────────────────────────────────────────────
+    if (isLegacy(body)) {
+      const effectiveShell: Shell =
+        body.role === "seeker" || body.role === "mentor" ? "talent" : "coach";
+
+      if (body.firstName && body.lastName) {
+        accountUpdate.name = `${body.firstName} ${body.lastName}`;
+      }
+      if (body.linkedinUrl) accountUpdate.linkedinUrl = body.linkedinUrl;
+      if (body.bio) accountUpdate.bio = body.bio;
+
       if (effectiveShell === "talent") {
         if (!account.seekerProfile) {
           await prisma.seekerProfile.create({
             data: {
               accountId: account.id,
-              targetSectors: sectors || [],
-              headline: jobTitle || goals?.[0] || null,
-              isMentor: role === "mentor",
-              mentorTopics: role === "mentor" ? sectors || [] : [],
-              skills: skills || [],
-              careerStage: careerStage || null,
-              yearsExperience: yearsExperience
-                ? parseYearsExperience(yearsExperience)
+              targetSectors: body.sectors || [],
+              headline: body.jobTitle || body.goals?.[0] || null,
+              isMentor: body.role === "mentor",
+              mentorTopics: body.role === "mentor" ? body.sectors || [] : [],
+              skills: body.skills || [],
+              careerStage: body.careerStage || null,
+              yearsExperience: body.yearsExperience
+                ? parseYearsExperience(body.yearsExperience)
                 : null,
             },
           });
@@ -188,43 +473,41 @@ export async function POST(request: NextRequest) {
           await prisma.seekerProfile.update({
             where: { id: account.seekerProfile.id },
             data: {
-              targetSectors: sectors || account.seekerProfile.targetSectors,
+              targetSectors: body.sectors || account.seekerProfile.targetSectors,
               headline:
-                jobTitle ||
-                goals?.[0] ||
+                body.jobTitle ||
+                body.goals?.[0] ||
                 account.seekerProfile.headline,
-              isMentor: role === "mentor"
+              isMentor: body.role === "mentor"
                 ? true
                 : account.seekerProfile.isMentor,
-              mentorTopics: role === "mentor"
-                ? sectors || []
+              mentorTopics: body.role === "mentor"
+                ? body.sectors || []
                 : account.seekerProfile.mentorTopics,
-              skills: skills || account.seekerProfile.skills,
+              skills: body.skills || account.seekerProfile.skills,
               careerStage:
-                careerStage || account.seekerProfile.careerStage,
-              yearsExperience: yearsExperience
-                ? parseYearsExperience(yearsExperience)
+                body.careerStage || account.seekerProfile.careerStage,
+              yearsExperience: body.yearsExperience
+                ? parseYearsExperience(body.yearsExperience)
                 : account.seekerProfile.yearsExperience,
             },
           });
         }
-      }
-
-      // ── Coach ──────────────────────────────────────────────────
-      if (effectiveShell === "coach") {
+      } else {
+        // Coach via legacy
         if (!account.coachProfile) {
           await prisma.coachProfile.create({
             data: {
               accountId: account.id,
-              firstName: firstName || null,
-              lastName: lastName || null,
-              bio: bio || null,
-              headline: headline || null,
-              sectors: sectors || [],
-              expertise: expertise || [],
-              sessionTypes: sessionTypes || [],
-              sessionRate: sessionRate || 15000,
-              yearsInClimate: yearsInClimate || null,
+              firstName: body.firstName || null,
+              lastName: body.lastName || null,
+              bio: body.bio || null,
+              headline: body.headline || null,
+              sectors: body.sectors || [],
+              expertise: body.expertise || [],
+              sessionTypes: body.sessionTypes || [],
+              sessionRate: body.sessionRate || 15000,
+              yearsInClimate: body.yearsInClimate || null,
               status: "PENDING",
               applicationDate: new Date(),
             },
@@ -233,105 +516,22 @@ export async function POST(request: NextRequest) {
           await prisma.coachProfile.update({
             where: { id: account.coachProfile.id },
             data: {
-              firstName: firstName || account.coachProfile.firstName,
-              lastName: lastName || account.coachProfile.lastName,
-              bio: bio || account.coachProfile.bio,
-              headline: headline || account.coachProfile.headline,
-              sectors: sectors || account.coachProfile.sectors,
-              expertise: expertise || account.coachProfile.expertise,
-              sessionTypes: sessionTypes || account.coachProfile.sessionTypes,
-              sessionRate: sessionRate || account.coachProfile.sessionRate,
+              firstName: body.firstName || account.coachProfile.firstName,
+              lastName: body.lastName || account.coachProfile.lastName,
+              bio: body.bio || account.coachProfile.bio,
+              headline: body.headline || account.coachProfile.headline,
+              sectors: body.sectors || account.coachProfile.sectors,
+              expertise: body.expertise || account.coachProfile.expertise,
+              sessionTypes: body.sessionTypes || account.coachProfile.sessionTypes,
+              sessionRate: body.sessionRate || account.coachProfile.sessionRate,
               yearsInClimate:
-                yearsInClimate || account.coachProfile.yearsInClimate,
+                body.yearsInClimate || account.coachProfile.yearsInClimate,
             },
           });
         }
       }
 
-      // ── Employer ───────────────────────────────────────────────
-      if (effectiveShell === "employer" && companyName) {
-        // Create organization and membership
-        const slug = companyName
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "");
-
-        const org = await prisma.organization.upsert({
-          where: { slug },
-          create: {
-            name: companyName,
-            slug,
-            description: companyDescription || null,
-            website: companyWebsite || null,
-            location: companyLocation || null,
-          },
-          update: {
-            description: companyDescription || undefined,
-            website: companyWebsite || undefined,
-            location: companyLocation || undefined,
-          },
-        });
-
-        // Create org membership if not exists
-        const existingMembership = await prisma.organizationMember.findUnique({
-          where: {
-            accountId_organizationId: {
-              accountId: account.id,
-              organizationId: org.id,
-            },
-          },
-        });
-
-        if (!existingMembership) {
-          await prisma.organizationMember.create({
-            data: {
-              accountId: account.id,
-              organizationId: org.id,
-              role: "OWNER",
-              title: userTitle || null,
-            },
-          });
-        }
-      }
-
-      // ── Update onboarding progress ─────────────────────────────
-      // Ensure role state exists
-      if (!progress.roles[effectiveShell]) {
-        progress.roles[effectiveShell] = createRoleOnboardingState(effectiveShell);
-      }
-
-      // Mark role as complete
-      progress = completeRoleOnboarding(progress, effectiveShell);
-
-      // Mark base profile as complete if we have name
-      if (account.name || (firstName && lastName)) {
-        progress.baseProfileComplete = true;
-      }
-
-      // Add to active roles
-      const activeRoles = [...(account.activeRoles || [])];
-      if (!activeRoles.includes(effectiveShell)) {
-        activeRoles.push(effectiveShell);
-      }
-      accountUpdate.activeRoles = activeRoles;
-
-      // Set primary role if not set
-      if (!account.primaryRole) {
-        accountUpdate.primaryRole = effectiveShell;
-      }
-
-      accountUpdate.onboardingProgress = progress;
-
-      await prisma.account.update({
-        where: { id: account.id },
-        data: accountUpdate,
-      });
-
-      return NextResponse.json({
-        success: true,
-        action: effectiveAction,
-        shell: effectiveShell,
-      });
+      return finishRoleOnboarding(account, progress, effectiveShell, accountUpdate, "complete-role");
     }
 
     return NextResponse.json(
@@ -345,4 +545,47 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+// ── Shared: finalize role onboarding progress ────────────────────
+
+async function finishRoleOnboarding(
+  account: { id: string; name: string | null; activeRoles: string[]; primaryRole: string | null },
+  progress: OnboardingProgress,
+  shell: Shell,
+  accountUpdate: AccountUpdate,
+  action: string,
+) {
+  if (!progress.roles[shell]) {
+    progress.roles[shell] = createRoleOnboardingState(shell);
+  }
+
+  progress = completeRoleOnboarding(progress, shell);
+
+  if (account.name || accountUpdate.name) {
+    progress.baseProfileComplete = true;
+  }
+
+  const activeRoles = [...(account.activeRoles || [])];
+  if (!activeRoles.includes(shell)) {
+    activeRoles.push(shell);
+  }
+  accountUpdate.activeRoles = activeRoles;
+
+  if (!account.primaryRole) {
+    accountUpdate.primaryRole = shell;
+  }
+
+  accountUpdate.onboardingProgress = progress;
+
+  await prisma.account.update({
+    where: { id: account.id },
+    data: accountUpdate,
+  });
+
+  return NextResponse.json({
+    success: true,
+    action,
+    shell,
+  });
 }
