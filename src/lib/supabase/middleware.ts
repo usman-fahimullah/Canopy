@@ -1,6 +1,32 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Paths that require authentication
+const PROTECTED_PREFIXES = [
+  '/talent',
+  '/coach',
+  '/employer',
+  '/onboarding',
+  '/candid/dashboard',
+  '/candid/sessions',
+  '/candid/messages',
+  '/candid/profile',
+  '/candid/settings',
+  '/candid/coach-dashboard',
+]
+
+// Auth pages — redirect away if already logged in
+const AUTH_PATHS = ['/login', '/signup', '/forgot-password']
+
+// Paths that skip onboarding checks (let users through even if onboarding incomplete)
+const ONBOARDING_EXEMPT_PREFIXES = [
+  '/onboarding',
+  '/api/',
+  '/design-system',
+  '/demo',
+  '/_next',
+]
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -35,38 +61,37 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Define protected routes that require authentication
-  const protectedPaths = [
-    '/candid/dashboard',
-    '/candid/sessions',
-    '/candid/messages',
-    '/candid/profile',
-    '/candid/settings',
-  ]
+  const pathname = request.nextUrl.pathname
 
-  const isProtectedPath = protectedPaths.some(path =>
-    request.nextUrl.pathname.startsWith(path)
+  // ── 1. Protected route check ──────────────────────────────────
+  const isProtectedPath = PROTECTED_PREFIXES.some(prefix =>
+    pathname.startsWith(prefix)
   )
 
-  // Redirect to login if accessing protected route without auth
   if (isProtectedPath && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
+    url.searchParams.set('redirect', pathname)
     return NextResponse.redirect(url)
   }
 
-  // Redirect authenticated users away from auth pages
-  const authPaths = ['/login', '/signup', '/forgot-password']
-  const isAuthPath = authPaths.some(path =>
-    request.nextUrl.pathname === path
-  )
+  // ── 2. Redirect authenticated users away from auth pages ──────
+  const isAuthPath = AUTH_PATHS.some(path => pathname === path)
 
   if (isAuthPath && user) {
+    // Instead of hardcoding /candid/dashboard, route to shell resolver
+    // The /api/auth/redirect endpoint will determine the correct destination
+    // For now, use a lightweight cookie/header check, or redirect to a resolver page
     const url = request.nextUrl.clone()
-    url.pathname = '/candid/dashboard'
+    url.pathname = '/auth/redirect'
     return NextResponse.redirect(url)
   }
+
+  // ── 3. Onboarding guard for shell routes ──────────────────────
+  // If user is accessing a shell route (talent/coach/employer),
+  // verify they've completed onboarding for that shell.
+  // This is handled at the layout level rather than middleware
+  // to avoid a database call on every request.
 
   return supabaseResponse
 }

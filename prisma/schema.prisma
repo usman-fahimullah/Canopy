@@ -32,9 +32,11 @@ model Account {
   ethnicity   String?  // For diversity reporting
   linkedinUrl String?  // LinkedIn profile URL
 
-  // Onboarding status
-  onboardingCompleted Boolean @default(false)
-  onboardingStep      Int     @default(0)
+  // Multi-role onboarding
+  entryIntent         String?   // "talent" | "coach" | "employer" — what brought them here
+  activeRoles         String[]  // Accumulated roles: ["talent", "coach", "employer"]
+  primaryRole         String?   // Determines default shell on login
+  onboardingProgress  Json?     // Per-role completion tracking (OnboardingProgress type)
 
   // Role profiles (a person can hold multiple)
   orgMemberships OrganizationMember[]
