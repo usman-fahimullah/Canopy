@@ -61,10 +61,25 @@ const skillOptions: ComboboxOption[] = [
   { value: "wind", label: "Wind Power", icon: <Wind size={16} />, group: "Renewable Energy" },
   { value: "hydro", label: "Hydroelectric", icon: <Drop size={16} />, group: "Renewable Energy" },
   { value: "esg", label: "ESG Reporting", icon: <Leaf size={16} />, group: "Sustainability" },
-  { value: "lca", label: "Life Cycle Assessment", icon: <TreeEvergreen size={16} />, group: "Sustainability" },
-  { value: "carbon", label: "Carbon Accounting", icon: <Leaf size={16} />, group: "Sustainability" },
+  {
+    value: "lca",
+    label: "Life Cycle Assessment",
+    icon: <TreeEvergreen size={16} />,
+    group: "Sustainability",
+  },
+  {
+    value: "carbon",
+    label: "Carbon Accounting",
+    icon: <Leaf size={16} />,
+    group: "Sustainability",
+  },
   { value: "ev", label: "Electric Vehicles", icon: <Lightning size={16} />, group: "Clean Tech" },
-  { value: "battery", label: "Battery Storage", icon: <Lightning size={16} />, group: "Clean Tech" },
+  {
+    value: "battery",
+    label: "Battery Storage",
+    icon: <Lightning size={16} />,
+    group: "Clean Tech",
+  },
 ];
 
 const departmentOptions: ComboboxOption[] = [
@@ -72,7 +87,12 @@ const departmentOptions: ComboboxOption[] = [
   { value: "operations", label: "Operations", description: "Day-to-day management" },
   { value: "sustainability", label: "Sustainability", description: "Environmental impact" },
   { value: "sales", label: "Sales", description: "Business development" },
-  { value: "marketing", label: "Marketing", description: "Brand and communications", disabled: true },
+  {
+    value: "marketing",
+    label: "Marketing",
+    description: "Brand and communications",
+    disabled: true,
+  },
 ];
 
 // ============================================
@@ -83,7 +103,8 @@ const comboboxProps = [
   {
     name: "options",
     type: "ComboboxOption[]",
-    description: "Array of options to display. Each option has value, label, and optional description, icon, disabled, and group properties.",
+    description:
+      "Array of options to display. Each option has value, label, and optional description, icon, disabled, and group properties.",
     default: "[]",
   },
   {
@@ -303,46 +324,39 @@ export default function ComboboxPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Combobox
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Combobox combines a text input with a dropdown list, allowing users to
-          search and select from a list of options. It's ideal for large option
-          sets where users benefit from typing to filter, such as selecting
-          locations, skills, or candidates.
+        <h1 className="mb-2 text-heading-lg text-foreground">Combobox</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Combobox combines a text input with a dropdown list, allowing users to search and select
+          from a list of options. It&apos;s ideal for large option sets where users benefit from
+          typing to filter, such as selecting locations, skills, or candidates.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Interactive
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             3 Variants
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Async Support
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Large option sets (5+ items)</li>
-              <li>• Users know what they're looking for</li>
+              <li>• Users know what they&apos;re looking for</li>
               <li>• Options have predictable, searchable labels</li>
               <li>• Multi-selection with search filtering</li>
               <li>• API-driven options that load dynamically</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Small option sets (use Select instead)</li>
               <li>• Binary choices (use Switch or Checkbox)</li>
               <li>• When users need to see all options at once</li>
@@ -359,21 +373,25 @@ export default function ComboboxPage() {
         parts={[
           {
             name: "Trigger Button",
-            description: "The clickable area that opens the dropdown. Shows selected value or placeholder.",
+            description:
+              "The clickable area that opens the dropdown. Shows selected value or placeholder.",
             required: true,
           },
           {
             name: "Selected Value / Placeholder",
-            description: "Displays the current selection or placeholder text when nothing is selected.",
+            description:
+              "Displays the current selection or placeholder text when nothing is selected.",
             required: true,
           },
           {
             name: "Clear Button",
-            description: "Optional button to clear the selection. Only visible when clearable is true and a value is selected.",
+            description:
+              "Optional button to clear the selection. Only visible when clearable is true and a value is selected.",
           },
           {
             name: "Dropdown Indicator",
-            description: "Caret icon that rotates when dropdown is open. Shows loading spinner or error icon based on state.",
+            description:
+              "Caret icon that rotates when dropdown is open. Shows loading spinner or error icon based on state.",
             required: true,
           },
           {
@@ -388,7 +406,8 @@ export default function ComboboxPage() {
           },
           {
             name: "Selected Badges (Multi)",
-            description: "In MultiCombobox, shows badges for each selected item with remove buttons.",
+            description:
+              "In MultiCombobox, shows badges for each selected item with remove buttons.",
           },
         ]}
       />
@@ -424,8 +443,9 @@ const options = [
               onValueChange={setSingleValue}
               placeholder="Select a location"
             />
-            <p className="text-caption text-foreground-muted mt-2">
-              Selected: <code className="bg-background-muted px-1 rounded">{singleValue || "(none)"}</code>
+            <p className="mt-2 text-caption text-foreground-muted">
+              Selected:{" "}
+              <code className="rounded bg-background-muted px-1">{singleValue || "(none)"}</code>
             </p>
           </div>
         </CodePreview>
@@ -474,7 +494,7 @@ const options = [
                 placeholder="Select skills"
               />
               {multiValue.length > 0 && (
-                <p className="text-caption text-foreground-muted mt-2">
+                <p className="mt-2 text-caption text-foreground-muted">
                   Selected: {multiValue.join(", ")}
                 </p>
               )}
@@ -498,7 +518,7 @@ const options = [
                 debounceMs={300}
                 minChars={1}
               />
-              <p className="text-caption text-foreground-muted mt-2">
+              <p className="mt-2 text-caption text-foreground-muted">
                 Type to search. Results are fetched from a simulated API.
               </p>
             </div>
@@ -530,10 +550,30 @@ const options = [
           <div className="max-w-md">
             <Combobox
               options={[
-                { value: "solar", label: "Solar Energy", icon: <SunDim size={16} />, description: "Photovoltaic systems" },
-                { value: "wind", label: "Wind Power", icon: <Wind size={16} />, description: "Onshore and offshore" },
-                { value: "hydro", label: "Hydroelectric", icon: <Drop size={16} />, description: "Dam and run-of-river" },
-                { value: "geo", label: "Geothermal", icon: <Lightning size={16} />, description: "Earth's heat" },
+                {
+                  value: "solar",
+                  label: "Solar Energy",
+                  icon: <SunDim size={16} />,
+                  description: "Photovoltaic systems",
+                },
+                {
+                  value: "wind",
+                  label: "Wind Power",
+                  icon: <Wind size={16} />,
+                  description: "Onshore and offshore",
+                },
+                {
+                  value: "hydro",
+                  label: "Hydroelectric",
+                  icon: <Drop size={16} />,
+                  description: "Dam and run-of-river",
+                },
+                {
+                  value: "geo",
+                  label: "Geothermal",
+                  icon: <Lightning size={16} />,
+                  description: "Earth's heat",
+                },
               ]}
               placeholder="Select energy type"
             />
@@ -560,10 +600,7 @@ const options = [
 <Combobox options={options} />`}
         >
           <div className="max-w-md">
-            <Combobox
-              options={skillOptions}
-              placeholder="Select a skill"
-            />
+            <Combobox options={skillOptions} placeholder="Select a skill" />
           </div>
         </CodePreview>
       </ComponentCard>
@@ -571,64 +608,36 @@ const options = [
       {/* ============================================ */}
       {/* 7. STATES */}
       {/* ============================================ */}
-      <ComponentCard
-        id="states"
-        title="States"
-        description="Visual states for different scenarios"
-      >
+      <ComponentCard id="states" title="States" description="Visual states for different scenarios">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label>Default</Label>
-            <Combobox
-              options={locationOptions}
-              placeholder="Select location"
-            />
+            <Combobox options={locationOptions} placeholder="Select location" />
             <p className="text-caption text-foreground-muted">Ready for input</p>
           </div>
           <div className="space-y-2">
             <Label>With Value</Label>
-            <Combobox
-              options={locationOptions}
-              value="sf"
-              placeholder="Select location"
-            />
+            <Combobox options={locationOptions} value="sf" placeholder="Select location" />
             <p className="text-caption text-foreground-muted">Has selection</p>
           </div>
           <div className="space-y-2">
             <Label>Loading</Label>
-            <Combobox
-              options={locationOptions}
-              placeholder="Loading..."
-              loading
-            />
+            <Combobox options={locationOptions} placeholder="Loading..." loading />
             <p className="text-caption text-foreground-muted">Fetching options</p>
           </div>
           <div className="space-y-2">
             <Label>Error</Label>
-            <Combobox
-              options={locationOptions}
-              placeholder="Select location"
-              error
-            />
+            <Combobox options={locationOptions} placeholder="Select location" error />
             <p className="text-caption text-foreground-muted">Validation failed</p>
           </div>
           <div className="space-y-2">
             <Label>Success</Label>
-            <Combobox
-              options={locationOptions}
-              value="sf"
-              placeholder="Select location"
-              success
-            />
+            <Combobox options={locationOptions} value="sf" placeholder="Select location" success />
             <p className="text-caption text-foreground-muted">Valid selection</p>
           </div>
           <div className="space-y-2">
             <Label>Disabled</Label>
-            <Combobox
-              options={locationOptions}
-              placeholder="Select location"
-              disabled
-            />
+            <Combobox options={locationOptions} placeholder="Select location" disabled />
             <p className="text-caption text-foreground-muted">Cannot interact</p>
           </div>
         </div>
@@ -659,7 +668,7 @@ const options = [
               maxItems={3}
               placeholder="Select up to 3 skills"
             />
-            <p className="text-caption text-foreground-muted mt-2">
+            <p className="mt-2 text-caption text-foreground-muted">
               Maximum 3 selections. The counter shows progress.
             </p>
           </div>
@@ -675,12 +684,9 @@ const options = [
         description="Individual options can be disabled while keeping others selectable"
       >
         <div className="max-w-md">
-          <Combobox
-            options={departmentOptions}
-            placeholder="Select department"
-          />
-          <p className="text-caption text-foreground-muted mt-2">
-            The "Marketing" option is disabled and cannot be selected.
+          <Combobox options={departmentOptions} placeholder="Select department" />
+          <p className="mt-2 text-caption text-foreground-muted">
+            The &quot;Marketing&quot; option is disabled and cannot be selected.
           </p>
         </div>
       </ComponentCard>
@@ -691,19 +697,19 @@ const options = [
       <ComponentCard id="props" title="Props Reference">
         <div className="space-y-8">
           <div>
-            <h4 className="text-body-strong mb-4">Combobox Props</h4>
+            <h4 className="mb-4 text-body-strong">Combobox Props</h4>
             <PropsTable props={comboboxProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">MultiCombobox Additional Props</h4>
+            <h4 className="mb-4 text-body-strong">MultiCombobox Additional Props</h4>
             <PropsTable props={multiComboboxProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">AsyncCombobox Additional Props</h4>
+            <h4 className="mb-4 text-body-strong">AsyncCombobox Additional Props</h4>
             <PropsTable props={asyncComboboxProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">ComboboxOption Interface</h4>
+            <h4 className="mb-4 text-body-strong">ComboboxOption Interface</h4>
             <PropsTable props={optionProps} />
           </div>
         </div>
@@ -713,9 +719,7 @@ const options = [
       {/* 11. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use Combobox for 5+ options where search helps users find items faster",
@@ -798,16 +802,14 @@ const options = [
       {/* 14. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Job Posting Location Filter"
           description="Location selection with remote option in job posting form"
         >
           <Card>
-            <CardContent className="pt-6 space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div>
                 <Label className="mb-2 block">Job Location</Label>
                 <Combobox
@@ -815,8 +817,18 @@ const options = [
                     { value: "sf", label: "San Francisco, CA", icon: <MapPin size={16} /> },
                     { value: "nyc", label: "New York, NY", icon: <MapPin size={16} /> },
                     { value: "austin", label: "Austin, TX", icon: <MapPin size={16} /> },
-                    { value: "remote", label: "Remote (US)", icon: <Buildings size={16} />, description: "Work from anywhere in the US" },
-                    { value: "remote-global", label: "Remote (Global)", icon: <Buildings size={16} />, description: "Work from anywhere" },
+                    {
+                      value: "remote",
+                      label: "Remote (US)",
+                      icon: <Buildings size={16} />,
+                      description: "Work from anywhere in the US",
+                    },
+                    {
+                      value: "remote-global",
+                      label: "Remote (Global)",
+                      icon: <Buildings size={16} />,
+                      description: "Work from anywhere",
+                    },
                   ]}
                   placeholder="Select job location"
                 />
@@ -830,14 +842,11 @@ const options = [
           description="Multi-select for tagging candidate skills during screening"
         >
           <Card>
-            <CardContent className="pt-6 space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div>
                 <Label className="mb-2 block">Candidate Skills</Label>
-                <MultiCombobox
-                  options={skillOptions}
-                  placeholder="Add skills..."
-                />
-                <p className="text-caption text-foreground-muted mt-2">
+                <MultiCombobox options={skillOptions} placeholder="Add skills..." />
+                <p className="mt-2 text-caption text-foreground-muted">
                   Search and select all relevant skills for this candidate.
                 </p>
               </div>
@@ -850,7 +859,7 @@ const options = [
           description="Async combobox for searching candidates across the talent pool"
         >
           <Card>
-            <CardContent className="pt-6 space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div>
                 <Label className="mb-2 block">Find Candidate</Label>
                 <AsyncCombobox
@@ -858,7 +867,7 @@ const options = [
                   placeholder="Search by name or role..."
                   debounceMs={300}
                 />
-                <p className="text-caption text-foreground-muted mt-2">
+                <p className="mt-2 text-caption text-foreground-muted">
                   Start typing to search across your candidate database.
                 </p>
               </div>

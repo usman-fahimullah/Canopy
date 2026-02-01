@@ -7,13 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Briefcase,
-  MapPin,
-  CaretRight,
-  BookmarkSimple,
-  Buildings,
-} from "@phosphor-icons/react";
+import { Briefcase, MapPin, CaretRight, BookmarkSimple, Buildings } from "@phosphor-icons/react";
 
 interface Job {
   id: string;
@@ -56,24 +50,41 @@ export function JobMatchesWidget({
         const res = await fetch(`/api/jobs/matches?limit=${limit}`);
         if (res.ok) {
           const data = await res.json();
-          const apiJobs = (data.jobs || []).map((job: any) => ({
-            id: job.id,
-            title: job.title,
-            company: job.organization?.name || "Unknown Company",
-            location: job.location || (job.locationType === "REMOTE" ? "Remote" : "Location TBD"),
-            salary: formatJobSalary(job.salaryMin, job.salaryMax, job.salaryCurrency),
-            postedAt: formatJobDate(job.publishedAt),
-            matchScore: job.matchScore,
-            url: `/candid/jobs?job=${job.id}`,
-            remote: job.locationType === "REMOTE",
-          }));
+          const apiJobs = (data.jobs || []).map(
+            (job: {
+              id: string;
+              title: string;
+              organization?: { name: string };
+              location?: string;
+              locationType: string;
+              salaryMin?: number;
+              salaryMax?: number;
+              salaryCurrency?: string;
+              publishedAt?: string;
+              matchScore?: number;
+            }) => ({
+              id: job.id,
+              title: job.title,
+              company: job.organization?.name || "Unknown Company",
+              location: job.location || (job.locationType === "REMOTE" ? "Remote" : "Location TBD"),
+              salary: formatJobSalary(
+                job.salaryMin ?? null,
+                job.salaryMax ?? null,
+                job.salaryCurrency ?? "USD"
+              ),
+              postedAt: formatJobDate(job.publishedAt ?? null),
+              matchScore: job.matchScore,
+              url: `/candid/jobs?job=${job.id}`,
+              remote: job.locationType === "REMOTE",
+            })
+          );
           setJobs(apiJobs);
 
           // Mark saved jobs
           const savedRes = await fetch("/api/jobs/saved");
           if (savedRes.ok) {
             const savedData = await savedRes.json();
-            const savedIds = (savedData.jobs || []).map((j: any) => j.id);
+            const savedIds = (savedData.jobs || []).map((j: { id: string }) => j.id);
             setSavedJobs(new Set(savedIds));
           }
         } else {
@@ -91,7 +102,11 @@ export function JobMatchesWidget({
   }, [limit]);
 
   // Helper function to format salary
-  function formatJobSalary(min: number | null, max: number | null, currency: string = "USD"): string {
+  function formatJobSalary(
+    min: number | null,
+    max: number | null,
+    currency: string = "USD"
+  ): string {
     if (!min && !max) return "";
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -167,14 +182,17 @@ export function JobMatchesWidget({
   if (loading) {
     return (
       <Card className={cn("p-4", className)}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <Skeleton className="h-5 w-32" />
           <Skeleton className="h-4 w-20" />
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex gap-3 p-3 rounded-lg border border-[var(--border-default)]">
-              <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
+            <div
+              key={i}
+              className="flex gap-3 rounded-lg border border-[var(--border-default)] p-3"
+            >
+              <Skeleton className="h-10 w-10 flex-shrink-0 rounded-lg" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
@@ -189,13 +207,13 @@ export function JobMatchesWidget({
   if (jobs.length === 0) {
     return (
       <Card className={cn("p-6 text-center", className)}>
-        <div className="flex h-12 w-12 mx-auto items-center justify-center rounded-xl bg-[var(--primitive-blue-100)] mb-4">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
           <Briefcase size={24} className="text-[var(--primitive-green-700)]" />
         </div>
-        <h3 className="text-body-strong font-medium text-foreground-default mb-1">
+        <h3 className="text-foreground-default mb-1 text-body-strong font-medium">
           No job matches yet
         </h3>
-        <p className="text-caption text-foreground-muted mb-4">
+        <p className="mb-4 text-caption text-foreground-muted">
           Complete your profile to get personalized job recommendations.
         </p>
         <Button variant="primary" size="sm" asChild>
@@ -211,9 +229,7 @@ export function JobMatchesWidget({
       <div className="flex items-center justify-between border-b border-[var(--border-default)] px-4 py-3">
         <div className="flex items-center gap-2">
           <Briefcase size={18} className="text-[var(--primitive-green-700)]" weight="fill" />
-          <h3 className="text-body-strong font-medium text-foreground-default">
-            {title}
-          </h3>
+          <h3 className="text-foreground-default text-body-strong font-medium">{title}</h3>
         </div>
         <Link
           href="/candid/jobs"
@@ -229,28 +245,26 @@ export function JobMatchesWidget({
         {jobs.map((job) => (
           <div
             key={job.id}
-            className="flex items-start gap-3 p-4 hover:bg-[var(--background-subtle)] transition-colors"
+            className="flex items-start gap-3 p-4 transition-colors hover:bg-[var(--background-subtle)]"
           >
             {/* Company icon placeholder */}
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--background-subtle)] flex-shrink-0">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--background-subtle)]">
               <Buildings size={20} className="text-foreground-muted" />
             </div>
 
             {/* Job info */}
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <a
                     href={job.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-body-sm font-medium text-foreground-default hover:text-[var(--primitive-green-700)] transition-colors line-clamp-1"
+                    className="text-foreground-default line-clamp-1 text-body-sm font-medium transition-colors hover:text-[var(--primitive-green-700)]"
                   >
                     {job.title}
                   </a>
-                  <p className="text-caption text-foreground-muted">
-                    {job.company}
-                  </p>
+                  <p className="text-caption text-foreground-muted">{job.company}</p>
                 </div>
                 {job.matchScore && (
                   <Chip variant="primary" size="sm" className="flex-shrink-0">
@@ -264,32 +278,21 @@ export function JobMatchesWidget({
                   <MapPin size={12} />
                   {job.remote ? "Remote" : job.location}
                 </span>
-                {job.salary && (
-                  <span>{job.salary}</span>
-                )}
+                {job.salary && <span>{job.salary}</span>}
                 <span>{job.postedAt}</span>
               </div>
 
               {/* Actions */}
               <div className="mt-3 flex items-center gap-2">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  asChild
-                >
-                  <Link href={job.url}>
-                    View Job
-                  </Link>
+                <Button variant="primary" size="sm" asChild>
+                  <Link href={job.url}>View Job</Link>
                 </Button>
                 <Button
                   variant={savedJobs.has(job.id) ? "secondary" : "tertiary"}
                   size="sm"
                   onClick={() => handleSaveJob(job.id)}
                 >
-                  <BookmarkSimple
-                    size={14}
-                    weight={savedJobs.has(job.id) ? "fill" : "regular"}
-                  />
+                  <BookmarkSimple size={14} weight={savedJobs.has(job.id) ? "fill" : "regular"} />
                   {savedJobs.has(job.id) ? "Saved" : "Save"}
                 </Button>
               </div>
@@ -300,7 +303,7 @@ export function JobMatchesWidget({
 
       {/* Footer */}
       <div className="border-t border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3">
-        <p className="text-caption text-foreground-muted text-center">
+        <p className="text-center text-caption text-foreground-muted">
           Powered by{" "}
           <a
             href="https://greenjobsboard.us"

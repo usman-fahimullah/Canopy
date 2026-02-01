@@ -113,7 +113,8 @@ const dropdownContentProps = [
     name: "maxHeight",
     type: "string",
     default: '"300px"',
-    description: "Maximum height before scrolling is enabled. Content becomes scrollable with gradient indicators when exceeded.",
+    description:
+      "Maximum height before scrolling is enabled. Content becomes scrollable with gradient indicators when exceeded.",
   },
   {
     name: "position",
@@ -191,49 +192,43 @@ export default function DropdownPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Dropdown
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Dropdown components allow users to choose a single option from a
-          dropdown list. Built on Radix UI primitives, they provide full
-          keyboard navigation, screen reader support, and customizable styling.
-          Features scrollable content with gradient fade indicators for long lists.
+        <h1 className="mb-2 text-heading-lg text-foreground">Dropdown</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Dropdown components allow users to choose a single option from a dropdown list. Built on
+          Radix UI primitives, they provide full keyboard navigation, screen reader support, and
+          customizable styling. Features scrollable content with gradient fade indicators for long
+          lists.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Form Control
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Radix UI
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Accessible
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Scrollable
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Choosing from 5+ predefined options</li>
               <li>• Single selection from a long list</li>
               <li>• Form fields with standard options (country, state)</li>
               <li>• When space is limited for displaying all options</li>
-              <li>• Options that don't require preview before selection</li>
+              <li>• Options that don&apos;t require preview before selection</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• 2-4 options visible at once (use Radio Group)</li>
               <li>• Actions or commands (use Dropdown Menu)</li>
               <li>• Multiple selections (use Checkbox Group)</li>
@@ -327,7 +322,7 @@ export default function DropdownPage() {
   </Dropdown>
 </div>`}
         >
-          <div className="space-y-2 max-w-sm">
+          <div className="max-w-sm space-y-2">
             <Label>Job Category</Label>
             <Dropdown>
               <DropdownTrigger>
@@ -369,7 +364,7 @@ export default function DropdownPage() {
 </Dropdown>`}
         >
           <div className="space-y-4">
-            <div className="space-y-2 max-w-sm">
+            <div className="max-w-sm space-y-2">
               <Label>Climate Category (Scrollable)</Label>
               <Dropdown value={scrollDemo} onValueChange={setScrollDemo}>
                 <DropdownTrigger>
@@ -384,9 +379,9 @@ export default function DropdownPage() {
                 </DropdownContent>
               </Dropdown>
             </div>
-            <p className="text-caption text-foreground-muted max-w-md">
-              Scroll the dropdown to see gradient indicators appear at top/bottom.
-              The gradients use a multi-stop fade with animated transitions for a polished feel.
+            <p className="max-w-md text-caption text-foreground-muted">
+              Scroll the dropdown to see gradient indicators appear at top/bottom. The gradients use
+              a multi-stop fade with animated transitions for a polished feel.
             </p>
           </div>
         </CodePreview>
@@ -426,9 +421,7 @@ export default function DropdownPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Label className="text-body-strong">Large Size</Label>
-              <span className="text-caption text-foreground-muted">
-                — 20px font for prominence
-              </span>
+              <span className="text-caption text-foreground-muted">— 20px font for prominence</span>
             </div>
             <div className="max-w-sm">
               <Dropdown>
@@ -453,7 +446,7 @@ export default function DropdownPage() {
         title="States"
         description="Visual states for different interaction scenarios"
       >
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-4xl">
+        <div className="grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label>Default (Placeholder)</Label>
             <Dropdown>
@@ -481,9 +474,7 @@ export default function DropdownPage() {
                 <DropdownItem value="wind">Wind Power</DropdownItem>
               </DropdownContent>
             </Dropdown>
-            <p className="text-caption text-foreground-muted">
-              Green-800 text for selected value
-            </p>
+            <p className="text-caption text-foreground-muted">Green-800 text for selected value</p>
           </div>
 
           <div className="space-y-2">
@@ -496,9 +487,7 @@ export default function DropdownPage() {
                 <DropdownItem value="valid">Valid Selection</DropdownItem>
               </DropdownContent>
             </Dropdown>
-            <p className="text-caption text-foreground-muted">
-              Green-500 border indicates valid
-            </p>
+            <p className="text-caption text-foreground-muted">Green-500 border indicates valid</p>
           </div>
 
           <div className="space-y-2">
@@ -511,9 +500,7 @@ export default function DropdownPage() {
                 <DropdownItem value="opt1">Option 1</DropdownItem>
               </DropdownContent>
             </Dropdown>
-            <p className="text-caption text-foreground-error">
-              Please select an option
-            </p>
+            <p className="text-caption text-foreground-error">Please select an option</p>
           </div>
 
           <div className="space-y-2">
@@ -526,9 +513,7 @@ export default function DropdownPage() {
                 <DropdownItem value="opt1">Option 1</DropdownItem>
               </DropdownContent>
             </Dropdown>
-            <p className="text-caption text-foreground-muted">
-              50% opacity, no interaction
-            </p>
+            <p className="text-caption text-foreground-muted">50% opacity, no interaction</p>
           </div>
 
           <div className="space-y-2">
@@ -544,9 +529,7 @@ export default function DropdownPage() {
                 </DropdownItem>
               </DropdownContent>
             </Dropdown>
-            <p className="text-caption text-foreground-muted">
-              Individual options can be disabled
-            </p>
+            <p className="text-caption text-foreground-muted">Individual options can be disabled</p>
           </div>
         </div>
       </ComponentCard>
@@ -576,7 +559,7 @@ export default function DropdownPage() {
 <p>Selected: {value || "None"}</p>
 <Button onClick={() => setValue(undefined)}>Clear</Button>`}
         >
-          <div className="space-y-4 max-w-sm">
+          <div className="max-w-sm space-y-4">
             <Label>Employment Type</Label>
             <Dropdown value={employmentType} onValueChange={setEmploymentType}>
               <DropdownTrigger>
@@ -592,16 +575,10 @@ export default function DropdownPage() {
             <div className="flex items-center gap-4">
               <p className="text-caption text-foreground-muted">
                 Selected:{" "}
-                <code className="bg-background-muted px-1 rounded">
-                  {employmentType || "None"}
-                </code>
+                <code className="rounded bg-background-muted px-1">{employmentType || "None"}</code>
               </p>
               {employmentType && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEmploymentType(undefined)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setEmploymentType(undefined)}>
                   Clear
                 </Button>
               )}
@@ -640,7 +617,7 @@ export default function DropdownPage() {
   </DropdownContent>
 </Dropdown>`}
         >
-          <div className="space-y-2 max-w-sm">
+          <div className="max-w-sm space-y-2">
             <Label>Location Type</Label>
             <Dropdown value={location} onValueChange={setLocation}>
               <DropdownTrigger>
@@ -670,9 +647,7 @@ export default function DropdownPage() {
       {/* 9. PROPS TABLES */}
       {/* ============================================ */}
       <div id="props" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Props Reference
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Props Reference</h2>
 
         <ComponentCard title="Dropdown (Root) Props">
           <PropsTable props={dropdownRootProps} />
@@ -695,9 +670,7 @@ export default function DropdownPage() {
       {/* 10. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use when there are 5 or more options to choose from",
@@ -748,10 +721,11 @@ export default function DropdownPage() {
         description="The Select component has been renamed to Dropdown. Both names are supported for backward compatibility."
       >
         <div className="space-y-4">
-          <div className="p-4 bg-background-warning rounded-lg border border-border-warning">
+          <div className="rounded-lg border border-border-warning bg-background-warning p-4">
             <p className="text-sm text-foreground-muted">
-              <strong className="text-foreground-warning">Note:</strong> The old <code>Select*</code> component names
-              are deprecated but still work. Update your imports to use <code>Dropdown*</code> names when possible.
+              <strong className="text-foreground-warning">Note:</strong> The old{" "}
+              <code>Select*</code> component names are deprecated but still work. Update your
+              imports to use <code>Dropdown*</code> names when possible.
             </p>
           </div>
           <CodePreview
@@ -772,16 +746,34 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
 </Dropdown>`}
           >
             <div className="text-sm text-foreground-muted">
-              <p>Simply rename your imports from <code>Select*</code> to <code>Dropdown*</code>:</p>
-              <ul className="mt-2 space-y-1 list-disc list-inside">
-                <li><code>Select</code> → <code>Dropdown</code></li>
-                <li><code>SelectTrigger</code> → <code>DropdownTrigger</code></li>
-                <li><code>SelectContent</code> → <code>DropdownContent</code></li>
-                <li><code>SelectItem</code> → <code>DropdownItem</code></li>
-                <li><code>SelectValue</code> → <code>DropdownValue</code></li>
-                <li><code>SelectGroup</code> → <code>DropdownGroup</code></li>
-                <li><code>SelectLabel</code> → <code>DropdownLabel</code></li>
-                <li><code>SelectSeparator</code> → <code>DropdownSeparator</code></li>
+              <p>
+                Simply rename your imports from <code>Select*</code> to <code>Dropdown*</code>:
+              </p>
+              <ul className="mt-2 list-inside list-disc space-y-1">
+                <li>
+                  <code>Select</code> → <code>Dropdown</code>
+                </li>
+                <li>
+                  <code>SelectTrigger</code> → <code>DropdownTrigger</code>
+                </li>
+                <li>
+                  <code>SelectContent</code> → <code>DropdownContent</code>
+                </li>
+                <li>
+                  <code>SelectItem</code> → <code>DropdownItem</code>
+                </li>
+                <li>
+                  <code>SelectValue</code> → <code>DropdownValue</code>
+                </li>
+                <li>
+                  <code>SelectGroup</code> → <code>DropdownGroup</code>
+                </li>
+                <li>
+                  <code>SelectLabel</code> → <code>DropdownLabel</code>
+                </li>
+                <li>
+                  <code>SelectSeparator</code> → <code>DropdownSeparator</code>
+                </li>
               </ul>
             </div>
           </CodePreview>
@@ -832,9 +824,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
       {/* 14. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Job Posting Form"
@@ -842,9 +832,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
         >
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-body-strong text-foreground mb-4">
-                Job Details
-              </h3>
+              <h3 className="mb-4 text-body-strong text-foreground">Job Details</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="job-category">Category *</Label>
@@ -869,9 +857,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
                     </DropdownContent>
                   </Dropdown>
                   {!category && (
-                    <p className="text-caption text-foreground-error">
-                      Please select a category
-                    </p>
+                    <p className="text-caption text-foreground-error">Please select a category</p>
                   )}
                 </div>
 
@@ -931,7 +917,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-wrap items-end gap-4">
-                <div className="space-y-2 flex-1 min-w-[150px]">
+                <div className="min-w-[150px] flex-1 space-y-2">
                   <Label>Status</Label>
                   <Dropdown defaultValue="all">
                     <DropdownTrigger>
@@ -947,7 +933,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
                   </Dropdown>
                 </div>
 
-                <div className="space-y-2 flex-1 min-w-[150px]">
+                <div className="min-w-[150px] flex-1 space-y-2">
                   <Label>Source</Label>
                   <Dropdown>
                     <DropdownTrigger>
@@ -962,7 +948,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
                   </Dropdown>
                 </div>
 
-                <div className="space-y-2 flex-1 min-w-[150px]">
+                <div className="min-w-[150px] flex-1 space-y-2">
                   <Label>Sort By</Label>
                   <Dropdown defaultValue="recent">
                     <DropdownTrigger>
@@ -987,12 +973,10 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
           title="Form Validation State"
           description="Dropdown showing validation feedback inline"
         >
-          <div className="max-w-md mx-auto">
+          <div className="mx-auto max-w-md">
             <Card>
-              <CardContent className="pt-6 space-y-4">
-                <h3 className="text-body-strong text-foreground">
-                  Required Fields Demo
-                </h3>
+              <CardContent className="space-y-4 pt-6">
+                <h3 className="text-body-strong text-foreground">Required Fields Demo</h3>
 
                 <div className="space-y-2">
                   <Label>Department *</Label>
@@ -1006,9 +990,7 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
                       <DropdownItem value="sales">Sales</DropdownItem>
                     </DropdownContent>
                   </Dropdown>
-                  <p className="text-caption text-foreground-error">
-                    Department is required
-                  </p>
+                  <p className="text-caption text-foreground-error">Department is required</p>
                 </div>
 
                 <div className="space-y-2">
@@ -1023,12 +1005,10 @@ import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownValue
                       <DropdownItem value="product">Product</DropdownItem>
                     </DropdownContent>
                   </Dropdown>
-                  <p className="text-caption text-foreground-success">
-                    Great choice!
-                  </p>
+                  <p className="text-caption text-foreground-success">Great choice!</p>
                 </div>
 
-                <div className="pt-4 flex justify-end gap-3">
+                <div className="flex justify-end gap-3 pt-4">
                   <Button variant="tertiary">Cancel</Button>
                   <Button variant="primary" rightIcon={<ArrowRight size={16} />}>
                     Continue

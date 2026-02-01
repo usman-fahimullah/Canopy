@@ -72,7 +72,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner size={32} className="animate-spin text-[var(--primitive-green-600)]" />
       </div>
     );
@@ -80,18 +80,16 @@ export default function ProfilePage() {
 
   if (notFound || !coach) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
-        <div className="rounded-card bg-white p-12 shadow-card text-center">
-          <h2 className="text-heading-sm font-semibold text-foreground-default">
+      <div className="mx-auto max-w-4xl px-4 py-8 pb-24 sm:px-6 md:pb-8 lg:px-8">
+        <div className="rounded-card bg-white p-12 text-center shadow-card">
+          <h2 className="text-foreground-default text-heading-sm font-semibold">
             Profile not found
           </h2>
           <p className="mt-2 text-body text-foreground-muted">
-            The user you're looking for doesn't exist or has been removed.
+            The user you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <Button variant="primary" className="mt-4" leftIcon={<ArrowLeft size={16} />} asChild>
-            <Link href="/candid/browse">
-              Back to Browse
-            </Link>
+            <Link href="/candid/browse">Back to Browse</Link>
           </Button>
         </div>
       </div>
@@ -99,16 +97,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
+    <div className="mx-auto max-w-4xl px-4 py-8 pb-24 sm:px-6 md:pb-8 lg:px-8">
       {/* Back Link */}
       <Button variant="ghost" size="sm" className="mb-6" leftIcon={<ArrowLeft size={16} />} asChild>
-        <Link href="/candid/browse">
-          Back to Browse
-        </Link>
+        <Link href="/candid/browse">Back to Browse</Link>
       </Button>
 
       {/* Profile Card - White card with shadow */}
-      <div className="rounded-card bg-white shadow-card overflow-hidden">
+      <div className="overflow-hidden rounded-card bg-white shadow-card">
         {/* Header with solid Green 800 background */}
         <div className="relative h-32 bg-[var(--primitive-green-800)]">
           {coach.isFeatured && (
@@ -139,7 +135,7 @@ export default function ProfilePage() {
 
           {/* Name & Role */}
           <div className="mb-6">
-            <h1 className="text-heading-md font-semibold text-foreground-default">
+            <h1 className="text-foreground-default text-heading-md font-semibold">
               {coach.firstName} {coach.lastName}
             </h1>
             <p className="text-body-lg text-foreground-muted">
@@ -183,14 +179,10 @@ export default function ProfilePage() {
           {/* Action Buttons */}
           <div className="mb-6 flex flex-wrap gap-3">
             <Button variant="primary" leftIcon={<CalendarBlank size={18} />} asChild>
-              <Link href={`/candid/sessions/schedule?mentor=${coach.id}`}>
-                Schedule Session
-              </Link>
+              <Link href={`/candid/sessions/schedule?mentor=${coach.id}`}>Schedule Session</Link>
             </Button>
             <Button variant="secondary" leftIcon={<ChatCircle size={18} />} asChild>
-              <Link href={`/candid/messages?new=${coach.id}`}>
-                Send Message
-              </Link>
+              <Link href={`/candid/messages?new=${coach.id}`}>Send Message</Link>
             </Button>
           </div>
 
@@ -200,7 +192,7 @@ export default function ProfilePage() {
               <h2 className="mb-2 text-caption font-semibold uppercase tracking-wide text-foreground-muted">
                 About
               </h2>
-              <p className="text-body text-foreground-default leading-relaxed">{coach.bio}</p>
+              <p className="text-foreground-default text-body leading-relaxed">{coach.bio}</p>
             </div>
           )}
 

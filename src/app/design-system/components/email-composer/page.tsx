@@ -13,11 +13,7 @@ import {
   CardContent,
   Badge,
 } from "@/components/ui";
-import type {
-  EmailRecipient,
-  EmailTemplate,
-  EmailVariable,
-} from "@/components/ui";
+import type { EmailRecipient, EmailTemplate, EmailVariable } from "@/components/ui";
 import {
   ComponentCard,
   UsageGuide,
@@ -29,13 +25,7 @@ import {
 import { CodePreview } from "@/components/design-system/CodeBlock";
 import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
-import {
-  EnvelopeSimple,
-  PaperPlaneTilt,
-  Lightning,
-  Calendar,
-  User,
-} from "@phosphor-icons/react";
+import { EnvelopeSimple, PaperPlaneTilt, Lightning, Calendar, User } from "@phosphor-icons/react";
 
 // ============================================
 // SAMPLE DATA
@@ -97,14 +87,49 @@ const sampleTemplates: EmailTemplate[] = [
 ];
 
 const sampleVariables: EmailVariable[] = [
-  { key: "candidate_first_name", label: "Candidate First Name", sampleValue: "John", category: "candidate" },
-  { key: "candidate_last_name", label: "Candidate Last Name", sampleValue: "Doe", category: "candidate" },
-  { key: "candidate_email", label: "Candidate Email", sampleValue: "john@email.com", category: "candidate" },
-  { key: "job_title", label: "Job Title", sampleValue: "Senior Sustainability Analyst", category: "job" },
-  { key: "company_name", label: "Company Name", sampleValue: "GreenTech Corp", category: "company" },
+  {
+    key: "candidate_first_name",
+    label: "Candidate First Name",
+    sampleValue: "John",
+    category: "candidate",
+  },
+  {
+    key: "candidate_last_name",
+    label: "Candidate Last Name",
+    sampleValue: "Doe",
+    category: "candidate",
+  },
+  {
+    key: "candidate_email",
+    label: "Candidate Email",
+    sampleValue: "john@email.com",
+    category: "candidate",
+  },
+  {
+    key: "job_title",
+    label: "Job Title",
+    sampleValue: "Senior Sustainability Analyst",
+    category: "job",
+  },
+  {
+    key: "company_name",
+    label: "Company Name",
+    sampleValue: "GreenTech Corp",
+    category: "company",
+  },
   { key: "sender_name", label: "Sender Name", sampleValue: "Sarah Johnson", category: "other" },
-  { key: "interview_date", label: "Interview Date", sampleValue: "January 28, 2026", category: "other" },
-  { key: "interview_time", label: "Interview Time", sampleValue: "10:00 AM PST", category: "other" },
+  {
+    key: "interview_date",
+    label: "Interview Date",
+    sampleValue: "January 28, 2026",
+    category: "other",
+  },
+  {
+    key: "interview_time",
+    label: "Interview Time",
+    sampleValue: "10:00 AM PST",
+    category: "other",
+  },
 ];
 
 const quickReplies = [
@@ -401,6 +426,7 @@ export default function EmailComposerPage() {
     subject: string;
     body: string;
   }) => {
+    // eslint-disable-next-line no-console
     console.log("Sending email:", email);
   };
 
@@ -410,34 +436,30 @@ export default function EmailComposerPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Email Composer
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          A comprehensive email composition interface for sending candidate
-          communications. Features template selection, variable placeholders,
-          rich text formatting, recipient management, and attachments. Designed
-          for ATS workflows where consistent, personalized emails are essential.
+        <h1 className="mb-2 text-heading-lg text-foreground">Email Composer</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          A comprehensive email composition interface for sending candidate communications. Features
+          template selection, variable placeholders, rich text formatting, recipient management, and
+          attachments. Designed for ATS workflows where consistent, personalized emails are
+          essential.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Communication
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Templates
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             ATS Feature
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Sending interview invitations to candidates</li>
               <li>Rejection or offer communications</li>
               <li>Follow-up emails with templates</li>
@@ -445,11 +467,9 @@ export default function EmailComposerPage() {
               <li>Bulk emails with personalization</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Internal team notes (use MentionInput)</li>
               <li>Chat or instant messaging</li>
               <li>Marketing campaigns (use dedicated tools)</li>
@@ -467,14 +487,12 @@ export default function EmailComposerPage() {
         parts={[
           {
             name: "Header",
-            description:
-              "Template selector dropdown and action buttons (Send, Save Draft)",
+            description: "Template selector dropdown and action buttons (Send, Save Draft)",
             required: true,
           },
           {
             name: "Recipients Section",
-            description:
-              "To, CC, BCC fields with autocomplete and chip display",
+            description: "To, CC, BCC fields with autocomplete and chip display",
             required: true,
           },
           {
@@ -484,8 +502,7 @@ export default function EmailComposerPage() {
           },
           {
             name: "Body Editor",
-            description:
-              "Rich text editor for email content with toolbar",
+            description: "Rich text editor for email content with toolbar",
             required: true,
           },
           {
@@ -529,6 +546,7 @@ export default function EmailComposerPage() {
             variables={sampleVariables}
             suggestedRecipients={sampleRecipients}
             onSend={handleSend}
+            // eslint-disable-next-line no-console
             onSaveDraft={() => console.log("Draft saved")}
           />
         </CodePreview>
@@ -555,8 +573,13 @@ export default function EmailComposerPage() {
           <div className="max-w-md">
             <QuickReply
               to={sampleRecipients[0]}
-              replyTo={{ subject: "Interview Invitation - Senior Engineer", body: "Thank you for your application..." }}
+              replyTo={{
+                subject: "Interview Invitation - Senior Engineer",
+                body: "Thank you for your application...",
+              }}
+              // eslint-disable-next-line no-console
               onSend={(body) => console.log("Reply sent:", body)}
+              // eslint-disable-next-line no-console
               onCancel={() => console.log("Cancelled")}
             />
           </div>
@@ -581,7 +604,7 @@ export default function EmailComposerPage() {
   placeholder="Add recipients..."
 />`}
         >
-          <div className="space-y-4 max-w-md">
+          <div className="max-w-md space-y-4">
             <Label>To:</Label>
             <RecipientInput
               value={recipients}
@@ -623,8 +646,8 @@ export default function EmailComposerPage() {
                 alert(`Inserted: {{${variableKey}}}`);
               }}
             />
-            <div className="p-3 bg-background-muted rounded-lg">
-              <Label className="text-caption text-foreground-muted mb-2 block">
+            <div className="rounded-lg bg-background-muted p-3">
+              <Label className="mb-2 block text-caption text-foreground-muted">
                 Default Variables Available:
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -650,10 +673,10 @@ export default function EmailComposerPage() {
         <div className="space-y-8">
           <div className="space-y-2">
             <Label className="font-semibold">Loading State</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Shows loading indicator on send button
             </p>
-            <div className="p-4 border border-border-muted rounded-lg">
+            <div className="rounded-lg border border-border-muted p-4">
               <div className="flex gap-2">
                 <Button variant="primary" disabled>
                   <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -668,7 +691,7 @@ export default function EmailComposerPage() {
 
           <div className="space-y-2">
             <Label className="font-semibold">With CC/BCC Enabled</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Use allowCcBcc prop to enable CC and BCC fields
             </p>
             <EmailComposer
@@ -682,7 +705,7 @@ export default function EmailComposerPage() {
 
           <div className="space-y-2">
             <Label className="font-semibold">With Pre-filled Content</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Pass subject and body to pre-fill the composer
             </p>
             <EmailComposer
@@ -706,15 +729,18 @@ export default function EmailComposerPage() {
         description="How templates work with the email composer"
       >
         <div className="space-y-6">
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid gap-4 md:grid-cols-3">
             {sampleTemplates.map((template) => (
-              <Card key={template.id} className="cursor-pointer hover:border-border-brand transition-colors">
+              <Card
+                key={template.id}
+                className="cursor-pointer transition-colors hover:border-border-brand"
+              >
                 <CardContent className="pt-4">
-                  <div className="flex items-start gap-2 mb-2">
-                    <EnvelopeSimple className="h-4 w-4 text-foreground-brand mt-0.5" />
+                  <div className="mb-2 flex items-start gap-2">
+                    <EnvelopeSimple className="mt-0.5 h-4 w-4 text-foreground-brand" />
                     <div>
-                      <p className="font-medium text-sm">{template.name}</p>
-                      <p className="text-xs text-foreground-muted line-clamp-2">
+                      <p className="text-sm font-medium">{template.name}</p>
+                      <p className="line-clamp-2 text-xs text-foreground-muted">
                         {template.subject}
                       </p>
                     </div>
@@ -725,9 +751,7 @@ export default function EmailComposerPage() {
           </div>
           <p className="text-caption text-foreground-muted">
             Templates are available in the composer dropdown. Variables like{" "}
-            <code className="px-1 bg-background-muted rounded">
-              {"{{candidate_first_name}}"}
-            </code>{" "}
+            <code className="rounded bg-background-muted px-1">{"{{candidate_first_name}}"}</code>{" "}
             will be replaced with actual values when sending.
           </p>
         </div>
@@ -737,9 +761,7 @@ export default function EmailComposerPage() {
       {/* 9. PROPS TABLES */}
       {/* ============================================ */}
       <div id="props" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Props Reference
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Props Reference</h2>
 
         <ComponentCard title="EmailComposer Props">
           <PropsTable props={emailComposerProps} />
@@ -774,9 +796,7 @@ export default function EmailComposerPage() {
       {/* 10. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Always provide commonly used templates for consistency",
@@ -847,9 +867,7 @@ export default function EmailComposerPage() {
       {/* 13. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Interview Scheduling"
@@ -861,9 +879,7 @@ export default function EmailComposerPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-5 w-5 text-foreground-brand" />
-                    <h3 className="text-body-strong text-foreground">
-                      Schedule Interview
-                    </h3>
+                    <h3 className="text-body-strong text-foreground">Schedule Interview</h3>
                   </div>
                   <Badge variant="info">Interview</Badge>
                 </div>
@@ -896,17 +912,20 @@ export default function EmailComposerPage() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Lightning className="h-5 w-5 text-foreground-brand" />
-                  <h3 className="text-body-strong text-foreground">
-                    Quick Responses
-                  </h3>
+                  <h3 className="text-body-strong text-foreground">Quick Responses</h3>
                 </div>
 
                 <div className="space-y-3">
                   <Label>Quick Reply to Candidate</Label>
                   <QuickReply
                     to={sampleRecipients[0]}
-                    replyTo={{ subject: "Application Status - Senior Analyst", body: "I applied for the Senior Analyst position..." }}
+                    replyTo={{
+                      subject: "Application Status - Senior Analyst",
+                      body: "I applied for the Senior Analyst position...",
+                    }}
+                    // eslint-disable-next-line no-console
                     onSend={(body) => console.log("Reply sent:", body)}
+                    // eslint-disable-next-line no-console
                     onCancel={() => console.log("Cancelled")}
                   />
                 </div>
@@ -926,9 +945,7 @@ export default function EmailComposerPage() {
                   <div className="flex items-center gap-2">
                     <User className="h-5 w-5 text-foreground-brand" />
                     <div>
-                      <h3 className="text-body-strong text-foreground">
-                        John Doe
-                      </h3>
+                      <h3 className="text-body-strong text-foreground">John Doe</h3>
                       <p className="text-caption text-foreground-muted">
                         Senior Sustainability Analyst
                       </p>
@@ -938,7 +955,7 @@ export default function EmailComposerPage() {
                 </div>
 
                 <div className="border-t border-border-muted pt-4">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="mb-4 flex items-center gap-2">
                     <PaperPlaneTilt className="h-4 w-4 text-foreground-muted" />
                     <Label>Send Email</Label>
                   </div>

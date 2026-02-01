@@ -53,7 +53,12 @@ import {
 
 type Step = "mentor" | "datetime" | "details" | "confirm";
 
-type SessionType = "coaching" | "mock-interview" | "resume-review" | "career-planning" | "networking";
+type SessionType =
+  | "coaching"
+  | "mock-interview"
+  | "resume-review"
+  | "career-planning"
+  | "networking";
 
 interface Coach {
   id: string;
@@ -70,7 +75,13 @@ interface Coach {
   menteeCount?: number;
 }
 
-const sessionTypes: { value: SessionType; label: string; description: string; duration: number; icon: React.ElementType }[] = [
+const sessionTypes: {
+  value: SessionType;
+  label: string;
+  description: string;
+  duration: number;
+  icon: React.ElementType;
+}[] = [
   {
     value: "coaching",
     label: "Coaching Session",
@@ -111,7 +122,11 @@ const sessionTypes: { value: SessionType; label: string; description: string; du
 const prepChecklist = [
   { id: "goals", label: "Write down your top 3 goals for this session", icon: Target },
   { id: "questions", label: "Prepare 2-3 specific questions you want answered", icon: Lightbulb },
-  { id: "materials", label: "Have any relevant documents ready (resume, portfolio, etc.)", icon: FileText },
+  {
+    id: "materials",
+    label: "Have any relevant documents ready (resume, portfolio, etc.)",
+    icon: FileText,
+  },
   { id: "quiet", label: "Find a quiet space with good internet connection", icon: VideoCamera },
   { id: "camera", label: "Test your camera and microphone beforehand", icon: CheckCircle },
 ];
@@ -132,7 +147,9 @@ const timeSlots = generateTimeSlots();
 
 export default function ScheduleSessionPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#FAF9F7] to-[#E5F1FF]/30" />}>
+    <Suspense
+      fallback={<div className="min-h-screen bg-gradient-to-b from-[#FAF9F7] to-[#E5F1FF]/30" />}
+    >
       <ScheduleSessionContent />
     </Suspense>
   );
@@ -245,7 +262,7 @@ function ScheduleSessionContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -258,14 +275,14 @@ function ScheduleSessionContent() {
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
           <Link
             href="/candid/sessions"
-            className="flex items-center gap-2 text-foreground-muted hover:text-foreground-default transition-colors"
+            className="hover:text-foreground-default flex items-center gap-2 text-foreground-muted transition-colors"
           >
             <ArrowLeft size={20} />
             <span className="text-body-sm font-medium">Back to Sessions</span>
           </Link>
 
           {/* Step Indicator */}
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="hidden items-center gap-2 sm:flex">
             {steps.map((s, i) => (
               <div key={s} className="flex items-center gap-2">
                 <div
@@ -274,8 +291,8 @@ function ScheduleSessionContent() {
                     i < currentStepIndex
                       ? "bg-[var(--primitive-green-500)] text-white"
                       : i === currentStepIndex
-                      ? "bg-[#072924] text-white"
-                      : "bg-[var(--background-subtle)] text-foreground-muted"
+                        ? "bg-[#072924] text-white"
+                        : "bg-[var(--background-subtle)] text-foreground-muted"
                   )}
                 >
                   {i < currentStepIndex ? <Check size={14} weight="bold" /> : i + 1}
@@ -314,10 +331,10 @@ function ScheduleSessionContent() {
         {step === "mentor" && (
           <div>
             <div className="mb-6">
-              <h1 className="text-display font-semibold text-foreground-default">
+              <h1 className="text-foreground-default text-display font-semibold">
                 Choose Your Mentor
               </h1>
-              <p className="mt-2 text-body-lg text-foreground-muted">
+              <p className="text-body-lg mt-2 text-foreground-muted">
                 Select a mentor to schedule your session with
               </p>
             </div>
@@ -352,22 +369,28 @@ function ScheduleSessionContent() {
                       name={`${mentor.firstName} ${mentor.lastName}`}
                       color="green"
                     />
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground-default">
+                        <h3 className="text-foreground-default font-semibold">
                           {mentor.firstName} {mentor.lastName}
                         </h3>
                         {mentor.isFoundingMember && (
-                          <Badge variant="feature" size="sm">Founding</Badge>
+                          <Badge variant="feature" size="sm">
+                            Founding
+                          </Badge>
                         )}
                       </div>
-                      <p className="text-body-sm text-foreground-muted mt-0.5">
+                      <p className="mt-0.5 text-body-sm text-foreground-muted">
                         {mentor.currentRole} at {mentor.currentCompany}
                       </p>
-                      <div className="flex items-center gap-3 mt-2">
+                      <div className="mt-2 flex items-center gap-3">
                         {mentor.rating && (
                           <span className="flex items-center gap-1 text-body-sm">
-                            <Star size={14} weight="fill" className="text-[var(--primitive-yellow-500)]" />
+                            <Star
+                              size={14}
+                              weight="fill"
+                              className="text-[var(--primitive-yellow-500)]"
+                            />
                             {mentor.rating.toFixed(1)}
                           </span>
                         )}
@@ -397,11 +420,11 @@ function ScheduleSessionContent() {
         {step === "datetime" && selectedMentor && (
           <div>
             <div className="mb-6">
-              <h1 className="text-display font-semibold text-foreground-default">
+              <h1 className="text-foreground-default text-display font-semibold">
                 Pick a Date & Time
               </h1>
-              <p className="mt-2 text-body-lg text-foreground-muted">
-                Select when you'd like to meet with {selectedMentor.firstName}
+              <p className="text-body-lg mt-2 text-foreground-muted">
+                Select when you&apos;d like to meet with {selectedMentor.firstName}
               </p>
             </div>
 
@@ -412,7 +435,7 @@ function ScheduleSessionContent() {
                   <div className="flex items-center justify-between">
                     <button
                       onClick={() => setWeekStart(subWeeks(weekStart, 1))}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--background-subtle)] text-foreground-muted"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-muted hover:bg-[var(--background-subtle)]"
                     >
                       <CaretLeft size={20} />
                     </button>
@@ -421,7 +444,7 @@ function ScheduleSessionContent() {
                     </CardTitle>
                     <button
                       onClick={() => setWeekStart(addWeeks(weekStart, 1))}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--background-subtle)] text-foreground-muted"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground-muted hover:bg-[var(--background-subtle)]"
                     >
                       <CaretRight size={20} />
                     </button>
@@ -444,23 +467,30 @@ function ScheduleSessionContent() {
                             isSelected
                               ? "bg-[#072924] text-white"
                               : isPast || !hasAvailable
-                              ? "cursor-not-allowed opacity-40"
-                              : isToday(day)
-                              ? "bg-[var(--candid-background-subtle)] text-[#072924] hover:bg-[var(--candid-background-accent)]"
-                              : "hover:bg-[var(--background-subtle)]"
+                                ? "cursor-not-allowed opacity-40"
+                                : isToday(day)
+                                  ? "bg-[var(--candid-background-subtle)] text-[#072924] hover:bg-[var(--candid-background-accent)]"
+                                  : "hover:bg-[var(--background-subtle)]"
                           )}
                         >
                           <span className="text-caption-sm font-medium uppercase">
                             {format(day, "EEE")}
                           </span>
-                          <span className={cn("text-heading-sm font-semibold", isSelected && "text-white")}>
+                          <span
+                            className={cn(
+                              "text-heading-sm font-semibold",
+                              isSelected && "text-white"
+                            )}
+                          >
                             {format(day, "d")}
                           </span>
                           {!isPast && hasAvailable && (
-                            <div className={cn(
-                              "h-1.5 w-1.5 rounded-full",
-                              isSelected ? "bg-white" : "bg-[var(--primitive-green-500)]"
-                            )} />
+                            <div
+                              className={cn(
+                                "h-1.5 w-1.5 rounded-full",
+                                isSelected ? "bg-white" : "bg-[var(--primitive-green-500)]"
+                              )}
+                            />
                           )}
                         </button>
                       );
@@ -472,11 +502,11 @@ function ScheduleSessionContent() {
               {/* Time Slots */}
               <Card variant="outlined">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-body-strong flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-body-strong">
                     <Clock size={18} />
                     Available Times
                     {selectedDate && (
-                      <span className="text-foreground-muted font-normal">
+                      <span className="font-normal text-foreground-muted">
                         – {format(selectedDate, "EEEE, MMM d")}
                       </span>
                     )}
@@ -484,7 +514,7 @@ function ScheduleSessionContent() {
                 </CardHeader>
                 <CardContent>
                   {selectedDate ? (
-                    <div className="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
+                    <div className="grid max-h-[300px] grid-cols-3 gap-2 overflow-y-auto">
                       {getAvailableSlots(selectedDate).map((time) => {
                         const isSelected = selectedTime === time;
                         return (
@@ -523,7 +553,7 @@ function ScheduleSessionContent() {
                     <Calendar size={20} />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground-default">
+                    <p className="text-foreground-default font-semibold">
                       {format(selectedDate, "EEEE, MMMM d, yyyy")} at {selectedTime}
                     </p>
                     <p className="text-body-sm text-foreground-muted">
@@ -540,10 +570,10 @@ function ScheduleSessionContent() {
         {step === "details" && selectedMentor && (
           <div>
             <div className="mb-6">
-              <h1 className="text-display font-semibold text-foreground-default">
+              <h1 className="text-foreground-default text-display font-semibold">
                 Session Details
               </h1>
-              <p className="mt-2 text-body-lg text-foreground-muted">
+              <p className="text-body-lg mt-2 text-foreground-muted">
                 Choose the type of session and add any notes
               </p>
             </div>
@@ -551,7 +581,7 @@ function ScheduleSessionContent() {
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Session Type */}
               <div>
-                <h2 className="text-body-strong font-semibold text-foreground-default mb-4">
+                <h2 className="text-foreground-default mb-4 text-body-strong font-semibold">
                   Session Type
                 </h2>
                 <div className="space-y-3">
@@ -563,7 +593,7 @@ function ScheduleSessionContent() {
                         key={type.value}
                         onClick={() => setSelectedType(type.value)}
                         className={cn(
-                          "w-full flex items-start gap-4 rounded-xl border-2 p-4 text-left transition-all duration-200",
+                          "flex w-full items-start gap-4 rounded-xl border-2 p-4 text-left transition-all duration-200",
                           isSelected
                             ? "border-[#072924] bg-[var(--candid-background-subtle)]"
                             : "border-[var(--border-default)] bg-white hover:border-[var(--candid-border-accent)]"
@@ -580,11 +610,11 @@ function ScheduleSessionContent() {
                           <Icon size={20} weight={isSelected ? "fill" : "regular"} />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-foreground-default">{type.label}</h3>
-                          <p className="text-body-sm text-foreground-muted mt-0.5">
+                          <h3 className="text-foreground-default font-semibold">{type.label}</h3>
+                          <p className="mt-0.5 text-body-sm text-foreground-muted">
                             {type.description}
                           </p>
-                          <div className="flex items-center gap-1 mt-2 text-body-sm text-foreground-muted">
+                          <div className="mt-2 flex items-center gap-1 text-body-sm text-foreground-muted">
                             <Clock size={14} />
                             {type.duration} minutes
                           </div>
@@ -621,7 +651,7 @@ function ScheduleSessionContent() {
                 {/* Preparation Checklist */}
                 <Card variant="outlined">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-body-strong flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-body-strong">
                       <ListChecks size={18} />
                       Preparation Checklist
                     </CardTitle>
@@ -635,22 +665,26 @@ function ScheduleSessionContent() {
                           <button
                             key={item.id}
                             onClick={() => toggleCheckItem(item.id)}
-                            className="flex items-start gap-3 w-full text-left group"
+                            className="group flex w-full items-start gap-3 text-left"
                           >
                             <div
                               className={cn(
-                                "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 transition-all mt-0.5",
+                                "mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 transition-all",
                                 isChecked
                                   ? "border-[var(--primitive-green-500)] bg-[var(--primitive-green-500)]"
                                   : "border-[var(--border-default)] group-hover:border-[var(--candid-border-accent)]"
                               )}
                             >
-                              {isChecked && <Check size={12} weight="bold" className="text-white" />}
+                              {isChecked && (
+                                <Check size={12} weight="bold" className="text-white" />
+                              )}
                             </div>
                             <span
                               className={cn(
                                 "text-body-sm transition-colors",
-                                isChecked ? "text-foreground-muted line-through" : "text-foreground-default"
+                                isChecked
+                                  ? "text-foreground-muted line-through"
+                                  : "text-foreground-default"
                               )}
                             >
                               {item.label}
@@ -659,10 +693,10 @@ function ScheduleSessionContent() {
                         );
                       })}
                     </div>
-                    <div className="mt-4 pt-3 border-t border-[var(--border-default)]">
+                    <div className="mt-4 border-t border-[var(--border-default)] pt-3">
                       <div className="flex items-center justify-between text-body-sm">
                         <span className="text-foreground-muted">Preparation progress</span>
-                        <span className="font-medium text-foreground-default">
+                        <span className="text-foreground-default font-medium">
                           {checkedItems.length}/{prepChecklist.length}
                         </span>
                       </div>
@@ -680,154 +714,167 @@ function ScheduleSessionContent() {
         )}
 
         {/* Step 4: Confirm */}
-        {step === "confirm" && selectedMentor && selectedDate && selectedTime && selectedSessionType && (
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#E5F1FF] to-[#99C9FF]">
-                <Sparkle size={40} weight="fill" className="text-[#072924]" />
+        {step === "confirm" &&
+          selectedMentor &&
+          selectedDate &&
+          selectedTime &&
+          selectedSessionType && (
+            <div className="mx-auto max-w-2xl">
+              <div className="mb-8 text-center">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#E5F1FF] to-[#99C9FF]">
+                  <Sparkle size={40} weight="fill" className="text-[#072924]" />
+                </div>
+                <h1 className="text-foreground-default text-display font-semibold">
+                  Confirm Your Session
+                </h1>
+                <p className="text-body-lg mt-2 text-foreground-muted">
+                  Review the details and book your session
+                </p>
               </div>
-              <h1 className="text-display font-semibold text-foreground-default">
-                Confirm Your Session
-              </h1>
-              <p className="mt-2 text-body-lg text-foreground-muted">
-                Review the details and book your session
-              </p>
-            </div>
 
-            {/* Session Summary Card */}
-            <Card variant="outlined" className="mb-6">
-              <CardContent className="p-6">
-                {/* Mentor */}
-                <div className="flex items-center gap-4 pb-4 border-b border-[var(--border-default)]">
-                  <Avatar
-                    size="lg"
-                    src={selectedMentor.avatar || undefined}
-                    name={`${selectedMentor.firstName} ${selectedMentor.lastName}`}
-                    color="green"
-                  />
+              {/* Session Summary Card */}
+              <Card variant="outlined" className="mb-6">
+                <CardContent className="p-6">
+                  {/* Mentor */}
+                  <div className="flex items-center gap-4 border-b border-[var(--border-default)] pb-4">
+                    <Avatar
+                      size="lg"
+                      src={selectedMentor.avatar || undefined}
+                      name={`${selectedMentor.firstName} ${selectedMentor.lastName}`}
+                      color="green"
+                    />
+                    <div>
+                      <h3 className="text-foreground-default font-semibold">
+                        {selectedMentor.firstName} {selectedMentor.lastName}
+                      </h3>
+                      <p className="text-body-sm text-foreground-muted">
+                        {selectedMentor.currentRole} at {selectedMentor.currentCompany}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Details */}
+                  <div className="space-y-4 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
+                        <Calendar size={20} className="text-[#072924]" />
+                      </div>
+                      <div>
+                        <p className="text-foreground-default font-medium">
+                          {format(selectedDate, "EEEE, MMMM d, yyyy")}
+                        </p>
+                        <p className="text-body-sm text-foreground-muted">
+                          {selectedTime} · {selectedSessionType.duration} minutes
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
+                        <selectedSessionType.icon size={20} className="text-[#072924]" />
+                      </div>
+                      <div>
+                        <p className="text-foreground-default font-medium">
+                          {selectedSessionType.label}
+                        </p>
+                        <p className="text-body-sm text-foreground-muted">
+                          {selectedSessionType.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    {notes && (
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
+                          <FileText size={20} className="text-[#072924]" />
+                        </div>
+                        <div>
+                          <p className="text-foreground-default font-medium">Session Notes</p>
+                          <p className="text-body-sm text-foreground-muted">{notes}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Preparation Status */}
+                  <div className="border-t border-[var(--border-default)] pt-4">
+                    <div className="flex items-center gap-2">
+                      {checkedItems.length === prepChecklist.length ? (
+                        <>
+                          <CheckCircle
+                            size={16}
+                            weight="fill"
+                            className="text-[var(--primitive-green-600)]"
+                          />
+                          <span className="text-body-sm font-medium text-[var(--primitive-green-600)]">
+                            Preparation complete!
+                          </span>
+                        </>
+                      ) : checkedItems.length > 0 ? (
+                        <>
+                          <Info size={16} className="text-[var(--primitive-orange-500)]" />
+                          <span className="text-body-sm text-foreground-muted">
+                            {checkedItems.length}/{prepChecklist.length} preparation items completed
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Warning size={16} className="text-[var(--primitive-orange-500)]" />
+                          <span className="text-body-sm text-foreground-muted">
+                            Don&apos;t forget to prepare for your session!
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Info Box */}
+              <div className="mb-6 rounded-xl border border-[var(--candid-border-accent)] bg-[var(--candid-background-subtle)] p-4">
+                <div className="flex items-start gap-3">
+                  <VideoCamera size={20} className="mt-0.5 flex-shrink-0 text-[#072924]" />
                   <div>
-                    <h3 className="font-semibold text-foreground-default">
-                      {selectedMentor.firstName} {selectedMentor.lastName}
-                    </h3>
-                    <p className="text-body-sm text-foreground-muted">
-                      {selectedMentor.currentRole} at {selectedMentor.currentCompany}
+                    <p className="text-foreground-default font-medium">
+                      You&apos;ll receive a calendar invite with the meeting link
+                    </p>
+                    <p className="mt-1 text-body-sm text-foreground-muted">
+                      A reminder will be sent 24 hours and 1 hour before your session
                     </p>
                   </div>
                 </div>
-
-                {/* Details */}
-                <div className="py-4 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
-                      <Calendar size={20} className="text-[#072924]" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground-default">
-                        {format(selectedDate, "EEEE, MMMM d, yyyy")}
-                      </p>
-                      <p className="text-body-sm text-foreground-muted">
-                        {selectedTime} · {selectedSessionType.duration} minutes
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
-                      <selectedSessionType.icon size={20} className="text-[#072924]" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground-default">
-                        {selectedSessionType.label}
-                      </p>
-                      <p className="text-body-sm text-foreground-muted">
-                        {selectedSessionType.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {notes && (
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
-                        <FileText size={20} className="text-[#072924]" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground-default">Session Notes</p>
-                        <p className="text-body-sm text-foreground-muted">{notes}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Preparation Status */}
-                <div className="pt-4 border-t border-[var(--border-default)]">
-                  <div className="flex items-center gap-2">
-                    {checkedItems.length === prepChecklist.length ? (
-                      <>
-                        <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-600)]" />
-                        <span className="text-body-sm text-[var(--primitive-green-600)] font-medium">
-                          Preparation complete!
-                        </span>
-                      </>
-                    ) : checkedItems.length > 0 ? (
-                      <>
-                        <Info size={16} className="text-[var(--primitive-orange-500)]" />
-                        <span className="text-body-sm text-foreground-muted">
-                          {checkedItems.length}/{prepChecklist.length} preparation items completed
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Warning size={16} className="text-[var(--primitive-orange-500)]" />
-                        <span className="text-body-sm text-foreground-muted">
-                          Don't forget to prepare for your session!
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Info Box */}
-            <div className="rounded-xl border border-[var(--candid-border-accent)] bg-[var(--candid-background-subtle)] p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <VideoCamera size={20} className="text-[#072924] flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium text-foreground-default">
-                    You'll receive a calendar invite with the meeting link
-                  </p>
-                  <p className="text-body-sm text-foreground-muted mt-1">
-                    A reminder will be sent 24 hours and 1 hour before your session
-                  </p>
-                </div>
               </div>
-            </div>
 
-            {/* Book Button */}
-            <Button
-              onClick={() => {
-                // In real app, this would create the session
-                window.location.href = "/candid/sessions?booked=true";
-              }}
-              variant="primary"
-              size="lg"
-              className="w-full"
-              rightIcon={<ArrowRight size={18} />}
-            >
-              Confirm & Book Session
-            </Button>
-          </div>
-        )}
+              {/* Book Button */}
+              <Button
+                onClick={() => {
+                  // In real app, this would create the session
+                  window.location.href = "/candid/sessions?booked=true";
+                }}
+                variant="primary"
+                size="lg"
+                className="w-full"
+                rightIcon={<ArrowRight size={18} />}
+              >
+                Confirm & Book Session
+              </Button>
+            </div>
+          )}
 
         {/* Navigation */}
         {step !== "confirm" && (
           <div className="mt-10 flex items-center justify-between">
             <Button
               onClick={goToPreviousStep}
-              disabled={currentStepIndex === 0 || (step === "datetime" && preSelectedMentorId !== null)}
+              disabled={
+                currentStepIndex === 0 || (step === "datetime" && preSelectedMentorId !== null)
+              }
               variant="ghost"
               leftIcon={<ArrowLeft size={18} />}
-              className={cn((currentStepIndex === 0 || (step === "datetime" && preSelectedMentorId !== null)) && "invisible")}
+              className={cn(
+                (currentStepIndex === 0 || (step === "datetime" && preSelectedMentorId !== null)) &&
+                  "invisible"
+              )}
             >
               Back
             </Button>

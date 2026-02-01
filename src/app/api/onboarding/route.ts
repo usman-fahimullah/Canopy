@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { type Prisma, type CareerStage } from "@prisma/client";
 import {
   type Shell,
   type OnboardingProgress,
@@ -36,9 +37,7 @@ const talentFields = {
   skills: z.array(z.string().max(200)).max(50).optional(),
   sectors: z.array(z.string().max(200)).max(50).optional(),
   goals: z.array(z.string().max(500)).max(20).optional(),
-  yearsExperience: z
-    .enum(["less-than-1", "1-3", "3-7", "7-10", "10+"])
-    .optional(),
+  yearsExperience: z.enum(["less-than-1", "1-3", "3-7", "7-10", "10+"]).optional(),
   roleTypes: z.array(z.string().max(100)).max(20).optional(),
   transitionTimeline: z.string().max(100).optional(),
   locationPreference: z.string().max(200).optional(),
@@ -124,8 +123,8 @@ interface AccountUpdate {
 }
 
 /** Convert OnboardingProgress to a plain JSON object for Prisma's Json field */
-function toJsonValue(progress: OnboardingProgress): unknown {
-  return JSON.parse(JSON.stringify(progress));
+function toJsonValue(progress: OnboardingProgress): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(progress)) as Prisma.InputJsonValue;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -223,10 +222,7 @@ export async function POST(request: NextRequest) {
     try {
       rawBody = await request.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid JSON body" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
     const parsed = onboardingBodySchema.safeParse(rawBody);
@@ -239,15 +235,14 @@ export async function POST(request: NextRequest) {
             message: i.message,
           })),
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const body = parsed.data;
 
     let progress: OnboardingProgress =
-      (account.onboardingProgress as OnboardingProgress | null) ||
-      createOnboardingProgress();
+      (account.onboardingProgress as OnboardingProgress | null) || createOnboardingProgress();
 
     const accountUpdate: AccountUpdate = {};
 
@@ -319,7 +314,7 @@ export async function POST(request: NextRequest) {
             isMentor: legacyRole === "mentor",
             mentorTopics: legacyRole === "mentor" ? body.sectors || [] : [],
             skills: body.skills || [],
-            careerStage: body.careerStage || null,
+            careerStage: (body.careerStage as CareerStage) || null,
             yearsExperience: body.yearsExperience
               ? parseYearsExperience(body.yearsExperience)
               : null,
@@ -330,19 +325,12 @@ export async function POST(request: NextRequest) {
           where: { id: account.seekerProfile.id },
           data: {
             targetSectors: body.sectors || account.seekerProfile.targetSectors,
-            headline:
-              body.jobTitle ||
-              body.goals?.[0] ||
-              account.seekerProfile.headline,
-            isMentor: legacyRole === "mentor"
-              ? true
-              : account.seekerProfile.isMentor,
-            mentorTopics: legacyRole === "mentor"
-              ? body.sectors || []
-              : account.seekerProfile.mentorTopics,
+            headline: body.jobTitle || body.goals?.[0] || account.seekerProfile.headline,
+            isMentor: legacyRole === "mentor" ? true : account.seekerProfile.isMentor,
+            mentorTopics:
+              legacyRole === "mentor" ? body.sectors || [] : account.seekerProfile.mentorTopics,
             skills: body.skills || account.seekerProfile.skills,
-            careerStage:
-              body.careerStage || account.seekerProfile.careerStage,
+            careerStage: (body.careerStage as CareerStage) || account.seekerProfile.careerStage,
             yearsExperience: body.yearsExperience
               ? parseYearsExperience(body.yearsExperience)
               : account.seekerProfile.yearsExperience,
@@ -390,8 +378,7 @@ export async function POST(request: NextRequest) {
             expertise: body.expertise || account.coachProfile.expertise,
             sessionTypes: body.sessionTypes || account.coachProfile.sessionTypes,
             sessionRate: body.sessionRate || account.coachProfile.sessionRate,
-            yearsInClimate:
-              body.yearsInClimate || account.coachProfile.yearsInClimate,
+            yearsInClimate: body.yearsInClimate || account.coachProfile.yearsInClimate,
           },
         });
       }
@@ -470,7 +457,7 @@ export async function POST(request: NextRequest) {
               isMentor: body.role === "mentor",
               mentorTopics: body.role === "mentor" ? body.sectors || [] : [],
               skills: body.skills || [],
-              careerStage: body.careerStage || null,
+              careerStage: (body.careerStage as CareerStage) || null,
               yearsExperience: body.yearsExperience
                 ? parseYearsExperience(body.yearsExperience)
                 : null,
@@ -481,19 +468,12 @@ export async function POST(request: NextRequest) {
             where: { id: account.seekerProfile.id },
             data: {
               targetSectors: body.sectors || account.seekerProfile.targetSectors,
-              headline:
-                body.jobTitle ||
-                body.goals?.[0] ||
-                account.seekerProfile.headline,
-              isMentor: body.role === "mentor"
-                ? true
-                : account.seekerProfile.isMentor,
-              mentorTopics: body.role === "mentor"
-                ? body.sectors || []
-                : account.seekerProfile.mentorTopics,
+              headline: body.jobTitle || body.goals?.[0] || account.seekerProfile.headline,
+              isMentor: body.role === "mentor" ? true : account.seekerProfile.isMentor,
+              mentorTopics:
+                body.role === "mentor" ? body.sectors || [] : account.seekerProfile.mentorTopics,
               skills: body.skills || account.seekerProfile.skills,
-              careerStage:
-                body.careerStage || account.seekerProfile.careerStage,
+              careerStage: (body.careerStage as CareerStage) || account.seekerProfile.careerStage,
               yearsExperience: body.yearsExperience
                 ? parseYearsExperience(body.yearsExperience)
                 : account.seekerProfile.yearsExperience,
@@ -531,26 +511,28 @@ export async function POST(request: NextRequest) {
               expertise: body.expertise || account.coachProfile.expertise,
               sessionTypes: body.sessionTypes || account.coachProfile.sessionTypes,
               sessionRate: body.sessionRate || account.coachProfile.sessionRate,
-              yearsInClimate:
-                body.yearsInClimate || account.coachProfile.yearsInClimate,
+              yearsInClimate: body.yearsInClimate || account.coachProfile.yearsInClimate,
             },
           });
         }
       }
 
-      return finishRoleOnboarding(account, progress, effectiveShell, accountUpdate, "complete-role");
+      return finishRoleOnboarding(
+        account,
+        progress,
+        effectiveShell,
+        accountUpdate,
+        "complete-role"
+      );
     }
 
     return NextResponse.json(
       { error: "Invalid action or missing required fields" },
-      { status: 400 },
+      { status: 400 }
     );
   } catch (error) {
     console.error("Onboarding error:", error);
-    return NextResponse.json(
-      { error: "Failed to complete onboarding" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to complete onboarding" }, { status: 500 });
   }
 }
 
@@ -561,7 +543,7 @@ async function finishRoleOnboarding(
   progress: OnboardingProgress,
   shell: Shell,
   accountUpdate: AccountUpdate,
-  action: string,
+  action: string
 ) {
   if (!progress.roles[shell]) {
     progress.roles[shell] = createRoleOnboardingState(shell);

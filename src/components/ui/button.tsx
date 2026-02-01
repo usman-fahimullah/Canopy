@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Loader2 } from "lucide-react";
+import { SpinnerGap } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,7 +28,7 @@ const buttonVariants = cva(
   [
     "inline-flex items-center justify-center",
     "whitespace-nowrap font-bold",
-    "rounded-2xl",                         // 16px border-radius per Figma
+    "rounded-2xl", // 16px border-radius per Figma
     "transition-all duration-150",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
@@ -38,17 +38,23 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Primary - Figma: bg #0A3D2C, hover #0e5249, text #e5f1ff
-        primary: "bg-[var(--button-primary-background)] hover:bg-[var(--button-primary-background-hover)] text-[var(--button-primary-foreground)]",
+        primary:
+          "bg-[var(--button-primary-background)] hover:bg-[var(--button-primary-background-hover)] text-[var(--button-primary-foreground)]",
         // Secondary - Figma: bg #cce4ff, hover #99c9ff, text #0A3D2C
-        secondary: "bg-[var(--button-secondary-background)] hover:bg-[var(--button-secondary-background-hover)] text-[var(--button-secondary-foreground)]",
+        secondary:
+          "bg-[var(--button-secondary-background)] hover:bg-[var(--button-secondary-background-hover)] text-[var(--button-secondary-foreground)]",
         // Tertiary - Figma: bg #f2ede9, hover #e5dfd8, text #0A3D2C
-        tertiary: "bg-[var(--button-tertiary-background)] hover:bg-[var(--button-tertiary-background-hover)] text-[var(--button-tertiary-foreground)]",
+        tertiary:
+          "bg-[var(--button-tertiary-background)] hover:bg-[var(--button-tertiary-background-hover)] text-[var(--button-tertiary-foreground)]",
         // Inverse - Figma: bg white, hover #eaffe0, text #0A3D2C
-        inverse: "bg-[var(--button-inverse-background)] hover:bg-[var(--button-inverse-background-hover)] text-[var(--button-inverse-foreground)]",
+        inverse:
+          "bg-[var(--button-inverse-background)] hover:bg-[var(--button-inverse-background-hover)] text-[var(--button-inverse-foreground)]",
         // Destructive - Figma: bg #ff5c5c, hover #e90000, text white
-        destructive: "bg-[var(--button-destructive-background)] hover:bg-[var(--button-destructive-background-hover)] text-[var(--button-destructive-foreground)]",
+        destructive:
+          "bg-[var(--button-destructive-background)] hover:bg-[var(--button-destructive-background-hover)] text-[var(--button-destructive-foreground)]",
         // Ghost - transparent background with subtle hover
-        ghost: "bg-[var(--button-ghost-background)] hover:bg-[var(--button-ghost-background-hover)] text-[var(--button-ghost-foreground)]",
+        ghost:
+          "bg-[var(--button-ghost-background)] hover:bg-[var(--button-ghost-background-hover)] text-[var(--button-ghost-foreground)]",
         // Outline - Border with transparent background
         outline: [
           "bg-[var(--button-outline-background)] text-[var(--button-outline-foreground)]",
@@ -79,8 +85,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   /** Use the Slot component to render a custom element */
   asChild?: boolean;
   /** Show loading spinner and disable interactions */
@@ -120,7 +125,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" aria-hidden="true" />
             <span className="sr-only">Loading...</span>
             {children}
           </>

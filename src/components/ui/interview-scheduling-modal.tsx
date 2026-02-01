@@ -5,13 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Textarea } from "./textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./dropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./dropdown";
 import { Avatar } from "./avatar";
 import { Banner } from "./banner";
 import { SegmentedController } from "./segmented-controller";
@@ -236,19 +230,14 @@ const AttendeeChip: React.FC<AttendeeChipProps> = ({
       className={cn(
         "inline-flex items-center gap-1.5",
         "px-2 py-1.5",
-        "bg-[var(--primitive-neutral-200)] rounded-full",
+        "rounded-full bg-[var(--primitive-neutral-200)]",
         "text-[13px]",
         attendee.calendarStatus === "loading" && "animate-pulse",
         className
       )}
     >
-      <Avatar
-        src={attendee.avatar}
-        name={attendee.name}
-        size="xs"
-        className="w-5 h-5"
-      />
-      <span className="font-medium text-[var(--foreground-default)] max-w-[100px] truncate">
+      <Avatar src={attendee.avatar} name={attendee.name} size="xs" className="h-5 w-5" />
+      <span className="max-w-[100px] truncate font-medium text-[var(--foreground-default)]">
         {attendee.name.split(" ")[0]}
       </span>
       {/* Always show role for all attendees */}
@@ -262,7 +251,7 @@ const AttendeeChip: React.FC<AttendeeChipProps> = ({
         <button
           type="button"
           onClick={onRemove}
-          className="ml-0.5 p-1 min-w-[24px] min-h-[24px] flex items-center justify-center rounded-full text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] hover:bg-[var(--primitive-neutral-300)] transition-colors"
+          className="ml-0.5 flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-300)] hover:text-[var(--foreground-default)]"
           aria-label={`Remove ${attendee.name}`}
         >
           <X size={12} weight="bold" />
@@ -281,16 +270,12 @@ interface TimeSlotChipProps {
   className?: string;
 }
 
-const TimeSlotChip: React.FC<TimeSlotChipProps> = ({
-  slot,
-  onRemove,
-  className,
-}) => {
+const TimeSlotChip: React.FC<TimeSlotChipProps> = ({ slot, onRemove, className }) => {
   return (
     <div
       className={cn(
         "inline-flex items-center gap-2 px-3 py-2",
-        "bg-[var(--primitive-blue-400)] rounded-lg",
+        "rounded-lg bg-[var(--primitive-blue-400)]",
         "border-l-4 border-[var(--primitive-blue-500)]",
         "text-[12px] font-medium text-white",
         "shadow-sm",
@@ -308,7 +293,7 @@ const TimeSlotChip: React.FC<TimeSlotChipProps> = ({
         <button
           type="button"
           onClick={onRemove}
-          className="ml-1 p-1 min-w-[24px] min-h-[24px] flex items-center justify-center rounded-full hover:bg-[var(--primitive-blue-500)] transition-colors"
+          className="ml-1 flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full p-1 transition-colors hover:bg-[var(--primitive-blue-500)]"
           aria-label="Remove time slot"
         >
           <X size={12} weight="bold" />
@@ -345,14 +330,46 @@ type SlotAvailability = "available" | "partial" | "busy" | "past";
 // Colors for attendee calendar overlays - using dedicated calendar palette
 // These muted, harmonious colors don't conflict with semantic UI colors (red=error, green=success)
 const ATTENDEE_COLORS = [
-  { bg: "var(--calendar-attendee-1-background)", border: "var(--calendar-attendee-1-border)", text: "var(--calendar-attendee-1-foreground)" }, // Sage
-  { bg: "var(--calendar-attendee-2-background)", border: "var(--calendar-attendee-2-border)", text: "var(--calendar-attendee-2-foreground)" }, // Terracotta
-  { bg: "var(--calendar-attendee-3-background)", border: "var(--calendar-attendee-3-border)", text: "var(--calendar-attendee-3-foreground)" }, // Slate
-  { bg: "var(--calendar-attendee-4-background)", border: "var(--calendar-attendee-4-border)", text: "var(--calendar-attendee-4-foreground)" }, // Orchid
-  { bg: "var(--calendar-attendee-5-background)", border: "var(--calendar-attendee-5-border)", text: "var(--calendar-attendee-5-foreground)" }, // Rose
-  { bg: "var(--calendar-attendee-6-background)", border: "var(--calendar-attendee-6-border)", text: "var(--calendar-attendee-6-foreground)" }, // Fern
-  { bg: "var(--calendar-attendee-7-background)", border: "var(--calendar-attendee-7-border)", text: "var(--calendar-attendee-7-foreground)" }, // Wheat
-  { bg: "var(--calendar-attendee-8-background)", border: "var(--calendar-attendee-8-border)", text: "var(--calendar-attendee-8-foreground)" }, // Steel
+  {
+    bg: "var(--calendar-attendee-1-background)",
+    border: "var(--calendar-attendee-1-border)",
+    text: "var(--calendar-attendee-1-foreground)",
+  }, // Sage
+  {
+    bg: "var(--calendar-attendee-2-background)",
+    border: "var(--calendar-attendee-2-border)",
+    text: "var(--calendar-attendee-2-foreground)",
+  }, // Terracotta
+  {
+    bg: "var(--calendar-attendee-3-background)",
+    border: "var(--calendar-attendee-3-border)",
+    text: "var(--calendar-attendee-3-foreground)",
+  }, // Slate
+  {
+    bg: "var(--calendar-attendee-4-background)",
+    border: "var(--calendar-attendee-4-border)",
+    text: "var(--calendar-attendee-4-foreground)",
+  }, // Orchid
+  {
+    bg: "var(--calendar-attendee-5-background)",
+    border: "var(--calendar-attendee-5-border)",
+    text: "var(--calendar-attendee-5-foreground)",
+  }, // Rose
+  {
+    bg: "var(--calendar-attendee-6-background)",
+    border: "var(--calendar-attendee-6-border)",
+    text: "var(--calendar-attendee-6-foreground)",
+  }, // Fern
+  {
+    bg: "var(--calendar-attendee-7-background)",
+    border: "var(--calendar-attendee-7-border)",
+    text: "var(--calendar-attendee-7-foreground)",
+  }, // Wheat
+  {
+    bg: "var(--calendar-attendee-8-background)",
+    border: "var(--calendar-attendee-8-border)",
+    text: "var(--calendar-attendee-8-foreground)",
+  }, // Steel
 ];
 
 // CSS pattern for tentative/optional events (diagonal stripes)
@@ -405,18 +422,18 @@ const DraggableSlot: React.FC<DraggableSlotProps> = ({
     <div
       ref={setNodeRef}
       className={cn(
-        "absolute left-1 right-1 rounded-lg bg-[var(--primitive-blue-400)] shadow-sm transition-colors group border-l-4 border-[var(--primitive-blue-500)]",
-        isDragging ? "shadow-lg cursor-grabbing" : "cursor-grab hover:bg-[var(--primitive-blue-500)]"
+        "group absolute left-1 right-1 rounded-lg border-l-4 border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-400)] shadow-sm transition-colors",
+        isDragging
+          ? "cursor-grabbing shadow-lg"
+          : "cursor-grab hover:bg-[var(--primitive-blue-500)]"
       )}
       style={style}
       {...listeners}
       {...attributes}
     >
-      <div className="px-2 py-1.5 h-full flex flex-col overflow-hidden">
+      <div className="flex h-full flex-col overflow-hidden px-2 py-1.5">
         <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold text-white truncate flex-1">
-            Interview Slot
-          </p>
+          <p className="flex-1 truncate text-[11px] font-semibold text-white">Interview Slot</p>
           <div className="flex items-center gap-0.5">
             {/* Drag handle indicator */}
             <DotsSixVertical size={12} className="text-white/60" weight="bold" />
@@ -433,7 +450,7 @@ const DraggableSlot: React.FC<DraggableSlotProps> = ({
               e.stopPropagation();
               onRemove();
             }}
-            className="mt-auto opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] text-white/80 hover:text-white"
+            className="mt-auto flex items-center gap-1 text-[10px] text-white/80 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
           >
             <X size={10} />
             <span>Remove</span>
@@ -454,12 +471,7 @@ interface DroppableDayProps {
   className?: string;
 }
 
-const DroppableDay: React.FC<DroppableDayProps> = ({
-  day,
-  dayIndex,
-  children,
-  className,
-}) => {
+const DroppableDay: React.FC<DroppableDayProps> = ({ day, dayIndex, children, className }) => {
   const { isOver, setNodeRef } = useDroppable({
     id: `day-${dayIndex}`,
     data: { day, dayIndex },
@@ -497,7 +509,10 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 }) => {
   const [hoveredTime, setHoveredTime] = React.useState<{ day: Date; minutes: number } | null>(null);
   const [activeDragId, setActiveDragId] = React.useState<string | null>(null);
-  const [dropPreview, setDropPreview] = React.useState<{ dayIndex: number; minutes: number } | null>(null);
+  const [dropPreview, setDropPreview] = React.useState<{
+    dayIndex: number;
+    minutes: number;
+  } | null>(null);
   const [weekView, setWeekView] = React.useState<WeekViewType>("5-day");
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const hasScrolledRef = React.useRef(false);
@@ -516,11 +531,10 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   // 7-day: Sun-Sat (weekStartsOn: 0)
   const weekStartsOn = weekView === "7-day" ? 0 : 1;
   const weekStart = startOfWeek(selectedDate, { weekStartsOn });
-  const weekEnd = weekView === "7-day"
-    ? endOfWeek(selectedDate, { weekStartsOn })
-    : addDays(weekStart, 4); // Mon-Fri = 5 days
+  const weekEnd =
+    weekView === "7-day" ? endOfWeek(selectedDate, { weekStartsOn }) : addDays(weekStart, 4); // Mon-Fri = 5 days
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  const todayInView = days.some(day => isToday(day));
+  const todayInView = days.some((day) => isToday(day));
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const totalMinutes = (endHour - startHour) * 60;
 
@@ -565,9 +579,9 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
     if (isBefore(slotStart, now)) return "past";
 
-    const freeCount = attendees.filter(attendee => {
+    const freeCount = attendees.filter((attendee) => {
       if (!attendee.availability || attendee.availability.length === 0) return true;
-      const isBusy = attendee.availability.some(block => {
+      const isBusy = attendee.availability.some((block) => {
         if (block.status === "free") return false;
         return slotStart < block.end && slotEnd > block.start;
       });
@@ -584,9 +598,9 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     const slotStart = addMinutes(setHours(setMinutes(day, 0), 0), startMinutes);
     const slotEnd = addMinutes(slotStart, duration);
 
-    return attendees.filter(attendee => {
+    return attendees.filter((attendee) => {
       if (!attendee.availability) return false;
-      return attendee.availability.some(block => {
+      return attendee.availability.some((block) => {
         if (block.status === "free") return false;
         return slotStart < block.end && slotEnd > block.start;
       });
@@ -606,10 +620,8 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     const slotStart = addMinutes(setHours(setMinutes(day, 0), 0), minutes);
 
     // Check if clicking on an existing selected slot
-    const existingSlot = selectedSlots.find(s =>
-      isSameDay(s.start, day) &&
-      slotStart >= s.start &&
-      slotStart < s.end
+    const existingSlot = selectedSlots.find(
+      (s) => isSameDay(s.start, day) && slotStart >= s.start && slotStart < s.end
     );
 
     if (existingSlot) {
@@ -636,7 +648,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   // Get busy blocks for an attendee on a specific day
   const getAttendeeBusyBlocksForDay = (attendee: Attendee, day: Date) => {
     if (!attendee.availability) return [];
-    return attendee.availability.filter(block => {
+    return attendee.availability.filter((block) => {
       if (block.status === "free") return false;
       return isSameDay(block.start, day);
     });
@@ -644,7 +656,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
 
   // Get selected slots for a specific day
   const getSelectedSlotsForDay = (day: Date) => {
-    return selectedSlots.filter(slot => isSameDay(slot.start, day));
+    return selectedSlots.filter((slot) => isSameDay(slot.start, day));
   };
 
   // Handle drag start - track which slot is being dragged
@@ -662,7 +674,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       return;
     }
 
-    const draggedSlot = selectedSlots.find(s => s.id === active.id);
+    const draggedSlot = selectedSlots.find((s) => s.id === active.id);
     if (!draggedSlot) {
       setDropPreview(null);
       return;
@@ -676,13 +688,13 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     }
 
     // Calculate the vertical offset in minutes (based on pixel movement)
-    const minutesDelta = Math.round((delta.y / HOUR_HEIGHT) * 60 / 15) * 15; // Snap to 15-min intervals
+    const minutesDelta = Math.round(((delta.y / HOUR_HEIGHT) * 60) / 15) * 15; // Snap to 15-min intervals
 
     // Calculate new start time
     const originalStartMinutes = draggedSlot.start.getHours() * 60 + draggedSlot.start.getMinutes();
     const newStartMinutes = Math.max(
       startHour * 60,
-      Math.min(originalStartMinutes + minutesDelta, (endHour * 60) - duration)
+      Math.min(originalStartMinutes + minutesDelta, endHour * 60 - duration)
     );
 
     setDropPreview({
@@ -700,7 +712,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     if (!over || !onSlotUpdate) return;
 
     const draggedSlotId = active.id as string;
-    const draggedSlot = selectedSlots.find(s => s.id === draggedSlotId);
+    const draggedSlot = selectedSlots.find((s) => s.id === draggedSlotId);
     if (!draggedSlot) return;
 
     // Get the target day from the droppable
@@ -710,13 +722,13 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     const targetDay = targetDayData.day;
 
     // Calculate the vertical offset in minutes (based on pixel movement)
-    const minutesDelta = Math.round((delta.y / HOUR_HEIGHT) * 60 / 15) * 15; // Snap to 15-min intervals
+    const minutesDelta = Math.round(((delta.y / HOUR_HEIGHT) * 60) / 15) * 15; // Snap to 15-min intervals
 
     // Calculate new start time
     const originalStartMinutes = draggedSlot.start.getHours() * 60 + draggedSlot.start.getMinutes();
     const newStartMinutes = Math.max(
       startHour * 60,
-      Math.min(originalStartMinutes + minutesDelta, (endHour * 60) - duration)
+      Math.min(originalStartMinutes + minutesDelta, endHour * 60 - duration)
     );
 
     // Create new start date on the target day
@@ -738,7 +750,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
   };
 
   // Get the currently dragged slot for the overlay
-  const activeDragSlot = activeDragId ? selectedSlots.find(s => s.id === activeDragId) : null;
+  const activeDragSlot = activeDragId ? selectedSlots.find((s) => s.id === activeDragId) : null;
 
   return (
     <DndContext
@@ -748,468 +760,479 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
     >
-    <div className={cn("flex flex-col h-full min-h-0 bg-white", className)}>
-      {/* Calendar Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-200)]">
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => navigateWeek("prev")}
-            className="p-1.5 rounded hover:bg-[var(--primitive-neutral-100)] text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors"
-            aria-label="Previous week"
-          >
-            <CaretLeft size={16} weight="bold" />
-          </button>
-          <button
-            type="button"
-            onClick={() => navigateWeek("next")}
-            className="p-1.5 rounded hover:bg-[var(--primitive-neutral-100)] text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors"
-            aria-label="Next week"
-          >
-            <CaretRight size={16} weight="bold" />
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-[var(--foreground-default)]">
-            {format(weekStart, "MMM d")} – {format(weekEnd, "d, yyyy")}
-          </span>
-          <span className="flex items-center gap-1 text-[11px] text-[var(--foreground-muted)] bg-[var(--primitive-neutral-100)] px-2 py-0.5 rounded">
-            <GlobeHemisphereWest size={12} />
-            {Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ")}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Week View Toggle */}
-          <div className="flex items-center bg-[var(--primitive-neutral-100)] rounded-lg p-0.5">
+      <div className={cn("flex h-full min-h-0 flex-col bg-white", className)}>
+        {/* Calendar Header */}
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--primitive-neutral-200)] px-4 py-3">
+          <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => setWeekView("5-day")}
-              className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded-md transition-all",
-                weekView === "5-day"
-                  ? "bg-white text-[var(--foreground-default)] shadow-sm"
-                  : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
-              )}
+              onClick={() => navigateWeek("prev")}
+              className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--foreground-default)]"
+              aria-label="Previous week"
             >
-              5 days
+              <CaretLeft size={16} weight="bold" />
             </button>
             <button
               type="button"
-              onClick={() => setWeekView("7-day")}
-              className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded-md transition-all",
-                weekView === "7-day"
-                  ? "bg-white text-[var(--foreground-default)] shadow-sm"
-                  : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
-              )}
+              onClick={() => navigateWeek("next")}
+              className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--foreground-default)]"
+              aria-label="Next week"
             >
-              7 days
+              <CaretRight size={16} weight="bold" />
             </button>
           </div>
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={goToToday}
-            aria-label="Go to today"
-          >
-            <CalendarDot size={16} weight="fill" />
-          </Button>
-        </div>
-      </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-[var(--foreground-default)]">
+              {format(weekStart, "MMM d")} – {format(weekEnd, "d, yyyy")}
+            </span>
+            <span className="flex items-center gap-1 rounded bg-[var(--primitive-neutral-100)] px-2 py-0.5 text-[11px] text-[var(--foreground-muted)]">
+              <GlobeHemisphereWest size={12} />
+              {Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ")}
+            </span>
+          </div>
 
-      {/* Legend bar - attendee colors and visibility toggles */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)]">
-        <div className="flex items-center gap-2 text-[11px] text-[var(--foreground-muted)]">
-          {/* Attendee legend chips */}
-          {attendees.length > 0 && (
-            <div className="flex items-center gap-2">
-              {attendees.map((attendee, index) => {
-                const color = getAttendeeColor(index);
-                return (
-                  <div
-                    key={attendee.id}
-                    className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border"
-                    style={{
-                      backgroundColor: color.bg,
-                      borderColor: color.border
-                    }}
-                  >
+          <div className="flex items-center gap-2">
+            {/* Week View Toggle */}
+            <div className="flex items-center rounded-lg bg-[var(--primitive-neutral-100)] p-0.5">
+              <button
+                type="button"
+                onClick={() => setWeekView("5-day")}
+                className={cn(
+                  "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
+                  weekView === "5-day"
+                    ? "bg-white text-[var(--foreground-default)] shadow-sm"
+                    : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
+                )}
+              >
+                5 days
+              </button>
+              <button
+                type="button"
+                onClick={() => setWeekView("7-day")}
+                className={cn(
+                  "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
+                  weekView === "7-day"
+                    ? "bg-white text-[var(--foreground-default)] shadow-sm"
+                    : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
+                )}
+              >
+                7 days
+              </button>
+            </div>
+
+            <Button variant="outline" size="icon" onClick={goToToday} aria-label="Go to today">
+              <CalendarDot size={16} weight="fill" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Legend bar - attendee colors and visibility toggles */}
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] px-4 py-2">
+          <div className="flex items-center gap-2 text-[11px] text-[var(--foreground-muted)]">
+            {/* Attendee legend chips */}
+            {attendees.length > 0 && (
+              <div className="flex items-center gap-2">
+                {attendees.map((attendee, index) => {
+                  const color = getAttendeeColor(index);
+                  return (
                     <div
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: color.border }}
-                    />
-                    <span
-                      className="text-[10px] font-medium"
-                      style={{ color: color.text }}
+                      key={attendee.id}
+                      className="flex items-center gap-1.5 rounded-full border px-2 py-0.5"
+                      style={{
+                        backgroundColor: color.bg,
+                        borderColor: color.border,
+                      }}
                     >
-                      {attendee.name.split(" ")[0]}
-                    </span>
-                  </div>
-                );
-              })}
-              {/* Tentative pattern legend */}
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--primitive-neutral-100)] border border-[var(--primitive-neutral-300)]">
-                <div
-                  className="w-3 h-3 rounded-sm border border-[var(--primitive-neutral-400)]"
-                  style={{
-                    backgroundImage: TENTATIVE_PATTERN,
-                    backgroundColor: "var(--primitive-neutral-200)"
-                  }}
-                />
-                <span className="text-[10px] text-[var(--foreground-muted)]">
-                  Tentative
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="text-[11px] text-[var(--foreground-muted)]">
-          {duration} min slots
-        </div>
-      </div>
-
-      {/* Calendar Grid - Scrollable area */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <div
-          ref={scrollContainerRef}
-          className="h-full overflow-auto"
-        >
-          <div className="flex min-w-[700px]">
-            {/* Time column */}
-            <div className="w-14 flex-shrink-0 border-r border-[var(--primitive-neutral-200)]">
-              {/* Header spacer */}
-              <div className="h-12 border-b border-[var(--primitive-neutral-200)]" />
-              {/* Hour labels */}
-              {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className="relative border-b border-[var(--primitive-neutral-100)]"
-                  style={{ height: HOUR_HEIGHT }}
-                >
-                  <span className="absolute -top-2 right-2 text-[11px] text-[var(--foreground-muted)]">
-                    {format(setHours(new Date(), hour), "h a")}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Day columns */}
-            {days.map((day, dayIndex) => {
-              const isCurrentDay = isToday(day);
-              const isPastDay = isBefore(day, new Date()) && !isCurrentDay;
-              const daySelectedSlots = getSelectedSlotsForDay(day);
-
-              return (
-                <DroppableDay
-                  key={day.toISOString()}
-                  day={day}
-                  dayIndex={dayIndex}
-                  className={cn(
-                    "flex-1 min-w-[85px] border-r border-[var(--primitive-neutral-200)] last:border-r-0",
-                    isPastDay && "opacity-50"
-                  )}
-                >
-                  {/* Day header */}
-                  <div className="h-12 flex flex-col items-center justify-center border-b border-[var(--primitive-neutral-200)] bg-white sticky top-0 z-10">
-                    <span className="text-[10px] text-[var(--foreground-muted)] uppercase tracking-wider">
-                      {format(day, "EEE")}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-sm font-semibold mt-0.5",
-                        isCurrentDay
-                          ? "w-7 h-7 flex items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
-                          : "text-[var(--foreground-default)]"
-                      )}
-                    >
-                      {format(day, "d")}
-                    </span>
-                  </div>
-
-                  {/* Time grid - clickable area */}
+                      <div
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: color.border }}
+                      />
+                      <span className="text-[10px] font-medium" style={{ color: color.text }}>
+                        {attendee.name.split(" ")[0]}
+                      </span>
+                    </div>
+                  );
+                })}
+                {/* Tentative pattern legend */}
+                <div className="flex items-center gap-1.5 rounded-full border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] px-2 py-0.5">
                   <div
-                    className="relative cursor-crosshair"
-                    style={{ height: hours.length * HOUR_HEIGHT }}
-                    onClick={(e) => handleGridClick(day, e)}
-                    onMouseMove={(e) => handleGridMouseMove(day, e)}
-                    onMouseLeave={() => setHoveredTime(null)}
+                    className="h-3 w-3 rounded-sm border border-[var(--primitive-neutral-400)]"
+                    style={{
+                      backgroundImage: TENTATIVE_PATTERN,
+                      backgroundColor: "var(--primitive-neutral-200)",
+                    }}
+                  />
+                  <span className="text-[10px] text-[var(--foreground-muted)]">Tentative</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="text-[11px] text-[var(--foreground-muted)]">{duration} min slots</div>
+        </div>
+
+        {/* Calendar Grid - Scrollable area */}
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <div ref={scrollContainerRef} className="h-full overflow-auto">
+            <div className="flex min-w-[700px]">
+              {/* Time column */}
+              <div className="w-14 flex-shrink-0 border-r border-[var(--primitive-neutral-200)]">
+                {/* Header spacer */}
+                <div className="h-12 border-b border-[var(--primitive-neutral-200)]" />
+                {/* Hour labels */}
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    className="relative border-b border-[var(--primitive-neutral-100)]"
+                    style={{ height: HOUR_HEIGHT }}
                   >
-                    {/* Hour lines */}
-                    {hours.map((hour) => (
-                      <div
-                        key={hour}
-                        className="absolute left-0 right-0 border-b border-[var(--primitive-neutral-100)]"
-                        style={{ top: (hour - startHour) * HOUR_HEIGHT + HOUR_HEIGHT - 1 }}
-                      />
-                    ))}
+                    <span className="absolute -top-2 right-2 text-[11px] text-[var(--foreground-muted)]">
+                      {format(setHours(new Date(), hour), "h a")}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
-                    {/* Half-hour lines (dashed) */}
-                    {hours.map((hour) => (
-                      <div
-                        key={`${hour}-30`}
-                        className="absolute left-0 right-0 border-b border-dashed border-[var(--primitive-neutral-100)]"
-                        style={{ top: (hour - startHour) * HOUR_HEIGHT + HOUR_HEIGHT / 2 }}
-                      />
-                    ))}
+              {/* Day columns */}
+              {days.map((day, dayIndex) => {
+                const isCurrentDay = isToday(day);
+                const isPastDay = isBefore(day, new Date()) && !isCurrentDay;
+                const daySelectedSlots = getSelectedSlotsForDay(day);
 
-                    {/* Attendee busy blocks (shown as full-width stacked event cards) */}
-                    {attendees.length > 0 && (() => {
-                      // Collect all events for this day with their attendee info
-                      const allEvents: Array<{
-                        block: AttendeeAvailability;
-                        attendee: Attendee;
-                        attendeeIndex: number;
-                        color: typeof ATTENDEE_COLORS[0];
-                      }> = [];
+                return (
+                  <DroppableDay
+                    key={day.toISOString()}
+                    day={day}
+                    dayIndex={dayIndex}
+                    className={cn(
+                      "min-w-[85px] flex-1 border-r border-[var(--primitive-neutral-200)] last:border-r-0",
+                      isPastDay && "opacity-50"
+                    )}
+                  >
+                    {/* Day header */}
+                    <div className="sticky top-0 z-10 flex h-12 flex-col items-center justify-center border-b border-[var(--primitive-neutral-200)] bg-white">
+                      <span className="text-[10px] uppercase tracking-wider text-[var(--foreground-muted)]">
+                        {format(day, "EEE")}
+                      </span>
+                      <span
+                        className={cn(
+                          "mt-0.5 text-sm font-semibold",
+                          isCurrentDay
+                            ? "flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
+                            : "text-[var(--foreground-default)]"
+                        )}
+                      >
+                        {format(day, "d")}
+                      </span>
+                    </div>
 
-                      attendees.forEach((attendee, attendeeIndex) => {
-                        const busyBlocks = getAttendeeBusyBlocksForDay(attendee, day);
-                        const color = getAttendeeColor(attendeeIndex);
-                        busyBlocks.forEach(block => {
-                          allEvents.push({ block, attendee, attendeeIndex, color });
-                        });
-                      });
+                    {/* Time grid - clickable area */}
+                    <div
+                      className="relative cursor-crosshair"
+                      style={{ height: hours.length * HOUR_HEIGHT }}
+                      onClick={(e) => handleGridClick(day, e)}
+                      onMouseMove={(e) => handleGridMouseMove(day, e)}
+                      onMouseLeave={() => setHoveredTime(null)}
+                    >
+                      {/* Hour lines */}
+                      {hours.map((hour) => (
+                        <div
+                          key={hour}
+                          className="absolute left-0 right-0 border-b border-[var(--primitive-neutral-100)]"
+                          style={{ top: (hour - startHour) * HOUR_HEIGHT + HOUR_HEIGHT - 1 }}
+                        />
+                      ))}
 
-                      // Sort by start time
-                      allEvents.sort((a, b) => a.block.start.getTime() - b.block.start.getTime());
+                      {/* Half-hour lines (dashed) */}
+                      {hours.map((hour) => (
+                        <div
+                          key={`${hour}-30`}
+                          className="absolute left-0 right-0 border-b border-dashed border-[var(--primitive-neutral-100)]"
+                          style={{ top: (hour - startHour) * HOUR_HEIGHT + HOUR_HEIGHT / 2 }}
+                        />
+                      ))}
 
-                      return allEvents.map(({ block, attendee, attendeeIndex, color }, eventIndex) => {
-                        const startMinutes = block.start.getHours() * 60 + block.start.getMinutes();
-                        const endMinutes = block.end.getHours() * 60 + block.end.getMinutes();
-                        const top = getPositionFromMinutes(startMinutes);
-                        const height = Math.max(((endMinutes - startMinutes) / 60) * HOUR_HEIGHT, 24);
+                      {/* Attendee busy blocks (shown as full-width stacked event cards) */}
+                      {attendees.length > 0 &&
+                        (() => {
+                          // Collect all events for this day with their attendee info
+                          const allEvents: Array<{
+                            block: AttendeeAvailability;
+                            attendee: Attendee;
+                            attendeeIndex: number;
+                            color: (typeof ATTENDEE_COLORS)[0];
+                          }> = [];
 
-                        // Determine visual style based on response status
-                        const isOptional = block.responseStatus === "needsAction" || block.responseStatus === "tentative";
-                        const isTentativeBlock = block.status === "tentative";
-                        const showPattern = isOptional || isTentativeBlock;
+                          attendees.forEach((attendee, attendeeIndex) => {
+                            const busyBlocks = getAttendeeBusyBlocksForDay(attendee, day);
+                            const color = getAttendeeColor(attendeeIndex);
+                            busyBlocks.forEach((block) => {
+                              allEvents.push({ block, attendee, attendeeIndex, color });
+                            });
+                          });
 
-                        // Get first name for compact display
-                        const firstName = attendee.name.split(" ")[0];
+                          // Sort by start time
+                          allEvents.sort(
+                            (a, b) => a.block.start.getTime() - b.block.start.getTime()
+                          );
 
-                        return (
-                          <div
-                            key={`${attendee.id}-${eventIndex}`}
-                            className={cn(
-                              "absolute left-1 right-1 rounded-md pointer-events-auto transition-all overflow-hidden",
-                              "hover:z-20 hover:ring-2 hover:ring-offset-1",
-                              showPattern ? "opacity-85 hover:opacity-100" : "opacity-95 hover:opacity-100"
-                            )}
-                            style={{
-                              top,
-                              height,
-                              backgroundColor: color.bg,
-                              borderLeft: `4px solid ${color.border}`,
-                              backgroundImage: showPattern ? TENTATIVE_PATTERN : undefined,
-                              // @ts-expect-error CSS custom property for hover ring color
-                              "--tw-ring-color": color.border,
-                            }}
-                          >
-                            <div className="px-2 py-1 h-full flex flex-col overflow-hidden">
-                              {/* Row 1: Attendee color dot + Title */}
-                              <div className="flex items-start gap-1.5 min-h-0">
+                          return allEvents.map(
+                            ({ block, attendee, attendeeIndex, color }, eventIndex) => {
+                              const startMinutes =
+                                block.start.getHours() * 60 + block.start.getMinutes();
+                              const endMinutes = block.end.getHours() * 60 + block.end.getMinutes();
+                              const top = getPositionFromMinutes(startMinutes);
+                              const height = Math.max(
+                                ((endMinutes - startMinutes) / 60) * HOUR_HEIGHT,
+                                24
+                              );
+
+                              // Determine visual style based on response status
+                              const isOptional =
+                                block.responseStatus === "needsAction" ||
+                                block.responseStatus === "tentative";
+                              const isTentativeBlock = block.status === "tentative";
+                              const showPattern = isOptional || isTentativeBlock;
+
+                              // Get first name for compact display
+                              const firstName = attendee.name.split(" ")[0];
+
+                              return (
                                 <div
-                                  className="w-2 h-2 rounded-full flex-shrink-0 mt-0.5"
-                                  style={{ backgroundColor: color.border }}
-                                />
-                                <p
-                                  className="text-[11px] font-semibold leading-tight line-clamp-2 flex-1"
-                                  style={{ color: color.text }}
-                                >
-                                  {block.title || "Busy"}
-                                </p>
-                              </div>
-                              {/* Row 2: Time - show if height >= 36px */}
-                              {height >= 36 && (
-                                <p
-                                  className="text-[10px] leading-tight mt-0.5 pl-3.5"
-                                  style={{ color: color.text, opacity: 0.8 }}
-                                >
-                                  {format(block.start, "h:mm")} – {format(block.end, "h:mm a")}
-                                </p>
-                              )}
-                              {/* Row 3: Attendee name + status indicator - show if height >= 52px */}
-                              {height >= 52 && (
-                                <div className="flex items-center gap-1.5 mt-auto pl-3.5">
-                                  <p
-                                    className="text-[10px] leading-tight"
-                                    style={{ color: color.text, opacity: 0.75 }}
-                                  >
-                                    {firstName}
-                                  </p>
-                                  {showPattern && (
-                                    <span
-                                      className="text-[9px] px-1 py-0.5 rounded"
-                                      style={{
-                                        backgroundColor: `color-mix(in srgb, ${color.border} 20%, transparent)`,
-                                        color: color.text,
-                                      }}
-                                    >
-                                      {block.responseStatus === "tentative" ? "Maybe" : "Pending"}
-                                    </span>
+                                  key={`${attendee.id}-${eventIndex}`}
+                                  className={cn(
+                                    "pointer-events-auto absolute left-1 right-1 overflow-hidden rounded-md transition-all",
+                                    "hover:z-20 hover:ring-2 hover:ring-offset-1",
+                                    showPattern
+                                      ? "opacity-85 hover:opacity-100"
+                                      : "opacity-95 hover:opacity-100"
                                   )}
+                                  style={{
+                                    top,
+                                    height,
+                                    backgroundColor: color.bg,
+                                    borderLeft: `4px solid ${color.border}`,
+                                    backgroundImage: showPattern ? TENTATIVE_PATTERN : undefined,
+                                    // @ts-expect-error CSS custom property for hover ring color
+                                    "--tw-ring-color": color.border,
+                                  }}
+                                >
+                                  <div className="flex h-full flex-col overflow-hidden px-2 py-1">
+                                    {/* Row 1: Attendee color dot + Title */}
+                                    <div className="flex min-h-0 items-start gap-1.5">
+                                      <div
+                                        className="mt-0.5 h-2 w-2 flex-shrink-0 rounded-full"
+                                        style={{ backgroundColor: color.border }}
+                                      />
+                                      <p
+                                        className="line-clamp-2 flex-1 text-[11px] font-semibold leading-tight"
+                                        style={{ color: color.text }}
+                                      >
+                                        {block.title || "Busy"}
+                                      </p>
+                                    </div>
+                                    {/* Row 2: Time - show if height >= 36px */}
+                                    {height >= 36 && (
+                                      <p
+                                        className="mt-0.5 pl-3.5 text-[10px] leading-tight"
+                                        style={{ color: color.text, opacity: 0.8 }}
+                                      >
+                                        {format(block.start, "h:mm")} –{" "}
+                                        {format(block.end, "h:mm a")}
+                                      </p>
+                                    )}
+                                    {/* Row 3: Attendee name + status indicator - show if height >= 52px */}
+                                    {height >= 52 && (
+                                      <div className="mt-auto flex items-center gap-1.5 pl-3.5">
+                                        <p
+                                          className="text-[10px] leading-tight"
+                                          style={{ color: color.text, opacity: 0.75 }}
+                                        >
+                                          {firstName}
+                                        </p>
+                                        {showPattern && (
+                                          <span
+                                            className="rounded px-1 py-0.5 text-[9px]"
+                                            style={{
+                                              backgroundColor: `color-mix(in srgb, ${color.border} 20%, transparent)`,
+                                              color: color.text,
+                                            }}
+                                          >
+                                            {block.responseStatus === "tentative"
+                                              ? "Maybe"
+                                              : "Pending"}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
+                              );
+                            }
+                          );
+                        })()}
 
-                    {/* Hover preview */}
-                    {hoveredTime && isSameDay(hoveredTime.day, day) && (
-                      (() => {
-                        const availability = getAvailabilityForRange(day, hoveredTime.minutes);
-                        if (availability === "past" || availability === "busy") return null;
+                      {/* Hover preview */}
+                      {hoveredTime &&
+                        isSameDay(hoveredTime.day, day) &&
+                        (() => {
+                          const availability = getAvailabilityForRange(day, hoveredTime.minutes);
+                          if (availability === "past" || availability === "busy") return null;
 
-                        const top = getPositionFromMinutes(hoveredTime.minutes);
-                        const height = (duration / 60) * HOUR_HEIGHT;
-                        const startTime = addMinutes(setHours(setMinutes(day, 0), 0), hoveredTime.minutes);
-                        const busyAttendees = getBusyAttendeesForRange(day, hoveredTime.minutes);
-                        const isMaxReached = selectedSlots.length >= maxSlots;
+                          const top = getPositionFromMinutes(hoveredTime.minutes);
+                          const height = (duration / 60) * HOUR_HEIGHT;
+                          const startTime = addMinutes(
+                            setHours(setMinutes(day, 0), 0),
+                            hoveredTime.minutes
+                          );
+                          const busyAttendees = getBusyAttendeesForRange(day, hoveredTime.minutes);
+                          const isMaxReached = selectedSlots.length >= maxSlots;
 
-                        // Show "max reached" state when at capacity
-                        if (isMaxReached) {
+                          // Show "max reached" state when at capacity
+                          if (isMaxReached) {
+                            return (
+                              <div
+                                className="pointer-events-none absolute left-1 right-1 rounded-lg bg-[var(--primitive-neutral-200)] transition-all"
+                                style={{ top, height }}
+                              >
+                                <div className="flex h-full flex-col justify-center px-2 py-1.5">
+                                  <p className="text-[11px] font-medium text-[var(--primitive-neutral-600)]">
+                                    Max slots reached
+                                  </p>
+                                  <p className="text-[10px] text-[var(--primitive-neutral-500)]">
+                                    Remove a slot to add more
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          }
+
                           return (
                             <div
-                              className="absolute left-1 right-1 rounded-lg bg-[var(--primitive-neutral-200)] pointer-events-none transition-all"
+                              className={cn(
+                                "pointer-events-none absolute left-1 right-1 rounded-lg border-2 border-dashed transition-all",
+                                availability === "partial"
+                                  ? "bg-[var(--primitive-orange-100)]/50 border-[var(--primitive-orange-400)]"
+                                  : "bg-[var(--primitive-blue-100)]/60 border-[var(--primitive-blue-400)]"
+                              )}
                               style={{ top, height }}
                             >
-                              <div className="px-2 py-1.5 h-full flex flex-col justify-center">
-                                <p className="text-[11px] font-medium text-[var(--primitive-neutral-600)]">
-                                  Max slots reached
+                              <div className="px-2 py-1.5">
+                                <p
+                                  className={cn(
+                                    "text-[11px] font-medium",
+                                    availability === "partial"
+                                      ? "text-[var(--primitive-orange-700)]"
+                                      : "text-[var(--primitive-blue-700)]"
+                                  )}
+                                >
+                                  {format(startTime, "h:mm a")} –{" "}
+                                  {format(addMinutes(startTime, duration), "h:mm a")}
                                 </p>
-                                <p className="text-[10px] text-[var(--primitive-neutral-500)]">
-                                  Remove a slot to add more
+                                {availability === "partial" && busyAttendees.length > 0 && (
+                                  <p className="text-[10px] text-[var(--primitive-orange-600)]">
+                                    {busyAttendees.map((a) => a.name.split(" ")[0]).join(", ")} busy
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                      {/* Selected time slots - draggable event cards */}
+                      {daySelectedSlots.map((slot) => {
+                        const startMinutes = slot.start.getHours() * 60 + slot.start.getMinutes();
+                        const top = getPositionFromMinutes(startMinutes);
+                        const height = (duration / 60) * HOUR_HEIGHT;
+                        const isDragging = activeDragId === slot.id;
+
+                        return (
+                          <DraggableSlot
+                            key={slot.id}
+                            slot={slot}
+                            top={top}
+                            height={height}
+                            onRemove={() => onSlotRemove(slot.id)}
+                            isDragging={isDragging}
+                          />
+                        );
+                      })}
+
+                      {/* Drop preview - shows where the slot will land */}
+                      {dropPreview &&
+                        dropPreview.dayIndex === dayIndex &&
+                        activeDragId &&
+                        (() => {
+                          const previewTop = getPositionFromMinutes(dropPreview.minutes);
+                          const previewHeight = (duration / 60) * HOUR_HEIGHT;
+                          const previewStartTime = setMinutes(
+                            setHours(day, Math.floor(dropPreview.minutes / 60)),
+                            dropPreview.minutes % 60
+                          );
+                          const previewEndTime = addMinutes(previewStartTime, duration);
+                          const isPastTime = isBefore(previewStartTime, new Date());
+
+                          return (
+                            <div
+                              className={cn(
+                                "pointer-events-none absolute left-1 right-1 rounded-lg transition-all",
+                                isPastTime
+                                  ? "bg-[var(--primitive-neutral-200)]"
+                                  : "bg-[var(--primitive-blue-100)]"
+                              )}
+                              style={{ top: previewTop, height: previewHeight }}
+                            >
+                              <div className="flex h-full flex-col justify-center px-2 py-1.5">
+                                <p
+                                  className={cn(
+                                    "text-[11px] font-medium",
+                                    isPastTime
+                                      ? "text-[var(--primitive-neutral-500)]"
+                                      : "text-[var(--primitive-blue-600)]"
+                                  )}
+                                >
+                                  {format(previewStartTime, "h:mm")} –{" "}
+                                  {format(previewEndTime, "h:mm a")}
                                 </p>
                               </div>
                             </div>
                           );
-                        }
-
-                        return (
-                          <div
-                            className={cn(
-                              "absolute left-1 right-1 rounded-lg border-2 border-dashed pointer-events-none transition-all",
-                              availability === "partial"
-                                ? "bg-[var(--primitive-orange-100)]/50 border-[var(--primitive-orange-400)]"
-                                : "bg-[var(--primitive-blue-100)]/60 border-[var(--primitive-blue-400)]"
-                            )}
-                            style={{ top, height }}
-                          >
-                            <div className="px-2 py-1.5">
-                              <p className={cn(
-                                "text-[11px] font-medium",
-                                availability === "partial"
-                                  ? "text-[var(--primitive-orange-700)]"
-                                  : "text-[var(--primitive-blue-700)]"
-                              )}>
-                                {format(startTime, "h:mm a")} – {format(addMinutes(startTime, duration), "h:mm a")}
-                              </p>
-                              {availability === "partial" && busyAttendees.length > 0 && (
-                                <p className="text-[10px] text-[var(--primitive-orange-600)]">
-                                  {busyAttendees.map(a => a.name.split(" ")[0]).join(", ")} busy
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })()
-                    )}
-
-                    {/* Selected time slots - draggable event cards */}
-                    {daySelectedSlots.map((slot) => {
-                      const startMinutes = slot.start.getHours() * 60 + slot.start.getMinutes();
-                      const top = getPositionFromMinutes(startMinutes);
-                      const height = (duration / 60) * HOUR_HEIGHT;
-                      const isDragging = activeDragId === slot.id;
-
-                      return (
-                        <DraggableSlot
-                          key={slot.id}
-                          slot={slot}
-                          top={top}
-                          height={height}
-                          onRemove={() => onSlotRemove(slot.id)}
-                          isDragging={isDragging}
-                        />
-                      );
-                    })}
-
-                    {/* Drop preview - shows where the slot will land */}
-                    {dropPreview && dropPreview.dayIndex === dayIndex && activeDragId && (
-                      (() => {
-                        const previewTop = getPositionFromMinutes(dropPreview.minutes);
-                        const previewHeight = (duration / 60) * HOUR_HEIGHT;
-                        const previewStartTime = setMinutes(
-                          setHours(day, Math.floor(dropPreview.minutes / 60)),
-                          dropPreview.minutes % 60
-                        );
-                        const previewEndTime = addMinutes(previewStartTime, duration);
-                        const isPastTime = isBefore(previewStartTime, new Date());
-
-                        return (
-                          <div
-                            className={cn(
-                              "absolute left-1 right-1 rounded-lg pointer-events-none transition-all",
-                              isPastTime
-                                ? "bg-[var(--primitive-neutral-200)]"
-                                : "bg-[var(--primitive-blue-100)]"
-                            )}
-                            style={{ top: previewTop, height: previewHeight }}
-                          >
-                            <div className="px-2 py-1.5 h-full flex flex-col justify-center">
-                              <p className={cn(
-                                "text-[11px] font-medium",
-                                isPastTime
-                                  ? "text-[var(--primitive-neutral-500)]"
-                                  : "text-[var(--primitive-blue-600)]"
-                              )}>
-                                {format(previewStartTime, "h:mm")} – {format(previewEndTime, "h:mm a")}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })()
-                    )}
-                  </div>
-                </DroppableDay>
-              );
-            })}
+                        })()}
+                    </div>
+                  </DroppableDay>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    {/* Drag Overlay - shows a preview of the dragged slot */}
-    <DragOverlay dropAnimation={null}>
-      {activeDragSlot && (
-        <div
-          className="rounded-lg bg-[var(--primitive-blue-400)] shadow-lg border-l-4 border-[var(--primitive-blue-500)] cursor-grabbing opacity-95"
-          style={{
-            width: 'calc(100% - 8px)',
-            minWidth: 80,
-            height: (duration / 60) * HOUR_HEIGHT,
-          }}
-        >
-          <div className="px-2 py-1.5 h-full flex flex-col overflow-hidden">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-semibold text-white truncate flex-1">
-                Interview Slot
+      {/* Drag Overlay - shows a preview of the dragged slot */}
+      <DragOverlay dropAnimation={null}>
+        {activeDragSlot && (
+          <div
+            className="cursor-grabbing rounded-lg border-l-4 border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-400)] opacity-95 shadow-lg"
+            style={{
+              width: "calc(100% - 8px)",
+              minWidth: 80,
+              height: (duration / 60) * HOUR_HEIGHT,
+            }}
+          >
+            <div className="flex h-full flex-col overflow-hidden px-2 py-1.5">
+              <div className="flex items-center justify-between">
+                <p className="flex-1 truncate text-[11px] font-semibold text-white">
+                  Interview Slot
+                </p>
+                <DotsSixVertical size={12} className="text-white/60" weight="bold" />
+              </div>
+              <p className="text-[10px] text-white/90">
+                {format(activeDragSlot.start, "h:mm")} – {format(activeDragSlot.end, "h:mm a")}
               </p>
-              <DotsSixVertical size={12} className="text-white/60" weight="bold" />
             </div>
-            <p className="text-[10px] text-white/90">
-              {format(activeDragSlot.start, "h:mm")} – {format(activeDragSlot.end, "h:mm a")}
-            </p>
           </div>
-        </div>
-      )}
-    </DragOverlay>
+        )}
+      </DragOverlay>
     </DndContext>
   );
 };
@@ -1251,12 +1274,10 @@ const InternalNotesSection: React.FC<InternalNotesSectionProps> = ({
           weight="bold"
           className={cn("transition-transform", !isOpen && "-rotate-90")}
         />
-        {hasContent && !isOpen ? (
-          <NotePencil size={14} weight="fill" />
-        ) : null}
+        {hasContent && !isOpen ? <NotePencil size={14} weight="fill" /> : null}
         <span>Internal notes</span>
         {hasContent && !isOpen && (
-          <span className="ml-1 px-1.5 py-0.5 text-[10px] font-medium bg-[var(--primitive-green-100)] text-[var(--primitive-green-700)] rounded-full">
+          <span className="ml-1 rounded-full bg-[var(--primitive-green-100)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--primitive-green-700)]">
             Has notes
           </span>
         )}
@@ -1267,7 +1288,7 @@ const InternalNotesSection: React.FC<InternalNotesSectionProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Notes for your team (not shared with candidate)"
-            className="min-h-[80px] text-sm resize-none border-[var(--primitive-neutral-300)] focus:border-[var(--primitive-neutral-400)] bg-transparent"
+            className="min-h-[80px] resize-none border-[var(--primitive-neutral-300)] bg-transparent text-sm focus:border-[var(--primitive-neutral-400)]"
           />
         </div>
       )}
@@ -1336,7 +1357,7 @@ const AddAttendeePopover: React.FC<AddAttendeePopoverProps> = ({
           "text-[13px] font-medium",
           "border border-dashed border-[var(--primitive-neutral-400)]",
           "text-[var(--foreground-muted)]",
-          "hover:text-[var(--primitive-green-700)] hover:border-[var(--primitive-green-400)] hover:bg-[var(--primitive-green-50)]",
+          "hover:border-[var(--primitive-green-400)] hover:bg-[var(--primitive-green-50)] hover:text-[var(--primitive-green-700)]",
           "rounded-full transition-all"
         )}
       >
@@ -1347,20 +1368,20 @@ const AddAttendeePopover: React.FC<AddAttendeePopoverProps> = ({
       {isOpen && (
         <div
           className={cn(
-            "absolute top-full left-0 mt-1 z-50",
-            "w-72 max-h-80",
-            "bg-white border border-[var(--primitive-neutral-300)]",
-            "rounded-lg shadow-lg overflow-hidden"
+            "absolute left-0 top-full z-50 mt-1",
+            "max-h-80 w-72",
+            "border border-[var(--primitive-neutral-300)] bg-white",
+            "overflow-hidden rounded-lg shadow-lg"
           )}
         >
-          <div className="p-2 border-b border-[var(--primitive-neutral-200)]">
+          <div className="border-b border-[var(--primitive-neutral-200)] p-2">
             <input
               ref={inputRef}
               type="text"
               placeholder="Search team members..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-[var(--primitive-neutral-100)] rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-500)]"
+              className="w-full rounded-lg border-0 bg-[var(--primitive-neutral-100)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-500)]"
             />
           </div>
 
@@ -1378,19 +1399,14 @@ const AddAttendeePopover: React.FC<AddAttendeePopoverProps> = ({
                   key={member.id}
                   type="button"
                   onClick={() => handleSelect(member)}
-                  className="flex items-center gap-3 w-full px-3 py-2.5 text-left hover:bg-[var(--primitive-neutral-100)] transition-colors"
+                  className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-[var(--primitive-neutral-100)]"
                 >
-                  <Avatar
-                    src={member.avatar}
-                    name={member.name}
-                    size="sm"
-                    className="w-8 h-8"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--foreground-default)] truncate">
+                  <Avatar src={member.avatar} name={member.name} size="sm" className="h-8 w-8" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-[var(--foreground-default)]">
                       {member.name}
                     </p>
-                    <p className={cn("text-[11px] truncate", ROLE_COLORS[member.role])}>
+                    <p className={cn("truncate text-[11px]", ROLE_COLORS[member.role])}>
                       {ROLE_LABELS[member.role]} · {member.email}
                     </p>
                   </div>
@@ -1421,17 +1437,19 @@ const CandidatePreviewCard: React.FC<CandidatePreviewCardProps> = ({
   if (selectedSlots.length === 0) return null;
 
   return (
-    <div className={cn(
-      "p-3 rounded-lg bg-[var(--primitive-blue-50)] border border-[var(--primitive-blue-200)]",
-      className
-    )}>
-      <div className="flex items-center gap-1.5 text-[12px] font-medium text-[var(--primitive-blue-700)] mb-2">
+    <div
+      className={cn(
+        "rounded-lg border border-[var(--primitive-blue-200)] bg-[var(--primitive-blue-50)] p-3",
+        className
+      )}
+    >
+      <div className="mb-2 flex items-center gap-1.5 text-[12px] font-medium text-[var(--primitive-blue-700)]">
         <Eye size={14} />
         <span>Candidate will see</span>
       </div>
       <p className="text-[12px] text-[var(--primitive-blue-600)]">
-        {selectedSlots.length} time option{selectedSlots.length !== 1 ? "s" : ""} to choose from ({duration} min each).
-        They'll pick their preferred slot and confirm.
+        {selectedSlots.length} time option{selectedSlots.length !== 1 ? "s" : ""} to choose from (
+        {duration} min each). They&apos;ll pick their preferred slot and confirm.
       </p>
     </div>
   );
@@ -1484,7 +1502,7 @@ const SuggestTimesButton: React.FC<SuggestTimesButtonProps> = ({
               "text-[var(--primitive-purple-700)]",
               "hover:from-[var(--primitive-purple-200)] hover:to-[var(--primitive-blue-200)]",
               "rounded-full transition-all",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
+              "disabled:cursor-not-allowed disabled:opacity-50",
               isLoading && "animate-pulse",
               className
             )}
@@ -1529,10 +1547,10 @@ const CalendarOverlayToggle: React.FC<CalendarOverlayToggleProps> = ({
       type="button"
       onClick={() => onToggle(!enabled)}
       className={cn(
-        "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[12px] font-medium transition-all",
+        "flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] font-medium transition-all",
         enabled
-          ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)] border border-[var(--primitive-blue-300)]"
-          : "bg-[var(--primitive-neutral-100)] text-[var(--foreground-muted)] border border-[var(--primitive-neutral-300)]",
+          ? "border border-[var(--primitive-blue-300)] bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
+          : "border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] text-[var(--foreground-muted)]",
         className
       )}
     >
@@ -1577,11 +1595,10 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
   // Calculate week days based on view type
   const weekStartsOn = weekView === "7-day" ? 0 : 1;
   const weekStart = startOfWeek(selectedDate, { weekStartsOn });
-  const weekEnd = weekView === "7-day"
-    ? endOfWeek(selectedDate, { weekStartsOn })
-    : addDays(weekStart, 4);
+  const weekEnd =
+    weekView === "7-day" ? endOfWeek(selectedDate, { weekStartsOn }) : addDays(weekStart, 4);
   const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  const todayInView = days.some(day => isToday(day));
+  const todayInView = days.some((day) => isToday(day));
 
   // Height per hour in pixels (matches AvailabilityCalendar)
   const LOCAL_HOUR_HEIGHT = 48;
@@ -1608,9 +1625,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
   }, [startHour]);
 
   const navigateWeek = (direction: "prev" | "next") => {
-    const newDate = direction === "prev"
-      ? subWeeks(selectedDate, 1)
-      : addWeeks(selectedDate, 1);
+    const newDate = direction === "prev" ? subWeeks(selectedDate, 1) : addWeeks(selectedDate, 1);
     onDateChange(newDate);
   };
 
@@ -1639,7 +1654,10 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
   };
 
   // Check if a time range conflicts with events or is in the past
-  const getAvailabilityForRange = (day: Date, startMinutes: number): "available" | "busy" | "past" => {
+  const getAvailabilityForRange = (
+    day: Date,
+    startMinutes: number
+  ): "available" | "busy" | "past" => {
     const now = new Date();
     const slotStart = addMinutes(setHours(setMinutes(day, 0), 0), startMinutes);
     const slotEnd = addMinutes(slotStart, duration);
@@ -1689,21 +1707,21 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
 
   return (
-    <div className={cn("flex flex-col h-full min-h-0", className)}>
+    <div className={cn("flex h-full min-h-0 flex-col", className)}>
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-200)]">
+      <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--primitive-neutral-200)] px-4 py-3">
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => navigateWeek("prev")}
-            className="p-1.5 rounded hover:bg-[var(--primitive-neutral-200)] text-[var(--foreground-muted)] transition-colors"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
           >
             <CaretLeft size={16} weight="bold" />
           </button>
           <button
             type="button"
             onClick={() => navigateWeek("next")}
-            className="p-1.5 rounded hover:bg-[var(--primitive-neutral-200)] text-[var(--foreground-muted)] transition-colors"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
           >
             <CaretRight size={16} weight="bold" />
           </button>
@@ -1713,19 +1731,19 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
           <span className="text-sm font-medium text-[var(--foreground-default)]">
             {format(weekStart, "MMM d")} – {format(weekEnd, "d, yyyy")}
           </span>
-          <span className="flex items-center gap-1 text-[11px] text-[var(--foreground-muted)] bg-[var(--primitive-neutral-100)] px-2 py-0.5 rounded">
+          <span className="flex items-center gap-1 rounded bg-[var(--primitive-neutral-100)] px-2 py-0.5 text-[11px] text-[var(--foreground-muted)]">
             <GlobeHemisphereWest size={12} />
             {Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ")}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-[var(--primitive-neutral-100)] rounded-lg p-0.5">
+          <div className="flex items-center rounded-lg bg-[var(--primitive-neutral-100)] p-0.5">
             <button
               type="button"
               onClick={() => setWeekView("5-day")}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded-md transition-all",
+                "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
                 weekView === "5-day"
                   ? "bg-white text-[var(--foreground-default)] shadow-sm"
                   : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
@@ -1737,7 +1755,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
               type="button"
               onClick={() => setWeekView("7-day")}
               className={cn(
-                "px-2 py-1 text-[11px] font-medium rounded-md transition-all",
+                "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
                 weekView === "7-day"
                   ? "bg-white text-[var(--foreground-default)] shadow-sm"
                   : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
@@ -1767,7 +1785,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
       />
 
       {/* Calendar grid - Scrollable area */}
-      <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-auto px-4 py-2">
+      <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-auto px-4 py-2">
         <div className="flex min-w-[600px]">
           {/* Time column */}
           <div className="w-12 flex-shrink-0 pt-10">
@@ -1777,7 +1795,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                 className="flex items-start justify-end pr-2"
                 style={{ height: LOCAL_HOUR_HEIGHT }}
               >
-                <span className="text-[11px] text-[var(--foreground-muted)] -mt-1.5">
+                <span className="-mt-1.5 text-[11px] text-[var(--foreground-muted)]">
                   {format(setHours(new Date(), hour), "ha").toLowerCase()}
                 </span>
               </div>
@@ -1791,17 +1809,17 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
             const isCurrentDay = isToday(day);
 
             return (
-              <div key={day.toISOString()} className="flex-1 min-w-[80px]">
+              <div key={day.toISOString()} className="min-w-[80px] flex-1">
                 {/* Day header */}
-                <div className="h-10 flex flex-col items-center justify-center mb-1">
-                  <span className="text-[11px] text-[var(--foreground-muted)] uppercase tracking-wide">
+                <div className="mb-1 flex h-10 flex-col items-center justify-center">
+                  <span className="text-[11px] uppercase tracking-wide text-[var(--foreground-muted)]">
                     {format(day, "EEE")}
                   </span>
                   <span
                     className={cn(
                       "text-sm font-semibold",
                       isCurrentDay
-                        ? "w-6 h-6 flex items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
+                        ? "flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
                         : "text-[var(--foreground-default)]"
                     )}
                   >
@@ -1822,7 +1840,9 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                     <div
                       key={hour}
                       className="absolute left-0 right-0 border-b border-[var(--primitive-neutral-100)]"
-                      style={{ top: (hour - startHour) * LOCAL_HOUR_HEIGHT + LOCAL_HOUR_HEIGHT - 1 }}
+                      style={{
+                        top: (hour - startHour) * LOCAL_HOUR_HEIGHT + LOCAL_HOUR_HEIGHT - 1,
+                      }}
                     />
                   ))}
 
@@ -1831,7 +1851,9 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                     <div
                       key={`${hour}-30`}
                       className="absolute left-0 right-0 border-b border-dashed border-[var(--primitive-neutral-100)]"
-                      style={{ top: (hour - startHour) * LOCAL_HOUR_HEIGHT + LOCAL_HOUR_HEIGHT / 2 }}
+                      style={{
+                        top: (hour - startHour) * LOCAL_HOUR_HEIGHT + LOCAL_HOUR_HEIGHT / 2,
+                      }}
                     />
                   ))}
 
@@ -1845,10 +1867,10 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                     return (
                       <div
                         key={event.id}
-                        className="absolute left-1 right-1 rounded-lg bg-[var(--primitive-neutral-600)] border-l-4 border-[var(--primitive-neutral-700)] px-2 py-1.5 overflow-hidden pointer-events-none"
+                        className="pointer-events-none absolute left-1 right-1 overflow-hidden rounded-lg border-l-4 border-[var(--primitive-neutral-700)] bg-[var(--primitive-neutral-600)] px-2 py-1.5"
                         style={{ top, height: Math.max(height, 24) }}
                       >
-                        <p className="text-[11px] font-medium text-white truncate">{event.title}</p>
+                        <p className="truncate text-[11px] font-medium text-white">{event.title}</p>
                         {height > 35 && (
                           <p className="text-[10px] text-white/80">
                             {format(event.start, "h:mm")} – {format(event.end, "h:mm a")}
@@ -1859,29 +1881,34 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                   })}
 
                   {/* Hover preview - blue to match date picker */}
-                  {hoveredTime && isSameDay(hoveredTime.day, day) && selectedSlots.length < maxSlots && (
+                  {hoveredTime &&
+                    isSameDay(hoveredTime.day, day) &&
+                    selectedSlots.length < maxSlots &&
                     (() => {
                       const availability = getAvailabilityForRange(day, hoveredTime.minutes);
                       if (availability !== "available") return null;
 
                       const top = getPositionFromMinutes(hoveredTime.minutes);
                       const height = (duration / 60) * LOCAL_HOUR_HEIGHT;
-                      const startTime = addMinutes(setHours(setMinutes(day, 0), 0), hoveredTime.minutes);
+                      const startTime = addMinutes(
+                        setHours(setMinutes(day, 0), 0),
+                        hoveredTime.minutes
+                      );
 
                       return (
                         <div
-                          className="absolute left-1 right-1 rounded-lg border-2 border-dashed bg-[var(--primitive-blue-100)]/60 border-[var(--primitive-blue-400)] pointer-events-none transition-all"
+                          className="bg-[var(--primitive-blue-100)]/60 pointer-events-none absolute left-1 right-1 rounded-lg border-2 border-dashed border-[var(--primitive-blue-400)] transition-all"
                           style={{ top, height }}
                         >
                           <div className="px-2 py-1.5">
                             <p className="text-[11px] font-medium text-[var(--primitive-blue-700)]">
-                              {format(startTime, "h:mm a")} – {format(addMinutes(startTime, duration), "h:mm a")}
+                              {format(startTime, "h:mm a")} –{" "}
+                              {format(addMinutes(startTime, duration), "h:mm a")}
                             </p>
                           </div>
                         </div>
                       );
-                    })()
-                  )}
+                    })()}
 
                   {/* Selected time slots - unified event cards in blue */}
                   {daySelectedSlots.map((slot) => {
@@ -1894,15 +1921,15 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div
-                              className="absolute left-1 right-1 rounded-lg bg-[var(--primitive-blue-400)] shadow-sm cursor-pointer hover:bg-[var(--primitive-blue-500)] transition-colors group border-l-4 border-[var(--primitive-blue-500)]"
+                              className="group absolute left-1 right-1 cursor-pointer rounded-lg border-l-4 border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-400)] shadow-sm transition-colors hover:bg-[var(--primitive-blue-500)]"
                               style={{ top, height }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onSlotRemove(slot.id);
                               }}
                             >
-                              <div className="px-2 py-1.5 h-full flex flex-col overflow-hidden">
-                                <p className="text-[11px] font-semibold text-white truncate">
+                              <div className="flex h-full flex-col overflow-hidden px-2 py-1.5">
+                                <p className="truncate text-[11px] font-semibold text-white">
                                   Interview Slot
                                 </p>
                                 <p className="text-[10px] text-white/90">
@@ -1910,7 +1937,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                                 </p>
                                 {/* Remove indicator on hover - only show if card is tall enough */}
                                 {height > 50 && (
-                                  <div className="mt-auto opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[10px] text-white/80">
+                                  <div className="mt-auto flex items-center gap-1 text-[10px] text-white/80 opacity-0 transition-opacity group-hover:opacity-100">
                                     <X size={10} />
                                     <span>Remove</span>
                                   </div>
@@ -1933,13 +1960,13 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 px-4 py-2 border-t border-[var(--primitive-neutral-200)] bg-white text-[11px] text-[var(--foreground-muted)]">
+      <div className="flex items-center gap-4 border-t border-[var(--primitive-neutral-200)] bg-white px-4 py-2 text-[11px] text-[var(--foreground-muted)]">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-[var(--primitive-neutral-600)] border-l-2 border-[var(--primitive-neutral-700)]" />
+          <div className="h-3 w-3 rounded border-l-2 border-[var(--primitive-neutral-700)] bg-[var(--primitive-neutral-600)]" />
           <span>My events</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-[var(--primitive-blue-500)] border-l-2 border-[var(--primitive-blue-600)]" />
+          <div className="h-3 w-3 rounded border-l-2 border-[var(--primitive-blue-600)] bg-[var(--primitive-blue-500)]" />
           <span>Proposed times</span>
         </div>
       </div>
@@ -1966,18 +1993,12 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
   className,
 }) => {
   // Form state
-  const [title, setTitle] = React.useState(
-    job ? `${job.title} Interview` : "Interview"
-  );
-  const [duration, setDuration] = React.useState(
-    String(defaults.duration || 60)
-  );
+  const [title, setTitle] = React.useState(job ? `${job.title} Interview` : "Interview");
+  const [duration, setDuration] = React.useState(String(defaults.duration || 60));
   const [videoProvider, setVideoProvider] = React.useState<string>(
     defaults.videoProvider || "google-meet"
   );
-  const [selectedCalendar, setSelectedCalendar] = React.useState(
-    calendars[0]?.id || ""
-  );
+  const [selectedCalendar, setSelectedCalendar] = React.useState(calendars[0]?.id || "");
   const [instructions, setInstructions] = React.useState("");
   const [internalNotes, setInternalNotes] = React.useState("");
   const [showInternalNotes, setShowInternalNotes] = React.useState(false);
@@ -2011,16 +2032,14 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
     // Simulate loading calendar availability
     setTimeout(() => {
       setAttendees((prev) =>
-        prev.map((a) =>
-          a.id === attendee.id ? { ...a, calendarStatus: "loaded" } : a
-        )
+        prev.map((a) => (a.id === attendee.id ? { ...a, calendarStatus: "loaded" } : a))
       );
     }, 800);
   };
 
   const handleRemoveAttendee = (attendeeId: string) => {
     // Prevent removing candidate
-    const attendee = attendees.find(a => a.id === attendeeId);
+    const attendee = attendees.find((a) => a.id === attendeeId);
     if (attendee?.role === "candidate") return;
 
     setAttendees((prev) => prev.filter((a) => a.id !== attendeeId));
@@ -2046,8 +2065,8 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
 
   const handleSuggestedSlots = (slots: TimeSlot[]) => {
     setSelectedSlots((prev) => {
-      const existingIds = new Set(prev.map(s => s.id));
-      const newSlots = slots.filter(s => !existingIds.has(s.id));
+      const existingIds = new Set(prev.map((s) => s.id));
+      const newSlots = slots.filter((s) => !existingIds.has(s.id));
       return [...prev, ...newSlots].slice(0, 5);
     });
   };
@@ -2084,37 +2103,34 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
 
   if (!open) return null;
 
-  const selectedVideoProvider = VIDEO_PROVIDER_OPTIONS.find(v => v.value === videoProvider);
+  const selectedVideoProvider = VIDEO_PROVIDER_OPTIONS.find((v) => v.value === videoProvider);
 
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        onClick={() => onOpenChange(false)}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={() => onOpenChange(false)} />
 
       {/* Modal - Full screen with margins */}
       <div
         className={cn(
-          "relative flex w-full max-h-[calc(100vh-32px)] m-4 bg-white rounded-2xl overflow-hidden shadow-2xl",
+          "relative m-4 flex max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-2xl bg-white shadow-2xl",
           className
         )}
       >
         {/* Left Panel - Form */}
-        <div className="w-[340px] flex-shrink-0 flex flex-col h-full bg-white border-r border-[var(--primitive-neutral-200)]">
+        <div className="flex h-full w-[340px] flex-shrink-0 flex-col border-r border-[var(--primitive-neutral-200)] bg-white">
           {/* Header - X button on left */}
-          <div className="flex-shrink-0 flex items-center gap-3 px-4 py-3 border-b border-[var(--primitive-neutral-200)]">
+          <div className="flex flex-shrink-0 items-center gap-3 border-b border-[var(--primitive-neutral-200)] px-4 py-3">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="p-1.5 -ml-1 flex items-center justify-center rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] hover:bg-[var(--primitive-neutral-100)] transition-colors"
+              className="-ml-1 flex items-center justify-center rounded-lg p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--foreground-default)]"
               aria-label="Close modal"
             >
               <X size={20} weight="bold" />
             </button>
-            <div className="flex-1 min-w-0">
-              <h2 className="text-[15px] font-semibold text-[var(--foreground-default)] truncate">
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-[15px] font-semibold text-[var(--foreground-default)]">
                 Schedule interview with {candidate.name}
               </h2>
             </div>
@@ -2123,24 +2139,24 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
           {/* Form Content */}
           <div className="flex-1 overflow-auto">
             {/* Interview Details Section */}
-            <div className="px-4 py-3 border-b border-[var(--primitive-neutral-200)]">
-              <span className="text-[11px] font-medium text-[var(--foreground-muted)] uppercase tracking-wide mb-2 block">
+            <div className="border-b border-[var(--primitive-neutral-200)] px-4 py-3">
+              <span className="mb-2 block text-[11px] font-medium uppercase tracking-wide text-[var(--foreground-muted)]">
                 Interview Details
               </span>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Event title"
-                className="text-[15px] font-medium border-0 px-0 h-auto py-1 focus:ring-0 bg-transparent placeholder:text-[var(--foreground-muted)]"
+                className="h-auto border-0 bg-transparent px-0 py-1 text-[15px] font-medium placeholder:text-[var(--foreground-muted)] focus:ring-0"
               />
 
               {/* Event Settings - Stacked rows */}
-              <div className="space-y-2 mt-3">
+              <div className="mt-3 space-y-2">
                 {/* Row 1: Duration */}
                 <div className="flex items-center gap-2">
-                  <Clock size={14} className="text-[var(--foreground-muted)] flex-shrink-0" />
+                  <Clock size={14} className="flex-shrink-0 text-[var(--foreground-muted)]" />
                   <Select value={duration} onValueChange={setDuration}>
-                    <SelectTrigger className="flex-1 h-8 text-[13px] border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] rounded-lg">
+                    <SelectTrigger className="h-8 flex-1 rounded-lg border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] text-[13px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2156,12 +2172,18 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                 {/* Row 2: Video Provider */}
                 <div className="flex items-center gap-2">
                   {selectedVideoProvider ? (
-                    <selectedVideoProvider.icon size={14} className="text-[var(--foreground-muted)] flex-shrink-0" />
+                    <selectedVideoProvider.icon
+                      size={14}
+                      className="flex-shrink-0 text-[var(--foreground-muted)]"
+                    />
                   ) : (
-                    <VideoCamera size={14} className="text-[var(--foreground-muted)] flex-shrink-0" />
+                    <VideoCamera
+                      size={14}
+                      className="flex-shrink-0 text-[var(--foreground-muted)]"
+                    />
                   )}
                   <Select value={videoProvider} onValueChange={setVideoProvider}>
-                    <SelectTrigger className="flex-1 h-8 text-[13px] border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] rounded-lg">
+                    <SelectTrigger className="h-8 flex-1 rounded-lg border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] text-[13px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2180,9 +2202,12 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                 {/* Row 3: Calendar Selection */}
                 {calendars.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <CalendarBlank size={14} className="text-[var(--foreground-muted)] flex-shrink-0" />
+                    <CalendarBlank
+                      size={14}
+                      className="flex-shrink-0 text-[var(--foreground-muted)]"
+                    />
                     <Select value={selectedCalendar} onValueChange={setSelectedCalendar}>
-                      <SelectTrigger className="flex-1 h-8 text-[13px] border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] rounded-lg">
+                      <SelectTrigger className="h-8 flex-1 rounded-lg border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] text-[13px]">
                         <SelectValue placeholder="Select calendar" />
                       </SelectTrigger>
                       <SelectContent>
@@ -2199,13 +2224,13 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
             </div>
 
             {/* Attendees Section */}
-            <div className="px-4 py-3 border-b border-[var(--primitive-neutral-200)]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[12px] font-medium text-[var(--foreground-muted)] uppercase tracking-wide">
+            <div className="border-b border-[var(--primitive-neutral-200)] px-4 py-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-[12px] font-medium uppercase tracking-wide text-[var(--foreground-muted)]">
                   Attendees
                 </span>
                 <span className="text-[11px] text-[var(--primitive-green-700)]">
-                  <GlobeHemisphereWest size={12} className="inline mr-1" />
+                  <GlobeHemisphereWest size={12} className="mr-1 inline" />
                   {getTimezoneAbbr(candidate.timezone) || "EST"}
                 </span>
               </div>
@@ -2228,9 +2253,9 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
             </div>
 
             {/* Proposed Times Section */}
-            <div className="px-4 py-3 border-b border-[var(--primitive-neutral-200)]">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[12px] font-medium text-[var(--foreground-muted)] uppercase tracking-wide">
+            <div className="border-b border-[var(--primitive-neutral-200)] px-4 py-3">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-[12px] font-medium uppercase tracking-wide text-[var(--foreground-muted)]">
                   Proposed times
                 </span>
                 <span className="text-[11px] text-[var(--foreground-muted)]">
@@ -2251,12 +2276,15 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-3">
-                  <CalendarBlank size={24} className="mx-auto mb-2 text-[var(--foreground-muted)] opacity-50" />
-                  <p className="text-[12px] text-[var(--foreground-muted)] mb-2">
+                <div className="py-3 text-center">
+                  <CalendarBlank
+                    size={24}
+                    className="mx-auto mb-2 text-[var(--foreground-muted)] opacity-50"
+                  />
+                  <p className="mb-2 text-[12px] text-[var(--foreground-muted)]">
                     No times proposed yet
                   </p>
-                  <p className="text-[11px] text-[var(--foreground-muted)] mb-3">
+                  <p className="mb-3 text-[11px] text-[var(--foreground-muted)]">
                     Click available slots in the calendar →
                   </p>
                   {onSuggestTimes && (
@@ -2273,9 +2301,9 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                       }}
                       disabled={attendees.length < 2}
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all",
+                        "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-medium transition-all",
                         attendees.length < 2
-                          ? "bg-[var(--primitive-neutral-100)] text-[var(--foreground-muted)] cursor-not-allowed"
+                          ? "cursor-not-allowed bg-[var(--primitive-neutral-100)] text-[var(--foreground-muted)]"
                           : "bg-[var(--primitive-yellow-100)] text-[var(--primitive-yellow-800)] hover:bg-[var(--primitive-yellow-200)]"
                       )}
                     >
@@ -2288,19 +2316,16 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
             </div>
 
             {/* Candidate Preview */}
-            <div className="px-4 py-3 border-b border-[var(--primitive-neutral-200)]">
-              <CandidatePreviewCard
-                selectedSlots={selectedSlots}
-                duration={parseInt(duration)}
-              />
+            <div className="border-b border-[var(--primitive-neutral-200)] px-4 py-3">
+              <CandidatePreviewCard selectedSlots={selectedSlots} duration={parseInt(duration)} />
             </div>
 
             {/* Instructions - Collapsible */}
-            <div className="px-4 py-3 space-y-3">
+            <div className="space-y-3 px-4 py-3">
               <div className="space-y-2">
                 <div className="flex items-center gap-1.5">
                   <TextAlignLeft size={14} className="text-[var(--foreground-muted)]" />
-                  <span className="text-[12px] font-medium text-[var(--foreground-muted)] uppercase tracking-wide">
+                  <span className="text-[12px] font-medium uppercase tracking-wide text-[var(--foreground-muted)]">
                     Instructions
                   </span>
                   <span className="text-[11px] text-[var(--foreground-muted)]">(optional)</span>
@@ -2309,7 +2334,7 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
                   placeholder="Agenda, preparation tips..."
-                  className="min-h-[60px] text-[13px] resize-none border-[var(--primitive-neutral-200)] focus:border-[var(--primitive-neutral-400)] bg-[var(--primitive-neutral-50)] rounded-lg"
+                  className="min-h-[60px] resize-none rounded-lg border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] text-[13px] focus:border-[var(--primitive-neutral-400)]"
                 />
               </div>
 
@@ -2324,12 +2349,12 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
           </div>
 
           {/* Footer - Fixed at bottom */}
-          <div className="flex-shrink-0 px-4 py-3 border-t border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)]">
+          <div className="flex-shrink-0 border-t border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] px-4 py-3">
             <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="px-3 py-1.5 text-[13px] text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors rounded-lg hover:bg-[var(--primitive-neutral-200)]"
+                className="rounded-lg px-3 py-1.5 text-[13px] text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
               >
                 Cancel
               </button>
@@ -2364,14 +2389,18 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
         </div>
 
         {/* Right Panel - Calendar with Tabs */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--primitive-neutral-100)]">
+        <div className="flex h-full flex-1 flex-col overflow-hidden bg-[var(--primitive-neutral-100)]">
           {/* Tab Header - Fixed at top */}
-          <div className="flex-shrink-0 flex items-center justify-between px-4 py-2 border-b border-[var(--primitive-neutral-200)] bg-white">
+          <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-white px-4 py-2">
             {/* Tab Switcher */}
             <SegmentedController
               options={[
                 { value: "find-time", label: "Find a Time", icon: <Users size={16} /> },
-                { value: "your-calendar", label: "Your Calendar", icon: <CalendarBlank size={16} /> },
+                {
+                  value: "your-calendar",
+                  label: "Your Calendar",
+                  icon: <CalendarBlank size={16} />,
+                },
               ]}
               value={activeTab}
               onValueChange={(value) => setActiveTab(value as "find-time" | "your-calendar")}
@@ -2400,7 +2429,7 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
 
           {/* Tab Content */}
           {activeTab === "find-time" ? (
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               {/* Info Banner */}
               <Banner
                 type="info"
@@ -2425,11 +2454,11 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                 endHour={24}
                 showAttendeeCalendars={showCalendarOverlay}
                 onToggleAttendeeCalendars={setShowCalendarOverlay}
-                className="flex-1 min-h-0"
+                className="min-h-0 flex-1"
               />
             </div>
           ) : (
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <YourCalendarView
                 selectedDate={selectedDate}
                 onDateChange={setSelectedDate}
@@ -2441,7 +2470,7 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                 duration={parseInt(duration)}
                 startHour={0}
                 endHour={24}
-                className="flex-1 min-h-0"
+                className="min-h-0 flex-1"
               />
             </div>
           )}

@@ -20,10 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/dropdown";
-import {
-  RichTextEditor,
-  RichTextToolbar,
-} from "@/components/ui/rich-text-editor";
+import { RichTextEditor, RichTextToolbar } from "@/components/ui/rich-text-editor";
 import { RichTextCharacterCounter } from "@/components/ui/character-counter";
 import { BenefitsSelector, defaultBenefitCategories } from "@/components/ui/benefits-selector";
 import { RoleTemplateCard } from "@/components/ui/role-template-card";
@@ -195,15 +192,15 @@ interface SortableQuestionItemProps {
   getIconWithBg: (type: string) => React.ReactNode;
 }
 
-function SortableQuestionItem({ question, onEdit, onDelete, getIconWithBg }: SortableQuestionItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: question.id });
+function SortableQuestionItem({
+  question,
+  onEdit,
+  onDelete,
+  getIconWithBg,
+}: SortableQuestionItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: question.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -215,17 +212,17 @@ function SortableQuestionItem({ question, onEdit, onDelete, getIconWithBg }: Sor
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-6 border-b border-[var(--primitive-neutral-200)] hover:bg-[var(--primitive-neutral-100)] transition-colors bg-white"
+      className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-white p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]"
     >
       <div className="flex items-center gap-4">
         {/* Drag Handle */}
         <button
           type="button"
-          className="cursor-grab active:cursor-grabbing p-1 -ml-2 text-[var(--primitive-neutral-400)] hover:text-[var(--primitive-neutral-600)] transition-colors"
+          className="-ml-2 cursor-grab p-1 text-[var(--primitive-neutral-400)] transition-colors hover:text-[var(--primitive-neutral-600)] active:cursor-grabbing"
           {...attributes}
           {...listeners}
         >
-          <DotsSixVertical weight="bold" className="w-5 h-5" />
+          <DotsSixVertical weight="bold" className="h-5 w-5" />
         </button>
         {getIconWithBg(question.type)}
         <span className="text-body-sm text-foreground">{question.title}</span>
@@ -234,7 +231,7 @@ function SortableQuestionItem({ question, onEdit, onDelete, getIconWithBg }: Sor
         <Button
           variant="tertiary"
           size="sm"
-          leftIcon={<PencilSimpleLine weight="regular" className="w-4 h-4" />}
+          leftIcon={<PencilSimpleLine weight="regular" className="h-4 w-4" />}
           onClick={() => onEdit(question.id, question.type)}
         >
           Edit Question
@@ -245,7 +242,7 @@ function SortableQuestionItem({ question, onEdit, onDelete, getIconWithBg }: Sor
           onClick={() => onDelete(question.id)}
           className="rounded-full"
         >
-          <Trash weight="regular" className="w-5 h-5" />
+          <Trash weight="regular" className="h-5 w-5" />
         </Button>
       </div>
     </div>
@@ -303,9 +300,10 @@ export default function RoleEditPage() {
 
   // Shareable link
   const [linkCopied, setLinkCopied] = React.useState(false);
-  const applicationLink = typeof window !== 'undefined'
-    ? `${window.location.origin}/apply/${params.id}`
-    : `/apply/${params.id}`;
+  const applicationLink =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/apply/${params.id}`
+      : `/apply/${params.id}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(applicationLink);
@@ -337,16 +335,29 @@ export default function RoleEditPage() {
 
   // Questions section
   const [questionsEnabled, setQuestionsEnabled] = React.useState(true);
-  const [questions, setQuestions] = React.useState<{
-    id: string;
-    type: "text" | "yes-no" | "multiple-choice" | "file-upload";
-    title: string;
-    required: boolean;
-    options?: string[];
-  }[]>([
+  const [questions, setQuestions] = React.useState<
+    {
+      id: string;
+      type: "text" | "yes-no" | "multiple-choice" | "file-upload";
+      title: string;
+      required: boolean;
+      options?: string[];
+    }[]
+  >([
     { id: "q1", type: "text", title: "Why are you interested in this role?", required: true },
-    { id: "q2", type: "yes-no", title: "Do you have experience with renewable energy projects?", required: false },
-    { id: "q3", type: "multiple-choice", title: "What is your preferred work style?", required: false, options: ["Remote", "Hybrid", "On-site"] },
+    {
+      id: "q2",
+      type: "yes-no",
+      title: "Do you have experience with renewable energy projects?",
+      required: false,
+    },
+    {
+      id: "q3",
+      type: "multiple-choice",
+      title: "What is your preferred work style?",
+      required: false,
+      options: ["Remote", "Hybrid", "On-site"],
+    },
   ]);
 
   // Modal state
@@ -400,10 +411,14 @@ export default function RoleEditPage() {
     const newQuestion = {
       id: `q${Date.now()}`,
       type,
-      title: type === "text" ? "New text question"
-           : type === "yes-no" ? "New yes/no question"
-           : type === "multiple-choice" ? "New multiple choice question"
-           : "Upload a file",
+      title:
+        type === "text"
+          ? "New text question"
+          : type === "yes-no"
+            ? "New yes/no question"
+            : type === "multiple-choice"
+              ? "New multiple choice question"
+              : "Upload a file",
       required: false,
       ...(type === "multiple-choice" ? { options: ["Option 1", "Option 2", "Option 3"] } : {}),
     };
@@ -411,7 +426,7 @@ export default function RoleEditPage() {
   };
 
   const handleDeleteQuestion = (id: string) => {
-    setQuestions(questions.filter(q => q.id !== id));
+    setQuestions(questions.filter((q) => q.id !== id));
   };
 
   // Drag and drop sensors
@@ -449,10 +464,8 @@ export default function RoleEditPage() {
   };
 
   const handleOpenPersonalDetailsModal = () => {
-    console.log("Opening personal details modal");
     setTempPersonalDetails({ ...personalDetails });
     setPersonalDetailsModalOpen(true);
-    console.log("Modal state set to true");
   };
 
   const handleSavePersonalDetails = () => {
@@ -472,7 +485,7 @@ export default function RoleEditPage() {
 
   // Text question modal handlers
   const handleOpenTextQuestionModal = (questionId: string) => {
-    const question = questions.find(q => q.id === questionId);
+    const question = questions.find((q) => q.id === questionId);
     if (question && question.type === "text") {
       setEditingQuestionId(questionId);
       setTempTextQuestion({
@@ -487,11 +500,13 @@ export default function RoleEditPage() {
 
   const handleSaveTextQuestion = () => {
     if (editingQuestionId) {
-      setQuestions(questions.map(q =>
-        q.id === editingQuestionId
-          ? { ...q, title: tempTextQuestion.title, required: tempTextQuestion.requireAnswer }
-          : q
-      ));
+      setQuestions(
+        questions.map((q) =>
+          q.id === editingQuestionId
+            ? { ...q, title: tempTextQuestion.title, required: tempTextQuestion.requireAnswer }
+            : q
+        )
+      );
     }
     setTextQuestionModalOpen(false);
     setEditingQuestionId(null);
@@ -504,7 +519,7 @@ export default function RoleEditPage() {
 
   // Yes/No question modal handlers
   const handleOpenYesNoQuestionModal = (questionId: string) => {
-    const question = questions.find(q => q.id === questionId);
+    const question = questions.find((q) => q.id === questionId);
     if (question && question.type === "yes-no") {
       setEditingQuestionId(questionId);
       setTempYesNoQuestion({
@@ -518,11 +533,13 @@ export default function RoleEditPage() {
 
   const handleSaveYesNoQuestion = () => {
     if (editingQuestionId) {
-      setQuestions(questions.map(q =>
-        q.id === editingQuestionId
-          ? { ...q, title: tempYesNoQuestion.title, required: tempYesNoQuestion.requireAnswer }
-          : q
-      ));
+      setQuestions(
+        questions.map((q) =>
+          q.id === editingQuestionId
+            ? { ...q, title: tempYesNoQuestion.title, required: tempYesNoQuestion.requireAnswer }
+            : q
+        )
+      );
     }
     setYesNoQuestionModalOpen(false);
     setEditingQuestionId(null);
@@ -535,7 +552,7 @@ export default function RoleEditPage() {
 
   // Multiple choice question modal handlers
   const handleOpenMultipleChoiceModal = (questionId: string) => {
-    const question = questions.find(q => q.id === questionId);
+    const question = questions.find((q) => q.id === questionId);
     if (question && question.type === "multiple-choice") {
       setEditingQuestionId(questionId);
       setTempMultipleChoice({
@@ -551,11 +568,18 @@ export default function RoleEditPage() {
 
   const handleSaveMultipleChoice = () => {
     if (editingQuestionId) {
-      setQuestions(questions.map(q =>
-        q.id === editingQuestionId
-          ? { ...q, title: tempMultipleChoice.title, required: tempMultipleChoice.requireAnswer, options: tempMultipleChoice.options }
-          : q
-      ));
+      setQuestions(
+        questions.map((q) =>
+          q.id === editingQuestionId
+            ? {
+                ...q,
+                title: tempMultipleChoice.title,
+                required: tempMultipleChoice.requireAnswer,
+                options: tempMultipleChoice.options,
+              }
+            : q
+        )
+      );
     }
     setMultipleChoiceModalOpen(false);
     setEditingQuestionId(null);
@@ -585,13 +609,13 @@ export default function RoleEditPage() {
   const handleUpdateOption = (index: number, value: string) => {
     setTempMultipleChoice({
       ...tempMultipleChoice,
-      options: tempMultipleChoice.options.map((opt, i) => i === index ? value : opt),
+      options: tempMultipleChoice.options.map((opt, i) => (i === index ? value : opt)),
     });
   };
 
   // File upload question modal handlers
   const handleOpenFileUploadModal = (questionId: string) => {
-    const question = questions.find(q => q.id === questionId);
+    const question = questions.find((q) => q.id === questionId);
     if (question && question.type === "file-upload") {
       setEditingQuestionId(questionId);
       setTempFileUpload({
@@ -607,11 +631,13 @@ export default function RoleEditPage() {
 
   const handleSaveFileUpload = () => {
     if (editingQuestionId) {
-      setQuestions(questions.map(q =>
-        q.id === editingQuestionId
-          ? { ...q, title: tempFileUpload.title, required: tempFileUpload.requireAnswer }
-          : q
-      ));
+      setQuestions(
+        questions.map((q) =>
+          q.id === editingQuestionId
+            ? { ...q, title: tempFileUpload.title, required: tempFileUpload.requireAnswer }
+            : q
+        )
+      );
     }
     setFileUploadModalOpen(false);
     setEditingQuestionId(null);
@@ -627,32 +653,32 @@ export default function RoleEditPage() {
     switch (type) {
       case "text":
         return (
-          <div className="w-10 h-10 rounded-xl bg-[var(--primitive-blue-100)] flex items-center justify-center">
-            <ListBullets weight="regular" className="w-5 h-5 text-[var(--primitive-blue-500)]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+            <ListBullets weight="regular" className="h-5 w-5 text-[var(--primitive-blue-500)]" />
           </div>
         );
       case "yes-no":
         return (
-          <div className="w-10 h-10 rounded-xl bg-[var(--primitive-red-100)] flex items-center justify-center">
-            <Circle weight="regular" className="w-5 h-5 text-[var(--primitive-red-500)]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-red-100)]">
+            <Circle weight="regular" className="h-5 w-5 text-[var(--primitive-red-500)]" />
           </div>
         );
       case "multiple-choice":
         return (
-          <div className="w-10 h-10 rounded-xl bg-[var(--primitive-yellow-100)] flex items-center justify-center">
-            <CheckSquare weight="regular" className="w-5 h-5 text-[var(--primitive-yellow-600)]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-yellow-100)]">
+            <CheckSquare weight="regular" className="h-5 w-5 text-[var(--primitive-yellow-600)]" />
           </div>
         );
       case "file-upload":
         return (
-          <div className="w-10 h-10 rounded-xl bg-[var(--primitive-blue-100)] flex items-center justify-center">
-            <Upload weight="regular" className="w-5 h-5 text-[var(--primitive-blue-500)]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+            <Upload weight="regular" className="h-5 w-5 text-[var(--primitive-blue-500)]" />
           </div>
         );
       default:
         return (
-          <div className="w-10 h-10 rounded-xl bg-[var(--primitive-blue-100)] flex items-center justify-center">
-            <ListBullets weight="regular" className="w-5 h-5 text-[var(--primitive-blue-500)]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+            <ListBullets weight="regular" className="h-5 w-5 text-[var(--primitive-blue-500)]" />
           </div>
         );
     }
@@ -668,10 +694,10 @@ export default function RoleEditPage() {
   return (
     <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
       {/* Top Navigation Bar */}
-      <header className="bg-white border-b border-[var(--primitive-neutral-100)]">
+      <header className="border-b border-[var(--primitive-neutral-100)] bg-white">
         <div className="flex items-center justify-between">
           {/* Left: Logo */}
-          <div className="flex items-center h-full px-12 py-4">
+          <div className="flex h-full items-center px-12 py-4">
             <Link href="/" className="flex items-center py-[15px]">
               <div className="flex items-center gap-1">
                 <span className="text-body font-medium text-foreground">Green Jobs Board</span>
@@ -681,33 +707,33 @@ export default function RoleEditPage() {
           </div>
 
           {/* Center: Navigation Tabs */}
-          <div className="flex-1 flex items-center justify-center gap-3 py-6 px-1">
+          <div className="flex flex-1 items-center justify-center gap-3 px-1 py-6">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 px-4 py-3 rounded-2xl text-caption text-foreground hover:bg-[var(--primitive-neutral-100)] transition-colors"
+              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
             >
-              <GridFour weight="regular" className="w-4 h-4" />
+              <GridFour weight="regular" className="h-4 w-4" />
               <span>Dashboard</span>
             </Link>
             <Link
               href="/roles"
-              className="flex items-center gap-1 px-4 py-3 rounded-2xl text-caption text-foreground bg-[var(--primitive-blue-100)]"
+              className="flex items-center gap-1 rounded-2xl bg-[var(--primitive-blue-100)] px-4 py-3 text-caption text-foreground"
             >
-              <Nut weight="regular" className="w-4 h-4" />
+              <Nut weight="regular" className="h-4 w-4" />
               <span>Manage Roles</span>
             </Link>
             <Link
               href="/organization"
-              className="flex items-center gap-1 px-4 py-3 rounded-2xl text-caption text-foreground hover:bg-[var(--primitive-neutral-100)] transition-colors"
+              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
             >
-              <Buildings weight="regular" className="w-4 h-4" />
+              <Buildings weight="regular" className="h-4 w-4" />
               <span>Organization</span>
             </Link>
             <Link
               href="/profile"
-              className="flex items-center gap-1 px-4 py-2 rounded-xl text-caption text-foreground hover:bg-[var(--primitive-neutral-100)] transition-colors"
+              className="flex items-center gap-1 rounded-xl px-4 py-2 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
             >
-              <div className="w-6 h-6 rounded-2xl border border-[var(--primitive-neutral-200)] overflow-hidden">
+              <div className="h-6 w-6 overflow-hidden rounded-2xl border border-[var(--primitive-neutral-200)]">
                 <Avatar name="Soobin Han" size="xs" />
               </div>
               <span>Profile</span>
@@ -715,9 +741,9 @@ export default function RoleEditPage() {
           </div>
 
           {/* Right: Organization selector */}
-          <div className="flex items-center h-full px-8 py-4">
-            <div className="flex items-center gap-2 p-2 rounded-2xl">
-              <div className="w-8 h-8 rounded-lg border border-[var(--primitive-neutral-200)] bg-[#1963b0] flex items-center justify-center overflow-hidden">
+          <div className="flex h-full items-center px-8 py-4">
+            <div className="flex items-center gap-2 rounded-2xl p-2">
+              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-[var(--primitive-neutral-200)] bg-[#1963b0]">
                 <span className="text-caption-sm font-bold text-white">SA</span>
               </div>
               <span className="text-caption text-foreground">Seattle Aquarium</span>
@@ -727,15 +753,18 @@ export default function RoleEditPage() {
       </header>
 
       {/* Page Content with left border and rounded corners */}
-      <div className="border-l border-[var(--primitive-neutral-200)] rounded-tl-3xl rounded-bl-3xl">
+      <div className="rounded-bl-3xl rounded-tl-3xl border-l border-[var(--primitive-neutral-200)]">
         {/* Page Header */}
-        <div className="bg-white border-b border-[var(--primitive-neutral-200)] px-12 py-6">
+        <div className="border-b border-[var(--primitive-neutral-200)] bg-white px-12 py-6">
           <div className="relative flex items-center justify-between">
             {/* Left: Icon + Title + Badge - with truncation */}
-            <div className="flex items-center gap-3 min-w-0 max-w-[280px]">
-              <CircleDashed weight="regular" className="w-5 h-5 text-[var(--primitive-neutral-400)] shrink-0" />
-              <div className="flex flex-col gap-0.5 min-w-0">
-                <h1 className="text-heading-sm text-foreground truncate">
+            <div className="flex min-w-0 max-w-[280px] items-center gap-3">
+              <CircleDashed
+                weight="regular"
+                className="h-5 w-5 shrink-0 text-[var(--primitive-neutral-400)]"
+              />
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <h1 className="truncate text-heading-sm text-foreground">
                   {roleTitle || "Untitled Role"}
                 </h1>
                 <Badge variant="feature" size="sm" className="w-fit">
@@ -748,8 +777,16 @@ export default function RoleEditPage() {
             <div className="absolute left-1/2 -translate-x-1/2">
               <SegmentedController
                 options={[
-                  { value: "job-post", label: "Job Post", icon: <PencilSimpleLine weight="regular" /> },
-                  { value: "apply-form", label: "Apply Form", icon: <ListChecks weight="regular" /> },
+                  {
+                    value: "job-post",
+                    label: "Job Post",
+                    icon: <PencilSimpleLine weight="regular" />,
+                  },
+                  {
+                    value: "apply-form",
+                    label: "Apply Form",
+                    icon: <ListChecks weight="regular" />,
+                  },
                   { value: "candidates", label: "Candidates", icon: <User weight="regular" /> },
                 ]}
                 value={activeTab}
@@ -760,11 +797,15 @@ export default function RoleEditPage() {
 
             {/* Right: Buttons */}
             <div className="flex items-center gap-2">
-              <Button variant="primary" size="lg" rightIcon={<CaretDown weight="bold" className="w-4 h-4" />}>
+              <Button
+                variant="primary"
+                size="lg"
+                rightIcon={<CaretDown weight="bold" className="h-4 w-4" />}
+              >
                 Review Role
               </Button>
-              <Button variant="tertiary" size="icon" className="rounded-full w-12 h-12">
-                <Nut weight="regular" className="w-6 h-6" />
+              <Button variant="tertiary" size="icon" className="h-12 w-12 rounded-full">
+                <Nut weight="regular" className="h-6 w-6" />
               </Button>
             </div>
           </div>
@@ -778,9 +819,9 @@ export default function RoleEditPage() {
           {activeTab === "apply-form" && (
             <div className="flex flex-col gap-4">
               {/* Apply Form Header Card */}
-              <div className="bg-white border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
                 {/* Title Section */}
-                <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
+                <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                   <h2 className="text-heading-sm text-foreground">Apply Form</h2>
                 </div>
 
@@ -796,15 +837,17 @@ export default function RoleEditPage() {
                         <Button
                           variant="tertiary"
                           size="sm"
-                          leftIcon={<Eye weight="regular" className="w-4 h-4" />}
-                          onClick={() => window.open(`/apply/${params.id}?preview=true`, '_blank')}
+                          leftIcon={<Eye weight="regular" className="h-4 w-4" />}
+                          onClick={() => window.open(`/apply/${params.id}?preview=true`, "_blank")}
                         >
                           Preview
                         </Button>
                         <Button
                           variant="primary"
                           size="sm"
-                          onClick={() => console.log("Save changes clicked")}
+                          onClick={() => {
+                            /* TODO: Implement save changes */
+                          }}
                         >
                           Save Changes
                         </Button>
@@ -823,16 +866,25 @@ export default function RoleEditPage() {
                     title="Share this link with candidates"
                     action={
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 bg-[var(--primitive-neutral-100)] px-3 py-2 rounded-lg border border-[var(--primitive-neutral-300)]">
-                          <LinkChain weight="regular" className="w-4 h-4 text-[var(--primitive-neutral-600)]" />
-                          <code className="text-caption text-foreground font-mono">
+                        <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] px-3 py-2">
+                          <LinkChain
+                            weight="regular"
+                            className="h-4 w-4 text-[var(--primitive-neutral-600)]"
+                          />
+                          <code className="font-mono text-caption text-foreground">
                             {applicationLink}
                           </code>
                         </div>
                         <Button
                           variant="primary"
                           size="sm"
-                          leftIcon={linkCopied ? <Check weight="bold" className="w-4 h-4" /> : <Copy weight="regular" className="w-4 h-4" />}
+                          leftIcon={
+                            linkCopied ? (
+                              <Check weight="bold" className="h-4 w-4" />
+                            ) : (
+                              <Copy weight="regular" className="h-4 w-4" />
+                            )
+                          }
                           onClick={copyLink}
                         >
                           {linkCopied ? "Copied!" : "Copy Link"}
@@ -845,22 +897,25 @@ export default function RoleEditPage() {
               </div>
 
               {/* Personal Info Card */}
-              <div className="bg-white border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
                 {/* Header */}
-                <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
+                <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                   <h2 className="text-body-strong text-foreground">Personal Info</h2>
                 </div>
 
                 {/* Personal Details Row */}
-                <div className="flex items-center justify-between p-6 border-b border-[var(--primitive-neutral-200)] hover:bg-[var(--primitive-neutral-100)] transition-colors">
+                <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--primitive-blue-100)] flex items-center justify-center">
-                      <User weight="regular" className="w-5 h-5 text-[var(--primitive-blue-500)]" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+                      <User weight="regular" className="h-5 w-5 text-[var(--primitive-blue-500)]" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-body-sm font-medium text-foreground">Personal Details</span>
+                      <span className="text-body-sm font-medium text-foreground">
+                        Personal Details
+                      </span>
                       <span className="text-caption text-foreground-subtle">
-                        Provide a detailed overview of the responsibilities and qualifications expected from the job applicant.
+                        Provide a detailed overview of the responsibilities and qualifications
+                        expected from the job applicant.
                       </span>
                     </div>
                   </div>
@@ -869,22 +924,28 @@ export default function RoleEditPage() {
                     variant="tertiary"
                     size="sm"
                     onClick={handleOpenPersonalDetailsModal}
-                    leftIcon={<PencilSimpleLine weight="regular" className="w-4 h-4" />}
+                    leftIcon={<PencilSimpleLine weight="regular" className="h-4 w-4" />}
                   >
                     Edit Details
                   </Button>
                 </div>
 
                 {/* Career Details Row */}
-                <div className="flex items-center justify-between p-6 hover:bg-[var(--primitive-neutral-100)] transition-colors">
+                <div className="flex items-center justify-between p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--primitive-green-100)] flex items-center justify-center">
-                      <ChatCenteredText weight="regular" className="w-5 h-5 text-[var(--primitive-green-600)]" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
+                      <ChatCenteredText
+                        weight="regular"
+                        className="h-5 w-5 text-[var(--primitive-green-600)]"
+                      />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-body-sm font-medium text-foreground">Career Details</span>
+                      <span className="text-body-sm font-medium text-foreground">
+                        Career Details
+                      </span>
                       <span className="text-caption text-foreground-subtle">
-                        What are the key responsibilities that a candidate must fulfill to be considered for this role?
+                        What are the key responsibilities that a candidate must fulfill to be
+                        considered for this role?
                       </span>
                     </div>
                   </div>
@@ -893,7 +954,7 @@ export default function RoleEditPage() {
                     variant="tertiary"
                     size="sm"
                     onClick={handleOpenCareerDetailsModal}
-                    leftIcon={<PencilSimpleLine weight="regular" className="w-4 h-4" />}
+                    leftIcon={<PencilSimpleLine weight="regular" className="h-4 w-4" />}
                   >
                     Edit Details
                   </Button>
@@ -901,13 +962,10 @@ export default function RoleEditPage() {
               </div>
 
               {/* Questions Section Card */}
-              <div className="bg-white border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
                 {/* Header with Toggle */}
-                <div className="flex items-center gap-3 p-6 border-b border-[var(--primitive-neutral-200)]">
-                  <Switch
-                    checked={questionsEnabled}
-                    onCheckedChange={setQuestionsEnabled}
-                  />
+                <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                  <Switch checked={questionsEnabled} onCheckedChange={setQuestionsEnabled} />
                   <h2 className="text-body-strong text-foreground">Questions</h2>
                 </div>
 
@@ -920,7 +978,7 @@ export default function RoleEditPage() {
                       onDragEnd={handleDragEnd}
                     >
                       <SortableContext
-                        items={questions.map(q => q.id)}
+                        items={questions.map((q) => q.id)}
                         strategy={verticalListSortingStrategy}
                       >
                         {questions.map((question) => (
@@ -942,36 +1000,62 @@ export default function RoleEditPage() {
                           <Button
                             variant="tertiary"
                             size="lg"
-                            leftIcon={<Plus weight="bold" className="w-5 h-5" />}
+                            leftIcon={<Plus weight="bold" className="h-5 w-5" />}
                           >
                             Add a question
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-64 p-2">
-                          <div className="px-3 py-2 mb-1">
-                            <span className="text-caption-strong text-foreground">Choose Question Type</span>
+                          <div className="mb-1 px-3 py-2">
+                            <span className="text-caption-strong text-foreground">
+                              Choose Question Type
+                            </span>
                           </div>
-                          <DropdownMenuItem onClick={() => handleAddQuestion("text")} className="flex items-center gap-3 py-3">
-                            <div className="w-8 h-8 rounded-lg bg-[var(--primitive-blue-100)] flex items-center justify-center">
-                              <ListBullets weight="regular" className="w-4 h-4 text-[var(--primitive-blue-500)]" />
+                          <DropdownMenuItem
+                            onClick={() => handleAddQuestion("text")}
+                            className="flex items-center gap-3 py-3"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-blue-100)]">
+                              <ListBullets
+                                weight="regular"
+                                className="h-4 w-4 text-[var(--primitive-blue-500)]"
+                              />
                             </div>
                             <span className="text-body-sm">Text</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAddQuestion("yes-no")} className="flex items-center gap-3 py-3">
-                            <div className="w-8 h-8 rounded-lg bg-[var(--primitive-red-100)] flex items-center justify-center">
-                              <Circle weight="regular" className="w-4 h-4 text-[var(--primitive-red-500)]" />
+                          <DropdownMenuItem
+                            onClick={() => handleAddQuestion("yes-no")}
+                            className="flex items-center gap-3 py-3"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-red-100)]">
+                              <Circle
+                                weight="regular"
+                                className="h-4 w-4 text-[var(--primitive-red-500)]"
+                              />
                             </div>
                             <span className="text-body-sm">Yes/No</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAddQuestion("multiple-choice")} className="flex items-center gap-3 py-3">
-                            <div className="w-8 h-8 rounded-lg bg-[var(--primitive-yellow-100)] flex items-center justify-center">
-                              <CheckSquare weight="regular" className="w-4 h-4 text-[var(--primitive-yellow-600)]" />
+                          <DropdownMenuItem
+                            onClick={() => handleAddQuestion("multiple-choice")}
+                            className="flex items-center gap-3 py-3"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-yellow-100)]">
+                              <CheckSquare
+                                weight="regular"
+                                className="h-4 w-4 text-[var(--primitive-yellow-600)]"
+                              />
                             </div>
                             <span className="text-body-sm">Multiple choice</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAddQuestion("file-upload")} className="flex items-center gap-3 py-3">
-                            <div className="w-8 h-8 rounded-lg bg-[var(--primitive-blue-100)] flex items-center justify-center">
-                              <Upload weight="regular" className="w-4 h-4 text-[var(--primitive-blue-500)]" />
+                          <DropdownMenuItem
+                            onClick={() => handleAddQuestion("file-upload")}
+                            className="flex items-center gap-3 py-3"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-blue-100)]">
+                              <Upload
+                                weight="regular"
+                                className="h-4 w-4 text-[var(--primitive-blue-500)]"
+                              />
                             </div>
                             <span className="text-body-sm">File upload</span>
                           </DropdownMenuItem>
@@ -988,11 +1072,11 @@ export default function RoleEditPage() {
               PERSONAL DETAILS MODAL - Figma Design 523:6134
               ============================================ */}
           <Dialog open={personalDetailsModalOpen} onOpenChange={setPersonalDetailsModalOpen}>
-            <DialogContent className="p-0 gap-0 max-w-2xl overflow-hidden" hideCloseButton>
+            <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0" hideCloseButton>
               {/* Header - Figma: border-b, px-32 py-16 */}
-              <div className="flex items-center gap-3 px-8 py-4 border-b border-[var(--primitive-neutral-300)]">
-                <div className="bg-[var(--primitive-blue-200)] p-1 rounded-lg shrink-0">
-                  <User weight="regular" className="w-6 h-6 text-foreground" />
+              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
+                <div className="shrink-0 rounded-lg bg-[var(--primitive-blue-200)] p-1">
+                  <User weight="regular" className="h-6 w-6 text-foreground" />
                 </div>
                 <DialogTitle className="flex-1 text-body text-foreground">
                   Personal Details
@@ -1005,7 +1089,7 @@ export default function RoleEditPage() {
                   className="rounded-2xl"
                   aria-label="Close"
                 >
-                  <X weight="regular" className="w-6 h-6" />
+                  <X weight="regular" className="h-6 w-6" />
                 </Button>
               </div>
 
@@ -1016,40 +1100,40 @@ export default function RoleEditPage() {
                 </DialogDescription>
 
                 {/* Table - Figma: border rounded-16 */}
-                <div className="border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
                   {/* Table Header - Figma: bg neutral-200, p-16 */}
-                  <div className="flex gap-2 items-center p-4 bg-[var(--primitive-neutral-200)] border-b border-[var(--primitive-neutral-300)]">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-200)] p-4">
                     <span className="flex-1 text-body text-foreground">Field</span>
                     <span className="flex-1 text-body text-foreground">Require an answer</span>
                   </div>
 
                   {/* Name Row - Always required, opacity 50% */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)] opacity-50">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch checked={true} disabled />
                       <span className="text-body text-foreground">Name</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox checked={true} disabled />
                       <span className="text-caption text-foreground-brand">Always required</span>
                     </div>
                   </div>
 
                   {/* Email Row - Always required, opacity 50% */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)] opacity-50">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch checked={true} disabled />
                       <span className="text-body text-foreground">Email</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox checked={true} disabled />
                       <span className="text-caption text-foreground-brand">Always required</span>
                     </div>
                   </div>
 
                   {/* Date of Birth Row */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)]">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempPersonalDetails.dateOfBirth.visible}
                         onCheckedChange={(checked) =>
@@ -1061,14 +1145,17 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body text-foreground">Date of birth</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempPersonalDetails.dateOfBirth.required}
                         disabled={!tempPersonalDetails.dateOfBirth.visible}
                         onCheckedChange={(checked) =>
                           setTempPersonalDetails({
                             ...tempPersonalDetails,
-                            dateOfBirth: { ...tempPersonalDetails.dateOfBirth, required: checked === true },
+                            dateOfBirth: {
+                              ...tempPersonalDetails.dateOfBirth,
+                              required: checked === true,
+                            },
                           })
                         }
                       />
@@ -1079,8 +1166,8 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* Pronouns Row */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)]">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempPersonalDetails.pronouns.visible}
                         onCheckedChange={(checked) =>
@@ -1092,14 +1179,17 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body text-foreground">Pronouns</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempPersonalDetails.pronouns.required}
                         disabled={!tempPersonalDetails.pronouns.visible}
                         onCheckedChange={(checked) =>
                           setTempPersonalDetails({
                             ...tempPersonalDetails,
-                            pronouns: { ...tempPersonalDetails.pronouns, required: checked === true },
+                            pronouns: {
+                              ...tempPersonalDetails.pronouns,
+                              required: checked === true,
+                            },
                           })
                         }
                       />
@@ -1110,8 +1200,8 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* Location Row - Last row, no bottom border */}
-                  <div className="flex gap-2 items-center p-4">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempPersonalDetails.location.visible}
                         onCheckedChange={(checked) =>
@@ -1123,14 +1213,17 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body text-foreground">Location</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempPersonalDetails.location.required}
                         disabled={!tempPersonalDetails.location.visible}
                         onCheckedChange={(checked) =>
                           setTempPersonalDetails({
                             ...tempPersonalDetails,
-                            location: { ...tempPersonalDetails.location, required: checked === true },
+                            location: {
+                              ...tempPersonalDetails.location,
+                              required: checked === true,
+                            },
                           })
                         }
                       />
@@ -1143,8 +1236,12 @@ export default function RoleEditPage() {
               </div>
 
               {/* Footer - Figma: border-t, px-32 py-16, buttons right-aligned */}
-              <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-[var(--primitive-neutral-300)]">
-                <Button type="button" variant="tertiary" onClick={() => setPersonalDetailsModalOpen(false)}>
+              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  onClick={() => setPersonalDetailsModalOpen(false)}
+                >
                   Discard
                 </Button>
                 <Button type="button" variant="primary" onClick={handleSavePersonalDetails}>
@@ -1158,11 +1255,11 @@ export default function RoleEditPage() {
               CAREER DETAILS MODAL
               ============================================ */}
           <Dialog open={careerDetailsModalOpen} onOpenChange={setCareerDetailsModalOpen}>
-            <DialogContent className="p-0 gap-0 max-w-2xl overflow-hidden" hideCloseButton>
+            <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0" hideCloseButton>
               {/* Header - Matching Personal Details design */}
-              <div className="flex items-center gap-3 px-8 py-4 border-b border-[var(--primitive-neutral-300)]">
-                <div className="bg-[var(--primitive-green-200)] p-1 rounded-lg shrink-0">
-                  <Briefcase weight="regular" className="w-6 h-6 text-foreground" />
+              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
+                <div className="shrink-0 rounded-lg bg-[var(--primitive-green-200)] p-1">
+                  <Briefcase weight="regular" className="h-6 w-6 text-foreground" />
                 </div>
                 <DialogTitle className="flex-1 text-body text-foreground">
                   Career Details
@@ -1175,7 +1272,7 @@ export default function RoleEditPage() {
                   className="rounded-2xl"
                   aria-label="Close"
                 >
-                  <X weight="regular" className="w-6 h-6" />
+                  <X weight="regular" className="h-6 w-6" />
                 </Button>
               </div>
 
@@ -1186,20 +1283,22 @@ export default function RoleEditPage() {
                 </DialogDescription>
 
                 {/* Table Container */}
-                <div className="border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
                   {/* Table Header Row */}
-                  <div className="flex gap-2 items-center p-4 bg-[var(--primitive-neutral-100)] border-b border-[var(--primitive-neutral-300)]">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-4">
                     <div className="flex-1">
                       <span className="text-caption font-medium text-foreground-subtle">Field</span>
                     </div>
                     <div className="flex-1">
-                      <span className="text-caption font-medium text-foreground-subtle">Require</span>
+                      <span className="text-caption font-medium text-foreground-subtle">
+                        Require
+                      </span>
                     </div>
                   </div>
 
                   {/* Current Role Row */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)]">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempCareerDetails.currentRole.visible}
                         onCheckedChange={(checked) =>
@@ -1211,14 +1310,17 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body text-foreground">Current Role</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempCareerDetails.currentRole.required}
                         disabled={!tempCareerDetails.currentRole.visible}
                         onCheckedChange={(checked) =>
                           setTempCareerDetails({
                             ...tempCareerDetails,
-                            currentRole: { ...tempCareerDetails.currentRole, required: checked === true },
+                            currentRole: {
+                              ...tempCareerDetails.currentRole,
+                              required: checked === true,
+                            },
                           })
                         }
                       />
@@ -1229,27 +1331,33 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* Current Company Row */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)]">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempCareerDetails.currentCompany.visible}
                         onCheckedChange={(checked) =>
                           setTempCareerDetails({
                             ...tempCareerDetails,
-                            currentCompany: { ...tempCareerDetails.currentCompany, visible: checked },
+                            currentCompany: {
+                              ...tempCareerDetails.currentCompany,
+                              visible: checked,
+                            },
                           })
                         }
                       />
                       <span className="text-body text-foreground">Current Company</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempCareerDetails.currentCompany.required}
                         disabled={!tempCareerDetails.currentCompany.visible}
                         onCheckedChange={(checked) =>
                           setTempCareerDetails({
                             ...tempCareerDetails,
-                            currentCompany: { ...tempCareerDetails.currentCompany, required: checked === true },
+                            currentCompany: {
+                              ...tempCareerDetails.currentCompany,
+                              required: checked === true,
+                            },
                           })
                         }
                       />
@@ -1260,27 +1368,33 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* Years of Experience Row */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)]">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempCareerDetails.yearsExperience.visible}
                         onCheckedChange={(checked) =>
                           setTempCareerDetails({
                             ...tempCareerDetails,
-                            yearsExperience: { ...tempCareerDetails.yearsExperience, visible: checked },
+                            yearsExperience: {
+                              ...tempCareerDetails.yearsExperience,
+                              visible: checked,
+                            },
                           })
                         }
                       />
                       <span className="text-body text-foreground">Years of Experience</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempCareerDetails.yearsExperience.required}
                         disabled={!tempCareerDetails.yearsExperience.visible}
                         onCheckedChange={(checked) =>
                           setTempCareerDetails({
                             ...tempCareerDetails,
-                            yearsExperience: { ...tempCareerDetails.yearsExperience, required: checked === true },
+                            yearsExperience: {
+                              ...tempCareerDetails.yearsExperience,
+                              required: checked === true,
+                            },
                           })
                         }
                       />
@@ -1291,8 +1405,8 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* LinkedIn Row */}
-                  <div className="flex gap-2 items-center p-4 border-b border-[var(--primitive-neutral-300)]">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempCareerDetails.linkedIn.visible}
                         onCheckedChange={(checked) =>
@@ -1304,7 +1418,7 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body text-foreground">LinkedIn Profile</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempCareerDetails.linkedIn.required}
                         disabled={!tempCareerDetails.linkedIn.visible}
@@ -1322,8 +1436,8 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* Portfolio Row - Last row, no bottom border */}
-                  <div className="flex gap-2 items-center p-4">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex items-center gap-2 p-4">
+                    <div className="flex flex-1 items-center gap-3">
                       <Switch
                         checked={tempCareerDetails.portfolio.visible}
                         onCheckedChange={(checked) =>
@@ -1335,14 +1449,17 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body text-foreground">Portfolio URL</span>
                     </div>
-                    <div className="flex-1 flex items-center gap-2">
+                    <div className="flex flex-1 items-center gap-2">
                       <Checkbox
                         checked={tempCareerDetails.portfolio.required}
                         disabled={!tempCareerDetails.portfolio.visible}
                         onCheckedChange={(checked) =>
                           setTempCareerDetails({
                             ...tempCareerDetails,
-                            portfolio: { ...tempCareerDetails.portfolio, required: checked === true },
+                            portfolio: {
+                              ...tempCareerDetails.portfolio,
+                              required: checked === true,
+                            },
                           })
                         }
                       />
@@ -1355,8 +1472,12 @@ export default function RoleEditPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-[var(--primitive-neutral-300)]">
-                <Button type="button" variant="tertiary" onClick={() => setCareerDetailsModalOpen(false)}>
+              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  onClick={() => setCareerDetailsModalOpen(false)}
+                >
                   Discard
                 </Button>
                 <Button type="button" variant="primary" onClick={handleSaveCareerDetails}>
@@ -1370,15 +1491,16 @@ export default function RoleEditPage() {
               TEXT QUESTION MODAL
               ============================================ */}
           <Dialog open={textQuestionModalOpen} onOpenChange={setTextQuestionModalOpen}>
-            <DialogContent className="p-0 gap-0 max-w-[720px] overflow-hidden" hideCloseButton>
+            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
               {/* Header - Figma: border-b, px-32 py-16 */}
-              <div className="flex items-center gap-3 px-8 py-4 border-b border-[var(--primitive-neutral-300)]">
-                <div className="bg-[var(--primitive-blue-200)] p-1 rounded-lg shrink-0">
-                  <TextAlignLeft weight="regular" className="w-6 h-6 text-[var(--primitive-blue-700)]" />
+              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
+                <div className="shrink-0 rounded-lg bg-[var(--primitive-blue-200)] p-1">
+                  <TextAlignLeft
+                    weight="regular"
+                    className="h-6 w-6 text-[var(--primitive-blue-700)]"
+                  />
                 </div>
-                <DialogTitle className="flex-1 text-body text-foreground">
-                  Text
-                </DialogTitle>
+                <DialogTitle className="flex-1 text-body text-foreground">Text</DialogTitle>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -1387,7 +1509,7 @@ export default function RoleEditPage() {
                   className="rounded-2xl"
                   aria-label="Close"
                 >
-                  <X weight="regular" className="w-5 h-5" />
+                  <X weight="regular" className="h-5 w-5" />
                 </Button>
               </div>
 
@@ -1398,9 +1520,11 @@ export default function RoleEditPage() {
                   <label className="text-body text-foreground">Question title</label>
                   <Input
                     value={tempTextQuestion.title}
-                    onChange={(e) => setTempTextQuestion({ ...tempTextQuestion, title: e.target.value })}
+                    onChange={(e) =>
+                      setTempTextQuestion({ ...tempTextQuestion, title: e.target.value })
+                    }
                     placeholder="Write your question?"
-                    className="bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-200)] text-body py-4 px-4"
+                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
                   />
                 </div>
 
@@ -1409,36 +1533,45 @@ export default function RoleEditPage() {
                   <label className="text-body text-foreground">Answer Type</label>
                   <RadioGroup
                     value={tempTextQuestion.answerType}
-                    onValueChange={(value) => setTempTextQuestion({ ...tempTextQuestion, answerType: value as "long" | "short" })}
+                    onValueChange={(value) =>
+                      setTempTextQuestion({
+                        ...tempTextQuestion,
+                        answerType: value as "long" | "short",
+                      })
+                    }
                     className="grid grid-cols-2 gap-3"
                   >
                     {/* Long Answer Option */}
                     <label
                       htmlFor="long-answer"
-                      className={`flex flex-col items-center pb-2 pt-4 px-4 rounded-2xl border cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
                         tempTextQuestion.answerType === "long"
-                          ? "bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-300)]"
+                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
                           : "border-[var(--primitive-neutral-300)]"
                       }`}
                     >
                       {/* Preview Box */}
-                      <div className="bg-[var(--primitive-neutral-200)] rounded-2xl h-[162px] w-full mb-2 flex items-center justify-center overflow-hidden">
-                        <div className={`w-[85%] h-[89px] rounded-lg p-3 flex items-start ${
-                          tempTextQuestion.answerType === "long"
-                            ? "bg-[var(--primitive-blue-100)] border border-[var(--primitive-blue-500)]"
-                            : "bg-white border border-[var(--primitive-neutral-200)]"
-                        }`}>
-                          <span className={`text-body ${
+                      <div className="mb-2 flex h-[162px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)]">
+                        <div
+                          className={`flex h-[89px] w-[85%] items-start rounded-lg p-3 ${
                             tempTextQuestion.answerType === "long"
-                              ? "text-foreground-info font-medium"
-                              : "text-foreground-subtle"
-                          }`}>
+                              ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                              : "border border-[var(--primitive-neutral-200)] bg-white"
+                          }`}
+                        >
+                          <span
+                            className={`text-body ${
+                              tempTextQuestion.answerType === "long"
+                                ? "font-medium text-foreground-info"
+                                : "text-foreground-subtle"
+                            }`}
+                          >
                             Write an answer
                           </span>
                         </div>
                       </div>
                       {/* Radio Button with Label */}
-                      <div className="flex items-center gap-1 w-full">
+                      <div className="flex w-full items-center gap-1">
                         <RadioGroupItem value="long" id="long-answer" />
                         <span className="text-caption text-foreground">Long Answer</span>
                       </div>
@@ -1447,30 +1580,34 @@ export default function RoleEditPage() {
                     {/* Short Answer Option */}
                     <label
                       htmlFor="short-answer"
-                      className={`flex flex-col items-center pb-2 pt-4 px-4 rounded-2xl border cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
                         tempTextQuestion.answerType === "short"
-                          ? "bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-300)]"
+                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
                           : "border-[var(--primitive-neutral-300)]"
                       }`}
                     >
                       {/* Preview Box */}
-                      <div className="bg-[var(--primitive-neutral-200)] rounded-2xl h-[162px] w-full mb-2 flex items-center justify-center overflow-hidden">
-                        <div className={`w-[85%] rounded-lg p-4 ${
-                          tempTextQuestion.answerType === "short"
-                            ? "bg-[var(--primitive-blue-100)] border border-[var(--primitive-blue-500)]"
-                            : "bg-white border border-[var(--primitive-neutral-200)]"
-                        }`}>
-                          <span className={`text-body ${
+                      <div className="mb-2 flex h-[162px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)]">
+                        <div
+                          className={`w-[85%] rounded-lg p-4 ${
                             tempTextQuestion.answerType === "short"
-                              ? "text-foreground-info font-medium"
-                              : "text-foreground-subtle"
-                          }`}>
+                              ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                              : "border border-[var(--primitive-neutral-200)] bg-white"
+                          }`}
+                        >
+                          <span
+                            className={`text-body ${
+                              tempTextQuestion.answerType === "short"
+                                ? "font-medium text-foreground-info"
+                                : "text-foreground-subtle"
+                            }`}
+                          >
                             Write an answer
                           </span>
                         </div>
                       </div>
                       {/* Radio Button with Label */}
-                      <div className="flex items-center gap-1 w-full">
+                      <div className="flex w-full items-center gap-1">
                         <RadioGroupItem value="short" id="short-answer" />
                         <span className="text-caption text-foreground">Short Answer</span>
                       </div>
@@ -1481,13 +1618,15 @@ export default function RoleEditPage() {
                 {/* Settings Section */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Settings</label>
-                  <div className="border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
+                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
                     {/* Hide from apply form */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-300)]">
+                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
                       <span className="text-body text-foreground">Hide from apply form</span>
                       <Switch
                         checked={tempTextQuestion.hideFromApplyForm}
-                        onCheckedChange={(checked) => setTempTextQuestion({ ...tempTextQuestion, hideFromApplyForm: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempTextQuestion({ ...tempTextQuestion, hideFromApplyForm: checked })
+                        }
                       />
                     </div>
                     {/* Require an answer */}
@@ -1495,7 +1634,9 @@ export default function RoleEditPage() {
                       <span className="text-body text-foreground">Require an answer</span>
                       <Switch
                         checked={tempTextQuestion.requireAnswer}
-                        onCheckedChange={(checked) => setTempTextQuestion({ ...tempTextQuestion, requireAnswer: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempTextQuestion({ ...tempTextQuestion, requireAnswer: checked })
+                        }
                       />
                     </div>
                   </div>
@@ -1503,8 +1644,13 @@ export default function RoleEditPage() {
               </div>
 
               {/* Footer - Figma: border-t, px-32 py-16 */}
-              <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-[var(--primitive-neutral-300)]">
-                <Button type="button" variant="tertiary" size="lg" onClick={handleDiscardTextQuestion}>
+              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="lg"
+                  onClick={handleDiscardTextQuestion}
+                >
                   Discard
                 </Button>
                 <Button type="button" variant="primary" size="lg" onClick={handleSaveTextQuestion}>
@@ -1518,15 +1664,13 @@ export default function RoleEditPage() {
               YES/NO QUESTION MODAL
               ============================================ */}
           <Dialog open={yesNoQuestionModalOpen} onOpenChange={setYesNoQuestionModalOpen}>
-            <DialogContent className="p-0 gap-0 max-w-[720px] overflow-hidden" hideCloseButton>
+            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
               {/* Header */}
-              <div className="flex items-center gap-3 px-8 py-4 border-b border-[var(--primitive-neutral-300)]">
-                <div className="bg-[var(--primitive-red-100)] p-1 rounded-lg shrink-0">
-                  <Circle weight="regular" className="w-6 h-6 text-[var(--primitive-red-500)]" />
+              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
+                <div className="shrink-0 rounded-lg bg-[var(--primitive-red-100)] p-1">
+                  <Circle weight="regular" className="h-6 w-6 text-[var(--primitive-red-500)]" />
                 </div>
-                <DialogTitle className="flex-1 text-body text-foreground">
-                  Yes/No
-                </DialogTitle>
+                <DialogTitle className="flex-1 text-body text-foreground">Yes/No</DialogTitle>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -1535,7 +1679,7 @@ export default function RoleEditPage() {
                   className="rounded-2xl"
                   aria-label="Close"
                 >
-                  <X weight="regular" className="w-5 h-5" />
+                  <X weight="regular" className="h-5 w-5" />
                 </Button>
               </div>
 
@@ -1546,25 +1690,27 @@ export default function RoleEditPage() {
                   <label className="text-body text-foreground">Question title</label>
                   <Input
                     value={tempYesNoQuestion.title}
-                    onChange={(e) => setTempYesNoQuestion({ ...tempYesNoQuestion, title: e.target.value })}
+                    onChange={(e) =>
+                      setTempYesNoQuestion({ ...tempYesNoQuestion, title: e.target.value })
+                    }
                     placeholder="Write your yes/no question?"
-                    className="bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-200)] text-body py-4 px-4"
+                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
                   />
                 </div>
 
                 {/* Preview Section */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Answer Preview</label>
-                  <div className="bg-[var(--primitive-neutral-100)] rounded-2xl p-6">
+                  <div className="rounded-2xl bg-[var(--primitive-neutral-100)] p-6">
                     <div className="flex gap-4">
-                      <div className="flex items-center gap-2 px-6 py-3 bg-white border border-[var(--primitive-neutral-300)] rounded-xl">
-                        <div className="w-5 h-5 rounded-full border-2 border-[var(--primitive-blue-500)] flex items-center justify-center">
-                          <div className="w-2.5 h-2.5 rounded-full bg-[var(--primitive-blue-500)]" />
+                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-white px-6 py-3">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--primitive-blue-500)]">
+                          <div className="h-2.5 w-2.5 rounded-full bg-[var(--primitive-blue-500)]" />
                         </div>
                         <span className="text-body-sm text-foreground">Yes</span>
                       </div>
-                      <div className="flex items-center gap-2 px-6 py-3 bg-white border border-[var(--primitive-neutral-300)] rounded-xl">
-                        <div className="w-5 h-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
+                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-white px-6 py-3">
+                        <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
                         <span className="text-body-sm text-foreground">No</span>
                       </div>
                     </div>
@@ -1574,19 +1720,23 @@ export default function RoleEditPage() {
                 {/* Settings Section */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Settings</label>
-                  <div className="border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-300)]">
+                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
                       <span className="text-body text-foreground">Hide from apply form</span>
                       <Switch
                         checked={tempYesNoQuestion.hideFromApplyForm}
-                        onCheckedChange={(checked) => setTempYesNoQuestion({ ...tempYesNoQuestion, hideFromApplyForm: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempYesNoQuestion({ ...tempYesNoQuestion, hideFromApplyForm: checked })
+                        }
                       />
                     </div>
                     <div className="flex items-center justify-between px-4 py-3">
                       <span className="text-body text-foreground">Require an answer</span>
                       <Switch
                         checked={tempYesNoQuestion.requireAnswer}
-                        onCheckedChange={(checked) => setTempYesNoQuestion({ ...tempYesNoQuestion, requireAnswer: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempYesNoQuestion({ ...tempYesNoQuestion, requireAnswer: checked })
+                        }
                       />
                     </div>
                   </div>
@@ -1594,8 +1744,13 @@ export default function RoleEditPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-[var(--primitive-neutral-300)]">
-                <Button type="button" variant="tertiary" size="lg" onClick={handleDiscardYesNoQuestion}>
+              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="lg"
+                  onClick={handleDiscardYesNoQuestion}
+                >
                   Discard
                 </Button>
                 <Button type="button" variant="primary" size="lg" onClick={handleSaveYesNoQuestion}>
@@ -1609,11 +1764,14 @@ export default function RoleEditPage() {
               MULTIPLE CHOICE QUESTION MODAL
               ============================================ */}
           <Dialog open={multipleChoiceModalOpen} onOpenChange={setMultipleChoiceModalOpen}>
-            <DialogContent className="p-0 gap-0 max-w-[720px] overflow-hidden" hideCloseButton>
+            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
               {/* Header */}
-              <div className="flex items-center gap-3 px-8 py-4 border-b border-[var(--primitive-neutral-300)]">
-                <div className="bg-[var(--primitive-yellow-100)] p-1 rounded-lg shrink-0">
-                  <CheckSquare weight="regular" className="w-6 h-6 text-[var(--primitive-yellow-600)]" />
+              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
+                <div className="shrink-0 rounded-lg bg-[var(--primitive-yellow-100)] p-1">
+                  <CheckSquare
+                    weight="regular"
+                    className="h-6 w-6 text-[var(--primitive-yellow-600)]"
+                  />
                 </div>
                 <DialogTitle className="flex-1 text-body text-foreground">
                   Multiple Choice
@@ -1626,7 +1784,7 @@ export default function RoleEditPage() {
                   className="rounded-2xl"
                   aria-label="Close"
                 >
-                  <X weight="regular" className="w-5 h-5" />
+                  <X weight="regular" className="h-5 w-5" />
                 </Button>
               </div>
 
@@ -1637,9 +1795,11 @@ export default function RoleEditPage() {
                   <label className="text-body text-foreground">Question title</label>
                   <Input
                     value={tempMultipleChoice.title}
-                    onChange={(e) => setTempMultipleChoice({ ...tempMultipleChoice, title: e.target.value })}
+                    onChange={(e) =>
+                      setTempMultipleChoice({ ...tempMultipleChoice, title: e.target.value })
+                    }
                     placeholder="Write your question?"
-                    className="bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-200)] text-body py-4 px-4"
+                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
                   />
                 </div>
 
@@ -1648,45 +1808,54 @@ export default function RoleEditPage() {
                   <label className="text-body text-foreground">Selection Type</label>
                   <RadioGroup
                     value={tempMultipleChoice.allowMultiple ? "multiple" : "single"}
-                    onValueChange={(value) => setTempMultipleChoice({ ...tempMultipleChoice, allowMultiple: value === "multiple" })}
+                    onValueChange={(value) =>
+                      setTempMultipleChoice({
+                        ...tempMultipleChoice,
+                        allowMultiple: value === "multiple",
+                      })
+                    }
                     className="grid grid-cols-2 gap-3"
                   >
                     {/* Single Answer Option */}
                     <label
                       htmlFor="single-answer"
-                      className={`flex flex-col items-center pb-2 pt-4 px-4 rounded-2xl border cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
                         !tempMultipleChoice.allowMultiple
-                          ? "bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-300)]"
+                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
                           : "border-[var(--primitive-neutral-300)]"
                       }`}
                     >
                       {/* Preview Box */}
-                      <div className="bg-[var(--primitive-neutral-200)] rounded-2xl h-[120px] w-full mb-2 flex items-center justify-center overflow-hidden p-4">
-                        <div className="flex flex-col gap-2 w-full">
-                          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                            !tempMultipleChoice.allowMultiple
-                              ? "bg-[var(--primitive-blue-100)] border border-[var(--primitive-blue-500)]"
-                              : "bg-white border border-[var(--primitive-neutral-200)]"
-                          }`}>
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                      <div className="mb-2 flex h-[120px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)] p-4">
+                        <div className="flex w-full flex-col gap-2">
+                          <div
+                            className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
                               !tempMultipleChoice.allowMultiple
-                                ? "border-[var(--primitive-blue-500)]"
-                                : "border-[var(--primitive-neutral-400)]"
-                            }`}>
+                                ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                                : "border border-[var(--primitive-neutral-200)] bg-white"
+                            }`}
+                          >
+                            <div
+                              className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
+                                !tempMultipleChoice.allowMultiple
+                                  ? "border-[var(--primitive-blue-500)]"
+                                  : "border-[var(--primitive-neutral-400)]"
+                              }`}
+                            >
                               {!tempMultipleChoice.allowMultiple && (
-                                <div className="w-2 h-2 rounded-full bg-[var(--primitive-blue-500)]" />
+                                <div className="h-2 w-2 rounded-full bg-[var(--primitive-blue-500)]" />
                               )}
                             </div>
                             <span className="text-caption">Option A</span>
                           </div>
-                          <div className="flex items-center gap-2 px-3 py-2 bg-white border border-[var(--primitive-neutral-200)] rounded-lg">
-                            <div className="w-4 h-4 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
+                          <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-200)] bg-white px-3 py-2">
+                            <div className="h-4 w-4 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
                             <span className="text-caption text-foreground-subtle">Option B</span>
                           </div>
                         </div>
                       </div>
                       {/* Radio Button with Label */}
-                      <div className="flex items-center gap-1 w-full">
+                      <div className="flex w-full items-center gap-1">
                         <RadioGroupItem value="single" id="single-answer" />
                         <span className="text-caption text-foreground">Single Answer</span>
                       </div>
@@ -1695,43 +1864,51 @@ export default function RoleEditPage() {
                     {/* Multiple Answers Option */}
                     <label
                       htmlFor="multiple-answers"
-                      className={`flex flex-col items-center pb-2 pt-4 px-4 rounded-2xl border cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
                         tempMultipleChoice.allowMultiple
-                          ? "bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-300)]"
+                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
                           : "border-[var(--primitive-neutral-300)]"
                       }`}
                     >
                       {/* Preview Box */}
-                      <div className="bg-[var(--primitive-neutral-200)] rounded-2xl h-[120px] w-full mb-2 flex items-center justify-center overflow-hidden p-4">
-                        <div className="flex flex-col gap-2 w-full">
-                          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                            tempMultipleChoice.allowMultiple
-                              ? "bg-[var(--primitive-blue-100)] border border-[var(--primitive-blue-500)]"
-                              : "bg-white border border-[var(--primitive-neutral-200)]"
-                          }`}>
-                            <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center ${
+                      <div className="mb-2 flex h-[120px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)] p-4">
+                        <div className="flex w-full flex-col gap-2">
+                          <div
+                            className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
                               tempMultipleChoice.allowMultiple
-                                ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
-                                : "border-[var(--primitive-neutral-400)]"
-                            }`}>
+                                ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                                : "border border-[var(--primitive-neutral-200)] bg-white"
+                            }`}
+                          >
+                            <div
+                              className={`flex h-4 w-4 items-center justify-center rounded-md border-2 ${
+                                tempMultipleChoice.allowMultiple
+                                  ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
+                                  : "border-[var(--primitive-neutral-400)]"
+                              }`}
+                            >
                               {tempMultipleChoice.allowMultiple && (
-                                <Check weight="bold" className="w-3 h-3 text-white" />
+                                <Check weight="bold" className="h-3 w-3 text-white" />
                               )}
                             </div>
                             <span className="text-caption">Option A</span>
                           </div>
-                          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                            tempMultipleChoice.allowMultiple
-                              ? "bg-[var(--primitive-blue-100)] border border-[var(--primitive-blue-500)]"
-                              : "bg-white border border-[var(--primitive-neutral-200)]"
-                          }`}>
-                            <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center ${
+                          <div
+                            className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
                               tempMultipleChoice.allowMultiple
-                                ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
-                                : "border-[var(--primitive-neutral-400)]"
-                            }`}>
+                                ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                                : "border border-[var(--primitive-neutral-200)] bg-white"
+                            }`}
+                          >
+                            <div
+                              className={`flex h-4 w-4 items-center justify-center rounded-md border-2 ${
+                                tempMultipleChoice.allowMultiple
+                                  ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
+                                  : "border-[var(--primitive-neutral-400)]"
+                              }`}
+                            >
                               {tempMultipleChoice.allowMultiple && (
-                                <Check weight="bold" className="w-3 h-3 text-white" />
+                                <Check weight="bold" className="h-3 w-3 text-white" />
                               )}
                             </div>
                             <span className="text-caption">Option B</span>
@@ -1739,7 +1916,7 @@ export default function RoleEditPage() {
                         </div>
                       </div>
                       {/* Radio Button with Label */}
-                      <div className="flex items-center gap-1 w-full">
+                      <div className="flex w-full items-center gap-1">
                         <RadioGroupItem value="multiple" id="multiple-answers" />
                         <span className="text-caption text-foreground">Multiple Answers</span>
                       </div>
@@ -1753,18 +1930,18 @@ export default function RoleEditPage() {
                   <div className="flex flex-col gap-2">
                     {tempMultipleChoice.options.map((option, index) => (
                       <div key={index} className="flex items-center gap-2">
-                        <div className="flex items-center gap-3 flex-1 bg-[var(--primitive-neutral-100)] border border-[var(--primitive-neutral-200)] rounded-xl px-4 py-3">
+                        <div className="flex flex-1 items-center gap-3 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3">
                           {/* Show radio circle or checkbox square based on selection type */}
                           {tempMultipleChoice.allowMultiple ? (
-                            <div className="w-5 h-5 rounded-md border-2 border-[var(--primitive-neutral-400)]" />
+                            <div className="h-5 w-5 rounded-md border-2 border-[var(--primitive-neutral-400)]" />
                           ) : (
-                            <div className="w-5 h-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
+                            <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
                           )}
                           <Input
                             value={option}
                             onChange={(e) => handleUpdateOption(index, e.target.value)}
                             placeholder={`Option ${index + 1}`}
-                            className="flex-1 bg-transparent border-0 p-0 text-body-sm focus-visible:ring-0"
+                            className="flex-1 border-0 bg-transparent p-0 text-body-sm focus-visible:ring-0"
                           />
                         </div>
                         {tempMultipleChoice.options.length > 2 && (
@@ -1775,7 +1952,7 @@ export default function RoleEditPage() {
                             onClick={() => handleRemoveOption(index)}
                             className="shrink-0 text-[var(--primitive-red-500)] hover:bg-[var(--primitive-red-100)]"
                           >
-                            <Trash weight="regular" className="w-5 h-5" />
+                            <Trash weight="regular" className="h-5 w-5" />
                           </Button>
                         )}
                       </div>
@@ -1785,7 +1962,7 @@ export default function RoleEditPage() {
                     type="button"
                     variant="tertiary"
                     onClick={handleAddOption}
-                    leftIcon={<Plus weight="bold" className="w-4 h-4" />}
+                    leftIcon={<Plus weight="bold" className="h-4 w-4" />}
                     className="self-start"
                   >
                     Add option
@@ -1795,19 +1972,26 @@ export default function RoleEditPage() {
                 {/* Settings Section */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Settings</label>
-                  <div className="border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-300)]">
+                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
                       <span className="text-body text-foreground">Hide from apply form</span>
                       <Switch
                         checked={tempMultipleChoice.hideFromApplyForm}
-                        onCheckedChange={(checked) => setTempMultipleChoice({ ...tempMultipleChoice, hideFromApplyForm: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempMultipleChoice({
+                            ...tempMultipleChoice,
+                            hideFromApplyForm: checked,
+                          })
+                        }
                       />
                     </div>
                     <div className="flex items-center justify-between px-4 py-3">
                       <span className="text-body text-foreground">Require an answer</span>
                       <Switch
                         checked={tempMultipleChoice.requireAnswer}
-                        onCheckedChange={(checked) => setTempMultipleChoice({ ...tempMultipleChoice, requireAnswer: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempMultipleChoice({ ...tempMultipleChoice, requireAnswer: checked })
+                        }
                       />
                     </div>
                   </div>
@@ -1815,11 +1999,21 @@ export default function RoleEditPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-[var(--primitive-neutral-300)]">
-                <Button type="button" variant="tertiary" size="lg" onClick={handleDiscardMultipleChoice}>
+              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="lg"
+                  onClick={handleDiscardMultipleChoice}
+                >
                   Discard
                 </Button>
-                <Button type="button" variant="primary" size="lg" onClick={handleSaveMultipleChoice}>
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="lg"
+                  onClick={handleSaveMultipleChoice}
+                >
                   Apply Changes
                 </Button>
               </div>
@@ -1830,15 +2024,13 @@ export default function RoleEditPage() {
               FILE UPLOAD QUESTION MODAL
               ============================================ */}
           <Dialog open={fileUploadModalOpen} onOpenChange={setFileUploadModalOpen}>
-            <DialogContent className="p-0 gap-0 max-w-[720px] overflow-hidden" hideCloseButton>
+            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
               {/* Header */}
-              <div className="flex items-center gap-3 px-8 py-4 border-b border-[var(--primitive-neutral-300)]">
-                <div className="bg-[var(--primitive-blue-200)] p-1 rounded-lg shrink-0">
-                  <Upload weight="regular" className="w-6 h-6 text-[var(--primitive-blue-700)]" />
+              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
+                <div className="shrink-0 rounded-lg bg-[var(--primitive-blue-200)] p-1">
+                  <Upload weight="regular" className="h-6 w-6 text-[var(--primitive-blue-700)]" />
                 </div>
-                <DialogTitle className="flex-1 text-body text-foreground">
-                  File Upload
-                </DialogTitle>
+                <DialogTitle className="flex-1 text-body text-foreground">File Upload</DialogTitle>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -1847,7 +2039,7 @@ export default function RoleEditPage() {
                   className="rounded-2xl"
                   aria-label="Close"
                 >
-                  <X weight="regular" className="w-5 h-5" />
+                  <X weight="regular" className="h-5 w-5" />
                 </Button>
               </div>
 
@@ -1858,9 +2050,11 @@ export default function RoleEditPage() {
                   <label className="text-body text-foreground">Question title</label>
                   <Input
                     value={tempFileUpload.title}
-                    onChange={(e) => setTempFileUpload({ ...tempFileUpload, title: e.target.value })}
+                    onChange={(e) =>
+                      setTempFileUpload({ ...tempFileUpload, title: e.target.value })
+                    }
                     placeholder="e.g., Upload your resume"
-                    className="bg-[var(--primitive-neutral-100)] border-[var(--primitive-neutral-200)] text-body py-4 px-4"
+                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
                   />
                 </div>
 
@@ -1868,33 +2062,48 @@ export default function RoleEditPage() {
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Accepted file types</label>
                   <div className="flex flex-wrap gap-3">
-                    <label className="flex items-center gap-2 px-4 py-3 bg-[var(--primitive-neutral-100)] border border-[var(--primitive-neutral-200)] rounded-xl cursor-pointer hover:bg-[var(--primitive-neutral-200)] transition-colors">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
                       <Checkbox
                         checked={tempFileUpload.acceptedTypes.pdf}
-                        onCheckedChange={(checked) => setTempFileUpload({
-                          ...tempFileUpload,
-                          acceptedTypes: { ...tempFileUpload.acceptedTypes, pdf: checked === true }
-                        })}
+                        onCheckedChange={(checked) =>
+                          setTempFileUpload({
+                            ...tempFileUpload,
+                            acceptedTypes: {
+                              ...tempFileUpload.acceptedTypes,
+                              pdf: checked === true,
+                            },
+                          })
+                        }
                       />
                       <span className="text-body-sm">PDF</span>
                     </label>
-                    <label className="flex items-center gap-2 px-4 py-3 bg-[var(--primitive-neutral-100)] border border-[var(--primitive-neutral-200)] rounded-xl cursor-pointer hover:bg-[var(--primitive-neutral-200)] transition-colors">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
                       <Checkbox
                         checked={tempFileUpload.acceptedTypes.doc}
-                        onCheckedChange={(checked) => setTempFileUpload({
-                          ...tempFileUpload,
-                          acceptedTypes: { ...tempFileUpload.acceptedTypes, doc: checked === true }
-                        })}
+                        onCheckedChange={(checked) =>
+                          setTempFileUpload({
+                            ...tempFileUpload,
+                            acceptedTypes: {
+                              ...tempFileUpload.acceptedTypes,
+                              doc: checked === true,
+                            },
+                          })
+                        }
                       />
                       <span className="text-body-sm">DOC/DOCX</span>
                     </label>
-                    <label className="flex items-center gap-2 px-4 py-3 bg-[var(--primitive-neutral-100)] border border-[var(--primitive-neutral-200)] rounded-xl cursor-pointer hover:bg-[var(--primitive-neutral-200)] transition-colors">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
                       <Checkbox
                         checked={tempFileUpload.acceptedTypes.images}
-                        onCheckedChange={(checked) => setTempFileUpload({
-                          ...tempFileUpload,
-                          acceptedTypes: { ...tempFileUpload.acceptedTypes, images: checked === true }
-                        })}
+                        onCheckedChange={(checked) =>
+                          setTempFileUpload({
+                            ...tempFileUpload,
+                            acceptedTypes: {
+                              ...tempFileUpload.acceptedTypes,
+                              images: checked === true,
+                            },
+                          })
+                        }
                       />
                       <span className="text-body-sm">Images (PNG, JPG)</span>
                     </label>
@@ -1904,12 +2113,17 @@ export default function RoleEditPage() {
                 {/* Upload Preview */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Upload Preview</label>
-                  <div className="bg-[var(--primitive-neutral-100)] rounded-2xl p-8 border-2 border-dashed border-[var(--primitive-neutral-300)] flex flex-col items-center justify-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[var(--primitive-blue-100)] flex items-center justify-center">
-                      <Upload weight="regular" className="w-6 h-6 text-[var(--primitive-blue-500)]" />
+                  <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-8">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
+                      <Upload
+                        weight="regular"
+                        className="h-6 w-6 text-[var(--primitive-blue-500)]"
+                      />
                     </div>
                     <div className="text-center">
-                      <p className="text-body-sm text-foreground font-medium">Drop files here or click to upload</p>
+                      <p className="text-body-sm font-medium text-foreground">
+                        Drop files here or click to upload
+                      </p>
                       <p className="text-caption text-foreground-subtle">
                         Max file size: {tempFileUpload.maxFileSize}MB
                       </p>
@@ -1920,19 +2134,23 @@ export default function RoleEditPage() {
                 {/* Settings Section */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Settings</label>
-                  <div className="border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-300)]">
+                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
                       <span className="text-body text-foreground">Hide from apply form</span>
                       <Switch
                         checked={tempFileUpload.hideFromApplyForm}
-                        onCheckedChange={(checked) => setTempFileUpload({ ...tempFileUpload, hideFromApplyForm: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempFileUpload({ ...tempFileUpload, hideFromApplyForm: checked })
+                        }
                       />
                     </div>
                     <div className="flex items-center justify-between px-4 py-3">
                       <span className="text-body text-foreground">Require an answer</span>
                       <Switch
                         checked={tempFileUpload.requireAnswer}
-                        onCheckedChange={(checked) => setTempFileUpload({ ...tempFileUpload, requireAnswer: checked })}
+                        onCheckedChange={(checked) =>
+                          setTempFileUpload({ ...tempFileUpload, requireAnswer: checked })
+                        }
                       />
                     </div>
                   </div>
@@ -1940,8 +2158,13 @@ export default function RoleEditPage() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-3 px-8 py-4 border-t border-[var(--primitive-neutral-300)]">
-                <Button type="button" variant="tertiary" size="lg" onClick={handleDiscardFileUpload}>
+              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="lg"
+                  onClick={handleDiscardFileUpload}
+                >
                   Discard
                 </Button>
                 <Button type="button" variant="primary" size="lg" onClick={handleSaveFileUpload}>
@@ -1957,12 +2180,10 @@ export default function RoleEditPage() {
           {activeTab === "candidates" && (
             <div className="space-y-4">
               {/* Header Card */}
-              <div className="bg-white border border-[var(--primitive-neutral-300)] rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-white p-6">
+                <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <h2 className="text-heading-sm text-foreground mb-1">
-                      Applications
-                    </h2>
+                    <h2 className="mb-1 text-heading-sm text-foreground">Applications</h2>
                     <p className="text-body-sm text-foreground-muted">
                       3 candidates have applied for this role
                     </p>
@@ -1979,30 +2200,30 @@ export default function RoleEditPage() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-4 gap-4">
-                  <div className="p-4 bg-[var(--primitive-neutral-100)] rounded-xl">
-                    <div className="text-heading-md text-foreground mb-1">3</div>
+                  <div className="rounded-xl bg-[var(--primitive-neutral-100)] p-4">
+                    <div className="mb-1 text-heading-md text-foreground">3</div>
                     <div className="text-caption text-foreground-muted">Total Applications</div>
                   </div>
-                  <div className="p-4 bg-[var(--primitive-blue-100)] rounded-xl">
-                    <div className="text-heading-md text-foreground mb-1">1</div>
+                  <div className="rounded-xl bg-[var(--primitive-blue-100)] p-4">
+                    <div className="mb-1 text-heading-md text-foreground">1</div>
                     <div className="text-caption text-foreground-muted">New</div>
                   </div>
-                  <div className="p-4 bg-[var(--primitive-yellow-100)] rounded-xl">
-                    <div className="text-heading-md text-foreground mb-1">1</div>
+                  <div className="rounded-xl bg-[var(--primitive-yellow-100)] p-4">
+                    <div className="mb-1 text-heading-md text-foreground">1</div>
                     <div className="text-caption text-foreground-muted">In Review</div>
                   </div>
-                  <div className="p-4 bg-[var(--primitive-green-100)] rounded-xl">
-                    <div className="text-heading-md text-foreground mb-1">1</div>
+                  <div className="rounded-xl bg-[var(--primitive-green-100)] p-4">
+                    <div className="mb-1 text-heading-md text-foreground">1</div>
                     <div className="text-caption text-foreground-muted">Interview</div>
                   </div>
                 </div>
               </div>
 
               {/* Applications List */}
-              <div className="bg-white border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
                 {/* Table Header */}
-                <div className="px-6 py-3 border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)]">
-                  <div className="grid grid-cols-12 gap-4 text-caption text-foreground-muted font-semibold">
+                <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-6 py-3">
+                  <div className="grid grid-cols-12 gap-4 text-caption font-semibold text-foreground-muted">
                     <div className="col-span-3">Candidate</div>
                     <div className="col-span-2">Location</div>
                     <div className="col-span-2">Experience</div>
@@ -2016,76 +2237,118 @@ export default function RoleEditPage() {
                 {/* Application Rows */}
                 <div className="divide-y divide-[var(--primitive-neutral-200)]">
                   {/* Application 1 */}
-                  <div className="px-6 py-4 hover:bg-[var(--primitive-neutral-100)] transition-colors cursor-pointer">
-                    <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                    <div className="grid grid-cols-12 items-center gap-4">
                       <div className="col-span-3 flex items-center gap-3">
                         <Avatar name="Sarah Chen" size="default" />
                         <div>
-                          <div className="text-body-sm text-foreground font-medium">Sarah Chen</div>
-                          <div className="text-caption text-foreground-muted">sarah.chen@example.com</div>
+                          <div className="text-body-sm font-medium text-foreground">Sarah Chen</div>
+                          <div className="text-caption text-foreground-muted">
+                            sarah.chen@example.com
+                          </div>
                         </div>
                       </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">San Francisco, CA</div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">5-10 years</div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">2 days ago</div>
-                      <div className="col-span-1">
-                        <Badge variant="success" size="sm">92%</Badge>
+                      <div className="col-span-2 text-body-sm text-foreground-muted">
+                        San Francisco, CA
+                      </div>
+                      <div className="col-span-2 text-body-sm text-foreground-muted">
+                        5-10 years
+                      </div>
+                      <div className="col-span-2 text-body-sm text-foreground-muted">
+                        2 days ago
                       </div>
                       <div className="col-span-1">
-                        <Badge variant="neutral" size="sm">New</Badge>
+                        <Badge variant="success" size="sm">
+                          92%
+                        </Badge>
+                      </div>
+                      <div className="col-span-1">
+                        <Badge variant="neutral" size="sm">
+                          New
+                        </Badge>
                       </div>
                       <div className="col-span-1 flex justify-end">
-                        <Button variant="tertiary" size="sm">View</Button>
+                        <Button variant="tertiary" size="sm">
+                          View
+                        </Button>
                       </div>
                     </div>
                   </div>
 
                   {/* Application 2 */}
-                  <div className="px-6 py-4 hover:bg-[var(--primitive-neutral-100)] transition-colors cursor-pointer">
-                    <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                    <div className="grid grid-cols-12 items-center gap-4">
                       <div className="col-span-3 flex items-center gap-3">
                         <Avatar name="Marcus Johnson" size="default" />
                         <div>
-                          <div className="text-body-sm text-foreground font-medium">Marcus Johnson</div>
-                          <div className="text-caption text-foreground-muted">marcus.j@example.com</div>
+                          <div className="text-body-sm font-medium text-foreground">
+                            Marcus Johnson
+                          </div>
+                          <div className="text-caption text-foreground-muted">
+                            marcus.j@example.com
+                          </div>
                         </div>
                       </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">Austin, TX</div>
+                      <div className="col-span-2 text-body-sm text-foreground-muted">
+                        Austin, TX
+                      </div>
                       <div className="col-span-2 text-body-sm text-foreground-muted">3-5 years</div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">5 days ago</div>
-                      <div className="col-span-1">
-                        <Badge variant="warning" size="sm">85%</Badge>
+                      <div className="col-span-2 text-body-sm text-foreground-muted">
+                        5 days ago
                       </div>
                       <div className="col-span-1">
-                        <Badge variant="info" size="sm">Reviewing</Badge>
+                        <Badge variant="warning" size="sm">
+                          85%
+                        </Badge>
+                      </div>
+                      <div className="col-span-1">
+                        <Badge variant="info" size="sm">
+                          Reviewing
+                        </Badge>
                       </div>
                       <div className="col-span-1 flex justify-end">
-                        <Button variant="tertiary" size="sm">View</Button>
+                        <Button variant="tertiary" size="sm">
+                          View
+                        </Button>
                       </div>
                     </div>
                   </div>
 
                   {/* Application 3 */}
-                  <div className="px-6 py-4 hover:bg-[var(--primitive-neutral-100)] transition-colors cursor-pointer">
-                    <div className="grid grid-cols-12 gap-4 items-center">
+                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                    <div className="grid grid-cols-12 items-center gap-4">
                       <div className="col-span-3 flex items-center gap-3">
                         <Avatar name="Priya Patel" size="default" />
                         <div>
-                          <div className="text-body-sm text-foreground font-medium">Priya Patel</div>
-                          <div className="text-caption text-foreground-muted">priya.patel@example.com</div>
+                          <div className="text-body-sm font-medium text-foreground">
+                            Priya Patel
+                          </div>
+                          <div className="text-caption text-foreground-muted">
+                            priya.patel@example.com
+                          </div>
                         </div>
                       </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">New York, NY</div>
+                      <div className="col-span-2 text-body-sm text-foreground-muted">
+                        New York, NY
+                      </div>
                       <div className="col-span-2 text-body-sm text-foreground-muted">10+ years</div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">7 days ago</div>
-                      <div className="col-span-1">
-                        <Badge variant="success" size="sm">88%</Badge>
+                      <div className="col-span-2 text-body-sm text-foreground-muted">
+                        7 days ago
                       </div>
                       <div className="col-span-1">
-                        <Badge variant="info" size="sm">Interview</Badge>
+                        <Badge variant="success" size="sm">
+                          88%
+                        </Badge>
+                      </div>
+                      <div className="col-span-1">
+                        <Badge variant="info" size="sm">
+                          Interview
+                        </Badge>
                       </div>
                       <div className="col-span-1 flex justify-end">
-                        <Button variant="tertiary" size="sm">View</Button>
+                        <Button variant="tertiary" size="sm">
+                          View
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -2098,407 +2361,417 @@ export default function RoleEditPage() {
               JOB POST TAB
               ============================================ */}
           {activeTab === "job-post" && (
-          <div className="flex gap-4">
-            {/* Left Column - Form */}
-            <div className="flex-1 flex flex-col gap-4">
-              {/* Basic Info Card */}
-              <FormCard>
-                <FormTitleInput
-                  placeholder="Untitled Role"
-                  value={roleTitle}
-                  onChange={(e) => setRoleTitle(e.target.value)}
-                  required
-                />
-
-                <FormField label="Job Category" required>
-                  <Select value={jobCategory} onValueChange={setJobCategory}>
-                    <SelectTrigger size="lg">
-                      <SelectValue placeholder="Select a Job Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {jobCategories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormField>
-
-                <FormRow columns={2}>
-                  <FormField label="Position Type" required>
-                    <Select value={positionType} onValueChange={setPositionType}>
-                      <SelectTrigger size="lg">
-                        <SelectValue placeholder="Select a Position Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {positionTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormField>
-                  <FormField label="Level of Experience" required>
-                    <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                      <SelectTrigger size="lg">
-                        <SelectValue placeholder="Select Experience Level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {experienceLevels.map((level) => (
-                          <SelectItem key={level.value} value={level.value}>
-                            {level.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormField>
-                </FormRow>
-              </FormCard>
-
-              {/* Role Information Card */}
-              <FormCard>
-                <FormSection title="Role Information">
-                  <FormField
-                    label="Role Description"
+            <div className="flex gap-4">
+              {/* Left Column - Form */}
+              <div className="flex flex-1 flex-col gap-4">
+                {/* Basic Info Card */}
+                <FormCard>
+                  <FormTitleInput
+                    placeholder="Untitled Role"
+                    value={roleTitle}
+                    onChange={(e) => setRoleTitle(e.target.value)}
                     required
-                    helpText="Provide a detailed overview of the responsibilities and qualifications expected from the job applicant."
-                  >
-                    <RichTextEditor
-                      content={description}
-                      onChange={setDescription}
-                      placeholder="Write your role description here"
-                      minHeight="100px"
-                    >
-                      <RichTextToolbar />
-                    </RichTextEditor>
-                    <div className="flex justify-end mt-2">
-                      <RichTextCharacterCounter htmlContent={description} max={250} />
-                    </div>
-                  </FormField>
+                  />
 
-                  <FormField
-                    label="Primary Responsibilities"
-                    helpText="What are the key responsibilities a candidate must fulfill to be considered for this role?"
-                  >
-                    <RichTextEditor
-                      content={responsibilities}
-                      onChange={setResponsibilities}
-                      placeholder="What are the primary responsibilities for this job?"
-                      minHeight="100px"
-                    >
-                      <RichTextToolbar />
-                    </RichTextEditor>
-                    <div className="flex justify-end mt-2">
-                      <RichTextCharacterCounter htmlContent={responsibilities} max={250} />
-                    </div>
-                  </FormField>
-
-                  <FormField
-                    label="Required Qualifications"
-                    helpText="What are the essential qualifications required for a candidate to be eligible for consideration for this role."
-                  >
-                    <RichTextEditor
-                      content={requiredQuals}
-                      onChange={setRequiredQuals}
-                      placeholder="What are the required qualifications for this job?"
-                      minHeight="100px"
-                    >
-                      <RichTextToolbar />
-                    </RichTextEditor>
-                    <div className="flex justify-end mt-2">
-                      <RichTextCharacterCounter htmlContent={requiredQuals} max={250} />
-                    </div>
-                  </FormField>
-
-                  <FormField
-                    label="Desired Qualifications"
-                    helpText="What are the qualifications that, while not mandatory, are highly advantageous for the position."
-                  >
-                    <RichTextEditor
-                      content={desiredQuals}
-                      onChange={setDesiredQuals}
-                      placeholder="What are the desired qualifications for this job?"
-                      minHeight="100px"
-                    >
-                      <RichTextToolbar />
-                    </RichTextEditor>
-                    <div className="flex justify-end mt-2">
-                      <RichTextCharacterCounter htmlContent={desiredQuals} max={250} />
-                    </div>
-                  </FormField>
-                </FormSection>
-              </FormCard>
-
-              {/* Education Requirements Card */}
-              <FormCard>
-                <FormSection title="Education Requirements">
-                  <FormField label="Education Level">
-                    <Select value={educationLevel} onValueChange={setEducationLevel}>
+                  <FormField label="Job Category" required>
+                    <Select value={jobCategory} onValueChange={setJobCategory}>
                       <SelectTrigger size="lg">
-                        <SelectValue placeholder="Education Level" />
+                        <SelectValue placeholder="Select a Job Category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {educationLevels.map((level) => (
-                          <SelectItem key={level.value} value={level.value}>
-                            {level.label}
+                        {jobCategories.map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </FormField>
 
-                  <FormField
-                    label="Specific Education Requirements"
-                    helpText="Outline the degrees, credentials, and training required to support students with disabilities and diverse learning needs effectively."
-                  >
-                    <RichTextEditor
-                      content={educationDetails}
-                      onChange={setEducationDetails}
-                      placeholder="Add any information regarding any specific education requirements"
-                      minHeight="100px"
-                    >
-                      <RichTextToolbar />
-                    </RichTextEditor>
-                    <div className="flex justify-end mt-2">
-                      <RichTextCharacterCounter htmlContent={educationDetails} max={250} />
-                    </div>
-                  </FormField>
-                </FormSection>
-              </FormCard>
-
-              {/* Workplace Information Card */}
-              <FormCard>
-                <FormSection title="Workplace Information">
-                  <FormField label="Workplace Type" required>
-                    <SegmentedController
-                      options={[
-                        { value: "onsite", label: "Onsite" },
-                        { value: "remote", label: "Remote" },
-                        { value: "hybrid", label: "Hybrid" },
-                      ]}
-                      value={workplaceType}
-                      onValueChange={setWorkplaceType}
-                    />
-                  </FormField>
-
-                  {workplaceType !== "remote" && (
-                    <FormField label="Office Location">
-                      <FormRow columns={3}>
-                        <Input
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          placeholder="City"
-                          inputSize="lg"
-                        />
-                        <Select value={state} onValueChange={setState}>
-                          <SelectTrigger size="lg">
-                            <SelectValue placeholder="State" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {usStates.map((s) => (
-                              <SelectItem key={s.value} value={s.value}>
-                                {s.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Select value={country} onValueChange={setCountry}>
-                          <SelectTrigger size="lg">
-                            <SelectValue placeholder="Country" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {countries.map((c) => (
-                              <SelectItem key={c.value} value={c.value}>
-                                {c.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormRow>
-                    </FormField>
-                  )}
-                </FormSection>
-              </FormCard>
-
-              {/* Compensation & Benefits Card */}
-              <FormCard>
-                <FormSection title="Compensation & Benefits Information">
-                  {/* Compensation subsection */}
-                  <FormField
-                    label="Compensation"
-                    helpText="Outline the pay range, and incentives needed to fairly reward, attract, and retain someone in this role."
-                  >
-                    <div className="flex items-center gap-4">
-                      <Select value={payType} onValueChange={setPayType}>
-                        <SelectTrigger size="lg" className="w-[340px]">
-                          <SelectValue placeholder="Pay Type" />
+                  <FormRow columns={2}>
+                    <FormField label="Position Type" required>
+                      <Select value={positionType} onValueChange={setPositionType}>
+                        <SelectTrigger size="lg">
+                          <SelectValue placeholder="Select a Position Type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {payTypes.map((type) => (
+                          {positionTypes.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <Input
-                        value={minPay}
-                        onChange={(e) => setMinPay(e.target.value)}
-                        placeholder="Minimum Pay Amount"
-                        inputSize="lg"
-                        leftAddon={<span className="text-body font-medium">$</span>}
-                        className="flex-1"
-                      />
-                      <span className="text-[var(--primitive-neutral-500)]">—</span>
-                      <Input
-                        value={maxPay}
-                        onChange={(e) => setMaxPay(e.target.value)}
-                        placeholder="Maximum Pay Amount"
-                        inputSize="lg"
-                        leftAddon={<span className="text-body font-medium">$</span>}
-                        className="flex-1"
-                      />
-                    </div>
-                  </FormField>
+                    </FormField>
+                    <FormField label="Level of Experience" required>
+                      <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                        <SelectTrigger size="lg">
+                          <SelectValue placeholder="Select Experience Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {experienceLevels.map((level) => (
+                            <SelectItem key={level.value} value={level.value}>
+                              {level.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+                  </FormRow>
+                </FormCard>
 
-                  <FormField label="Pay frequency">
-                    <SegmentedController
-                      options={[
-                        { value: "weekly", label: "Weekly" },
-                        { value: "bi-weekly", label: "Bi-Weekly" },
-                        { value: "monthly", label: "Monthly" },
-                      ]}
-                      value={payFrequency}
-                      onValueChange={setPayFrequency}
-                    />
-                  </FormField>
-
-                  {/* Benefits subsection */}
-                  <FormField
-                    label="Benefits"
-                    helpText="Outline the benefits needed to fairly reward, attract, and retain someone in this role."
-                  >
-                    <BenefitsSelector
-                      categories={defaultBenefitCategories}
-                      selectedBenefits={selectedBenefits}
-                      onSelectionChange={setSelectedBenefits}
-                      useCompanyDefaults={useCompanyBenefits}
-                      onUseCompanyDefaultsChange={setUseCompanyBenefits}
-                      companyName="Company"
-                    />
-                    <RichTextEditor
-                      content={compensationDetails}
-                      onChange={setCompensationDetails}
-                      placeholder="Add any details on compensation or benefits."
-                      minHeight="100px"
+                {/* Role Information Card */}
+                <FormCard>
+                  <FormSection title="Role Information">
+                    <FormField
+                      label="Role Description"
+                      required
+                      helpText="Provide a detailed overview of the responsibilities and qualifications expected from the job applicant."
                     >
-                      <RichTextToolbar />
-                    </RichTextEditor>
-                    <div className="flex justify-end mt-2">
-                      <RichTextCharacterCounter htmlContent={compensationDetails} max={250} />
-                    </div>
-                  </FormField>
-                </FormSection>
-              </FormCard>
-            </div>
+                      <RichTextEditor
+                        content={description}
+                        onChange={setDescription}
+                        placeholder="Write your role description here"
+                        minHeight="100px"
+                      >
+                        <RichTextToolbar />
+                      </RichTextEditor>
+                      <div className="mt-2 flex justify-end">
+                        <RichTextCharacterCounter htmlContent={description} max={250} />
+                      </div>
+                    </FormField>
 
-            {/* Right Column - Sidebar */}
-            <div className="w-[480px] flex flex-col gap-4 sticky top-6 self-start">
-              {/* Role Settings Card - Figma 188:6269 */}
-              <div className="bg-white border border-[var(--primitive-neutral-300)] rounded-2xl overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center gap-2 p-6 border-b border-[var(--primitive-neutral-200)]">
-                  <SlidersHorizontal weight="regular" className="w-6 h-6 text-[var(--primitive-neutral-600)]" />
-                  <h2 className="flex-1 text-body-strong text-foreground">Role Settings</h2>
-                </div>
+                    <FormField
+                      label="Primary Responsibilities"
+                      helpText="What are the key responsibilities a candidate must fulfill to be considered for this role?"
+                    >
+                      <RichTextEditor
+                        content={responsibilities}
+                        onChange={setResponsibilities}
+                        placeholder="What are the primary responsibilities for this job?"
+                        minHeight="100px"
+                      >
+                        <RichTextToolbar />
+                      </RichTextEditor>
+                      <div className="mt-2 flex justify-end">
+                        <RichTextCharacterCounter htmlContent={responsibilities} max={250} />
+                      </div>
+                    </FormField>
 
-                {/* Show Recruiter */}
-                <div className="flex flex-col gap-3 p-6 border-b border-[var(--primitive-neutral-200)]">
-                  <span className="text-body text-foreground leading-6">Show Recruiter</span>
-                  <div className="flex items-center gap-2">
-                    <Avatar name="Soobin Han" size="sm" className="border border-[var(--primitive-neutral-300)]" />
-                    <div className="flex-1 flex flex-col">
-                      <span className="text-body text-foreground leading-6">Soobin Han</span>
-                      <span className="text-caption text-foreground-subtle leading-4">Sr. Technical Recruiter</span>
-                    </div>
-                    <Switch
-                      checked={showRecruiter}
-                      onCheckedChange={setShowRecruiter}
-                    />
-                  </div>
-                </div>
+                    <FormField
+                      label="Required Qualifications"
+                      helpText="What are the essential qualifications required for a candidate to be eligible for consideration for this role."
+                    >
+                      <RichTextEditor
+                        content={requiredQuals}
+                        onChange={setRequiredQuals}
+                        placeholder="What are the required qualifications for this job?"
+                        minHeight="100px"
+                      >
+                        <RichTextToolbar />
+                      </RichTextEditor>
+                      <div className="mt-2 flex justify-end">
+                        <RichTextCharacterCounter htmlContent={requiredQuals} max={250} />
+                      </div>
+                    </FormField>
 
-                {/* Closing Date */}
-                <div className="flex flex-col gap-3 p-6 border-b border-[var(--primitive-neutral-200)]">
-                  <label className="text-body text-foreground leading-6">Closing Date</label>
-                  <DatePicker
-                    value={closingDate}
-                    onChange={setClosingDate}
-                    placeholder="Select closing date"
-                    className="rounded-xl"
-                  />
-                </div>
+                    <FormField
+                      label="Desired Qualifications"
+                      helpText="What are the qualifications that, while not mandatory, are highly advantageous for the position."
+                    >
+                      <RichTextEditor
+                        content={desiredQuals}
+                        onChange={setDesiredQuals}
+                        placeholder="What are the desired qualifications for this job?"
+                        minHeight="100px"
+                      >
+                        <RichTextToolbar />
+                      </RichTextEditor>
+                      <div className="mt-2 flex justify-end">
+                        <RichTextCharacterCounter htmlContent={desiredQuals} max={250} />
+                      </div>
+                    </FormField>
+                  </FormSection>
+                </FormCard>
 
-                {/* External Link */}
-                <div className="flex flex-col gap-3 p-6 border-b border-[var(--primitive-neutral-200)]">
-                  <label className="text-body text-foreground leading-6">External Link</label>
-                  <Input
-                    value={externalLink}
-                    onChange={(e) => setExternalLink(e.target.value)}
-                    placeholder="https://example.com/apply"
-                    inputSize="lg"
-                    leftAddon={<LinkIcon weight="regular" />}
-                    className="rounded-xl"
-                  />
-                </div>
+                {/* Education Requirements Card */}
+                <FormCard>
+                  <FormSection title="Education Requirements">
+                    <FormField label="Education Level">
+                      <Select value={educationLevel} onValueChange={setEducationLevel}>
+                        <SelectTrigger size="lg">
+                          <SelectValue placeholder="Education Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {educationLevels.map((level) => (
+                            <SelectItem key={level.value} value={level.value}>
+                              {level.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormField>
 
-                {/* Required Files */}
-                <div className="flex flex-col gap-3 p-6 border-b border-[var(--primitive-neutral-200)]">
-                  <div className="flex items-center gap-3">
-                    <span className="flex-1 text-body text-foreground leading-6">Required Files</span>
-                    <Folder weight="regular" className="w-6 h-6 text-[var(--primitive-neutral-600)]" />
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <SwitchWithLabel
-                      label="Resume"
-                      labelPosition="right"
-                      checked={requireResume}
-                      onCheckedChange={setRequireResume}
-                    />
-                    <SwitchWithLabel
-                      label="Cover Letter"
-                      labelPosition="right"
-                      checked={requireCoverLetter}
-                      onCheckedChange={setRequireCoverLetter}
-                    />
-                    <SwitchWithLabel
-                      label="Portfolio"
-                      labelPosition="right"
-                      checked={requirePortfolio}
-                      onCheckedChange={setRequirePortfolio}
-                    />
-                  </div>
-                </div>
+                    <FormField
+                      label="Specific Education Requirements"
+                      helpText="Outline the degrees, credentials, and training required to support students with disabilities and diverse learning needs effectively."
+                    >
+                      <RichTextEditor
+                        content={educationDetails}
+                        onChange={setEducationDetails}
+                        placeholder="Add any information regarding any specific education requirements"
+                        minHeight="100px"
+                      >
+                        <RichTextToolbar />
+                      </RichTextEditor>
+                      <div className="mt-2 flex justify-end">
+                        <RichTextCharacterCounter htmlContent={educationDetails} max={250} />
+                      </div>
+                    </FormField>
+                  </FormSection>
+                </FormCard>
+
+                {/* Workplace Information Card */}
+                <FormCard>
+                  <FormSection title="Workplace Information">
+                    <FormField label="Workplace Type" required>
+                      <SegmentedController
+                        options={[
+                          { value: "onsite", label: "Onsite" },
+                          { value: "remote", label: "Remote" },
+                          { value: "hybrid", label: "Hybrid" },
+                        ]}
+                        value={workplaceType}
+                        onValueChange={setWorkplaceType}
+                      />
+                    </FormField>
+
+                    {workplaceType !== "remote" && (
+                      <FormField label="Office Location">
+                        <FormRow columns={3}>
+                          <Input
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                            placeholder="City"
+                            inputSize="lg"
+                          />
+                          <Select value={state} onValueChange={setState}>
+                            <SelectTrigger size="lg">
+                              <SelectValue placeholder="State" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {usStates.map((s) => (
+                                <SelectItem key={s.value} value={s.value}>
+                                  {s.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Select value={country} onValueChange={setCountry}>
+                            <SelectTrigger size="lg">
+                              <SelectValue placeholder="Country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {countries.map((c) => (
+                                <SelectItem key={c.value} value={c.value}>
+                                  {c.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormRow>
+                      </FormField>
+                    )}
+                  </FormSection>
+                </FormCard>
+
+                {/* Compensation & Benefits Card */}
+                <FormCard>
+                  <FormSection title="Compensation & Benefits Information">
+                    {/* Compensation subsection */}
+                    <FormField
+                      label="Compensation"
+                      helpText="Outline the pay range, and incentives needed to fairly reward, attract, and retain someone in this role."
+                    >
+                      <div className="flex items-center gap-4">
+                        <Select value={payType} onValueChange={setPayType}>
+                          <SelectTrigger size="lg" className="w-[340px]">
+                            <SelectValue placeholder="Pay Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {payTypes.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          value={minPay}
+                          onChange={(e) => setMinPay(e.target.value)}
+                          placeholder="Minimum Pay Amount"
+                          inputSize="lg"
+                          leftAddon={<span className="text-body font-medium">$</span>}
+                          className="flex-1"
+                        />
+                        <span className="text-[var(--primitive-neutral-500)]">—</span>
+                        <Input
+                          value={maxPay}
+                          onChange={(e) => setMaxPay(e.target.value)}
+                          placeholder="Maximum Pay Amount"
+                          inputSize="lg"
+                          leftAddon={<span className="text-body font-medium">$</span>}
+                          className="flex-1"
+                        />
+                      </div>
+                    </FormField>
+
+                    <FormField label="Pay frequency">
+                      <SegmentedController
+                        options={[
+                          { value: "weekly", label: "Weekly" },
+                          { value: "bi-weekly", label: "Bi-Weekly" },
+                          { value: "monthly", label: "Monthly" },
+                        ]}
+                        value={payFrequency}
+                        onValueChange={setPayFrequency}
+                      />
+                    </FormField>
+
+                    {/* Benefits subsection */}
+                    <FormField
+                      label="Benefits"
+                      helpText="Outline the benefits needed to fairly reward, attract, and retain someone in this role."
+                    >
+                      <BenefitsSelector
+                        categories={defaultBenefitCategories}
+                        selectedBenefits={selectedBenefits}
+                        onSelectionChange={setSelectedBenefits}
+                        useCompanyDefaults={useCompanyBenefits}
+                        onUseCompanyDefaultsChange={setUseCompanyBenefits}
+                        companyName="Company"
+                      />
+                      <RichTextEditor
+                        content={compensationDetails}
+                        onChange={setCompensationDetails}
+                        placeholder="Add any details on compensation or benefits."
+                        minHeight="100px"
+                      >
+                        <RichTextToolbar />
+                      </RichTextEditor>
+                      <div className="mt-2 flex justify-end">
+                        <RichTextCharacterCounter htmlContent={compensationDetails} max={250} />
+                      </div>
+                    </FormField>
+                  </FormSection>
+                </FormCard>
               </div>
 
-              {/* Role Template Card */}
-              <RoleTemplateCard
-                onSaveTemplate={handleSaveTemplate}
-                isSaved={templateSaved}
-                loading={savingTemplate}
-              />
-            </div>
-          </div>
-          )}
+              {/* Right Column - Sidebar */}
+              <div className="sticky top-6 flex w-[480px] flex-col gap-4 self-start">
+                {/* Role Settings Card - Figma 188:6269 */}
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+                  {/* Header */}
+                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-200)] p-6">
+                    <SlidersHorizontal
+                      weight="regular"
+                      className="h-6 w-6 text-[var(--primitive-neutral-600)]"
+                    />
+                    <h2 className="flex-1 text-body-strong text-foreground">Role Settings</h2>
+                  </div>
 
+                  {/* Show Recruiter */}
+                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                    <span className="text-body leading-6 text-foreground">Show Recruiter</span>
+                    <div className="flex items-center gap-2">
+                      <Avatar
+                        name="Soobin Han"
+                        size="sm"
+                        className="border border-[var(--primitive-neutral-300)]"
+                      />
+                      <div className="flex flex-1 flex-col">
+                        <span className="text-body leading-6 text-foreground">Soobin Han</span>
+                        <span className="text-caption leading-4 text-foreground-subtle">
+                          Sr. Technical Recruiter
+                        </span>
+                      </div>
+                      <Switch checked={showRecruiter} onCheckedChange={setShowRecruiter} />
+                    </div>
+                  </div>
+
+                  {/* Closing Date */}
+                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                    <label className="text-body leading-6 text-foreground">Closing Date</label>
+                    <DatePicker
+                      value={closingDate}
+                      onChange={setClosingDate}
+                      placeholder="Select closing date"
+                      className="rounded-xl"
+                    />
+                  </div>
+
+                  {/* External Link */}
+                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                    <label className="text-body leading-6 text-foreground">External Link</label>
+                    <Input
+                      value={externalLink}
+                      onChange={(e) => setExternalLink(e.target.value)}
+                      placeholder="https://example.com/apply"
+                      inputSize="lg"
+                      leftAddon={<LinkIcon weight="regular" />}
+                      className="rounded-xl"
+                    />
+                  </div>
+
+                  {/* Required Files */}
+                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                    <div className="flex items-center gap-3">
+                      <span className="flex-1 text-body leading-6 text-foreground">
+                        Required Files
+                      </span>
+                      <Folder
+                        weight="regular"
+                        className="h-6 w-6 text-[var(--primitive-neutral-600)]"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <SwitchWithLabel
+                        label="Resume"
+                        labelPosition="right"
+                        checked={requireResume}
+                        onCheckedChange={setRequireResume}
+                      />
+                      <SwitchWithLabel
+                        label="Cover Letter"
+                        labelPosition="right"
+                        checked={requireCoverLetter}
+                        onCheckedChange={setRequireCoverLetter}
+                      />
+                      <SwitchWithLabel
+                        label="Portfolio"
+                        labelPosition="right"
+                        checked={requirePortfolio}
+                        onCheckedChange={setRequirePortfolio}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Role Template Card */}
+                <RoleTemplateCard
+                  onSaveTemplate={handleSaveTemplate}
+                  isSaved={templateSaved}
+                  loading={savingTemplate}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="mt-12 text-center">
             <p className="text-caption">
               <span className="text-foreground-brand">Make an </span>
-              <span className="text-foreground-brand font-semibold">Impact.</span>
+              <span className="font-semibold text-foreground-brand">Impact.</span>
             </p>
           </div>
         </main>

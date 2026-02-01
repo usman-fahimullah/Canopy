@@ -21,7 +21,14 @@ import {
 
 export default function AdminCoachesPage() {
   return (
-    <Suspense fallback={<div className="animate-pulse p-8"><div className="h-8 bg-[var(--primitive-neutral-200)] rounded w-1/3 mb-4" /><div className="h-64 bg-[var(--primitive-neutral-200)] rounded" /></div>}>
+    <Suspense
+      fallback={
+        <div className="animate-pulse p-8">
+          <div className="mb-4 h-8 w-1/3 rounded bg-[var(--primitive-neutral-200)]" />
+          <div className="h-64 rounded bg-[var(--primitive-neutral-200)]" />
+        </div>
+      }
+    >
       <AdminCoachesContent />
     </Suspense>
   );
@@ -120,24 +127,22 @@ function AdminCoachesContent() {
     <div>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[var(--primitive-green-800)]">
-          Coach Management
-        </h1>
+        <h1 className="text-2xl font-bold text-[var(--primitive-green-800)]">Coach Management</h1>
         <p className="text-[var(--primitive-neutral-600)]">
           Review applications and manage coach accounts.
         </p>
       </div>
 
       {/* Status Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.value}
             onClick={() => setSelectedStatus(tab.value)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+            className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               selectedStatus === tab.value
                 ? "bg-[var(--primitive-green-600)] text-white"
-                : "bg-white border border-[var(--primitive-neutral-200)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-50)]"
+                : "border border-[var(--primitive-neutral-200)] bg-white text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-50)]"
             }`}
           >
             {tab.label}
@@ -157,7 +162,7 @@ function AdminCoachesContent() {
             placeholder="Search coaches..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-[var(--primitive-neutral-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)] focus:border-transparent"
+            className="w-full rounded-lg border border-[var(--primitive-neutral-200)] py-2 pl-10 pr-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]"
           />
         </div>
       </div>
@@ -166,13 +171,13 @@ function AdminCoachesContent() {
         {/* Coach List */}
         <div className="flex-1">
           {loading ? (
-            <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-8 text-center">
-              <div className="animate-spin w-8 h-8 border-2 border-[var(--primitive-green-600)] border-t-transparent rounded-full mx-auto" />
+            <div className="rounded-xl border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+              <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--primitive-green-600)] border-t-transparent" />
               <p className="mt-4 text-[var(--primitive-neutral-600)]">Loading coaches...</p>
             </div>
           ) : filteredCoaches.length === 0 ? (
-            <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-8 text-center">
-              <User size={48} className="mx-auto text-[var(--primitive-neutral-400)] mb-4" />
+            <div className="rounded-xl border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+              <User size={48} className="mx-auto mb-4 text-[var(--primitive-neutral-400)]" />
               <p className="text-[var(--primitive-neutral-600)]">
                 No {selectedStatus.toLowerCase()} coaches found
               </p>
@@ -183,34 +188,34 @@ function AdminCoachesContent() {
                 <button
                   key={coach.id}
                   onClick={() => setSelectedCoach(coach)}
-                  className={`w-full text-left bg-white rounded-xl border p-4 transition-all ${
+                  className={`w-full rounded-xl border bg-white p-4 text-left transition-all ${
                     selectedCoach?.id === coach.id
                       ? "border-[var(--primitive-green-600)] ring-2 ring-[var(--primitive-green-100)]"
                       : "border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-neutral-300)]"
                   }`}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[var(--primitive-green-100)] flex items-center justify-center text-lg font-bold text-[var(--primitive-green-700)]">
-                      {coach.firstName?.[0]}{coach.lastName?.[0]}
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primitive-green-100)] text-lg font-bold text-[var(--primitive-green-700)]">
+                      {coach.firstName?.[0]}
+                      {coach.lastName?.[0]}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-[var(--primitive-green-800)] truncate">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex items-center gap-2">
+                        <h3 className="truncate font-semibold text-[var(--primitive-green-800)]">
                           {coach.firstName} {coach.lastName}
                         </h3>
                         <StatusBadge status={coach.status} />
                       </div>
-                      <p className="text-sm text-[var(--primitive-neutral-600)] truncate">
+                      <p className="truncate text-sm text-[var(--primitive-neutral-600)]">
                         {coach.headline}
                       </p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-[var(--primitive-neutral-500)]">
+                      <div className="mt-2 flex items-center gap-4 text-xs text-[var(--primitive-neutral-500)]">
                         <span className="flex items-center gap-1">
                           <Briefcase size={14} />
                           {coach.yearsInClimate}+ years
                         </span>
                         <span className="flex items-center gap-1">
-                          <CurrencyDollar size={14} />
-                          ${coach.sessionRate / 100}/session
+                          <CurrencyDollar size={14} />${coach.sessionRate / 100}/session
                         </span>
                         {coach.applicationDate && (
                           <span className="flex items-center gap-1">
@@ -230,12 +235,13 @@ function AdminCoachesContent() {
         {/* Coach Detail Panel */}
         {selectedCoach && (
           <div className="w-96 shrink-0">
-            <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] sticky top-24">
+            <div className="sticky top-24 rounded-xl border border-[var(--primitive-neutral-200)] bg-white">
               {/* Header */}
-              <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full bg-[var(--primitive-green-100)] flex items-center justify-center text-2xl font-bold text-[var(--primitive-green-700)]">
-                    {selectedCoach.firstName?.[0]}{selectedCoach.lastName?.[0]}
+              <div className="border-b border-[var(--primitive-neutral-200)] p-6">
+                <div className="mb-4 flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)] text-2xl font-bold text-[var(--primitive-green-700)]">
+                    {selectedCoach.firstName?.[0]}
+                    {selectedCoach.lastName?.[0]}
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-[var(--primitive-green-800)]">
@@ -250,7 +256,7 @@ function AdminCoachesContent() {
               </div>
 
               {/* Details */}
-              <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              <div className="max-h-[60vh] space-y-4 overflow-y-auto p-6">
                 <DetailItem
                   icon={EnvelopeSimple}
                   label="Email"
@@ -275,14 +281,14 @@ function AdminCoachesContent() {
                 )}
 
                 <div>
-                  <p className="text-sm font-medium text-[var(--primitive-neutral-600)] mb-2">
+                  <p className="mb-2 text-sm font-medium text-[var(--primitive-neutral-600)]">
                     Expertise
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {selectedCoach.expertise.map((exp) => (
                       <span
                         key={exp}
-                        className="px-2 py-1 bg-[var(--primitive-green-100)] text-[var(--primitive-green-700)] text-xs rounded"
+                        className="rounded bg-[var(--primitive-green-100)] px-2 py-1 text-xs text-[var(--primitive-green-700)]"
                       >
                         {exp}
                       </span>
@@ -291,14 +297,14 @@ function AdminCoachesContent() {
                 </div>
 
                 <div>
-                  <p className="text-sm font-medium text-[var(--primitive-neutral-600)] mb-2">
+                  <p className="mb-2 text-sm font-medium text-[var(--primitive-neutral-600)]">
                     Sectors
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {selectedCoach.sectors.map((sector) => (
                       <span
                         key={sector}
-                        className="px-2 py-1 bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)] text-xs rounded"
+                        className="rounded bg-[var(--primitive-blue-100)] px-2 py-1 text-xs text-[var(--primitive-blue-700)]"
                       >
                         {sector}
                       </span>
@@ -308,7 +314,7 @@ function AdminCoachesContent() {
 
                 {selectedCoach.bio && (
                   <div>
-                    <p className="text-sm font-medium text-[var(--primitive-neutral-600)] mb-2">
+                    <p className="mb-2 text-sm font-medium text-[var(--primitive-neutral-600)]">
                       Bio
                     </p>
                     <p className="text-sm text-[var(--primitive-neutral-700)]">
@@ -319,7 +325,7 @@ function AdminCoachesContent() {
 
                 {selectedCoach.availability && (
                   <div>
-                    <p className="text-sm font-medium text-[var(--primitive-neutral-600)] mb-2">
+                    <p className="mb-2 text-sm font-medium text-[var(--primitive-neutral-600)]">
                       Availability & Motivation
                     </p>
                     <p className="text-sm text-[var(--primitive-neutral-700)]">
@@ -338,7 +344,7 @@ function AdminCoachesContent() {
 
               {/* Actions */}
               {selectedCoach.status === "PENDING" && (
-                <div className="p-6 border-t border-[var(--primitive-neutral-200)]">
+                <div className="border-t border-[var(--primitive-neutral-200)] p-6">
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
@@ -370,7 +376,10 @@ function AdminCoachesContent() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { variant: any; label: string }> = {
+  const config: Record<
+    string,
+    { variant: "warning" | "info" | "success" | "error" | "default"; label: string }
+  > = {
     PENDING: { variant: "warning", label: "Pending Review" },
     APPROVED: { variant: "info", label: "Approved" },
     ACTIVE: { variant: "success", label: "Active" },
@@ -388,13 +397,13 @@ function DetailItem({
   label,
   value,
 }: {
-  icon: any;
+  icon: React.ComponentType<{ size?: number | string; className?: string }>;
   label: string;
   value: string;
 }) {
   return (
     <div className="flex items-start gap-3">
-      <Icon size={18} className="text-[var(--primitive-neutral-400)] mt-0.5" />
+      <Icon size={18} className="mt-0.5 text-[var(--primitive-neutral-400)]" />
       <div>
         <p className="text-xs text-[var(--primitive-neutral-500)]">{label}</p>
         <p className="text-sm font-medium text-[var(--primitive-green-800)]">{value}</p>

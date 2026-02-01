@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, CaretDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -49,7 +49,7 @@ const DropdownTrigger = React.forwardRef<
       // Figma: 18px font, green-800 for selected value
       "text-lg leading-6 text-[var(--select-foreground)]",
       // Transitions
-      "transition-all duration-normal ease-default",
+      "ease-default transition-all duration-normal",
       // Hover: border neutral-300
       "hover:border-[var(--select-border-hover)]",
       // Focus: outline removed
@@ -80,7 +80,7 @@ const DropdownTrigger = React.forwardRef<
     {children}
     <SelectPrimitive.Icon asChild>
       {/* Figma: 24px icon, green-800 color, rotates 180deg when open */}
-      <ChevronDown className="h-6 w-6 text-[var(--select-icon)] shrink-0 transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
+      <CaretDown className="h-6 w-6 shrink-0 text-[var(--select-icon)] transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -96,8 +96,8 @@ const DropdownScrollUpIndicator = React.forwardRef<
   <SelectPrimitive.ScrollUpButton
     ref={ref}
     className={cn(
-      "absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none",
-      "bg-gradient-to-b from-[var(--select-content-background)] via-[var(--select-content-background)]/60 to-transparent",
+      "pointer-events-none absolute left-0 right-0 top-0 z-10 h-10",
+      "via-[var(--select-content-background)]/60 bg-gradient-to-b from-[var(--select-content-background)] to-transparent",
       // Animated fade-in/out
       "animate-in fade-in-0 duration-150",
       "data-[state=hidden]:animate-out data-[state=hidden]:fade-out-0",
@@ -115,8 +115,8 @@ const DropdownScrollDownIndicator = React.forwardRef<
   <SelectPrimitive.ScrollDownButton
     ref={ref}
     className={cn(
-      "absolute bottom-0 left-0 right-0 h-10 z-10 pointer-events-none",
-      "bg-gradient-to-t from-[var(--select-content-background)] via-[var(--select-content-background)]/60 to-transparent",
+      "pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-10",
+      "via-[var(--select-content-background)]/60 bg-gradient-to-t from-[var(--select-content-background)] to-transparent",
       // Animated fade-in/out
       "animate-in fade-in-0 duration-150",
       "data-[state=hidden]:animate-out data-[state=hidden]:fade-out-0",
@@ -167,11 +167,10 @@ const DropdownContent = React.forwardRef<
       <SelectPrimitive.Viewport
         className={cn(
           // Figma: 4px padding, 4px gap between items
-          "p-1 flex flex-col gap-1",
+          "flex flex-col gap-1 p-1",
           // Scrollable with max-height
           "overflow-y-auto",
-          position === "popper" &&
-            "w-full min-w-[var(--radix-select-trigger-width)]"
+          position === "popper" && "w-full min-w-[var(--radix-select-trigger-width)]"
         )}
         style={{ maxHeight }}
       >
@@ -190,10 +189,7 @@ const DropdownLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn(
-      "px-3 py-2 text-caption font-medium text-foreground-muted",
-      className
-    )}
+    className={cn("px-3 py-2 text-caption font-medium text-foreground-muted", className)}
     {...props}
   />
 ));
@@ -224,12 +220,10 @@ const DropdownItem = React.forwardRef<
     )}
     {...props}
   >
-    <SelectPrimitive.ItemText className="flex-1">
-      {children}
-    </SelectPrimitive.ItemText>
-    <SelectPrimitive.ItemIndicator className="shrink-0 ml-2">
+    <SelectPrimitive.ItemText className="flex-1">{children}</SelectPrimitive.ItemText>
+    <SelectPrimitive.ItemIndicator className="ml-2 shrink-0">
       {/* Figma: 24px blue checkmark icon for selected state */}
-      <Check className="h-6 w-6 text-[var(--select-item-checkmark)]" strokeWidth={2.5} />
+      <Check className="h-6 w-6 text-[var(--select-item-checkmark)]" weight="bold" />
     </SelectPrimitive.ItemIndicator>
   </SelectPrimitive.Item>
 ));

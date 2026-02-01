@@ -9,19 +9,59 @@ import { PageNavigation } from "@/components/design-system/PageNavigation";
 
 const progressProps = [
   { name: "value", type: "number", default: "0", description: "Progress value (0-100)" },
-  { name: "size", type: '"sm" | "md" | "lg" | "xl"', default: '"md"', description: "Height of the progress bar" },
-  { name: "variant", type: '"default" | "success" | "warning" | "error" | "info"', default: '"default"', description: "Color variant" },
+  {
+    name: "size",
+    type: '"sm" | "md" | "lg" | "xl"',
+    default: '"md"',
+    description: "Height of the progress bar",
+  },
+  {
+    name: "variant",
+    type: '"default" | "success" | "warning" | "error" | "info"',
+    default: '"default"',
+    description: "Color variant",
+  },
   { name: "showLabel", type: "boolean", default: "false", description: "Show percentage label" },
-  { name: "formatLabel", type: "(value: number) => string", default: "undefined", description: "Custom label format function" },
-  { name: "indeterminate", type: "boolean", default: "false", description: "Indeterminate loading state" },
+  {
+    name: "formatLabel",
+    type: "(value: number) => string",
+    default: "undefined",
+    description: "Custom label format function",
+  },
+  {
+    name: "indeterminate",
+    type: "boolean",
+    default: "false",
+    description: "Indeterminate loading state",
+  },
 ];
 
 const circularProgressProps = [
   { name: "value", type: "number", default: "0", description: "Progress value (0-100)" },
-  { name: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Size of the circular progress" },
-  { name: "strokeWidth", type: "number", default: "4", description: "Width of the progress stroke" },
-  { name: "showLabel", type: "boolean", default: "false", description: "Show percentage label in center" },
-  { name: "variant", type: '"default" | "success" | "warning" | "error" | "info"', default: '"default"', description: "Color variant" },
+  {
+    name: "size",
+    type: '"sm" | "md" | "lg"',
+    default: '"md"',
+    description: "Size of the circular progress",
+  },
+  {
+    name: "strokeWidth",
+    type: "number",
+    default: "4",
+    description: "Width of the progress stroke",
+  },
+  {
+    name: "showLabel",
+    type: "boolean",
+    default: "false",
+    description: "Show percentage label in center",
+  },
+  {
+    name: "variant",
+    type: '"default" | "success" | "warning" | "error" | "info"',
+    default: '"default"',
+    description: "Color variant",
+  },
 ];
 
 export default function ProgressPage() {
@@ -38,12 +78,12 @@ export default function ProgressPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Progress
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          Progress indicators show the completion status of a task or operation.
-          Use them for file uploads, form submissions, or any process that takes time.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          Progress indicators show the completion status of a task or operation. Use them for file
+          uploads, form submissions, or any process that takes time.
         </p>
       </div>
 
@@ -53,9 +93,7 @@ export default function ProgressPage() {
         title="Basic Usage"
         description="Linear progress bar with value"
       >
-        <CodePreview
-          code={`<Progress value={60} />`}
-        >
+        <CodePreview code={`<Progress value={60} />`}>
           <div className="max-w-md">
             <Progress value={60} />
           </div>
@@ -68,21 +106,21 @@ export default function ProgressPage() {
         title="Sizes"
         description="Different height options for the progress bar"
       >
-        <div className="space-y-6 max-w-md">
+        <div className="max-w-md space-y-6">
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Small</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Small</p>
             <Progress value={40} size="sm" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Medium (default)</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Medium (default)</p>
             <Progress value={60} size="md" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Large</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Large</p>
             <Progress value={80} size="lg" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Extra Large</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Extra Large</p>
             <Progress value={90} size="xl" />
           </div>
         </div>
@@ -94,39 +132,33 @@ export default function ProgressPage() {
         title="Variants"
         description="Color variants for different contexts"
       >
-        <div className="space-y-4 max-w-md">
+        <div className="max-w-md space-y-4">
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Default</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Default</p>
             <Progress value={70} variant="default" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Success</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Success</p>
             <Progress value={100} variant="success" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Warning</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Warning</p>
             <Progress value={50} variant="warning" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Error</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Error</p>
             <Progress value={25} variant="error" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Info</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Info</p>
             <Progress value={65} variant="info" />
           </div>
         </div>
       </ComponentCard>
 
       {/* With Label */}
-      <ComponentCard
-        id="with-label"
-        title="With Label"
-        description="Show percentage completion"
-      >
-        <CodePreview
-          code={`<Progress value={75} showLabel />`}
-        >
+      <ComponentCard id="with-label" title="With Label" description="Show percentage completion">
+        <CodePreview code={`<Progress value={75} showLabel />`}>
           <div className="max-w-md">
             <Progress value={75} showLabel />
           </div>
@@ -139,9 +171,7 @@ export default function ProgressPage() {
         title="Indeterminate"
         description="For unknown completion time"
       >
-        <CodePreview
-          code={`<Progress indeterminate />`}
-        >
+        <CodePreview code={`<Progress indeterminate />`}>
           <div className="max-w-md">
             <Progress indeterminate />
           </div>
@@ -157,15 +187,15 @@ export default function ProgressPage() {
         <div className="flex flex-wrap items-end gap-6">
           <div className="text-center">
             <CircularProgress value={25} size="sm" />
-            <p className="text-caption text-foreground-muted mt-2">Small</p>
+            <p className="mt-2 text-caption text-foreground-muted">Small</p>
           </div>
           <div className="text-center">
             <CircularProgress value={50} size="md" />
-            <p className="text-caption text-foreground-muted mt-2">Medium</p>
+            <p className="mt-2 text-caption text-foreground-muted">Medium</p>
           </div>
           <div className="text-center">
             <CircularProgress value={75} size="lg" showLabel />
-            <p className="text-caption text-foreground-muted mt-2">Large with label</p>
+            <p className="mt-2 text-caption text-foreground-muted">Large with label</p>
           </div>
         </div>
       </ComponentCard>
@@ -186,18 +216,12 @@ export default function ProgressPage() {
       </ComponentCard>
 
       {/* Animated Example */}
-      <ComponentCard
-        id="animated"
-        title="Animated"
-        description="Progress updates in real-time"
-      >
-        <div className="space-y-4 max-w-md">
+      <ComponentCard id="animated" title="Animated" description="Progress updates in real-time">
+        <div className="max-w-md space-y-4">
           <Progress value={progress} showLabel variant="success" />
           <div className="flex items-center gap-4">
             <CircularProgress value={progress} showLabel />
-            <p className="text-body-sm text-foreground-muted">
-              Simulating a file upload...
-            </p>
+            <p className="text-body-sm text-foreground-muted">Simulating a file upload...</p>
           </div>
         </div>
       </ComponentCard>
@@ -208,17 +232,17 @@ export default function ProgressPage() {
         title="Use Cases"
         description="Common progress scenarios in an ATS"
       >
-        <div className="space-y-6 max-w-md">
+        <div className="max-w-md space-y-6">
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Resume Upload</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Resume Upload</p>
             <Progress value={85} showLabel variant="default" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Profile Completion</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Profile Completion</p>
             <Progress value={60} showLabel variant="info" />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-2">Application Progress</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Application Progress</p>
             <div className="flex items-center gap-4">
               <CircularProgress value={75} size="lg" showLabel variant="success" />
               <div>
@@ -234,11 +258,11 @@ export default function ProgressPage() {
       <ComponentCard id="props" title="Props">
         <div className="space-y-6">
           <div>
-            <h4 className="text-body-strong mb-3">Progress</h4>
+            <h4 className="mb-3 text-body-strong">Progress</h4>
             <PropsTable props={progressProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-3">CircularProgress</h4>
+            <h4 className="mb-3 text-body-strong">CircularProgress</h4>
             <PropsTable props={circularProgressProps} />
           </div>
         </div>
@@ -250,15 +274,23 @@ export default function ProgressPage() {
         title="Accessibility"
         description="Progress accessibility features"
       >
-        <div className="p-4 border border-border rounded-lg bg-background-subtle max-w-lg">
+        <div className="max-w-lg rounded-lg border border-border bg-background-subtle p-4">
           <ul className="space-y-2 text-body-sm">
             <li className="flex gap-2">
               <span className="text-semantic-success">✓</span>
-              Uses <code className="text-caption bg-background-muted px-1 rounded">role="progressbar"</code>
+              Uses{" "}
+              <code className="rounded bg-background-muted px-1 text-caption">
+                role=&quot;progressbar&quot;
+              </code>
             </li>
             <li className="flex gap-2">
               <span className="text-semantic-success">✓</span>
-              Includes <code className="text-caption bg-background-muted px-1 rounded">aria-valuenow</code>, <code className="text-caption bg-background-muted px-1 rounded">aria-valuemin</code>, <code className="text-caption bg-background-muted px-1 rounded">aria-valuemax</code>
+              Includes{" "}
+              <code className="rounded bg-background-muted px-1 text-caption">
+                aria-valuenow
+              </code>,{" "}
+              <code className="rounded bg-background-muted px-1 text-caption">aria-valuemin</code>,{" "}
+              <code className="rounded bg-background-muted px-1 text-caption">aria-valuemax</code>
             </li>
             <li className="flex gap-2">
               <span className="text-semantic-success">✓</span>

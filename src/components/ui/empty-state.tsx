@@ -2,14 +2,14 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import {
-  Inbox,
-  Search,
+  Tray,
+  MagnifyingGlass,
   FileX,
   Users,
   Briefcase,
-  AlertCircle,
+  WarningCircle,
   Plus,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -20,21 +20,18 @@ import { Button } from "@/components/ui/button";
  * - background-muted for icon backgrounds
  */
 
-const emptyStateVariants = cva(
-  "flex flex-col items-center justify-center text-center",
-  {
-    variants: {
-      size: {
-        sm: "py-8 gap-3",
-        md: "py-12 gap-4",
-        lg: "py-16 gap-6",
-      },
+const emptyStateVariants = cva("flex flex-col items-center justify-center text-center", {
+  variants: {
+    size: {
+      sm: "py-8 gap-3",
+      md: "py-12 gap-4",
+      lg: "py-16 gap-6",
     },
-    defaultVariants: {
-      size: "md",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
 
 const iconContainerVariants = cva(
   "flex items-center justify-center rounded-full bg-background-muted",
@@ -67,17 +64,16 @@ const iconVariants = cva("text-foreground-muted", {
 
 // Preset icons for common empty states
 const presetIcons = {
-  inbox: Inbox,
-  search: Search,
+  inbox: Tray,
+  search: MagnifyingGlass,
   file: FileX,
   users: Users,
   jobs: Briefcase,
-  error: AlertCircle,
+  error: WarningCircle,
 };
 
 export interface EmptyStateProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof emptyStateVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof emptyStateVariants> {
   /** Preset icon type */
   preset?: keyof typeof presetIcons;
   /** Custom icon */
@@ -132,8 +128,8 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
               "hover:scale-105 hover:shadow-sm"
             )}
           >
-            {icon || (
-              IconComponent && (
+            {icon ||
+              (IconComponent && (
                 <IconComponent
                   className={cn(
                     iconVariants({ size }),
@@ -142,16 +138,15 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
                     preset === "inbox" && "animate-[pulse_2s_ease-in-out_infinite]"
                   )}
                 />
-              )
-            )}
+              ))}
           </div>
         )}
 
         {/* Text with staggered animation */}
-        <div className="space-y-1.5 max-w-sm">
+        <div className="max-w-sm space-y-1.5">
           <h3
             className={cn(
-              "font-medium text-foreground-default animate-fade-in",
+              "text-foreground-default animate-fade-in font-medium",
               size === "sm" && "text-body-sm",
               size === "md" && "text-body",
               size === "lg" && "text-heading-sm"
@@ -163,7 +158,7 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
           {description && (
             <p
               className={cn(
-                "text-foreground-muted animate-fade-in",
+                "animate-fade-in text-foreground-muted",
                 size === "sm" && "text-caption-sm",
                 size === "md" && "text-caption",
                 size === "lg" && "text-body-sm"
@@ -178,7 +173,7 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
         {/* Actions with staggered animation */}
         {(action || secondaryAction || children) && (
           <div
-            className="flex flex-col sm:flex-row items-center gap-2 animate-fade-in"
+            className="flex animate-fade-in flex-col items-center gap-2 sm:flex-row"
             style={{ animationDelay: "300ms" }}
           >
             {action && (
@@ -186,7 +181,9 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
                 onClick={action.onClick}
                 className="transition-all duration-fast hover:scale-105 active:scale-95"
               >
-                {action.icon || <Plus className="mr-2 h-4 w-4 transition-transform duration-fast group-hover:rotate-90" />}
+                {action.icon || (
+                  <Plus className="mr-2 h-4 w-4 transition-transform duration-fast group-hover:rotate-90" />
+                )}
                 {action.label}
               </Button>
             )}

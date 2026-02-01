@@ -201,29 +201,29 @@ export default function PdfViewerPage() {
     <div className="space-y-12">
       {/* Overview */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           PDF Viewer
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl mb-4">
-          Resume and document preview component for displaying PDF files inline with zoom,
-          page navigation, and download options. Optimized for reviewing candidate resumes
-          and application materials in ATS workflows.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Resume and document preview component for displaying PDF files inline with zoom, page
+          navigation, and download options. Optimized for reviewing candidate resumes and
+          application materials in ATS workflows.
         </p>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success/10 rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">When to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Reviewing candidate resumes</li>
               <li>Viewing cover letters and portfolios</li>
               <li>Displaying offer letters and contracts</li>
               <li>Previewing application attachments</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error/10 rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">When not to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Image galleries (use Image component)</li>
               <li>Document editing (use rich text editor)</li>
               <li>Video content (use video player)</li>
@@ -254,6 +254,7 @@ export default function PdfViewerPage() {
               src={SAMPLE_PDF_URL}
               title="Sample Document.pdf"
               onPageChange={setCurrentPage}
+              // eslint-disable-next-line no-console
               onLoad={(numPages) => console.log("Loaded:", numPages)}
             />
           </div>
@@ -267,26 +268,26 @@ export default function PdfViewerPage() {
         description="Built-in controls for navigation and actions"
       >
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex flex-col items-center gap-2 p-4 border border-border-muted rounded-lg">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-border-muted p-4">
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MagnifyingGlassMinus className="h-4 w-4" />
                 </Button>
-                <span className="text-sm px-2">100%</span>
+                <span className="px-2 text-sm">100%</span>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MagnifyingGlassPlus className="h-4 w-4" />
                 </Button>
               </div>
               <span className="text-caption text-foreground-muted">Zoom Controls</span>
             </div>
-            <div className="flex flex-col items-center gap-2 p-4 border border-border-muted rounded-lg">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-border-muted p-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm">1 / 5</span>
               </div>
               <span className="text-caption text-foreground-muted">Page Navigation</span>
             </div>
-            <div className="flex flex-col items-center gap-2 p-4 border border-border-muted rounded-lg">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-border-muted p-4">
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <DownloadSimple className="h-4 w-4" />
@@ -297,7 +298,7 @@ export default function PdfViewerPage() {
               </div>
               <span className="text-caption text-foreground-muted">Download / Print</span>
             </div>
-            <div className="flex flex-col items-center gap-2 p-4 border border-border-muted rounded-lg">
+            <div className="flex flex-col items-center gap-2 rounded-lg border border-border-muted p-4">
               <div className="flex items-center gap-1">
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <ArrowsOut className="h-4 w-4" />
@@ -310,18 +311,14 @@ export default function PdfViewerPage() {
       </ComponentCard>
 
       {/* Zoom Levels */}
-      <ComponentCard
-        id="zoom"
-        title="Zoom Options"
-        description="Preset and custom zoom levels"
-      >
+      <ComponentCard id="zoom" title="Zoom Options" description="Preset and custom zoom levels">
         <CodePreview
           code={`<PdfViewer
   src={pdfUrl}
   initialZoom={1.5}  // Start at 150%
 />`}
         >
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="mb-4 flex flex-wrap gap-2">
             {[0.5, 0.75, 1, 1.25, 1.5, 2].map((level) => (
               <Button
                 key={level}
@@ -352,12 +349,8 @@ export default function PdfViewerPage() {
   height="400px"
 />`}
         >
-          <div className="h-[300px] border border-border-muted rounded-lg overflow-hidden">
-            <PdfViewer
-              src={SAMPLE_PDF_URL}
-              showToolbar={false}
-              height="100%"
-            />
+          <div className="h-[300px] overflow-hidden rounded-lg border border-border-muted">
+            <PdfViewer src={SAMPLE_PDF_URL} showToolbar={false} height="100%" />
           </div>
         </CodePreview>
       </ComponentCard>
@@ -436,7 +429,7 @@ export default function PdfViewerPage() {
   onDelete={() => deleteFile()}
 />`}
         >
-          <div className="space-y-3 max-w-md">
+          <div className="max-w-md space-y-3">
             <DocumentPreviewCard
               title="Sarah_Chen_Resume.pdf"
               src={SAMPLE_PDF_URL}
@@ -444,7 +437,9 @@ export default function PdfViewerPage() {
               uploadedAt={new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)}
               fileSize={245760}
               onView={() => setViewingDocument("resume")}
+              // eslint-disable-next-line no-console
               onDownload={() => console.log("Download")}
+              // eslint-disable-next-line no-console
               onDelete={() => console.log("Delete")}
             />
             <DocumentPreviewCard
@@ -454,6 +449,7 @@ export default function PdfViewerPage() {
               uploadedAt={new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)}
               fileSize={128000}
               onView={() => setViewingDocument("cover")}
+              // eslint-disable-next-line no-console
               onDownload={() => console.log("Download")}
             />
             <DocumentPreviewCard
@@ -463,7 +459,9 @@ export default function PdfViewerPage() {
               uploadedAt={new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)}
               fileSize={5242880}
               onView={() => setViewingDocument("portfolio")}
+              // eslint-disable-next-line no-console
               onDownload={() => console.log("Download")}
+              // eslint-disable-next-line no-console
               onDelete={() => console.log("Delete")}
             />
           </div>
@@ -471,24 +469,20 @@ export default function PdfViewerPage() {
       </ComponentCard>
 
       {/* Loading State */}
-      <ComponentCard
-        id="loading"
-        title="Loading State"
-        description="Shows spinner while PDF loads"
-      >
+      <ComponentCard id="loading" title="Loading State" description="Shows spinner while PDF loads">
         <div className="space-y-4">
           <p className="text-sm text-foreground-muted">
-            The PDF viewer shows a loading spinner with the PDF icon while the document loads.
-            This provides visual feedback during file download and rendering.
+            The PDF viewer shows a loading spinner with the PDF icon while the document loads. This
+            provides visual feedback during file download and rendering.
           </p>
-          <div className="p-8 border border-border-muted rounded-lg bg-background-subtle flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-border-muted bg-background-subtle p-8">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-background-brand-subtle flex items-center justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background-brand-subtle">
                 <FilePdf className="h-8 w-8 text-foreground-brand" />
               </div>
-              <div className="absolute -inset-1 border-2 border-foreground-brand/30 rounded-full animate-spin border-t-foreground-brand" />
+              <div className="border-foreground-brand/30 absolute -inset-1 animate-spin rounded-full border-2 border-t-foreground-brand" />
             </div>
-            <p className="text-sm font-medium text-foreground mt-4">Loading PDF</p>
+            <p className="mt-4 text-sm font-medium text-foreground">Loading PDF</p>
             <p className="text-xs text-foreground-muted">Please wait...</p>
           </div>
         </div>
@@ -509,12 +503,12 @@ export default function PdfViewerPage() {
   }}
 />`}
         >
-          <div className="p-8 border border-border-muted rounded-lg bg-background-subtle flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-background-error/20 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-border-muted bg-background-subtle p-8">
+            <div className="bg-background-error/20 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
               <FilePdf className="h-8 w-8 text-foreground-error" />
             </div>
             <p className="font-medium text-foreground">Unable to load PDF</p>
-            <p className="text-sm text-foreground-muted mt-1 mb-4">The file could not be loaded</p>
+            <p className="mb-4 mt-1 text-sm text-foreground-muted">The file could not be loaded</p>
             <Button variant="outline" size="sm">
               Try again
             </Button>
@@ -531,10 +525,10 @@ export default function PdfViewerPage() {
         <div className="space-y-8">
           {/* Candidate Profile Documents */}
           <div>
-            <h4 className="text-body-strong mb-4">Candidate Profile - Documents Tab</h4>
+            <h4 className="mb-4 text-body-strong">Candidate Profile - Documents Tab</h4>
             <Card className="max-w-lg">
               <CardHeader>
-                <CardTitle className="text-body-strong flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-body-strong">
                   <FilePdf className="h-4 w-4" />
                   Documents
                 </CardTitle>
@@ -545,7 +539,9 @@ export default function PdfViewerPage() {
                   src={SAMPLE_PDF_URL}
                   uploadedAt={new Date()}
                   fileSize={245760}
+                  // eslint-disable-next-line no-console
                   onView={() => console.log("View")}
+                  // eslint-disable-next-line no-console
                   onDownload={() => console.log("Download")}
                 />
                 <DocumentPreviewCard
@@ -553,7 +549,9 @@ export default function PdfViewerPage() {
                   src={SAMPLE_PDF_URL}
                   uploadedAt={new Date(Date.now() - 86400000)}
                   fileSize={98304}
+                  // eslint-disable-next-line no-console
                   onView={() => console.log("View")}
+                  // eslint-disable-next-line no-console
                   onDownload={() => console.log("Download")}
                 />
                 <Button variant="outline" className="w-full">
@@ -565,9 +563,9 @@ export default function PdfViewerPage() {
 
           {/* Resume Review Modal */}
           <div>
-            <h4 className="text-body-strong mb-4">Resume Review Panel</h4>
-            <div className="border border-border-muted rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-border-muted bg-background-subtle flex items-center justify-between">
+            <h4 className="mb-4 text-body-strong">Resume Review Panel</h4>
+            <div className="overflow-hidden rounded-xl border border-border-muted">
+              <div className="flex items-center justify-between border-b border-border-muted bg-background-subtle p-4">
                 <div className="flex items-center gap-3">
                   <Badge variant="default">Resume</Badge>
                   <span className="font-medium">Sarah Chen</span>
@@ -582,37 +580,25 @@ export default function PdfViewerPage() {
                 </div>
               </div>
               <div className="h-[400px]">
-                <PdfViewer
-                  src={SAMPLE_PDF_URL}
-                  showToolbar={true}
-                  height="100%"
-                />
+                <PdfViewer src={SAMPLE_PDF_URL} showToolbar={true} height="100%" />
               </div>
             </div>
           </div>
 
           {/* Side-by-side View */}
           <div>
-            <h4 className="text-body-strong mb-4">Side-by-Side Comparison</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h4 className="mb-4 text-body-strong">Side-by-Side Comparison</h4>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label className="mb-2 block">Candidate A - Resume</Label>
-                <div className="h-[300px] border border-border-muted rounded-lg overflow-hidden">
-                  <PdfViewer
-                    src={SAMPLE_PDF_URL}
-                    title="John_Smith_Resume.pdf"
-                    height="100%"
-                  />
+                <div className="h-[300px] overflow-hidden rounded-lg border border-border-muted">
+                  <PdfViewer src={SAMPLE_PDF_URL} title="John_Smith_Resume.pdf" height="100%" />
                 </div>
               </div>
               <div>
                 <Label className="mb-2 block">Candidate B - Resume</Label>
-                <div className="h-[300px] border border-border-muted rounded-lg overflow-hidden">
-                  <PdfViewer
-                    src={SAMPLE_PDF_URL}
-                    title="Jane_Doe_Resume.pdf"
-                    height="100%"
-                  />
+                <div className="h-[300px] overflow-hidden rounded-lg border border-border-muted">
+                  <PdfViewer src={SAMPLE_PDF_URL} title="Jane_Doe_Resume.pdf" height="100%" />
                 </div>
               </div>
             </div>
@@ -625,17 +611,17 @@ export default function PdfViewerPage() {
         <ComponentCard id="props" title="Props">
           <div className="space-y-8">
             <div>
-              <h4 className="text-body-strong mb-3">PdfViewer</h4>
+              <h4 className="mb-3 text-body-strong">PdfViewer</h4>
               <PropsTable props={pdfViewerProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">ResumeViewer</h4>
+              <h4 className="mb-3 text-body-strong">ResumeViewer</h4>
               <PropsTable props={resumeViewerProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">DocumentPreviewCard</h4>
+              <h4 className="mb-3 text-body-strong">DocumentPreviewCard</h4>
               <PropsTable props={documentPreviewCardProps} />
             </div>
           </div>
@@ -680,31 +666,31 @@ export default function PdfViewerPage() {
         title="Related Components"
         description="Components commonly used with PDF Viewer"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <a
             href="/design-system/components/file-upload"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">File Upload</p>
             <p className="text-caption text-foreground-muted">Upload documents</p>
           </a>
           <a
             href="/design-system/components/modal"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Modal</p>
             <p className="text-caption text-foreground-muted">Full-screen preview</p>
           </a>
           <a
             href="/design-system/components/candidate-card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Candidate Card</p>
             <p className="text-caption text-foreground-muted">Profile context</p>
           </a>
           <a
             href="/design-system/components/card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Card</p>
             <p className="text-caption text-foreground-muted">Container layout</p>

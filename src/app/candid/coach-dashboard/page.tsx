@@ -46,7 +46,13 @@ interface CoachDashboardData {
     sessionRate: number;
   } | null;
   upcomingSessions: Session[];
-  recentReviews: any[];
+  recentReviews: {
+    id: string;
+    rating: number;
+    comment: string | null;
+    createdAt: string;
+    mentee?: { name: string };
+  }[];
   monthlyStats: {
     sessions: number;
     earnings: number;
@@ -86,7 +92,10 @@ export default function CoachDashboardPage() {
         const allSessions = sessionsData.sessions || [];
         const upcomingSessions = allSessions
           .filter((s: Session) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date())
-          .sort((a: Session, b: Session) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+          .sort(
+            (a: Session, b: Session) =>
+              new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+          );
 
         // Get this month's earnings from breakdown
         const currentMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
@@ -95,9 +104,11 @@ export default function CoachDashboardPage() {
         );
 
         // Get recent reviews if coach profile exists
-        let recentReviews: any[] = [];
+        let recentReviews: CoachDashboardData["recentReviews"] = [];
         if (profileData.account?.coachProfile?.id) {
-          const reviewsRes = await fetch(`/api/reviews?coachId=${profileData.account.coachProfile.id}`);
+          const reviewsRes = await fetch(
+            `/api/reviews?coachId=${profileData.account.coachProfile.id}`
+          );
           if (reviewsRes.ok) {
             const reviewsData = await reviewsRes.json();
             recentReviews = (reviewsData.reviews || []).slice(0, 5);
@@ -164,26 +175,27 @@ export default function CoachDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner size={32} className="animate-spin text-[var(--primitive-green-600)]" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 pb-24 sm:px-6 md:pb-8 lg:px-8">
       {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-heading-md text-foreground-default">
-            {getGreeting()}, Coach!
-          </h1>
+          <h1 className="text-foreground-default text-heading-md">{getGreeting()}, Coach!</h1>
           <p className="mt-1 text-body text-foreground-muted">
-            Here's an overview of your coaching activity
+            Here&apos;s an overview of your coaching activity
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/candid/settings/payments" className={buttonVariants({ variant: "secondary" })}>
+          <Link
+            href="/candid/settings/payments"
+            className={buttonVariants({ variant: "secondary" })}
+          >
             <Gear size={16} />
             Settings
           </Link>
@@ -191,26 +203,26 @@ export default function CoachDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="rounded-card bg-white p-5 shadow-card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-[var(--primitive-green-100)] flex items-center justify-center">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
               <CalendarBlank size={20} className="text-[var(--primitive-green-700)]" />
             </div>
           </div>
-          <p className="text-heading-sm font-bold text-foreground-default">
+          <p className="text-foreground-default text-heading-sm font-bold">
             {data.profile?.totalSessions || 0}
           </p>
           <p className="text-caption text-foreground-muted">Total Sessions</p>
         </div>
 
         <div className="rounded-card bg-white p-5 shadow-card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-[var(--primitive-yellow-100)] flex items-center justify-center">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-yellow-100)]">
               <Star size={20} className="text-[var(--primitive-yellow-600)]" />
             </div>
           </div>
-          <p className="text-heading-sm font-bold text-foreground-default">
+          <p className="text-foreground-default text-heading-sm font-bold">
             {data.profile?.rating?.toFixed(1) || "N/A"}
           </p>
           <p className="text-caption text-foreground-muted">
@@ -219,38 +231,41 @@ export default function CoachDashboardPage() {
         </div>
 
         <div className="rounded-card bg-white p-5 shadow-card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-[var(--primitive-blue-100)] flex items-center justify-center">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
               <TrendUp size={20} className="text-[var(--primitive-blue-600)]" />
             </div>
           </div>
-          <p className="text-heading-sm font-bold text-foreground-default">
+          <p className="text-foreground-default text-heading-sm font-bold">
             {data.monthlyStats.sessions}
           </p>
           <p className="text-caption text-foreground-muted">Sessions This Month</p>
         </div>
 
         <div className="rounded-card bg-white p-5 shadow-card">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-[var(--primitive-green-100)] flex items-center justify-center">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
               <CurrencyDollar size={20} className="text-[var(--primitive-green-700)]" />
             </div>
           </div>
-          <p className="text-heading-sm font-bold text-foreground-default">
+          <p className="text-foreground-default text-heading-sm font-bold">
             ${((data.profile?.totalEarnings || 0) / 100).toLocaleString()}
           </p>
           <p className="text-caption text-foreground-muted">Total Earnings</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid gap-8 lg:grid-cols-3">
         {/* Upcoming Sessions */}
         <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-heading-sm font-semibold text-foreground-default">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-foreground-default text-heading-sm font-semibold">
               Upcoming Sessions
             </h2>
-            <Link href="/candid/sessions" className={buttonVariants({ variant: "link", size: "sm" })}>
+            <Link
+              href="/candid/sessions"
+              className={buttonVariants({ variant: "link", size: "sm" })}
+            >
               View all
               <CaretRight size={14} />
             </Link>
@@ -264,11 +279,15 @@ export default function CoachDashboardPage() {
                 return (
                   <div key={group.label}>
                     {/* Date Header */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={cn(
-                        "text-body-strong font-semibold",
-                        isGroupToday ? "text-[var(--primitive-green-700)]" : "text-foreground-default"
-                      )}>
+                    <div className="mb-3 flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "text-body-strong font-semibold",
+                          isGroupToday
+                            ? "text-[var(--primitive-green-700)]"
+                            : "text-foreground-default"
+                        )}
+                      >
                         {group.label}
                       </span>
                       {isGroupToday && (
@@ -295,10 +314,10 @@ export default function CoachDashboardPage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
                                 <div>
-                                  <p className="text-caption text-foreground-muted mb-1">
+                                  <p className="mb-1 text-caption text-foreground-muted">
                                     {format(sessionDate, "h:mm a")} - {format(endTime, "h:mm a")}
                                   </p>
-                                  <p className="text-body-strong font-medium text-foreground-default">
+                                  <p className="text-foreground-default text-body-strong font-medium">
                                     Session with {session.mentee.name}
                                   </p>
                                 </div>
@@ -306,7 +325,11 @@ export default function CoachDashboardPage() {
                               <div className="flex items-center gap-2">
                                 {isGroupToday && session.meetingLink && (
                                   <Button variant="primary" size="sm" asChild>
-                                    <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                      href={session.meetingLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <VideoCamera size={16} className="mr-1" />
                                       Join
                                     </a>
@@ -328,11 +351,11 @@ export default function CoachDashboardPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-card bg-white p-8 shadow-card text-center">
+            <div className="rounded-card bg-white p-8 text-center shadow-card">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
                 <CalendarBlank size={32} className="text-[var(--primitive-green-700)]" />
               </div>
-              <h3 className="text-body-strong font-semibold text-foreground-default mb-1">
+              <h3 className="text-foreground-default mb-1 text-body-strong font-semibold">
                 No upcoming sessions
               </h3>
               <p className="text-caption text-foreground-muted">
@@ -347,28 +370,28 @@ export default function CoachDashboardPage() {
           {/* Profile Status */}
           {data.profile && (
             <div className="rounded-card bg-white p-5 shadow-card">
-              <h3 className="text-body-strong font-semibold text-foreground-default mb-4">
+              <h3 className="text-foreground-default mb-4 text-body-strong font-semibold">
                 Profile Status
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-caption text-foreground-muted">Status</span>
-                  <Chip
-                    variant={data.profile.status === "ACTIVE" ? "primary" : "yellow"}
-                    size="sm"
-                  >
+                  <Chip variant={data.profile.status === "ACTIVE" ? "primary" : "yellow"} size="sm">
                     {data.profile.status}
                   </Chip>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-caption text-foreground-muted">Session Rate</span>
-                  <span className="text-body font-medium text-foreground-default">
+                  <span className="text-foreground-default text-body font-medium">
                     ${(data.profile.sessionRate / 100).toFixed(0)}/session
                   </span>
                 </div>
                 <Link
                   href={`/candid/coach/${data.profile.id}`}
-                  className={cn(buttonVariants({ variant: "secondary", size: "sm" }), "w-full mt-2")}
+                  className={cn(
+                    buttonVariants({ variant: "secondary", size: "sm" }),
+                    "mt-2 w-full"
+                  )}
                 >
                   View Public Profile
                 </Link>
@@ -378,20 +401,26 @@ export default function CoachDashboardPage() {
 
           {/* Quick Actions */}
           <div className="rounded-card bg-white p-5 shadow-card">
-            <h3 className="text-body-strong font-semibold text-foreground-default mb-4">
+            <h3 className="text-foreground-default mb-4 text-body-strong font-semibold">
               Quick Actions
             </h3>
             <div className="space-y-2">
               <Link
                 href="/candid/settings/availability"
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-start")}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "w-full justify-start"
+                )}
               >
                 <Clock size={16} className="mr-2" />
                 Update Availability
               </Link>
               <Link
                 href="/candid/settings/payments"
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-start")}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "w-full justify-start"
+                )}
               >
                 <CurrencyDollar size={16} className="mr-2" />
                 Payment Settings
@@ -401,38 +430,46 @@ export default function CoachDashboardPage() {
 
           {/* Recent Reviews Preview */}
           <div className="rounded-card bg-white p-5 shadow-card">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-body-strong font-semibold text-foreground-default">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-foreground-default text-body-strong font-semibold">
                 Recent Reviews
               </h3>
-              <Link href="/candid/reviews" className={buttonVariants({ variant: "link", size: "sm" })}>
+              <Link
+                href="/candid/reviews"
+                className={buttonVariants({ variant: "link", size: "sm" })}
+              >
                 View all
               </Link>
             </div>
             {data.recentReviews.length > 0 ? (
               <div className="space-y-3">
-                {data.recentReviews.slice(0, 3).map((review: any) => (
-                  <div key={review.id} className="pb-3 border-b border-[var(--border-default)] last:border-0 last:pb-0">
-                    <div className="flex items-center gap-1 mb-1">
+                {data.recentReviews.slice(0, 3).map((review) => (
+                  <div
+                    key={review.id}
+                    className="border-b border-[var(--border-default)] pb-3 last:border-0 last:pb-0"
+                  >
+                    <div className="mb-1 flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
                           size={12}
                           weight={star <= review.rating ? "fill" : "regular"}
-                          className={star <= review.rating ? "text-[#F59E0B]" : "text-[var(--primitive-neutral-300)]"}
+                          className={
+                            star <= review.rating
+                              ? "text-[#F59E0B]"
+                              : "text-[var(--primitive-neutral-300)]"
+                          }
                         />
                       ))}
                     </div>
-                    <p className="text-caption text-foreground-default line-clamp-2">
+                    <p className="text-foreground-default line-clamp-2 text-caption">
                       {review.comment || "No comment"}
                     </p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-caption text-foreground-muted text-center py-4">
-                No reviews yet
-              </p>
+              <p className="py-4 text-center text-caption text-foreground-muted">No reviews yet</p>
             )}
           </div>
         </div>

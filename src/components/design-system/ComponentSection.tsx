@@ -24,23 +24,21 @@ export function ComponentSection({
   return (
     <section id={id} className={cn("scroll-mt-24", className)}>
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="mb-2 flex items-center gap-3">
           <h2 className="text-heading-sm font-semibold text-foreground">{title}</h2>
           {figmaUrl && (
             <a
               href={figmaUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-caption text-foreground-muted hover:text-foreground-brand transition-colors"
+              className="inline-flex items-center gap-1 text-caption text-foreground-muted transition-colors hover:text-foreground-brand"
             >
               <span>Figma</span>
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="h-3 w-3" />
             </a>
           )}
         </div>
-        {description && (
-          <p className="text-body-sm text-foreground-muted">{description}</p>
-        )}
+        {description && <p className="text-body-sm text-foreground-muted">{description}</p>}
       </div>
       {children}
     </section>
@@ -55,29 +53,19 @@ interface ComponentCardProps {
   className?: string;
 }
 
-export function ComponentCard({
-  id,
-  title,
-  description,
-  children,
-  className,
-}: ComponentCardProps) {
+export function ComponentCard({ id, title, description, children, className }: ComponentCardProps) {
   return (
     <div
       id={id}
       className={cn(
-        "bg-surface rounded-xl border border-border overflow-hidden scroll-mt-24",
+        "scroll-mt-24 overflow-hidden rounded-xl border border-border bg-surface",
         className
       )}
     >
       {(title || description) && (
-        <div className="px-6 py-4 border-b border-border-muted">
-          {title && (
-            <h3 className="text-body-strong text-foreground">{title}</h3>
-          )}
-          {description && (
-            <p className="text-caption text-foreground-muted mt-1">{description}</p>
-          )}
+        <div className="border-b border-border-muted px-6 py-4">
+          {title && <h3 className="text-body-strong text-foreground">{title}</h3>}
+          {description && <p className="mt-1 text-caption text-foreground-muted">{description}</p>}
         </div>
       )}
       <div className="p-6">{children}</div>
@@ -95,17 +83,17 @@ export function UsageGuide({ dos, donts, className }: UsageGuideProps) {
   return (
     <div className={cn("grid gap-4 md:grid-cols-2", className)}>
       {dos && dos.length > 0 && (
-        <div className="bg-background-success rounded-xl p-4">
-          <h4 className="text-body-strong text-foreground-success mb-3 flex items-center gap-2">
-            <span className="w-5 h-5 bg-primary-600 rounded-full flex items-center justify-center text-white text-caption-sm">
+        <div className="rounded-xl bg-background-success p-4">
+          <h4 className="mb-3 flex items-center gap-2 text-body-strong text-foreground-success">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-caption-sm text-white">
               ✓
             </span>
             Do
           </h4>
           <ul className="space-y-2">
             {dos.map((item, i) => (
-              <li key={i} className="text-caption text-foreground-success flex items-start gap-2">
-                <span className="text-foreground-success mt-0.5">•</span>
+              <li key={i} className="flex items-start gap-2 text-caption text-foreground-success">
+                <span className="mt-0.5 text-foreground-success">•</span>
                 {item}
               </li>
             ))}
@@ -113,17 +101,17 @@ export function UsageGuide({ dos, donts, className }: UsageGuideProps) {
         </div>
       )}
       {donts && donts.length > 0 && (
-        <div className="bg-background-error rounded-xl p-4">
-          <h4 className="text-body-strong text-foreground-error mb-3 flex items-center gap-2">
-            <span className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-caption-sm">
+        <div className="rounded-xl bg-background-error p-4">
+          <h4 className="mb-3 flex items-center gap-2 text-body-strong text-foreground-error">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-caption-sm text-white">
               ✕
             </span>
-            Don't
+            Don&apos;t
           </h4>
           <ul className="space-y-2">
             {donts.map((item, i) => (
-              <li key={i} className="text-caption text-foreground-error flex items-start gap-2">
-                <span className="text-foreground-error mt-0.5">•</span>
+              <li key={i} className="flex items-start gap-2 text-caption text-foreground-error">
+                <span className="mt-0.5 text-foreground-error">•</span>
                 {item}
               </li>
             ))}
@@ -141,17 +129,17 @@ interface AccessibilityInfoProps {
 
 export function AccessibilityInfo({ items, className }: AccessibilityInfoProps) {
   return (
-    <div className={cn("bg-background-info rounded-xl p-4", className)}>
-      <h4 className="text-body-strong text-foreground-info mb-3 flex items-center gap-2">
-        <span className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-caption-sm">
+    <div className={cn("rounded-xl bg-background-info p-4", className)}>
+      <h4 className="mb-3 flex items-center gap-2 text-body-strong text-foreground-info">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-caption-sm text-white">
           ♿
         </span>
         Accessibility
       </h4>
       <ul className="space-y-2">
         {items.map((item, i) => (
-          <li key={i} className="text-caption text-foreground-info flex items-start gap-2">
-            <span className="text-foreground-info mt-0.5">•</span>
+          <li key={i} className="flex items-start gap-2 text-caption text-foreground-info">
+            <span className="mt-0.5 text-foreground-info">•</span>
             {item}
           </li>
         ))}
@@ -177,10 +165,10 @@ interface ComponentAnatomyProps {
 
 export function ComponentAnatomy({ parts, className }: ComponentAnatomyProps) {
   return (
-    <div className={cn("bg-surface rounded-xl border border-border overflow-hidden", className)}>
-      <div className="px-6 py-4 border-b border-border-muted">
+    <div className={cn("overflow-hidden rounded-xl border border-border bg-surface", className)}>
+      <div className="border-b border-border-muted px-6 py-4">
         <h3 className="text-body-strong text-foreground">Component Anatomy</h3>
-        <p className="text-caption text-foreground-muted mt-1">
+        <p className="mt-1 text-caption text-foreground-muted">
           Understanding the parts that make up this component
         </p>
       </div>
@@ -188,17 +176,19 @@ export function ComponentAnatomy({ parts, className }: ComponentAnatomyProps) {
         <div className="space-y-4">
           {parts.map((part, i) => (
             <div key={i} className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background-brand-subtle text-foreground-brand font-semibold text-sm shrink-0">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background-brand-subtle text-sm font-semibold text-foreground-brand">
                 {i + 1}
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-foreground">{part.name}</span>
                   {part.required && (
-                    <span className="text-caption-sm text-foreground-error font-medium">Required</span>
+                    <span className="text-caption-sm font-medium text-foreground-error">
+                      Required
+                    </span>
                   )}
                 </div>
-                <p className="text-caption text-foreground-muted mt-0.5">{part.description}</p>
+                <p className="mt-0.5 text-caption text-foreground-muted">{part.description}</p>
               </div>
             </div>
           ))}
@@ -226,18 +216,18 @@ interface RelatedComponentsProps {
 export function RelatedComponents({ components, className }: RelatedComponentsProps) {
   return (
     <div className={cn("", className)}>
-      <h3 className="text-body-strong text-foreground mb-4">Related Components</h3>
+      <h3 className="mb-4 text-body-strong text-foreground">Related Components</h3>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {components.map((comp, i) => (
           <a
             key={i}
             href={comp.href}
-            className="group bg-surface rounded-xl border border-border p-4 hover:border-border-brand transition-colors"
+            className="group rounded-xl border border-border bg-surface p-4 transition-colors hover:border-border-brand"
           >
-            <h4 className="font-medium text-foreground group-hover:text-foreground-brand transition-colors">
+            <h4 className="font-medium text-foreground transition-colors group-hover:text-foreground-brand">
               {comp.name}
             </h4>
-            <p className="text-caption text-foreground-muted mt-1">{comp.description}</p>
+            <p className="mt-1 text-caption text-foreground-muted">{comp.description}</p>
           </a>
         ))}
       </div>
@@ -256,19 +246,24 @@ interface RealWorldExampleProps {
   className?: string;
 }
 
-export function RealWorldExample({ title, description, children, className }: RealWorldExampleProps) {
+export function RealWorldExample({
+  title,
+  description,
+  children,
+  className,
+}: RealWorldExampleProps) {
   return (
-    <div className={cn("bg-surface rounded-xl border border-border overflow-hidden", className)}>
-      <div className="px-6 py-4 border-b border-border-muted bg-background-subtle">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="px-2 py-0.5 bg-background-brand-subtle text-foreground-brand rounded text-caption-sm font-medium">
+    <div className={cn("overflow-hidden rounded-xl border border-border bg-surface", className)}>
+      <div className="border-b border-border-muted bg-background-subtle px-6 py-4">
+        <div className="mb-1 flex items-center gap-2">
+          <span className="rounded bg-background-brand-subtle px-2 py-0.5 text-caption-sm font-medium text-foreground-brand">
             Real-World Example
           </span>
         </div>
         <h3 className="text-body-strong text-foreground">{title}</h3>
-        <p className="text-caption text-foreground-muted mt-1">{description}</p>
+        <p className="mt-1 text-caption text-foreground-muted">{description}</p>
       </div>
-      <div className="p-6 bg-background-muted">{children}</div>
+      <div className="bg-background-muted p-6">{children}</div>
     </div>
   );
 }

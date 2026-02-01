@@ -48,7 +48,17 @@ import {
   CaretDown as ChevronDown,
 } from "@phosphor-icons/react";
 
-type Step = "welcome" | "role" | "profile" | "career" | "preferences" | "coach" | "goals" | "sectors" | "availability" | "complete";
+type Step =
+  | "welcome"
+  | "role"
+  | "profile"
+  | "career"
+  | "preferences"
+  | "coach"
+  | "goals"
+  | "sectors"
+  | "availability"
+  | "complete";
 
 const roleOptions = [
   {
@@ -89,12 +99,12 @@ const goalSuggestions = [
 const sectorIcons: Record<Sector, React.ElementType> = {
   "climate-tech": Lightning,
   "clean-energy": SolarPanel,
-  "policy": Globe,
-  "finance": Bank,
-  "nonprofit": Heart,
+  policy: Globe,
+  finance: Bank,
+  nonprofit: Heart,
   "corporate-sustainability": Buildings,
-  "agriculture": Plant,
-  "transportation": Truck,
+  agriculture: Plant,
+  transportation: Truck,
 };
 
 const sectors = Object.entries(SECTOR_INFO).map(([key, value]) => ({
@@ -135,7 +145,11 @@ const careerStageOptions = [
   { value: "ENTRY_LEVEL", label: "Entry Level", description: "Just starting career" },
   { value: "MID_CAREER", label: "Mid-Career", description: "3-7 years experience" },
   { value: "SENIOR", label: "Senior", description: "7+ years experience" },
-  { value: "CAREER_CHANGER", label: "Career Changer", description: "Transitioning from another field" },
+  {
+    value: "CAREER_CHANGER",
+    label: "Career Changer",
+    description: "Transitioning from another field",
+  },
   { value: "RETURNING", label: "Returning", description: "Returning to workforce" },
 ];
 
@@ -192,12 +206,23 @@ export default function OnboardingPage() {
   const [salaryMin, setSalaryMin] = useState("");
   const [salaryMax, setSalaryMax] = useState("");
 
-  const steps: Step[] = selectedRole === "seeker"
-    ? ["welcome", "role", "profile", "career", "preferences", "goals", "sectors", "coach", "complete"]
-    : ["welcome", "role", "profile", "sectors", "availability", "complete"];
+  const steps: Step[] =
+    selectedRole === "seeker"
+      ? [
+          "welcome",
+          "role",
+          "profile",
+          "career",
+          "preferences",
+          "goals",
+          "sectors",
+          "coach",
+          "complete",
+        ]
+      : ["welcome", "role", "profile", "sectors", "availability", "complete"];
 
   const currentStepIndex = steps.indexOf(step);
-  const progressPercentage = ((currentStepIndex) / (steps.length - 1)) * 100;
+  const progressPercentage = (currentStepIndex / (steps.length - 1)) * 100;
 
   const submitOnboarding = useCallback(async () => {
     if (submitting) return;
@@ -223,7 +248,13 @@ export default function OnboardingPage() {
           roleTypes,
           transitionTimeline,
           locationPreference,
-          salaryRange: salaryMin || salaryMax ? { min: salaryMin ? parseInt(salaryMin) : null, max: salaryMax ? parseInt(salaryMax) : null } : undefined,
+          salaryRange:
+            salaryMin || salaryMax
+              ? {
+                  min: salaryMin ? parseInt(salaryMin) : null,
+                  max: salaryMax ? parseInt(salaryMax) : null,
+                }
+              : undefined,
         }),
       });
     } catch (err) {
@@ -231,7 +262,27 @@ export default function OnboardingPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, selectedRole, firstName, lastName, email, linkedIn, bio, selectedSectors, goals, availability, jobTitle, yearsExperience, skills, careerStage, roleTypes, transitionTimeline, locationPreference, salaryMin, salaryMax]);
+  }, [
+    submitting,
+    selectedRole,
+    firstName,
+    lastName,
+    email,
+    linkedIn,
+    bio,
+    selectedSectors,
+    goals,
+    availability,
+    jobTitle,
+    yearsExperience,
+    skills,
+    careerStage,
+    roleTypes,
+    transitionTimeline,
+    locationPreference,
+    salaryMin,
+    salaryMax,
+  ]);
 
   const goToNextStep = () => {
     setIsAnimating(true);
@@ -264,8 +315,8 @@ export default function OnboardingPage() {
       prev.includes(sector)
         ? prev.filter((s) => s !== sector)
         : prev.length < 5
-        ? [...prev, sector]
-        : prev
+          ? [...prev, sector]
+          : prev
     );
   };
 
@@ -333,7 +384,10 @@ export default function OnboardingPage() {
       subtitle: "Help your mentors understand what you're working towards",
     },
     sectors: {
-      title: selectedRole === "seeker" ? "What sectors interest you?" : "What are your areas of expertise?",
+      title:
+        selectedRole === "seeker"
+          ? "What sectors interest you?"
+          : "What are your areas of expertise?",
       subtitle: "Select up to 5 sectors for better matching",
     },
     coach: {
@@ -355,7 +409,10 @@ export default function OnboardingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-white/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
-          <Link href="/candid" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+          <Link
+            href="/candid"
+            className="flex items-center gap-2 transition-opacity hover:opacity-80"
+          >
             <CandidSymbol size={28} />
             <CandidLogo className="hidden sm:block" />
           </Link>
@@ -365,7 +422,7 @@ export default function OnboardingPage() {
             <span className="text-caption text-foreground-muted">
               Step {Math.max(1, currentStepIndex)} of {steps.length - 1}
             </span>
-            <div className="hidden sm:flex items-center gap-1.5">
+            <div className="hidden items-center gap-1.5 sm:flex">
               {steps.slice(1, -1).map((s, i) => (
                 <div
                   key={s}
@@ -374,8 +431,8 @@ export default function OnboardingPage() {
                     i < currentStepIndex - 1
                       ? "bg-[var(--candid-dark)]"
                       : i === currentStepIndex - 1
-                      ? "bg-[var(--candid-dark)] w-6"
-                      : "bg-[var(--primitive-neutral-300)]"
+                        ? "w-6 bg-[var(--candid-dark)]"
+                        : "bg-[var(--primitive-neutral-300)]"
                   )}
                 />
               ))}
@@ -396,27 +453,43 @@ export default function OnboardingPage() {
         <div
           className={cn(
             "transition-all duration-150",
-            isAnimating ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"
+            isAnimating ? "translate-x-4 opacity-0" : "translate-x-0 opacity-100"
           )}
         >
           {/* Step: Welcome */}
           {step === "welcome" && (
             <div className="text-center">
               <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
-                <TreeEvergreen size={48} weight="fill" className="text-[var(--primitive-green-800)]" />
+                <TreeEvergreen
+                  size={48}
+                  weight="fill"
+                  className="text-[var(--primitive-green-800)]"
+                />
               </div>
-              <h1 className="text-display font-semibold text-foreground-default">
+              <h1 className="text-foreground-default text-display font-semibold">
                 {stepContent.welcome.title}
               </h1>
-              <p className="mt-3 text-body-lg text-foreground-muted">
+              <p className="text-body-lg mt-3 text-foreground-muted">
                 {stepContent.welcome.subtitle}
               </p>
 
               <div className="mt-10 grid gap-4 text-left">
                 {[
-                  { icon: Users, title: "Connect with mentors", desc: "Get matched with climate professionals who've been where you want to go" },
-                  { icon: Target, title: "Achieve your goals", desc: "Set clear objectives and track your progress with personalized guidance" },
-                  { icon: Leaf, title: "Make an impact", desc: "Join a community dedicated to building a sustainable future" },
+                  {
+                    icon: Users,
+                    title: "Connect with mentors",
+                    desc: "Get matched with climate professionals who've been where you want to go",
+                  },
+                  {
+                    icon: Target,
+                    title: "Achieve your goals",
+                    desc: "Set clear objectives and track your progress with personalized guidance",
+                  },
+                  {
+                    icon: Leaf,
+                    title: "Make an impact",
+                    desc: "Join a community dedicated to building a sustainable future",
+                  },
                 ].map((item, i) => (
                   <Card
                     key={i}
@@ -426,7 +499,9 @@ export default function OnboardingPage() {
                       <item.icon size={20} className="text-[var(--primitive-green-800)]" />
                     </div>
                     <div>
-                      <h3 className="text-body-strong font-semibold text-foreground-default">{item.title}</h3>
+                      <h3 className="text-foreground-default text-body-strong font-semibold">
+                        {item.title}
+                      </h3>
                       <p className="mt-0.5 text-caption text-foreground-muted">{item.desc}</p>
                     </div>
                   </Card>
@@ -438,11 +513,11 @@ export default function OnboardingPage() {
           {/* Step: Role Selection */}
           {step === "role" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.role.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.role.subtitle}
                 </p>
               </div>
@@ -464,11 +539,7 @@ export default function OnboardingPage() {
                       )}
                     >
                       {option.highlight && (
-                        <Badge
-                          variant="feature"
-                          size="sm"
-                          className="absolute -top-2.5 right-4"
-                        >
+                        <Badge variant="feature" size="sm" className="absolute -top-2.5 right-4">
                           {option.highlight}
                         </Badge>
                       )}
@@ -484,7 +555,7 @@ export default function OnboardingPage() {
                           <Icon size={24} weight={isSelected ? "fill" : "regular"} />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-body-strong font-semibold text-foreground-default">
+                          <h3 className="text-foreground-default text-body-strong font-semibold">
                             {option.title}
                           </h3>
                           <p className="mt-1 text-caption text-foreground-muted">
@@ -514,7 +585,9 @@ export default function OnboardingPage() {
                               : "border-[var(--border-default)]"
                           )}
                         >
-                          {isSelected && <CheckCircle size={16} weight="fill" className="text-white" />}
+                          {isSelected && (
+                            <CheckCircle size={16} weight="fill" className="text-white" />
+                          )}
                         </div>
                       </div>
                     </button>
@@ -527,11 +600,11 @@ export default function OnboardingPage() {
           {/* Step: Profile Info */}
           {step === "profile" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.profile.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.profile.subtitle}
                 </p>
               </div>
@@ -588,7 +661,8 @@ export default function OnboardingPage() {
 
                 <div className="space-y-1.5">
                   <Label>
-                    LinkedIn Profile <span className="text-foreground-muted font-normal">(optional)</span>
+                    LinkedIn Profile{" "}
+                    <span className="font-normal text-foreground-muted">(optional)</span>
                   </Label>
                   <Input
                     type="url"
@@ -601,7 +675,7 @@ export default function OnboardingPage() {
 
                 <div className="space-y-1.5">
                   <Label>
-                    Short Bio <span className="text-foreground-muted font-normal">(optional)</span>
+                    Short Bio <span className="font-normal text-foreground-muted">(optional)</span>
                   </Label>
                   <Textarea
                     value={bio}
@@ -614,7 +688,8 @@ export default function OnboardingPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label>
-                      Current Job Title <span className="text-foreground-muted font-normal">(optional)</span>
+                      Current Job Title{" "}
+                      <span className="font-normal text-foreground-muted">(optional)</span>
                     </Label>
                     <Input
                       type="text"
@@ -626,13 +701,14 @@ export default function OnboardingPage() {
                   </div>
                   <div className="space-y-1.5">
                     <Label>
-                      Years of Experience <span className="text-foreground-muted font-normal">(optional)</span>
+                      Years of Experience{" "}
+                      <span className="font-normal text-foreground-muted">(optional)</span>
                     </Label>
                     <div className="relative">
                       <select
                         value={yearsExperience || ""}
                         onChange={(e) => setYearsExperience(e.target.value || null)}
-                        className="w-full appearance-none rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 text-foreground-default transition-colors hover:border-[var(--border-muted)] focus:border-[var(--primitive-green-600)] focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]/20"
+                        className="text-foreground-default focus:ring-[var(--primitive-green-600)]/20 w-full appearance-none rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 transition-colors hover:border-[var(--border-muted)] focus:border-[var(--primitive-green-600)] focus:outline-none focus:ring-2"
                       >
                         <option value="">Select experience level...</option>
                         {yearsOfExperienceOptions.map((option) => (
@@ -655,11 +731,11 @@ export default function OnboardingPage() {
           {/* Step: Career (Seekers only) */}
           {step === "career" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.career.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.career.subtitle}
                 </p>
               </div>
@@ -667,7 +743,7 @@ export default function OnboardingPage() {
               <div className="space-y-6">
                 {/* Career Stage */}
                 <div>
-                  <h3 className="text-body-strong font-semibold text-foreground-default mb-3">
+                  <h3 className="text-foreground-default mb-3 text-body-strong font-semibold">
                     Career Stage
                   </h3>
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -680,17 +756,23 @@ export default function OnboardingPage() {
                           className={cn(
                             "rounded-card p-4 text-left transition-all duration-200",
                             isSelected
-                              ? "bg-[var(--primitive-blue-200)] border-2 border-[var(--primitive-green-800)]"
-                              : "bg-white shadow-card hover:shadow-card-hover border border-[var(--border-default)]"
+                              ? "border-2 border-[var(--primitive-green-800)] bg-[var(--primitive-blue-200)]"
+                              : "border border-[var(--border-default)] bg-white shadow-card hover:shadow-card-hover"
                           )}
                         >
-                          <h4 className={cn(
-                            "font-semibold",
-                            isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
-                          )}>
+                          <h4
+                            className={cn(
+                              "font-semibold",
+                              isSelected
+                                ? "text-[var(--primitive-green-800)]"
+                                : "text-foreground-default"
+                            )}
+                          >
                             {option.label}
                           </h4>
-                          <p className="text-caption text-foreground-muted mt-1">{option.description}</p>
+                          <p className="mt-1 text-caption text-foreground-muted">
+                            {option.description}
+                          </p>
                         </button>
                       );
                     })}
@@ -699,10 +781,10 @@ export default function OnboardingPage() {
 
                 {/* Skills */}
                 <div>
-                  <h3 className="text-body-strong font-semibold text-foreground-default mb-3">
+                  <h3 className="text-foreground-default mb-3 text-body-strong font-semibold">
                     Skills & Expertise
                   </h3>
-                  <div className="flex gap-2 mb-4">
+                  <div className="mb-4 flex gap-2">
                     <Input
                       type="text"
                       value={currentSkill}
@@ -737,7 +819,7 @@ export default function OnboardingPage() {
 
                   {/* Skill suggestions */}
                   <div className="mb-4">
-                    <p className="text-caption text-foreground-muted mb-2">Suggestions:</p>
+                    <p className="mb-2 text-caption text-foreground-muted">Suggestions:</p>
                     <div className="flex flex-wrap gap-2">
                       {skillSuggestions.map((suggestion) => {
                         const isAdded = skills.includes(suggestion);
@@ -749,12 +831,14 @@ export default function OnboardingPage() {
                             className={cn(
                               "rounded-full border px-3 py-1.5 text-caption transition-all",
                               isAdded
-                                ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)]/5 text-[var(--primitive-green-800)] cursor-default"
+                                ? "bg-[var(--primitive-green-800)]/5 cursor-default border-[var(--primitive-green-800)] text-[var(--primitive-green-800)]"
                                 : "border-[var(--border-default)] bg-white hover:border-[var(--primitive-green-800)] hover:bg-[var(--primitive-blue-200)]"
                             )}
                           >
                             {suggestion}
-                            {isAdded && <CheckCircle size={12} weight="fill" className="inline ml-1" />}
+                            {isAdded && (
+                              <CheckCircle size={12} weight="fill" className="ml-1 inline" />
+                            )}
                           </button>
                         );
                       })}
@@ -764,19 +848,21 @@ export default function OnboardingPage() {
                   {/* Added skills */}
                   {skills.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-caption font-medium text-foreground-default">Your skills ({skills.length}):</p>
+                      <p className="text-foreground-default text-caption font-medium">
+                        Your skills ({skills.length}):
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {skills.map((skill) => (
                           <Badge
                             key={skill}
                             variant="secondary"
                             size="default"
-                            className="flex items-center gap-2 pl-3 pr-2 py-2"
+                            className="flex items-center gap-2 py-2 pl-3 pr-2"
                           >
                             {skill}
                             <button
                               onClick={() => setSkills(skills.filter((s) => s !== skill))}
-                              className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-[var(--primitive-green-800)]/10 text-foreground-muted hover:text-[var(--primitive-green-800)] transition-colors"
+                              className="hover:bg-[var(--primitive-green-800)]/10 flex h-5 w-5 items-center justify-center rounded-full text-foreground-muted transition-colors hover:text-[var(--primitive-green-800)]"
                             >
                               ×
                             </button>
@@ -793,11 +879,11 @@ export default function OnboardingPage() {
           {/* Step: Preferences (Seekers only) */}
           {step === "preferences" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.preferences.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.preferences.subtitle}
                 </p>
               </div>
@@ -805,7 +891,7 @@ export default function OnboardingPage() {
               <div className="space-y-6">
                 {/* Role Type - Multiple Select */}
                 <div>
-                  <Label className="block mb-3 font-semibold">Target Role Type</Label>
+                  <Label className="mb-3 block font-semibold">Target Role Type</Label>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {roleTypeOptions.map((option) => {
                       const isSelected = roleTypes.includes(option.value);
@@ -839,13 +925,19 @@ export default function OnboardingPage() {
                           <span
                             className={cn(
                               "flex-1 font-medium transition-colors",
-                              isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                              isSelected
+                                ? "text-[var(--primitive-green-800)]"
+                                : "text-foreground-default"
                             )}
                           >
                             {option.label}
                           </span>
                           {isSelected && (
-                            <CheckCircle size={20} weight="fill" className="text-[var(--primitive-green-800)]" />
+                            <CheckCircle
+                              size={20}
+                              weight="fill"
+                              className="text-[var(--primitive-green-800)]"
+                            />
                           )}
                         </button>
                       );
@@ -855,7 +947,9 @@ export default function OnboardingPage() {
 
                 {/* Transition Timeline - Radio */}
                 <div>
-                  <Label className="block mb-3 font-semibold">When are you ready to transition?</Label>
+                  <Label className="mb-3 block font-semibold">
+                    When are you ready to transition?
+                  </Label>
                   <div className="space-y-3">
                     {transitionTimelineOptions.map((option) => {
                       const isSelected = transitionTimeline === option.value;
@@ -864,7 +958,7 @@ export default function OnboardingPage() {
                           key={option.value}
                           onClick={() => setTransitionTimeline(option.value)}
                           className={cn(
-                            "w-full flex items-center justify-between rounded-card p-4 text-left transition-all duration-200",
+                            "flex w-full items-center justify-between rounded-card p-4 text-left transition-all duration-200",
                             isSelected
                               ? "bg-[var(--primitive-blue-200)]"
                               : "bg-white shadow-card hover:shadow-card-hover"
@@ -873,7 +967,9 @@ export default function OnboardingPage() {
                           <span
                             className={cn(
                               "font-medium",
-                              isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                              isSelected
+                                ? "text-[var(--primitive-green-800)]"
+                                : "text-foreground-default"
                             )}
                           >
                             {option.label}
@@ -886,7 +982,9 @@ export default function OnboardingPage() {
                                 : "border-[var(--border-default)]"
                             )}
                           >
-                            {isSelected && <CheckCircle size={16} weight="fill" className="text-white" />}
+                            {isSelected && (
+                              <CheckCircle size={16} weight="fill" className="text-white" />
+                            )}
                           </div>
                         </button>
                       );
@@ -896,7 +994,7 @@ export default function OnboardingPage() {
 
                 {/* Location Preference - Radio */}
                 <div>
-                  <Label className="block mb-3 font-semibold">Location Preference</Label>
+                  <Label className="mb-3 block font-semibold">Location Preference</Label>
                   <div className="space-y-3">
                     {locationPreferenceOptions.map((option) => {
                       const isSelected = locationPreference === option.value;
@@ -905,7 +1003,7 @@ export default function OnboardingPage() {
                           key={option.value}
                           onClick={() => setLocationPreference(option.value)}
                           className={cn(
-                            "w-full flex items-center justify-between rounded-card p-4 text-left transition-all duration-200",
+                            "flex w-full items-center justify-between rounded-card p-4 text-left transition-all duration-200",
                             isSelected
                               ? "bg-[var(--primitive-blue-200)]"
                               : "bg-white shadow-card hover:shadow-card-hover"
@@ -914,7 +1012,9 @@ export default function OnboardingPage() {
                           <span
                             className={cn(
                               "font-medium",
-                              isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                              isSelected
+                                ? "text-[var(--primitive-green-800)]"
+                                : "text-foreground-default"
                             )}
                           >
                             {option.label}
@@ -927,7 +1027,9 @@ export default function OnboardingPage() {
                                 : "border-[var(--border-default)]"
                             )}
                           >
-                            {isSelected && <CheckCircle size={16} weight="fill" className="text-white" />}
+                            {isSelected && (
+                              <CheckCircle size={16} weight="fill" className="text-white" />
+                            )}
                           </div>
                         </button>
                       );
@@ -937,8 +1039,9 @@ export default function OnboardingPage() {
 
                 {/* Salary Expectations */}
                 <div>
-                  <Label className="block mb-3 font-semibold">
-                    Salary Expectations <span className="text-foreground-muted font-normal">(optional)</span>
+                  <Label className="mb-3 block font-semibold">
+                    Salary Expectations{" "}
+                    <span className="font-normal text-foreground-muted">(optional)</span>
                   </Label>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
@@ -953,7 +1056,7 @@ export default function OnboardingPage() {
                           inputSize="lg"
                           className="flex-1"
                         />
-                        <span className="text-foreground-muted text-caption">K</span>
+                        <span className="text-caption text-foreground-muted">K</span>
                       </div>
                     </div>
                     <div className="space-y-1.5">
@@ -968,7 +1071,7 @@ export default function OnboardingPage() {
                           inputSize="lg"
                           className="flex-1"
                         />
-                        <span className="text-foreground-muted text-caption">K</span>
+                        <span className="text-caption text-foreground-muted">K</span>
                       </div>
                     </div>
                   </div>
@@ -980,17 +1083,17 @@ export default function OnboardingPage() {
           {/* Step: Goals (Seekers only) */}
           {step === "goals" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.goals.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.goals.subtitle}
                 </p>
               </div>
 
               {/* Goal input */}
-              <div className="flex gap-2 mb-4">
+              <div className="mb-4 flex gap-2">
                 <Input
                   type="text"
                   value={currentGoal}
@@ -1017,7 +1120,7 @@ export default function OnboardingPage() {
 
               {/* Goal suggestions */}
               <div className="mb-6">
-                <p className="text-caption text-foreground-muted mb-2">Suggestions:</p>
+                <p className="mb-2 text-caption text-foreground-muted">Suggestions:</p>
                 <div className="flex flex-wrap gap-2">
                   {goalSuggestions.map((suggestion) => {
                     const isAdded = goals.includes(suggestion.text);
@@ -1030,7 +1133,7 @@ export default function OnboardingPage() {
                         className={cn(
                           "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-caption transition-all",
                           isAdded
-                            ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)]/5 text-[var(--primitive-green-800)] cursor-default"
+                            ? "bg-[var(--primitive-green-800)]/5 cursor-default border-[var(--primitive-green-800)] text-[var(--primitive-green-800)]"
                             : "border-[var(--border-default)] bg-white hover:border-[var(--primitive-green-800)] hover:bg-[var(--primitive-blue-200)]"
                         )}
                       >
@@ -1046,19 +1149,21 @@ export default function OnboardingPage() {
               {/* Added goals */}
               {goals.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-caption font-medium text-foreground-default">Your goals ({goals.length}/5):</p>
+                  <p className="text-foreground-default text-caption font-medium">
+                    Your goals ({goals.length}/5):
+                  </p>
                   {goals.map((goal, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-3 rounded-lg bg-[var(--primitive-blue-200)] p-3 animate-in fade-in slide-in-from-top-2 duration-200"
+                      className="animate-in fade-in slide-in-from-top-2 flex items-center gap-3 rounded-lg bg-[var(--primitive-blue-200)] p-3 duration-200"
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-green-800)]/10">
+                      <div className="bg-[var(--primitive-green-800)]/10 flex h-8 w-8 items-center justify-center rounded-lg">
                         <Target size={16} className="text-[var(--primitive-green-800)]" />
                       </div>
-                      <span className="flex-1 text-body text-foreground-default">{goal}</span>
+                      <span className="text-foreground-default flex-1 text-body">{goal}</span>
                       <button
                         onClick={() => removeGoal(index)}
-                        className="flex h-6 w-6 items-center justify-center rounded-full text-foreground-muted hover:bg-[var(--primitive-red-100)] hover:text-[var(--primitive-red-600)] transition-colors"
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-foreground-muted transition-colors hover:bg-[var(--primitive-red-100)] hover:text-[var(--primitive-red-600)]"
                       >
                         ×
                       </button>
@@ -1068,10 +1173,11 @@ export default function OnboardingPage() {
               )}
 
               {goals.length === 0 && (
-                <div className="mt-8 rounded-xl border-2 border-dashed border-[var(--border-default)] bg-[var(--primitive-blue-200)]/50 p-8 text-center">
-                  <Target size={40} className="mx-auto text-[var(--primitive-green-800)]/40" />
+                <div className="bg-[var(--primitive-blue-200)]/50 mt-8 rounded-xl border-2 border-dashed border-[var(--border-default)] p-8 text-center">
+                  <Target size={40} className="text-[var(--primitive-green-800)]/40 mx-auto" />
                   <p className="mt-3 text-body text-foreground-muted">
-                    Add at least one goal to help your mentor understand what you're working towards
+                    Add at least one goal to help your mentor understand what you&apos;re working
+                    towards
                   </p>
                 </div>
               )}
@@ -1081,11 +1187,11 @@ export default function OnboardingPage() {
           {/* Step: Sectors */}
           {step === "sectors" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.sectors.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.sectors.subtitle}
                 </p>
               </div>
@@ -1106,7 +1212,7 @@ export default function OnboardingPage() {
                         isSelected
                           ? "bg-[var(--primitive-blue-200)]"
                           : "bg-white shadow-card hover:shadow-card-hover",
-                        isDisabled && "opacity-50 cursor-not-allowed"
+                        isDisabled && "cursor-not-allowed opacity-50"
                       )}
                     >
                       <div
@@ -1122,13 +1228,19 @@ export default function OnboardingPage() {
                       <span
                         className={cn(
                           "flex-1 font-medium transition-colors",
-                          isSelected ? "text-[var(--primitive-green-800)]" : "text-foreground-default"
+                          isSelected
+                            ? "text-[var(--primitive-green-800)]"
+                            : "text-foreground-default"
                         )}
                       >
                         {sector.label}
                       </span>
                       {isSelected && (
-                        <CheckCircle size={20} weight="fill" className="text-[var(--primitive-green-800)]" />
+                        <CheckCircle
+                          size={20}
+                          weight="fill"
+                          className="text-[var(--primitive-green-800)]"
+                        />
                       )}
                     </button>
                   );
@@ -1139,11 +1251,7 @@ export default function OnboardingPage() {
                 <span className="text-body-sm text-foreground-muted">
                   {selectedSectors.length}/5 sectors selected
                 </span>
-                <Progress
-                  value={(selectedSectors.length / 5) * 100}
-                  size="sm"
-                  className="w-24"
-                />
+                <Progress value={(selectedSectors.length / 5) * 100} size="sm" className="w-24" />
               </div>
             </div>
           )}
@@ -1151,11 +1259,11 @@ export default function OnboardingPage() {
           {/* Step: Availability (Mentors only) */}
           {step === "availability" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.availability.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.availability.subtitle}
                 </p>
               </div>
@@ -1168,7 +1276,7 @@ export default function OnboardingPage() {
                       key={option.value}
                       onClick={() => setAvailability(option.value)}
                       className={cn(
-                        "w-full flex items-center justify-between rounded-card p-5 text-left transition-all duration-200",
+                        "flex w-full items-center justify-between rounded-card p-5 text-left transition-all duration-200",
                         isSelected
                           ? "bg-[var(--primitive-blue-200)]"
                           : "bg-white shadow-card hover:shadow-card-hover"
@@ -1186,7 +1294,7 @@ export default function OnboardingPage() {
                           <Calendar size={24} weight={isSelected ? "fill" : "regular"} />
                         </div>
                         <div>
-                          <h3 className="text-body-strong font-semibold text-foreground-default">
+                          <h3 className="text-foreground-default text-body-strong font-semibold">
                             {option.label}
                           </h3>
                           <p className="text-caption text-foreground-muted">{option.description}</p>
@@ -1200,7 +1308,9 @@ export default function OnboardingPage() {
                             : "border-[var(--border-default)]"
                         )}
                       >
-                        {isSelected && <CheckCircle size={16} weight="fill" className="text-white" />}
+                        {isSelected && (
+                          <CheckCircle size={16} weight="fill" className="text-white" />
+                        )}
                       </div>
                     </button>
                   );
@@ -1208,21 +1318,33 @@ export default function OnboardingPage() {
               </div>
 
               <div className="mt-8 rounded-card bg-[var(--primitive-blue-200)] p-5">
-                <h4 className="text-body-strong font-semibold text-foreground-default flex items-center gap-2">
+                <h4 className="text-foreground-default flex items-center gap-2 text-body-strong font-semibold">
                   <Lightbulb size={18} className="text-[var(--primitive-green-800)]" />
                   What to expect
                 </h4>
                 <ul className="mt-3 space-y-2">
                   <li className="flex items-start gap-2 text-caption text-foreground-muted">
-                    <CheckCircle size={16} className="flex-shrink-0 text-[var(--primitive-green-600)] mt-0.5" weight="fill" />
-                    You'll receive mentee requests based on your availability
+                    <CheckCircle
+                      size={16}
+                      className="mt-0.5 flex-shrink-0 text-[var(--primitive-green-600)]"
+                      weight="fill"
+                    />
+                    You&apos;ll receive mentee requests based on your availability
                   </li>
                   <li className="flex items-start gap-2 text-caption text-foreground-muted">
-                    <CheckCircle size={16} className="flex-shrink-0 text-[var(--primitive-green-600)] mt-0.5" weight="fill" />
+                    <CheckCircle
+                      size={16}
+                      className="mt-0.5 flex-shrink-0 text-[var(--primitive-green-600)]"
+                      weight="fill"
+                    />
                     Accept only the requests that work for your schedule
                   </li>
                   <li className="flex items-start gap-2 text-caption text-foreground-muted">
-                    <CheckCircle size={16} className="flex-shrink-0 text-[var(--primitive-green-600)] mt-0.5" weight="fill" />
+                    <CheckCircle
+                      size={16}
+                      className="mt-0.5 flex-shrink-0 text-[var(--primitive-green-600)]"
+                      weight="fill"
+                    />
                     You can update your availability anytime
                   </li>
                 </ul>
@@ -1233,54 +1355,72 @@ export default function OnboardingPage() {
           {/* Step: Coach Intro (Seekers only) */}
           {step === "coach" && (
             <div>
-              <div className="text-center mb-8">
-                <h1 className="text-display font-semibold text-foreground-default">
+              <div className="mb-8 text-center">
+                <h1 className="text-foreground-default text-display font-semibold">
                   {stepContent.coach.title}
                 </h1>
-                <p className="mt-2 text-body-lg text-foreground-muted">
+                <p className="text-body-lg mt-2 text-foreground-muted">
                   {stepContent.coach.subtitle}
                 </p>
               </div>
 
-              <div className="max-w-2xl mx-auto space-y-6">
+              <div className="mx-auto max-w-2xl space-y-6">
                 {/* Saathe Studio Coach Card */}
-                <Card className="relative overflow-hidden rounded-card bg-gradient-to-br from-[var(--primitive-blue-100)] to-[var(--primitive-blue-50)] border-2 border-[var(--primitive-green-200)]">
-                  <div className="absolute -right-12 -bottom-12 h-48 w-48 rounded-full bg-[var(--primitive-green-100)]/40" />
+                <Card className="relative overflow-hidden rounded-card border-2 border-[var(--primitive-green-200)] bg-gradient-to-br from-[var(--primitive-blue-100)] to-[var(--primitive-blue-50)]">
+                  <div className="bg-[var(--primitive-green-100)]/40 absolute -bottom-12 -right-12 h-48 w-48 rounded-full" />
                   <div className="relative p-8">
                     <div className="flex items-start gap-6">
                       <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-green-800)] text-white">
                         <GraduationCap size={32} weight="fill" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-heading-sm font-bold text-foreground-default">
+                        <h3 className="text-foreground-default text-heading-sm font-bold">
                           Saathe Studio Professional Coaching
                         </h3>
                         <p className="mt-2 text-body text-foreground-muted">
-                          Get one-on-one guidance from experienced climate career coaches. Our certified professionals help you clarify your goals, prepare for interviews, and land your dream climate role.
+                          Get one-on-one guidance from experienced climate career coaches. Our
+                          certified professionals help you clarify your goals, prepare for
+                          interviews, and land your dream climate role.
                         </p>
 
                         <ul className="mt-4 space-y-2">
-                          <li className="flex items-center gap-2 text-caption text-foreground-default">
-                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                          <li className="text-foreground-default flex items-center gap-2 text-caption">
+                            <CheckCircle
+                              size={16}
+                              weight="fill"
+                              className="text-[var(--primitive-green-800)]"
+                            />
                             Personalized career roadmap
                           </li>
-                          <li className="flex items-center gap-2 text-caption text-foreground-default">
-                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                          <li className="text-foreground-default flex items-center gap-2 text-caption">
+                            <CheckCircle
+                              size={16}
+                              weight="fill"
+                              className="text-[var(--primitive-green-800)]"
+                            />
                             Interview preparation & resume review
                           </li>
-                          <li className="flex items-center gap-2 text-caption text-foreground-default">
-                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                          <li className="text-foreground-default flex items-center gap-2 text-caption">
+                            <CheckCircle
+                              size={16}
+                              weight="fill"
+                              className="text-[var(--primitive-green-800)]"
+                            />
                             Flexible scheduling and video sessions
                           </li>
-                          <li className="flex items-center gap-2 text-caption text-foreground-default">
-                            <CheckCircle size={16} weight="fill" className="text-[var(--primitive-green-800)]" />
+                          <li className="text-foreground-default flex items-center gap-2 text-caption">
+                            <CheckCircle
+                              size={16}
+                              weight="fill"
+                              className="text-[var(--primitive-green-800)]"
+                            />
                             First intro session is free
                           </li>
                         </ul>
                       </div>
                     </div>
 
-                    <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                       <Button
                         variant="primary"
                         size="lg"
@@ -1289,11 +1429,7 @@ export default function OnboardingPage() {
                       >
                         Book intro session
                       </Button>
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        onClick={goToNextStep}
-                      >
+                      <Button variant="secondary" size="lg" onClick={goToNextStep}>
                         Skip for now
                       </Button>
                     </div>
@@ -1302,13 +1438,20 @@ export default function OnboardingPage() {
 
                 {/* Testimonial */}
                 <div className="rounded-card bg-[var(--primitive-blue-100)] p-6 text-center">
-                  <div className="flex justify-center gap-1 mb-3">
+                  <div className="mb-3 flex justify-center gap-1">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} size={16} weight="fill" className="text-[var(--primitive-yellow-500)]" />
+                      <Star
+                        key={i}
+                        size={16}
+                        weight="fill"
+                        className="text-[var(--primitive-yellow-500)]"
+                      />
                     ))}
                   </div>
-                  <p className="text-body text-foreground-default italic mb-3">
-                    "My coach helped me pivot from traditional energy to renewables. Her guidance on positioning my experience made all the difference in landing interviews."
+                  <p className="text-foreground-default mb-3 text-body italic">
+                    &quot;My coach helped me pivot from traditional energy to renewables. Her
+                    guidance on positioning my experience made all the difference in landing
+                    interviews.&quot;
                   </p>
                   <p className="text-caption font-medium text-foreground-muted">
                     — Jordan M., Climate Career Coach Client
@@ -1321,15 +1464,15 @@ export default function OnboardingPage() {
           {/* Step: Complete */}
           {step === "complete" && (
             <div className="text-center">
-              <div className="mx-auto mb-6 relative">
-                <div className="h-28 w-28 mx-auto rounded-full bg-[var(--primitive-blue-200)] flex items-center justify-center animate-in zoom-in duration-500">
+              <div className="relative mx-auto mb-6">
+                <div className="animate-in zoom-in mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-[var(--primitive-blue-200)] duration-500">
                   <Sparkle size={56} weight="fill" className="text-[var(--primitive-green-800)]" />
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   {[0, 1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="absolute h-2 w-2 rounded-full bg-[var(--primitive-green-800)] animate-ping"
+                      className="absolute h-2 w-2 animate-ping rounded-full bg-[var(--primitive-green-800)]"
                       style={{
                         top: `${20 + Math.random() * 60}%`,
                         left: `${20 + Math.random() * 60}%`,
@@ -1341,37 +1484,38 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              <h1 className="text-display font-semibold text-foreground-default animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100">
+              <h1 className="text-foreground-default animate-in fade-in slide-in-from-bottom-2 text-display font-semibold delay-100 duration-300">
                 {stepContent.complete.title}
               </h1>
-              <p className="mt-2 text-body-lg text-foreground-muted animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200">
+              <p className="text-body-lg animate-in fade-in slide-in-from-bottom-2 mt-2 text-foreground-muted delay-200 duration-300">
                 {stepContent.complete.subtitle}
               </p>
 
               {/* Summary Card */}
-              <div className="mt-8 text-left rounded-card bg-white shadow-card animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+              <div className="animate-in fade-in slide-in-from-bottom-4 mt-8 rounded-card bg-white text-left shadow-card delay-300 duration-500">
                 <div className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Avatar
-                      size="lg"
-                      name={`${firstName} ${lastName}`}
-                      color="green"
-                    />
+                  <div className="mb-4 flex items-center gap-4">
+                    <Avatar size="lg" name={`${firstName} ${lastName}`} color="green" />
                     <div>
-                      <h3 className="text-body-strong font-semibold text-foreground-default">
+                      <h3 className="text-foreground-default text-body-strong font-semibold">
                         {firstName} {lastName}
                       </h3>
                       <p className="text-caption text-foreground-muted">
-                        {selectedRole === "seeker" ? "Climate Career Explorer" :
-                         selectedRole === "mentor" ? "Light Mentor" : "Career Coach"}
+                        {selectedRole === "seeker"
+                          ? "Climate Career Explorer"
+                          : selectedRole === "mentor"
+                            ? "Light Mentor"
+                            : "Career Coach"}
                       </p>
                     </div>
                   </div>
 
-                  <div className="border-t border-[var(--border-default)] pt-4 space-y-3">
+                  <div className="space-y-3 border-t border-[var(--border-default)] pt-4">
                     {selectedSectors.length > 0 && (
                       <div>
-                        <p className="text-caption text-foreground-muted mb-1.5">Interested sectors</p>
+                        <p className="mb-1.5 text-caption text-foreground-muted">
+                          Interested sectors
+                        </p>
                         <div className="flex flex-wrap gap-1.5">
                           {selectedSectors.map((sector) => (
                             <Badge key={sector} variant="secondary" size="sm">
@@ -1383,8 +1527,8 @@ export default function OnboardingPage() {
                     )}
                     {goals.length > 0 && (
                       <div>
-                        <p className="text-caption text-foreground-muted mb-1.5">Goals</p>
-                        <ul className="text-caption text-foreground-default space-y-1">
+                        <p className="mb-1.5 text-caption text-foreground-muted">Goals</p>
+                        <ul className="text-foreground-default space-y-1 text-caption">
                           {goals.slice(0, 2).map((goal, i) => (
                             <li key={i} className="flex items-center gap-2">
                               <Target size={14} className="text-[var(--primitive-green-800)]" />
@@ -1401,20 +1545,20 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
+              <div className="animate-in fade-in slide-in-from-bottom-4 mt-8 flex flex-col justify-center gap-3 delay-500 duration-500 sm:flex-row">
                 <Button
                   size="lg"
                   variant="primary"
                   rightIcon={<ArrowRight size={18} />}
-                  onClick={() => router.push(selectedRole === "coach" ? "/candid/coach-dashboard" : "/candid/dashboard")}
+                  onClick={() =>
+                    router.push(
+                      selectedRole === "coach" ? "/candid/coach-dashboard" : "/candid/dashboard"
+                    )
+                  }
                 >
                   Go to Dashboard
                 </Button>
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  onClick={() => router.push("/candid/browse")}
-                >
+                <Button size="lg" variant="secondary" onClick={() => router.push("/candid/browse")}>
                   Browse {selectedRole === "seeker" ? "Mentors" : "Mentees"}
                 </Button>
               </div>
@@ -1441,8 +1585,11 @@ export default function OnboardingPage() {
               size="lg"
               rightIcon={<ArrowRight size={18} />}
             >
-              {step === "welcome" ? "Get Started" :
-               currentStepIndex === steps.length - 2 ? "Complete" : "Continue"}
+              {step === "welcome"
+                ? "Get Started"
+                : currentStepIndex === steps.length - 2
+                  ? "Complete"
+                  : "Continue"}
             </Button>
           </div>
         )}

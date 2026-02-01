@@ -97,42 +97,37 @@ const spinnerSizes = {
 } as const;
 
 export interface SwitchProps
-  extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>,
     VariantProps<typeof switchVariants> {
   /** Show loading spinner in thumb */
   loading?: boolean;
 }
 
-const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitive.Root>,
-  SwitchProps
->(({ className, size = "default", error, loading, disabled, ...props }, ref) => {
-  const spinnerSize = spinnerSizes[size || "default"];
+const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.Root>, SwitchProps>(
+  ({ className, size = "default", error, loading, disabled, ...props }, ref) => {
+    const spinnerSize = spinnerSizes[size || "default"];
 
-  return (
-    <SwitchPrimitive.Root
-      className={cn(switchVariants({ size, error }), className)}
-      disabled={disabled || loading}
-      {...props}
-      ref={ref}
-    >
-      <SwitchPrimitive.Thumb
-        className={cn(
-          thumbVariants({ size, error }),
-          "left-0"
-        )}
+    return (
+      <SwitchPrimitive.Root
+        className={cn(switchVariants({ size, error }), className)}
+        disabled={disabled || loading}
+        {...props}
+        ref={ref}
       >
-        {loading && (
-          <CircleNotch
-            size={spinnerSize}
-            weight="bold"
-            className="animate-spin text-[var(--foreground-muted)]"
-          />
-        )}
-      </SwitchPrimitive.Thumb>
-    </SwitchPrimitive.Root>
-  );
-});
+        <SwitchPrimitive.Thumb className={cn(thumbVariants({ size, error }), "left-0")}>
+          {loading && (
+            <CircleNotch
+              size={spinnerSize}
+              weight="bold"
+              className="animate-spin text-[var(--foreground-muted)]"
+            />
+          )}
+        </SwitchPrimitive.Thumb>
+      </SwitchPrimitive.Root>
+    );
+  }
+);
 
 Switch.displayName = SwitchPrimitive.Root.displayName;
 
@@ -147,8 +142,7 @@ Switch.displayName = SwitchPrimitive.Root.displayName;
  * - Label position can be left or right of switch
  * - Supports required indicator
  */
-interface SwitchWithLabelProps
-  extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
+interface SwitchWithLabelProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
   /** Label text displayed next to the switch */
   label: string;
   /** Position of the label relative to the switch */
@@ -191,7 +185,8 @@ const SwitchWithLabel = React.forwardRef<
     },
     ref
   ) => {
-    const switchId = id || React.useId();
+    const generatedId = React.useId();
+    const switchId = id || generatedId;
 
     return (
       <div
@@ -210,26 +205,26 @@ const SwitchWithLabel = React.forwardRef<
           disabled={disabled}
           {...props}
         />
-        <div className="flex flex-col justify-center min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
           <label
             htmlFor={switchId}
             className={cn(
-              "text-body leading-6 cursor-pointer select-none",
+              "cursor-pointer select-none text-body leading-6",
               disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-default)]",
               error && !disabled && "text-[var(--foreground-error)]",
               labelClassName
             )}
           >
             {label}
-            {required && (
-              <span className="text-[var(--foreground-error)] ml-0.5">*</span>
-            )}
+            {required && <span className="ml-0.5 text-[var(--foreground-error)]">*</span>}
           </label>
           {helperText && !errorMessage && (
-            <span className={cn(
-              "text-caption leading-5",
-              disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
-            )}>
+            <span
+              className={cn(
+                "text-caption leading-5",
+                disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
+              )}
+            >
               {helperText}
             </span>
           )}
@@ -276,7 +271,11 @@ const SwitchGroup = ({
   divided = false,
 }: SwitchGroupProps) => {
   return (
-    <div className={cn("space-y-2", className)} role="group" aria-labelledby={label ? "switch-group-label" : undefined}>
+    <div
+      className={cn("space-y-2", className)}
+      role="group"
+      aria-labelledby={label ? "switch-group-label" : undefined}
+    >
       {label && (
         <div className="space-y-1">
           <label

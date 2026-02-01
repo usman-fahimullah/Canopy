@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "newest";
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       status: "PUBLISHED",
     };
 
@@ -56,8 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (minSalary || maxSalary) {
-      where.salaryMin = {};
-      if (minSalary) where.salaryMin.gte = parseInt(minSalary);
+      if (minSalary) where.salaryMin = { gte: parseInt(minSalary) };
       if (maxSalary) where.salaryMax = { lte: parseInt(maxSalary) };
     }
 
@@ -70,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy
-    let orderBy: any = { publishedAt: "desc" };
+    let orderBy: Record<string, string> | Record<string, string>[] = { publishedAt: "desc" };
     switch (sort) {
       case "salary_high":
         orderBy = { salaryMax: "desc" };
@@ -159,9 +158,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Fetch jobs error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch jobs" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch jobs" }, { status: 500 });
   }
 }

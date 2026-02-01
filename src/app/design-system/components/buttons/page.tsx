@@ -41,15 +41,13 @@ const buttonProps = [
     name: "size",
     type: '"sm" | "default" | "lg" | "icon" | "icon-sm"',
     default: '"default"',
-    description:
-      "Size of the button. Use 'icon' or 'icon-sm' for icon-only buttons.",
+    description: "Size of the button. Use 'icon' or 'icon-sm' for icon-only buttons.",
   },
   {
     name: "loading",
     type: "boolean",
     default: "false",
-    description:
-      "Shows a loading spinner and disables the button. Use for async operations.",
+    description: "Shows a loading spinner and disables the button. Use for async operations.",
   },
   {
     name: "disabled",
@@ -99,33 +97,29 @@ export default function ButtonsPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Button
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Buttons are interactive elements that trigger actions when clicked.
-          They are fundamental to user interactions and should communicate their
-          purpose clearly through labels, icons, and visual hierarchy.
+        <h1 className="mb-2 text-heading-lg text-foreground">Button</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Buttons are interactive elements that trigger actions when clicked. They are fundamental
+          to user interactions and should communicate their purpose clearly through labels, icons,
+          and visual hierarchy.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Interactive
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             8 Variants
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             5 Sizes
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Triggering form submissions</li>
               <li>• Initiating user actions (save, delete, create)</li>
               <li>• Navigation to important destinations</li>
@@ -133,11 +127,9 @@ export default function ButtonsPage() {
               <li>• Starting workflows or multi-step processes</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• For simple navigation (use Link instead)</li>
               <li>• When the action is just toggling a state (use Switch)</li>
               <li>• For selecting options (use Checkbox/Radio)</li>
@@ -216,9 +208,9 @@ export default function ButtonsPage() {
                 — Main CTA, highest visual emphasis
               </span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use for the single most important action on a page or in a modal.
-              Background: green-800, hover: green-700.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use for the single most important action on a page or in a modal. Background:
+              green-800, hover: green-700.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="primary">Primary Button</Button>
@@ -232,13 +224,11 @@ export default function ButtonsPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Label className="text-body-strong">Secondary</Label>
-              <span className="text-caption text-foreground-muted">
-                — Supporting actions
-              </span>
+              <span className="text-caption text-foreground-muted">— Supporting actions</span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use alongside primary buttons for secondary actions. Background:
-              blue-200, hover: blue-300.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use alongside primary buttons for secondary actions. Background: blue-200, hover:
+              blue-300.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="secondary">Secondary Button</Button>
@@ -252,13 +242,11 @@ export default function ButtonsPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Label className="text-body-strong">Tertiary</Label>
-              <span className="text-caption text-foreground-muted">
-                — Subtle, low emphasis
-              </span>
+              <span className="text-caption text-foreground-muted">— Subtle, low emphasis</span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use for less important actions or in dense UIs. Background:
-              neutral-200, hover: neutral-300.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use for less important actions or in dense UIs. Background: neutral-200, hover:
+              neutral-300.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="tertiary">Tertiary Button</Button>
@@ -272,15 +260,13 @@ export default function ButtonsPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Label className="text-body-strong">Inverse</Label>
-              <span className="text-caption text-foreground-muted">
-                — For dark backgrounds
-              </span>
+              <span className="text-caption text-foreground-muted">— For dark backgrounds</span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use on dark or colored backgrounds where primary wouldn't contrast
-              well. Background: white, hover: green-100.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use on dark or colored backgrounds where primary wouldn&apos;t contrast well.
+              Background: white, hover: green-100.
             </p>
-            <div className="bg-background-brand p-4 rounded-lg">
+            <div className="rounded-lg bg-background-brand p-4">
               <div className="flex flex-wrap gap-4">
                 <Button variant="inverse">Inverse Button</Button>
                 <Button variant="inverse" rightIcon={<ArrowRight size={16} />}>
@@ -298,9 +284,9 @@ export default function ButtonsPage() {
                 — Dangerous or irreversible actions
               </span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use only for actions that delete data or cannot be undone.
-              Background: red-500, hover: red-600.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use only for actions that delete data or cannot be undone. Background: red-500, hover:
+              red-600.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="destructive">Delete</Button>
@@ -318,9 +304,9 @@ export default function ButtonsPage() {
                 — Minimal presence until hover
               </span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use for tertiary actions in toolbars or when many buttons are
-              present. Transparent background, visible on hover.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use for tertiary actions in toolbars or when many buttons are present. Transparent
+              background, visible on hover.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="ghost">Ghost Button</Button>
@@ -338,9 +324,9 @@ export default function ButtonsPage() {
                 — Border style for neutral actions
               </span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use when you need a button that doesn't compete with primary
-              actions but needs more presence than ghost.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use when you need a button that doesn&apos;t compete with primary actions but needs
+              more presence than ghost.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="outline">Outline Button</Button>
@@ -358,9 +344,8 @@ export default function ButtonsPage() {
                 — Text-only, looks like a link
               </span>
             </div>
-            <p className="text-caption text-foreground-muted mb-3">
-              Use for navigation or when button styling would be too heavy. Uses
-              brand color text.
+            <p className="mb-3 text-caption text-foreground-muted">
+              Use for navigation or when button styling would be too heavy. Uses brand color text.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="link">View all jobs</Button>
@@ -386,25 +371,19 @@ export default function ButtonsPage() {
             <Label>Text Button Sizes</Label>
             <div className="flex flex-wrap items-end gap-4">
               <div className="space-y-2">
-                <span className="text-caption text-foreground-muted block">
-                  Small (32px)
-                </span>
+                <span className="block text-caption text-foreground-muted">Small (32px)</span>
                 <Button variant="primary" size="sm">
                   Small
                 </Button>
               </div>
               <div className="space-y-2">
-                <span className="text-caption text-foreground-muted block">
-                  Default (48px)
-                </span>
+                <span className="block text-caption text-foreground-muted">Default (48px)</span>
                 <Button variant="primary" size="default">
                   Default
                 </Button>
               </div>
               <div className="space-y-2">
-                <span className="text-caption text-foreground-muted block">
-                  Large (56px)
-                </span>
+                <span className="block text-caption text-foreground-muted">Large (56px)</span>
                 <Button variant="primary" size="lg">
                   Large
                 </Button>
@@ -413,32 +392,26 @@ export default function ButtonsPage() {
           </div>
 
           {/* Icon Buttons */}
-          <div className="space-y-3 pt-4 border-t border-border-muted">
+          <div className="space-y-3 border-t border-border-muted pt-4">
             <Label>Icon Button Sizes</Label>
             <div className="flex flex-wrap items-end gap-4">
               <div className="space-y-2">
-                <span className="text-caption text-foreground-muted block">
-                  Icon Small
-                </span>
+                <span className="block text-caption text-foreground-muted">Icon Small</span>
                 <Button variant="primary" size="icon-sm">
                   <Plus size={16} />
                 </Button>
               </div>
               <div className="space-y-2">
-                <span className="text-caption text-foreground-muted block">
-                  Icon Default
-                </span>
+                <span className="block text-caption text-foreground-muted">Icon Default</span>
                 <Button variant="primary" size="icon">
                   <Plus size={20} />
                 </Button>
               </div>
             </div>
-            <p className="text-caption text-foreground-muted mt-2">
+            <p className="mt-2 text-caption text-foreground-muted">
               Icon buttons should always include an{" "}
-              <code className="bg-background-muted px-1 rounded">
-                aria-label
-              </code>{" "}
-              for accessibility.
+              <code className="rounded bg-background-muted px-1">aria-label</code> for
+              accessibility.
             </p>
           </div>
         </div>
@@ -456,21 +429,14 @@ export default function ButtonsPage() {
           <div className="space-y-2">
             <Label>Default</Label>
             <Button variant="primary">Default</Button>
-            <p className="text-caption text-foreground-muted">
-              Ready for interaction
-            </p>
+            <p className="text-caption text-foreground-muted">Ready for interaction</p>
           </div>
           <div className="space-y-2">
             <Label>Hover</Label>
-            <Button
-              variant="primary"
-              className="bg-[var(--button-primary-background-hover)]"
-            >
+            <Button variant="primary" className="bg-[var(--button-primary-background-hover)]">
               Hover
             </Button>
-            <p className="text-caption text-foreground-muted">
-              Cursor over button
-            </p>
+            <p className="text-caption text-foreground-muted">Cursor over button</p>
           </div>
           <div className="space-y-2">
             <Label>Focus</Label>
@@ -480,41 +446,33 @@ export default function ButtonsPage() {
             >
               Focus
             </Button>
-            <p className="text-caption text-foreground-muted">
-              Keyboard focused state
-            </p>
+            <p className="text-caption text-foreground-muted">Keyboard focused state</p>
           </div>
           <div className="space-y-2">
             <Label>Active / Pressed</Label>
             <Button variant="primary" className="scale-[0.98]">
               Pressed
             </Button>
-            <p className="text-caption text-foreground-muted">
-              During click/tap
-            </p>
+            <p className="text-caption text-foreground-muted">During click/tap</p>
           </div>
           <div className="space-y-2">
             <Label>Loading</Label>
             <Button variant="primary" loading>
               Loading
             </Button>
-            <p className="text-caption text-foreground-muted">
-              Async operation in progress
-            </p>
+            <p className="text-caption text-foreground-muted">Async operation in progress</p>
           </div>
           <div className="space-y-2">
             <Label>Disabled</Label>
             <Button variant="primary" disabled>
               Disabled
             </Button>
-            <p className="text-caption text-foreground-muted">
-              Cannot be interacted with
-            </p>
+            <p className="text-caption text-foreground-muted">Cannot be interacted with</p>
           </div>
         </div>
 
         {/* All variants disabled */}
-        <div className="mt-8 pt-6 border-t border-border-muted">
+        <div className="mt-8 border-t border-border-muted pt-6">
           <Label className="mb-4 block">All Variants Disabled</Label>
           <div className="flex flex-wrap gap-4">
             <Button variant="primary" disabled>
@@ -551,8 +509,7 @@ export default function ButtonsPage() {
           <div className="space-y-3">
             <Label>Left Icon</Label>
             <p className="text-caption text-foreground-muted">
-              Use left icons to indicate the type of action (add, download,
-              etc.)
+              Use left icons to indicate the type of action (add, download, etc.)
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="primary" leftIcon={<Plus size={16} />}>
@@ -596,21 +553,13 @@ export default function ButtonsPage() {
                 <Button variant="primary" size="icon" aria-label="Add new item">
                   <Plus size={20} />
                 </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  aria-label="Download file"
-                >
+                <Button variant="secondary" size="icon" aria-label="Download file">
                   <Download size={20} />
                 </Button>
                 <Button variant="tertiary" size="icon" aria-label="Edit">
                   <PencilSimple size={20} />
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  aria-label="Delete item"
-                >
+                <Button variant="destructive" size="icon" aria-label="Delete item">
                   <Trash size={20} />
                 </Button>
               </div>
@@ -642,11 +591,7 @@ const handleClick = async () => {
         >
           <div className="space-y-4">
             <div className="flex flex-wrap gap-4">
-              <Button
-                variant="primary"
-                loading={isLoading}
-                onClick={handleAsyncAction}
-              >
+              <Button variant="primary" loading={isLoading} onClick={handleAsyncAction}>
                 {isLoading ? "Saving..." : "Save Changes"}
               </Button>
               <Button variant="secondary" loading>
@@ -657,7 +602,7 @@ const handleClick = async () => {
               </Button>
             </div>
             <p className="text-caption text-foreground-muted">
-              Click "Save Changes" to see the loading state in action
+              Click &quot;Save Changes&quot; to see the loading state in action
             </p>
           </div>
         </CodePreview>
@@ -674,9 +619,7 @@ const handleClick = async () => {
       {/* 10. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use primary variant for the single most important action on a page",
@@ -763,9 +706,7 @@ const handleClick = async () => {
       {/* 13. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Job Posting Actions"
@@ -773,7 +714,7 @@ const handleClick = async () => {
         >
           <Card>
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <div>
                   <h3 className="text-body-strong text-foreground">
                     Senior Sustainability Analyst
@@ -802,38 +743,26 @@ const handleClick = async () => {
         >
           <Card>
             <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-background-brand-subtle rounded-full flex items-center justify-center">
-                    <span className="text-foreground-brand font-semibold">
-                      JD
-                    </span>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background-brand-subtle">
+                    <span className="font-semibold text-foreground-brand">JD</span>
                   </div>
                   <div>
-                    <h3 className="text-body-strong text-foreground">
-                      Jane Doe
-                    </h3>
+                    <h3 className="text-body-strong text-foreground">Jane Doe</h3>
                     <p className="text-caption text-foreground-muted">
                       Applied for Solar Installation Lead
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    leftIcon={<Trash size={14} />}
-                  >
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button variant="destructive" size="sm" leftIcon={<Trash size={14} />}>
                     Reject
                   </Button>
                   <Button variant="tertiary" size="sm">
                     Schedule Later
                   </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    leftIcon={<Check size={14} />}
-                  >
+                  <Button variant="primary" size="sm" leftIcon={<Check size={14} />}>
                     Move to Interview
                   </Button>
                 </div>
@@ -842,20 +771,15 @@ const handleClick = async () => {
           </Card>
         </RealWorldExample>
 
-        <RealWorldExample
-          title="Empty State CTA"
-          description="Primary action in an empty state"
-        >
-          <div className="text-center py-12 px-6">
-            <div className="w-16 h-16 bg-background-brand-subtle rounded-full flex items-center justify-center mx-auto mb-4">
+        <RealWorldExample title="Empty State CTA" description="Primary action in an empty state">
+          <div className="px-6 py-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background-brand-subtle">
               <Briefcase size={32} className="text-foreground-brand" />
             </div>
-            <h3 className="text-heading-sm text-foreground mb-2">
-              No jobs posted yet
-            </h3>
-            <p className="text-body text-foreground-muted mb-6 max-w-md mx-auto">
-              Create your first job posting to start attracting climate-focused
-              talent to your organization.
+            <h3 className="mb-2 text-heading-sm text-foreground">No jobs posted yet</h3>
+            <p className="mx-auto mb-6 max-w-md text-body text-foreground-muted">
+              Create your first job posting to start attracting climate-focused talent to your
+              organization.
             </p>
             <Button variant="primary" size="lg" leftIcon={<Plus size={20} />}>
               Post Your First Job
@@ -867,23 +791,20 @@ const handleClick = async () => {
           title="Form Submission"
           description="Primary and secondary actions in a form footer"
         >
-          <div className="bg-surface border border-border rounded-xl p-6">
+          <div className="rounded-xl border border-border bg-surface p-6">
             <div className="mb-6">
               <Label className="mb-2 block">Job Title</Label>
               <input
                 type="text"
-                className="w-full px-4 py-2 border border-border-muted rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-500)]"
+                className="w-full rounded-lg border border-border-muted px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-500)]"
                 placeholder="e.g., Renewable Energy Engineer"
               />
             </div>
-            <div className="flex items-center justify-between pt-4 border-t border-border-muted">
+            <div className="flex items-center justify-between border-t border-border-muted pt-4">
               <Button variant="ghost">Save as Draft</Button>
               <div className="flex items-center gap-3">
                 <Button variant="tertiary">Cancel</Button>
-                <Button
-                  variant="primary"
-                  rightIcon={<ArrowRight size={16} />}
-                >
+                <Button variant="primary" rightIcon={<ArrowRight size={16} />}>
                   Continue to Details
                 </Button>
               </div>

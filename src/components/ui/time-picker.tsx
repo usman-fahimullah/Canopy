@@ -240,9 +240,7 @@ const parseTimeSmart = (
   const hasPM = /pm$|p\.m\.$|p$/.test(input);
   const period = hasAM ? "am" : hasPM ? "pm" : null;
 
-  const cleaned = input
-    .replace(/\s*(am|pm|a\.m\.|p\.m\.|a|p)\s*$/i, "")
-    .replace(/[^0-9:]/g, "");
+  const cleaned = input.replace(/\s*(am|pm|a\.m\.|p\.m\.|a|p)\s*$/i, "").replace(/[^0-9:]/g, "");
 
   let hours: number;
   let minutes: number = 0;
@@ -498,11 +496,7 @@ const SpinnerColumn = React.memo(
     };
 
     return (
-      <div
-        className="flex flex-col items-center gap-2"
-        role="group"
-        aria-label={label}
-      >
+      <div className="flex flex-col items-center gap-2" role="group" aria-label={label}>
         <Button
           variant="ghost"
           size="icon"
@@ -512,7 +506,7 @@ const SpinnerColumn = React.memo(
           className={cn(
             "h-11 w-11 rounded-lg",
             "text-[var(--foreground-muted)]",
-            "hover:text-[var(--foreground-brand)] hover:bg-[var(--background-brand-subtle)]",
+            "hover:bg-[var(--background-brand-subtle)] hover:text-[var(--foreground-brand)]",
             "active:scale-90 active:bg-[var(--background-brand-muted)]",
             "transition-all duration-200 ease-out"
           )}
@@ -541,7 +535,7 @@ const SpinnerColumn = React.memo(
             }
           }}
           className={cn(
-            "w-16 h-16 flex items-center justify-center",
+            "flex h-16 w-16 items-center justify-center",
             "text-2xl font-semibold tabular-nums",
             "rounded-lg border-2",
             "bg-[var(--background-default)]",
@@ -549,11 +543,11 @@ const SpinnerColumn = React.memo(
             "shadow-sm",
             "transition-all duration-200 ease-out",
             "hover:border-[var(--border-brand)] hover:shadow-md",
-            "focus:outline-none focus:border-[var(--border-brand)]",
-            "focus:ring-4 focus:ring-[var(--primitive-green-500)]/20",
+            "focus:border-[var(--border-brand)] focus:outline-none",
+            "focus:ring-[var(--primitive-green-500)]/20 focus:ring-4",
             enableDrag && "cursor-ns-resize select-none",
-            isDragging && "scale-105 shadow-lg border-[var(--border-brand)]",
-            disabled && "opacity-50 cursor-not-allowed"
+            isDragging && "scale-105 border-[var(--border-brand)] shadow-lg",
+            disabled && "cursor-not-allowed opacity-50"
           )}
         >
           {value}
@@ -567,7 +561,7 @@ const SpinnerColumn = React.memo(
           className={cn(
             "h-11 w-11 rounded-lg",
             "text-[var(--foreground-muted)]",
-            "hover:text-[var(--foreground-brand)] hover:bg-[var(--background-brand-subtle)]",
+            "hover:bg-[var(--background-brand-subtle)] hover:text-[var(--foreground-brand)]",
             "active:scale-90 active:bg-[var(--background-brand-muted)]",
             "transition-all duration-200 ease-out"
           )}
@@ -587,7 +581,7 @@ const AnimatedColon = React.memo(
   ({ animate = false, idle = true }: { animate?: boolean; idle?: boolean }) => (
     <span
       className={cn(
-        "text-2xl font-semibold text-[var(--foreground-muted)] select-none",
+        "select-none text-2xl font-semibold text-[var(--foreground-muted)]",
         "transition-opacity duration-500",
         animate && "animate-[blink_1s_ease-in-out_infinite]",
         idle && !animate && "animate-[pulse-subtle_2s_ease-in-out_infinite]"
@@ -606,15 +600,15 @@ AnimatedColon.displayName = "AnimatedColon";
 const TimePickerSkeleton = ({ className }: { className?: string }) => (
   <div
     className={cn(
-      "flex items-center gap-3 p-4 rounded-lg border border-[var(--border-muted)]",
-      "bg-[var(--background-default)] overflow-hidden",
+      "flex items-center gap-3 rounded-lg border border-[var(--border-muted)] p-4",
+      "overflow-hidden bg-[var(--background-default)]",
       className
     )}
   >
-    <div className="relative h-6 w-24 bg-[var(--background-muted)] rounded overflow-hidden">
+    <div className="relative h-6 w-24 overflow-hidden rounded bg-[var(--background-muted)]">
       <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
     </div>
-    <div className="relative h-5 w-5 bg-[var(--background-muted)] rounded overflow-hidden">
+    <div className="relative h-5 w-5 overflow-hidden rounded bg-[var(--background-muted)]">
       <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite_0.2s] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
     </div>
   </div>
@@ -627,9 +621,9 @@ const TimePeriodHeader = React.memo(({ period }: { period: TimePeriod }) => {
   const config = timePeriodConfig[period];
   const Icon = config.icon;
   return (
-    <div className="flex items-center gap-2 px-3 py-2 sticky top-0 bg-[var(--background-default)] border-b border-[var(--border-muted)] z-10">
+    <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-[var(--border-muted)] bg-[var(--background-default)] px-3 py-2">
       <Icon className="h-4 w-4 text-[var(--foreground-muted)]" weight="fill" />
-      <span className="text-xs font-medium text-[var(--foreground-muted)] uppercase tracking-wide">
+      <span className="text-xs font-medium uppercase tracking-wide text-[var(--foreground-muted)]">
         {config.label}
       </span>
     </div>
@@ -659,23 +653,19 @@ const ScrollContainer = React.forwardRef<
       {/* Top gradient mask */}
       <div
         className={cn(
-          "absolute top-0 left-0 right-0 h-8 z-10 pointer-events-none",
+          "pointer-events-none absolute left-0 right-0 top-0 z-10 h-8",
           "bg-gradient-to-b from-[var(--background-default)] to-transparent",
           "transition-opacity duration-200",
           showTopMask ? "opacity-100" : "opacity-0"
         )}
       />
-      <div
-        ref={ref}
-        className={cn("overflow-auto", className)}
-        onScroll={handleScroll}
-      >
+      <div ref={ref} className={cn("overflow-auto", className)} onScroll={handleScroll}>
         {children}
       </div>
       {/* Bottom gradient mask */}
       <div
         className={cn(
-          "absolute bottom-0 left-0 right-0 h-8 z-10 pointer-events-none",
+          "pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-8",
           "bg-gradient-to-t from-[var(--background-default)] to-transparent",
           "transition-opacity duration-200",
           showBottomMask ? "opacity-100" : "opacity-0"
@@ -721,9 +711,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
     ref
   ) => {
     const [open, setOpen] = React.useState(false);
-    const [internalValue, setInternalValue] = React.useState<Date | undefined>(
-      defaultValue
-    );
+    const [internalValue, setInternalValue] = React.useState<Date | undefined>(defaultValue);
     const [highlightedIndex, setHighlightedIndex] = React.useState(-1);
     const [justSelected, setJustSelected] = React.useState<string | null>(null);
     const [isClosing, setIsClosing] = React.useState(false);
@@ -758,21 +746,15 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
       return groups;
     }, [timeSlots, showTimePeriods]);
 
-    const displayValue = value
-      ? formatTime(value, is12Hour, showSeconds, timezone)
-      : "";
-    const timezoneAbbr =
-      timezone && showTimezone ? getTimezoneAbbr(timezone) : null;
-    const relativeTime =
-      value && showRelativeTime ? getRelativeTimeString(value) : null;
+    const displayValue = value ? formatTime(value, is12Hour, showSeconds, timezone) : "";
+    const timezoneAbbr = timezone && showTimezone ? getTimezoneAbbr(timezone) : null;
+    const relativeTime = value && showRelativeTime ? getRelativeTimeString(value) : null;
 
     const currentValueStr = value
       ? `${value.getHours().toString().padStart(2, "0")}:${value.getMinutes().toString().padStart(2, "0")}`
       : "";
 
-    const currentIndex = timeSlots.findIndex(
-      (slot) => slot.value === currentValueStr
-    );
+    const currentIndex = timeSlots.findIndex((slot) => slot.value === currentValueStr);
 
     const handleClose = React.useCallback(() => {
       setIsClosing(true);
@@ -827,11 +809,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent) => {
         if (!open) {
-          if (
-            e.key === "Enter" ||
-            e.key === " " ||
-            e.key === "ArrowDown"
-          ) {
+          if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
             e.preventDefault();
             setOpen(true);
             setHighlightedIndex(currentIndex >= 0 ? currentIndex : 0);
@@ -842,22 +820,15 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
         switch (e.key) {
           case "ArrowDown":
             e.preventDefault();
-            setHighlightedIndex((prev) =>
-              prev < timeSlots.length - 1 ? prev + 1 : 0
-            );
+            setHighlightedIndex((prev) => (prev < timeSlots.length - 1 ? prev + 1 : 0));
             break;
           case "ArrowUp":
             e.preventDefault();
-            setHighlightedIndex((prev) =>
-              prev > 0 ? prev - 1 : timeSlots.length - 1
-            );
+            setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : timeSlots.length - 1));
             break;
           case "Enter":
             e.preventDefault();
-            if (
-              highlightedIndex >= 0 &&
-              highlightedIndex < timeSlots.length
-            ) {
+            if (highlightedIndex >= 0 && highlightedIndex < timeSlots.length) {
               handleSelect(timeSlots[highlightedIndex]);
             }
             break;
@@ -905,10 +876,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
 
     React.useEffect(() => {
       if (open && listRef.current) {
-        const scrollIndex =
-          currentIndex >= 0
-            ? currentIndex
-            : findClosestTimeSlotIndex(timeSlots);
+        const scrollIndex = currentIndex >= 0 ? currentIndex : findClosestTimeSlotIndex(timeSlots);
         setHighlightedIndex(scrollIndex);
 
         setTimeout(() => {
@@ -921,9 +889,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
       }
     }, [open, currentIndex, timeSlots]);
 
-    const errorId = errorMessage
-      ? `${ariaDescribedBy || "time-picker"}-error`
-      : undefined;
+    const errorId = errorMessage ? `${ariaDescribedBy || "time-picker"}-error` : undefined;
 
     if (loading) {
       return <TimePickerSkeleton className={className} />;
@@ -933,64 +899,55 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
       if (showTimePeriods && groupedSlots) {
         return (
           <>
-            {(Object.entries(groupedSlots) as [TimePeriod, TimeSlot[]][]).map(
-              ([period, slots]) => {
-                if (slots.length === 0) return null;
-                return (
-                  <React.Fragment key={period}>
-                    <TimePeriodHeader period={period} />
-                    {slots.map((slot) => {
-                      const globalIndex = timeSlots.findIndex(
-                        (s) => s.value === slot.value
-                      );
-                      const isSelected = slot.value === currentValueStr;
-                      const isHighlighted = globalIndex === highlightedIndex;
-                      const isAnimating = slot.value === justSelected;
-                      return (
-                        <button
-                          key={slot.value}
-                          type="button"
-                          role="option"
-                          aria-selected={isSelected}
-                          onClick={() => handleSelect(slot)}
-                          onMouseEnter={() => setHighlightedIndex(globalIndex)}
+            {(Object.entries(groupedSlots) as [TimePeriod, TimeSlot[]][]).map(([period, slots]) => {
+              if (slots.length === 0) return null;
+              return (
+                <React.Fragment key={period}>
+                  <TimePeriodHeader period={period} />
+                  {slots.map((slot) => {
+                    const globalIndex = timeSlots.findIndex((s) => s.value === slot.value);
+                    const isSelected = slot.value === currentValueStr;
+                    const isHighlighted = globalIndex === highlightedIndex;
+                    const isAnimating = slot.value === justSelected;
+                    return (
+                      <button
+                        key={slot.value}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => handleSelect(slot)}
+                        onMouseEnter={() => setHighlightedIndex(globalIndex)}
+                        className={cn(
+                          "flex w-full items-center justify-between gap-3",
+                          "mx-1 rounded-lg px-4 py-3",
+                          "text-base font-medium",
+                          "transition-all duration-200 ease-out",
+                          "focus:outline-none",
+                          isHighlighted && !isSelected && "bg-[var(--background-subtle)]",
+                          isSelected &&
+                            "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
+                          isAnimating &&
+                            "scale-[0.96] bg-[var(--background-brand-muted)] shadow-inner"
+                        )}
+                      >
+                        <span>{slot.label}</span>
+                        <div
                           className={cn(
-                            "flex w-full items-center justify-between gap-3",
-                            "px-4 py-3 mx-1 rounded-lg",
-                            "text-base font-medium",
+                            "flex h-5 w-5 items-center justify-center",
                             "transition-all duration-200 ease-out",
-                            "focus:outline-none",
-                            isHighlighted &&
-                              !isSelected &&
-                              "bg-[var(--background-subtle)]",
-                            isSelected &&
-                              "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
-                            isAnimating &&
-                              "bg-[var(--background-brand-muted)] scale-[0.96] shadow-inner"
+                            isSelected || isAnimating
+                              ? "scale-100 opacity-100"
+                              : "scale-50 opacity-0"
                           )}
                         >
-                          <span>{slot.label}</span>
-                          <div
-                            className={cn(
-                              "h-5 w-5 flex items-center justify-center",
-                              "transition-all duration-200 ease-out",
-                              isSelected || isAnimating
-                                ? "opacity-100 scale-100"
-                                : "opacity-0 scale-50"
-                            )}
-                          >
-                            <Check
-                              className="h-5 w-5 text-[var(--foreground-brand)]"
-                              weight="bold"
-                            />
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </React.Fragment>
-                );
-              }
-            )}
+                          <Check className="h-5 w-5 text-[var(--foreground-brand)]" weight="bold" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
           </>
         );
       }
@@ -1009,31 +966,24 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
             onMouseEnter={() => setHighlightedIndex(index)}
             className={cn(
               "flex w-full items-center justify-between gap-3",
-              "px-4 py-3 mx-1 rounded-lg",
+              "mx-1 rounded-lg px-4 py-3",
               "text-base font-medium",
               "transition-all duration-200 ease-out",
               "focus:outline-none",
               isHighlighted && !isSelected && "bg-[var(--background-subtle)]",
-              isSelected &&
-                "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
-              isAnimating &&
-                "bg-[var(--background-brand-muted)] scale-[0.96] shadow-inner"
+              isSelected && "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
+              isAnimating && "scale-[0.96] bg-[var(--background-brand-muted)] shadow-inner"
             )}
           >
             <span>{slot.label}</span>
             <div
               className={cn(
-                "h-5 w-5 flex items-center justify-center",
+                "flex h-5 w-5 items-center justify-center",
                 "transition-all duration-200 ease-out",
-                isSelected || isAnimating
-                  ? "opacity-100 scale-100"
-                  : "opacity-0 scale-50"
+                isSelected || isAnimating ? "scale-100 opacity-100" : "scale-50 opacity-0"
               )}
             >
-              <Check
-                className="h-5 w-5 text-[var(--foreground-brand)]"
-                weight="bold"
-              />
+              <Check className="h-5 w-5 text-[var(--foreground-brand)]" weight="bold" />
             </div>
           </button>
         );
@@ -1044,25 +994,23 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
       <div className="relative" dir={dir}>
         <Popover open={open && !isClosing} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
+            {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props -- aria-invalid is valid on form-associated triggers */}
             <button
               ref={ref}
               type="button"
               disabled={disabled}
               onKeyDown={handleKeyDown}
               aria-label={ariaLabel || "Select time"}
-              aria-describedby={
-                [ariaDescribedBy, errorId].filter(Boolean).join(" ") ||
-                undefined
-              }
+              aria-describedby={[ariaDescribedBy, errorId].filter(Boolean).join(" ") || undefined}
               aria-invalid={error || undefined}
               aria-expanded={open}
               aria-haspopup="listbox"
               className={cn(
                 "group flex w-full items-center justify-between gap-3",
                 "rounded-lg border p-4",
-                "bg-[var(--input-background)] border-[var(--input-border)]",
+                "border-[var(--input-border)] bg-[var(--input-background)]",
                 "hover:border-[var(--input-border-hover)]",
-                "focus:outline-none focus:border-[var(--input-border-focus)]",
+                "focus:border-[var(--input-border-focus)] focus:outline-none",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 "transition-all duration-200 ease-out",
                 error && "border-[var(--input-border-error)]",
@@ -1085,26 +1033,19 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                   )}
                 </span>
                 {relativeTime && displayValue && (
-                  <span className="text-xs text-[var(--foreground-muted)]">
-                    {relativeTime}
-                  </span>
+                  <span className="text-xs text-[var(--foreground-muted)]">{relativeTime}</span>
                 )}
               </div>
-              <div
-                className={cn(
-                  "flex items-center gap-2",
-                  dir === "rtl" && "flex-row-reverse"
-                )}
-              >
+              <div className={cn("flex items-center gap-2", dir === "rtl" && "flex-row-reverse")}>
                 {clearable && value && !disabled && (
                   <button
                     type="button"
                     onClick={handleClear}
                     className={cn(
-                      "relative h-8 w-8 flex items-center justify-center rounded-lg",
+                      "relative flex h-8 w-8 items-center justify-center rounded-lg",
                       "text-[var(--foreground-muted)]",
-                      "hover:text-[var(--foreground-default)] hover:bg-[var(--background-subtle)]",
-                      "active:text-[var(--foreground-error)] active:bg-[var(--background-error)]",
+                      "hover:bg-[var(--background-subtle)] hover:text-[var(--foreground-default)]",
+                      "active:bg-[var(--background-error)] active:text-[var(--foreground-error)]",
                       "transition-all duration-200 ease-out",
                       "before:absolute before:inset-[-4px] before:content-['']"
                     )}
@@ -1120,7 +1061,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                       ? "text-[var(--foreground-error)]"
                       : success
                         ? "text-[var(--foreground-success)]"
-                        : "text-[var(--foreground-muted)] group-hover:text-[var(--foreground-brand)] group-hover:scale-110"
+                        : "text-[var(--foreground-muted)] group-hover:scale-110 group-hover:text-[var(--foreground-brand)]"
                   )}
                 />
               </div>
@@ -1128,7 +1069,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           </PopoverTrigger>
           <PopoverContent
             className={cn(
-              "w-72 p-0 overflow-hidden",
+              "w-72 overflow-hidden p-0",
               "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_8px_32px_-8px_rgba(0,0,0,0.1)]",
               "border border-[var(--border-muted)]",
               isClosing && "animate-out fade-out-0 zoom-out-95 duration-150"
@@ -1139,8 +1080,8 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           >
             {/* Smart Suggestions */}
             {showSmartSuggestions && smartSuggestions.length > 0 && (
-              <div className="p-2 border-b border-[var(--border-muted)] bg-[var(--background-subtle)]">
-                <div className="text-xs font-medium text-[var(--foreground-muted)] mb-2 px-2">
+              <div className="border-b border-[var(--border-muted)] bg-[var(--background-subtle)] p-2">
+                <div className="mb-2 px-2 text-xs font-medium text-[var(--foreground-muted)]">
                   Quick select
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -1150,8 +1091,8 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                       type="button"
                       onClick={() => handleSelect({ value: "", date: suggestion.date })}
                       className={cn(
-                        "px-3 py-1.5 rounded-full text-xs font-medium",
-                        "bg-[var(--background-default)] border border-[var(--border-muted)]",
+                        "rounded-full px-3 py-1.5 text-xs font-medium",
+                        "border border-[var(--border-muted)] bg-[var(--background-default)]",
                         "hover:border-[var(--border-brand)] hover:text-[var(--foreground-brand)]",
                         "transition-all duration-200"
                       )}
@@ -1165,12 +1106,12 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
 
             {/* Now Button */}
             {showNowButton && (
-              <div className="p-2 border-b border-[var(--border-muted)]">
+              <div className="border-b border-[var(--border-muted)] p-2">
                 <button
                   type="button"
                   onClick={handleNow}
                   className={cn(
-                    "flex w-full items-center gap-3 px-4 py-3 rounded-lg",
+                    "flex w-full items-center gap-3 rounded-lg px-4 py-3",
                     "text-base font-medium",
                     "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
                     "hover:bg-[var(--background-brand-muted)] hover:shadow-sm",
@@ -1180,7 +1121,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                 >
                   <Lightning className="h-5 w-5" weight="fill" />
                   <span>Now</span>
-                  <kbd className="ml-auto px-2 py-0.5 rounded bg-[var(--background-default)] text-xs font-mono text-[var(--foreground-muted)]">
+                  <kbd className="ml-auto rounded bg-[var(--background-default)] px-2 py-0.5 font-mono text-xs text-[var(--foreground-muted)]">
                     N
                   </kbd>
                 </button>
@@ -1194,7 +1135,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
 
             {/* Timezone indicator */}
             {timezone && (
-              <div className="px-4 py-3 border-t border-[var(--border-muted)] text-sm text-[var(--foreground-muted)] flex items-center gap-2 bg-[var(--background-subtle)]">
+              <div className="flex items-center gap-2 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] px-4 py-3 text-sm text-[var(--foreground-muted)]">
                 <GlobeHemisphereWest className="h-4 w-4" />
                 <span>{getTimezoneAbbr(timezone)}</span>
               </div>
@@ -1202,11 +1143,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
           </PopoverContent>
         </Popover>
         {errorMessage && (
-          <p
-            id={errorId}
-            className="mt-2 text-sm text-[var(--foreground-error)]"
-            role="alert"
-          >
+          <p id={errorId} className="mt-2 text-sm text-[var(--foreground-error)]" role="alert">
             {errorMessage}
           </p>
         )}
@@ -1250,9 +1187,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, TimeInputProps>(
         ? "HH:mm:ss"
         : "HH:mm";
 
-    const [internalValue, setInternalValue] = React.useState<Date | undefined>(
-      defaultValue
-    );
+    const [internalValue, setInternalValue] = React.useState<Date | undefined>(defaultValue);
     const isControlled = controlledValue !== undefined;
     const value = isControlled ? controlledValue : internalValue;
 
@@ -1266,9 +1201,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, TimeInputProps>(
 
     React.useEffect(() => {
       if (!isFocused) {
-        setInputValue(
-          value ? formatTime(value, is12Hour, showSeconds, timezone) : ""
-        );
+        setInputValue(value ? formatTime(value, is12Hour, showSeconds, timezone) : "");
         setHasValidationError(false);
       }
     }, [value, is12Hour, showSeconds, isFocused, timezone]);
@@ -1315,9 +1248,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, TimeInputProps>(
         onChange?.(undefined);
         setHasValidationError(false);
       } else {
-        setInputValue(
-          value ? formatTime(value, is12Hour, showSeconds, timezone) : ""
-        );
+        setInputValue(value ? formatTime(value, is12Hour, showSeconds, timezone) : "");
         setHasValidationError(false);
       }
     };
@@ -1332,8 +1263,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, TimeInputProps>(
         const currentDate = value || new Date();
         const delta = e.key === "ArrowUp" ? 1 : -1;
 
-        const cursorPos =
-          (e.target as HTMLInputElement).selectionStart || 0;
+        const cursorPos = (e.target as HTMLInputElement).selectionStart || 0;
         const colonPos = inputValue.indexOf(":");
 
         let newDate = new Date(currentDate);
@@ -1352,9 +1282,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, TimeInputProps>(
       }
     };
 
-    const errorId = errorMessage
-      ? `${ariaDescribedBy || "time-input"}-error`
-      : undefined;
+    const errorId = errorMessage ? `${ariaDescribedBy || "time-input"}-error` : undefined;
 
     if (loading) {
       return <TimePickerSkeleton className={className} />;
@@ -1373,9 +1301,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, TimeInputProps>(
           placeholder={placeholder || defaultPlaceholder}
           disabled={disabled}
           aria-label={ariaLabel || "Time input"}
-          aria-describedby={
-            [ariaDescribedBy, errorId].filter(Boolean).join(" ") || undefined
-          }
+          aria-describedby={[ariaDescribedBy, errorId].filter(Boolean).join(" ") || undefined}
           aria-invalid={error || undefined}
           error={error}
           success={success}
@@ -1393,20 +1319,13 @@ const TimeInput = React.forwardRef<HTMLInputElement, TimeInputProps>(
           }
         />
         {errorMessage && (
-          <p
-            id={errorId}
-            className="mt-2 text-sm text-[var(--foreground-error)]"
-            role="alert"
-          >
+          <p id={errorId} className="mt-2 text-sm text-[var(--foreground-error)]" role="alert">
             {errorMessage}
           </p>
         )}
         {hasValidationError && !errorMessage && (
-          <p
-            className="mt-2 text-sm text-[var(--foreground-error)]"
-            role="alert"
-          >
-            Invalid time format. Try "9:30 AM" or "14:30"
+          <p className="mt-2 text-sm text-[var(--foreground-error)]" role="alert">
+            Invalid time format. Try &quot;9:30 AM&quot; or &quot;14:30&quot;
           </p>
         )}
       </div>
@@ -1445,7 +1364,7 @@ const TimeSpinner = React.forwardRef<HTMLDivElement, TimeSpinnerProps>(
     const value = isControlled ? controlledValue : internalValue;
 
     const is12Hour = timeFormat === "12h";
-    const currentDate = value || new Date();
+    const currentDate = React.useMemo(() => value || new Date(), [value]);
 
     const hours = currentDate.getHours();
     const minutes = currentDate.getMinutes();
@@ -1595,7 +1514,7 @@ const TimeSpinner = React.forwardRef<HTMLDivElement, TimeSpinnerProps>(
             aria-label={`Switch to ${isPM ? "AM" : "PM"}`}
             aria-pressed={isPM}
             className={cn(
-              "ml-2 min-w-[60px] h-16 text-lg font-semibold rounded-lg",
+              "ml-2 h-16 min-w-[60px] rounded-lg text-lg font-semibold",
               "transition-all duration-200 ease-out",
               "hover:scale-105 hover:shadow-md",
               "active:scale-95"
@@ -1641,20 +1560,14 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
     ref
   ) => {
     const [open, setOpen] = React.useState(false);
-    const [internalValue, setInternalValue] = React.useState<Date | undefined>(
-      defaultValue
-    );
+    const [internalValue, setInternalValue] = React.useState<Date | undefined>(defaultValue);
     const [step, setStep] = React.useState<"date" | "time">("date");
 
     const isControlled = controlledValue !== undefined;
     const value = isControlled ? controlledValue : internalValue;
 
-    const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
-      value
-    );
-    const [justSelectedTime, setJustSelectedTime] = React.useState<
-      string | null
-    >(null);
+    const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(value);
+    const [justSelectedTime, setJustSelectedTime] = React.useState<string | null>(null);
     const is12Hour = timeFormat === "12h";
     const timeListRef = React.useRef<HTMLDivElement>(null);
 
@@ -1672,12 +1585,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
         if (!date) return;
         const newDate = new Date(date);
         if (selectedDate) {
-          newDate.setHours(
-            selectedDate.getHours(),
-            selectedDate.getMinutes(),
-            0,
-            0
-          );
+          newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes(), 0, 0);
         } else {
           newDate.setHours(DEFAULT_WORK_START_HOUR, 0, 0, 0);
         }
@@ -1686,8 +1594,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
 
         setTimeout(() => {
           if (timeListRef.current) {
-            const firstTimeButton =
-              timeListRef.current.querySelector("button");
+            const firstTimeButton = timeListRef.current.querySelector("button");
             firstTimeButton?.focus();
             timeListRef.current.scrollIntoView({
               behavior: "smooth",
@@ -1765,9 +1672,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
             ? findClosestTimeSlotIndex(timeSlots, selectedDate)
             : findClosestTimeSlotIndex(timeSlots);
 
-          const items = timeListRef.current?.querySelectorAll(
-            'button[role="option"]'
-          );
+          const items = timeListRef.current?.querySelectorAll('button[role="option"]');
           const targetEl = items?.[scrollIndex] as HTMLElement;
           if (targetEl) {
             targetEl.scrollIntoView({ block: "center" });
@@ -1790,6 +1695,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
       <div className="relative" dir={dir}>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
+            {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props -- aria-invalid is valid on form-associated triggers */}
             <button
               ref={ref}
               type="button"
@@ -1802,9 +1708,9 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
               className={cn(
                 "group flex w-full items-center justify-between gap-3",
                 "rounded-lg border p-4",
-                "bg-[var(--input-background)] border-[var(--input-border)]",
+                "border-[var(--input-border)] bg-[var(--input-background)]",
                 "hover:border-[var(--input-border-hover)]",
-                "focus:outline-none focus:border-[var(--input-border-focus)]",
+                "focus:border-[var(--input-border-focus)] focus:outline-none",
                 "disabled:cursor-not-allowed disabled:opacity-50",
                 "transition-all duration-200 ease-out",
                 error && "border-[var(--input-border-error)]",
@@ -1828,7 +1734,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
                       ? "text-[var(--foreground-error)]"
                       : success
                         ? "text-[var(--foreground-success)]"
-                        : "text-[var(--foreground-muted)] group-hover:text-[var(--foreground-brand)] group-hover:scale-110"
+                        : "text-[var(--foreground-muted)] group-hover:scale-110 group-hover:text-[var(--foreground-brand)]"
                   )}
                 />
               </div>
@@ -1836,7 +1742,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
           </PopoverTrigger>
           <PopoverContent
             className={cn(
-              "w-auto p-0 overflow-hidden",
+              "w-auto overflow-hidden p-0",
               "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_8px_32px_-8px_rgba(0,0,0,0.1)]"
             )}
             align="start"
@@ -1844,51 +1750,49 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
             aria-label="Date and time picker"
           >
             {/* Step indicator */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border-muted)] bg-[var(--background-subtle)]">
+            <div className="flex items-center gap-2 border-b border-[var(--border-muted)] bg-[var(--background-subtle)] px-4 py-3">
               <button
                 type="button"
                 onClick={() => setStep("date")}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium",
+                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium",
                   "transition-all duration-200",
                   step === "date"
                     ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]"
                     : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
                 )}
               >
-                <span className="w-5 h-5 flex items-center justify-center rounded-full bg-current/20 text-xs">
+                <span className="bg-current/20 flex h-5 w-5 items-center justify-center rounded-full text-xs">
                   1
                 </span>
                 Date
               </button>
-              <div className="w-8 h-px bg-[var(--border-muted)]" />
+              <div className="h-px w-8 bg-[var(--border-muted)]" />
               <button
                 type="button"
                 onClick={() => selectedDate && setStep("time")}
                 disabled={!selectedDate}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium",
+                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium",
                   "transition-all duration-200",
                   step === "time"
                     ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]"
                     : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]",
-                  !selectedDate && "opacity-50 cursor-not-allowed"
+                  !selectedDate && "cursor-not-allowed opacity-50"
                 )}
               >
-                <span className="w-5 h-5 flex items-center justify-center rounded-full bg-current/20 text-xs">
+                <span className="bg-current/20 flex h-5 w-5 items-center justify-center rounded-full text-xs">
                   2
                 </span>
                 Time
               </button>
             </div>
 
-            <div
-              className={cn("flex", dir === "rtl" && "flex-row-reverse")}
-            >
+            <div className={cn("flex", dir === "rtl" && "flex-row-reverse")}>
               {/* Date Picker - Calendar */}
               <div
                 className={cn(
-                  "p-3 border-r border-[var(--border-muted)]",
+                  "border-r border-[var(--border-muted)] p-3",
                   step !== "date" && "opacity-50"
                 )}
               >
@@ -1905,29 +1809,21 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
                 />
               </div>
               {/* Time Picker */}
-              <div
-                className={cn(
-                  "p-3 min-w-[180px]",
-                  step !== "time" && "opacity-50"
-                )}
-              >
-                <div className="text-sm font-medium mb-3 text-[var(--foreground-muted)] flex items-center justify-between">
+              <div className={cn("min-w-[180px] p-3", step !== "time" && "opacity-50")}>
+                <div className="mb-3 flex items-center justify-between text-sm font-medium text-[var(--foreground-muted)]">
                   <span>Time</span>
                   {showNowButton && (
                     <button
                       type="button"
                       onClick={handleNow}
-                      className="text-xs text-[var(--foreground-brand)] hover:underline flex items-center gap-1"
+                      className="flex items-center gap-1 text-xs text-[var(--foreground-brand)] hover:underline"
                     >
                       <Lightning className="h-3.5 w-3.5" weight="fill" />
                       Now
                     </button>
                   )}
                 </div>
-                <ScrollContainer
-                  ref={timeListRef}
-                  className="max-h-[280px]"
-                >
+                <ScrollContainer ref={timeListRef} className="max-h-[280px]">
                   <div role="listbox" aria-label="Time options">
                     {timeSlots.map((slot) => {
                       const isSelected = currentTimeStr === slot.value;
@@ -1940,23 +1836,22 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
                           aria-selected={isSelected}
                           onClick={() => handleTimeSelect(slot)}
                           className={cn(
-                            "flex w-full items-center justify-between px-4 py-2.5 rounded-lg text-sm",
+                            "flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-sm",
                             "transition-all duration-200",
                             "hover:bg-[var(--background-subtle)]",
                             isSelected &&
                               "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
-                            isAnimating &&
-                              "bg-[var(--background-brand-muted)] scale-[0.96]"
+                            isAnimating && "scale-[0.96] bg-[var(--background-brand-muted)]"
                           )}
                         >
                           <span>{slot.label}</span>
                           <div
                             className={cn(
-                              "h-5 w-5 flex items-center justify-center",
+                              "flex h-5 w-5 items-center justify-center",
                               "transition-all duration-200",
                               isSelected || isAnimating
-                                ? "opacity-100 scale-100"
-                                : "opacity-0 scale-50"
+                                ? "scale-100 opacity-100"
+                                : "scale-50 opacity-0"
                             )}
                           >
                             <Check
@@ -1971,7 +1866,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
                 </ScrollContainer>
               </div>
             </div>
-            <div className="flex justify-between items-center gap-2 p-3 border-t border-[var(--border-muted)] bg-[var(--background-subtle)]">
+            <div className="flex items-center justify-between gap-2 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] p-3">
               <Button
                 variant="ghost"
                 size="sm"
@@ -1981,18 +1876,10 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
                 Clear
               </Button>
               <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancel}
-                >
+                <Button variant="ghost" size="sm" onClick={handleCancel}>
                   Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleConfirm}
-                  disabled={!selectedDate}
-                >
+                <Button size="sm" onClick={handleConfirm} disabled={!selectedDate}>
                   Confirm
                 </Button>
               </div>
@@ -2000,11 +1887,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
           </PopoverContent>
         </Popover>
         {errorMessage && (
-          <p
-            id={errorId}
-            className="mt-2 text-sm text-[var(--foreground-error)]"
-            role="alert"
-          >
+          <p id={errorId} className="mt-2 text-sm text-[var(--foreground-error)]" role="alert">
             {errorMessage}
           </p>
         )}
@@ -2038,9 +1921,7 @@ const DurationInput = React.forwardRef<HTMLInputElement, DurationInputProps>(
     ref
   ) => {
     const [open, setOpen] = React.useState(false);
-    const [internalValue, setInternalValue] = React.useState<
-      number | undefined
-    >(defaultValue);
+    const [internalValue, setInternalValue] = React.useState<number | undefined>(defaultValue);
     const [inputValue, setInputValue] = React.useState(
       defaultValue ? formatDuration(defaultValue) : ""
     );
@@ -2158,7 +2039,7 @@ const DurationInput = React.forwardRef<HTMLInputElement, DurationInputProps>(
             )}
             align="start"
           >
-            <div className="text-xs font-medium text-[var(--foreground-muted)] mb-3">
+            <div className="mb-3 text-xs font-medium text-[var(--foreground-muted)]">
               Quick select
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -2168,13 +2049,13 @@ const DurationInput = React.forwardRef<HTMLInputElement, DurationInputProps>(
                   type="button"
                   onClick={() => handlePresetClick(minutes)}
                   className={cn(
-                    "px-4 py-3 rounded-lg text-sm font-medium",
+                    "rounded-lg px-4 py-3 text-sm font-medium",
                     "border transition-all duration-200",
                     "hover:border-[var(--border-brand)] hover:shadow-sm",
                     "active:scale-[0.98]",
                     value === minutes
-                      ? "bg-[var(--background-brand-subtle)] border-[var(--border-brand)] text-[var(--foreground-brand)]"
-                      : "bg-[var(--background-default)] border-[var(--border-muted)]",
+                      ? "border-[var(--border-brand)] bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]"
+                      : "border-[var(--border-muted)] bg-[var(--background-default)]",
                     popular && value !== minutes && "border-[var(--border-default)]"
                   )}
                 >
@@ -2185,19 +2066,12 @@ const DurationInput = React.forwardRef<HTMLInputElement, DurationInputProps>(
           </PopoverContent>
         </Popover>
         {errorMessage && (
-          <p
-            id={errorId}
-            className="mt-2 text-sm text-[var(--foreground-error)]"
-            role="alert"
-          >
+          <p id={errorId} className="mt-2 text-sm text-[var(--foreground-error)]" role="alert">
             {errorMessage}
           </p>
         )}
         {hasValidationError && !errorMessage && (
-          <p
-            className="mt-2 text-sm text-[var(--foreground-error)]"
-            role="alert"
-          >
+          <p className="mt-2 text-sm text-[var(--foreground-error)]" role="alert">
             {`Duration must be between ${formatDuration(min)} and ${formatDuration(max)}`}
           </p>
         )}

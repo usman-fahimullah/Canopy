@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ShellLayout } from "@/components/shell/shell-layout";
-import { employerNavConfig } from "@/lib/shell/nav-config";
 import { authorizeShell } from "@/lib/shell/authorize-shell";
 
 export const metadata: Metadata = {
@@ -16,9 +15,5 @@ export default async function EmployerLayout({
 }>) {
   await authorizeShell("employer");
 
-  return (
-    <ShellLayout shell="employer" config={employerNavConfig}>
-      {children}
-    </ShellLayout>
-  );
+  return <ShellLayout shell="employer">{children}</ShellLayout>;
 }

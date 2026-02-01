@@ -16,12 +16,27 @@ import { PageNavigation } from "@/components/design-system/PageNavigation";
 import { Leaf } from "@/components/Icons";
 
 const emptyStateProps = [
-  { name: "preset", type: '"inbox" | "search" | "file" | "users" | "jobs" | "error"', default: "undefined", description: "Preset icon type" },
+  {
+    name: "preset",
+    type: '"inbox" | "search" | "file" | "users" | "jobs" | "error"',
+    default: "undefined",
+    description: "Preset icon type",
+  },
   { name: "icon", type: "ReactNode", default: "undefined", description: "Custom icon" },
   { name: "title", type: "string", required: true, description: "Title text" },
   { name: "description", type: "string", default: "undefined", description: "Description text" },
-  { name: "action", type: "{ label: string; onClick: () => void; icon?: ReactNode }", default: "undefined", description: "Primary action button" },
-  { name: "secondaryAction", type: "{ label: string; onClick: () => void }", default: "undefined", description: "Secondary action button" },
+  {
+    name: "action",
+    type: "{ label: string; onClick: () => void; icon?: ReactNode }",
+    default: "undefined",
+    description: "Primary action button",
+  },
+  {
+    name: "secondaryAction",
+    type: "{ label: string; onClick: () => void }",
+    default: "undefined",
+    description: "Secondary action button",
+  },
   { name: "size", type: '"sm" | "md" | "lg"', default: '"md"', description: "Component size" },
 ];
 
@@ -30,12 +45,12 @@ export default function EmptyStatePage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Empty State
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          EmptyState displays a helpful message when no content is available.
-          It guides users on what to do next with optional actions.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          EmptyState displays a helpful message when no content is available. It guides users on
+          what to do next with optional actions.
         </p>
       </div>
 
@@ -62,6 +77,7 @@ export default function EmptyStatePage() {
             description="Add your first candidate to get started."
             action={{
               label: "Add Candidate",
+              // eslint-disable-next-line no-console
               onClick: () => console.log("Add candidate"),
             }}
           />
@@ -75,59 +91,31 @@ export default function EmptyStatePage() {
         description="Built-in icon presets for common scenarios"
       >
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="p-4 border border-border rounded-lg">
-            <EmptyState
-              preset="inbox"
-              title="Inbox"
-              size="sm"
-            />
+          <div className="rounded-lg border border-border p-4">
+            <EmptyState preset="inbox" title="Inbox" size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <EmptyState
-              preset="search"
-              title="Search"
-              size="sm"
-            />
+          <div className="rounded-lg border border-border p-4">
+            <EmptyState preset="search" title="Search" size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <EmptyState
-              preset="file"
-              title="File"
-              size="sm"
-            />
+          <div className="rounded-lg border border-border p-4">
+            <EmptyState preset="file" title="File" size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <EmptyState
-              preset="users"
-              title="Users"
-              size="sm"
-            />
+          <div className="rounded-lg border border-border p-4">
+            <EmptyState preset="users" title="Users" size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <EmptyState
-              preset="jobs"
-              title="Jobs"
-              size="sm"
-            />
+          <div className="rounded-lg border border-border p-4">
+            <EmptyState preset="jobs" title="Jobs" size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <EmptyState
-              preset="error"
-              title="Error"
-              size="sm"
-            />
+          <div className="rounded-lg border border-border p-4">
+            <EmptyState preset="error" title="Error" size="sm" />
           </div>
         </div>
       </ComponentCard>
 
       {/* Custom Icon */}
-      <ComponentCard
-        id="custom-icon"
-        title="Custom Icon"
-        description="Use a custom icon"
-      >
+      <ComponentCard id="custom-icon" title="Custom Icon" description="Use a custom icon">
         <EmptyState
-          icon={<Leaf className="w-8 h-8 text-primary-600" />}
+          icon={<Leaf className="h-8 w-8 text-primary-600" />}
           title="No green jobs found"
           description="Try adjusting your filters or search terms."
         />
@@ -145,23 +133,21 @@ export default function EmptyStatePage() {
           description="Create your first job posting to start receiving applications."
           action={{
             label: "Create Job",
+            // eslint-disable-next-line no-console
             onClick: () => console.log("Create job"),
           }}
           secondaryAction={{
             label: "Import Jobs",
+            // eslint-disable-next-line no-console
             onClick: () => console.log("Import"),
           }}
         />
       </ComponentCard>
 
       {/* Sizes */}
-      <ComponentCard
-        id="sizes"
-        title="Sizes"
-        description="Available empty state sizes"
-      >
+      <ComponentCard id="sizes" title="Sizes" description="Available empty state sizes">
         <div className="space-y-8">
-          <div className="p-4 border border-border rounded-lg">
+          <div className="rounded-lg border border-border p-4">
             <EmptyState
               preset="inbox"
               title="Small Empty State"
@@ -169,7 +155,7 @@ export default function EmptyStatePage() {
               size="sm"
             />
           </div>
-          <div className="p-4 border border-border rounded-lg">
+          <div className="rounded-lg border border-border p-4">
             <EmptyState
               preset="inbox"
               title="Medium Empty State"
@@ -177,7 +163,7 @@ export default function EmptyStatePage() {
               size="md"
             />
           </div>
-          <div className="p-4 border border-border rounded-lg">
+          <div className="rounded-lg border border-border p-4">
             <EmptyState
               preset="inbox"
               title="Large Empty State"
@@ -195,28 +181,29 @@ export default function EmptyStatePage() {
         description="Ready-to-use empty state components"
       >
         <div className="space-y-8">
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-caption-strong text-foreground-muted mb-4">EmptyStateNoCandidates</p>
+          <div className="rounded-lg border border-border p-4">
+            <p className="mb-4 text-caption-strong text-foreground-muted">EmptyStateNoCandidates</p>
             <EmptyStateNoCandidates size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-caption-strong text-foreground-muted mb-4">EmptyStateNoJobs</p>
+          <div className="rounded-lg border border-border p-4">
+            <p className="mb-4 text-caption-strong text-foreground-muted">EmptyStateNoJobs</p>
             <EmptyStateNoJobs size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-caption-strong text-foreground-muted mb-4">EmptyStateNoResults</p>
+          <div className="rounded-lg border border-border p-4">
+            <p className="mb-4 text-caption-strong text-foreground-muted">EmptyStateNoResults</p>
             <EmptyStateNoResults size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-caption-strong text-foreground-muted mb-4">EmptyStateNoActivity</p>
+          <div className="rounded-lg border border-border p-4">
+            <p className="mb-4 text-caption-strong text-foreground-muted">EmptyStateNoActivity</p>
             <EmptyStateNoActivity size="sm" />
           </div>
-          <div className="p-4 border border-border rounded-lg">
-            <p className="text-caption-strong text-foreground-muted mb-4">EmptyStateError</p>
+          <div className="rounded-lg border border-border p-4">
+            <p className="mb-4 text-caption-strong text-foreground-muted">EmptyStateError</p>
             <EmptyStateError
               size="sm"
               action={{
                 label: "Try Again",
+                // eslint-disable-next-line no-console
                 onClick: () => console.log("Retry"),
               }}
             />

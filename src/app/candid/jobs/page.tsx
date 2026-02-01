@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { sanitizeHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { SearchInput } from "@/components/ui/search-input";
@@ -123,10 +125,10 @@ function formatDate(dateStr: string | null): string {
 // Skeleton for Job List Item
 function JobListItemSkeleton() {
   return (
-    <div className="px-4 py-3 border-l-2 border-l-transparent">
+    <div className="border-l-2 border-l-transparent px-4 py-3">
       <div className="flex items-start gap-3">
-        <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" animation="shimmer" />
-        <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-10 w-10 flex-shrink-0 rounded-lg" animation="shimmer" />
+        <div className="min-w-0 flex-1 space-y-2">
           <Skeleton className="h-4 w-3/4" animation="shimmer" />
           <Skeleton className="h-3 w-1/2" animation="shimmer" />
           <div className="flex items-center gap-3">
@@ -142,13 +144,13 @@ function JobListItemSkeleton() {
 // Skeleton for Job Detail Panel
 function JobDetailPanelSkeleton() {
   return (
-    <div className="h-full flex flex-col animate-fade-in">
+    <div className="flex h-full animate-fade-in flex-col">
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-6 py-8">
+        <div className="mx-auto max-w-2xl px-6 py-8">
           <div className="mb-8">
-            <Skeleton className="h-12 w-12 rounded-lg mb-4" animation="shimmer" />
-            <Skeleton className="h-7 w-64 mb-2" animation="shimmer" />
-            <Skeleton className="h-5 w-48 mb-4" animation="shimmer" />
+            <Skeleton className="mb-4 h-12 w-12 rounded-lg" animation="shimmer" />
+            <Skeleton className="mb-2 h-7 w-64" animation="shimmer" />
+            <Skeleton className="mb-4 h-5 w-48" animation="shimmer" />
             <div className="flex items-center gap-4">
               <Skeleton className="h-4 w-20" animation="shimmer" />
               <Skeleton className="h-4 w-24" animation="shimmer" />
@@ -156,11 +158,11 @@ function JobDetailPanelSkeleton() {
             </div>
           </div>
           <section className="mb-8">
-            <Skeleton className="h-4 w-24 mb-3" animation="shimmer" />
+            <Skeleton className="mb-3 h-4 w-24" animation="shimmer" />
             <SkeletonText lines={6} />
           </section>
           <section className="mb-8">
-            <Skeleton className="h-4 w-28 mb-3" animation="shimmer" />
+            <Skeleton className="mb-3 h-4 w-28" animation="shimmer" />
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Skeleton key={i} className="h-6 w-20 rounded-full" animation="shimmer" />
@@ -169,8 +171,8 @@ function JobDetailPanelSkeleton() {
           </section>
         </div>
       </div>
-      <div className="border-t border-border-default bg-background-default px-6 py-4">
-        <div className="max-w-2xl mx-auto flex gap-3">
+      <div className="border-border-default bg-background-default border-t px-6 py-4">
+        <div className="mx-auto flex max-w-2xl gap-3">
           <Skeleton className="h-12 flex-1 rounded-lg" animation="shimmer" />
           <Skeleton className="h-12 w-32 rounded-lg" animation="shimmer" />
         </div>
@@ -189,24 +191,27 @@ function JobListItem({
   isSelected: boolean;
   onClick: () => void;
 }) {
-  const LocationIcon = locationTypeOptions.find(o => o.value === job.locationType)?.icon || MapPin;
+  const LocationIcon =
+    locationTypeOptions.find((o) => o.value === job.locationType)?.icon || MapPin;
 
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-4 py-3 transition-all duration-150 border-l-2 ${
+      className={`w-full border-l-2 px-4 py-3 text-left transition-all duration-150 ${
         isSelected
-          ? "bg-background-brand-subtle border-l-foreground-brand"
+          ? "border-l-foreground-brand bg-background-brand-subtle"
           : "border-l-transparent hover:bg-background-subtle"
       }`}
     >
       <div className="flex items-start gap-3">
         {/* Company Logo */}
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background-subtle flex-shrink-0 overflow-hidden">
+        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-background-subtle">
           {job.organization.logo ? (
-            <img
+            <Image
               src={job.organization.logo}
               alt={job.organization.name}
+              width={40}
+              height={40}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -214,11 +219,13 @@ function JobListItem({
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className={`text-body-sm font-medium truncate ${
-              isSelected ? "text-foreground-brand" : "text-foreground-default"
-            }`}>
+            <p
+              className={`truncate text-body-sm font-medium ${
+                isSelected ? "text-foreground-brand" : "text-foreground-default"
+              }`}
+            >
               {job.title}
             </p>
             {job.matchScore && (
@@ -227,13 +234,15 @@ function JobListItem({
               </Chip>
             )}
           </div>
-          <p className="text-caption text-foreground-muted truncate mt-0.5">
+          <p className="mt-0.5 truncate text-caption text-foreground-muted">
             {job.organization.name}
           </p>
-          <div className="flex items-center gap-2 mt-1 text-caption text-foreground-subtle flex-wrap">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-caption text-foreground-subtle">
             <span className="flex items-center gap-0.5">
               <LocationIcon size={12} />
-              {job.locationType === "REMOTE" ? "Remote" : job.location?.split(",")[0] || job.locationType}
+              {job.locationType === "REMOTE"
+                ? "Remote"
+                : job.location?.split(",")[0] || job.locationType}
             </span>
             {job.salaryMin && (
               <span className="flex items-center gap-0.5">
@@ -261,12 +270,13 @@ function JobDetailPanel({
   onBack: () => void;
 }) {
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency);
-  const LocationIcon = locationTypeOptions.find(o => o.value === job.locationType)?.icon || MapPin;
+  const LocationIcon =
+    locationTypeOptions.find((o) => o.value === job.locationType)?.icon || MapPin;
 
   return (
-    <div className="h-full flex flex-col animate-fade-in" key={job.id}>
+    <div className="flex h-full animate-fade-in flex-col" key={job.id}>
       {/* Mobile Back Button */}
-      <div className="lg:hidden px-4 py-3 border-b border-border-default">
+      <div className="border-border-default border-b px-4 py-3 lg:hidden">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft size={18} className="mr-2" />
           Back to jobs
@@ -275,15 +285,17 @@ function JobDetailPanel({
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-6 py-8">
+        <div className="mx-auto max-w-2xl px-6 py-8">
           {/* Job Header */}
           <div className="mb-8">
             {/* Company Logo */}
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-background-subtle mb-4 overflow-hidden">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-background-subtle">
               {job.organization.logo ? (
-                <img
+                <Image
                   src={job.organization.logo}
                   alt={job.organization.name}
+                  width={56}
+                  height={56}
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -291,39 +303,43 @@ function JobDetailPanel({
               )}
             </div>
 
-            <h1 className="text-heading-md font-semibold text-foreground-default">
-              {job.title}
-            </h1>
-            <p className="text-body text-foreground-muted mt-1">
-              {job.organization.name}
-            </p>
+            <h1 className="text-foreground-default text-heading-md font-semibold">{job.title}</h1>
+            <p className="mt-1 text-body text-foreground-muted">{job.organization.name}</p>
 
             {/* Diversity Badges */}
-            {(job.organization.isBipocOwned || job.organization.isWomenOwned || job.organization.isVeteranOwned) && (
-              <div className="flex flex-wrap gap-2 mt-3">
+            {(job.organization.isBipocOwned ||
+              job.organization.isWomenOwned ||
+              job.organization.isVeteranOwned) && (
+              <div className="mt-3 flex flex-wrap gap-2">
                 {job.organization.isBipocOwned && (
-                  <Chip variant="neutral" size="sm">BIPOC-owned</Chip>
+                  <Chip variant="neutral" size="sm">
+                    BIPOC-owned
+                  </Chip>
                 )}
                 {job.organization.isWomenOwned && (
-                  <Chip variant="neutral" size="sm">Women-owned</Chip>
+                  <Chip variant="neutral" size="sm">
+                    Women-owned
+                  </Chip>
                 )}
                 {job.organization.isVeteranOwned && (
-                  <Chip variant="neutral" size="sm">Veteran-owned</Chip>
+                  <Chip variant="neutral" size="sm">
+                    Veteran-owned
+                  </Chip>
                 )}
               </div>
             )}
 
             {/* Match Score */}
             {job.matchScore && (
-              <div className="mt-4 p-3 rounded-lg bg-background-brand-subtle border border-border-brand">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="mt-4 rounded-lg border border-border-brand bg-background-brand-subtle p-3">
+                <div className="mb-1 flex items-center gap-2">
                   <Lightning size={16} weight="fill" className="text-foreground-brand" />
                   <span className="text-body-sm font-semibold text-foreground-brand">
                     {job.matchScore}% Match
                   </span>
                 </div>
                 {job.matchReasons && job.matchReasons.length > 0 && (
-                  <ul className="text-caption text-foreground-muted space-y-0.5">
+                  <ul className="space-y-0.5 text-caption text-foreground-muted">
                     {job.matchReasons.map((reason, i) => (
                       <li key={i}>• {reason}</li>
                     ))}
@@ -333,7 +349,7 @@ function JobDetailPanel({
             )}
 
             {/* Meta Info */}
-            <div className="flex flex-wrap items-center gap-4 mt-4 text-caption text-foreground-muted">
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-caption text-foreground-muted">
               <span className="flex items-center gap-1">
                 <LocationIcon size={14} />
                 {job.locationType === "REMOTE" ? "Remote" : job.location || job.locationType}
@@ -346,7 +362,8 @@ function JobDetailPanel({
               )}
               <span className="flex items-center gap-1">
                 <Briefcase size={14} />
-                {employmentTypeOptions.find(o => o.value === job.employmentType)?.label || job.employmentType}
+                {employmentTypeOptions.find((o) => o.value === job.employmentType)?.label ||
+                  job.employmentType}
               </span>
               {job.publishedAt && (
                 <span className="flex items-center gap-1">
@@ -359,8 +376,8 @@ function JobDetailPanel({
 
           {/* Impact Description */}
           {job.impactDescription && (
-            <section className="mb-8 p-4 rounded-lg bg-[var(--primitive-green-100)] border border-[var(--primitive-green-200)]">
-              <div className="flex items-center gap-2 mb-2">
+            <section className="mb-8 rounded-lg border border-[var(--primitive-green-200)] bg-[var(--primitive-green-100)] p-4">
+              <div className="mb-2 flex items-center gap-2">
                 <Leaf size={16} weight="fill" className="text-[var(--primitive-green-700)]" />
                 <h2 className="text-body-sm font-semibold text-[var(--primitive-green-800)]">
                   Climate Impact
@@ -374,19 +391,19 @@ function JobDetailPanel({
 
           {/* Job Description */}
           <section className="mb-8">
-            <h2 className="text-body-sm font-semibold text-foreground-muted uppercase tracking-wide mb-3">
+            <h2 className="mb-3 text-body-sm font-semibold uppercase tracking-wide text-foreground-muted">
               About this role
             </h2>
             <div
-              className="text-body text-foreground-default leading-relaxed prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: job.description }}
+              className="text-foreground-default prose prose-sm max-w-none text-body leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(job.description) }}
             />
           </section>
 
           {/* Green Skills */}
           {job.greenSkills.length > 0 && (
             <section className="mb-8">
-              <h2 className="text-body-sm font-semibold text-foreground-muted uppercase tracking-wide mb-3">
+              <h2 className="mb-3 text-body-sm font-semibold uppercase tracking-wide text-foreground-muted">
                 Green Skills
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -402,7 +419,7 @@ function JobDetailPanel({
           {/* Pathway */}
           {job.pathway && (
             <section className="mb-8">
-              <h2 className="text-body-sm font-semibold text-foreground-muted uppercase tracking-wide mb-3">
+              <h2 className="mb-3 text-body-sm font-semibold uppercase tracking-wide text-foreground-muted">
                 Career Pathway
               </h2>
               <Chip variant="neutral" size="md">
@@ -414,14 +431,9 @@ function JobDetailPanel({
       </div>
 
       {/* Sticky Action Bar */}
-      <div className="border-t border-border-default bg-background-default px-6 py-4">
-        <div className="max-w-2xl mx-auto flex gap-3">
-          <Button
-            variant="primary"
-            size="lg"
-            className="flex-1"
-            asChild
-          >
+      <div className="border-border-default bg-background-default border-t px-6 py-4">
+        <div className="mx-auto flex max-w-2xl gap-3">
+          <Button variant="primary" size="lg" className="flex-1" asChild>
             <Link href={`/apply/${job.id}`}>
               <ArrowSquareOut size={18} className="mr-2" />
               Apply Now
@@ -433,11 +445,7 @@ function JobDetailPanel({
             onClick={() => onSaveJob(job.id)}
             loading={saving}
           >
-            <BookmarkSimple
-              size={18}
-              weight={job.isSaved ? "fill" : "regular"}
-              className="mr-2"
-            />
+            <BookmarkSimple size={18} weight={job.isSaved ? "fill" : "regular"} className="mr-2" />
             {job.isSaved ? "Saved" : "Save"}
           </Button>
         </div>
@@ -449,14 +457,12 @@ function JobDetailPanel({
 // Empty Selection State
 function EmptySelectionState() {
   return (
-    <div className="h-full flex items-center justify-center p-8 animate-fade-in">
-      <div className="text-center max-w-sm">
+    <div className="flex h-full animate-fade-in items-center justify-center p-8">
+      <div className="max-w-sm text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background-muted">
           <Briefcase size={28} className="text-foreground-muted" />
         </div>
-        <h2 className="text-heading-sm font-semibold text-foreground-default mb-2">
-          Select a job
-        </h2>
+        <h2 className="text-foreground-default mb-2 text-heading-sm font-semibold">Select a job</h2>
         <p className="text-body text-foreground-muted">
           Choose a job from the list to view details and apply.
         </p>
@@ -467,11 +473,13 @@ function EmptySelectionState() {
 
 export default function JobsBrowsePage() {
   return (
-    <Suspense fallback={
-      <div className="h-screen flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
       <JobsContent />
     </Suspense>
   );
@@ -555,7 +563,7 @@ function JobsContent() {
     setSaving(jobId);
     setError(null);
     try {
-      const job = jobs.find(j => j.id === jobId);
+      const job = jobs.find((j) => j.id === jobId);
       const isSaved = job?.isSaved;
 
       const res = await fetch(`/api/jobs/${jobId}/save`, {
@@ -563,9 +571,7 @@ function JobsContent() {
       });
 
       if (res.ok) {
-        setJobs(prev => prev.map(j =>
-          j.id === jobId ? { ...j, isSaved: !isSaved } : j
-        ));
+        setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, isSaved: !isSaved } : j)));
       } else {
         const data = await res.json();
         setError(data.error || "Failed to save job");
@@ -584,20 +590,18 @@ function JobsContent() {
   const activeFilters = [locationType, experienceLevel].filter(Boolean).length;
 
   return (
-    <div className="h-[calc(100vh-5rem)] lg:h-screen flex">
+    <div className="flex h-[calc(100vh-5rem)] lg:h-screen">
       {/* Left Panel - Job List */}
       <div
-        className={`w-full lg:w-[360px] xl:w-[400px] flex-shrink-0 bg-background-default border-r border-border-default flex flex-col ${
+        className={`bg-background-default border-border-default flex w-full flex-shrink-0 flex-col border-r lg:w-[360px] xl:w-[400px] ${
           selectedJobId ? "hidden lg:flex" : "flex"
         }`}
       >
         {/* Header */}
-        <div className="px-4 py-5 border-b border-border-default">
-          <div className="flex items-center gap-2 mb-1">
+        <div className="border-border-default border-b px-4 py-5">
+          <div className="mb-1 flex items-center gap-2">
             <Briefcase size={22} weight="duotone" className="text-foreground-brand" />
-            <h1 className="text-heading-sm font-semibold text-foreground-default">
-              Climate Jobs
-            </h1>
+            <h1 className="text-foreground-default text-heading-sm font-semibold">Climate Jobs</h1>
           </div>
           <p className="text-caption text-foreground-muted">
             Find your next role in the green economy
@@ -605,33 +609,33 @@ function JobsContent() {
         </div>
 
         {/* Tabs */}
-        <div className="px-4 py-2 border-b border-border-default flex gap-1">
+        <div className="border-border-default flex gap-1 border-b px-4 py-2">
           <button
             onClick={() => handleTabChange("matches")}
-            className={`px-3 py-2 rounded-lg text-body-sm font-medium transition-colors ${
+            className={`rounded-lg px-3 py-2 text-body-sm font-medium transition-colors ${
               tab === "matches"
                 ? "bg-background-brand-subtle text-foreground-brand"
-                : "text-foreground-muted hover:text-foreground-default hover:bg-background-subtle"
+                : "hover:text-foreground-default text-foreground-muted hover:bg-background-subtle"
             }`}
           >
             For You
           </button>
           <button
             onClick={() => handleTabChange("browse")}
-            className={`px-3 py-2 rounded-lg text-body-sm font-medium transition-colors ${
+            className={`rounded-lg px-3 py-2 text-body-sm font-medium transition-colors ${
               tab === "browse"
                 ? "bg-background-brand-subtle text-foreground-brand"
-                : "text-foreground-muted hover:text-foreground-default hover:bg-background-subtle"
+                : "hover:text-foreground-default text-foreground-muted hover:bg-background-subtle"
             }`}
           >
             Browse All
           </button>
           <button
             onClick={() => handleTabChange("saved")}
-            className={`px-3 py-2 rounded-lg text-body-sm font-medium transition-colors ${
+            className={`rounded-lg px-3 py-2 text-body-sm font-medium transition-colors ${
               tab === "saved"
                 ? "bg-background-brand-subtle text-foreground-brand"
-                : "text-foreground-muted hover:text-foreground-default hover:bg-background-subtle"
+                : "hover:text-foreground-default text-foreground-muted hover:bg-background-subtle"
             }`}
           >
             Saved
@@ -640,7 +644,7 @@ function JobsContent() {
 
         {/* Search & Filter Toggle (only for browse tab) */}
         {tab === "browse" && (
-          <div className="px-4 py-3 border-b border-border-default space-y-3">
+          <div className="border-border-default space-y-3 border-b px-4 py-3">
             <SearchInput
               placeholder="Search jobs..."
               value={searchQuery}
@@ -649,7 +653,7 @@ function JobsContent() {
             />
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 text-caption text-foreground-muted hover:text-foreground-default transition-colors"
+              className="hover:text-foreground-default flex items-center gap-2 text-caption text-foreground-muted transition-colors"
             >
               <Funnel size={14} />
               <span>Filters</span>
@@ -663,14 +667,14 @@ function JobsContent() {
 
             {/* Filter Panel */}
             {showFilters && (
-              <div className="pt-2 space-y-4 animate-fade-in">
+              <div className="animate-fade-in space-y-4 pt-2">
                 {/* Location Type */}
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <p className="text-caption font-medium text-foreground-muted">Work Type</p>
                     {locationType && (
                       <button
-                        className="text-caption text-foreground-muted hover:text-foreground-default"
+                        className="hover:text-foreground-default text-caption text-foreground-muted"
                         onClick={() => setLocationType("")}
                       >
                         Clear
@@ -683,9 +687,7 @@ function JobsContent() {
                         key={opt.value}
                         variant={locationType === opt.value ? "primary" : "neutral"}
                         size="sm"
-                        onClick={() =>
-                          setLocationType(locationType === opt.value ? "" : opt.value)
-                        }
+                        onClick={() => setLocationType(locationType === opt.value ? "" : opt.value)}
                       >
                         {opt.label}
                       </Chip>
@@ -695,11 +697,11 @@ function JobsContent() {
 
                 {/* Experience Level */}
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2 flex items-center justify-between">
                     <p className="text-caption font-medium text-foreground-muted">Experience</p>
                     {experienceLevel && (
                       <button
-                        className="text-caption text-foreground-muted hover:text-foreground-default"
+                        className="hover:text-foreground-default text-caption text-foreground-muted"
                         onClick={() => setExperienceLevel("")}
                       >
                         Clear
@@ -729,11 +731,7 @@ function JobsContent() {
         {/* Error State */}
         {error && (
           <div className="px-4 py-3">
-            <Alert
-              variant="critical"
-              dismissible
-              onDismiss={() => setError(null)}
-            >
+            <Alert variant="critical" dismissible onDismiss={() => setError(null)}>
               {error}
             </Alert>
           </div>
@@ -772,12 +770,12 @@ function JobsContent() {
                   tab === "saved"
                     ? "Save jobs you're interested in to view them here"
                     : tab === "matches"
-                    ? "Complete your profile to get personalized job matches"
-                    : "Try adjusting your filters"
+                      ? "Complete your profile to get personalized job matches"
+                      : "Try adjusting your filters"
                 }
                 size="sm"
                 action={
-                  (searchQuery || locationType || experienceLevel)
+                  searchQuery || locationType || experienceLevel
                     ? {
                         label: "Clear filters",
                         onClick: () => {
@@ -787,11 +785,11 @@ function JobsContent() {
                         },
                       }
                     : tab === "matches"
-                    ? {
-                        label: "Complete Profile",
-                        onClick: () => router.push("/candid/profile"),
-                      }
-                    : undefined
+                      ? {
+                          label: "Complete Profile",
+                          onClick: () => router.push("/candid/profile"),
+                        }
+                      : undefined
                 }
               />
             </div>
@@ -799,7 +797,7 @@ function JobsContent() {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-border-default">
+        <div className="border-border-default border-t px-4 py-3">
           <p className="text-caption text-foreground-muted">
             {jobs.length} job{jobs.length !== 1 ? "s" : ""}{" "}
             {tab === "matches" ? "matched" : tab === "saved" ? "saved" : "found"}
@@ -808,11 +806,7 @@ function JobsContent() {
       </div>
 
       {/* Right Panel - Job Detail */}
-      <div
-        className={`flex-1 bg-background-subtle ${
-          selectedJobId ? "flex" : "hidden lg:flex"
-        }`}
-      >
+      <div className={`flex-1 bg-background-subtle ${selectedJobId ? "flex" : "hidden lg:flex"}`}>
         {selectedJobId && loading ? (
           <JobDetailPanelSkeleton />
         ) : selectedJob ? (

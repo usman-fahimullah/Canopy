@@ -91,19 +91,19 @@ export default function ATSComponentsPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           ATS Components
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          Specialized components for Applicant Tracking System functionality. These components
-          power the core hiring workflow: candidate pipelines, evaluations, scheduling, and
-          document management.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          Specialized components for Applicant Tracking System functionality. These components power
+          the core hiring workflow: candidate pipelines, evaluations, scheduling, and document
+          management.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Climate-Focused ATS
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             {atsComponents.length} Components
           </span>
         </div>
@@ -117,20 +117,20 @@ export default function ATSComponentsPage() {
             <Link
               key={component.href}
               href={component.href}
-              className="group p-4 border border-border rounded-lg hover:border-border-brand hover:bg-background-subtle transition-all"
+              className="group rounded-lg border border-border p-4 transition-all hover:border-border-brand hover:bg-background-subtle"
             >
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-background-brand-subtle rounded-lg group-hover:bg-background-brand-muted transition-colors">
+                <div className="rounded-lg bg-background-brand-subtle p-2 transition-colors group-hover:bg-background-brand-muted">
                   <Icon className="h-5 w-5 text-foreground-brand" weight="duotone" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-body-strong text-foreground group-hover:text-foreground-brand transition-colors truncate">
+                    <h3 className="truncate text-body-strong text-foreground transition-colors group-hover:text-foreground-brand">
                       {component.name}
                     </h3>
-                    <ArrowRight className="h-4 w-4 text-foreground-muted group-hover:text-foreground-brand transition-colors flex-shrink-0 ml-2" />
+                    <ArrowRight className="ml-2 h-4 w-4 flex-shrink-0 text-foreground-muted transition-colors group-hover:text-foreground-brand" />
                   </div>
-                  <p className="text-caption text-foreground-muted mt-1 line-clamp-2">
+                  <p className="mt-1 line-clamp-2 text-caption text-foreground-muted">
                     {component.description}
                   </p>
                 </div>
@@ -144,52 +144,52 @@ export default function ATSComponentsPage() {
       <div id="guidelines" className="space-y-6">
         <h2 className="text-heading-md text-foreground">Usage Guidelines</h2>
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="p-4 border border-border-success rounded-lg bg-background-success">
-            <h3 className="text-body-strong text-foreground-success mb-3">Do</h3>
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-3 text-body-strong text-foreground-success">Do</h3>
             <ul className="space-y-2 text-body-sm text-foreground-muted">
               <li className="flex gap-2">
-                <span className="text-foreground-success flex-shrink-0">✓</span>
+                <span className="flex-shrink-0 text-foreground-success">✓</span>
                 Use Kanban boards for visual pipeline management
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-success flex-shrink-0">✓</span>
+                <span className="flex-shrink-0 text-foreground-success">✓</span>
                 Show AI match scores with clear reasoning
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-success flex-shrink-0">✓</span>
+                <span className="flex-shrink-0 text-foreground-success">✓</span>
                 Use consistent stage colors across all views
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-success flex-shrink-0">✓</span>
+                <span className="flex-shrink-0 text-foreground-success">✓</span>
                 Provide loading states for async operations
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-success flex-shrink-0">✓</span>
+                <span className="flex-shrink-0 text-foreground-success">✓</span>
                 Allow users to override AI suggestions
               </li>
             </ul>
           </div>
-          <div className="p-4 border border-border-error rounded-lg bg-background-error">
-            <h3 className="text-body-strong text-foreground-error mb-3">Don&apos;t</h3>
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-3 text-body-strong text-foreground-error">Don&apos;t</h3>
             <ul className="space-y-2 text-body-sm text-foreground-muted">
               <li className="flex gap-2">
-                <span className="text-foreground-error flex-shrink-0">✗</span>
+                <span className="flex-shrink-0 text-foreground-error">✗</span>
                 Show AI scores without explanation
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-error flex-shrink-0">✗</span>
+                <span className="flex-shrink-0 text-foreground-error">✗</span>
                 Use inconsistent stage colors
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-error flex-shrink-0">✗</span>
+                <span className="flex-shrink-0 text-foreground-error">✗</span>
                 Block users from manual actions
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-error flex-shrink-0">✗</span>
+                <span className="flex-shrink-0 text-foreground-error">✗</span>
                 Hide candidate activity history
               </li>
               <li className="flex gap-2">
-                <span className="text-foreground-error flex-shrink-0">✗</span>
+                <span className="flex-shrink-0 text-foreground-error">✗</span>
                 Auto-reject without human review
               </li>
             </ul>
@@ -198,12 +198,13 @@ export default function ATSComponentsPage() {
       </div>
 
       {/* Human-First AI Philosophy */}
-      <div id="philosophy" className="p-6 border border-border-brand rounded-xl bg-background-brand-subtle">
-        <h2 className="text-heading-sm text-foreground mb-3">
-          Human-First, AI-Enabled Philosophy
-        </h2>
-        <p className="text-body text-foreground-muted mb-4">
-          Canopy follows a "human-first, AI-enabled" approach. AI features should assist
+      <div
+        id="philosophy"
+        className="rounded-xl border border-border-brand bg-background-brand-subtle p-6"
+      >
+        <h2 className="mb-3 text-heading-sm text-foreground">Human-First, AI-Enabled Philosophy</h2>
+        <p className="mb-4 text-body text-foreground-muted">
+          Canopy follows a &quot;human-first, AI-enabled&quot; approach. AI features should assist
           and suggest, but humans always make the final decisions. When implementing these
           components:
         </p>
@@ -214,7 +215,7 @@ export default function ATSComponentsPage() {
           </li>
           <li className="flex gap-2">
             <span className="text-foreground-brand">→</span>
-            Provide clear "Accept" / "Dismiss" actions on suggestions
+            Provide clear &quot;Accept&quot; / &quot;Dismiss&quot; actions on suggestions
           </li>
           <li className="flex gap-2">
             <span className="text-foreground-brand">→</span>

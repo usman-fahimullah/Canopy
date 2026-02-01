@@ -312,8 +312,16 @@ const avatarDataType = [
 
 // Sample data for examples
 const sampleAvatars = [
-  { id: "1", name: "Sarah Chen", src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64" },
-  { id: "2", name: "Michael Park", src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64" },
+  {
+    id: "1",
+    name: "Sarah Chen",
+    src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64",
+  },
+  {
+    id: "2",
+    name: "Michael Park",
+    src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64",
+  },
   { id: "3", name: "Emily Johnson" },
   { id: "4", name: "David Kim" },
   { id: "5", name: "Lisa Wang" },
@@ -327,38 +335,30 @@ export default function AvatarPage() {
           SECTION 1: OVERVIEW
           ============================================ */}
       <div>
-        <h1
-          id="overview"
-          className="text-heading-lg text-foreground mb-2"
-        >
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Avatar
         </h1>
-        <p className="text-body text-foreground-muted mb-4 max-w-2xl">
-          Avatars represent users, organizations, or entities with images,
-          initials, or icons. They provide visual identification across the
-          application in lists, cards, comments, and navigation.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Avatars represent users, organizations, or entities with images, initials, or icons. They
+          provide visual identification across the application in lists, cards, comments, and
+          navigation.
         </p>
 
         {/* Category Tags */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="mb-6 flex flex-wrap gap-2">
           <Badge variant="feature" icon={<Info size={14} weight="bold" />}>
             Data Display
           </Badge>
-          <Badge
-            variant="neutral"
-            icon={<CheckCircle size={14} weight="bold" />}
-          >
+          <Badge variant="neutral" icon={<CheckCircle size={14} weight="bold" />}>
             Stable
           </Badge>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-[var(--background-success)]/30 rounded-lg border border-[var(--border-success)]">
-            <h3 className="font-semibold text-[var(--foreground-success)] mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-[var(--background-success)]/30 rounded-lg border border-[var(--border-success)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-success)]">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Representing users in lists or cards</li>
               <li>• Showing team members or collaborators</li>
               <li>• Identifying comment or note authors</li>
@@ -366,13 +366,11 @@ export default function AvatarPage() {
               <li>• Showing company/organization logos</li>
             </ul>
           </div>
-          <div className="p-4 bg-[var(--background-error)]/30 rounded-lg border border-[var(--border-error)]">
-            <h3 className="font-semibold text-[var(--foreground-error)] mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-[var(--background-error)]/30 rounded-lg border border-[var(--border-error)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-error)]">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• For decorative images (use Image component)</li>
-              <li>• For icons that aren't representing people</li>
+              <li>• For icons that aren&apos;t representing people</li>
               <li>• When you need complex image layouts</li>
               <li>• For thumbnails of non-person content</li>
             </ul>
@@ -396,8 +394,8 @@ export default function AvatarPage() {
             { name: "Badge (optional)", description: "Icon badge for special status" },
           ]}
         />
-        <div className="mt-6 p-4 bg-background-subtle rounded-lg">
-          <p className="text-caption text-foreground-muted mb-4">Live anatomy example:</p>
+        <div className="mt-6 rounded-lg bg-background-subtle p-4">
+          <p className="mb-4 text-caption text-foreground-muted">Live anatomy example:</p>
           <div className="flex items-center gap-8">
             <div className="relative">
               <Avatar
@@ -405,19 +403,19 @@ export default function AvatarPage() {
                 name="Sarah Chen"
                 size="lg"
               />
-              <div className="absolute -top-3 -left-2 w-5 h-5 bg-[var(--foreground-brand)] text-white rounded-full flex items-center justify-center text-xs font-medium">
+              <div className="absolute -left-2 -top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--foreground-brand)] text-xs font-medium text-white">
                 1
               </div>
             </div>
             <div className="relative">
               <Avatar name="Mike Park" size="lg" status="online" />
-              <div className="absolute -top-3 right-0 w-5 h-5 bg-[var(--foreground-brand)] text-white rounded-full flex items-center justify-center text-xs font-medium">
+              <div className="absolute -top-3 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--foreground-brand)] text-xs font-medium text-white">
                 3
               </div>
             </div>
             <div className="relative">
               <Avatar name="Emily Davis" size="lg" badge="favorite" />
-              <div className="absolute -bottom-3 right-0 w-5 h-5 bg-[var(--foreground-brand)] text-white rounded-full flex items-center justify-center text-xs font-medium">
+              <div className="absolute -bottom-3 right-0 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--foreground-brand)] text-xs font-medium text-white">
                 4
               </div>
             </div>
@@ -450,7 +448,7 @@ export default function AvatarPage() {
 <Avatar name="Climate Team" icon={Leaf} />`}
         >
           <div className="flex items-center gap-4">
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar
                 src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64"
                 alt="Sarah Chen"
@@ -458,11 +456,11 @@ export default function AvatarPage() {
               />
               <p className="text-caption-sm text-foreground-muted">With image</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Michael Park" />
               <p className="text-caption-sm text-foreground-muted">With initials</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Climate Team" icon={Leaf} />
               <p className="text-caption-sm text-foreground-muted">With icon</p>
             </div>
@@ -487,27 +485,27 @@ export default function AvatarPage() {
 <Avatar size="2xl" name="User" />  {/* 128px - 2 initials */}`}
         >
           <div className="flex flex-wrap items-end gap-4">
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar size="xs" name="User XS" />
               <p className="text-caption-sm text-foreground-muted">xs • 24px</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar size="sm" name="User SM" />
               <p className="text-caption-sm text-foreground-muted">sm • 32px</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar size="default" name="User Default" />
               <p className="text-caption-sm text-foreground-muted">default • 48px</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar size="lg" name="User LG" />
               <p className="text-caption-sm text-foreground-muted">lg • 64px</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar size="xl" name="User XL" />
               <p className="text-caption-sm text-foreground-muted">xl • 96px</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar size="2xl" name="User 2XL" />
               <p className="text-caption-sm text-foreground-muted">2xl • 128px</p>
             </div>
@@ -528,15 +526,15 @@ export default function AvatarPage() {
 <Avatar name="Michael Park" shape="square" />`}
         >
           <div className="flex flex-wrap items-center gap-6">
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Sarah Chen" size="lg" shape="circle" />
               <p className="text-caption-sm text-foreground-muted">circle</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Michael Park" size="lg" shape="square" />
               <p className="text-caption-sm text-foreground-muted">square</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar
                 src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64"
                 name="Emily Johnson"
@@ -545,7 +543,7 @@ export default function AvatarPage() {
               />
               <p className="text-caption-sm text-foreground-muted">image circle</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64"
                 name="David Kim"
@@ -568,53 +566,60 @@ export default function AvatarPage() {
       >
         <div className="space-y-8">
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Filled (Default)</h4>
-            <p className="text-caption text-foreground-muted mb-4">
-              Vibrant mid-tone backgrounds with dark text. All colors meet WCAG AA contrast requirements.
+            <h4 className="mb-3 text-body-strong text-foreground">Filled (Default)</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
+              Vibrant mid-tone backgrounds with dark text. All colors meet WCAG AA contrast
+              requirements.
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              {(["green", "blue", "purple", "red", "orange", "yellow", "neutral"] as const).map((color) => (
-                <div key={color} className="text-center space-y-2">
-                  <Avatar name={`${color} User`} color={color} variant="filled" />
-                  <p className="text-caption-sm text-foreground-muted">{color}</p>
-                </div>
-              ))}
+              {(["green", "blue", "purple", "red", "orange", "yellow", "neutral"] as const).map(
+                (color) => (
+                  <div key={color} className="space-y-2 text-center">
+                    <Avatar name={`${color} User`} color={color} variant="filled" />
+                    <p className="text-caption-sm text-foreground-muted">{color}</p>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Soft</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong text-foreground">Soft</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Lighter, more subtle backgrounds for less emphasis
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              {(["green", "blue", "purple", "red", "orange", "yellow", "neutral"] as const).map((color) => (
-                <div key={color} className="text-center space-y-2">
-                  <Avatar name={`${color} User`} color={color} variant="soft" />
-                  <p className="text-caption-sm text-foreground-muted">{color}</p>
-                </div>
-              ))}
+              {(["green", "blue", "purple", "red", "orange", "yellow", "neutral"] as const).map(
+                (color) => (
+                  <div key={color} className="space-y-2 text-center">
+                    <Avatar name={`${color} User`} color={color} variant="soft" />
+                    <p className="text-caption-sm text-foreground-muted">{color}</p>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Outlined</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong text-foreground">Outlined</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Transparent background with colored border
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              {(["green", "blue", "purple", "red", "orange", "yellow", "neutral"] as const).map((color) => (
-                <div key={color} className="text-center space-y-2">
-                  <Avatar name={`${color} User`} color={color} variant="outlined" />
-                  <p className="text-caption-sm text-foreground-muted">{color}</p>
-                </div>
-              ))}
+              {(["green", "blue", "purple", "red", "orange", "yellow", "neutral"] as const).map(
+                (color) => (
+                  <div key={color} className="space-y-2 text-center">
+                    <Avatar name={`${color} User`} color={color} variant="outlined" />
+                    <p className="text-caption-sm text-foreground-muted">{color}</p>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">High Contrast</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong text-foreground">High Contrast</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Maximum contrast for accessibility needs
             </p>
             <div className="flex flex-wrap items-center gap-4">
@@ -636,10 +641,10 @@ export default function AvatarPage() {
       >
         <div className="space-y-6">
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Auto-Generated Colors</h4>
-            <p className="text-caption text-foreground-muted mb-4">
-              When no color is specified, a consistent color is generated from the name hash.
-              The same name always produces the same color.
+            <h4 className="mb-3 text-body-strong text-foreground">Auto-Generated Colors</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
+              When no color is specified, a consistent color is generated from the name hash. The
+              same name always produces the same color.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Avatar name="Sarah Chen" showTooltip />
@@ -652,8 +657,8 @@ export default function AvatarPage() {
           </div>
 
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Email-Based Colors</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong text-foreground">Email-Based Colors</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               When name is unavailable, email can be used for consistent color generation
             </p>
             <CodePreview
@@ -661,15 +666,15 @@ export default function AvatarPage() {
 <Avatar email="mike@company.org" />`}
             >
               <div className="flex flex-wrap items-center gap-4">
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar email="sarah@example.com" />
                   <p className="text-caption-sm text-foreground-muted">sarah@...</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar email="mike@company.org" />
                   <p className="text-caption-sm text-foreground-muted">mike@...</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar email="emily@startup.io" />
                   <p className="text-caption-sm text-foreground-muted">emily@...</p>
                 </div>
@@ -702,11 +707,11 @@ export default function AvatarPage() {
 <Avatar name="Emily Johnson" showTooltip tooltipSide="right" />`}
         >
           <div className="flex flex-wrap items-center gap-6">
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Sarah Chen" showTooltip />
               <p className="text-caption-sm text-foreground-muted">Hover me</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar
                 name="Michael Park"
                 showTooltip
@@ -714,7 +719,7 @@ export default function AvatarPage() {
               />
               <p className="text-caption-sm text-foreground-muted">Custom content</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Emily Johnson" showTooltip tooltipSide="right" />
               <p className="text-caption-sm text-foreground-muted">Right side</p>
             </div>
@@ -733,9 +738,10 @@ export default function AvatarPage() {
         <div className="space-y-8">
           {/* Status Dots */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Status Dots</h4>
-            <p className="text-caption text-foreground-muted mb-4">
-              Simple dot indicators for real-time presence status. Online status includes a subtle pulse animation.
+            <h4 className="mb-3 text-body-strong text-foreground">Status Dots</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
+              Simple dot indicators for real-time presence status. Online status includes a subtle
+              pulse animation.
             </p>
             <CodePreview
               code={`<Avatar name="Sarah Chen" status="online" />
@@ -744,19 +750,19 @@ export default function AvatarPage() {
 <Avatar name="David Kim" status="offline" />`}
             >
               <div className="flex flex-wrap items-center gap-4">
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="Sarah Chen" status="online" />
                   <p className="text-caption-sm text-foreground-muted">online</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="Michael Park" status="away" />
                   <p className="text-caption-sm text-foreground-muted">away</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="Emily Johnson" status="busy" />
                   <p className="text-caption-sm text-foreground-muted">busy</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="David Kim" status="offline" />
                   <p className="text-caption-sm text-foreground-muted">offline</p>
                 </div>
@@ -766,8 +772,8 @@ export default function AvatarPage() {
 
           {/* Badge Indicators */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Badge Indicators</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong text-foreground">Badge Indicators</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Icon badges for special attributes (takes precedence over status)
             </p>
             <CodePreview
@@ -778,23 +784,23 @@ export default function AvatarPage() {
 <Avatar name="Lisa Wang" badge="bookmark" />`}
             >
               <div className="flex flex-wrap items-center gap-4">
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="Sarah Chen" badge="success" />
                   <p className="text-caption-sm text-foreground-muted">success</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="Michael Park" badge="critical" />
                   <p className="text-caption-sm text-foreground-muted">critical</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="Emily Johnson" badge="favorite" />
                   <p className="text-caption-sm text-foreground-muted">favorite</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="David Kim" badge="bipoc" />
                   <p className="text-caption-sm text-foreground-muted">bipoc</p>
                 </div>
-                <div className="text-center space-y-2">
+                <div className="space-y-2 text-center">
                   <Avatar name="Lisa Wang" badge="bookmark" />
                   <p className="text-caption-sm text-foreground-muted">bookmark</p>
                 </div>
@@ -804,7 +810,7 @@ export default function AvatarPage() {
 
           {/* Loading State */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Loading State</h4>
+            <h4 className="mb-3 text-body-strong text-foreground">Loading State</h4>
             <CodePreview
               code={`<Avatar loading size="sm" />
 <Avatar loading size="default" />
@@ -848,18 +854,15 @@ export default function AvatarPage() {
 />`}
         >
           <div className="flex flex-wrap items-center gap-6">
-            <div className="text-center space-y-2">
-              <Avatar
-                name="Sarah Chen"
-                onClick={() => alert("Clicked Sarah!")}
-              />
+            <div className="space-y-2 text-center">
+              <Avatar name="Sarah Chen" onClick={() => alert("Clicked Sarah!")} />
               <p className="text-caption-sm text-foreground-muted">Click me</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Michael Park" interactive />
               <p className="text-caption-sm text-foreground-muted">Interactive</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar
                 name="Emily Johnson"
                 interactive
@@ -870,9 +873,10 @@ export default function AvatarPage() {
             </div>
           </div>
         </CodePreview>
-        <p className="text-caption text-foreground-muted mt-4">
-          Interactive avatars have hover scale/lift animation, active press feedback, and visible focus rings.
-          Animations respect <code className="text-xs bg-background-muted px-1 rounded">prefers-reduced-motion</code>.
+        <p className="mt-4 text-caption text-foreground-muted">
+          Interactive avatars have hover scale/lift animation, active press feedback, and visible
+          focus rings. Animations respect{" "}
+          <code className="rounded bg-background-muted px-1 text-xs">prefers-reduced-motion</code>.
         </p>
       </ComponentCard>
 
@@ -888,30 +892,34 @@ export default function AvatarPage() {
           <p className="text-caption text-foreground-muted">
             The avatar handles various name formats intelligently:
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="text-center space-y-2">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+            <div className="space-y-2 text-center">
               <Avatar name="John Doe" />
-              <p className="text-caption-sm text-foreground-muted">"John Doe" → JD</p>
+              <p className="text-caption-sm text-foreground-muted">&quot;John Doe&quot; → JD</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Madonna" />
-              <p className="text-caption-sm text-foreground-muted">"Madonna" → MA</p>
+              <p className="text-caption-sm text-foreground-muted">&quot;Madonna&quot; → MA</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Dr. Jane Smith" />
-              <p className="text-caption-sm text-foreground-muted">"Dr. Jane Smith" → JS</p>
+              <p className="text-caption-sm text-foreground-muted">
+                &quot;Dr. Jane Smith&quot; → JS
+              </p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="Smith, John" />
-              <p className="text-caption-sm text-foreground-muted">"Smith, John" → JS</p>
+              <p className="text-caption-sm text-foreground-muted">&quot;Smith, John&quot; → JS</p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="John Michael Smith Jr." />
-              <p className="text-caption-sm text-foreground-muted">"John Michael Smith Jr." → JS</p>
+              <p className="text-caption-sm text-foreground-muted">
+                &quot;John Michael Smith Jr.&quot; → JS
+              </p>
             </div>
-            <div className="text-center space-y-2">
+            <div className="space-y-2 text-center">
               <Avatar name="李明" />
-              <p className="text-caption-sm text-foreground-muted">"李明" → 李明</p>
+              <p className="text-caption-sm text-foreground-muted">&quot;李明&quot; → 李明</p>
             </div>
           </div>
           <CodePreview
@@ -920,11 +928,11 @@ export default function AvatarPage() {
 <Avatar name="John Doe" maxInitials={1} /> {/* J */}`}
           >
             <div className="flex items-center gap-4">
-              <div className="text-center space-y-2">
+              <div className="space-y-2 text-center">
                 <Avatar name="John Michael Doe" maxInitials={3} size="lg" />
                 <p className="text-caption-sm text-foreground-muted">maxInitials=3</p>
               </div>
-              <div className="text-center space-y-2">
+              <div className="space-y-2 text-center">
                 <Avatar name="John Doe" maxInitials={1} size="lg" />
                 <p className="text-caption-sm text-foreground-muted">maxInitials=1</p>
               </div>
@@ -944,7 +952,7 @@ export default function AvatarPage() {
         <div className="space-y-8">
           {/* Basic Group */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Basic Group</h4>
+            <h4 className="mb-3 text-body-strong text-foreground">Basic Group</h4>
             <CodePreview
               code={`<AvatarGroup
   avatars={[
@@ -963,14 +971,14 @@ export default function AvatarPage() {
 
           {/* With Shapes */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">With Shapes</h4>
+            <h4 className="mb-3 text-body-strong text-foreground">With Shapes</h4>
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <span className="text-caption text-foreground-muted w-16">circle</span>
+                <span className="w-16 text-caption text-foreground-muted">circle</span>
                 <AvatarGroup avatars={sampleAvatars} max={4} shape="circle" />
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-caption text-foreground-muted w-16">square</span>
+                <span className="w-16 text-caption text-foreground-muted">square</span>
                 <AvatarGroup avatars={sampleAvatars} max={4} shape="square" />
               </div>
             </div>
@@ -978,32 +986,30 @@ export default function AvatarPage() {
 
           {/* Expand on Hover */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Expand on Hover</h4>
-            <CodePreview
-              code={`<AvatarGroup avatars={avatars} expandOnHover />`}
-            >
+            <h4 className="mb-3 text-body-strong text-foreground">Expand on Hover</h4>
+            <CodePreview code={`<AvatarGroup avatars={avatars} expandOnHover />`}>
               <AvatarGroup avatars={sampleAvatars} max={4} expandOnHover />
             </CodePreview>
           </div>
 
           {/* Different Sizes */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Different Sizes</h4>
+            <h4 className="mb-3 text-body-strong text-foreground">Different Sizes</h4>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <span className="text-caption text-foreground-muted w-16">xs</span>
+                <span className="w-16 text-caption text-foreground-muted">xs</span>
                 <AvatarGroup avatars={sampleAvatars} max={4} size="xs" />
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-caption text-foreground-muted w-16">sm</span>
+                <span className="w-16 text-caption text-foreground-muted">sm</span>
                 <AvatarGroup avatars={sampleAvatars} max={4} size="sm" />
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-caption text-foreground-muted w-16">default</span>
+                <span className="w-16 text-caption text-foreground-muted">default</span>
                 <AvatarGroup avatars={sampleAvatars} max={4} size="default" />
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-caption text-foreground-muted w-16">lg</span>
+                <span className="w-16 text-caption text-foreground-muted">lg</span>
                 <AvatarGroup avatars={sampleAvatars} max={4} size="lg" />
               </div>
             </div>
@@ -1034,20 +1040,9 @@ export default function AvatarPage() {
 />`}
         >
           <div className="space-y-4">
-            <AvatarStack
-              avatars={sampleAvatars.slice(0, 5)}
-              label="Applicants"
-            />
-            <AvatarStack
-              avatars={sampleAvatars.slice(0, 3)}
-              label="Reviewers"
-              size="large"
-            />
-            <AvatarStack
-              avatars={sampleAvatars.slice(0, 4)}
-              label="Team Members"
-              shape="square"
-            />
+            <AvatarStack avatars={sampleAvatars.slice(0, 5)} label="Applicants" />
+            <AvatarStack avatars={sampleAvatars.slice(0, 3)} label="Reviewers" size="large" />
+            <AvatarStack avatars={sampleAvatars.slice(0, 4)} label="Team Members" shape="square" />
           </div>
         </CodePreview>
       </ComponentCard>
@@ -1160,16 +1155,16 @@ export default function AvatarPage() {
   <Badge variant="feature">Interview</Badge>
 </div>`}
         >
-          <div className="flex items-center gap-3 p-4 border rounded-lg bg-surface max-w-md">
+          <div className="flex max-w-md items-center gap-3 rounded-lg border bg-surface p-4">
             <Avatar
               src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64"
               name="Sarah Chen"
               status="online"
               showTooltip
             />
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="font-semibold text-foreground">Sarah Chen</p>
-              <p className="text-caption text-foreground-muted truncate">
+              <p className="truncate text-caption text-foreground-muted">
                 Solar Installation Manager
               </p>
             </div>
@@ -1198,18 +1193,11 @@ export default function AvatarPage() {
   </div>
 </div>`}
         >
-          <div className="space-y-3 max-w-md">
+          <div className="max-w-md space-y-3">
             <h4 className="text-body-strong text-foreground">Interview Panel</h4>
             <div className="flex items-center gap-3">
-              <AvatarGroup
-                avatars={sampleAvatars.slice(0, 4)}
-                max={4}
-                size="sm"
-                expandOnHover
-              />
-              <span className="text-caption text-foreground-muted">
-                4 interviewers assigned
-              </span>
+              <AvatarGroup avatars={sampleAvatars.slice(0, 4)} max={4} size="sm" expandOnHover />
+              <span className="text-caption text-foreground-muted">4 interviewers assigned</span>
             </div>
           </div>
         </CodePreview>
@@ -1235,15 +1223,15 @@ export default function AvatarPage() {
   </div>
 </div>`}
         >
-          <div className="space-y-4 max-w-md">
+          <div className="max-w-md space-y-4">
             <div className="flex gap-3">
               <Avatar name="Sarah Chen" size="sm" showTooltip />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-foreground">Sarah Chen</span>
+                  <span className="text-sm font-medium text-foreground">Sarah Chen</span>
                   <span className="text-caption text-foreground-muted">2h ago</span>
                 </div>
-                <p className="text-body-sm text-foreground mt-1">
+                <p className="mt-1 text-body-sm text-foreground">
                   Great candidate! Strong solar installation experience and NABCEP certified.
                 </p>
               </div>
@@ -1252,10 +1240,10 @@ export default function AvatarPage() {
               <Avatar name="Michael Park" size="sm" showTooltip />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm text-foreground">Michael Park</span>
+                  <span className="text-sm font-medium text-foreground">Michael Park</span>
                   <span className="text-caption text-foreground-muted">1h ago</span>
                 </div>
-                <p className="text-body-sm text-foreground mt-1">
+                <p className="mt-1 text-body-sm text-foreground">
                   Agreed! Moving to interview stage.
                 </p>
               </div>

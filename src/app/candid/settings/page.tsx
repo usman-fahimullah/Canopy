@@ -10,18 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { SwitchWithLabel } from "@/components/ui/switch";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsListVertical,
-  TabsTriggerVertical,
-} from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsListVertical, TabsTriggerVertical } from "@/components/ui/tabs";
 import { Spinner } from "@/components/ui/spinner";
 import {
   User,
@@ -102,9 +92,16 @@ export default function SettingsPage() {
       if (!profileLoaded) {
         try {
           const supabase = createClient();
-          const { data: { user: authUser } } = await supabase.auth.getUser();
+          const {
+            data: { user: authUser },
+          } = await supabase.auth.getUser();
           if (authUser) {
-            const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
+            const nameParts = (
+              authUser.user_metadata?.full_name ||
+              authUser.user_metadata?.name ||
+              authUser.email?.split("@")[0] ||
+              "User"
+            ).split(" ");
             setUser({
               id: authUser.id,
               email: authUser.email || "",
@@ -135,7 +132,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -143,12 +140,9 @@ export default function SettingsPage() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <p className="text-foreground-muted">Unable to load your profile. Please try again.</p>
-        <Button
-          variant="primary"
-          onClick={() => window.location.reload()}
-        >
+        <Button variant="primary" onClick={() => window.location.reload()}>
           Retry
         </Button>
       </div>
@@ -206,23 +200,23 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
-      <h1 className="text-heading-md font-semibold text-foreground-default">Settings</h1>
+    <div className="mx-auto max-w-4xl px-4 py-8 pb-24 sm:px-6 md:pb-8 lg:px-8">
+      <h1 className="text-foreground-default text-heading-md font-semibold">Settings</h1>
       <p className="mt-1 text-body text-foreground-muted">
         Manage your account settings and preferences
       </p>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as SettingsTab)} className="mt-8 flex flex-col gap-8 lg:flex-row">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as SettingsTab)}
+        className="mt-8 flex flex-col gap-8 lg:flex-row"
+      >
         {/* Vertical Tabs Navigation */}
-        <TabsListVertical className="flex flex-row gap-1 lg:flex-col lg:w-48">
+        <TabsListVertical className="flex flex-row gap-1 lg:w-48 lg:flex-col">
           {tabItems.map((tab) => {
             const Icon = tab.icon;
             return (
-              <TabsTriggerVertical
-                key={tab.id}
-                value={tab.id}
-                className="flex items-center gap-3"
-              >
+              <TabsTriggerVertical key={tab.id} value={tab.id} className="flex items-center gap-3">
                 <Icon size={18} weight={activeTab === tab.id ? "fill" : "regular"} />
                 <span className="hidden lg:inline">{tab.label}</span>
               </TabsTriggerVertical>
@@ -289,10 +283,10 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <div>
-                    <p className="text-body-strong font-medium text-foreground-default">Profile Photo</p>
-                    <p className="text-caption text-foreground-muted">
-                      JPG, PNG or GIF. Max 2MB.
+                    <p className="text-foreground-default text-body-strong font-medium">
+                      Profile Photo
                     </p>
+                    <p className="text-caption text-foreground-muted">JPG, PNG or GIF. Max 2MB.</p>
                   </div>
                 </div>
 
@@ -327,13 +321,7 @@ export default function SettingsPage() {
                   <Label htmlFor="email" description="Contact support to change your email address">
                     Email
                   </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={user.email}
-                    disabled
-                    inputSize="sm"
-                  />
+                  <Input id="email" type="email" value={user.email} disabled inputSize="sm" />
                 </div>
 
                 {/* Location */}
@@ -440,14 +428,18 @@ export default function SettingsPage() {
 
               <CardContent className="space-y-6">
                 <div className="rounded-lg bg-[var(--background-subtle)] p-4">
-                  <h3 className="text-body-strong font-medium text-foreground-default">Profile Visibility</h3>
+                  <h3 className="text-foreground-default text-body-strong font-medium">
+                    Profile Visibility
+                  </h3>
                   <p className="mt-1 text-caption text-foreground-muted">
                     Your profile is visible to other Candid members
                   </p>
                 </div>
 
                 <div className="rounded-lg bg-[var(--background-subtle)] p-4">
-                  <h3 className="text-body-strong font-medium text-foreground-default">Data Export</h3>
+                  <h3 className="text-foreground-default text-body-strong font-medium">
+                    Data Export
+                  </h3>
                   <p className="mt-1 text-caption text-foreground-muted">
                     Download a copy of your data
                   </p>
@@ -457,7 +449,9 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="rounded-lg bg-[var(--primitive-red-100)] p-4">
-                  <h3 className="text-body-strong font-medium text-[var(--primitive-red-700)]">Delete Account</h3>
+                  <h3 className="text-body-strong font-medium text-[var(--primitive-red-700)]">
+                    Delete Account
+                  </h3>
                   <p className="mt-1 text-caption text-[var(--primitive-red-600)]">
                     Permanently delete your account and all associated data
                   </p>
@@ -481,14 +475,18 @@ export default function SettingsPage() {
 
               <CardContent className="space-y-6">
                 <div className="rounded-lg bg-[var(--candid-background-subtle)] p-4">
-                  <p className="text-body-strong font-medium text-[var(--candid-foreground-brand)]">Free Plan</p>
-                  <p className="mt-1 text-caption text-[var(--candid-foreground-brand)]/70">
-                    You're currently on the free tier. Upgrade to access premium features.
+                  <p className="text-body-strong font-medium text-[var(--candid-foreground-brand)]">
+                    Free Plan
+                  </p>
+                  <p className="text-[var(--candid-foreground-brand)]/70 mt-1 text-caption">
+                    You&apos;re currently on the free tier. Upgrade to access premium features.
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-body-strong font-medium text-foreground-default">Payment History</h3>
+                  <h3 className="text-foreground-default text-body-strong font-medium">
+                    Payment History
+                  </h3>
                   <p className="mt-2 text-caption text-foreground-muted">No payments yet</p>
                 </div>
               </CardContent>
@@ -498,7 +496,7 @@ export default function SettingsPage() {
           {/* Sign Out */}
           <Button
             variant="ghost"
-            className="mt-6 text-[var(--primitive-red-600)] hover:text-[var(--primitive-red-700)] hover:bg-[var(--primitive-red-100)]"
+            className="mt-6 text-[var(--primitive-red-600)] hover:bg-[var(--primitive-red-100)] hover:text-[var(--primitive-red-700)]"
             leftIcon={<SignOut size={18} />}
             onClick={handleSignOut}
           >

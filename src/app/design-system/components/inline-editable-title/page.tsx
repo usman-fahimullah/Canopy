@@ -9,13 +9,43 @@ import { PageNavigation } from "@/components/design-system/PageNavigation";
 
 const inlineEditableTitleProps = [
   { name: "value", type: "string", required: true, description: "Current title value" },
-  { name: "onChange", type: "(value: string) => void", required: true, description: "Callback when value changes" },
-  { name: "placeholder", type: "string", default: '"Untitled"', description: "Placeholder when empty" },
-  { name: "size", type: '"sm" | "default" | "lg"', default: '"default"', description: "Title size" },
+  {
+    name: "onChange",
+    type: "(value: string) => void",
+    required: true,
+    description: "Callback when value changes",
+  },
+  {
+    name: "placeholder",
+    type: "string",
+    default: '"Untitled"',
+    description: "Placeholder when empty",
+  },
+  {
+    name: "size",
+    type: '"sm" | "default" | "lg"',
+    default: '"default"',
+    description: "Title size",
+  },
   { name: "disabled", type: "boolean", default: "false", description: "Disable editing" },
-  { name: "onEditStart", type: "() => void", default: "undefined", description: "Called when editing starts" },
-  { name: "onEditEnd", type: "() => void", default: "undefined", description: "Called when editing ends" },
-  { name: "className", type: "string", default: "undefined", description: "Additional CSS classes" },
+  {
+    name: "onEditStart",
+    type: "() => void",
+    default: "undefined",
+    description: "Called when editing starts",
+  },
+  {
+    name: "onEditEnd",
+    type: "() => void",
+    default: "undefined",
+    description: "Called when editing ends",
+  },
+  {
+    name: "className",
+    type: "string",
+    default: "undefined",
+    description: "Additional CSS classes",
+  },
 ];
 
 export default function InlineEditableTitlePage() {
@@ -30,22 +60,17 @@ export default function InlineEditableTitlePage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Inline Editable Title
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          InlineEditableTitle provides a click-to-edit title that seamlessly
-          transitions between display and edit modes. Perfect for page headers
-          and document titles.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          InlineEditableTitle provides a click-to-edit title that seamlessly transitions between
+          display and edit modes. Perfect for page headers and document titles.
         </p>
       </div>
 
       {/* Basic Usage */}
-      <ComponentCard
-        id="basic-usage"
-        title="Basic Usage"
-        description="Click to edit inline title"
-      >
+      <ComponentCard id="basic-usage" title="Basic Usage" description="Click to edit inline title">
         <CodePreview
           code={`const [title, setTitle] = useState("Click to edit");
 
@@ -55,44 +80,25 @@ export default function InlineEditableTitlePage() {
 />`}
         >
           <div className="max-w-md">
-            <InlineEditableTitle
-              value={title1}
-              onChange={setTitle1}
-            />
+            <InlineEditableTitle value={title1} onChange={setTitle1} />
           </div>
         </CodePreview>
       </ComponentCard>
 
       {/* Sizes */}
-      <ComponentCard
-        id="sizes"
-        title="Sizes"
-        description="Available title sizes"
-      >
-        <div className="space-y-6 max-w-md">
+      <ComponentCard id="sizes" title="Sizes" description="Available title sizes">
+        <div className="max-w-md space-y-6">
           <div>
-            <p className="text-caption text-foreground-muted mb-2">Small</p>
-            <InlineEditableTitle
-              value={smallTitle}
-              onChange={setSmallTitle}
-              size="sm"
-            />
+            <p className="mb-2 text-caption text-foreground-muted">Small</p>
+            <InlineEditableTitle value={smallTitle} onChange={setSmallTitle} size="sm" />
           </div>
           <div>
-            <p className="text-caption text-foreground-muted mb-2">Default</p>
-            <InlineEditableTitle
-              value={mediumTitle}
-              onChange={setMediumTitle}
-              size="default"
-            />
+            <p className="mb-2 text-caption text-foreground-muted">Default</p>
+            <InlineEditableTitle value={mediumTitle} onChange={setMediumTitle} size="default" />
           </div>
           <div>
-            <p className="text-caption text-foreground-muted mb-2">Large</p>
-            <InlineEditableTitle
-              value={largeTitle}
-              onChange={setLargeTitle}
-              size="lg"
-            />
+            <p className="mb-2 text-caption text-foreground-muted">Large</p>
+            <InlineEditableTitle value={largeTitle} onChange={setLargeTitle} size="lg" />
           </div>
         </div>
       </ComponentCard>
@@ -113,38 +119,22 @@ export default function InlineEditableTitlePage() {
       </ComponentCard>
 
       {/* Disabled State */}
-      <ComponentCard
-        id="disabled"
-        title="Disabled State"
-        description="Non-editable title"
-      >
+      <ComponentCard id="disabled" title="Disabled State" description="Non-editable title">
         <div className="max-w-md">
-          <InlineEditableTitle
-            value="Read-only title"
-            onChange={() => {}}
-            disabled
-          />
+          <InlineEditableTitle value="Read-only title" onChange={() => {}} disabled />
         </div>
       </ComponentCard>
 
       {/* In Context */}
-      <ComponentCard
-        id="in-context"
-        title="In Context"
-        description="Title in a page header"
-      >
-        <div className="max-w-2xl p-6 border border-border rounded-lg">
-          <div className="flex items-center justify-between mb-6">
-            <InlineEditableTitle
-              value={title2}
-              onChange={setTitle2}
-              size="lg"
-            />
+      <ComponentCard id="in-context" title="In Context" description="Title in a page header">
+        <div className="max-w-2xl rounded-lg border border-border p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <InlineEditableTitle value={title2} onChange={setTitle2} size="lg" />
             <div className="flex gap-2">
-              <button className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-background-subtle">
+              <button className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-background-subtle">
                 Preview
               </button>
-              <button className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+              <button className="rounded-lg bg-primary-600 px-3 py-1.5 text-sm text-white hover:bg-primary-700">
                 Publish
               </button>
             </div>
@@ -167,13 +157,13 @@ export default function InlineEditableTitlePage() {
           <InlineEditableTitle
             value={title1}
             onChange={setTitle1}
+            // eslint-disable-next-line no-console
             onEditStart={() => console.log("Edit started")}
+            // eslint-disable-next-line no-console
             onEditEnd={() => console.log("Edit ended, value:", title1)}
             placeholder="Edit to see callbacks"
           />
-          <p className="text-caption text-foreground-muted mt-2">
-            Check console for edit events
-          </p>
+          <p className="mt-2 text-caption text-foreground-muted">Check console for edit events</p>
         </div>
       </ComponentCard>
 

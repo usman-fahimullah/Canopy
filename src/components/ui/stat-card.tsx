@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Minus, ArrowRight } from "lucide-react";
+import { TrendUp, TrendDown, Minus, ArrowRight } from "@phosphor-icons/react";
 
 /**
  * StatCard component for dashboard metrics
@@ -39,14 +39,13 @@ function getTrendColor(direction: TrendDirection, positive: boolean) {
 }
 
 function getTrendIcon(direction: TrendDirection) {
-  if (direction === "up") return TrendingUp;
-  if (direction === "down") return TrendingDown;
+  if (direction === "up") return TrendUp;
+  if (direction === "down") return TrendDown;
   return Minus;
 }
 
 export interface StatCardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof statCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof statCardVariants> {
   /** Stat label */
   label: string;
   /** Main value */
@@ -86,26 +85,18 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
     ref
   ) => {
     const trendDirection: TrendDirection =
-      trend === undefined || trend === 0
-        ? "neutral"
-        : trend > 0
-          ? "up"
-          : "down";
+      trend === undefined || trend === 0 ? "neutral" : trend > 0 ? "up" : "down";
     const TrendIcon = getTrendIcon(trendDirection);
     const trendColor = getTrendColor(trendDirection, trendPositive);
 
     return (
-      <div
-        ref={ref}
-        className={cn(statCardVariants({ size }), className)}
-        {...props}
-      >
+      <div ref={ref} className={cn(statCardVariants({ size }), className)} {...props}>
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <p className="text-caption text-foreground-muted">{label}</p>
             <p
               className={cn(
-                "font-semibold text-foreground-default",
+                "text-foreground-default font-semibold",
                 size === "sm" && "text-heading-sm",
                 size === "md" && "text-heading-md",
                 size === "lg" && "text-heading-lg"
@@ -114,11 +105,7 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
               {value}
             </p>
           </div>
-          {icon && (
-            <div className="rounded-lg bg-background-muted p-2">
-              {icon}
-            </div>
-          )}
+          {icon && <div className="rounded-lg bg-background-muted p-2">{icon}</div>}
         </div>
 
         {(trend !== undefined || previousValue !== undefined || action) && (
@@ -134,16 +121,14 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
                     </span>
                   </div>
                 )}
-                <span className="text-caption-sm text-foreground-subtle">
-                  {trendLabel}
-                </span>
+                <span className="text-caption-sm text-foreground-subtle">{trendLabel}</span>
               </div>
             )}
             {action && (
               <button
                 type="button"
                 onClick={action.onClick}
-                className="inline-flex items-center gap-1 text-caption text-foreground-link hover:text-foreground-link-hover transition-colors"
+                className="inline-flex items-center gap-1 text-caption text-foreground-link transition-colors hover:text-foreground-link-hover"
               >
                 {action.label}
                 <ArrowRight className="h-3 w-3" />
@@ -194,24 +179,14 @@ interface MiniStatProps extends React.HTMLAttributes<HTMLDivElement> {
 const MiniStat = React.forwardRef<HTMLDivElement, MiniStatProps>(
   ({ className, label, value, trend, trendPositive = true, ...props }, ref) => {
     const trendDirection: TrendDirection =
-      trend === undefined || trend === 0
-        ? "neutral"
-        : trend > 0
-          ? "up"
-          : "down";
+      trend === undefined || trend === 0 ? "neutral" : trend > 0 ? "up" : "down";
     const trendColor = getTrendColor(trendDirection, trendPositive);
 
     return (
-      <div
-        ref={ref}
-        className={cn("inline-flex items-center gap-3", className)}
-        {...props}
-      >
+      <div ref={ref} className={cn("inline-flex items-center gap-3", className)} {...props}>
         <div>
           <p className="text-caption-sm text-foreground-muted">{label}</p>
-          <p className="text-body-sm font-semibold text-foreground-default">
-            {value}
-          </p>
+          <p className="text-foreground-default text-body-sm font-semibold">{value}</p>
         </div>
         {trend !== undefined && (
           <span className={cn("text-caption font-medium", trendColor)}>

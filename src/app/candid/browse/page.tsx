@@ -115,11 +115,11 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <Link
             href={`/candid/coach/${mentor.id}`}
-            className="text-body-strong font-semibold text-foreground-default hover:text-[var(--primitive-green-800)]"
+            className="text-foreground-default text-body-strong font-semibold hover:text-[var(--primitive-green-800)]"
           >
             {mentor.firstName} {mentor.lastName}
           </Link>
@@ -137,7 +137,9 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
           {mentor.rating && mentor.rating > 0 && (
             <span className="flex items-center gap-1">
               <Star size={12} weight="fill" className="text-[#F59E0B]" />
-              <span className="font-semibold text-foreground-default">{mentor.rating.toFixed(1)}</span>
+              <span className="text-foreground-default font-semibold">
+                {mentor.rating.toFixed(1)}
+              </span>
             </span>
           )}
           <span className="flex items-center gap-1 text-foreground-muted">
@@ -155,9 +157,7 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
 
       {/* Actions */}
       <Button variant="secondary" size="sm" rightIcon={<CaretRight size={14} />} asChild>
-        <Link href={`/candid/coach/${mentor.id}`}>
-          View Profile
-        </Link>
+        <Link href={`/candid/coach/${mentor.id}`}>View Profile</Link>
       </Button>
     </Card>
   );
@@ -234,10 +234,10 @@ export default function BrowsePage() {
   }, [coaches]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 pb-24 sm:px-6 md:pb-8 lg:px-8">
       {/* Header - Clean, no gradient */}
       <div className="mb-8">
-        <h1 className="text-heading-md font-semibold text-foreground-default">Find a Coach</h1>
+        <h1 className="text-foreground-default text-heading-md font-semibold">Find a Coach</h1>
         <p className="mt-2 text-body text-foreground-muted">
           Connect with experienced climate professionals who can guide your career transition
         </p>
@@ -252,7 +252,8 @@ export default function BrowsePage() {
             <Star size={16} weight="fill" className="text-[#F59E0B]" />
             {coaches.length > 0
               ? (coaches.reduce((acc, c) => acc + (c.rating || 0), 0) / coaches.length).toFixed(1)
-              : "0.0"} avg. rating
+              : "0.0"}{" "}
+            avg. rating
           </span>
         </div>
       </div>
@@ -260,7 +261,9 @@ export default function BrowsePage() {
       {/* Featured Coaches Section */}
       {featuredCoaches.length > 0 && !hasActiveFilters && !loading && (
         <section className="mb-10">
-          <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">Featured Coaches</h2>
+          <h2 className="text-foreground-default mb-4 text-heading-sm font-semibold">
+            Featured Coaches
+          </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featuredCoaches.map((coach) => (
               <CoachCard key={coach.id} mentor={coach} variant="featured" />
@@ -272,7 +275,7 @@ export default function BrowsePage() {
       {/* Search & Controls */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Search */}
-        <div className="flex-1 max-w-md">
+        <div className="max-w-md flex-1">
           <SearchInput
             placeholder="Search by name, expertise, or sector..."
             value={searchQuery}
@@ -299,8 +302,11 @@ export default function BrowsePage() {
           </Button>
 
           {/* Sort */}
-          <Dropdown value={sortBy} onValueChange={(value) => setSortBy(value as "rating" | "sessions")}>
-            <DropdownTrigger className="min-w-[140px] h-10 px-3 py-2 text-caption">
+          <Dropdown
+            value={sortBy}
+            onValueChange={(value) => setSortBy(value as "rating" | "sessions")}
+          >
+            <DropdownTrigger className="h-10 min-w-[140px] px-3 py-2 text-caption">
               <DropdownValue placeholder="Sort by" />
             </DropdownTrigger>
             <DropdownContent>
@@ -310,7 +316,7 @@ export default function BrowsePage() {
           </Dropdown>
 
           {/* View Toggle */}
-          <div className="hidden sm:flex items-center gap-1">
+          <div className="hidden items-center gap-1 sm:flex">
             <Button
               variant={viewMode === "grid" ? "secondary" : "tertiary"}
               size="icon-sm"
@@ -332,8 +338,8 @@ export default function BrowsePage() {
       {/* Sector Filters - white card with shadow */}
       {showFilters && (
         <div className="mb-6 rounded-card bg-white p-4 shadow-card">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-body-strong font-medium text-foreground-default">Sectors</span>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-foreground-default text-body-strong font-medium">Sectors</span>
             {selectedSectors.length > 0 && (
               <Button variant="ghost" size="sm" onClick={() => setSelectedSectors([])}>
                 Clear
@@ -358,11 +364,11 @@ export default function BrowsePage() {
 
       {/* Active Filters */}
       {hasActiveFilters && (
-        <div className="mb-6 flex items-center gap-2 flex-wrap">
+        <div className="mb-6 flex flex-wrap items-center gap-2">
           <span className="text-caption text-foreground-muted">Showing:</span>
           {searchQuery && (
             <Chip variant="neutral" size="sm" removable onRemove={() => setSearchQuery("")}>
-              "{searchQuery}"
+              &quot;{searchQuery}&quot;
             </Chip>
           )}
           {selectedSectors.map((sector) => (
@@ -385,7 +391,7 @@ export default function BrowsePage() {
       {/* Results Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-heading-sm font-semibold text-foreground-default">
+          <h2 className="text-foreground-default text-heading-sm font-semibold">
             {hasActiveFilters ? "Search Results" : "All Coaches"}
           </h2>
           {!loading && (
@@ -423,9 +429,7 @@ export default function BrowsePage() {
       {!loading && !error && sortedCoaches.length > 0 && (
         <div
           className={cn(
-            viewMode === "grid"
-              ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-              : "flex flex-col gap-4"
+            viewMode === "grid" ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3" : "flex flex-col gap-4"
           )}
         >
           {sortedCoaches.map((coach) =>

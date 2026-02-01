@@ -91,20 +91,20 @@ const MOCK_JOB_DATA = {
       type: "text" as const,
       title: "Why are you interested in this role?",
       required: true,
-      description: "Tell us what excites you about this opportunity"
+      description: "Tell us what excites you about this opportunity",
     },
     {
       id: "q2",
       type: "yes-no" as const,
       title: "Do you have experience with renewable energy projects?",
-      required: true
+      required: true,
     },
     {
       id: "q3",
       type: "multiple-choice" as const,
       title: "What is your preferred work style?",
       required: false,
-      options: ["Remote", "Hybrid", "On-site"]
+      options: ["Remote", "Hybrid", "On-site"],
     },
   ],
 };
@@ -116,14 +116,14 @@ export default function ApplyPage() {
   const jobId = params.jobId as string;
 
   // Check if in preview mode (employer view)
-  const isPreviewMode = searchParams.get('preview') === 'true';
-  const [viewMode, setViewMode] = React.useState<'employer' | 'candidate'>(
-    isPreviewMode ? 'employer' : 'candidate'
+  const isPreviewMode = searchParams.get("preview") === "true";
+  const [viewMode, setViewMode] = React.useState<"employer" | "candidate">(
+    isPreviewMode ? "employer" : "candidate"
   );
 
   // Load from localStorage on mount
   const getInitialFormData = (): FormData => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return {
         name: "",
         email: "",
@@ -227,7 +227,7 @@ export default function ApplyPage() {
     }
 
     // Required questions
-    MOCK_JOB_DATA.questions.forEach(q => {
+    MOCK_JOB_DATA.questions.forEach((q) => {
       if (q.required) {
         total++;
         if (formData.questionAnswers[q.id]) completed++;
@@ -238,14 +238,14 @@ export default function ApplyPage() {
   }, [formData]);
 
   // File upload handlers
-  const handleFileUpload = (field: keyof Pick<FormData, "resumeFile" | "coverLetterFile" | "portfolioFile">) => (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData({ ...formData, [field]: file });
-    }
-  };
+  const handleFileUpload =
+    (field: keyof Pick<FormData, "resumeFile" | "coverLetterFile" | "portfolioFile">) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setFormData({ ...formData, [field]: file });
+      }
+    };
 
   // Validation
   const validateForm = () => {
@@ -286,21 +286,21 @@ export default function ApplyPage() {
 
     if (!validateForm()) {
       const firstError = document.querySelector('[data-error="true"]');
-      firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
     setIsSubmitting(true);
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Clear draft from localStorage
     localStorage.removeItem(`application-draft-${jobId}`);
 
     setIsSubmitting(false);
     setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Save draft handler
@@ -313,51 +313,50 @@ export default function ApplyPage() {
     };
     localStorage.setItem(`application-draft-${jobId}`, JSON.stringify(dataToSave));
     setLastSaved(new Date());
-    alert('Draft saved! You can return to complete your application later.');
+    alert("Draft saved! You can return to complete your application later.");
   };
 
   // Success state
   if (submitted) {
     return (
       <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
-        <div className="max-w-2xl mx-auto px-4 py-16">
-          <div className="bg-white rounded-2xl p-12 text-center border border-[var(--primitive-neutral-300)]">
-            <div className="w-16 h-16 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle weight="fill" className="w-10 h-10 text-[var(--primitive-green-600)]" />
+        <div className="mx-auto max-w-2xl px-4 py-16">
+          <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-white p-12 text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
+              <CheckCircle weight="fill" className="h-10 w-10 text-[var(--primitive-green-600)]" />
             </div>
 
-            <h1 className="text-heading-md text-foreground mb-3">
-              Application Submitted!
-            </h1>
+            <h1 className="mb-3 text-heading-md text-foreground">Application Submitted!</h1>
 
-            <p className="text-body text-foreground-muted mb-8">
-              Thank you for applying to <span className="font-semibold">{MOCK_JOB_DATA.title}</span> at {MOCK_JOB_DATA.company}.
-              We've received your application and will review it shortly.
+            <p className="mb-8 text-body text-foreground-muted">
+              Thank you for applying to <span className="font-semibold">{MOCK_JOB_DATA.title}</span>{" "}
+              at {MOCK_JOB_DATA.company}. We&apos;ve received your application and will review it
+              shortly.
             </p>
 
-            <div className="bg-[var(--primitive-neutral-100)] rounded-xl p-6 mb-8 text-left">
-              <h3 className="text-body-strong text-foreground mb-3">What's Next?</h3>
+            <div className="mb-8 rounded-xl bg-[var(--primitive-neutral-100)] p-6 text-left">
+              <h3 className="mb-3 text-body-strong text-foreground">What&apos;s Next?</h3>
               <ul className="space-y-2 text-body-sm text-foreground-muted">
                 <li className="flex items-start gap-2">
-                  <span className="text-[var(--primitive-green-600)] mt-1">•</span>
-                  <span>You'll receive a confirmation email within a few minutes</span>
+                  <span className="mt-1 text-[var(--primitive-green-600)]">•</span>
+                  <span>You&apos;ll receive a confirmation email within a few minutes</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[var(--primitive-green-600)] mt-1">•</span>
+                  <span className="mt-1 text-[var(--primitive-green-600)]">•</span>
                   <span>Our team will review your application within 5-7 business days</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-[var(--primitive-green-600)] mt-1">•</span>
-                  <span>We'll reach out via email with next steps or updates</span>
+                  <span className="mt-1 text-[var(--primitive-green-600)]">•</span>
+                  <span>We&apos;ll reach out via email with next steps or updates</span>
                 </li>
               </ul>
             </div>
 
-            <div className="flex gap-3 justify-center">
+            <div className="flex justify-center gap-3">
               <Button
                 variant="tertiary"
                 size="lg"
-                leftIcon={<ArrowLeft weight="regular" className="w-5 h-5" />}
+                leftIcon={<ArrowLeft weight="regular" className="h-5 w-5" />}
                 onClick={() => router.push("/")}
               >
                 Back to Jobs
@@ -397,21 +396,19 @@ export default function ApplyPage() {
   return (
     <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
       {/* Header */}
-      <header className="bg-white border-b border-[var(--primitive-neutral-300)] sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <div className="flex items-start justify-between mb-4">
+      <header className="sticky top-0 z-10 border-b border-[var(--primitive-neutral-300)] bg-white">
+        <div className="mx-auto max-w-4xl px-4 py-6">
+          <div className="mb-4 flex items-start justify-between">
             <div>
-              <h1 className="text-heading-sm text-foreground mb-2">
-                {MOCK_JOB_DATA.title}
-              </h1>
+              <h1 className="mb-2 text-heading-sm text-foreground">{MOCK_JOB_DATA.title}</h1>
               <div className="flex flex-wrap items-center gap-3 text-body-sm text-foreground-muted">
                 <div className="flex items-center gap-1">
-                  <Buildings weight="regular" className="w-4 h-4" />
+                  <Buildings weight="regular" className="h-4 w-4" />
                   <span>{MOCK_JOB_DATA.company}</span>
                 </div>
                 <span>•</span>
                 <div className="flex items-center gap-1">
-                  <MapPin weight="regular" className="w-4 h-4" />
+                  <MapPin weight="regular" className="h-4 w-4" />
                   <span>{MOCK_JOB_DATA.location}</span>
                 </div>
                 <span>•</span>
@@ -420,7 +417,7 @@ export default function ApplyPage() {
             </div>
             <div className="flex flex-col items-end gap-1">
               <div className="flex items-center gap-2 text-caption text-foreground-muted">
-                <Clock weight="regular" className="w-4 h-4" />
+                <Clock weight="regular" className="h-4 w-4" />
                 <span>~{MOCK_JOB_DATA.estimatedTime}</span>
               </div>
               {lastSaved && (
@@ -437,7 +434,7 @@ export default function ApplyPage() {
               <span>Progress</span>
               <span>{progress}% complete</span>
             </div>
-            <div className="h-2 bg-[var(--primitive-neutral-200)] rounded-full overflow-hidden">
+            <div className="h-2 overflow-hidden rounded-full bg-[var(--primitive-neutral-200)]">
               <div
                 className="h-full bg-[var(--primitive-green-500)] transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -449,35 +446,35 @@ export default function ApplyPage() {
 
       {/* Employer Preview Controls */}
       {isPreviewMode && (
-        <div className="bg-[var(--primitive-blue-100)] border-b border-[var(--primitive-blue-300)]">
-          <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="border-b border-[var(--primitive-blue-300)] bg-[var(--primitive-blue-100)]">
+          <div className="mx-auto max-w-4xl px-4 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Eye weight="fill" className="w-5 h-5 text-[var(--primitive-blue-600)]" />
+                <Eye weight="fill" className="h-5 w-5 text-[var(--primitive-blue-600)]" />
                 <div>
                   <h3 className="text-body-sm font-semibold text-foreground">Preview Mode</h3>
                   <p className="text-caption text-foreground-muted">
-                    {viewMode === 'employer'
-                      ? 'Viewing as employer - data is interactive but won\'t be saved'
-                      : 'Viewing as candidate - this is exactly what job seekers will see'}
+                    {viewMode === "employer"
+                      ? "Viewing as employer - data is interactive but won't be saved"
+                      : "Viewing as candidate - this is exactly what job seekers will see"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <SegmentedController
                   options={[
-                    { value: "employer", label: "Employer View", icon: <Pencil weight="regular" /> },
+                    {
+                      value: "employer",
+                      label: "Employer View",
+                      icon: <Pencil weight="regular" />,
+                    },
                     { value: "candidate", label: "Candidate View", icon: <Eye weight="regular" /> },
                   ]}
                   value={viewMode}
-                  onValueChange={(value) => setViewMode(value as 'employer' | 'candidate')}
+                  onValueChange={(value) => setViewMode(value as "employer" | "candidate")}
                   className="w-auto"
                 />
-                <Button
-                  variant="tertiary"
-                  size="sm"
-                  onClick={() => window.close()}
-                >
+                <Button variant="tertiary" size="sm" onClick={() => window.close()}>
                   Close Preview
                 </Button>
               </div>
@@ -487,9 +484,9 @@ export default function ApplyPage() {
       )}
 
       {/* Main Form */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="mx-auto max-w-4xl px-4 py-8">
         {/* Employer View Info Banner */}
-        {isPreviewMode && viewMode === 'employer' && (
+        {isPreviewMode && viewMode === "employer" && (
           <div className="mb-6">
             <Banner
               type="feature"
@@ -504,15 +501,13 @@ export default function ApplyPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Info Section */}
-          <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
-            <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
-              <h2 className="text-body-strong text-foreground mb-1">Personal Info</h2>
-              <p className="text-caption text-foreground-muted">
-                Tell us about yourself
-              </p>
+          <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+            <div className="border-b border-[var(--primitive-neutral-200)] p-6">
+              <h2 className="mb-1 text-body-strong text-foreground">Personal Info</h2>
+              <p className="text-caption text-foreground-muted">Tell us about yourself</p>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="space-y-4 p-6">
               {/* Name */}
               <div className="space-y-2" data-error={!!errors.name}>
                 <Label>
@@ -530,9 +525,7 @@ export default function ApplyPage() {
                   error={!!errors.name}
                 />
                 {errors.name && (
-                  <p className="text-caption text-[var(--primitive-red-600)]">
-                    {errors.name}
-                  </p>
+                  <p className="text-caption text-[var(--primitive-red-600)]">{errors.name}</p>
                 )}
               </div>
 
@@ -554,13 +547,11 @@ export default function ApplyPage() {
                   error={!!errors.email}
                 />
                 {errors.email && (
-                  <p className="text-caption text-[var(--primitive-red-600)]">
-                    {errors.email}
-                  </p>
+                  <p className="text-caption text-[var(--primitive-red-600)]">{errors.email}</p>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Date of Birth */}
                 {MOCK_JOB_DATA.personalDetails.dateOfBirth.visible && (
                   <div className="space-y-2">
@@ -592,7 +583,7 @@ export default function ApplyPage() {
                       value={formData.pronouns}
                       onValueChange={(value) => setFormData({ ...formData, pronouns: value })}
                     >
-                      <SelectTrigger className="rounded-xl h-12">
+                      <SelectTrigger className="h-12 rounded-xl">
                         <SelectValue placeholder="Select pronouns" />
                       </SelectTrigger>
                       <SelectContent>
@@ -638,16 +629,16 @@ export default function ApplyPage() {
           </section>
 
           {/* Career Details Section */}
-          <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
-            <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
-              <h2 className="text-body-strong text-foreground mb-1">Career Details</h2>
+          <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+            <div className="border-b border-[var(--primitive-neutral-200)] p-6">
+              <h2 className="mb-1 text-body-strong text-foreground">Career Details</h2>
               <p className="text-caption text-foreground-muted">
                 Share your professional background
               </p>
             </div>
 
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4 p-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Current Role */}
                 {MOCK_JOB_DATA.careerDetails.currentRole.visible && (
                   <div className="space-y-2">
@@ -702,7 +693,7 @@ export default function ApplyPage() {
                         if (errors.yearsExperience) setErrors({ ...errors, yearsExperience: "" });
                       }}
                     >
-                      <SelectTrigger className="rounded-xl h-12">
+                      <SelectTrigger className="h-12 rounded-xl">
                         <SelectValue placeholder="Select years" />
                       </SelectTrigger>
                       <SelectContent>
@@ -766,15 +757,13 @@ export default function ApplyPage() {
           {(MOCK_JOB_DATA.requiredFiles.resume ||
             MOCK_JOB_DATA.requiredFiles.coverLetter ||
             MOCK_JOB_DATA.requiredFiles.portfolio) && (
-            <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
-              <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
-                <h2 className="text-body-strong text-foreground mb-1">Required Files</h2>
-                <p className="text-caption text-foreground-muted">
-                  Upload the following documents
-                </p>
+            <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+              <div className="border-b border-[var(--primitive-neutral-200)] p-6">
+                <h2 className="mb-1 text-body-strong text-foreground">Required Files</h2>
+                <p className="text-caption text-foreground-muted">Upload the following documents</p>
               </div>
 
-              <div className="p-6 space-y-4">
+              <div className="space-y-4 p-6">
                 {/* Resume */}
                 {MOCK_JOB_DATA.requiredFiles.resume && (
                   <div className="space-y-2" data-error={!!errors.resumeFile}>
@@ -788,26 +777,32 @@ export default function ApplyPage() {
                         onChange={handleFileUpload("resumeFile")}
                         className="hidden"
                       />
-                      <div className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-                        formData.resumeFile
-                          ? 'border-[var(--primitive-green-500)] bg-[var(--primitive-green-100)]'
-                          : errors.resumeFile
-                          ? 'border-[var(--primitive-red-500)] bg-[var(--primitive-red-100)]'
-                          : 'border-[var(--primitive-neutral-300)] hover:border-[var(--primitive-neutral-400)]'
-                      }`}>
+                      <div
+                        className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+                          formData.resumeFile
+                            ? "border-[var(--primitive-green-500)] bg-[var(--primitive-green-100)]"
+                            : errors.resumeFile
+                              ? "border-[var(--primitive-red-500)] bg-[var(--primitive-red-100)]"
+                              : "border-[var(--primitive-neutral-300)] hover:border-[var(--primitive-neutral-400)]"
+                        }`}
+                      >
                         {formData.resumeFile ? (
                           <>
-                            <CheckCircle weight="fill" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-green-600)]" />
+                            <CheckCircle
+                              weight="fill"
+                              className="mx-auto mb-2 h-8 w-8 text-[var(--primitive-green-600)]"
+                            />
                             <p className="text-body-sm text-foreground">
                               {formData.resumeFile.name}
                             </p>
-                            <p className="text-caption text-foreground-subtle">
-                              Click to replace
-                            </p>
+                            <p className="text-caption text-foreground-subtle">Click to replace</p>
                           </>
                         ) : (
                           <>
-                            <Upload weight="regular" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-neutral-500)]" />
+                            <Upload
+                              weight="regular"
+                              className="mx-auto mb-2 h-8 w-8 text-[var(--primitive-neutral-500)]"
+                            />
                             <p className="text-body-sm text-foreground-muted">
                               Click to upload or drag and drop
                             </p>
@@ -839,26 +834,32 @@ export default function ApplyPage() {
                         onChange={handleFileUpload("coverLetterFile")}
                         className="hidden"
                       />
-                      <div className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-                        formData.coverLetterFile
-                          ? 'border-[var(--primitive-green-500)] bg-[var(--primitive-green-100)]'
-                          : errors.coverLetterFile
-                          ? 'border-[var(--primitive-red-500)] bg-[var(--primitive-red-100)]'
-                          : 'border-[var(--primitive-neutral-300)] hover:border-[var(--primitive-neutral-400)]'
-                      }`}>
+                      <div
+                        className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
+                          formData.coverLetterFile
+                            ? "border-[var(--primitive-green-500)] bg-[var(--primitive-green-100)]"
+                            : errors.coverLetterFile
+                              ? "border-[var(--primitive-red-500)] bg-[var(--primitive-red-100)]"
+                              : "border-[var(--primitive-neutral-300)] hover:border-[var(--primitive-neutral-400)]"
+                        }`}
+                      >
                         {formData.coverLetterFile ? (
                           <>
-                            <CheckCircle weight="fill" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-green-600)]" />
+                            <CheckCircle
+                              weight="fill"
+                              className="mx-auto mb-2 h-8 w-8 text-[var(--primitive-green-600)]"
+                            />
                             <p className="text-body-sm text-foreground">
                               {formData.coverLetterFile.name}
                             </p>
-                            <p className="text-caption text-foreground-subtle">
-                              Click to replace
-                            </p>
+                            <p className="text-caption text-foreground-subtle">Click to replace</p>
                           </>
                         ) : (
                           <>
-                            <Upload weight="regular" className="w-8 h-8 mx-auto mb-2 text-[var(--primitive-neutral-500)]" />
+                            <Upload
+                              weight="regular"
+                              className="mx-auto mb-2 h-8 w-8 text-[var(--primitive-neutral-500)]"
+                            />
                             <p className="text-body-sm text-foreground-muted">
                               Click to upload or drag and drop
                             </p>
@@ -882,17 +883,19 @@ export default function ApplyPage() {
 
           {/* Additional Questions Section */}
           {MOCK_JOB_DATA.questions.length > 0 && (
-            <section className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] overflow-hidden">
-              <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
-                <h2 className="text-body-strong text-foreground mb-1">Additional Questions</h2>
-                <p className="text-caption text-foreground-muted">
-                  Help us get to know you better
-                </p>
+            <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+              <div className="border-b border-[var(--primitive-neutral-200)] p-6">
+                <h2 className="mb-1 text-body-strong text-foreground">Additional Questions</h2>
+                <p className="text-caption text-foreground-muted">Help us get to know you better</p>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="space-y-6 p-6">
                 {MOCK_JOB_DATA.questions.map((question, index) => (
-                  <div key={question.id} className="space-y-2" data-error={!!errors[`question_${question.id}`]}>
+                  <div
+                    key={question.id}
+                    className="space-y-2"
+                    data-error={!!errors[`question_${question.id}`]}
+                  >
                     <Label>
                       {index + 1}. {question.title}
                       {question.required && (
@@ -900,7 +903,7 @@ export default function ApplyPage() {
                       )}
                     </Label>
                     {question.description && (
-                      <p className="text-caption text-foreground-muted mb-2">
+                      <p className="mb-2 text-caption text-foreground-muted">
                         {question.description}
                       </p>
                     )}
@@ -915,8 +918,8 @@ export default function ApplyPage() {
                               ...formData,
                               questionAnswers: {
                                 ...formData.questionAnswers,
-                                [question.id]: e.target.value
-                              }
+                                [question.id]: e.target.value,
+                              },
                             });
                             if (errors[`question_${question.id}`]) {
                               const newErrors = { ...errors };
@@ -945,8 +948,8 @@ export default function ApplyPage() {
                               ...formData,
                               questionAnswers: {
                                 ...formData.questionAnswers,
-                                [question.id]: value
-                              }
+                                [question.id]: value,
+                              },
                             });
                             if (errors[`question_${question.id}`]) {
                               const newErrors = { ...errors };
@@ -985,8 +988,8 @@ export default function ApplyPage() {
                               ...formData,
                               questionAnswers: {
                                 ...formData.questionAnswers,
-                                [question.id]: value
-                              }
+                                [question.id]: value,
+                              },
                             });
                             if (errors[`question_${question.id}`]) {
                               const newErrors = { ...errors };
@@ -997,14 +1000,8 @@ export default function ApplyPage() {
                         >
                           {question.options?.map((option, optIndex) => (
                             <div key={optIndex} className="flex items-center gap-2">
-                              <RadioGroupItem
-                                value={option}
-                                id={`${question.id}-${optIndex}`}
-                              />
-                              <Label
-                                htmlFor={`${question.id}-${optIndex}`}
-                                className="font-normal"
-                              >
+                              <RadioGroupItem value={option} id={`${question.id}-${optIndex}`} />
+                              <Label htmlFor={`${question.id}-${optIndex}`} className="font-normal">
                                 {option}
                               </Label>
                             </div>
@@ -1024,23 +1021,23 @@ export default function ApplyPage() {
           )}
 
           {/* Submit Section */}
-          <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-300)] p-6">
-            <div className="flex items-start gap-3 mb-6">
+          <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-white p-6">
+            <div className="mb-6 flex items-start gap-3">
               <Checkbox id="consent" required />
-              <Label htmlFor="consent" className="font-normal text-caption leading-relaxed">
-                I certify that the information provided in this application is true and complete.
-                I understand that false information may be grounds for not hiring me or for immediate
+              <Label htmlFor="consent" className="text-caption font-normal leading-relaxed">
+                I certify that the information provided in this application is true and complete. I
+                understand that false information may be grounds for not hiring me or for immediate
                 termination of employment at any point in the future.
               </Label>
             </div>
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex justify-end gap-3">
               {!isPreviewMode && (
                 <Button
                   type="button"
                   variant="tertiary"
                   size="lg"
-                  leftIcon={<FloppyDisk weight="regular" className="w-5 h-5" />}
+                  leftIcon={<FloppyDisk weight="regular" className="h-5 w-5" />}
                   onClick={handleSaveDraft}
                 >
                   Save as Draft
@@ -1056,8 +1053,8 @@ export default function ApplyPage() {
                 {isPreviewMode
                   ? "Preview Only - Submit Disabled"
                   : isSubmitting
-                  ? "Submitting..."
-                  : "Submit Application"}
+                    ? "Submitting..."
+                    : "Submit Application"}
               </Button>
             </div>
           </div>

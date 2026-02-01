@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       yearsExperience: formData.get("yearsExperience"),
       linkedIn: formData.get("linkedIn"),
       portfolio: formData.get("portfolio"),
-      questionAnswers: JSON.parse(formData.get("questionAnswers") as string || "{}"),
+      questionAnswers: JSON.parse((formData.get("questionAnswers") as string) || "{}"),
       submittedAt: new Date().toISOString(),
     };
 
@@ -33,28 +33,29 @@ export async function POST(request: NextRequest) {
     // 4. Send confirmation email
     // 5. Notify recruiter
 
-    console.log("New application received:", application);
-    console.log("Files:", {
-      resume: resumeFile?.name,
-      coverLetter: coverLetterFile?.name,
-      portfolio: portfolioFile?.name,
-    });
+    // TODO: Log application receipt to proper logging service
+    // Application received with files: resume, coverLetter, portfolio
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    return NextResponse.json({
-      success: true,
-      applicationId: `app_${Date.now()}`,
-      message: "Application submitted successfully",
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        applicationId: `app_${Date.now()}`,
+        message: "Application submitted successfully",
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error submitting application:", error);
-    return NextResponse.json({
-      success: false,
-      message: "Failed to submit application",
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to submit application",
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -65,10 +66,13 @@ export async function GET(request: NextRequest) {
     const jobId = searchParams.get("jobId");
 
     if (!jobId) {
-      return NextResponse.json({
-        success: false,
-        message: "jobId is required",
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "jobId is required",
+        },
+        { status: 400 }
+      );
     }
 
     // In a real app, fetch from database
@@ -112,17 +116,22 @@ export async function GET(request: NextRequest) {
       },
     ];
 
-    return NextResponse.json({
-      success: true,
-      applications: mockApplications,
-      total: mockApplications.length,
-    }, { status: 200 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        applications: mockApplications,
+        total: mockApplications.length,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error fetching applications:", error);
-    return NextResponse.json({
-      success: false,
-      message: "Failed to fetch applications",
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to fetch applications",
+      },
+      { status: 500 }
+    );
   }
 }

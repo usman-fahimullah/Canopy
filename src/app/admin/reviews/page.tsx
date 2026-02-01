@@ -1,18 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Avatar } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Star,
-  Flag,
-  Eye,
-  EyeSlash,
-  ChatCircle,
-  Warning,
-} from "@phosphor-icons/react";
+import { Star, Flag, Eye, EyeSlash, ChatCircle, Warning } from "@phosphor-icons/react";
 
 interface AdminReview {
   id: string;
@@ -42,11 +35,7 @@ export default function AdminReviewsPage() {
   const [flaggedOnly, setFlaggedOnly] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [flaggedOnly]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -62,12 +51,13 @@ export default function AdminReviewsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [flaggedOnly]);
 
-  const handleAction = async (
-    reviewId: string,
-    action: "hide" | "unhide" | "unflag"
-  ) => {
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  const handleAction = async (reviewId: string, action: "hide" | "unhide" | "unflag") => {
     setUpdating(reviewId);
     try {
       const body: Record<string, unknown> = { reviewId };
@@ -102,11 +92,9 @@ export default function AdminReviewsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)]">
-            Reviews
-          </h1>
+          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)]">Reviews</h1>
           <p className="text-sm text-[var(--primitive-neutral-600)]">
             Moderate reviews and handle flagged content
           </p>
@@ -128,18 +116,16 @@ export default function AdminReviewsPage() {
           <Spinner size="lg" />
         </div>
       ) : reviews.length === 0 ? (
-        <div className="text-center py-16 text-[var(--primitive-neutral-500)]">
+        <div className="py-16 text-center text-[var(--primitive-neutral-500)]">
           <Star size={48} className="mx-auto mb-3 opacity-40" />
-          <p className="font-medium">
-            {flaggedOnly ? "No flagged reviews" : "No reviews yet"}
-          </p>
+          <p className="font-medium">{flaggedOnly ? "No flagged reviews" : "No reviews yet"}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {reviews.map((review) => (
             <div
               key={review.id}
-              className={`bg-white rounded-xl border p-5 ${
+              className={`rounded-xl border bg-white p-5 ${
                 review.isFlagged
                   ? "border-[var(--primitive-red-300)]"
                   : !review.isVisible
@@ -149,11 +135,8 @@ export default function AdminReviewsPage() {
             >
               {/* Flags */}
               {review.isFlagged && (
-                <div className="flex items-center gap-2 mb-3 p-2 bg-[var(--primitive-red-100)] rounded-lg">
-                  <Warning
-                    size={16}
-                    className="text-[var(--primitive-red-600)]"
-                  />
+                <div className="mb-3 flex items-center gap-2 rounded-lg bg-[var(--primitive-red-100)] p-2">
+                  <Warning size={16} className="text-[var(--primitive-red-600)]" />
                   <span className="text-sm font-medium text-[var(--primitive-red-700)]">
                     Flagged
                   </span>
@@ -166,11 +149,8 @@ export default function AdminReviewsPage() {
               )}
 
               {!review.isVisible && (
-                <div className="flex items-center gap-2 mb-3 p-2 bg-[var(--primitive-neutral-100)] rounded-lg">
-                  <EyeSlash
-                    size={16}
-                    className="text-[var(--primitive-neutral-600)]"
-                  />
+                <div className="mb-3 flex items-center gap-2 rounded-lg bg-[var(--primitive-neutral-100)] p-2">
+                  <EyeSlash size={16} className="text-[var(--primitive-neutral-600)]" />
                   <span className="text-sm font-medium text-[var(--primitive-neutral-700)]">
                     Hidden from public view
                   </span>
@@ -178,7 +158,7 @@ export default function AdminReviewsPage() {
               )}
 
               {/* Header */}
-              <div className="flex items-start justify-between mb-3">
+              <div className="mb-3 flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar
                     size="sm"
@@ -216,7 +196,7 @@ export default function AdminReviewsPage() {
               </div>
 
               {/* Coach info */}
-              <div className="flex items-center gap-2 mb-3 text-sm text-[var(--primitive-neutral-600)]">
+              <div className="mb-3 flex items-center gap-2 text-sm text-[var(--primitive-neutral-600)]">
                 <span>Coach:</span>
                 <Avatar
                   size="xs"
@@ -231,16 +211,14 @@ export default function AdminReviewsPage() {
 
               {/* Comment */}
               {review.comment && (
-                <p className="text-sm text-[var(--primitive-neutral-700)] mb-3">
-                  {review.comment}
-                </p>
+                <p className="mb-3 text-sm text-[var(--primitive-neutral-700)]">{review.comment}</p>
               )}
 
               {/* Coach Response */}
               {review.coachResponse && (
-                <div className="pl-4 border-l-2 border-[var(--primitive-green-200)] mb-3">
-                  <p className="text-xs text-[var(--primitive-neutral-500)] mb-1">
-                    <ChatCircle size={12} className="inline mr-1" />
+                <div className="mb-3 border-l-2 border-[var(--primitive-green-200)] pl-4">
+                  <p className="mb-1 text-xs text-[var(--primitive-neutral-500)]">
+                    <ChatCircle size={12} className="mr-1 inline" />
                     Coach response:
                   </p>
                   <p className="text-sm text-[var(--primitive-neutral-700)]">
@@ -250,7 +228,7 @@ export default function AdminReviewsPage() {
               )}
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pt-3 border-t border-[var(--primitive-neutral-100)]">
+              <div className="flex items-center gap-2 border-t border-[var(--primitive-neutral-100)] pt-3">
                 {review.isVisible ? (
                   <Button
                     variant="ghost"

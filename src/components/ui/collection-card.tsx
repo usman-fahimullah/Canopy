@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { getCollectionGradient } from "@/lib/gradient-utils";
@@ -53,20 +54,7 @@ export interface CollectionCardProps {
 }
 
 const CollectionCard = React.forwardRef<HTMLAnchorElement, CollectionCardProps>(
-  (
-    {
-      title,
-      jobCount,
-      pathways,
-      description,
-      href,
-      sponsor,
-      badges,
-      className,
-      ...props
-    },
-    ref
-  ) => {
+  ({ title, jobCount, pathways, description, href, sponsor, badges, className, ...props }, ref) => {
     // Get gradient based on pathway combination
     const gradient = getCollectionGradient({ pathways });
 
@@ -76,7 +64,7 @@ const CollectionCard = React.forwardRef<HTMLAnchorElement, CollectionCardProps>(
         href={href}
         className={cn(
           // Layout
-          "group relative overflow-hidden flex flex-col",
+          "group relative flex flex-col overflow-hidden",
           // Size
           "h-[416px]",
           // Styling
@@ -94,12 +82,12 @@ const CollectionCard = React.forwardRef<HTMLAnchorElement, CollectionCardProps>(
       >
         {/* Top section: Badges */}
         {badges && badges.length > 0 && (
-          <div className="flex gap-2 mb-4">
+          <div className="mb-4 flex gap-2">
             {badges.map((badge, index) => (
               <div
                 key={index}
                 className={cn(
-                  "px-3 py-1 rounded-full text-caption-strong",
+                  "rounded-full px-3 py-1 text-caption-strong",
                   badge.variant === "accent"
                     ? "bg-[var(--primitive-neutral-0)]/20 text-[var(--primitive-neutral-0)] backdrop-blur-sm"
                     : "bg-[var(--primitive-neutral-0)]/90 text-[var(--primitive-green-800)]"
@@ -112,15 +100,15 @@ const CollectionCard = React.forwardRef<HTMLAnchorElement, CollectionCardProps>(
         )}
 
         {/* Main content area - grows to push bottom content down */}
-        <div className="flex-1 flex flex-col justify-center">
+        <div className="flex flex-1 flex-col justify-center">
           {/* Title */}
-          <h3 className="text-heading-md font-bold text-[var(--primitive-neutral-0)] mb-3">
+          <h3 className="mb-3 text-heading-md font-bold text-[var(--primitive-neutral-0)]">
             {title}
           </h3>
 
           {/* Description (optional) */}
           {description && (
-            <p className="text-body text-[var(--primitive-neutral-0)]/90 line-clamp-3">
+            <p className="text-[var(--primitive-neutral-0)]/90 line-clamp-3 text-body">
               {description}
             </p>
           )}
@@ -145,11 +133,11 @@ const CollectionCard = React.forwardRef<HTMLAnchorElement, CollectionCardProps>(
                 <PathwayTag
                   key={pathway}
                   pathway={pathway}
-                  className="bg-[var(--primitive-neutral-0)]/20 backdrop-blur-sm border border-[var(--primitive-neutral-0)]/30"
+                  className="bg-[var(--primitive-neutral-0)]/20 border-[var(--primitive-neutral-0)]/30 border backdrop-blur-sm"
                 />
               ))}
               {pathways.length > 3 && (
-                <div className="px-2 py-1 rounded-lg bg-[var(--primitive-neutral-0)]/20 backdrop-blur-sm border border-[var(--primitive-neutral-0)]/30 text-caption-strong text-[var(--primitive-neutral-0)]">
+                <div className="bg-[var(--primitive-neutral-0)]/20 border-[var(--primitive-neutral-0)]/30 rounded-lg border px-2 py-1 text-caption-strong text-[var(--primitive-neutral-0)] backdrop-blur-sm">
                   +{pathways.length - 3} more
                 </div>
               )}
@@ -158,15 +146,17 @@ const CollectionCard = React.forwardRef<HTMLAnchorElement, CollectionCardProps>(
 
           {/* Sponsor (if present) */}
           {sponsor && (
-            <div className="flex items-center gap-2 pt-4 border-t border-[var(--primitive-neutral-0)]/20">
-              <span className="text-caption text-[var(--primitive-neutral-0)]/80">
+            <div className="border-[var(--primitive-neutral-0)]/20 flex items-center gap-2 border-t pt-4">
+              <span className="text-[var(--primitive-neutral-0)]/80 text-caption">
                 Sponsored by
               </span>
               <div className="flex items-center gap-2">
                 {sponsor.logo && (
-                  <img
+                  <Image
                     src={sponsor.logo}
                     alt={sponsor.name}
+                    width={80}
+                    height={20}
                     className="h-5 w-auto object-contain"
                   />
                 )}

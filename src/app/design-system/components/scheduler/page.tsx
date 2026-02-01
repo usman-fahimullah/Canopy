@@ -26,12 +26,7 @@ import {
 import { CodePreview } from "@/components/design-system/CodeBlock";
 import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
-import {
-  VideoCamera,
-  Phone,
-  MapPin,
-  CalendarPlus,
-} from "@phosphor-icons/react";
+import { VideoCamera, Phone, MapPin, CalendarPlus } from "@phosphor-icons/react";
 import { addDays, addHours, setHours, setMinutes } from "date-fns";
 
 // Sample events for demonstration
@@ -408,29 +403,29 @@ export default function SchedulerPage() {
     <div className="space-y-12">
       {/* Overview */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Scheduler
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl mb-4">
-          Calendar and interview booking UI for scheduling interviews, viewing availability,
-          and managing appointments. Supports week, day, and month views with drag-and-drop
-          capabilities and timezone support.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Calendar and interview booking UI for scheduling interviews, viewing availability, and
+          managing appointments. Supports week, day, and month views with drag-and-drop capabilities
+          and timezone support.
         </p>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success/10 rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">When to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Interview scheduling and management</li>
               <li>Viewing team availability</li>
               <li>Self-service booking pages (Calendly-style)</li>
               <li>Managing candidate appointments</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error/10 rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">When not to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Simple date picking (use DatePicker)</li>
               <li>Event lists without time slots (use Timeline)</li>
               <li>Non-calendar task management (use Kanban)</li>
@@ -485,7 +480,7 @@ const events: SchedulerEvent[] = [
         title="Interview Types"
         description="Events are styled based on interview type"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {interviewTypes.map(({ type, label, icon }) => (
             <div key={type} className="space-y-3">
               <div className="flex items-center gap-2">
@@ -511,16 +506,12 @@ const events: SchedulerEvent[] = [
       </ComponentCard>
 
       {/* View Modes */}
-      <ComponentCard
-        id="views"
-        title="View Modes"
-        description="Week, day, and month view options"
-      >
+      <ComponentCard id="views" title="View Modes" description="Week, day, and month view options">
         <div className="space-y-8">
           {/* Week View */}
           <div>
-            <h4 className="text-body-strong mb-4">Week View</h4>
-            <div className="h-[400px] border border-border-muted rounded-lg overflow-hidden">
+            <h4 className="mb-4 text-body-strong">Week View</h4>
+            <div className="h-[400px] overflow-hidden rounded-lg border border-border-muted">
               <WeekView
                 events={sampleEvents}
                 selectedDate={selectedDate}
@@ -532,8 +523,8 @@ const events: SchedulerEvent[] = [
 
           {/* Day View */}
           <div>
-            <h4 className="text-body-strong mb-4">Day View</h4>
-            <div className="h-[400px] border border-border-muted rounded-lg overflow-hidden">
+            <h4 className="mb-4 text-body-strong">Day View</h4>
+            <div className="h-[400px] overflow-hidden rounded-lg border border-border-muted">
               <DayView
                 events={sampleEvents}
                 selectedDate={selectedDate}
@@ -545,8 +536,8 @@ const events: SchedulerEvent[] = [
 
           {/* Month View */}
           <div>
-            <h4 className="text-body-strong mb-4">Month View</h4>
-            <div className="h-[500px] border border-border-muted rounded-lg overflow-hidden">
+            <h4 className="mb-4 text-body-strong">Month View</h4>
+            <div className="h-[500px] overflow-hidden rounded-lg border border-border-muted">
               <MonthView
                 events={sampleEvents}
                 selectedDate={selectedDate}
@@ -621,6 +612,7 @@ const events: SchedulerEvent[] = [
                   interviews={sampleEvents}
                   maxItems={3}
                   onInterviewClick={setSelectedEvent}
+                  // eslint-disable-next-line no-console
                   onViewAll={() => console.log("View all")}
                 />
               </CardContent>
@@ -653,7 +645,9 @@ const events: SchedulerEvent[] = [
               title="Technical Interview"
               duration={45}
               isActive={true}
+              // eslint-disable-next-line no-console
               onCopy={() => console.log("Copied!")}
+              // eslint-disable-next-line no-console
               onToggleStatus={(active) => console.log("Status:", active)}
             />
           </div>
@@ -676,10 +670,7 @@ const events: SchedulerEvent[] = [
         >
           <div className="flex items-center gap-4">
             <Label>Current Timezone:</Label>
-            <TimezoneSelector
-              value={timezone}
-              onChange={setTimezone}
-            />
+            <TimezoneSelector value={timezone} onChange={setTimezone} />
           </div>
         </CodePreview>
       </ComponentCard>
@@ -693,10 +684,10 @@ const events: SchedulerEvent[] = [
         <div className="space-y-8">
           {/* Interview Scheduling Dashboard */}
           <div>
-            <h4 className="text-body-strong mb-4">Interview Scheduling Dashboard</h4>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <h4 className="mb-4 text-body-strong">Interview Scheduling Dashboard</h4>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                <div className="h-[400px] border border-border-muted rounded-lg overflow-hidden">
+                <div className="h-[400px] overflow-hidden rounded-lg border border-border-muted">
                   <Scheduler
                     events={sampleEvents}
                     selectedDate={selectedDate}
@@ -708,17 +699,18 @@ const events: SchedulerEvent[] = [
               <div className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-body-strong flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-body-strong">
                       <CalendarPlus className="h-4 w-4" />
                       Quick Schedule
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <Button className="w-full mb-3">Schedule Interview</Button>
+                    <Button className="mb-3 w-full">Schedule Interview</Button>
                     <div className="text-sm text-foreground-muted">
                       {selectedSlot ? (
                         <p>
-                          Selected: {selectedSlot.start.toLocaleTimeString()} - {selectedSlot.end.toLocaleTimeString()}
+                          Selected: {selectedSlot.start.toLocaleTimeString()} -{" "}
+                          {selectedSlot.end.toLocaleTimeString()}
                         </p>
                       ) : (
                         <p>Click a time slot to schedule</p>
@@ -732,8 +724,8 @@ const events: SchedulerEvent[] = [
                   </CardHeader>
                   <CardContent>
                     <UpcomingInterviews
-                      interviews={sampleEvents.filter(e => {
-                        const start = typeof e.start === 'string' ? new Date(e.start) : e.start;
+                      interviews={sampleEvents.filter((e) => {
+                        const start = typeof e.start === "string" ? new Date(e.start) : e.start;
                         return start.toDateString() === new Date().toDateString();
                       })}
                       maxItems={3}
@@ -747,9 +739,9 @@ const events: SchedulerEvent[] = [
 
           {/* Candidate Self-Booking Page */}
           <div>
-            <h4 className="text-body-strong mb-4">Candidate Self-Booking Page</h4>
-            <div className="border border-border-muted rounded-xl p-6 bg-background-subtle">
-              <div className="text-center mb-6">
+            <h4 className="mb-4 text-body-strong">Candidate Self-Booking Page</h4>
+            <div className="rounded-xl border border-border-muted bg-background-subtle p-6">
+              <div className="mb-6 text-center">
                 <h3 className="text-heading-sm">Schedule Your Interview</h3>
                 <p className="text-foreground-muted">
                   Senior Frontend Engineer - Climate Tech Startup
@@ -774,27 +766,27 @@ const events: SchedulerEvent[] = [
         <ComponentCard id="props" title="Props">
           <div className="space-y-8">
             <div>
-              <h4 className="text-body-strong mb-3">Scheduler</h4>
+              <h4 className="mb-3 text-body-strong">Scheduler</h4>
               <PropsTable props={schedulerProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">SchedulerEvent Object</h4>
+              <h4 className="mb-3 text-body-strong">SchedulerEvent Object</h4>
               <PropsTable props={eventProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">TimeSlotPicker</h4>
+              <h4 className="mb-3 text-body-strong">TimeSlotPicker</h4>
               <PropsTable props={timeSlotPickerProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">UpcomingInterviews</h4>
+              <h4 className="mb-3 text-body-strong">UpcomingInterviews</h4>
               <PropsTable props={upcomingInterviewsProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">BookingLink</h4>
+              <h4 className="mb-3 text-body-strong">BookingLink</h4>
               <PropsTable props={bookingLinkProps} />
             </div>
           </div>
@@ -839,31 +831,31 @@ const events: SchedulerEvent[] = [
         title="Related Components"
         description="Components commonly used with Scheduler"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <a
             href="/design-system/components/calendar"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Calendar</p>
             <p className="text-caption text-foreground-muted">Date selection</p>
           </a>
           <a
             href="/design-system/components/time-picker"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Time Picker</p>
             <p className="text-caption text-foreground-muted">Time selection</p>
           </a>
           <a
             href="/design-system/components/modal"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Modal</p>
             <p className="text-caption text-foreground-muted">Event details</p>
           </a>
           <a
             href="/design-system/components/candidate-card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Candidate Card</p>
             <p className="text-caption text-foreground-muted">Candidate info</p>

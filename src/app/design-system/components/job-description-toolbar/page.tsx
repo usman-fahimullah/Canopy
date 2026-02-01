@@ -15,35 +15,117 @@ import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
 
 const jobDescriptionToolbarProps = [
-  { name: "headingLevel", type: '"paragraph" | "h1" | "h2" | "h3"', default: '"paragraph"', description: "Current heading level" },
-  { name: "onHeadingChange", type: "(level: string) => void", default: "undefined", description: "Heading change callback" },
+  {
+    name: "headingLevel",
+    type: '"paragraph" | "h1" | "h2" | "h3"',
+    default: '"paragraph"',
+    description: "Current heading level",
+  },
+  {
+    name: "onHeadingChange",
+    type: "(level: string) => void",
+    default: "undefined",
+    description: "Heading change callback",
+  },
   { name: "isBold", type: "boolean", default: "false", description: "Bold formatting active" },
   { name: "isItalic", type: "boolean", default: "false", description: "Italic formatting active" },
-  { name: "isUnderline", type: "boolean", default: "false", description: "Underline formatting active" },
-  { name: "onBoldChange", type: "(value: boolean) => void", default: "undefined", description: "Bold toggle callback" },
-  { name: "onItalicChange", type: "(value: boolean) => void", default: "undefined", description: "Italic toggle callback" },
-  { name: "onUnderlineChange", type: "(value: boolean) => void", default: "undefined", description: "Underline toggle callback" },
-  { name: "alignment", type: '"left" | "center" | "right"', default: '"left"', description: "Text alignment" },
-  { name: "onAlignmentChange", type: "(value: string) => void", default: "undefined", description: "Alignment change callback" },
-  { name: "listType", type: '"none" | "bullet" | "numbered"', default: '"none"', description: "List type" },
-  { name: "onListChange", type: "(value: string) => void", default: "undefined", description: "List type change callback" },
-  { name: "onInsertLink", type: "() => void", default: "undefined", description: "Insert link callback" },
-  { name: "onInsertSection", type: "(section: JobSection) => void", default: "undefined", description: "Insert section callback" },
-  { name: "onInsertVariable", type: "(variable: TemplateVariable) => void", default: "undefined", description: "Insert variable callback" },
+  {
+    name: "isUnderline",
+    type: "boolean",
+    default: "false",
+    description: "Underline formatting active",
+  },
+  {
+    name: "onBoldChange",
+    type: "(value: boolean) => void",
+    default: "undefined",
+    description: "Bold toggle callback",
+  },
+  {
+    name: "onItalicChange",
+    type: "(value: boolean) => void",
+    default: "undefined",
+    description: "Italic toggle callback",
+  },
+  {
+    name: "onUnderlineChange",
+    type: "(value: boolean) => void",
+    default: "undefined",
+    description: "Underline toggle callback",
+  },
+  {
+    name: "alignment",
+    type: '"left" | "center" | "right"',
+    default: '"left"',
+    description: "Text alignment",
+  },
+  {
+    name: "onAlignmentChange",
+    type: "(value: string) => void",
+    default: "undefined",
+    description: "Alignment change callback",
+  },
+  {
+    name: "listType",
+    type: '"none" | "bullet" | "numbered"',
+    default: '"none"',
+    description: "List type",
+  },
+  {
+    name: "onListChange",
+    type: "(value: string) => void",
+    default: "undefined",
+    description: "List type change callback",
+  },
+  {
+    name: "onInsertLink",
+    type: "() => void",
+    default: "undefined",
+    description: "Insert link callback",
+  },
+  {
+    name: "onInsertSection",
+    type: "(section: JobSection) => void",
+    default: "undefined",
+    description: "Insert section callback",
+  },
+  {
+    name: "onInsertVariable",
+    type: "(variable: TemplateVariable) => void",
+    default: "undefined",
+    description: "Insert variable callback",
+  },
   { name: "canUndo", type: "boolean", default: "false", description: "Undo available" },
   { name: "canRedo", type: "boolean", default: "false", description: "Redo available" },
   { name: "onUndo", type: "() => void", default: "undefined", description: "Undo callback" },
   { name: "onRedo", type: "() => void", default: "undefined", description: "Redo callback" },
   { name: "isPreview", type: "boolean", default: "false", description: "Preview mode active" },
-  { name: "onPreviewToggle", type: "() => void", default: "undefined", description: "Preview toggle callback" },
+  {
+    name: "onPreviewToggle",
+    type: "() => void",
+    default: "undefined",
+    description: "Preview toggle callback",
+  },
   { name: "onCopy", type: "() => void", default: "undefined", description: "Copy callback" },
-  { name: "sections", type: "JobSection[]", default: "defaultJobSections", description: "Available sections" },
-  { name: "variables", type: "TemplateVariable[]", default: "defaultVariables", description: "Available variables" },
+  {
+    name: "sections",
+    type: "JobSection[]",
+    default: "defaultJobSections",
+    description: "Available sections",
+  },
+  {
+    name: "variables",
+    type: "TemplateVariable[]",
+    default: "defaultVariables",
+    description: "Available variables",
+  },
   { name: "disabled", type: "boolean", default: "false", description: "Disable the toolbar" },
 ];
 
 export default function JobDescriptionToolbarPage() {
-  const [headingLevel, setHeadingLevel] = React.useState<"paragraph" | "h1" | "h2" | "h3">("paragraph");
+  const [headingLevel, setHeadingLevel] = React.useState<"paragraph" | "h1" | "h2" | "h3">(
+    "paragraph"
+  );
   const [isBold, setIsBold] = React.useState(false);
   const [isItalic, setIsItalic] = React.useState(false);
   const [isUnderline, setIsUnderline] = React.useState(false);
@@ -64,13 +146,12 @@ export default function JobDescriptionToolbarPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Job Description Toolbar
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          JobDescriptionToolbar provides a specialized editing toolbar for job
-          descriptions. Includes text formatting, section insertion, template
-          variables, and preview toggle.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          JobDescriptionToolbar provides a specialized editing toolbar for job descriptions.
+          Includes text formatting, section insertion, template variables, and preview toggle.
         </p>
       </div>
 
@@ -116,9 +197,7 @@ export default function JobDescriptionToolbarPage() {
               onCopy={() => setLastAction("Content copied")}
             />
             {lastAction && (
-              <p className="text-caption text-foreground-muted">
-                Last action: {lastAction}
-              </p>
+              <p className="text-caption text-foreground-muted">Last action: {lastAction}</p>
             )}
           </div>
         </CodePreview>
@@ -138,11 +217,15 @@ export default function JobDescriptionToolbarPage() {
             onItalicChange={setIsItalic}
             listType={listType}
             onListChange={setListType}
+            // eslint-disable-next-line no-console
             onInsertLink={() => console.log("Insert link")}
+            // eslint-disable-next-line no-console
             onInsertSection={(section) => console.log("Insert:", section.label)}
             canUndo={true}
             canRedo={false}
+            // eslint-disable-next-line no-console
             onUndo={() => console.log("Undo")}
+            // eslint-disable-next-line no-console
             onRedo={() => console.log("Redo")}
           />
           <p className="text-caption text-foreground-muted">
@@ -161,15 +244,13 @@ export default function JobDescriptionToolbarPage() {
           {defaultJobSections.map((section) => (
             <div
               key={section.id}
-              className="p-4 border border-border rounded-lg hover:bg-background-subtle"
+              className="rounded-lg border border-border p-4 hover:bg-background-subtle"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-primary-600 [&>svg]:w-5 [&>svg]:h-5">
-                  {section.icon}
-                </span>
+              <div className="mb-2 flex items-center gap-2">
+                <span className="text-primary-600 [&>svg]:h-5 [&>svg]:w-5">{section.icon}</span>
                 <h4 className="font-medium">{section.label}</h4>
               </div>
-              <pre className="text-xs text-foreground-muted whitespace-pre-wrap line-clamp-3">
+              <pre className="line-clamp-3 whitespace-pre-wrap text-xs text-foreground-muted">
                 {section.template}
               </pre>
             </div>
@@ -187,21 +268,21 @@ export default function JobDescriptionToolbarPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-2 px-4 font-medium">Label</th>
-                <th className="text-left py-2 px-4 font-medium">Placeholder</th>
-                <th className="text-left py-2 px-4 font-medium">Description</th>
+                <th className="px-4 py-2 text-left font-medium">Label</th>
+                <th className="px-4 py-2 text-left font-medium">Placeholder</th>
+                <th className="px-4 py-2 text-left font-medium">Description</th>
               </tr>
             </thead>
             <tbody>
               {jobDefaultVariables.map((variable) => (
                 <tr key={variable.id} className="border-b border-border">
-                  <td className="py-2 px-4">{variable.label}</td>
-                  <td className="py-2 px-4">
-                    <code className="text-xs bg-background-subtle px-2 py-1 rounded">
+                  <td className="px-4 py-2">{variable.label}</td>
+                  <td className="px-4 py-2">
+                    <code className="rounded bg-background-subtle px-2 py-1 text-xs">
                       {variable.placeholder}
                     </code>
                   </td>
-                  <td className="py-2 px-4 text-foreground-muted">{variable.description}</td>
+                  <td className="px-4 py-2 text-foreground-muted">{variable.description}</td>
                 </tr>
               ))}
             </tbody>
@@ -210,21 +291,13 @@ export default function JobDescriptionToolbarPage() {
       </ComponentCard>
 
       {/* Disabled State */}
-      <ComponentCard
-        id="disabled"
-        title="Disabled State"
-        description="Toolbar in disabled state"
-      >
+      <ComponentCard id="disabled" title="Disabled State" description="Toolbar in disabled state">
         <JobDescriptionToolbar disabled />
       </ComponentCard>
 
       {/* In Context */}
-      <ComponentCard
-        id="in-context"
-        title="In Context"
-        description="Toolbar with editor area"
-      >
-        <div className="border border-border rounded-lg overflow-hidden">
+      <ComponentCard id="in-context" title="In Context" description="Toolbar with editor area">
+        <div className="overflow-hidden rounded-lg border border-border">
           <JobDescriptionToolbar
             headingLevel={headingLevel}
             onHeadingChange={setHeadingLevel}
@@ -244,20 +317,20 @@ export default function JobDescriptionToolbarPage() {
             onPreviewToggle={() => setIsPreview(!isPreview)}
             className="border-b border-border"
           />
-          <div className="p-4 min-h-[200px]">
+          <div className="min-h-[200px] p-4">
             {isPreview ? (
               <div className="prose prose-sm max-w-none">
                 <h2>About the Role</h2>
                 <p>
-                  We&apos;re looking for a passionate Solar Energy Engineer to join our
-                  growing team. You&apos;ll work on cutting-edge renewable energy projects
-                  that make a real impact on climate change.
+                  We&apos;re looking for a passionate Solar Energy Engineer to join our growing
+                  team. You&apos;ll work on cutting-edge renewable energy projects that make a real
+                  impact on climate change.
                 </p>
               </div>
             ) : (
-              <div className="text-foreground-muted text-center py-12">
+              <div className="py-12 text-center text-foreground-muted">
                 <p>Editor content area</p>
-                <p className="text-caption mt-2">
+                <p className="mt-2 text-caption">
                   Use the toolbar above to format your job description
                 </p>
               </div>

@@ -2,22 +2,56 @@
 
 import React from "react";
 import { Toast, Button } from "@/components/ui";
-import { ComponentCard, UsageGuide, AccessibilityInfo } from "@/components/design-system/ComponentSection";
+import {
+  ComponentCard,
+  UsageGuide,
+  AccessibilityInfo,
+} from "@/components/design-system/ComponentSection";
 import { CodePreview } from "@/components/design-system/CodeBlock";
 import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
 import { Bell, Info } from "@phosphor-icons/react";
 
 const toastProps = [
-  { name: "variant", type: '"success" | "critical" | "warning" | "info"', default: '"info"', description: "Visual style variant" },
+  {
+    name: "variant",
+    type: '"success" | "critical" | "warning" | "info"',
+    default: '"info"',
+    description: "Visual style variant",
+  },
   { name: "children", type: "ReactNode", required: true, description: "Toast message content" },
-  { name: "icon", type: "ReactNode", default: "undefined", description: "Override the default icon for the variant" },
+  {
+    name: "icon",
+    type: "ReactNode",
+    default: "undefined",
+    description: "Override the default icon for the variant",
+  },
   { name: "hideIcon", type: "boolean", default: "false", description: "Hide the icon completely" },
   { name: "dismissible", type: "boolean", default: "false", description: "Show a dismiss button" },
-  { name: "onDismiss", type: "() => void", default: "undefined", description: "Callback when the toast is dismissed" },
-  { name: "actionLabel", type: "string", default: "undefined", description: "Text for an action button" },
-  { name: "onAction", type: "() => void", default: "undefined", description: "Click handler for the action button" },
-  { name: "autoDismiss", type: "number", default: "undefined", description: "Auto-dismiss after duration (in ms)" },
+  {
+    name: "onDismiss",
+    type: "() => void",
+    default: "undefined",
+    description: "Callback when the toast is dismissed",
+  },
+  {
+    name: "actionLabel",
+    type: "string",
+    default: "undefined",
+    description: "Text for an action button",
+  },
+  {
+    name: "onAction",
+    type: "() => void",
+    default: "undefined",
+    description: "Click handler for the action button",
+  },
+  {
+    name: "autoDismiss",
+    type: "number",
+    default: "undefined",
+    description: "Auto-dismiss after duration (in ms)",
+  },
 ];
 
 export default function ToastPage() {
@@ -28,30 +62,23 @@ export default function ToastPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Toast
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          Toasts provide brief, non-blocking notifications about app processes.
-          They appear temporarily and are typically used to confirm actions or
-          display status messages.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          Toasts provide brief, non-blocking notifications about app processes. They appear
+          temporarily and are typically used to confirm actions or display status messages.
         </p>
       </div>
 
       {/* Basic Usage */}
-      <ComponentCard
-        id="basic-usage"
-        title="Basic Usage"
-        description="Simple toast notification"
-      >
+      <ComponentCard id="basic-usage" title="Basic Usage" description="Simple toast notification">
         <CodePreview
           code={`<Toast variant="success">
   Your changes have been saved successfully.
 </Toast>`}
         >
-          <Toast variant="success">
-            Your changes have been saved successfully.
-          </Toast>
+          <Toast variant="success">Your changes have been saved successfully.</Toast>
         </CodePreview>
       </ComponentCard>
 
@@ -61,19 +88,11 @@ export default function ToastPage() {
         title="Variants"
         description="Different toast types for various scenarios"
       >
-        <div className="space-y-4 max-w-lg">
-          <Toast variant="success">
-            Your changes have been saved successfully.
-          </Toast>
-          <Toast variant="critical">
-            Something went wrong. Please try again.
-          </Toast>
-          <Toast variant="warning">
-            Your session will expire in 5 minutes.
-          </Toast>
-          <Toast variant="info">
-            A new version is available.
-          </Toast>
+        <div className="max-w-lg space-y-4">
+          <Toast variant="success">Your changes have been saved successfully.</Toast>
+          <Toast variant="critical">Something went wrong. Please try again.</Toast>
+          <Toast variant="warning">Your session will expire in 5 minutes.</Toast>
+          <Toast variant="info">A new version is available.</Toast>
         </div>
       </ComponentCard>
 
@@ -96,13 +115,9 @@ export default function ToastPage() {
   </Toast>
 )}`}
         >
-          <div className="space-y-4 max-w-lg">
+          <div className="max-w-lg space-y-4">
             {showDismissible ? (
-              <Toast
-                variant="success"
-                dismissible
-                onDismiss={() => setShowDismissible(false)}
-              >
+              <Toast variant="success" dismissible onDismiss={() => setShowDismissible(false)}>
                 File uploaded successfully — click X to dismiss
               </Toast>
             ) : (
@@ -141,10 +156,11 @@ export default function ToastPage() {
   Job posting published
 </Toast>`}
         >
-          <div className="space-y-4 max-w-lg">
+          <div className="max-w-lg space-y-4">
             <Toast
               variant="info"
               actionLabel="Undo"
+              // eslint-disable-next-line no-console
               onAction={() => console.log("Undo clicked")}
             >
               Item moved to trash
@@ -153,6 +169,7 @@ export default function ToastPage() {
               <Toast
                 variant="success"
                 actionLabel="View"
+                // eslint-disable-next-line no-console
                 onAction={() => console.log("View clicked")}
                 dismissible
                 onDismiss={() => setShowWithAction(false)}
@@ -177,7 +194,7 @@ export default function ToastPage() {
         title="Custom Icon"
         description="Override the default variant icon"
       >
-        <div className="space-y-4 max-w-lg">
+        <div className="max-w-lg space-y-4">
           <Toast variant="info" icon={<Bell size={18} weight="fill" className="text-white" />}>
             You have 3 new notifications.
           </Toast>
@@ -188,12 +205,8 @@ export default function ToastPage() {
       </ComponentCard>
 
       {/* Hidden Icon */}
-      <ComponentCard
-        id="hidden-icon"
-        title="Hidden Icon"
-        description="Toast without any icon"
-      >
-        <div className="space-y-4 max-w-lg">
+      <ComponentCard id="hidden-icon" title="Hidden Icon" description="Toast without any icon">
+        <div className="max-w-lg space-y-4">
           <Toast variant="success" hideIcon>
             Changes saved (no icon).
           </Toast>
@@ -218,11 +231,11 @@ export default function ToastPage() {
   Link copied to clipboard
 </Toast>`}
         >
-          <div className="space-y-4 max-w-lg">
-            <p className="text-body-sm text-foreground-muted mb-4">
-              Use <code className="bg-background-muted px-1 rounded">autoDismiss</code> to automatically
-              hide toasts after a specified duration (in milliseconds). Recommended: 3-5 seconds for
-              simple confirmations.
+          <div className="max-w-lg space-y-4">
+            <p className="mb-4 text-body-sm text-foreground-muted">
+              Use <code className="rounded bg-background-muted px-1">autoDismiss</code> to
+              automatically hide toasts after a specified duration (in milliseconds). Recommended:
+              3-5 seconds for simple confirmations.
             </p>
             <Toast variant="success" autoDismiss={5000}>
               This toast will dismiss in 5 seconds
@@ -239,23 +252,23 @@ export default function ToastPage() {
       >
         <div className="space-y-6">
           <div>
-            <p className="text-body-sm text-foreground-muted mb-4">
+            <p className="mb-4 text-body-sm text-foreground-muted">
               Toasts use subtle slide and fade animations for a polished feel. They enter from the
               bottom and exit downward when dismissed.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 bg-background-subtle rounded-lg">
-                <p className="text-caption-strong text-foreground mb-2">Enter Animation</p>
-                <ul className="text-caption text-foreground-muted space-y-1">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-lg bg-background-subtle p-4">
+                <p className="mb-2 text-caption-strong text-foreground">Enter Animation</p>
+                <ul className="space-y-1 text-caption text-foreground-muted">
                   <li>• Fade in from 0% to 100% opacity</li>
                   <li>• Slide up from +8px offset</li>
                   <li>• Duration: 200ms</li>
                   <li>• Easing: ease-out</li>
                 </ul>
               </div>
-              <div className="p-4 bg-background-subtle rounded-lg">
-                <p className="text-caption-strong text-foreground mb-2">Exit Animation</p>
-                <ul className="text-caption text-foreground-muted space-y-1">
+              <div className="rounded-lg bg-background-subtle p-4">
+                <p className="mb-2 text-caption-strong text-foreground">Exit Animation</p>
+                <ul className="space-y-1 text-caption text-foreground-muted">
                   <li>• Fade out from 100% to 0% opacity</li>
                   <li>• Slide down to +8px offset</li>
                   <li>• Duration: 200ms</li>
@@ -264,11 +277,12 @@ export default function ToastPage() {
               </div>
             </div>
           </div>
-          <div className="p-4 border border-border-muted rounded-lg">
-            <p className="text-caption-strong text-foreground mb-2">Reduced Motion</p>
+          <div className="rounded-lg border border-border-muted p-4">
+            <p className="mb-2 text-caption-strong text-foreground">Reduced Motion</p>
             <p className="text-caption text-foreground-muted">
-              Animations automatically respect the user&apos;s <code className="bg-background-muted px-1 rounded">prefers-reduced-motion</code> setting.
-              When enabled, animations are disabled for accessibility.
+              Animations automatically respect the user&apos;s{" "}
+              <code className="rounded bg-background-muted px-1">prefers-reduced-motion</code>{" "}
+              setting. When enabled, animations are disabled for accessibility.
             </p>
           </div>
         </div>
@@ -280,27 +294,25 @@ export default function ToastPage() {
         title="Use Cases"
         description="Common toast scenarios in an ATS"
       >
-        <div className="space-y-4 max-w-lg">
+        <div className="max-w-lg space-y-4">
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-3">Form Submissions</p>
-            <Toast variant="success">
-              Job posting published successfully.
-            </Toast>
+            <p className="mb-3 text-caption-strong text-foreground-muted">Form Submissions</p>
+            <Toast variant="success">Job posting published successfully.</Toast>
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-3">Error Handling</p>
+            <p className="mb-3 text-caption-strong text-foreground-muted">Error Handling</p>
             <Toast variant="critical" dismissible>
               File exceeds the maximum size limit of 10MB.
             </Toast>
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-3">Undoable Actions</p>
+            <p className="mb-3 text-caption-strong text-foreground-muted">Undoable Actions</p>
             <Toast variant="info" actionLabel="Undo">
               Candidate moved to Rejected stage.
             </Toast>
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-3">Warnings</p>
+            <p className="mb-3 text-caption-strong text-foreground-muted">Warnings</p>
             <Toast variant="warning">
               Complete your company profile to improve job visibility.
             </Toast>
@@ -316,9 +328,9 @@ export default function ToastPage() {
       {/* Accessibility */}
       <AccessibilityInfo
         items={[
-          "**Role**: Uses `role=\"alert\"` for screen reader announcements",
-          "**Aria-live**: Critical toasts use `aria-live=\"assertive\"`, others use `aria-live=\"polite\"`",
-          "**Dismiss button**: Has `aria-label=\"Dismiss toast\"` for screen readers",
+          '**Role**: Uses `role="alert"` for screen reader announcements',
+          '**Aria-live**: Critical toasts use `aria-live="assertive"`, others use `aria-live="polite"`',
+          '**Dismiss button**: Has `aria-label="Dismiss toast"` for screen readers',
           "**Auto-dismiss timing**: Should be long enough to read (5+ seconds recommended)",
           "**Color contrast**: All variants meet WCAG AA standards",
           "**Not color alone**: Icons help convey status alongside color",

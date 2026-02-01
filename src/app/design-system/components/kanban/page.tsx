@@ -155,8 +155,20 @@ const kanbanAddCardProps = [
 // ============================================
 
 const sampleCandidates = [
-  { id: "1", name: "Sarah Chen", role: "Solar Engineer", score: 92, skills: ["NABCEP", "PV Design"] },
-  { id: "2", name: "Michael Torres", role: "Project Manager", score: 87, skills: ["LEED AP", "Agile"] },
+  {
+    id: "1",
+    name: "Sarah Chen",
+    role: "Solar Engineer",
+    score: 92,
+    skills: ["NABCEP", "PV Design"],
+  },
+  {
+    id: "2",
+    name: "Michael Torres",
+    role: "Project Manager",
+    score: 87,
+    skills: ["LEED AP", "Agile"],
+  },
   { id: "3", name: "Emily Johnson", role: "Analyst", score: 78, skills: ["ESG", "Data Analysis"] },
 ];
 
@@ -173,33 +185,29 @@ export default function KanbanPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Kanban Board
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          A visual pipeline management system for tracking candidates across hiring stages.
-          The Kanban board provides an intuitive drag-and-drop interface for moving candidates
-          through the recruitment workflow.
+        <h1 className="mb-2 text-heading-lg text-foreground">Kanban Board</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          A visual pipeline management system for tracking candidates across hiring stages. The
+          Kanban board provides an intuitive drag-and-drop interface for moving candidates through
+          the recruitment workflow.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             ATS Core
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Drag & Drop
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             6 Sub-components
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Managing candidate pipelines across stages</li>
               <li>• Visualizing hiring workflow status</li>
               <li>• Quick stage transitions via drag-and-drop</li>
@@ -207,13 +215,11 @@ export default function KanbanPage() {
               <li>• Tracking multiple job pipelines</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• For simple list views (use Data Table)</li>
-              <li>• When stages aren't sequential</li>
+              <li>• When stages aren&apos;t sequential</li>
               <li>• For detailed candidate information (use Profile)</li>
               <li>• When horizontal scrolling is problematic</li>
             </ul>
@@ -228,7 +234,8 @@ export default function KanbanPage() {
         parts={[
           {
             name: "Board Container",
-            description: "Horizontal scrolling container with rounded corners and overflow handling",
+            description:
+              "Horizontal scrolling container with rounded corners and overflow handling",
             required: true,
           },
           {
@@ -356,30 +363,42 @@ export default function KanbanPage() {
               </KanbanColumn>
             </KanbanBoard>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-caption">
+          <div className="grid grid-cols-2 gap-4 text-caption md:grid-cols-3">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[var(--primitive-purple-500)]" />
-              <span><strong>Applied</strong> — Purple, paper plane icon</span>
+              <div className="h-3 w-3 rounded-full bg-[var(--primitive-purple-500)]" />
+              <span>
+                <strong>Applied</strong> — Purple, paper plane icon
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[var(--primitive-blue-500)]" />
-              <span><strong>Qualified</strong> — Blue, checkmark icon</span>
+              <div className="h-3 w-3 rounded-full bg-[var(--primitive-blue-500)]" />
+              <span>
+                <strong>Qualified</strong> — Blue, checkmark icon
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[var(--primitive-orange-500)]" />
-              <span><strong>Interview</strong> — Orange, chat icon</span>
+              <div className="h-3 w-3 rounded-full bg-[var(--primitive-orange-500)]" />
+              <span>
+                <strong>Interview</strong> — Orange, chat icon
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[var(--primitive-green-500)]" />
-              <span><strong>Offer</strong> — Green, check circle icon</span>
+              <div className="h-3 w-3 rounded-full bg-[var(--primitive-green-500)]" />
+              <span>
+                <strong>Offer</strong> — Green, check circle icon
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[var(--primitive-green-500)]" />
-              <span><strong>Hired</strong> — Green, check circle icon</span>
+              <div className="h-3 w-3 rounded-full bg-[var(--primitive-green-500)]" />
+              <span>
+                <strong>Hired</strong> — Green, check circle icon
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[var(--primitive-red-500)]" />
-              <span><strong>Rejected</strong> — Red, x circle icon</span>
+              <div className="h-3 w-3 rounded-full bg-[var(--primitive-red-500)]" />
+              <span>
+                <strong>Rejected</strong> — Red, x circle icon
+              </span>
             </div>
           </div>
         </div>
@@ -453,17 +472,13 @@ export default function KanbanPage() {
       {/* ============================================ */}
       {/* 7. EMPTY STATE */}
       {/* ============================================ */}
-      <ComponentCard
-        id="empty"
-        title="Empty State"
-        description="Shown when a column has no cards"
-      >
+      <ComponentCard id="empty" title="Empty State" description="Shown when a column has no cards">
         <CodePreview
           code={`<KanbanColumn title="Offer" count={0} stage="offer">
   <KanbanEmpty message="No candidates in this stage" />
 </KanbanColumn>`}
         >
-          <div className="overflow-x-auto max-w-md">
+          <div className="max-w-md overflow-x-auto">
             <KanbanBoard>
               <KanbanColumn title="Offer" count={0} stage="offer">
                 <KanbanEmpty message="No candidates in this stage" />
@@ -485,7 +500,7 @@ export default function KanbanPage() {
           code={`{/* Show placeholder where card will be dropped */}
 <KanbanDropPlaceholder height={80} />`}
         >
-          <div className="space-y-2 max-w-xs">
+          <div className="max-w-xs space-y-2">
             <KanbanCard>
               <p className="font-medium text-foreground">Sarah Chen</p>
               <p className="text-caption text-foreground-muted">Solar Engineer</p>
@@ -516,7 +531,7 @@ export default function KanbanPage() {
   />
 </KanbanColumn>`}
         >
-          <div className="overflow-x-auto max-w-md">
+          <div className="max-w-md overflow-x-auto">
             <KanbanBoard>
               <KanbanColumn title="Applied" count={1} stage="applied">
                 <KanbanCard>
@@ -557,7 +572,7 @@ export default function KanbanPage() {
   {/* cards */}
 </KanbanColumn>`}
         >
-          <div className="overflow-x-auto max-w-md">
+          <div className="max-w-md overflow-x-auto">
             <KanbanBoard>
               <KanbanColumn
                 title="Interview"
@@ -622,14 +637,14 @@ export default function KanbanPage() {
                 isSelected={selectedCard === candidate.id}
                 onClick={() => setSelectedCard(candidate.id)}
               >
-                <div className="flex items-center gap-3 mb-2">
+                <div className="mb-2 flex items-center gap-3">
                   <Avatar name={candidate.name} size="sm" />
                   <div>
                     <p className="font-medium text-foreground">{candidate.name}</p>
                     <p className="text-caption text-foreground-muted">{candidate.role}</p>
                   </div>
                 </div>
-                <div className="flex gap-1 mb-2">
+                <div className="mb-2 flex gap-1">
                   {candidate.skills.map((skill) => (
                     <Badge key={skill} variant="secondary" size="sm">
                       {skill}
@@ -638,7 +653,13 @@ export default function KanbanPage() {
                 </div>
                 <div className="flex justify-between text-caption">
                   <span className="text-foreground-muted">Applied 2d ago</span>
-                  <span className={candidate.score >= 85 ? "text-foreground-success font-medium" : "text-foreground-warning font-medium"}>
+                  <span
+                    className={
+                      candidate.score >= 85
+                        ? "font-medium text-foreground-success"
+                        : "font-medium text-foreground-warning"
+                    }
+                  >
                     {candidate.score}% match
                   </span>
                 </div>
@@ -683,9 +704,7 @@ export default function KanbanPage() {
       {/* 13. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use consistent stage colors across all pipeline views",
@@ -772,9 +791,7 @@ export default function KanbanPage() {
       {/* 16. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Full Hiring Pipeline"
@@ -784,7 +801,7 @@ export default function KanbanPage() {
             <KanbanBoard>
               <KanbanColumn title="Applied" count={12} stage="applied">
                 <KanbanCard>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Alex Rivera" size="xs" />
                     <div>
                       <p className="text-body-sm font-medium text-foreground">Alex Rivera</p>
@@ -792,11 +809,13 @@ export default function KanbanPage() {
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <Badge variant="secondary" size="sm">B Corp</Badge>
+                    <Badge variant="secondary" size="sm">
+                      B Corp
+                    </Badge>
                   </div>
                 </KanbanCard>
                 <KanbanCard>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Jordan Kim" size="xs" />
                     <div>
                       <p className="text-body-sm font-medium text-foreground">Jordan Kim</p>
@@ -804,51 +823,59 @@ export default function KanbanPage() {
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <Badge variant="secondary" size="sm">ESG</Badge>
+                    <Badge variant="secondary" size="sm">
+                      ESG
+                    </Badge>
                   </div>
                 </KanbanCard>
                 <KanbanAddCard />
               </KanbanColumn>
               <KanbanColumn title="Qualified" count={5} stage="qualified">
                 <KanbanCard>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Sarah Chen" size="xs" />
                     <div>
                       <p className="text-body-sm font-medium text-foreground">Sarah Chen</p>
                       <p className="text-caption text-foreground-muted">Solar Engineer</p>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <Badge variant="secondary" size="sm">NABCEP</Badge>
-                    <span className="text-caption text-foreground-success font-medium">92%</span>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" size="sm">
+                      NABCEP
+                    </Badge>
+                    <span className="text-caption font-medium text-foreground-success">92%</span>
                   </div>
                 </KanbanCard>
               </KanbanColumn>
               <KanbanColumn title="Interview" count={2} stage="interview">
                 <KanbanCard>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Michael Torres" size="xs" />
                     <div>
                       <p className="text-body-sm font-medium text-foreground">Michael Torres</p>
                       <p className="text-caption text-foreground-muted">Project Manager</p>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <Badge variant="info" size="sm">Round 2</Badge>
-                    <span className="text-caption text-foreground-success font-medium">87%</span>
+                  <div className="flex items-center justify-between">
+                    <Badge variant="info" size="sm">
+                      Round 2
+                    </Badge>
+                    <span className="text-caption font-medium text-foreground-success">87%</span>
                   </div>
                 </KanbanCard>
               </KanbanColumn>
               <KanbanColumn title="Offer" count={1} stage="offer">
                 <KanbanCard>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Emily Johnson" size="xs" />
                     <div>
                       <p className="text-body-sm font-medium text-foreground">Emily Johnson</p>
                       <p className="text-caption text-foreground-muted">ESG Specialist</p>
                     </div>
                   </div>
-                  <Badge variant="success" size="sm">Offer Sent</Badge>
+                  <Badge variant="success" size="sm">
+                    Offer Sent
+                  </Badge>
                 </KanbanCard>
               </KanbanColumn>
               <KanbanColumn title="Hired" count={0} stage="hired">
@@ -862,7 +889,7 @@ export default function KanbanPage() {
           title="With dnd-kit Integration"
           description="Implementing drag-and-drop with @dnd-kit/core"
         >
-          <div className="p-6 bg-background-subtle rounded-lg">
+          <div className="rounded-lg bg-background-subtle p-6">
             <CodePreview
               code={`import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
@@ -909,11 +936,11 @@ function PipelineBoard() {
   );
 }`}
             >
-              <div className="text-center py-8 text-foreground-muted">
+              <div className="py-8 text-center text-foreground-muted">
                 <p className="text-body-sm">
-                  This component is presentational only. Implement drag-and-drop
-                  with <code className="bg-background-muted px-1 rounded">@dnd-kit/core</code> at
-                  the application level.
+                  This component is presentational only. Implement drag-and-drop with{" "}
+                  <code className="rounded bg-background-muted px-1">@dnd-kit/core</code> at the
+                  application level.
                 </p>
               </div>
             </CodePreview>

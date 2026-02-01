@@ -15,27 +15,28 @@ import {
 import { Plus } from "@phosphor-icons/react";
 
 // Import types and hook from separate file to avoid @dnd-kit SSR issues
-import {
-  useKanbanState,
-  type KanbanItem,
-} from "@/components/ui/kanban-state";
+import { useKanbanState, type KanbanItem } from "@/components/ui/kanban-state";
 
 // Import KanbanColumnData type from dnd file (only types, no runtime code)
 import type { KanbanColumnData } from "@/components/ui/kanban-dnd";
 
 // Dynamic import for dnd-kit components to avoid SSR issues
 const DndKanbanBoard = dynamic(
-  () => import("@/components/ui/kanban-dnd").then((mod) => {
-    console.log("DndKanbanBoard module loaded successfully", mod);
-    // Return object with default property for Next.js dynamic()
-    return { default: mod.DndKanbanBoard };
-  }).catch((err) => {
-    console.error("Failed to load DndKanbanBoard:", err);
-    throw err;
-  }),
+  () =>
+    import("@/components/ui/kanban-dnd")
+      .then((mod) => {
+        // eslint-disable-next-line no-console
+        console.log("DndKanbanBoard module loaded successfully", mod);
+        // Return object with default property for Next.js dynamic()
+        return { default: mod.DndKanbanBoard };
+      })
+      .catch((err) => {
+        console.error("Failed to load DndKanbanBoard:", err);
+        throw err;
+      }),
   {
     ssr: false,
-    loading: () => <div className="p-8 text-center text-foreground-muted">Loading kanban...</div>
+    loading: () => <div className="p-8 text-center text-foreground-muted">Loading kanban...</div>,
   }
 );
 
@@ -56,7 +57,10 @@ interface CandidateData {
   matchScore?: number;
   appliedDate: Date;
   daysInStage: number;
-  tags: Array<{ label: string; variant?: "default" | "green" | "blue" | "amber" | "purple" | "pink" }>;
+  tags: Array<{
+    label: string;
+    variant?: "default" | "green" | "blue" | "amber" | "purple" | "pink";
+  }>;
   lastComment?: string;
   scheduledInterview?: string;
   reviewers: ReviewerData[];
@@ -75,9 +79,7 @@ const sampleCandidates: CandidateData[] = [
       { label: "Referred", variant: "green" },
     ],
     lastComment: "2h ago",
-    reviewers: [
-      { name: "Soobin Han", status: "pending", color: "purple" },
-    ],
+    reviewers: [{ name: "Soobin Han", status: "pending", color: "purple" }],
   },
   {
     id: "2",
@@ -86,9 +88,7 @@ const sampleCandidates: CandidateData[] = [
     matchScore: 78,
     appliedDate: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
     daysInStage: 6,
-    tags: [
-      { label: "Climate exp.", variant: "green" },
-    ],
+    tags: [{ label: "Climate exp.", variant: "green" }],
     lastComment: "1d ago",
     reviewers: [
       { name: "Leo Moreau", status: "yes", rating: 5, color: "blue" },
@@ -121,9 +121,7 @@ const sampleCandidates: CandidateData[] = [
     matchScore: 88,
     appliedDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
     daysInStage: 8,
-    tags: [
-      { label: "Senior", variant: "amber" },
-    ],
+    tags: [{ label: "Senior", variant: "amber" }],
     lastComment: "1d ago",
     scheduledInterview: "Tomorrow, 2pm",
     reviewers: [
@@ -138,9 +136,7 @@ const sampleCandidates: CandidateData[] = [
     matchScore: 81,
     appliedDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
     daysInStage: 15,
-    tags: [
-      { label: "Final round", variant: "green" },
-    ],
+    tags: [{ label: "Final round", variant: "green" }],
     scheduledInterview: "Mon, 10am",
     reviewers: [
       { name: "Lisa Park", status: "yes", rating: 4, color: "green" },
@@ -154,13 +150,9 @@ const sampleCandidates: CandidateData[] = [
     matchScore: 95,
     appliedDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
     daysInStage: 9,
-    tags: [
-      { label: "Offer sent", variant: "green" },
-    ],
+    tags: [{ label: "Offer sent", variant: "green" }],
     lastComment: "2d ago",
-    reviewers: [
-      { name: "HR Team", status: "strong_yes", color: "blue" },
-    ],
+    reviewers: [{ name: "HR Team", status: "strong_yes", color: "blue" }],
   },
 ];
 
@@ -205,15 +197,11 @@ const CandidateCardContent = ({ candidate, columnId }: CandidateCardContentProps
           matchScore={candidate.matchScore}
           appliedDate={candidate.appliedDate}
         />
-        {showDaysInStage && (
-          <DaysInStage days={candidate.daysInStage} compact />
-        )}
+        {showDaysInStage && <DaysInStage days={candidate.daysInStage} compact />}
       </div>
 
       {/* Tags */}
-      {candidate.tags.length > 0 && (
-        <CandidateTags tags={candidate.tags} maxVisible={3} />
-      )}
+      {candidate.tags.length > 0 && <CandidateTags tags={candidate.tags} maxVisible={3} />}
 
       {/* Activity row */}
       <CandidateActivity
@@ -222,9 +210,7 @@ const CandidateCardContent = ({ candidate, columnId }: CandidateCardContentProps
       />
 
       {/* Reviewers */}
-      {candidate.reviewers.length > 0 && (
-        <CandidateReviewers reviewers={candidate.reviewers} />
-      )}
+      {candidate.reviewers.length > 0 && <CandidateReviewers reviewers={candidate.reviewers} />}
     </div>
   );
 };
@@ -236,37 +222,36 @@ const CandidateCardContent = ({ candidate, columnId }: CandidateCardContentProps
 export default function KanbanDndDemo() {
   // Debug: Log when component mounts
   React.useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log("KanbanDndDemo mounted");
+    // eslint-disable-next-line no-console
     return () => console.log("KanbanDndDemo unmounted");
   }, []);
 
   // Memoize initial items to prevent infinite re-renders
   // (useKanbanState has an effect that resets items when initialItems changes)
-  const initialItems = React.useMemo<KanbanItem<CandidateData>[]>(() =>
-    sampleCandidates.map((candidate) => ({
-      id: candidate.id,
-      columnId: initialColumnAssignments[candidate.id] || "applied",
-      content: (
-        <CandidateCardContent
-          candidate={candidate}
-          columnId={initialColumnAssignments[candidate.id] || "applied"}
-        />
-      ),
-      data: candidate,
-    })),
+  const initialItems = React.useMemo<KanbanItem<CandidateData>[]>(
+    () =>
+      sampleCandidates.map((candidate) => ({
+        id: candidate.id,
+        columnId: initialColumnAssignments[candidate.id] || "applied",
+        content: (
+          <CandidateCardContent
+            candidate={candidate}
+            columnId={initialColumnAssignments[candidate.id] || "applied"}
+          />
+        ),
+        data: candidate,
+      })),
     [] // Empty deps - sample data is static
   );
 
   // Use the kanban state hook
-  const {
-    items,
-    handleItemsChange,
-    handleDragEnd,
-    isMoving,
-  } = useKanbanState({
+  const { items, handleItemsChange, handleDragEnd, isMoving } = useKanbanState({
     initialItems,
     onMoveItem: async (itemId, fromColumnId, toColumnId) => {
       // Simulate API call
+      // eslint-disable-next-line no-console
       console.log(`Moving ${itemId} from ${fromColumnId} to ${toColumnId}`);
       await new Promise((resolve) => setTimeout(resolve, 500));
     },
@@ -275,18 +260,13 @@ export default function KanbanDndDemo() {
   // Render function for drag overlay
   const renderDragOverlay = (item: KanbanItem) => {
     const candidate = item.data as CandidateData;
-    return (
-      <CandidateCardContent
-        candidate={candidate}
-        columnId={String(item.columnId)}
-      />
-    );
+    return <CandidateCardContent candidate={candidate} columnId={String(item.columnId)} />;
   };
 
   // Column header actions
   const columnHeaderActions = (columnId: string | number) => (
     <Button variant="ghost" size="icon-sm" className="text-foreground-muted">
-      <Plus weight="bold" className="w-4 h-4" />
+      <Plus weight="bold" className="h-4 w-4" />
     </Button>
   );
 
@@ -294,23 +274,17 @@ export default function KanbanDndDemo() {
     <div className="min-h-screen bg-background-subtle p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-heading-md font-bold text-foreground mb-2">
-          DnD Kanban Demo
-        </h1>
+        <h1 className="mb-2 text-heading-md font-bold text-foreground">DnD Kanban Demo</h1>
         <p className="text-body text-foreground-muted">
-          Drag and drop candidates between stages. Try dragging cards to reorder within columns
-          or move them to different stages.
+          Drag and drop candidates between stages. Try dragging cards to reorder within columns or
+          move them to different stages.
         </p>
-        {isMoving && (
-          <p className="text-caption text-foreground-brand mt-2">
-            Saving changes...
-          </p>
-        )}
+        {isMoving && <p className="mt-2 text-caption text-foreground-brand">Saving changes...</p>}
       </div>
 
       {/* Decision Pills Preview */}
-      <div className="mb-6 p-4 bg-surface rounded-lg border border-border">
-        <h2 className="text-body-strong font-semibold mb-3">Decision Pills</h2>
+      <div className="mb-6 rounded-lg border border-border bg-surface p-4">
+        <h2 className="mb-3 text-body-strong font-semibold">Decision Pills</h2>
         <div className="flex flex-wrap gap-2">
           <DecisionPill decision="strong_yes" />
           <DecisionPill decision="yes" />
@@ -329,13 +303,13 @@ export default function KanbanDndDemo() {
         renderDragOverlay={renderDragOverlay}
         columnHeaderActions={columnHeaderActions}
         emptyMessage="Drop candidates here"
-        className="rounded-xl border border-border overflow-hidden"
+        className="overflow-hidden rounded-xl border border-border"
       />
 
       {/* Instructions */}
-      <div className="mt-6 p-4 bg-surface rounded-lg border border-border">
-        <h2 className="text-body-strong font-semibold mb-2">Features</h2>
-        <ul className="text-caption text-foreground-muted space-y-1">
+      <div className="mt-6 rounded-lg border border-border bg-surface p-4">
+        <h2 className="mb-2 text-body-strong font-semibold">Features</h2>
+        <ul className="space-y-1 text-caption text-foreground-muted">
           <li>• Drag cards between columns to change candidate stage</li>
           <li>• Drag cards within a column to reorder</li>
           <li>• Keyboard navigation supported (Tab to focus, Space to pick up)</li>

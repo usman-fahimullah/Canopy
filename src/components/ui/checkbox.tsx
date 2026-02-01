@@ -69,13 +69,7 @@ const iconSizes = {
 
 // Animated check icon with stroke-dasharray animation
 const AnimatedCheck = ({ size, className }: { size: number; className?: string }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 12 12"
-    fill="none"
-    className={className}
-  >
+  <svg width={size} height={size} viewBox="0 0 12 12" fill="none" className={className}>
     <path
       d="M2.5 6L5 8.5L9.5 3.5"
       stroke="currentColor"
@@ -93,13 +87,7 @@ const AnimatedCheck = ({ size, className }: { size: number; className?: string }
 
 // Animated minus icon
 const AnimatedMinus = ({ size, className }: { size: number; className?: string }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 12 12"
-    fill="none"
-    className={className}
-  >
+  <svg width={size} height={size} viewBox="0 0 12 12" fill="none" className={className}>
     <path
       d="M2.5 6H9.5"
       stroke="currentColor"
@@ -115,7 +103,8 @@ const AnimatedMinus = ({ size, className }: { size: number; className?: string }
 );
 
 export interface CheckboxProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>, "checked">,
+  extends
+    Omit<React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>, "checked">,
     VariantProps<typeof checkboxVariants> {
   /** Show indeterminate state (for "select all" patterns) */
   indeterminate?: boolean;
@@ -123,35 +112,32 @@ export interface CheckboxProps
   checked?: boolean | "indeterminate";
 }
 
-const Checkbox = React.forwardRef<
-  React.ElementRef<typeof CheckboxPrimitive.Root>,
-  CheckboxProps
->(({ className, indeterminate, size = "default", error, checked, ...props }, ref) => {
-  // Handle indeterminate prop
-  const checkedState = indeterminate ? "indeterminate" : checked;
-  const iconSize = iconSizes[size || "default"];
+const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
+  ({ className, indeterminate, size = "default", error, checked, ...props }, ref) => {
+    // Handle indeterminate prop
+    const checkedState = indeterminate ? "indeterminate" : checked;
+    const iconSize = iconSizes[size || "default"];
 
-  return (
-    <CheckboxPrimitive.Root
-      ref={ref}
-      checked={checkedState}
-      className={cn(checkboxVariants({ size, error }), className)}
-      {...props}
-    >
-      <CheckboxPrimitive.Indicator
-        className={cn(
-          "flex items-center justify-center text-[var(--checkbox-foreground)]"
-        )}
+    return (
+      <CheckboxPrimitive.Root
+        ref={ref}
+        checked={checkedState}
+        className={cn(checkboxVariants({ size, error }), className)}
+        {...props}
       >
-        {indeterminate || checkedState === "indeterminate" ? (
-          <AnimatedMinus size={iconSize} />
-        ) : (
-          <AnimatedCheck size={iconSize} />
-        )}
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
-  );
-});
+        <CheckboxPrimitive.Indicator
+          className={cn("flex items-center justify-center text-[var(--checkbox-foreground)]")}
+        >
+          {indeterminate || checkedState === "indeterminate" ? (
+            <AnimatedMinus size={iconSize} />
+          ) : (
+            <AnimatedCheck size={iconSize} />
+          )}
+        </CheckboxPrimitive.Indicator>
+      </CheckboxPrimitive.Root>
+    );
+  }
+);
 
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
@@ -165,8 +151,10 @@ Checkbox.displayName = CheckboxPrimitive.Root.displayName;
  * - Error message: text-caption, foreground-error
  * - Supports required indicator
  */
-interface CheckboxWithLabelProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>, "checked"> {
+interface CheckboxWithLabelProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
+  "checked"
+> {
   /** Label text displayed next to the checkbox */
   label: string;
   /** Optional helper/description text below the label */
@@ -211,15 +199,13 @@ const CheckboxWithLabel = React.forwardRef<
     },
     ref
   ) => {
-    const checkboxId = id || React.useId();
+    const generatedId = React.useId();
+    const checkboxId = id || generatedId;
 
     return (
       <div className={cn("flex gap-2", className)}>
         <div
-          className={cn(
-            "flex items-start gap-2",
-            labelPosition === "left" && "flex-row-reverse"
-          )}
+          className={cn("flex items-start gap-2", labelPosition === "left" && "flex-row-reverse")}
         >
           <Checkbox
             ref={ref}
@@ -231,26 +217,26 @@ const CheckboxWithLabel = React.forwardRef<
             className={size === "sm" ? "mt-0.5" : size === "lg" ? "mt-0" : "mt-0.5"}
             {...props}
           />
-          <div className="flex flex-col justify-center min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
             <label
               htmlFor={checkboxId}
               className={cn(
-                "text-body leading-6 cursor-pointer select-none",
+                "cursor-pointer select-none text-body leading-6",
                 disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-default)]",
                 error && !disabled && "text-[var(--foreground-error)]",
                 labelClassName
               )}
             >
               {label}
-              {required && (
-                <span className="text-[var(--foreground-error)] ml-0.5">*</span>
-              )}
+              {required && <span className="ml-0.5 text-[var(--foreground-error)]">*</span>}
             </label>
             {helperText && !errorMessage && (
-              <span className={cn(
-                "text-caption leading-5",
-                disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
-              )}>
+              <span
+                className={cn(
+                  "text-caption leading-5",
+                  disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
+                )}
+              >
                 {helperText}
               </span>
             )}
@@ -307,7 +293,11 @@ const CheckboxGroup = ({
   orientation = "vertical",
 }: CheckboxGroupProps) => {
   return (
-    <div className={cn("space-y-2", className)} role="group" aria-labelledby={label ? "checkbox-group-label" : undefined}>
+    <div
+      className={cn("space-y-2", className)}
+      role="group"
+      aria-labelledby={label ? "checkbox-group-label" : undefined}
+    >
       {label && (
         <div className="space-y-1">
           <label
@@ -318,9 +308,7 @@ const CheckboxGroup = ({
             )}
           >
             {label}
-            {required && (
-              <span className="text-[var(--foreground-error)] ml-0.5">*</span>
-            )}
+            {required && <span className="ml-0.5 text-[var(--foreground-error)]">*</span>}
           </label>
           {helperText && !errorMessage && (
             <p className="text-caption text-[var(--foreground-muted)]">{helperText}</p>
@@ -328,9 +316,7 @@ const CheckboxGroup = ({
         </div>
       )}
       <div
-        className={cn(
-          orientation === "vertical" ? "flex flex-col gap-3" : "flex flex-wrap gap-4"
-        )}
+        className={cn(orientation === "vertical" ? "flex flex-col gap-3" : "flex flex-wrap gap-4")}
       >
         {children}
       </div>

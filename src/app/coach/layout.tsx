@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ShellLayout } from "@/components/shell/shell-layout";
-import { coachNavConfig } from "@/lib/shell/nav-config";
 import { authorizeShell } from "@/lib/shell/authorize-shell";
 
 export const metadata: Metadata = {
@@ -16,9 +15,5 @@ export default async function CoachLayout({
 }>) {
   await authorizeShell("coach");
 
-  return (
-    <ShellLayout shell="coach" config={coachNavConfig}>
-      {children}
-    </ShellLayout>
-  );
+  return <ShellLayout shell="coach">{children}</ShellLayout>;
 }

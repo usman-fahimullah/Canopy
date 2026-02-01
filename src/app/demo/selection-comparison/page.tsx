@@ -31,7 +31,7 @@ function NeutralSelectionEditor() {
   if (!editor) return null;
 
   return (
-    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)]">
       <EditorContent
         editor={editor}
         className={cn(
@@ -78,7 +78,7 @@ function BlueSelectionEditor() {
   if (!editor) return null;
 
   return (
-    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)]">
       <EditorContent
         editor={editor}
         className={cn(
@@ -90,10 +90,10 @@ function BlueSelectionEditor() {
       />
       <style jsx global>{`
         .blue-selection .ProseMirror ::selection {
-          background-color: #BFDBFE !important;
+          background-color: #bfdbfe !important;
         }
         .blue-selection .ProseMirror *::selection {
-          background-color: #BFDBFE !important;
+          background-color: #bfdbfe !important;
         }
       `}</style>
     </div>
@@ -102,12 +102,10 @@ function BlueSelectionEditor() {
 
 export default function SelectionComparisonPage() {
   return (
-    <div className="min-h-screen bg-[var(--primitive-neutral-100)] py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[var(--primitive-neutral-100)] px-4 py-8">
+      <div className="mx-auto max-w-4xl space-y-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">
-            Text Selection Color Comparison
-          </h1>
+          <h1 className="mb-2 text-3xl font-bold text-black">Text Selection Color Comparison</h1>
           <p className="text-[var(--primitive-neutral-600)]">
             Click and drag to select text in each editor to compare selection highlight colors.
           </p>
@@ -115,15 +113,15 @@ export default function SelectionComparisonPage() {
 
         {/* Color Swatches */}
         <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-200)] p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-[#e5dfd8] border border-[var(--primitive-neutral-300)]" />
+          <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
+            <div className="mb-4 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl border border-[var(--primitive-neutral-300)] bg-[#e5dfd8]" />
               <div>
                 <h3 className="font-medium text-black">Option 1: Neutral Warm</h3>
                 <p className="text-sm text-[var(--primitive-neutral-600)]">#e5dfd8 (neutral-300)</p>
               </div>
             </div>
-            <ul className="text-sm text-[var(--primitive-neutral-600)] space-y-1">
+            <ul className="space-y-1 text-sm text-[var(--primitive-neutral-600)]">
               <li>✓ Matches existing design tokens</li>
               <li>✓ Warm, earthy tone fits brand</li>
               <li>✓ Subtle, professional feel</li>
@@ -131,15 +129,15 @@ export default function SelectionComparisonPage() {
             </ul>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-200)] p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-[#BFDBFE] border border-blue-300" />
+          <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
+            <div className="mb-4 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl border border-blue-300 bg-[#BFDBFE]" />
               <div>
                 <h3 className="font-medium text-black">Option 3: Light Blue</h3>
                 <p className="text-sm text-[var(--primitive-neutral-600)]">#BFDBFE (blue-200)</p>
               </div>
             </div>
-            <ul className="text-sm text-[var(--primitive-neutral-600)] space-y-1">
+            <ul className="space-y-1 text-sm text-[var(--primitive-neutral-600)]">
               <li>✓ Universally recognized as selection</li>
               <li>✓ Clear visual feedback</li>
               <li>✓ Familiar convention</li>
@@ -151,7 +149,7 @@ export default function SelectionComparisonPage() {
         {/* Editor Demos */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-medium text-black mb-3">
+            <h2 className="mb-3 text-xl font-medium text-black">
               Option 1: Neutral Warm Selection
             </h2>
             <div className="neutral-selection">
@@ -160,9 +158,7 @@ export default function SelectionComparisonPage() {
           </div>
 
           <div>
-            <h2 className="text-xl font-medium text-black mb-3">
-              Option 3: Light Blue Selection
-            </h2>
+            <h2 className="mb-3 text-xl font-medium text-black">Option 3: Light Blue Selection</h2>
             <div className="blue-selection">
               <BlueSelectionEditor />
             </div>
@@ -170,20 +166,27 @@ export default function SelectionComparisonPage() {
         </div>
 
         {/* Recommendation */}
-        <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-200)] p-6">
-          <h2 className="text-xl font-medium text-black mb-4">My Recommendation</h2>
+        <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
+          <h2 className="mb-4 text-xl font-medium text-black">My Recommendation</h2>
           <div className="prose prose-sm max-w-none text-[var(--primitive-neutral-700)]">
             <p>
-              For <strong>text selection</strong> specifically, I'd lean towards <strong>light blue (#BFDBFE)</strong> because:
+              For <strong>text selection</strong> specifically, I&apos;d lean towards{" "}
+              <strong>light blue (#BFDBFE)</strong> because:
             </p>
             <ul>
-              <li>Selection is a <em>transient UI state</em>, not a design element - users expect it to look like selection</li>
+              <li>
+                Selection is a <em>transient UI state</em>, not a design element - users expect it
+                to look like selection
+              </li>
               <li>It provides immediate, clear feedback that text is selected</li>
-              <li>It's a universal convention that doesn't need to match your brand colors</li>
+              <li>
+                It&apos;s a universal convention that doesn&apos;t need to match your brand colors
+              </li>
               <li>The neutral option might make users wonder if they actually selected the text</li>
             </ul>
             <p>
-              Think of it like cursor colors or scroll bars - some UI elements benefit from being conventionally styled rather than branded.
+              Think of it like cursor colors or scroll bars - some UI elements benefit from being
+              conventionally styled rather than branded.
             </p>
           </div>
         </div>

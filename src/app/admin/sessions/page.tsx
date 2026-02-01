@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Avatar } from "@/components/ui/avatar";
@@ -43,7 +43,10 @@ const STATUS_OPTIONS = [
   { value: "NO_SHOW", label: "No Show" },
 ];
 
-const STATUS_CHIP_VARIANT: Record<string, "neutral" | "primary" | "blue" | "red" | "orange" | "yellow" | "purple"> = {
+const STATUS_CHIP_VARIANT: Record<
+  string,
+  "neutral" | "primary" | "blue" | "red" | "orange" | "yellow" | "purple"
+> = {
   SCHEDULED: "blue",
   IN_PROGRESS: "primary",
   COMPLETED: "primary",
@@ -60,11 +63,7 @@ export default function AdminSessionsPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    fetchSessions();
-  }, [page, statusFilter]);
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -84,7 +83,11 @@ export default function AdminSessionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, statusFilter]);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -107,14 +110,10 @@ export default function AdminSessionsPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)]">
-            Sessions
-          </h1>
-          <p className="text-sm text-[var(--primitive-neutral-600)]">
-            {total} total sessions
-          </p>
+          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)]">Sessions</h1>
+          <p className="text-sm text-[var(--primitive-neutral-600)]">{total} total sessions</p>
         </div>
         <Button
           variant={showFilters ? "primary" : "secondary"}
@@ -127,8 +126,8 @@ export default function AdminSessionsPage() {
 
       {/* Filters */}
       {showFilters && (
-        <div className="mb-6 bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-4">
-          <div className="flex items-center justify-between mb-3">
+        <div className="mb-6 rounded-xl border border-[var(--primitive-neutral-200)] bg-white p-4">
+          <div className="mb-3 flex items-center justify-between">
             <p className="text-sm font-medium text-[var(--primitive-green-800)]">
               Filter by Status
             </p>
@@ -140,7 +139,7 @@ export default function AdminSessionsPage() {
                   setPage(1);
                 }}
               >
-                <X size={14} className="inline mr-1" />
+                <X size={14} className="mr-1 inline" />
                 Clear
               </button>
             )}
@@ -170,36 +169,36 @@ export default function AdminSessionsPage() {
           <Spinner size="lg" />
         </div>
       ) : sessions.length === 0 ? (
-        <div className="text-center py-16 text-[var(--primitive-neutral-500)]">
+        <div className="py-16 text-center text-[var(--primitive-neutral-500)]">
           <CalendarCheck size={48} className="mx-auto mb-3 opacity-40" />
           <p className="font-medium">No sessions found</p>
-          <p className="text-sm mt-1">Try adjusting your filters.</p>
+          <p className="mt-1 text-sm">Try adjusting your filters.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-[var(--primitive-neutral-200)] bg-white">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)]">
-                  <th className="text-left px-4 py-3 font-medium text-[var(--primitive-neutral-600)]">
+                  <th className="px-4 py-3 text-left font-medium text-[var(--primitive-neutral-600)]">
                     Date & Time
                   </th>
-                  <th className="text-left px-4 py-3 font-medium text-[var(--primitive-neutral-600)]">
+                  <th className="px-4 py-3 text-left font-medium text-[var(--primitive-neutral-600)]">
                     Coach
                   </th>
-                  <th className="text-left px-4 py-3 font-medium text-[var(--primitive-neutral-600)]">
+                  <th className="px-4 py-3 text-left font-medium text-[var(--primitive-neutral-600)]">
                     Mentee
                   </th>
-                  <th className="text-left px-4 py-3 font-medium text-[var(--primitive-neutral-600)]">
+                  <th className="px-4 py-3 text-left font-medium text-[var(--primitive-neutral-600)]">
                     Status
                   </th>
-                  <th className="text-right px-4 py-3 font-medium text-[var(--primitive-neutral-600)]">
+                  <th className="px-4 py-3 text-right font-medium text-[var(--primitive-neutral-600)]">
                     Amount
                   </th>
-                  <th className="text-right px-4 py-3 font-medium text-[var(--primitive-neutral-600)]">
+                  <th className="px-4 py-3 text-right font-medium text-[var(--primitive-neutral-600)]">
                     Platform Fee
                   </th>
-                  <th className="text-center px-4 py-3 font-medium text-[var(--primitive-neutral-600)]">
+                  <th className="px-4 py-3 text-center font-medium text-[var(--primitive-neutral-600)]">
                     Review
                   </th>
                 </tr>
@@ -208,13 +207,13 @@ export default function AdminSessionsPage() {
                 {sessions.map((session) => (
                   <tr
                     key={session.id}
-                    className="border-b border-[var(--primitive-neutral-100)] hover:bg-[var(--primitive-neutral-50)] transition-colors"
+                    className="border-b border-[var(--primitive-neutral-100)] transition-colors hover:bg-[var(--primitive-neutral-50)]"
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium text-[var(--primitive-green-800)]">
                         {formatDate(session.scheduledAt)}
                       </div>
-                      <div className="text-[var(--primitive-neutral-500)] flex items-center gap-1">
+                      <div className="flex items-center gap-1 text-[var(--primitive-neutral-500)]">
                         <Clock size={12} />
                         {formatTime(session.scheduledAt)} · {session.duration}min
                       </div>
@@ -246,10 +245,7 @@ export default function AdminSessionsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <Chip
-                        variant={STATUS_CHIP_VARIANT[session.status] || "neutral"}
-                        size="sm"
-                      >
+                      <Chip variant={STATUS_CHIP_VARIANT[session.status] || "neutral"} size="sm">
                         {session.status.replace("_", " ")}
                       </Chip>
                     </td>
@@ -282,7 +278,7 @@ export default function AdminSessionsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--primitive-neutral-200)]">
+            <div className="flex items-center justify-between border-t border-[var(--primitive-neutral-200)] px-4 py-3">
               <span className="text-sm text-[var(--primitive-neutral-600)]">
                 Page {page} of {totalPages}
               </span>

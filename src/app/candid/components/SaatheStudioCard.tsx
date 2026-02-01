@@ -6,13 +6,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Chip } from "@/components/ui/chip";
-import {
-  CheckCircle,
-  ArrowRight,
-  Star,
-  Users,
-  Leaf,
-} from "@phosphor-icons/react";
+import { CheckCircle, ArrowRight, Star, Users, Leaf } from "@phosphor-icons/react";
 
 interface SaatheStudioCardProps {
   /** Compact version for dashboard widgets */
@@ -24,10 +18,7 @@ interface SaatheStudioCardProps {
  * SaatheStudioCard displays Saathe Studio as Candid's coaching partner.
  * This is the single coaching partner for MVP.
  */
-export function SaatheStudioCard({
-  variant = "default",
-  className,
-}: SaatheStudioCardProps) {
+export function SaatheStudioCard({ variant = "default", className }: SaatheStudioCardProps) {
   const stats = [
     { label: "Climate transitions", value: "500+" },
     { label: "Avg. time to placement", value: "3 mo" },
@@ -48,8 +39,8 @@ export function SaatheStudioCard({
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100">
             <Leaf size={24} className="text-emerald-700" weight="fill" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-body-strong font-semibold text-foreground-default">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-foreground-default text-body-strong font-semibold">
               Saathe Studio
             </h3>
             <p className="text-caption text-foreground-muted">
@@ -67,9 +58,7 @@ export function SaatheStudioCard({
             </div>
           </div>
           <Button variant="primary" size="sm" asChild>
-            <Link href="/candid/sessions/schedule">
-              Book Session
-            </Link>
+            <Link href="/candid/sessions/schedule">Book Session</Link>
           </Button>
         </div>
       </Card>
@@ -85,18 +74,18 @@ export function SaatheStudioCard({
         )}
       >
         {/* Background decoration */}
-        <div className="absolute right-0 top-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-emerald-100/50" />
+        <div className="absolute right-0 top-0 h-32 w-32 -translate-y-8 translate-x-8 rounded-full bg-emerald-100/50" />
         <div className="absolute right-12 top-12 h-16 w-16 rounded-full bg-teal-100/50" />
 
         <div className="relative p-6">
           {/* Header */}
-          <div className="flex items-start gap-4 mb-6">
+          <div className="mb-6 flex items-start gap-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg">
               <Leaf size={32} className="text-white" weight="fill" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="text-heading-sm font-semibold text-foreground-default">
+                <h3 className="text-foreground-default text-heading-sm font-semibold">
                   Saathe Studio
                 </h3>
                 <Chip variant="primary" size="sm">
@@ -111,19 +100,16 @@ export function SaatheStudioCard({
 
           {/* Quote */}
           <blockquote className="mb-6 border-l-2 border-emerald-300 pl-4 text-body italic text-foreground-muted">
-            "We help ambitious professionals find their place in the climate solution space."
+            &quot;We help ambitious professionals find their place in the climate solution
+            space.&quot;
           </blockquote>
 
           {/* Stats */}
           <div className="mb-6 grid grid-cols-3 gap-4">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-heading-sm font-bold text-emerald-700">
-                  {stat.value}
-                </div>
-                <div className="text-caption text-foreground-muted">
-                  {stat.label}
-                </div>
+                <div className="text-heading-sm font-bold text-emerald-700">{stat.value}</div>
+                <div className="text-caption text-foreground-muted">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -154,22 +140,20 @@ export function SaatheStudioCard({
   return (
     <Card className={cn("p-6", className)}>
       {/* Header */}
-      <div className="flex items-start gap-4 mb-6">
+      <div className="mb-6 flex items-start gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100">
           <Leaf size={28} className="text-emerald-700" weight="fill" />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-body-strong font-semibold text-foreground-default">
+            <h3 className="text-foreground-default text-body-strong font-semibold">
               Saathe Studio
             </h3>
             <Chip variant="primary" size="sm">
               Coaching Partner
             </Chip>
           </div>
-          <p className="mt-1 text-caption text-foreground-muted">
-            Climate Career Coaching Experts
-          </p>
+          <p className="mt-1 text-caption text-foreground-muted">Climate Career Coaching Experts</p>
         </div>
       </div>
 
@@ -183,7 +167,7 @@ export function SaatheStudioCard({
       <div className="mb-6 flex items-center gap-4 text-caption">
         <span className="flex items-center gap-1">
           <Star size={14} weight="fill" className="text-amber-500" />
-          <span className="font-semibold text-foreground-default">4.9</span>
+          <span className="text-foreground-default font-semibold">4.9</span>
           <span className="text-foreground-muted">rating</span>
         </span>
         <span className="flex items-center gap-1 text-foreground-muted">
@@ -195,14 +179,10 @@ export function SaatheStudioCard({
       {/* CTA */}
       <div className="flex gap-3">
         <Button variant="primary" className="flex-1" asChild>
-          <Link href="/candid/sessions/schedule">
-            Book a Session
-          </Link>
+          <Link href="/candid/sessions/schedule">Book a Session</Link>
         </Button>
         <Button variant="secondary" asChild>
-          <Link href="/candid/coach/saathe-studio">
-            Learn More
-          </Link>
+          <Link href="/candid/coach/saathe-studio">Learn More</Link>
         </Button>
       </div>
     </Card>

@@ -48,9 +48,7 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
         const params = new URLSearchParams({ limit: String(limit) });
         if (cursor) params.set("cursor", cursor);
 
-        const res = await fetch(
-          `/api/conversations/${conversationId}/messages?${params}`
-        );
+        const res = await fetch(`/api/conversations/${conversationId}/messages?${params}`);
 
         if (!res.ok) {
           throw new Error("Failed to fetch messages");
@@ -131,19 +129,15 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
   const sendMessage = useCallback(
     async (content: string, attachmentUrls?: string[]) => {
       if (!conversationId) return null;
-      if (!content.trim() && (!attachmentUrls || attachmentUrls.length === 0))
-        return null;
+      if (!content.trim() && (!attachmentUrls || attachmentUrls.length === 0)) return null;
 
       setSending(true);
       try {
-        const res = await fetch(
-          `/api/conversations/${conversationId}/messages`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content, attachmentUrls }),
-          }
-        );
+        const res = await fetch(`/api/conversations/${conversationId}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content, attachmentUrls }),
+        });
 
         if (!res.ok) {
           const data = await res.json();
@@ -156,7 +150,7 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
         setMessages((prev) => [...prev, data.message]);
 
         return data.message;
-      } catch (err: any) {
+      } catch (err) {
         console.error("sendMessage error:", err);
         setError("Failed to send message");
         return null;

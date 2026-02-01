@@ -14,8 +14,8 @@ import {
   ChatTeardropDots,
   Handshake,
 } from "@phosphor-icons/react";
-import { TreehouseIcon } from "@/components/icons/treehouse-icon";
-import { ProfileIcon } from "@/components/icons/profile-icon";
+import { TreehouseIcon } from "@/components/Icons/treehouse-icon";
+import { ProfileIcon } from "@/components/Icons/profile-icon";
 import type { ShellNavConfig } from "./types";
 
 // ---------------------------------------------------------------------------

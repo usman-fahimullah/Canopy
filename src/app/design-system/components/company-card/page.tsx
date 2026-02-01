@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  CompanyCard,
-  type PathwayType,
-} from "@/components/ui";
+import { CompanyCard, type PathwayType } from "@/components/ui";
 import { Label } from "@/components/ui/label";
 import {
   ComponentCard,
@@ -118,29 +115,28 @@ export default function CompanyCardPage() {
     <div className="space-y-12">
       {/* Overview */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Company Card
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl mb-4">
-          Display company profiles with industry pathway, job count, partner status,
-          and BIPOC-owned indicators. Designed for company directories and job board
-          employer listings.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Display company profiles with industry pathway, job count, partner status, and BIPOC-owned
+          indicators. Designed for company directories and job board employer listings.
         </p>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success/10 rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">When to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Company directory listings</li>
               <li>Employer profiles on job boards</li>
               <li>Partner company showcases</li>
               <li>Search results for companies</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error/10 rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">When not to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Job listings (use JobPostCard)</li>
               <li>Full company profile pages (use dedicated layout)</li>
               <li>Team member cards (use CandidateCard or Avatar)</li>
@@ -150,56 +146,71 @@ export default function CompanyCardPage() {
       </div>
 
       {/* Anatomy */}
-      <ComponentCard
-        id="anatomy"
-        title="Anatomy"
-        description="The company card structure"
-      >
-        <div className="relative p-6 bg-background-subtle rounded-lg">
+      <ComponentCard id="anatomy" title="Anatomy" description="The company card structure">
+        <div className="relative rounded-lg bg-background-subtle p-6">
           <div className="max-w-[350px]">
-            <div className="relative bg-[var(--primitive-neutral-0)] rounded-[12px] p-4 shadow-[1px_2px_16px_rgba(31,29,28,0.08)] flex items-center h-[124px]">
+            <div className="relative flex h-[124px] items-center rounded-[12px] bg-[var(--primitive-neutral-0)] p-4 shadow-[1px_2px_16px_rgba(31,29,28,0.08)]">
               {/* Content */}
-              <div className="flex items-start gap-3 flex-1 h-full">
+              <div className="flex h-full flex-1 items-start gap-3">
                 {/* Left: Company Info */}
-                <div className="flex flex-col justify-between flex-1 h-full">
+                <div className="flex h-full flex-1 flex-col justify-between">
                   {/* Company Name */}
                   <div className="relative">
                     <h3 className="text-2xl font-medium text-[var(--primitive-neutral-800)]">
                       SunPower Systems
                     </h3>
-                    <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">1</div>
+                    <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                      1
+                    </div>
                   </div>
                   {/* Tags Row */}
-                  <div className="relative flex items-center gap-2 flex-wrap">
-                    <div className="px-2 py-1 rounded-lg bg-[var(--primitive-yellow-200)]">
-                      <span className="text-sm font-bold text-[var(--primitive-yellow-700)]">Energy</span>
+                  <div className="relative flex flex-wrap items-center gap-2">
+                    <div className="rounded-lg bg-[var(--primitive-yellow-200)] px-2 py-1">
+                      <span className="text-sm font-bold text-[var(--primitive-yellow-700)]">
+                        Energy
+                      </span>
                     </div>
-                    <div className="px-2 py-1 rounded-full bg-[var(--primitive-neutral-200)]">
+                    <div className="rounded-full bg-[var(--primitive-neutral-200)] px-2 py-1">
                       <span className="text-sm text-[var(--primitive-neutral-700)]">12 Jobs</span>
                     </div>
-                    <div className="px-2 py-1 rounded-full bg-[var(--primitive-blue-100)]">
-                      <span className="text-sm font-bold text-[var(--primitive-blue-500)]">Partner</span>
+                    <div className="rounded-full bg-[var(--primitive-blue-100)] px-2 py-1">
+                      <span className="text-sm font-bold text-[var(--primitive-blue-500)]">
+                        Partner
+                      </span>
                     </div>
-                    <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">2</div>
+                    <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                      2
+                    </div>
                   </div>
                 </div>
                 {/* Right: Avatar */}
                 <div className="relative shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-[var(--primitive-neutral-200)] flex items-center justify-center text-sm font-medium">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-neutral-200)] text-sm font-medium">
                     SP
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--primitive-green-200)] border-2 border-white flex items-center justify-center">
+                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[var(--primitive-green-200)]">
                     <span className="text-xs text-[var(--primitive-green-700)]">+</span>
                   </div>
-                  <div className="absolute -top-2 -right-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">3</div>
+                  <div className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                    3
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-2 text-sm">
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">1</span> Company Name</div>
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">2</span> Pathway + Jobs + Partner</div>
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">3</span> Avatar + BIPOC Badge</div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">1</span> Company
+              Name
+            </div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">2</span> Pathway
+              + Jobs + Partner
+            </div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">3</span> Avatar
+              + BIPOC Badge
+            </div>
           </div>
         </div>
       </ComponentCard>
@@ -225,6 +236,7 @@ export default function CompanyCardPage() {
               companyName="SunPower Systems"
               pathway="energy"
               jobCount={12}
+              // eslint-disable-next-line no-console
               onClick={() => console.log("View company")}
             />
           </div>
@@ -279,7 +291,7 @@ export default function CompanyCardPage() {
         title="Partner Badge"
         description="Highlight platform partner companies"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label>Standard Company</Label>
             <CompanyCard
@@ -299,8 +311,9 @@ export default function CompanyCardPage() {
             />
           </div>
         </div>
-        <p className="text-caption text-foreground-muted mt-4">
-          Note: When a company is a partner, the pathway tag shows only the icon (minimized) to make room for the Partner badge.
+        <p className="mt-4 text-caption text-foreground-muted">
+          Note: When a company is a partner, the pathway tag shows only the icon (minimized) to make
+          room for the Partner badge.
         </p>
       </ComponentCard>
 
@@ -310,7 +323,7 @@ export default function CompanyCardPage() {
         title="BIPOC-Owned Badge"
         description="Indicator for BIPOC-owned businesses"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label>Standard</Label>
             <CompanyCard
@@ -330,7 +343,7 @@ export default function CompanyCardPage() {
             />
           </div>
         </div>
-        <p className="text-caption text-foreground-muted mt-4">
+        <p className="mt-4 text-caption text-foreground-muted">
           The BIPOC-owned indicator appears as a green checkmark badge on the company avatar.
         </p>
       </ComponentCard>
@@ -341,8 +354,17 @@ export default function CompanyCardPage() {
         title="Pathway Types"
         description="Climate industry pathways with color-coded tags"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(["energy", "agriculture", "conservation", "transportation", "construction", "technology"] as PathwayType[]).map((pathway) => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {(
+            [
+              "energy",
+              "agriculture",
+              "conservation",
+              "transportation",
+              "construction",
+              "technology",
+            ] as PathwayType[]
+          ).map((pathway) => (
             <CompanyCard
               key={pathway}
               companyName={`${pathway.charAt(0).toUpperCase() + pathway.slice(1)} Inc`}
@@ -363,26 +385,15 @@ export default function CompanyCardPage() {
         <div className="flex flex-wrap gap-4">
           <div className="space-y-2">
             <Label>No Jobs Shown</Label>
-            <CompanyCard
-              companyName="Startup Co"
-              pathway="technology"
-            />
+            <CompanyCard companyName="Startup Co" pathway="technology" />
           </div>
           <div className="space-y-2">
             <Label>Few Jobs</Label>
-            <CompanyCard
-              companyName="Small Team"
-              pathway="conservation"
-              jobCount={2}
-            />
+            <CompanyCard companyName="Small Team" pathway="conservation" jobCount={2} />
           </div>
           <div className="space-y-2">
             <Label>Many Jobs</Label>
-            <CompanyCard
-              companyName="Large Corp"
-              pathway="energy"
-              jobCount={50}
-            />
+            <CompanyCard companyName="Large Corp" pathway="energy" jobCount={50} />
           </div>
         </div>
       </ComponentCard>
@@ -423,8 +434,8 @@ export default function CompanyCardPage() {
         <div className="space-y-8">
           {/* Company Directory Grid */}
           <div>
-            <h4 className="text-body-strong mb-4">Company Directory Grid</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <h4 className="mb-4 text-body-strong">Company Directory Grid</h4>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {sampleCompanies.map((company) => (
                 <CompanyCard
                   key={company.name}
@@ -433,6 +444,7 @@ export default function CompanyCardPage() {
                   jobCount={company.jobCount}
                   isPartner={company.isPartner}
                   isBipocOwned={company.isBipocOwned}
+                  // eslint-disable-next-line no-console
                   onClick={() => console.log(`View ${company.name}`)}
                 />
               ))}
@@ -441,7 +453,7 @@ export default function CompanyCardPage() {
 
           {/* Featured Partners Section */}
           <div>
-            <h4 className="text-body-strong mb-4">Featured Partners</h4>
+            <h4 className="mb-4 text-body-strong">Featured Partners</h4>
             <div className="flex gap-4 overflow-x-auto pb-2">
               {sampleCompanies
                 .filter((c) => c.isPartner)
@@ -460,8 +472,8 @@ export default function CompanyCardPage() {
 
           {/* Compact List */}
           <div>
-            <h4 className="text-body-strong mb-4">Compact Company List</h4>
-            <div className="space-y-3 max-w-lg">
+            <h4 className="mb-4 text-body-strong">Compact Company List</h4>
+            <div className="max-w-lg space-y-3">
               {sampleCompanies.slice(0, 3).map((company) => (
                 <CompanyCard
                   key={company.name}
@@ -519,31 +531,31 @@ export default function CompanyCardPage() {
         title="Related Components"
         description="Components commonly used with Company Card"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <a
             href="/design-system/components/job-post-card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Job Post Card</p>
             <p className="text-caption text-foreground-muted">Job listings</p>
           </a>
           <a
             href="/design-system/components/job-note-card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Job Note Card</p>
             <p className="text-caption text-foreground-muted">Career guidance</p>
           </a>
           <a
             href="/design-system/components/chip"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Chip / Pathway Tag</p>
             <p className="text-caption text-foreground-muted">Industry tags</p>
           </a>
           <a
             href="/design-system/components/avatar"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Avatar</p>
             <p className="text-caption text-foreground-muted">Company logos</p>

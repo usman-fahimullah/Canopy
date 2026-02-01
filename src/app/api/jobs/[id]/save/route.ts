@@ -3,14 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 
 // POST - Save a job
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: jobId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -87,10 +86,7 @@ export async function POST(
     });
   } catch (error) {
     console.error("Save job error:", error);
-    return NextResponse.json(
-      { error: "Failed to save job" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to save job" }, { status: 500 });
   }
 }
 
@@ -102,7 +98,9 @@ export async function DELETE(
   try {
     const { id: jobId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -129,28 +127,25 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: "Job unsaved successfully" });
-  } catch (error: any) {
+  } catch (error) {
     // Handle case where job wasn't saved
-    if (error?.code === "P2025") {
+    const prismaError = error as { code?: string };
+    if (prismaError.code === "P2025") {
       return NextResponse.json({ error: "Job not in saved list" }, { status: 404 });
     }
     console.error("Unsave job error:", error);
-    return NextResponse.json(
-      { error: "Failed to unsave job" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to unsave job" }, { status: 500 });
   }
 }
 
 // PATCH - Update notes on a saved job
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: jobId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -184,14 +179,12 @@ export async function PATCH(
       message: "Notes updated successfully",
       savedJob,
     });
-  } catch (error: any) {
-    if (error?.code === "P2025") {
+  } catch (error) {
+    const prismaError = error as { code?: string };
+    if (prismaError.code === "P2025") {
       return NextResponse.json({ error: "Job not in saved list" }, { status: 404 });
     }
     console.error("Update saved job notes error:", error);
-    return NextResponse.json(
-      { error: "Failed to update notes" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update notes" }, { status: 500 });
   }
 }

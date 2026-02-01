@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDown } from "lucide-react";
+import { CaretDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,7 +22,7 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b border-border-default", className)}
+    className={cn("border-border-default border-b", className)}
     {...props}
   />
 ));
@@ -51,7 +51,7 @@ const AccordionTrigger = React.forwardRef<
     >
       {children}
       {!hideIcon && (
-        <ChevronDown className="h-4 w-4 shrink-0 text-foreground-muted transition-transform duration-200" />
+        <CaretDown className="h-4 w-4 shrink-0 text-foreground-muted transition-transform duration-200" />
       )}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
@@ -86,7 +86,7 @@ const AccordionCard = React.forwardRef<
   <AccordionPrimitive.Item
     ref={ref}
     className={cn(
-      "rounded-lg border border-border-default bg-surface-default",
+      "border-border-default bg-surface-default rounded-lg border",
       "data-[state=open]:border-border-brand",
       "transition-colors",
       className
@@ -97,10 +97,4 @@ const AccordionCard = React.forwardRef<
 
 AccordionCard.displayName = "AccordionCard";
 
-export {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-  AccordionCard,
-};
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionCard };

@@ -3,14 +3,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import {
-  Flag,
-  Warning,
-  WarningDiamond,
-  CheckCircle,
-  Info,
-  X,
-} from "@phosphor-icons/react";
+import { Flag, Warning, WarningDiamond, CheckCircle, Info, X } from "@phosphor-icons/react";
 import { Button } from "./button";
 
 /**
@@ -126,8 +119,7 @@ const iconColorClasses: Record<AlertType, string> = {
 };
 
 export interface AlertProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">,
-    VariantProps<typeof alertVariants> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">, VariantProps<typeof alertVariants> {
   /** The type/severity of the alert */
   variant?: AlertType;
   /** Message text (required) */
@@ -180,6 +172,15 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     const [isExiting, setIsExiting] = React.useState(false);
     const [progress, setProgress] = React.useState(100);
 
+    const handleDismiss = React.useCallback(() => {
+      setIsExiting(true);
+      // Wait for exit animation to complete before removing from DOM
+      setTimeout(() => {
+        setIsVisible(false);
+        onDismiss?.();
+      }, 200); // Match animation duration
+    }, [onDismiss]);
+
     // Auto-dismiss timer
     React.useEffect(() => {
       if (!autoDismiss) return;
@@ -207,16 +208,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       }, autoDismiss);
 
       return () => clearTimeout(timer);
-    }, [autoDismiss, showProgress]);
-
-    const handleDismiss = React.useCallback(() => {
-      setIsExiting(true);
-      // Wait for exit animation to complete before removing from DOM
-      setTimeout(() => {
-        setIsVisible(false);
-        onDismiss?.();
-      }, 200); // Match animation duration
-    }, [onDismiss]);
+    }, [autoDismiss, showProgress, handleDismiss]);
 
     if (!isVisible) return null;
 
@@ -244,7 +236,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
 
         {/* Icon */}
         {!hideIcon && (
-          <div className="shrink-0 flex items-center justify-center">
+          <div className="flex shrink-0 items-center justify-center">
             {icon || (
               <IconComponent
                 weight="fill"
@@ -257,27 +249,18 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         )}
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
-          {title && (
-            <div className="font-semibold text-[0.9375rem] leading-5 mb-0.5">
-              {title}
-            </div>
-          )}
+        <div className="min-w-0 flex-1">
+          {title && <div className="mb-0.5 text-[0.9375rem] font-semibold leading-5">{title}</div>}
           <div className="text-[0.9375rem] leading-5">{children}</div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
           {/* Action Button */}
           {(action || actionLabel) && (
             <>
               {action || (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onAction}
-                  className="font-medium"
-                >
+                <Button variant="ghost" size="sm" onClick={onAction} className="font-medium">
                   {actionLabel}
                 </Button>
               )}
@@ -290,7 +273,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
               type="button"
               onClick={handleDismiss}
               className={cn(
-                "shrink-0 p-1.5 rounded-md",
+                "shrink-0 rounded-md p-1.5",
                 "bg-[var(--alert-dismiss-background)]",
                 "hover:bg-[var(--alert-dismiss-background-hover)]",
                 "active:bg-[var(--alert-dismiss-background-active)]",
@@ -312,16 +295,15 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
 Alert.displayName = "Alert";
 
 // Sub-components for compound usage pattern
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("font-semibold text-[0.9375rem] leading-5", className)}
-    {...props}
-  />
-));
+const AlertTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
+  ({ className, ...props }, ref) => (
+    <h5
+      ref={ref}
+      className={cn("text-[0.9375rem] font-semibold leading-5", className)}
+      {...props}
+    />
+  )
+);
 
 AlertTitle.displayName = "AlertTitle";
 
@@ -329,11 +311,7 @@ const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-[0.9375rem] leading-5 mt-1", className)}
-    {...props}
-  />
+  <div ref={ref} className={cn("mt-1 text-[0.9375rem] leading-5", className)} {...props} />
 ));
 
 AlertDescription.displayName = "AlertDescription";

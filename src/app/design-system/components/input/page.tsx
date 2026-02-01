@@ -73,20 +73,17 @@ const inputProps = [
     name: "success",
     type: "boolean",
     default: "false",
-    description:
-      "Applies success styling (green border). Overrides variant prop.",
+    description: "Applies success styling (green border). Overrides variant prop.",
   },
   {
     name: "leftAddon",
     type: "ReactNode",
-    description:
-      "Icon or element to display on the left side (rendered at 24px)",
+    description: "Icon or element to display on the left side (rendered at 24px)",
   },
   {
     name: "rightAddon",
     type: "ReactNode",
-    description:
-      "Icon or element to display on the right side (rendered at 16px)",
+    description: "Icon or element to display on the right side (rendered at 16px)",
   },
   {
     name: "disabled",
@@ -164,47 +161,40 @@ export default function InputPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Input
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Input components allow users to enter and edit text. They are the
-          foundation of forms and data entry, supporting various types including
-          text, email, password, and numbers. The Input family includes
-          InputMessage for validation feedback and InputWithMessage for
+        <h1 className="mb-2 text-heading-lg text-foreground">Input</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Input components allow users to enter and edit text. They are the foundation of forms and
+          data entry, supporting various types including text, email, password, and numbers. The
+          Input family includes InputMessage for validation feedback and InputWithMessage for
           convenience.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Form Control
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Accessible
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Validation Support
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Single-line text entry (names, emails, URLs)</li>
               <li>• Numeric data entry (phone numbers, quantities)</li>
               <li>• Password and secure text entry</li>
               <li>• Search queries and filters</li>
-              <li>• Short text that doesn't need line breaks</li>
+              <li>• Short text that doesn&apos;t need line breaks</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Multi-line text (use Textarea instead)</li>
               <li>• Selecting from predefined options (use Select)</li>
               <li>• Dates or times (use DatePicker/TimePicker)</li>
@@ -222,8 +212,7 @@ export default function InputPage() {
         parts={[
           {
             name: "Container",
-            description:
-              "The outer wrapper with background (neutral-100), border, and 8px radius",
+            description: "The outer wrapper with background (neutral-100), border, and 8px radius",
             required: true,
           },
           {
@@ -233,8 +222,7 @@ export default function InputPage() {
           },
           {
             name: "Input Field",
-            description:
-              "The actual text input area with 18px font and black text color",
+            description: "The actual text input area with 18px font and black text color",
             required: true,
           },
           {
@@ -244,8 +232,7 @@ export default function InputPage() {
           },
           {
             name: "Validation Message",
-            description:
-              "Optional InputMessage component below the input showing status feedback",
+            description: "Optional InputMessage component below the input showing status feedback",
           },
         ]}
       />
@@ -266,7 +253,7 @@ export default function InputPage() {
   <Input id="name" placeholder="Enter your full name" />
 </div>`}
         >
-          <div className="space-y-2 max-w-sm">
+          <div className="max-w-sm space-y-2">
             <Label htmlFor="name">Full Name</Label>
             <Input id="name" placeholder="Enter your full name" />
           </div>
@@ -282,7 +269,7 @@ export default function InputPage() {
         description="Different HTML input types for specific data entry needs"
       >
         <div className="space-y-8">
-          <div className="grid gap-6 md:grid-cols-2 max-w-3xl">
+          <div className="grid max-w-3xl gap-6 md:grid-cols-2">
             {/* Text */}
             <div className="space-y-2">
               <Label htmlFor="text-type">Text</Label>
@@ -318,7 +305,7 @@ export default function InputPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-inherit hover:opacity-70 transition-opacity"
+                    className="text-inherit transition-opacity hover:opacity-70"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeSlash /> : <Eye />}
@@ -333,13 +320,7 @@ export default function InputPage() {
             {/* Number */}
             <div className="space-y-2">
               <Label htmlFor="number-type">Number</Label>
-              <Input
-                id="number-type"
-                type="number"
-                placeholder="0"
-                min={0}
-                max={100}
-              />
+              <Input id="number-type" type="number" placeholder="0" min={0} max={100} />
               <p className="text-caption text-foreground-muted">
                 Numeric keyboard on mobile, increment/decrement
               </p>
@@ -354,9 +335,7 @@ export default function InputPage() {
                 placeholder="+1 (555) 000-0000"
                 leftAddon={<Phone />}
               />
-              <p className="text-caption text-foreground-muted">
-                Phone pad keyboard on mobile
-              </p>
+              <p className="text-caption text-foreground-muted">Phone pad keyboard on mobile</p>
             </div>
 
             {/* URL */}
@@ -384,7 +363,7 @@ export default function InputPage() {
         title="Sizes"
         description="Different size options for various contexts"
       >
-        <div className="space-y-6 max-w-md">
+        <div className="max-w-md space-y-6">
           <div className="space-y-2">
             <Label>Small (12px padding, 14px font)</Label>
             <Input inputSize="sm" placeholder="Small input" />
@@ -408,7 +387,7 @@ export default function InputPage() {
         title="States"
         description="Visual states for different interaction scenarios"
       >
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-4xl">
+        <div className="grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label>Default</Label>
             <Input placeholder="Default state" />
@@ -418,30 +397,18 @@ export default function InputPage() {
           </div>
           <div className="space-y-2">
             <Label>Hover</Label>
-            <Input
-              placeholder="Hover state"
-              className="border-[var(--primitive-neutral-300)]"
-            />
-            <p className="text-caption text-foreground-muted">
-              Neutral-300 border on hover
-            </p>
+            <Input placeholder="Hover state" className="border-[var(--primitive-neutral-300)]" />
+            <p className="text-caption text-foreground-muted">Neutral-300 border on hover</p>
           </div>
           <div className="space-y-2">
             <Label>Focus</Label>
-            <Input
-              placeholder="Focus state"
-              className="border-[var(--primitive-green-600)]"
-            />
-            <p className="text-caption text-foreground-muted">
-              Green-600 border when focused
-            </p>
+            <Input placeholder="Focus state" className="border-[var(--primitive-green-600)]" />
+            <p className="text-caption text-foreground-muted">Green-600 border when focused</p>
           </div>
           <div className="space-y-2">
             <Label>Filled</Label>
             <Input defaultValue="John Doe" />
-            <p className="text-caption text-foreground-muted">
-              Black text when filled
-            </p>
+            <p className="text-caption text-foreground-muted">Black text when filled</p>
           </div>
           <div className="space-y-2">
             <Label>Error</Label>
@@ -456,9 +423,7 @@ export default function InputPage() {
           <div className="space-y-2">
             <Label>Disabled</Label>
             <Input disabled placeholder="Disabled state" />
-            <p className="text-caption text-foreground-muted">
-              50% opacity, no interaction
-            </p>
+            <p className="text-caption text-foreground-muted">50% opacity, no interaction</p>
           </div>
         </div>
       </ComponentCard>
@@ -495,7 +460,7 @@ const validateEmail = (value: string) => {
   leftAddon={<Mail />}
 />`}
         >
-          <div className="space-y-4 max-w-sm">
+          <div className="max-w-sm space-y-4">
             <Label htmlFor="controlled-email">Email Address</Label>
             <InputWithMessage
               id="controlled-email"
@@ -509,7 +474,8 @@ const validateEmail = (value: string) => {
               leftAddon={<Mail />}
             />
             <p className="text-caption text-foreground-muted">
-              Current value: <code className="bg-background-muted px-1 rounded">{email || "(empty)"}</code>
+              Current value:{" "}
+              <code className="rounded bg-background-muted px-1">{email || "(empty)"}</code>
             </p>
           </div>
         </CodePreview>
@@ -523,37 +489,29 @@ const validateEmail = (value: string) => {
         title="Input Message"
         description="Contextual messages for validation and helper text"
       >
-        <div className="space-y-6 max-w-md">
+        <div className="max-w-md space-y-6">
           <div className="space-y-1">
             <Label>Error Message</Label>
             <Input error placeholder="Invalid input" />
-            <InputMessage status="error">
-              This field is required
-            </InputMessage>
+            <InputMessage status="error">This field is required</InputMessage>
           </div>
 
           <div className="space-y-1">
             <Label>Success Message</Label>
             <Input success defaultValue="valid@email.com" />
-            <InputMessage status="success">
-              Email address is valid
-            </InputMessage>
+            <InputMessage status="success">Email address is valid</InputMessage>
           </div>
 
           <div className="space-y-1">
             <Label>Warning Message</Label>
             <Input placeholder="Username" />
-            <InputMessage status="warning">
-              Username should be at least 3 characters
-            </InputMessage>
+            <InputMessage status="warning">Username should be at least 3 characters</InputMessage>
           </div>
 
           <div className="space-y-1">
             <Label>Info Message (Helper Text)</Label>
             <Input type="password" placeholder="Password" />
-            <InputMessage status="info">
-              Must contain at least 8 characters
-            </InputMessage>
+            <InputMessage status="info">Must contain at least 8 characters</InputMessage>
           </div>
         </div>
       </ComponentCard>
@@ -566,21 +524,15 @@ const validateEmail = (value: string) => {
         title="With Addons"
         description="Icons and interactive elements within the input"
       >
-        <div className="space-y-6 max-w-md">
+        <div className="max-w-md space-y-6">
           <div className="space-y-2">
             <Label>Left Icon (24px, neutral-600)</Label>
-            <Input
-              placeholder="Search candidates..."
-              leftAddon={<Search />}
-            />
+            <Input placeholder="Search candidates..." leftAddon={<Search />} />
           </div>
 
           <div className="space-y-2">
             <Label>Right Icon (16px, green-800)</Label>
-            <Input
-              placeholder="Enter company name"
-              rightAddon={<Building />}
-            />
+            <Input placeholder="Enter company name" rightAddon={<Building />} />
           </div>
 
           <div className="space-y-2">
@@ -603,7 +555,7 @@ const validateEmail = (value: string) => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-inherit hover:opacity-70 transition-opacity"
+                  className="text-inherit transition-opacity hover:opacity-70"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeSlash /> : <Eye />}
@@ -618,9 +570,7 @@ const validateEmail = (value: string) => {
       {/* 10. PROPS TABLES */}
       {/* ============================================ */}
       <div id="props" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Props Reference
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Props Reference</h2>
 
         <ComponentCard title="Input Props">
           <PropsTable props={inputProps} />
@@ -639,9 +589,7 @@ const validateEmail = (value: string) => {
       {/* 11. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Always pair inputs with visible labels (not just placeholders)",
@@ -726,9 +674,7 @@ const validateEmail = (value: string) => {
       {/* 14. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Job Application Form"
@@ -736,17 +682,11 @@ const validateEmail = (value: string) => {
         >
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-body-strong text-foreground mb-4">
-                Contact Information
-              </h3>
+              <h3 className="mb-4 text-body-strong text-foreground">Contact Information</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="applicant-name">Full Name *</Label>
-                  <Input
-                    id="applicant-name"
-                    placeholder="Jane Doe"
-                    leftAddon={<User />}
-                  />
+                  <Input id="applicant-name" placeholder="Jane Doe" leftAddon={<User />} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="applicant-email">Email Address *</Label>
@@ -780,10 +720,7 @@ const validateEmail = (value: string) => {
           </Card>
         </RealWorldExample>
 
-        <RealWorldExample
-          title="Create Job Posting"
-          description="Job details form in the ATS"
-        >
+        <RealWorldExample title="Create Job Posting" description="Job details form in the ATS">
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
@@ -810,15 +747,11 @@ const validateEmail = (value: string) => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="job-salary">Salary Range (USD)</Label>
-                    <Input
-                      id="job-salary"
-                      type="text"
-                      placeholder="e.g., $120,000 - $150,000"
-                    />
+                    <Input id="job-salary" type="text" placeholder="e.g., $120,000 - $150,000" />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-border-muted">
+                <div className="flex justify-end gap-3 border-t border-border-muted pt-4">
                   <Button variant="tertiary">Save Draft</Button>
                   <Button variant="primary" rightIcon={<ArrowRight size={16} />}>
                     Continue
@@ -833,10 +766,10 @@ const validateEmail = (value: string) => {
           title="Login Form with Validation"
           description="Email and password login with inline validation"
         >
-          <div className="max-w-sm mx-auto">
+          <div className="mx-auto max-w-sm">
             <Card>
               <CardContent className="pt-6">
-                <h3 className="text-heading-sm text-foreground text-center mb-6">
+                <h3 className="mb-6 text-center text-heading-sm text-foreground">
                   Sign in to Canopy
                 </h3>
                 <div className="space-y-4">
@@ -849,9 +782,7 @@ const validateEmail = (value: string) => {
                       leftAddon={<Mail />}
                       error
                     />
-                    <InputMessage status="error">
-                      Please enter a valid email address
-                    </InputMessage>
+                    <InputMessage status="error">Please enter a valid email address</InputMessage>
                   </div>
 
                   <div className="space-y-1">

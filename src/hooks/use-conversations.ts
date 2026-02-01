@@ -89,7 +89,7 @@ export function useConversations() {
         // Refresh the list
         await fetchConversations();
         return data.conversation;
-      } catch (err: any) {
+      } catch (err) {
         console.error("createConversation error:", err);
         throw err;
       }
@@ -97,10 +97,7 @@ export function useConversations() {
     [fetchConversations]
   );
 
-  const totalUnread = conversations.reduce(
-    (sum, c) => sum + c.unreadCount,
-    0
-  );
+  const totalUnread = conversations.reduce((sum, c) => sum + c.unreadCount, 0);
 
   return {
     conversations,

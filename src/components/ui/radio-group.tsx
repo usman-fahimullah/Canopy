@@ -73,8 +73,9 @@ interface RadioGroupContextValue {
 
 const RadioGroupContext = React.createContext<RadioGroupContextValue>({});
 
-export interface RadioGroupProps
-  extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> {
+export interface RadioGroupProps extends React.ComponentPropsWithoutRef<
+  typeof RadioGroupPrimitive.Root
+> {
   /** Size variant for all radio items */
   size?: "sm" | "default" | "lg";
   /** Show error state for all items */
@@ -87,18 +88,15 @@ const RadioGroup = React.forwardRef<
 >(({ className, size = "default", error, ...props }, ref) => {
   return (
     <RadioGroupContext.Provider value={{ size, error }}>
-      <RadioGroupPrimitive.Root
-        className={cn("grid gap-3", className)}
-        {...props}
-        ref={ref}
-      />
+      <RadioGroupPrimitive.Root className={cn("grid gap-3", className)} {...props} ref={ref} />
     </RadioGroupContext.Provider>
   );
 });
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
 
 export interface RadioGroupItemProps
-  extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
+  extends
+    React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
     VariantProps<typeof radioItemVariants> {}
 
 const RadioGroupItem = React.forwardRef<
@@ -139,8 +137,10 @@ RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName;
  * - Description: text-caption, foreground-muted
  * - Supports disabled state
  */
-interface RadioGroupItemWithLabelProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>, "children"> {
+interface RadioGroupItemWithLabelProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
+  "children"
+> {
   /** Label text displayed next to the radio */
   label: string;
   /** Optional description text below the label */
@@ -171,7 +171,8 @@ const RadioGroupItemWithLabel = React.forwardRef<
     },
     ref
   ) => {
-    const radioId = id || React.useId();
+    const generatedId = React.useId();
+    const radioId = id || generatedId;
     const context = React.useContext(RadioGroupContext);
     const size = sizeProp ?? context.size ?? "default";
     const error = errorProp ?? context.error ?? false;
@@ -187,11 +188,11 @@ const RadioGroupItemWithLabel = React.forwardRef<
           className={size === "sm" ? "mt-0.5" : size === "lg" ? "mt-0" : "mt-0.5"}
           {...props}
         />
-        <div className="flex flex-col justify-center min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
           <label
             htmlFor={radioId}
             className={cn(
-              "text-body leading-6 cursor-pointer select-none",
+              "cursor-pointer select-none text-body leading-6",
               disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-default)]",
               error && !disabled && "text-[var(--foreground-error)]",
               labelClassName
@@ -200,10 +201,12 @@ const RadioGroupItemWithLabel = React.forwardRef<
             {label}
           </label>
           {description && (
-            <span className={cn(
-              "text-caption leading-5",
-              disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
-            )}>
+            <span
+              className={cn(
+                "text-caption leading-5",
+                disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
+              )}
+            >
               {description}
             </span>
           )}
@@ -224,8 +227,10 @@ RadioGroupItemWithLabel.displayName = "RadioGroupItemWithLabel";
  * - Supports description and icons
  * - Useful for option selection with more context
  */
-interface RadioGroupCardProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>, "children"> {
+interface RadioGroupCardProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>,
+  "children"
+> {
   /** Label text */
   label: string;
   /** Description text */
@@ -256,7 +261,8 @@ const RadioGroupCard = React.forwardRef<
     },
     ref
   ) => {
-    const radioId = id || React.useId();
+    const generatedId = React.useId();
+    const radioId = id || generatedId;
     const context = React.useContext(RadioGroupContext);
     const size = sizeProp ?? context.size ?? "default";
     const error = errorProp ?? context.error ?? false;
@@ -264,14 +270,14 @@ const RadioGroupCard = React.forwardRef<
     return (
       <div
         className={cn(
-          "relative flex gap-3 p-3 rounded-lg border cursor-pointer",
-          "transition-all duration-normal ease-default",
+          "relative flex cursor-pointer gap-3 rounded-lg border p-3",
+          "ease-default transition-all duration-normal",
           "hover:bg-[var(--background-interactive-hover)]",
           error
             ? "border-[var(--radio-border-error)] hover:border-[var(--primitive-red-600)]"
             : "border-[var(--border-default)] hover:border-[var(--border-interactive-hover)]",
           "has-[[data-state=checked]]:border-[var(--radio-border-checked)]",
-          disabled && "opacity-50 cursor-not-allowed hover:bg-transparent",
+          disabled && "cursor-not-allowed opacity-50 hover:bg-transparent",
           className
         )}
       >
@@ -286,17 +292,18 @@ const RadioGroupCard = React.forwardRef<
         />
         <label
           htmlFor={radioId}
-          className={cn(
-            "flex-1 cursor-pointer select-none",
-            disabled && "cursor-not-allowed"
-          )}
+          className={cn("flex-1 cursor-pointer select-none", disabled && "cursor-not-allowed")}
         >
           <div className="flex items-center gap-2">
             {icon && (
-              <span className={cn(
-                "shrink-0",
-                disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-default)]"
-              )}>
+              <span
+                className={cn(
+                  "shrink-0",
+                  disabled
+                    ? "text-[var(--foreground-disabled)]"
+                    : "text-[var(--foreground-default)]"
+                )}
+              >
                 {icon}
               </span>
             )}
@@ -311,10 +318,12 @@ const RadioGroupCard = React.forwardRef<
             </span>
           </div>
           {description && (
-            <p className={cn(
-              "text-caption mt-1",
-              disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
-            )}>
+            <p
+              className={cn(
+                "mt-1 text-caption",
+                disabled ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-muted)]"
+              )}
+            >
               {description}
             </p>
           )}
@@ -335,8 +344,9 @@ RadioGroupCard.displayName = "RadioGroupCard";
  * - Error state with message
  * - Consistent spacing
  */
-interface RadioGroupWithLabelProps
-  extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> {
+interface RadioGroupWithLabelProps extends React.ComponentPropsWithoutRef<
+  typeof RadioGroupPrimitive.Root
+> {
   /** Group label */
   label?: string;
   /** Helper text for the group */
@@ -383,9 +393,7 @@ const RadioGroupWithLabel = React.forwardRef<
               )}
             >
               {label}
-              {required && (
-                <span className="text-[var(--foreground-error)] ml-0.5">*</span>
-              )}
+              {required && <span className="ml-0.5 text-[var(--foreground-error)]">*</span>}
             </label>
             {helperText && !errorMessage && (
               <p className="text-caption text-[var(--foreground-muted)]">{helperText}</p>
@@ -397,7 +405,9 @@ const RadioGroupWithLabel = React.forwardRef<
           size={size}
           error={error}
           aria-labelledby={label ? `${groupId}-label` : undefined}
-          aria-describedby={errorMessage ? `${groupId}-error` : helperText ? `${groupId}-description` : undefined}
+          aria-describedby={
+            errorMessage ? `${groupId}-error` : helperText ? `${groupId}-description` : undefined
+          }
           {...props}
         >
           {children}
@@ -414,10 +424,4 @@ const RadioGroupWithLabel = React.forwardRef<
 
 RadioGroupWithLabel.displayName = "RadioGroupWithLabel";
 
-export {
-  RadioGroup,
-  RadioGroupItem,
-  RadioGroupItemWithLabel,
-  RadioGroupCard,
-  RadioGroupWithLabel,
-};
+export { RadioGroup, RadioGroupItem, RadioGroupItemWithLabel, RadioGroupCard, RadioGroupWithLabel };

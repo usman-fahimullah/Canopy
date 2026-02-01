@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import {
   RecruiterCalendarView,
   Button,
@@ -18,14 +19,7 @@ import {
   Funnel,
   Eye,
 } from "@phosphor-icons/react";
-import {
-  addDays,
-  setHours,
-  setMinutes,
-  subDays,
-  addWeeks,
-  format,
-} from "date-fns";
+import { addDays, setHours, setMinutes, subDays, addWeeks, format } from "date-fns";
 
 /**
  * Demo page for the Recruiter Calendar View
@@ -46,7 +40,8 @@ const generateSampleEvents = (): CalendarEvent[] => {
     type: "interview-video",
     status: "confirmed",
     candidateName: "Sarah Chen",
-    candidateAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+    candidateAvatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
     jobTitle: "Senior Engineer",
     meetingLink: "https://meet.google.com/abc-def-ghi",
     interviewers: [
@@ -72,7 +67,8 @@ const generateSampleEvents = (): CalendarEvent[] => {
     type: "interview-phone",
     status: "confirmed",
     candidateName: "Marcus Johnson",
-    candidateAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    candidateAvatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
     jobTitle: "Product Designer",
   });
 
@@ -94,7 +90,8 @@ const generateSampleEvents = (): CalendarEvent[] => {
     type: "interview-onsite",
     status: "confirmed",
     candidateName: "Emily Wong",
-    candidateAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
+    candidateAvatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
     jobTitle: "Engineering Manager",
     location: "Conference Room A",
     interviewers: [
@@ -123,7 +120,8 @@ const generateSampleEvents = (): CalendarEvent[] => {
     type: "interview-video",
     status: "tentative",
     candidateName: "James Park",
-    candidateAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+    candidateAvatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
     jobTitle: "UX Designer",
   });
 
@@ -137,11 +135,10 @@ const generateSampleEvents = (): CalendarEvent[] => {
     type: "interview-video",
     status: "confirmed",
     candidateName: "Rachel Kim",
-    candidateAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop",
+    candidateAvatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop",
     jobTitle: "Frontend Engineer",
-    interviewers: [
-      { id: "int-1", name: "Diego Navarro", role: "Interviewer" },
-    ],
+    interviewers: [{ id: "int-1", name: "Diego Navarro", role: "Interviewer" }],
   });
 
   events.push({
@@ -162,7 +159,8 @@ const generateSampleEvents = (): CalendarEvent[] => {
     type: "interview-onsite",
     status: "confirmed",
     candidateName: "Alex Thompson",
-    candidateAvatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop",
+    candidateAvatar:
+      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop",
     jobTitle: "Senior Product Manager",
     location: "HQ Office",
   });
@@ -206,20 +204,22 @@ export default function RecruiterCalendarDemoPage() {
   };
 
   const handleSlotClick = (start: Date, end: Date) => {
+    // eslint-disable-next-line no-console
     console.log("Create new event:", { start, end });
     // In production, this would open a create event modal
   };
 
   const handleCreateEvent = () => {
+    // eslint-disable-next-line no-console
     console.log("Create new event clicked");
     // In production, this would open a create event modal
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--primitive-neutral-100)]">
+    <div className="flex h-screen flex-col bg-[var(--primitive-neutral-100)]">
       {/* Header */}
-      <header className="flex-shrink-0 bg-white border-b border-[var(--primitive-neutral-200)]">
-        <div className="max-w-[1600px] mx-auto px-6 py-3">
+      <header className="flex-shrink-0 border-b border-[var(--primitive-neutral-200)] bg-white">
+        <div className="mx-auto max-w-[1600px] px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
@@ -235,7 +235,7 @@ export default function RecruiterCalendarDemoPage() {
             <div className="flex items-center gap-3">
               <a
                 href="/demo/interview-scheduling"
-                className="flex items-center gap-1.5 text-sm text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors"
+                className="flex items-center gap-1.5 text-sm text-[var(--foreground-muted)] transition-colors hover:text-[var(--foreground-default)]"
               >
                 <span>Interview Modal</span>
                 <ArrowSquareOut size={14} />
@@ -246,12 +246,15 @@ export default function RecruiterCalendarDemoPage() {
       </header>
 
       {/* Feature Highlights Bar */}
-      <div className="flex-shrink-0 bg-[var(--primitive-green-50)] border-b border-[var(--primitive-green-200)]">
-        <div className="max-w-[1600px] mx-auto px-6 py-2">
+      <div className="flex-shrink-0 border-b border-[var(--primitive-green-200)] bg-[var(--primitive-green-50)]">
+        <div className="mx-auto max-w-[1600px] px-6 py-2">
           <div className="flex items-center justify-center gap-8 text-[12px]">
             <div className="flex items-center gap-1.5 text-[var(--primitive-green-700)]">
               <Keyboard size={14} />
-              <span>Keyboard shortcuts (press <kbd className="px-1 bg-white rounded border text-[10px]">?</kbd>)</span>
+              <span>
+                Keyboard shortcuts (press{" "}
+                <kbd className="rounded border bg-white px-1 text-[10px]">?</kbd>)
+              </span>
             </div>
             <div className="flex items-center gap-1.5 text-[var(--primitive-green-700)]">
               <Eye size={14} />
@@ -285,19 +288,16 @@ export default function RecruiterCalendarDemoPage() {
       {/* Event Detail Modal */}
       {showEventModal && selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setShowEventModal(false)}
-          />
-          <Card className="relative max-w-md w-full mx-4 p-0 overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowEventModal(false)} />
+          <Card className="relative mx-4 w-full max-w-md overflow-hidden p-0 shadow-2xl">
             {/* Header */}
-            <div className="p-5 border-b border-[var(--primitive-neutral-200)]">
+            <div className="border-b border-[var(--primitive-neutral-200)] p-5">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-[var(--foreground-default)]">
                     {selectedEvent.title}
                   </h3>
-                  <p className="text-sm text-[var(--foreground-muted)] mt-1">
+                  <p className="mt-1 text-sm text-[var(--foreground-muted)]">
                     {format(
                       typeof selectedEvent.start === "string"
                         ? new Date(selectedEvent.start)
@@ -323,23 +323,24 @@ export default function RecruiterCalendarDemoPage() {
                 </div>
                 <button
                   onClick={() => setShowEventModal(false)}
-                  className="p-1 rounded hover:bg-[var(--primitive-neutral-200)] transition-colors"
+                  className="rounded p-1 transition-colors hover:bg-[var(--primitive-neutral-200)]"
                 >
-                  <span className="sr-only">Close</span>
-                  ×
+                  <span className="sr-only">Close</span>×
                 </button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="p-5 space-y-4">
+            <div className="space-y-4 p-5">
               {/* Candidate info */}
               {selectedEvent.candidateName && (
-                <div className="flex items-center gap-3 p-3 bg-[var(--primitive-neutral-50)] rounded-lg">
-                  <img
-                    src={selectedEvent.candidateAvatar}
+                <div className="flex items-center gap-3 rounded-lg bg-[var(--primitive-neutral-50)] p-3">
+                  <Image
+                    src={selectedEvent.candidateAvatar || ""}
                     alt={selectedEvent.candidateName}
-                    className="w-10 h-10 rounded-full object-cover"
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 rounded-full object-cover"
                   />
                   <div>
                     <p className="font-medium text-[var(--foreground-default)]">
@@ -355,22 +356,17 @@ export default function RecruiterCalendarDemoPage() {
               {/* Interviewers */}
               {selectedEvent.interviewers && selectedEvent.interviewers.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium text-[var(--foreground-default)] mb-2">
+                  <p className="mb-2 text-sm font-medium text-[var(--foreground-default)]">
                     Interviewers
                   </p>
                   <div className="space-y-2">
                     {selectedEvent.interviewers.map((interviewer) => (
-                      <div
-                        key={interviewer.id}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-[var(--primitive-neutral-200)] flex items-center justify-center text-xs font-medium">
+                      <div key={interviewer.id} className="flex items-center gap-2 text-sm">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-neutral-200)] text-xs font-medium">
                           {interviewer.name.charAt(0)}
                         </div>
                         <span>{interviewer.name}</span>
-                        <span className="text-[var(--foreground-muted)]">
-                          · {interviewer.role}
-                        </span>
+                        <span className="text-[var(--foreground-muted)]">· {interviewer.role}</span>
                       </div>
                     ))}
                   </div>
@@ -380,7 +376,7 @@ export default function RecruiterCalendarDemoPage() {
               {/* Location / Meeting Link */}
               {(selectedEvent.location || selectedEvent.meetingLink) && (
                 <div>
-                  <p className="text-sm font-medium text-[var(--foreground-default)] mb-1">
+                  <p className="mb-1 text-sm font-medium text-[var(--foreground-default)]">
                     {selectedEvent.location ? "Location" : "Meeting Link"}
                   </p>
                   <p className="text-sm text-[var(--foreground-muted)]">
@@ -391,7 +387,7 @@ export default function RecruiterCalendarDemoPage() {
             </div>
 
             {/* Footer */}
-            <div className="p-5 border-t border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)]">
+            <div className="border-t border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] p-5">
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="flex-1">
                   Edit

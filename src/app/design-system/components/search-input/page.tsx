@@ -296,6 +296,7 @@ export default function SearchInputPage() {
   ]);
 
   const handleSearch = (search: string, location?: string) => {
+    // eslint-disable-next-line no-console
     console.log("Search:", search, "Location:", location);
   };
 
@@ -309,23 +310,21 @@ export default function SearchInputPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Search Input
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Search Input components provide specialized input fields for search functionality.
-          This family includes the base SearchInput, LocationInput for location-based filtering,
-          RecentlySearchedDropdown for search history, and the composite SearchBar that combines
-          all elements into a complete search experience.
+        <h1 className="mb-2 text-heading-lg text-foreground">Search Input</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Search Input components provide specialized input fields for search functionality. This
+          family includes the base SearchInput, LocationInput for location-based filtering,
+          RecentlySearchedDropdown for search history, and the composite SearchBar that combines all
+          elements into a complete search experience.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Form Control
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Composable
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Controlled & Uncontrolled
           </span>
         </div>
@@ -435,11 +434,7 @@ export default function SearchInputPage() {
   onSearch={(search) => console.log(search)}
 />`}
             >
-              <SearchBar
-                showLocation={false}
-                buttonText="Search"
-                onSearch={handleSearch}
-              />
+              <SearchBar showLocation={false} buttonText="Search" onSearch={handleSearch} />
             </CodePreview>
           </div>
 
@@ -450,7 +445,7 @@ export default function SearchInputPage() {
               SearchInput and LocationInput can be used independently
             </p>
             <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
+              <div className="min-w-[200px] flex-1">
                 <Label className="mb-2 block">Search Input</Label>
                 <SearchInput placeholder="Search..." />
               </div>
@@ -474,14 +469,14 @@ export default function SearchInputPage() {
         <div className="space-y-6">
           <div className="space-y-2">
             <Label>Default (56px height)</Label>
-            <div className="flex gap-4 items-start">
+            <div className="flex items-start gap-4">
               <SearchInput size="default" placeholder="Default size search..." />
               <LocationInput size="default" />
             </div>
           </div>
           <div className="space-y-2">
             <Label>Compact (48px height)</Label>
-            <div className="flex gap-4 items-start">
+            <div className="flex items-start gap-4">
               <SearchInput size="compact" placeholder="Compact size search..." />
               <LocationInput size="compact" />
             </div>
@@ -527,16 +522,13 @@ export default function SearchInputPage() {
             </div>
             <div className="space-y-2">
               <Label>Disabled</Label>
-              <SearchInput
-                placeholder="Search by title, company name, etc."
-                disabled
-              />
+              <SearchInput placeholder="Search by title, company name, etc." disabled />
               <p className="text-caption text-foreground-muted">Reduced opacity, no interaction</p>
             </div>
           </div>
 
           <div className="border-t border-border-muted pt-6">
-            <h4 className="text-body-strong text-foreground mb-4">Location Input States</h4>
+            <h4 className="mb-4 text-body-strong text-foreground">Location Input States</h4>
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Default</Label>
@@ -561,11 +553,7 @@ export default function SearchInputPage() {
               </div>
               <div className="space-y-2">
                 <Label>Disabled</Label>
-                <LocationInput
-                  placeholder="City, state, or zip code"
-                  disabled
-                  size="full"
-                />
+                <LocationInput placeholder="City, state, or zip code" disabled size="full" />
               </div>
             </div>
           </div>
@@ -585,8 +573,9 @@ export default function SearchInputPage() {
           <div className="space-y-3">
             <h4 className="text-body-strong text-foreground">Controlled Mode</h4>
             <p className="text-caption text-foreground-muted">
-              Use <code className="bg-background-muted px-1 rounded">value</code> and{" "}
-              <code className="bg-background-muted px-1 rounded">onValueChange</code> for full control
+              Use <code className="rounded bg-background-muted px-1">value</code> and{" "}
+              <code className="rounded bg-background-muted px-1">onValueChange</code> for full
+              control
             </p>
             <CodePreview
               code={`const [value, setValue] = React.useState("");
@@ -607,11 +596,7 @@ export default function SearchInputPage() {
                 <p className="text-caption text-foreground-muted">
                   Current value: <strong>{controlledValue || "(empty)"}</strong>
                 </p>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setControlledValue("")}
-                >
+                <Button variant="secondary" size="sm" onClick={() => setControlledValue("")}>
                   Clear Value
                 </Button>
               </div>
@@ -622,7 +607,8 @@ export default function SearchInputPage() {
           <div className="space-y-3">
             <h4 className="text-body-strong text-foreground">Uncontrolled Mode</h4>
             <p className="text-caption text-foreground-muted">
-              Use <code className="bg-background-muted px-1 rounded">defaultValue</code> and let the component manage state internally
+              Use <code className="rounded bg-background-muted px-1">defaultValue</code> and let the
+              component manage state internally
             </p>
             <CodePreview
               code={`<SearchInput
@@ -633,6 +619,7 @@ export default function SearchInputPage() {
             >
               <SearchInput
                 defaultValue="Initial search"
+                // eslint-disable-next-line no-console
                 onValueChange={(value) => console.log("Changed:", value)}
                 placeholder="Uncontrolled input..."
               />
@@ -663,10 +650,12 @@ export default function SearchInputPage() {
   onDelete={() => console.log('deleted')}
 />`}
             >
-              <div className="w-full max-w-md border border-border-muted rounded-xl">
+              <div className="w-full max-w-md rounded-xl border border-border-muted">
                 <RecentlySearchedItem
                   text="Climate Corp"
+                  // eslint-disable-next-line no-console
                   onClick={() => console.log("Item clicked")}
+                  // eslint-disable-next-line no-console
                   onDelete={() => console.log("Item deleted")}
                 />
               </div>
@@ -694,6 +683,7 @@ export default function SearchInputPage() {
               <div className="w-full max-w-xl">
                 <RecentlySearchedDropdown
                   items={recentSearches}
+                  // eslint-disable-next-line no-console
                   onItemClick={(item) => console.log("Selected:", item)}
                   onItemDelete={handleDeleteRecent}
                   maxItems={5}
@@ -729,6 +719,7 @@ export default function SearchInputPage() {
                   showRecentSearches={true}
                   recentSearches={recentSearches}
                   onRecentSearchClick={(item) => {
+                    // eslint-disable-next-line no-console
                     console.log("Selected:", item);
                   }}
                   onRecentSearchDelete={handleDeleteRecent}
@@ -770,7 +761,7 @@ export default function SearchInputPage() {
       {/* 10. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">Usage Guidelines</h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use SearchBar for main search functionality on job boards and candidate search",
@@ -799,7 +790,7 @@ export default function SearchInputPage() {
         <AccessibilityInfo
           items={[
             "All inputs include appropriate role and aria attributes for screen readers",
-            "The search input uses type=\"text\" with proper labeling for assistive technology",
+            'The search input uses type="text" with proper labeling for assistive technology',
             "Delete buttons include descriptive aria-label (e.g., 'Remove \"Climate Corp\" from recent searches')",
             "Focus states are clearly visible with high-contrast green/red borders",
             "Error messages are associated with inputs for screen reader announcements",
@@ -861,11 +852,12 @@ export default function SearchInputPage() {
         >
           <Card className="overflow-hidden">
             <div className="bg-background-brand p-8">
-              <h2 className="text-heading-md text-foreground-on-emphasis mb-2">
+              <h2 className="mb-2 text-heading-md text-foreground-on-emphasis">
                 Find Climate Jobs
               </h2>
-              <p className="text-body text-foreground-on-emphasis/80 mb-6">
-                Discover opportunities in renewable energy, sustainability, and environmental sectors
+              <p className="text-foreground-on-emphasis/80 mb-6 text-body">
+                Discover opportunities in renewable energy, sustainability, and environmental
+                sectors
               </p>
               <SearchBar
                 searchPlaceholder="Job title, company, or keywords"
@@ -875,6 +867,7 @@ export default function SearchInputPage() {
                 onSearch={handleSearch}
                 showRecentSearches={true}
                 recentSearches={recentSearches.slice(0, 3)}
+                // eslint-disable-next-line no-console
                 onRecentSearchClick={(item) => console.log(item)}
                 onRecentSearchDelete={handleDeleteRecent}
               />
@@ -891,8 +884,8 @@ export default function SearchInputPage() {
           title="Candidate Search in ATS Dashboard"
           description="Search for candidates within the applicant tracking system"
         >
-          <div className="bg-surface rounded-xl border border-border p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="rounded-xl border border-border bg-surface p-6">
+            <div className="mb-6 flex items-center justify-between">
               <h3 className="text-body-strong text-foreground">Candidates</h3>
               <Button variant="primary" size="sm">
                 Add Candidate
@@ -914,9 +907,9 @@ export default function SearchInputPage() {
           title="Compact Search in Navigation"
           description="Compact search input used in a toolbar or navigation bar"
         >
-          <div className="bg-surface rounded-xl border border-border p-4 flex items-center gap-4">
+          <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4">
             <span className="text-body-strong text-foreground">Dashboard</span>
-            <div className="flex-1 max-w-md">
+            <div className="max-w-md flex-1">
               <SearchInput size="compact" placeholder="Quick search..." />
             </div>
             <Button variant="ghost" size="icon-sm">

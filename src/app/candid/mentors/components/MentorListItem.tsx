@@ -17,11 +17,9 @@ export function MentorListItem({
   return (
     <button
       onClick={onClick}
-      aria-selected={isSelected}
-      className={`w-full text-left px-6 py-4 transition-all duration-150 border-b border-[var(--primitive-neutral-200)] ${
-        isSelected
-          ? "bg-background-brand-subtle"
-          : "bg-white hover:bg-background-subtle"
+      aria-pressed={isSelected}
+      className={`w-full border-b border-[var(--primitive-neutral-200)] px-6 py-4 text-left transition-all duration-150 ${
+        isSelected ? "bg-background-brand-subtle" : "bg-white hover:bg-background-subtle"
       }`}
     >
       <div className="flex items-start gap-3">
@@ -31,12 +29,12 @@ export function MentorListItem({
           name={mentor.name}
           color="green"
           shape="square"
-          className="shrink-0 border border-[var(--primitive-neutral-300)] !rounded-[16px]"
+          className="shrink-0 !rounded-[16px] border border-[var(--primitive-neutral-300)]"
         />
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {/* Name + Badge */}
           <div className="flex items-center gap-2">
-            <p className="text-[18px] leading-6 text-[var(--primitive-neutral-800)] truncate">
+            <p className="truncate text-[18px] leading-6 text-[var(--primitive-neutral-800)]">
               {mentor.name}
             </p>
             {mentor.badge && <MentorBadge type={mentor.badge} />}
@@ -44,20 +42,20 @@ export function MentorListItem({
 
           {/* Role */}
           {mentor.role && (
-            <p className="text-caption text-[var(--primitive-neutral-600)] truncate mt-1">
+            <p className="mt-1 truncate text-caption text-[var(--primitive-neutral-600)]">
               {mentor.role}
             </p>
           )}
 
           {/* Specialty */}
           {mentor.specialty && (
-            <p className="text-caption font-bold text-[var(--primitive-green-600)] truncate mt-1">
+            <p className="mt-1 truncate text-caption font-bold text-[var(--primitive-green-600)]">
               {mentor.specialty}
             </p>
           )}
 
           {/* Location + Rating */}
-          <div className="flex items-center gap-1 mt-1 text-caption text-[var(--primitive-neutral-600)]">
+          <div className="mt-1 flex items-center gap-1 text-caption text-[var(--primitive-neutral-600)]">
             {mentor.location && (
               <span className="flex items-center gap-1">
                 <MapPin size={16} />
@@ -69,11 +67,7 @@ export function MentorListItem({
             )}
             {mentor.rating > 0 && (
               <span className="flex items-center gap-1">
-                <Star
-                  size={16}
-                  weight="fill"
-                  className="text-[var(--primitive-yellow-500)]"
-                />
+                <Star size={16} weight="fill" className="text-[var(--primitive-yellow-500)]" />
                 {mentor.rating.toFixed(1)}
               </span>
             )}

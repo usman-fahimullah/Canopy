@@ -29,7 +29,9 @@ function getResendClient(): Resend | null {
 /**
  * Send an email using Resend
  */
-export async function sendEmail(payload: EmailPayload): Promise<{ success: boolean; error?: string }> {
+export async function sendEmail(
+  payload: EmailPayload
+): Promise<{ success: boolean; error?: string }> {
   const emailPayload = {
     ...payload,
     from: payload.from || DEFAULT_FROM,
@@ -39,7 +41,7 @@ export async function sendEmail(payload: EmailPayload): Promise<{ success: boole
 
   // Dev mode fallback when Resend is not configured
   if (!client) {
-    console.log("[Email] Resend not configured. Would send:", {
+    console.warn("[Email] Resend not configured. Would send:", {
       to: emailPayload.to,
       subject: emailPayload.subject,
       from: emailPayload.from,
@@ -62,7 +64,7 @@ export async function sendEmail(payload: EmailPayload): Promise<{ success: boole
       return { success: false, error: error.message };
     }
 
-    console.log("[Email] Sent successfully:", data?.id);
+    // Email sent successfully
     return { success: true };
   } catch (error) {
     console.error("[Email] Error:", error);

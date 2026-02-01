@@ -41,7 +41,7 @@ import {
   ListBullets,
   ListNumbers,
   Link,
-  Image,
+  Image as ImageIcon,
   Code,
   Quotes,
   Table,
@@ -240,33 +240,29 @@ export default function ToolbarPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Toolbar
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Toolbar provides a container for grouping related actions and controls.
-          It's commonly used in editors, forms, and content management interfaces
-          where users need quick access to formatting options and actions.
+        <h1 className="mb-2 text-heading-lg text-foreground">Toolbar</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Toolbar provides a container for grouping related actions and controls. It&apos;s commonly
+          used in editors, forms, and content management interfaces where users need quick access to
+          formatting options and actions.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Interactive
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Composable
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Keyboard Navigable
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Rich text editor formatting controls</li>
               <li>• Image/document editing tools</li>
               <li>• Table/spreadsheet controls</li>
@@ -274,11 +270,9 @@ export default function ToolbarPage() {
               <li>• Any interface with grouped related actions</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Main navigation (use Navigation instead)</li>
               <li>• Form submission buttons (use Button)</li>
               <li>• Single actions (use standalone Button)</li>
@@ -295,7 +289,8 @@ export default function ToolbarPage() {
         parts={[
           {
             name: "Toolbar Container",
-            description: "The root element with white background, rounded corners (16px), and subtle shadow.",
+            description:
+              "The root element with white background, rounded corners (16px), and subtle shadow.",
             required: true,
           },
           {
@@ -308,7 +303,8 @@ export default function ToolbarPage() {
           },
           {
             name: "Group (Grouped)",
-            description: "Groups buttons inside a neutral-100 background container with rounded corners.",
+            description:
+              "Groups buttons inside a neutral-100 background container with rounded corners.",
           },
           {
             name: "Button",
@@ -317,7 +313,8 @@ export default function ToolbarPage() {
           },
           {
             name: "Toggle Group",
-            description: "Mutually exclusive options where only one can be selected (like radio buttons).",
+            description:
+              "Mutually exclusive options where only one can be selected (like radio buttons).",
           },
           {
             name: "Multi Toggle Group",
@@ -436,8 +433,8 @@ export default function ToolbarPage() {
                   </ToolbarToggleItem>
                 </ToolbarToggleGroup>
               </Toolbar>
-              <p className="text-caption text-foreground-muted mt-2">
-                Selected: <code className="bg-background-muted px-1 rounded">{alignment}</code>
+              <p className="mt-2 text-caption text-foreground-muted">
+                Selected: <code className="rounded bg-background-muted px-1">{alignment}</code>
               </p>
             </CodePreview>
           </div>
@@ -487,8 +484,11 @@ export default function ToolbarPage() {
                   </ToolbarToggleItem>
                 </ToolbarMultiToggleGroup>
               </Toolbar>
-              <p className="text-caption text-foreground-muted mt-2">
-                Selected: <code className="bg-background-muted px-1 rounded">{formatStyles.join(", ") || "(none)"}</code>
+              <p className="mt-2 text-caption text-foreground-muted">
+                Selected:{" "}
+                <code className="rounded bg-background-muted px-1">
+                  {formatStyles.join(", ") || "(none)"}
+                </code>
               </p>
             </CodePreview>
           </div>
@@ -550,7 +550,9 @@ export default function ToolbarPage() {
                   <TextB weight="bold" />
                 </ToolbarButton>
               </Toolbar>
-              <p className="text-caption text-foreground-muted">Unselected, ready for interaction</p>
+              <p className="text-caption text-foreground-muted">
+                Unselected, ready for interaction
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Selected</Label>
@@ -577,16 +579,20 @@ export default function ToolbarPage() {
                   <ArrowCounterClockwise weight="bold" />
                 </ToolbarButton>
               </Toolbar>
-              <p className="text-caption text-foreground-muted">Cannot interact (e.g., no undo history)</p>
+              <p className="text-caption text-foreground-muted">
+                Cannot interact (e.g., no undo history)
+              </p>
             </div>
           </div>
 
           {/* Grouped button states */}
-          <div className="pt-6 border-t border-border-muted">
+          <div className="border-t border-border-muted pt-6">
             <Label className="mb-4 block">Grouped Button States</Label>
             <div className="grid gap-6 md:grid-cols-3">
               <div className="space-y-2">
-                <span className="text-caption text-foreground-muted">Unselected (inside group)</span>
+                <span className="text-caption text-foreground-muted">
+                  Unselected (inside group)
+                </span>
                 <Toolbar>
                   <ToolbarToggleGroup value="" aria-label="Demo">
                     <ToolbarToggleItem value="left">
@@ -596,7 +602,9 @@ export default function ToolbarPage() {
                 </Toolbar>
               </div>
               <div className="space-y-2">
-                <span className="text-caption text-foreground-muted">Selected (white bg + shadow)</span>
+                <span className="text-caption text-foreground-muted">
+                  Selected (white bg + shadow)
+                </span>
                 <Toolbar>
                   <ToolbarToggleGroup value="left" aria-label="Demo">
                     <ToolbarToggleItem value="left">
@@ -713,13 +721,13 @@ export default function ToolbarPage() {
             <Link weight="bold" />
           </ToolbarButton>
           <ToolbarButton tooltip="Insert image" shortcut="Ctrl+Shift+I">
-            <Image weight="bold" />
+            <ImageIcon weight="bold" />
           </ToolbarButton>
           <ToolbarButton tooltip="Insert code block" shortcut="Ctrl+Shift+C">
             <Code weight="bold" />
           </ToolbarButton>
         </Toolbar>
-        <p className="text-caption text-foreground-muted mt-3">
+        <p className="mt-3 text-caption text-foreground-muted">
           Hover over buttons to see tooltips with keyboard shortcuts.
         </p>
       </ComponentCard>
@@ -762,8 +770,9 @@ export default function ToolbarPage() {
               </ToolbarToggleItem>
             </ToolbarToggleGroup>
           </Toolbar>
-          <p className="text-caption text-foreground-muted mt-2">
-            Set <code className="bg-background-muted px-1 rounded">disabled</code> on the Toolbar to disable all children.
+          <p className="mt-2 text-caption text-foreground-muted">
+            Set <code className="rounded bg-background-muted px-1">disabled</code> on the Toolbar to
+            disable all children.
           </p>
         </CodePreview>
       </ComponentCard>
@@ -774,23 +783,23 @@ export default function ToolbarPage() {
       <ComponentCard id="props" title="Props Reference">
         <div className="space-y-8">
           <div>
-            <h4 className="text-body-strong mb-4">Toolbar Props</h4>
+            <h4 className="mb-4 text-body-strong">Toolbar Props</h4>
             <PropsTable props={toolbarProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">ToolbarButton Props</h4>
+            <h4 className="mb-4 text-body-strong">ToolbarButton Props</h4>
             <PropsTable props={toolbarButtonProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">ToolbarToggleGroup Props (Single Select)</h4>
+            <h4 className="mb-4 text-body-strong">ToolbarToggleGroup Props (Single Select)</h4>
             <PropsTable props={toolbarToggleGroupProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">ToolbarMultiToggleGroup Props (Multi Select)</h4>
+            <h4 className="mb-4 text-body-strong">ToolbarMultiToggleGroup Props (Multi Select)</h4>
             <PropsTable props={toolbarMultiToggleGroupProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">ToolbarToggleItem Props</h4>
+            <h4 className="mb-4 text-body-strong">ToolbarToggleItem Props</h4>
             <PropsTable props={toolbarToggleItemProps} />
           </div>
         </div>
@@ -808,54 +817,92 @@ export default function ToolbarPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-muted">
-                <th className="text-left py-3 font-medium text-foreground">Component</th>
-                <th className="text-left py-3 font-medium text-foreground">Description</th>
+                <th className="py-3 text-left font-medium text-foreground">Component</th>
+                <th className="py-3 text-left font-medium text-foreground">Description</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-muted">
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">Toolbar</code></td>
-                <td className="py-3 text-foreground-muted">Root container with styling and keyboard navigation</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">Toolbar</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Root container with styling and keyboard navigation
+                </td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarSection</code></td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarSection</code>
+                </td>
                 <td className="py-3 text-foreground-muted">Logical grouping of related content</td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarGroup</code></td>
-                <td className="py-3 text-foreground-muted">Visual grouping with optional background</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarGroup</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Visual grouping with optional background
+                </td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarButton</code></td>
-                <td className="py-3 text-foreground-muted">Individual action button with optional tooltip</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarButton</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Individual action button with optional tooltip
+                </td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarToggleGroup</code></td>
-                <td className="py-3 text-foreground-muted">Single-select toggle container (radio behavior)</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarToggleGroup</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Single-select toggle container (radio behavior)
+                </td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarMultiToggleGroup</code></td>
-                <td className="py-3 text-foreground-muted">Multi-select toggle container (checkbox behavior)</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarMultiToggleGroup</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Multi-select toggle container (checkbox behavior)
+                </td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarToggleItem</code></td>
-                <td className="py-3 text-foreground-muted">Toggle button used inside toggle groups</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarToggleItem</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Toggle button used inside toggle groups
+                </td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarSeparator</code></td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarSeparator</code>
+                </td>
                 <td className="py-3 text-foreground-muted">Vertical divider between groups</td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarSpacer</code></td>
-                <td className="py-3 text-foreground-muted">Flexible space that pushes content apart</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarSpacer</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Flexible space that pushes content apart
+                </td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarLabel</code></td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarLabel</code>
+                </td>
                 <td className="py-3 text-foreground-muted">Text label within the toolbar</td>
               </tr>
               <tr>
-                <td className="py-3"><code className="bg-background-muted px-1 rounded">ToolbarActions</code></td>
-                <td className="py-3 text-foreground-muted">Right-aligned action button container</td>
+                <td className="py-3">
+                  <code className="rounded bg-background-muted px-1">ToolbarActions</code>
+                </td>
+                <td className="py-3 text-foreground-muted">
+                  Right-aligned action button container
+                </td>
               </tr>
             </tbody>
           </table>
@@ -866,9 +913,7 @@ export default function ToolbarPage() {
       {/* 12. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Group related actions together (formatting, alignment, insert)",
@@ -951,9 +996,7 @@ export default function ToolbarPage() {
       {/* 15. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Rich Text Editor Toolbar"
@@ -1012,7 +1055,7 @@ export default function ToolbarPage() {
                   <Link weight="bold" />
                 </ToolbarButton>
                 <ToolbarButton tooltip="Insert image">
-                  <Image weight="bold" />
+                  <ImageIcon weight="bold" />
                 </ToolbarButton>
                 <ToolbarButton tooltip="Block quote">
                   <Quotes weight="bold" />
@@ -1064,7 +1107,12 @@ export default function ToolbarPage() {
               <ToolbarButton tooltip="Share">
                 <Share weight="bold" />
               </ToolbarButton>
-              <ToolbarButton tooltip="Save" shortcut="Ctrl+S" onClick={handleSave} loading={isLoading}>
+              <ToolbarButton
+                tooltip="Save"
+                shortcut="Ctrl+S"
+                onClick={handleSave}
+                loading={isLoading}
+              >
                 <FloppyDisk weight="bold" />
               </ToolbarButton>
             </ToolbarActions>

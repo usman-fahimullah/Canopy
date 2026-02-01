@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
-import { Check, ChevronRight, Circle } from "lucide-react";
+import { Check, CaretRight, Circle } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -44,7 +44,7 @@ const ContextMenuSubTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <ChevronRight className="ml-auto h-4 w-4" />
+    <CaretRight className="ml-auto h-4 w-4" />
   </ContextMenuPrimitive.SubTrigger>
 ));
 
@@ -58,7 +58,7 @@ const ContextMenuSubContent = React.forwardRef<
     ref={ref}
     className={cn(
       "z-popover min-w-[8rem] overflow-hidden rounded-lg",
-      "border border-border-default bg-surface-overlay p-1 shadow-dropdown",
+      "border-border-default border bg-surface-overlay p-1 shadow-dropdown",
       // Animations
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -84,7 +84,7 @@ const ContextMenuContent = React.forwardRef<
       ref={ref}
       className={cn(
         "z-popover min-w-[8rem] overflow-hidden rounded-lg",
-        "border border-border-default bg-surface-overlay p-1 shadow-dropdown",
+        "border-border-default border bg-surface-overlay p-1 shadow-dropdown",
         // Animations
         "animate-in fade-in-80",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
@@ -150,8 +150,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
   </ContextMenuPrimitive.CheckboxItem>
 ));
 
-ContextMenuCheckboxItem.displayName =
-  ContextMenuPrimitive.CheckboxItem.displayName;
+ContextMenuCheckboxItem.displayName = ContextMenuPrimitive.CheckboxItem.displayName;
 
 const ContextMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.RadioItem>,
@@ -204,23 +203,17 @@ const ContextMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ContextMenuPrimitive.Separator
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-border-default", className)}
+    className={cn("bg-border-default -mx-1 my-1 h-px", className)}
     {...props}
   />
 ));
 
 ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName;
 
-const ContextMenuShortcut = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
+const ContextMenuShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={cn(
-        "ml-auto text-caption-sm tracking-widest text-foreground-muted",
-        className
-      )}
+      className={cn("ml-auto text-caption-sm tracking-widest text-foreground-muted", className)}
       {...props}
     />
   );

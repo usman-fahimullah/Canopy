@@ -137,33 +137,29 @@ export default function StageBadgePage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Stage Badge
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Visual indicators for candidate pipeline stages. Stage badges use semantic
-          colors to communicate hiring progress at a glance. Includes related components
-          for progress visualization and stage lists.
+        <h1 className="mb-2 text-heading-lg text-foreground">Stage Badge</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Visual indicators for candidate pipeline stages. Stage badges use semantic colors to
+          communicate hiring progress at a glance. Includes related components for progress
+          visualization and stage lists.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             ATS Core
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             10 Variants
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             4 Sub-components
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Showing candidate pipeline status</li>
               <li>• Indicating hiring stage in lists and cards</li>
               <li>• Progress tracking in candidate profiles</li>
@@ -171,14 +167,12 @@ export default function StageBadgePage() {
               <li>• Stage selection in dropdowns</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• For general status (use Badge component)</li>
               <li>• For non-hiring workflows</li>
-              <li>• When color distinction isn't meaningful</li>
+              <li>• When color distinction isn&apos;t meaningful</li>
               <li>• For action buttons (use Button)</li>
             </ul>
           </div>
@@ -239,7 +233,7 @@ export default function StageBadgePage() {
         description="All pre-defined pipeline stage variants with semantic colors"
       >
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
             <div className="space-y-2">
               <Label className="text-caption">Applied</Label>
               <StageBadge variant="applied">Applied</StageBadge>
@@ -287,7 +281,9 @@ export default function StageBadgePage() {
             </div>
             <div className="space-y-2">
               <Label className="text-caption">Custom</Label>
-              <StageBadge variant="custom" color="#9333ea">Custom</StageBadge>
+              <StageBadge variant="custom" color="#9333ea">
+                Custom
+              </StageBadge>
               <p className="text-caption text-foreground-muted">Any hex color</p>
             </div>
           </div>
@@ -305,15 +301,21 @@ export default function StageBadgePage() {
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-2">
             <Label>Small</Label>
-            <StageBadge variant="interview" size="sm">Interview</StageBadge>
+            <StageBadge variant="interview" size="sm">
+              Interview
+            </StageBadge>
           </div>
           <div className="space-y-2">
             <Label>Medium (default)</Label>
-            <StageBadge variant="interview" size="md">Interview</StageBadge>
+            <StageBadge variant="interview" size="md">
+              Interview
+            </StageBadge>
           </div>
           <div className="space-y-2">
             <Label>Large</Label>
-            <StageBadge variant="interview" size="lg">Interview</StageBadge>
+            <StageBadge variant="interview" size="lg">
+              Interview
+            </StageBadge>
           </div>
         </div>
       </ComponentCard>
@@ -332,9 +334,15 @@ export default function StageBadgePage() {
 </StageBadge>`}
         >
           <div className="flex flex-wrap gap-3">
-            <StageBadge variant="applied" showDot={false}>Applied</StageBadge>
-            <StageBadge variant="interview" showDot={false}>Interview</StageBadge>
-            <StageBadge variant="hired" showDot={false}>Hired</StageBadge>
+            <StageBadge variant="applied" showDot={false}>
+              Applied
+            </StageBadge>
+            <StageBadge variant="interview" showDot={false}>
+              Interview
+            </StageBadge>
+            <StageBadge variant="hired" showDot={false}>
+              Hired
+            </StageBadge>
           </div>
         </CodePreview>
       </ComponentCard>
@@ -441,7 +449,11 @@ const stages = [
           <div className="space-y-8">
             <div className="space-y-2">
               <Label>Horizontal</Label>
-              <StageList stages={sampleStages} currentStageId="interview" orientation="horizontal" />
+              <StageList
+                stages={sampleStages}
+                currentStageId="interview"
+                orientation="horizontal"
+              />
             </div>
             <div className="space-y-2">
               <Label>Vertical</Label>
@@ -468,10 +480,18 @@ const stages = [
 </StageBadge>`}
         >
           <div className="flex flex-wrap gap-3">
-            <StageBadge variant="custom" color="#9333ea">Technical Review</StageBadge>
-            <StageBadge variant="custom" color="#0891b2">Background Check</StageBadge>
-            <StageBadge variant="custom" color="#db2777">Culture Fit</StageBadge>
-            <StageBadge variant="custom" color="#059669">Reference Check</StageBadge>
+            <StageBadge variant="custom" color="#9333ea">
+              Technical Review
+            </StageBadge>
+            <StageBadge variant="custom" color="#0891b2">
+              Background Check
+            </StageBadge>
+            <StageBadge variant="custom" color="#db2777">
+              Culture Fit
+            </StageBadge>
+            <StageBadge variant="custom" color="#059669">
+              Reference Check
+            </StageBadge>
           </div>
         </CodePreview>
       </ComponentCard>
@@ -503,9 +523,7 @@ const stages = [
       {/* 12. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use consistent stage colors across all views",
@@ -582,9 +600,7 @@ const stages = [
       {/* 15. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Candidate Card with Stage"
@@ -597,7 +613,9 @@ const stages = [
                   <p className="font-medium text-foreground">Sarah Chen</p>
                   <p className="text-caption text-foreground-muted">Solar Installation Engineer</p>
                 </div>
-                <StageBadge variant="interview" size="sm">Interview</StageBadge>
+                <StageBadge variant="interview" size="sm">
+                  Interview
+                </StageBadge>
               </div>
               <div className="mt-4">
                 <StageProgress stages={sampleStages} currentStageId="interview" />
@@ -606,24 +624,21 @@ const stages = [
           </Card>
         </RealWorldExample>
 
-        <RealWorldExample
-          title="Pipeline Stage Filter"
-          description="Stage badges as filter chips"
-        >
+        <RealWorldExample title="Pipeline Stage Filter" description="Stage badges as filter chips">
           <div className="flex flex-wrap gap-2">
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border hover:border-border-brand hover:bg-background-subtle transition-colors">
+            <button className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 transition-colors hover:border-border-brand hover:bg-background-subtle">
               <StageIndicator variant="applied" size="sm" />
               <span className="text-caption">Applied (12)</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border-brand bg-background-brand-subtle">
+            <button className="flex items-center gap-2 rounded-full border border-border-brand bg-background-brand-subtle px-3 py-1.5">
               <StageIndicator variant="interview" size="sm" />
               <span className="text-caption font-medium text-foreground-brand">Interview (5)</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border hover:border-border-brand hover:bg-background-subtle transition-colors">
+            <button className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 transition-colors hover:border-border-brand hover:bg-background-subtle">
               <StageIndicator variant="offer" size="sm" />
               <span className="text-caption">Offer (2)</span>
             </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border hover:border-border-brand hover:bg-background-subtle transition-colors">
+            <button className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 transition-colors hover:border-border-brand hover:bg-background-subtle">
               <StageIndicator variant="hired" size="sm" />
               <span className="text-caption">Hired (8)</span>
             </button>
@@ -634,9 +649,9 @@ const stages = [
           title="Candidate Profile Header"
           description="Stage progress in profile context"
         >
-          <div className="p-6 border border-border rounded-xl">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-background-brand-subtle flex items-center justify-center">
+          <div className="rounded-xl border border-border p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background-brand-subtle">
                 <span className="text-heading-sm text-foreground-brand">SC</span>
               </div>
               <div className="flex-1">
@@ -644,7 +659,9 @@ const stages = [
                   <h2 className="text-heading-sm text-foreground">Sarah Chen</h2>
                   <StageBadge variant="interview">Interview</StageBadge>
                 </div>
-                <p className="text-body-sm text-foreground-muted">Solar Installation Engineer • San Francisco, CA</p>
+                <p className="text-body-sm text-foreground-muted">
+                  Solar Installation Engineer • San Francisco, CA
+                </p>
               </div>
             </div>
             <StageProgress stages={sampleStages} currentStageId="interview" />

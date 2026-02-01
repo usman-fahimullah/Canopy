@@ -6,13 +6,7 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProgressMeterLinear } from "@/components/ui/progress-meter";
-import {
-  CheckCircle,
-  Circle,
-  Rocket,
-  CaretRight,
-  X,
-} from "@phosphor-icons/react";
+import { CheckCircle, Circle, Rocket, CaretRight, X } from "@phosphor-icons/react";
 
 interface ChecklistItem {
   id: string;
@@ -144,9 +138,7 @@ export function GettingStartedChecklist({
   const handleItemClick = (itemId: string) => {
     // Mark item as completed when clicked
     setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, completed: true } : item
-      )
+      prev.map((item) => (item.id === itemId ? { ...item, completed: true } : item))
     );
 
     // Save to localStorage
@@ -168,17 +160,15 @@ export function GettingStartedChecklist({
   // Hide if all complete (or show completion celebration)
   if (allComplete) {
     return (
-      <Card className={cn("p-4 border-emerald-200 bg-emerald-50", className)}>
+      <Card className={cn("border-emerald-200 bg-emerald-50 p-4", className)}>
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
             <CheckCircle size={24} className="text-emerald-600" weight="fill" />
           </div>
           <div className="flex-1">
-            <p className="text-body-strong font-medium text-emerald-800">
-              You're all set!
-            </p>
+            <p className="text-body-strong font-medium text-emerald-800">You&apos;re all set!</p>
             <p className="text-caption text-emerald-600">
-              You've completed all getting started steps.
+              You&apos;ve completed all getting started steps.
             </p>
           </div>
           {dismissible && (
@@ -200,9 +190,7 @@ export function GettingStartedChecklist({
             <Rocket size={16} className="text-emerald-700" weight="fill" />
           </div>
           <div>
-            <h3 className="text-body-strong font-medium text-foreground-default">
-              Get Started
-            </h3>
+            <h3 className="text-foreground-default text-body-strong font-medium">Get Started</h3>
             <p className="text-caption text-foreground-muted">
               {completedCount} of {totalCount} completed
             </p>
@@ -229,42 +217,28 @@ export function GettingStartedChecklist({
             onClick={() => handleItemClick(item.id)}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-3 transition-all",
-              item.completed
-                ? "opacity-60"
-                : "hover:bg-[var(--background-subtle)]"
+              item.completed ? "opacity-60" : "hover:bg-[var(--background-subtle)]"
             )}
           >
             {/* Check icon */}
             {item.completed ? (
-              <CheckCircle
-                size={20}
-                className="flex-shrink-0 text-emerald-600"
-                weight="fill"
-              />
+              <CheckCircle size={20} className="flex-shrink-0 text-emerald-600" weight="fill" />
             ) : (
-              <Circle
-                size={20}
-                className="flex-shrink-0 text-foreground-muted"
-                weight="regular"
-              />
+              <Circle size={20} className="flex-shrink-0 text-foreground-muted" weight="regular" />
             )}
 
             {/* Content */}
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <p
                 className={cn(
                   "text-body-sm font-medium",
-                  item.completed
-                    ? "text-foreground-muted line-through"
-                    : "text-foreground-default"
+                  item.completed ? "text-foreground-muted line-through" : "text-foreground-default"
                 )}
               >
                 {item.label}
               </p>
               {!item.completed && (
-                <p className="text-caption text-foreground-muted truncate">
-                  {item.description}
-                </p>
+                <p className="truncate text-caption text-foreground-muted">{item.description}</p>
               )}
             </div>
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
-import { ChevronDown } from "lucide-react";
+import { CaretDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,8 +36,8 @@ const CollapsibleTrigger = React.forwardRef<
     <CollapsiblePrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex items-center justify-between w-full",
-        "text-body-sm font-medium text-foreground-default",
+        "flex w-full items-center justify-between",
+        "text-foreground-default text-body-sm font-medium",
         "transition-colors hover:bg-background-interactive-hover",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-interactive-focus",
         "[&[data-state=open]>svg]:rotate-180",
@@ -47,7 +47,7 @@ const CollapsibleTrigger = React.forwardRef<
     >
       {children}
       {showChevron && (
-        <ChevronDown className="h-4 w-4 text-foreground-muted transition-transform duration-200" />
+        <CaretDown className="h-4 w-4 text-foreground-muted transition-transform duration-200" />
       )}
     </CollapsiblePrimitive.Trigger>
   );

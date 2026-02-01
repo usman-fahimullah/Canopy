@@ -5,13 +5,7 @@ import { cn } from "@/lib/utils";
 import { Avatar } from "./avatar";
 import { Badge } from "./badge";
 import { Button } from "./button";
-import {
-  formatDistanceToNow,
-  format,
-  isToday,
-  isYesterday,
-  parseISO,
-} from "date-fns";
+import { formatDistanceToNow, format, isToday, isYesterday, parseISO } from "date-fns";
 import {
   EnvelopeSimple,
   Note,
@@ -178,10 +172,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
       return (
         <>
           <span className="font-medium">{actorName}</span> moved{" "}
-          {candidateName && (
-            <span className="font-medium">{candidateName}</span>
-          )}{" "}
-          from{" "}
+          {candidateName && <span className="font-medium">{candidateName}</span>} from{" "}
           <Badge variant="secondary" size="sm">
             {metadata?.fromStage}
           </Badge>{" "}
@@ -211,7 +202,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
           <span className="font-medium">{actorName}</span> sent an email
           {metadata?.subject && (
             <>
-              : "<span className="italic">{metadata.subject}</span>"
+              : &quot;<span className="italic">{metadata.subject}</span>&quot;
             </>
           )}
         </>
@@ -229,7 +220,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
           )}
           {metadata?.subject && (
             <>
-              : "<span className="italic">{metadata.subject}</span>"
+              : &quot;<span className="italic">{metadata.subject}</span>&quot;
             </>
           )}
         </>
@@ -269,8 +260,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
           {metadata?.rating && (
             <>
               {" "}
-              with rating{" "}
-              <span className="font-medium">{metadata.rating}/5</span>
+              with rating <span className="font-medium">{metadata.rating}/5</span>
             </>
           )}
         </>
@@ -279,8 +269,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
     case "application_received":
       return (
         <>
-          <span className="font-medium">{candidateName || "New candidate"}</span>{" "}
-          applied
+          <span className="font-medium">{candidateName || "New candidate"}</span> applied
           {jobTitle && (
             <>
               {" "}
@@ -294,10 +283,8 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
       return (
         <>
           <span className="font-medium">{actorName}</span> viewed{" "}
-          {candidateName && (
-            <span className="font-medium">{candidateName}</span>
-          )}
-          's profile
+          {candidateName && <span className="font-medium">{candidateName}</span>}
+          &apos;s profile
         </>
       );
 
@@ -305,9 +292,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
       return (
         <>
           <span className="font-medium">{actorName}</span> uploaded{" "}
-          <span className="font-medium">
-            {metadata?.documentName || "a document"}
-          </span>
+          <span className="font-medium">{metadata?.documentName || "a document"}</span>
         </>
       );
 
@@ -350,8 +335,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
     case "mention":
       return (
         <>
-          <span className="font-medium">{actorName}</span> mentioned you in a
-          note
+          <span className="font-medium">{actorName}</span> mentioned you in a note
         </>
       );
 
@@ -359,11 +343,8 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
       return (
         <>
           <span className="font-medium">{actorName}</span> assigned{" "}
-          {candidateName && <span className="font-medium">{candidateName}</span>}{" "}
-          to{" "}
-          <span className="font-medium">
-            {metadata?.assignee?.name || "someone"}
-          </span>
+          {candidateName && <span className="font-medium">{candidateName}</span>} to{" "}
+          <span className="font-medium">{metadata?.assignee?.name || "someone"}</span>
         </>
       );
 
@@ -371,9 +352,7 @@ const generateActivityMessage = (activity: Activity): React.ReactNode => {
       return (
         <>
           AI suggested an action
-          {metadata?.aiConfidence && (
-            <> ({Math.round(metadata.aiConfidence * 100)}% confidence)</>
-          )}
+          {metadata?.aiConfidence && <> ({Math.round(metadata.aiConfidence * 100)}% confidence)</>}
         </>
       );
 
@@ -419,8 +398,8 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
   return (
     <div
       className={cn(
-        "group flex gap-3 p-3 rounded-lg",
-        "hover:bg-background-muted transition-all duration-fast",
+        "group flex gap-3 rounded-lg p-3",
+        "transition-all duration-fast hover:bg-background-muted",
         "animate-fade-in",
         onClick && "cursor-pointer"
       )}
@@ -428,19 +407,15 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
       onClick={() => onClick?.(activity)}
     >
       {/* Icon or Avatar */}
-      <div className="flex-shrink-0 mt-0.5">
+      <div className="mt-0.5 flex-shrink-0">
         {showAvatar && activity.actor ? (
           <div className="transition-transform duration-fast group-hover:scale-110">
-            <Avatar
-              src={activity.actor.avatar}
-              name={activity.actor.name}
-              size="sm"
-            />
+            <Avatar src={activity.actor.avatar} name={activity.actor.name} size="sm" />
           </div>
         ) : (
           <div
             className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center",
+              "flex h-8 w-8 items-center justify-center rounded-full",
               "transition-all duration-fast group-hover:scale-110 group-hover:shadow-sm",
               activityColors[activity.type]
             )}
@@ -451,8 +426,8 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-foreground-default leading-relaxed transition-colors duration-fast group-hover:text-foreground-default">
+      <div className="min-w-0 flex-1">
+        <p className="text-foreground-default group-hover:text-foreground-default text-sm leading-relaxed transition-colors duration-fast">
           {generateActivityMessage(activity)}
         </p>
 
@@ -460,9 +435,9 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
         {hasExpandableContent && (
           <div
             className={cn(
-              "mt-2 text-sm text-foreground-muted bg-background-subtle rounded-lg p-3",
+              "mt-2 rounded-lg bg-background-subtle p-3 text-sm text-foreground-muted",
               "border border-transparent transition-all duration-fast",
-              "hover:border-border-muted hover:bg-background-muted cursor-pointer",
+              "cursor-pointer hover:border-border-muted hover:bg-background-muted",
               isExpanded ? "line-clamp-none" : "line-clamp-2"
             )}
             onClick={(e) => {
@@ -471,9 +446,11 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
             }}
           >
             {activity.metadata?.noteContent}
-            {!isExpanded && activity.metadata?.noteContent && activity.metadata.noteContent.length > 100 && (
-              <span className="text-foreground-brand ml-1 font-medium">Show more</span>
-            )}
+            {!isExpanded &&
+              activity.metadata?.noteContent &&
+              activity.metadata.noteContent.length > 100 && (
+                <span className="ml-1 font-medium text-foreground-brand">Show more</span>
+              )}
           </div>
         )}
 
@@ -501,7 +478,7 @@ const ActivityItem: React.FC<ActivityItemProps> = ({
 
       {/* Expand indicator for clickable items */}
       {onClick && (
-        <div className="flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+        <div className="flex-shrink-0 self-center opacity-0 transition-opacity duration-fast group-hover:opacity-100">
           <ArrowRight className="h-4 w-4 text-foreground-muted" />
         </div>
       )}
@@ -546,48 +523,54 @@ const ActivityFeed = React.forwardRef<HTMLDivElement, ActivityFeedProps>(
     }, [activities, groupByDate]);
 
     return (
-      <div
-        ref={ref}
-        className={cn("relative", className)}
-        style={{ maxHeight }}
-      >
-        <div
-          className={cn(
-            maxHeight && "overflow-y-auto",
-            "space-y-1"
-          )}
-        >
+      <div ref={ref} className={cn("relative", className)} style={{ maxHeight }}>
+        <div className={cn(maxHeight && "overflow-y-auto", "space-y-1")}>
           {loading && activities.length === 0 ? (
             // Loading skeleton with staggered animation
             <div className="space-y-3 p-3">
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="flex gap-3 animate-pulse"
+                  className="flex animate-pulse gap-3"
                   style={{ animationDelay: `${i * 100}ms` }}
                 >
-                  <div className="w-8 h-8 rounded-full bg-skeleton-background animate-shimmer" />
+                  <div className="bg-skeleton-background h-8 w-8 animate-shimmer rounded-full" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-skeleton-background rounded w-3/4 animate-shimmer" style={{ animationDelay: '100ms' }} />
-                    <div className="h-3 bg-skeleton-background rounded w-1/4 animate-shimmer" style={{ animationDelay: '200ms' }} />
+                    <div
+                      className="bg-skeleton-background h-4 w-3/4 animate-shimmer rounded"
+                      style={{ animationDelay: "100ms" }}
+                    />
+                    <div
+                      className="bg-skeleton-background h-3 w-1/4 animate-shimmer rounded"
+                      style={{ animationDelay: "200ms" }}
+                    />
                   </div>
                 </div>
               ))}
             </div>
           ) : activities.length === 0 ? (
             // Empty state with animation
-            <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in">
-              <div className="h-16 w-16 rounded-full bg-background-muted flex items-center justify-center mb-4 animate-scale-in">
+            <div className="flex animate-fade-in flex-col items-center justify-center py-12 text-center">
+              <div className="mb-4 flex h-16 w-16 animate-scale-in items-center justify-center rounded-full bg-background-muted">
                 <ChatCircle className="h-8 w-8 text-foreground-muted" />
               </div>
-              <p className="text-foreground-muted animate-fade-in" style={{ animationDelay: '100ms' }}>{emptyMessage}</p>
+              <p
+                className="animate-fade-in text-foreground-muted"
+                style={{ animationDelay: "100ms" }}
+              >
+                {emptyMessage}
+              </p>
             </div>
           ) : groupByDate ? (
             // Grouped by date with staggered animations
             Object.entries(groupedActivities).map(([date, items], groupIndex) => (
-              <div key={date} className="animate-fade-in" style={{ animationDelay: `${groupIndex * 100}ms` }}>
-                <div className="sticky top-0 z-10 bg-background-default/95 backdrop-blur-sm px-3 py-2">
-                  <p className="text-xs font-medium text-foreground-muted uppercase tracking-wide">
+              <div
+                key={date}
+                className="animate-fade-in"
+                style={{ animationDelay: `${groupIndex * 100}ms` }}
+              >
+                <div className="bg-background-default/95 sticky top-0 z-10 px-3 py-2 backdrop-blur-sm">
+                  <p className="text-xs font-medium uppercase tracking-wide text-foreground-muted">
                     {date}
                   </p>
                 </div>
@@ -619,7 +602,7 @@ const ActivityFeed = React.forwardRef<HTMLDivElement, ActivityFeedProps>(
 
           {/* Load more */}
           {hasMore && onLoadMore && (
-            <div className="p-3 text-center animate-fade-in">
+            <div className="animate-fade-in p-3 text-center">
               <Button
                 variant="ghost"
                 size="sm"
@@ -629,7 +612,7 @@ const ActivityFeed = React.forwardRef<HTMLDivElement, ActivityFeedProps>(
               >
                 {loading ? (
                   <>
-                    <div className="h-4 w-4 mr-2 rounded-full border-2 border-foreground-muted border-t-transparent animate-spin" />
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-foreground-muted border-t-transparent" />
                     Loading...
                   </>
                 ) : (
@@ -669,15 +652,15 @@ const CompactActivityList: React.FC<CompactActivityListProps> = ({
         <div
           key={activity.id}
           className={cn(
-            "group flex items-start gap-2 p-2 -mx-2 rounded-lg",
-            "hover:bg-background-muted transition-all duration-fast",
+            "group -mx-2 flex items-start gap-2 rounded-lg p-2",
+            "transition-all duration-fast hover:bg-background-muted",
             "animate-fade-in cursor-pointer"
           )}
           style={{ animationDelay: `${index * 40}ms` }}
         >
           <div
             className={cn(
-              "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0",
+              "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full",
               "transition-transform duration-fast group-hover:scale-110",
               activityColors[activity.type]
             )}
@@ -686,8 +669,8 @@ const CompactActivityList: React.FC<CompactActivityListProps> = ({
               className: "h-3 w-3",
             })}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-foreground-default line-clamp-2 transition-colors duration-fast group-hover:text-foreground-default">
+          <div className="min-w-0 flex-1">
+            <p className="text-foreground-default group-hover:text-foreground-default line-clamp-2 text-xs transition-colors duration-fast">
               {generateActivityMessage(activity)}
             </p>
             <p className="text-xs text-foreground-subtle transition-colors duration-fast group-hover:text-foreground-muted">

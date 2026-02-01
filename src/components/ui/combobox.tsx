@@ -3,21 +3,10 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./popover";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Badge } from "./badge";
 import { Checkbox } from "./checkbox";
-import {
-  CaretDown,
-  Check,
-  X,
-  MagnifyingGlass,
-  CircleNotch,
-  Warning,
-} from "@phosphor-icons/react";
+import { CaretDown, Check, X, MagnifyingGlass, CircleNotch, Warning } from "@phosphor-icons/react";
 
 /* ============================================
    Combobox Types
@@ -94,6 +83,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
   ) => {
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState("");
+    const listboxId = React.useId();
 
     const selectedOption = options.find((opt) => opt.value === value);
 
@@ -128,6 +118,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
             type="button"
             role="combobox"
             aria-expanded={open}
+            aria-controls={listboxId}
             aria-haspopup="listbox"
             disabled={disabled}
             className={cn(
@@ -147,7 +138,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
               "focus:border-[var(--select-border-focus)]",
               "focus:bg-[var(--select-background-open)]",
               // Open state
-              open && "bg-[var(--select-background-open)] border-[var(--select-border-focus)]",
+              open && "border-[var(--select-border-focus)] bg-[var(--select-background-open)]",
               // Disabled state
               "disabled:cursor-not-allowed disabled:opacity-50",
               // Transitions
@@ -192,9 +183,9 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                     onValueChange?.("");
                   }}
                   className={cn(
-                    "h-6 w-6 flex items-center justify-center rounded-full",
+                    "flex h-6 w-6 items-center justify-center rounded-full",
                     "text-[var(--foreground-muted)]",
-                    "hover:text-[var(--foreground-error)] hover:bg-[var(--background-error)]",
+                    "hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]",
                     "transition-all duration-[var(--duration-fast)]"
                   )}
                 >
@@ -224,7 +215,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
             "bg-[var(--select-content-background)]",
             "border border-[var(--select-border)]",
             "shadow-[var(--select-content-shadow)]",
-            "rounded-lg overflow-hidden",
+            "overflow-hidden rounded-lg",
             "animate-in fade-in-0 zoom-in-95 duration-[var(--duration-normal)]"
           )}
           align="start"
@@ -249,10 +240,10 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                 )}
               />
             </div>
-            <CommandPrimitive.List className="max-h-60 overflow-auto p-1">
+            <CommandPrimitive.List id={listboxId} className="max-h-60 overflow-auto p-1">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-6 gap-2">
-                  <div className="h-8 w-8 rounded-full bg-[var(--background-brand-subtle)] flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center gap-2 py-6">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--background-brand-subtle)]">
                     <CircleNotch className="h-4 w-4 animate-spin text-[var(--foreground-brand)]" />
                   </div>
                   <span className="text-caption text-[var(--foreground-muted)]">Searching...</span>
@@ -293,9 +284,11 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                             <div className="flex flex-1 items-center gap-2">
                               {option.icon}
                               <div className="flex flex-col">
-                                <span className={cn(
-                                  isSelected && "text-[var(--select-item-foreground-selected)]"
-                                )}>
+                                <span
+                                  className={cn(
+                                    isSelected && "text-[var(--select-item-foreground-selected)]"
+                                  )}
+                                >
                                   {option.label}
                                 </span>
                                 {option.description && (
@@ -305,12 +298,17 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                                 )}
                               </div>
                             </div>
-                            <div className={cn(
-                              "h-4 w-4 flex items-center justify-center",
-                              "transition-all duration-[var(--duration-fast)]",
-                              isSelected ? "opacity-100 scale-100" : "opacity-0 scale-75"
-                            )}>
-                              <Check className="h-4 w-4 text-[var(--select-item-checkmark)]" weight="bold" />
+                            <div
+                              className={cn(
+                                "flex h-4 w-4 items-center justify-center",
+                                "transition-all duration-[var(--duration-fast)]",
+                                isSelected ? "scale-100 opacity-100" : "scale-75 opacity-0"
+                              )}
+                            >
+                              <Check
+                                className="h-4 w-4 text-[var(--select-item-checkmark)]"
+                                weight="bold"
+                              />
                             </div>
                           </>
                         )}
@@ -319,73 +317,79 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                   })}
 
                   {/* Grouped options */}
-                  {Array.from(groupedOptions.groups.entries()).map(
-                    ([groupName, groupOptions]) => (
-                      <CommandPrimitive.Group
-                        key={groupName}
-                        heading={groupName}
-                        className={cn(
-                          "[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2",
-                          "[&_[cmdk-group-heading]]:text-caption [&_[cmdk-group-heading]]:font-medium",
-                          "[&_[cmdk-group-heading]]:text-[var(--foreground-muted)]"
-                        )}
-                      >
-                        {groupOptions.map((option) => {
-                          const isSelected = option.value === value;
-                          return (
-                            <CommandPrimitive.Item
-                              key={option.value}
-                              value={option.value}
-                              disabled={option.disabled}
-                              onSelect={() => {
-                                onValueChange?.(option.value);
-                                setOpen(false);
-                                setSearch("");
-                              }}
-                              className={cn(
-                                "relative flex cursor-pointer select-none items-center gap-2",
-                                "rounded-md px-3 py-2 text-body-sm outline-none",
-                                "text-[var(--select-item-foreground)]",
-                                "data-[selected=true]:bg-[var(--select-item-background-hover)]",
-                                "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
-                                "transition-colors duration-[var(--duration-fast)]",
-                                isSelected && "bg-[var(--select-item-background-selected)]"
-                              )}
-                            >
-                              {renderOption ? (
-                                renderOption(option, isSelected)
-                              ) : (
-                                <>
-                                  <div className="flex flex-1 items-center gap-2">
-                                    {option.icon}
-                                    <div className="flex flex-col">
-                                      <span className={cn(
-                                        isSelected && "text-[var(--select-item-foreground-selected)]"
-                                      )}>
-                                        {option.label}
-                                      </span>
-                                      {option.description && (
-                                        <span className="text-caption text-[var(--foreground-muted)]">
-                                          {option.description}
-                                        </span>
+                  {Array.from(groupedOptions.groups.entries()).map(([groupName, groupOptions]) => (
+                    <CommandPrimitive.Group
+                      key={groupName}
+                      heading={groupName}
+                      className={cn(
+                        "[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2",
+                        "[&_[cmdk-group-heading]]:text-caption [&_[cmdk-group-heading]]:font-medium",
+                        "[&_[cmdk-group-heading]]:text-[var(--foreground-muted)]"
+                      )}
+                    >
+                      {groupOptions.map((option) => {
+                        const isSelected = option.value === value;
+                        return (
+                          <CommandPrimitive.Item
+                            key={option.value}
+                            value={option.value}
+                            disabled={option.disabled}
+                            onSelect={() => {
+                              onValueChange?.(option.value);
+                              setOpen(false);
+                              setSearch("");
+                            }}
+                            className={cn(
+                              "relative flex cursor-pointer select-none items-center gap-2",
+                              "rounded-md px-3 py-2 text-body-sm outline-none",
+                              "text-[var(--select-item-foreground)]",
+                              "data-[selected=true]:bg-[var(--select-item-background-hover)]",
+                              "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+                              "transition-colors duration-[var(--duration-fast)]",
+                              isSelected && "bg-[var(--select-item-background-selected)]"
+                            )}
+                          >
+                            {renderOption ? (
+                              renderOption(option, isSelected)
+                            ) : (
+                              <>
+                                <div className="flex flex-1 items-center gap-2">
+                                  {option.icon}
+                                  <div className="flex flex-col">
+                                    <span
+                                      className={cn(
+                                        isSelected &&
+                                          "text-[var(--select-item-foreground-selected)]"
                                       )}
-                                    </div>
+                                    >
+                                      {option.label}
+                                    </span>
+                                    {option.description && (
+                                      <span className="text-caption text-[var(--foreground-muted)]">
+                                        {option.description}
+                                      </span>
+                                    )}
                                   </div>
-                                  <div className={cn(
-                                    "h-4 w-4 flex items-center justify-center",
+                                </div>
+                                <div
+                                  className={cn(
+                                    "flex h-4 w-4 items-center justify-center",
                                     "transition-all duration-[var(--duration-fast)]",
-                                    isSelected ? "opacity-100 scale-100" : "opacity-0 scale-75"
-                                  )}>
-                                    <Check className="h-4 w-4 text-[var(--select-item-checkmark)]" weight="bold" />
-                                  </div>
-                                </>
-                              )}
-                            </CommandPrimitive.Item>
-                          );
-                        })}
-                      </CommandPrimitive.Group>
-                    )
-                  )}
+                                    isSelected ? "scale-100 opacity-100" : "scale-75 opacity-0"
+                                  )}
+                                >
+                                  <Check
+                                    className="h-4 w-4 text-[var(--select-item-checkmark)]"
+                                    weight="bold"
+                                  />
+                                </div>
+                              </>
+                            )}
+                          </CommandPrimitive.Item>
+                        );
+                      })}
+                    </CommandPrimitive.Group>
+                  ))}
                 </>
               )}
             </CommandPrimitive.List>
@@ -423,6 +427,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
     const [open, setOpen] = React.useState(false);
     const [search, setSearch] = React.useState("");
     const inputRef = React.useRef<HTMLInputElement>(null);
+    const multiListboxId = React.useId();
 
     const selectedOptions = options.filter((opt) => value.includes(opt.value));
     const canAddMore = !maxItems || value.length < maxItems;
@@ -451,6 +456,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
             ref={ref}
             role="combobox"
             aria-expanded={open}
+            aria-controls={multiListboxId}
             aria-haspopup="listbox"
             aria-invalid={error ? "true" : undefined}
             className={cn(
@@ -469,7 +475,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
               "focus-within:border-[var(--select-border-focus)]",
               "focus-within:bg-[var(--select-background-open)]",
               // Open state
-              open && "bg-[var(--select-background-open)] border-[var(--select-border-focus)]",
+              open && "border-[var(--select-border-focus)] bg-[var(--select-background-open)]",
               // Cursor and transitions
               "cursor-text transition-all duration-[var(--duration-normal)] ease-[var(--ease-default)]",
               // Disabled state
@@ -499,7 +505,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
               <Badge
                 key={option.value}
                 variant="secondary"
-                className="gap-1 pr-1 animate-in fade-in-0 zoom-in-95"
+                className="animate-in fade-in-0 zoom-in-95 gap-1 pr-1"
               >
                 {option.icon}
                 {option.label}
@@ -511,9 +517,9 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
                       handleRemove(option.value);
                     }}
                     className={cn(
-                      "h-5 w-5 flex items-center justify-center rounded-full ml-1",
+                      "ml-1 flex h-5 w-5 items-center justify-center rounded-full",
                       "text-[var(--foreground-muted)]",
-                      "hover:text-[var(--foreground-error)] hover:bg-[var(--background-error)]",
+                      "hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]",
                       "transition-all duration-[var(--duration-fast)]"
                     )}
                   >
@@ -549,7 +555,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
             "bg-[var(--select-content-background)]",
             "border border-[var(--select-border)]",
             "shadow-[var(--select-content-shadow)]",
-            "rounded-lg overflow-hidden",
+            "overflow-hidden rounded-lg",
             "animate-in fade-in-0 zoom-in-95 duration-[var(--duration-normal)]"
           )}
           align="start"
@@ -575,10 +581,10 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
                 )}
               />
             </div>
-            <CommandPrimitive.List className="max-h-60 overflow-auto p-1">
+            <CommandPrimitive.List id={multiListboxId} className="max-h-60 overflow-auto p-1">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-6 gap-2">
-                  <div className="h-8 w-8 rounded-full bg-[var(--background-brand-subtle)] flex items-center justify-center">
+                <div className="flex flex-col items-center justify-center gap-2 py-6">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--background-brand-subtle)]">
                     <CircleNotch className="h-4 w-4 animate-spin text-[var(--foreground-brand)]" />
                   </div>
                   <span className="text-caption text-[var(--foreground-muted)]">Searching...</span>
@@ -590,8 +596,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
                   </CommandPrimitive.Empty>
                   {options.map((option) => {
                     const isSelected = value.includes(option.value);
-                    const isDisabled =
-                      option.disabled || (!isSelected && !canAddMore);
+                    const isDisabled = option.disabled || (!isSelected && !canAddMore);
 
                     return (
                       <CommandPrimitive.Item
@@ -638,7 +643,8 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
             </CommandPrimitive.List>
             {maxItems && (
               <div className="border-t border-[var(--border-muted)] px-3 py-2 text-caption text-[var(--foreground-muted)]">
-                <span className="tabular-nums font-medium">{value.length}</span> / {maxItems} selected
+                <span className="font-medium tabular-nums">{value.length}</span> / {maxItems}{" "}
+                selected
               </div>
             )}
           </CommandPrimitive>
@@ -662,16 +668,7 @@ interface AsyncComboboxProps extends Omit<ComboboxProps, "options"> {
 }
 
 const AsyncCombobox = React.forwardRef<HTMLButtonElement, AsyncComboboxProps>(
-  (
-    {
-      loadOptions,
-      debounceMs = 300,
-      minChars = 1,
-      placeholder = "Search...",
-      ...props
-    },
-    ref
-  ) => {
+  ({ loadOptions, debounceMs = 300, minChars = 1, placeholder = "Search...", ...props }, ref) => {
     const [options, setOptions] = React.useState<ComboboxOption[]>([]);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(false);
@@ -724,8 +721,4 @@ AsyncCombobox.displayName = "AsyncCombobox";
 /* ============================================
    Exports
    ============================================ */
-export {
-  Combobox,
-  MultiCombobox,
-  AsyncCombobox,
-};
+export { Combobox, MultiCombobox, AsyncCombobox };

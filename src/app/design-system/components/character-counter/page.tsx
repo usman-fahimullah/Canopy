@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { sanitizeHtml } from "@/lib/utils";
 import { CharacterCounter, RichTextCharacterCounter, Textarea } from "@/components/ui";
 import { ComponentCard, UsageGuide } from "@/components/design-system/ComponentSection";
 import { CodePreview } from "@/components/design-system/CodeBlock";
@@ -10,22 +11,59 @@ import { PageNavigation } from "@/components/design-system/PageNavigation";
 const characterCounterProps = [
   { name: "current", type: "number", required: true, description: "Current character count" },
   { name: "max", type: "number", required: true, description: "Maximum character limit" },
-  { name: "warningThreshold", type: "number", default: "80", description: "Percentage threshold for warning state (e.g., 80 for 80%)" },
-  { name: "showWhenEmpty", type: "boolean", default: "true", description: "Show counter even when count is 0" },
-  { name: "className", type: "string", default: "undefined", description: "Additional CSS classes" },
+  {
+    name: "warningThreshold",
+    type: "number",
+    default: "80",
+    description: "Percentage threshold for warning state (e.g., 80 for 80%)",
+  },
+  {
+    name: "showWhenEmpty",
+    type: "boolean",
+    default: "true",
+    description: "Show counter even when count is 0",
+  },
+  {
+    name: "className",
+    type: "string",
+    default: "undefined",
+    description: "Additional CSS classes",
+  },
 ];
 
 const richTextCharacterCounterProps = [
-  { name: "htmlContent", type: "string", required: true, description: "HTML content to count (tags stripped)" },
+  {
+    name: "htmlContent",
+    type: "string",
+    required: true,
+    description: "HTML content to count (tags stripped)",
+  },
   { name: "max", type: "number", required: true, description: "Maximum character limit" },
-  { name: "warningThreshold", type: "number", default: "80", description: "Percentage threshold for warning state" },
-  { name: "showWhenEmpty", type: "boolean", default: "true", description: "Show counter even when count is 0" },
-  { name: "className", type: "string", default: "undefined", description: "Additional CSS classes" },
+  {
+    name: "warningThreshold",
+    type: "number",
+    default: "80",
+    description: "Percentage threshold for warning state",
+  },
+  {
+    name: "showWhenEmpty",
+    type: "boolean",
+    default: "true",
+    description: "Show counter even when count is 0",
+  },
+  {
+    name: "className",
+    type: "string",
+    default: "undefined",
+    description: "Additional CSS classes",
+  },
 ];
 
 export default function CharacterCounterPage() {
   const [text1, setText1] = React.useState("");
-  const [text2, setText2] = React.useState("This is some sample text that shows how the counter works when there's content.");
+  const [text2, setText2] = React.useState(
+    "This is some sample text that shows how the counter works when there's content."
+  );
   const [text3, setText3] = React.useState("Getting close to the limit...");
 
   const richTextContent = "<p>This is <strong>rich text</strong> with <em>formatting</em>.</p>";
@@ -34,12 +72,12 @@ export default function CharacterCounterPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Character Counter
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          CharacterCounter displays character count progress with warning and error
-          states. Use with textareas and inputs that have character limits.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          CharacterCounter displays character count progress with warning and error states. Use with
+          textareas and inputs that have character limits.
         </p>
       </div>
 
@@ -77,7 +115,7 @@ export default function CharacterCounterPage() {
         title="Counter States"
         description="Normal, warning, and error states"
       >
-        <div className="space-y-6 max-w-md">
+        <div className="max-w-md space-y-6">
           <div className="space-y-2">
             <p className="text-caption-strong text-foreground-muted">Normal (0-80%)</p>
             <CharacterCounter current={50} max={200} />
@@ -100,15 +138,8 @@ export default function CharacterCounterPage() {
         description="Counter showing existing content length"
       >
         <div className="max-w-md space-y-2">
-          <Textarea
-            value={text2}
-            onChange={(e) => setText2(e.target.value)}
-            maxLength={150}
-          />
-          <CharacterCounter
-            current={text2.length}
-            max={150}
-          />
+          <Textarea value={text2} onChange={(e) => setText2(e.target.value)} maxLength={150} />
+          <CharacterCounter current={text2.length} max={150} />
         </div>
       </ComponentCard>
 
@@ -118,7 +149,7 @@ export default function CharacterCounterPage() {
         title="Custom Warning Threshold"
         description="Set when the warning state activates"
       >
-        <div className="space-y-6 max-w-md">
+        <div className="max-w-md space-y-6">
           <div className="space-y-2">
             <p className="text-caption-strong text-foreground-muted">Default threshold (80%)</p>
             <CharacterCounter current={160} max={200} />
@@ -140,9 +171,9 @@ export default function CharacterCounterPage() {
         title="Rich Text Counter"
         description="Count characters in HTML content (ignores tags)"
       >
-        <div className="space-y-4 max-w-md">
-          <div className="p-4 border border-border rounded-lg">
-            <div dangerouslySetInnerHTML={{ __html: richTextContent }} />
+        <div className="max-w-md space-y-4">
+          <div className="rounded-lg border border-border p-4">
+            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(richTextContent) }} />
           </div>
           <RichTextCharacterCounter htmlContent={richTextContent} max={100} />
           <p className="text-caption text-foreground-muted">

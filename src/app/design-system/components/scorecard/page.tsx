@@ -186,29 +186,29 @@ export default function ScorecardPage() {
     <div className="space-y-12">
       {/* Overview */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Scorecard
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl mb-4">
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
           Structured evaluation forms for collecting interviewer feedback with star ratings,
-          criteria-based assessment, and hiring recommendations. Essential for consistent
-          candidate evaluation in the ATS pipeline.
+          criteria-based assessment, and hiring recommendations. Essential for consistent candidate
+          evaluation in the ATS pipeline.
         </p>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success/10 rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">When to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Post-interview feedback collection</li>
               <li>• Standardized candidate evaluation</li>
-              <li>• Comparing multiple interviewers' assessments</li>
+              <li>• Comparing multiple interviewers&apos; assessments</li>
               <li>• Documenting hiring decisions</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error/10 rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">When not to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Quick feedback (use notes instead)</li>
               <li>• Non-interview assessments</li>
               <li>• Binary yes/no decisions only</li>
@@ -223,7 +223,7 @@ export default function ScorecardPage() {
         title="Anatomy"
         description="The scorecard is composed of several building blocks"
       >
-        <div className="relative p-6 bg-background-subtle rounded-lg">
+        <div className="relative rounded-lg bg-background-subtle p-6">
           <div className="max-w-md">
             <Scorecard>
               <div className="relative">
@@ -232,29 +232,48 @@ export default function ScorecardPage() {
                   subtitle="Technical Interview · Jan 15, 2025"
                   avatar={<Avatar name="Jane Cooper" size="default" />}
                 />
-                <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">1</div>
+                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                  1
+                </div>
               </div>
               <div className="relative mt-4">
                 <ScorecardSection title="Technical Skills">
-                  <ScorecardCriterion label="Problem Solving" description="Approach to breaking down complex problems">
+                  <ScorecardCriterion
+                    label="Problem Solving"
+                    description="Approach to breaking down complex problems"
+                  >
                     <StarRating value={4} readOnly />
                   </ScorecardCriterion>
                 </ScorecardSection>
-                <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">2</div>
+                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                  2
+                </div>
               </div>
               <div className="relative mt-4">
                 <div className="py-4">
-                  <h4 className="text-body-sm font-medium text-foreground-muted mb-3">Recommendation</h4>
+                  <h4 className="mb-3 text-body-sm font-medium text-foreground-muted">
+                    Recommendation
+                  </h4>
                   <RecommendationSelect value="yes" />
                 </div>
-                <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">3</div>
+                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                  3
+                </div>
               </div>
             </Scorecard>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-2 text-sm">
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">1</span> Header</div>
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">2</span> Sections & Criteria</div>
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">3</span> Recommendation</div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">1</span> Header
+            </div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">2</span>{" "}
+              Sections & Criteria
+            </div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">3</span>{" "}
+              Recommendation
+            </div>
           </div>
         </div>
       </ComponentCard>
@@ -320,7 +339,7 @@ import { Avatar } from "@/components/ui/avatar";
         <div className="space-y-8">
           {/* Sizes */}
           <div>
-            <h4 className="text-body-strong mb-4">Sizes</h4>
+            <h4 className="mb-4 text-body-strong">Sizes</h4>
             <div className="flex flex-wrap items-end gap-8">
               <div className="space-y-2">
                 <Label>Small</Label>
@@ -339,7 +358,7 @@ import { Avatar } from "@/components/ui/avatar";
 
           {/* Half Stars */}
           <div>
-            <h4 className="text-body-strong mb-4">Half-Star Support</h4>
+            <h4 className="mb-4 text-body-strong">Half-Star Support</h4>
             <div className="flex flex-wrap items-center gap-8">
               <div className="space-y-2">
                 <Label>4.5 Stars</Label>
@@ -358,13 +377,13 @@ import { Avatar } from "@/components/ui/avatar";
 
           {/* Show Value */}
           <div>
-            <h4 className="text-body-strong mb-4">With Numeric Value</h4>
+            <h4 className="mb-4 text-body-strong">With Numeric Value</h4>
             <StarRating value={4.5} readOnly allowHalf size="lg" showValue />
           </div>
 
           {/* Interactive */}
           <div>
-            <h4 className="text-body-strong mb-4">Interactive Rating</h4>
+            <h4 className="mb-4 text-body-strong">Interactive Rating</h4>
             <CodePreview
               code={`const [rating, setRating] = React.useState(3);
 
@@ -410,19 +429,20 @@ const [recommendation, setRecommendation] = useState<RecommendationType>("yes");
           <div className="space-y-4">
             <RecommendationSelect value={recommendation} onChange={setRecommendation} />
             <p className="text-caption text-foreground-muted">
-              Selected: <code className="bg-background-muted px-1.5 py-0.5 rounded">{recommendation}</code>
+              Selected:{" "}
+              <code className="rounded bg-background-muted px-1.5 py-0.5">{recommendation}</code>
             </p>
           </div>
         </CodePreview>
 
-        <div className="mt-6 pt-6 border-t border-border-muted">
-          <h4 className="text-body-strong mb-4">All Recommendation Options</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+        <div className="mt-6 border-t border-border-muted pt-6">
+          <h4 className="mb-4 text-body-strong">All Recommendation Options</h4>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
             {(["strong_yes", "yes", "neutral", "no", "strong_no"] as RecommendationType[]).map(
               (rec) => (
                 <div key={rec} className="text-center">
                   <RecommendationSelect value={rec} />
-                  <p className="text-caption text-foreground-muted mt-2 capitalize">
+                  <p className="mt-2 text-caption capitalize text-foreground-muted">
                     {rec.replace("_", " ")}
                   </p>
                 </div>
@@ -456,8 +476,8 @@ const [recommendation, setRecommendation] = useState<RecommendationType>("yes");
           </div>
         </CodePreview>
 
-        <div className="mt-6 pt-6 border-t border-border-muted">
-          <h4 className="text-body-strong mb-4">Different Recommendations</h4>
+        <div className="mt-6 border-t border-border-muted pt-6">
+          <h4 className="mb-4 text-body-strong">Different Recommendations</h4>
           <div className="space-y-4">
             <ScorecardSummary
               overallRating={4}
@@ -562,11 +582,7 @@ const [comments, setComments] = useState("");
                   label="Technical Knowledge"
                   description="Understanding of core concepts and technologies"
                 >
-                  <StarRating
-                    value={technicalRating}
-                    onChange={setTechnicalRating}
-                    allowHalf
-                  />
+                  <StarRating value={technicalRating} onChange={setTechnicalRating} allowHalf />
                 </ScorecardCriterion>
                 <ScorecardCriterion
                   label="Problem Solving"
@@ -597,10 +613,7 @@ const [comments, setComments] = useState("");
                 <div className="space-y-4">
                   <div>
                     <Label className="mb-2 block">Recommendation</Label>
-                    <RecommendationSelect
-                      value={recommendation}
-                      onChange={setRecommendation}
-                    />
+                    <RecommendationSelect value={recommendation} onChange={setRecommendation} />
                   </div>
                   <div>
                     <Label htmlFor="comments" className="mb-2 block">
@@ -616,7 +629,7 @@ const [comments, setComments] = useState("");
                 </div>
               </ScorecardSection>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+              <div className="flex justify-end gap-3 border-t border-border pt-4">
                 <Button variant="outline">Save Draft</Button>
                 <Button>Submit Feedback</Button>
               </div>
@@ -630,37 +643,37 @@ const [comments, setComments] = useState("");
         <ComponentCard id="props" title="Props">
           <div className="space-y-8">
             <div>
-              <h4 className="text-body-strong mb-3">Scorecard</h4>
+              <h4 className="mb-3 text-body-strong">Scorecard</h4>
               <PropsTable props={scorecardProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">ScorecardHeader</h4>
+              <h4 className="mb-3 text-body-strong">ScorecardHeader</h4>
               <PropsTable props={scorecardHeaderProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">ScorecardSection</h4>
+              <h4 className="mb-3 text-body-strong">ScorecardSection</h4>
               <PropsTable props={scorecardSectionProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">ScorecardCriterion</h4>
+              <h4 className="mb-3 text-body-strong">ScorecardCriterion</h4>
               <PropsTable props={scorecardCriterionProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">StarRating</h4>
+              <h4 className="mb-3 text-body-strong">StarRating</h4>
               <PropsTable props={starRatingProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">RecommendationSelect</h4>
+              <h4 className="mb-3 text-body-strong">RecommendationSelect</h4>
               <PropsTable props={recommendationSelectProps} />
             </div>
 
             <div>
-              <h4 className="text-body-strong mb-3">ScorecardSummary</h4>
+              <h4 className="mb-3 text-body-strong">ScorecardSummary</h4>
               <PropsTable props={scorecardSummaryProps} />
             </div>
           </div>
@@ -703,31 +716,31 @@ const [comments, setComments] = useState("");
         title="Related Components"
         description="Components commonly used with Scorecard"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <a
             href="/design-system/components/candidate-card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Candidate Card</p>
             <p className="text-caption text-foreground-muted">Display scores on cards</p>
           </a>
           <a
             href="/design-system/components/kanban"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Kanban Board</p>
             <p className="text-caption text-foreground-muted">Pipeline management</p>
           </a>
           <a
             href="/design-system/components/activity-feed"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Activity Feed</p>
             <p className="text-caption text-foreground-muted">Show scorecard submissions</p>
           </a>
           <a
             href="/design-system/components/modal"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Modal</p>
             <p className="text-caption text-foreground-muted">Scorecard dialogs</p>

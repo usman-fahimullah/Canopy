@@ -14,18 +14,18 @@
 
 ## Tech Stack
 
-| Layer | Technology | Notes |
-|-------|------------|-------|
-| Framework | Next.js 14+ (App Router) | TypeScript, Server Components |
-| Styling | Tailwind CSS | Design tokens as CSS variables |
-| Database | PostgreSQL + Prisma | Hosted on Supabase or Neon |
-| Auth | Clerk | Multi-tenant, team invites |
-| Career Page Builder | Craft.js | Custom blocks, JSON storage |
-| Kanban/Drag-Drop | dnd-kit | Pipeline management |
-| File Storage | Uploadthing or S3 | Resume, media uploads |
-| Email | Resend | Transactional + templates |
-| Calendar | Cal.com or Nylas | Google + Outlook sync |
-| AI | Claude API / OpenAI | Sourcing, matching, generation |
+| Layer               | Technology               | Notes                          |
+| ------------------- | ------------------------ | ------------------------------ |
+| Framework           | Next.js 14+ (App Router) | TypeScript, Server Components  |
+| Styling             | Tailwind CSS             | Design tokens as CSS variables |
+| Database            | PostgreSQL + Prisma      | Hosted on Supabase or Neon     |
+| Auth                | Clerk                    | Multi-tenant, team invites     |
+| Career Page Builder | Craft.js                 | Custom blocks, JSON storage    |
+| Kanban/Drag-Drop    | dnd-kit                  | Pipeline management            |
+| File Storage        | Uploadthing or S3        | Resume, media uploads          |
+| Email               | Resend                   | Transactional + templates      |
+| Calendar            | Cal.com or Nylas         | Google + Outlook sync          |
+| AI                  | Claude API / OpenAI      | Sourcing, matching, generation |
 
 ---
 
@@ -178,20 +178,20 @@ model Organization {
   name          String
   slug          String    @unique
   logo          String?
-  
+
   // Brand kit for career pages
   primaryColor  String    @default("#0F766E")
   secondaryColor String?
   fontFamily    String    @default("Inter")
-  
+
   // Career page settings
   customDomain  String?   @unique
   careerPageJson String?  @db.Text  // Craft.js JSON
-  
+
   jobs          Job[]
   candidates    Candidate[]
   users         User[]
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -203,13 +203,13 @@ model User {
   name          String?
   avatar        String?
   role          UserRole  @default(MEMBER)
-  
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
+
   notes         Note[]
   scores        Score[]
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -232,28 +232,28 @@ model Job {
   salaryMin     Int?
   salaryMax     Int?
   salaryCurrency String   @default("USD")
-  
+
   // Climate-specific fields
   climateCategory String?  // e.g., "Renewable Energy", "Circular Economy"
   impactDescription String? @db.Text
   requiredCerts String[]  // e.g., ["LEED", "NABCEP"]
   greenSkills   String[]  // From GJB Pathways taxonomy
-  
+
   status        JobStatus @default(DRAFT)
   publishedAt   DateTime?
   closesAt      DateTime?
-  
+
   // Pipeline stages (JSON for flexibility)
   stages        String    @default("[{\"id\":\"applied\",\"name\":\"Applied\"},{\"id\":\"screening\",\"name\":\"Screening\"},{\"id\":\"interview\",\"name\":\"Interview\"},{\"id\":\"offer\",\"name\":\"Offer\"},{\"id\":\"hired\",\"name\":\"Hired\"}]")
-  
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
+
   applications  Application[]
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   @@unique([organizationId, slug])
 }
 
@@ -286,99 +286,99 @@ model Candidate {
   resumeUrl     String?
   linkedinUrl   String?
   portfolioUrl  String?
-  
+
   // Parsed/AI-enriched data
   skills        String[]
   greenSkills   String[]  // Climate-specific skills
   certifications String[]
   yearsExperience Int?
-  
+
   // AI matching
   aiSummary     String?   @db.Text
-  
+
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
-  
+
   applications  Application[]
   notes         Note[]
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   @@unique([organizationId, email])
 }
 
 model Application {
   id            String    @id @default(cuid())
-  
+
   candidateId   String
   candidate     Candidate @relation(fields: [candidateId], references: [id])
-  
+
   jobId         String
   job           Job       @relation(fields: [jobId], references: [id])
-  
+
   stage         String    @default("applied")
   stageOrder    Int       @default(0)  // For sorting within stage
-  
+
   // Application form responses
   formResponses String?   @db.Text  // JSON
   coverLetter   String?   @db.Text
-  
+
   // AI matching score
   matchScore    Float?    // 0-100
   matchReasons  String?   @db.Text  // JSON explanation
-  
+
   // Screening
   knockoutPassed Boolean  @default(true)
-  
+
   source        String?   // e.g., "Green Jobs Board", "LinkedIn", "Referral"
-  
+
   scores        Score[]
-  
+
   rejectedAt    DateTime?
   hiredAt       DateTime?
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   @@unique([candidateId, jobId])
 }
 
 model Note {
   id            String    @id @default(cuid())
   content       String    @db.Text
-  
+
   candidateId   String
   candidate     Candidate @relation(fields: [candidateId], references: [id])
-  
+
   authorId      String
   author        User      @relation(fields: [authorId], references: [id])
-  
+
   // For @mentions
   mentions      String[]  // User IDs
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
 model Score {
   id            String    @id @default(cuid())
-  
+
   applicationId String
   application   Application @relation(fields: [applicationId], references: [id])
-  
+
   scorerId      String
   scorer        User      @relation(fields: [scorerId], references: [id])
-  
+
   // Scorecard responses (JSON)
   responses     String    @db.Text
   overallRating Int       // 1-5
   recommendation Recommendation
   comments      String?   @db.Text
-  
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
   @@unique([applicationId, scorerId])
 }
 
@@ -418,7 +418,7 @@ When the user provides Figma designs, extract tokens into this structure:
     --color-primary-800: #115e59;
     --color-primary-900: #134e4a;
     --color-primary-950: #042f2e;
-    
+
     /* Neutral/Gray scale */
     --color-gray-50: #f9fafb;
     --color-gray-100: #f3f4f6;
@@ -431,17 +431,17 @@ When the user provides Figma designs, extract tokens into this structure:
     --color-gray-800: #1f2937;
     --color-gray-900: #111827;
     --color-gray-950: #030712;
-    
+
     /* Semantic */
     --color-success: #10b981;
     --color-warning: #f59e0b;
     --color-error: #ef4444;
     --color-info: #3b82f6;
-    
+
     /* Typography */
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    
+    --font-sans: "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+
     /* Font sizes */
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
@@ -451,7 +451,7 @@ When the user provides Figma designs, extract tokens into this structure:
     --text-2xl: 1.5rem;
     --text-3xl: 1.875rem;
     --text-4xl: 2.25rem;
-    
+
     /* Spacing (4px base) */
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -463,7 +463,7 @@ When the user provides Figma designs, extract tokens into this structure:
     --space-10: 2.5rem;
     --space-12: 3rem;
     --space-16: 4rem;
-    
+
     /* Border radius */
     --radius-sm: 0.25rem;
     --radius-md: 0.375rem;
@@ -471,19 +471,19 @@ When the user provides Figma designs, extract tokens into this structure:
     --radius-xl: 0.75rem;
     --radius-2xl: 1rem;
     --radius-full: 9999px;
-    
+
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    
+
     /* Component-specific */
     --header-height: 4rem;
     --sidebar-width: 16rem;
     --sidebar-collapsed-width: 4.5rem;
   }
-  
+
   .dark {
     /* Dark mode overrides */
   }
@@ -497,9 +497,7 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   darkMode: "class",
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {
@@ -544,10 +542,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
-  ],
+  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")],
 };
 
 export default config;
@@ -575,7 +570,8 @@ const buttonVariants = cva(
       variant: {
         primary: "bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800",
         secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300",
-        outline: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100",
+        outline:
+          "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100",
         ghost: "text-gray-700 hover:bg-gray-100 active:bg-gray-200",
         destructive: "bg-error text-white hover:bg-red-600 active:bg-red-700",
         link: "text-primary-600 underline-offset-4 hover:underline",
@@ -595,8 +591,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
 }
@@ -658,15 +653,15 @@ export const ImpactMetrics: UserComponent<ImpactMetricsProps> = ({
   return (
     <section
       ref={(ref) => connect(drag(ref!))}
-      className="py-16 px-8"
+      className="px-8 py-16"
       style={{ backgroundColor, color: textColor }}
     >
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12">{headline}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="mx-auto max-w-4xl">
+        <h2 className="mb-12 text-center text-3xl font-bold">{headline}</h2>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {metrics.map((metric, index) => (
             <div key={index} className="text-center">
-              <div className="text-5xl font-bold mb-2">{metric.value}</div>
+              <div className="mb-2 text-5xl font-bold">{metric.value}</div>
               <div className="text-lg opacity-80">{metric.label}</div>
             </div>
           ))}
@@ -696,12 +691,14 @@ const ImpactMetricsSettings = () => {
         <Label>Headline</Label>
         <Input
           value={headline}
-          onChange={(e) => setProp((props: ImpactMetricsProps) => (props.headline = e.target.value))}
+          onChange={(e) =>
+            setProp((props: ImpactMetricsProps) => (props.headline = e.target.value))
+          }
         />
       </div>
-      
+
       {metrics.map((metric, index) => (
-        <div key={index} className="space-y-2 p-3 border rounded-lg">
+        <div key={index} className="space-y-2 rounded-lg border p-3">
           <Label>Metric {index + 1}</Label>
           <Input
             placeholder="Value (e.g., 50K)"
@@ -723,7 +720,7 @@ const ImpactMetricsSettings = () => {
           />
         </div>
       ))}
-      
+
       <div>
         <Label>Background Color</Label>
         <Input
@@ -734,7 +731,7 @@ const ImpactMetricsSettings = () => {
           }
         />
       </div>
-      
+
       <div>
         <Label>Text Color</Label>
         <Input
@@ -809,6 +806,7 @@ Sidebar:
 ## Build Order
 
 ### Phase 1: Foundation (Week 1-2)
+
 1. Next.js scaffold with App Router
 2. Clerk auth integration
 3. Database schema + Prisma setup
@@ -817,6 +815,7 @@ Sidebar:
 6. Dashboard layout shell
 
 ### Phase 2: Career Page Builder (Week 2-4)
+
 1. Craft.js basic integration
 2. Core blocks (Container, Text, Image, Video, Columns)
 3. Climate-specific blocks (ImpactMetrics, SustainabilityBadges)
@@ -826,6 +825,7 @@ Sidebar:
 7. Public page SSR renderer
 
 ### Phase 3: Core ATS (Week 3-5)
+
 1. Job posting CRUD
 2. Kanban pipeline with dnd-kit
 3. Candidate profiles
@@ -833,12 +833,14 @@ Sidebar:
 5. Team notes + @mentions
 
 ### Phase 4: AI Integration (Week 5-6)
+
 1. AI sourcing agent
 2. Candidate matching/ranking
 3. Match score UI with reasoning
 4. AI-generated job descriptions
 
 ### Phase 5: Polish (Week 6-7)
+
 1. Calendar sync
 2. Email templates
 3. Analytics dashboard
@@ -926,15 +928,18 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ### Completed Work
 
 #### Design System Page (`/src/app/page.tsx`)
+
 A comprehensive, functional design system documentation page has been built. It serves as the source of truth for the Trails Design System used by Green Jobs Board / Candid.
 
 **Page Structure:**
+
 - **Header** - Sticky navigation with search (⌘K), theme toggle, and section links
 - **Left Sidebar** - Collapsible navigation organized by Foundations and Components
 - **Main Content** - Component showcases with live examples, code previews, props tables
 - **Right Sidebar (On This Page)** - Dynamic table of contents with scroll tracking
 
 **Section Wrappers:**
+
 ```tsx
 <div id="components" className="space-y-16 scroll-mt-24">
   {/* All component sections: buttons, form-controls, data-display, overlays, etc. */}
@@ -947,21 +952,21 @@ A comprehensive, functional design system documentation page has been built. It 
 
 #### Design System Components (`/src/components/design-system/`)
 
-| Component | File | Description |
-|-----------|------|-------------|
-| Header | `Header.tsx` | Sticky header with search, theme toggle, nav links. NavLinks use IntersectionObserver for active state tracking and smooth scroll. |
-| Sidebar | `Sidebar.tsx` | Collapsible navigation with section groupings. Uses IntersectionObserver for scroll-based highlighting. |
-| SearchModal | `SearchModal.tsx` | Command palette (⌘K) with keyboard navigation and smooth scroll to sections. |
-| ThemeToggle | `ThemeToggle.tsx` | Light/dark mode toggle using next-themes. Dynamically imported to avoid hydration issues. |
-| OnThisPage | `OnThisPage.tsx` | Right sidebar TOC with scroll tracking via IntersectionObserver. |
-| ComponentSection | `ComponentSection.tsx` | Section wrapper with title, description, optional Figma link. |
-| ComponentCard | `ComponentSection.tsx` | Card container for component examples. |
-| CodeBlock | `CodeBlock.tsx` | Syntax-highlighted code display with copy button. |
-| CodePreview | `CodeBlock.tsx` | Live component preview with toggleable code view. |
-| PropsTable | `PropsTable.tsx` | Table for documenting component props. |
-| VariantTable | `PropsTable.tsx` | Table for showing component variants with previews. |
-| UsageGuide | `ComponentSection.tsx` | Do's and Don'ts guidance cards. |
-| AccessibilityInfo | `ComponentSection.tsx` | Accessibility notes card. |
+| Component         | File                   | Description                                                                                                                        |
+| ----------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Header            | `Header.tsx`           | Sticky header with search, theme toggle, nav links. NavLinks use IntersectionObserver for active state tracking and smooth scroll. |
+| Sidebar           | `Sidebar.tsx`          | Collapsible navigation with section groupings. Uses IntersectionObserver for scroll-based highlighting.                            |
+| SearchModal       | `SearchModal.tsx`      | Command palette (⌘K) with keyboard navigation and smooth scroll to sections.                                                       |
+| ThemeToggle       | `ThemeToggle.tsx`      | Light/dark mode toggle using next-themes. Dynamically imported to avoid hydration issues.                                          |
+| OnThisPage        | `OnThisPage.tsx`       | Right sidebar TOC with scroll tracking via IntersectionObserver.                                                                   |
+| ComponentSection  | `ComponentSection.tsx` | Section wrapper with title, description, optional Figma link.                                                                      |
+| ComponentCard     | `ComponentSection.tsx` | Card container for component examples.                                                                                             |
+| CodeBlock         | `CodeBlock.tsx`        | Syntax-highlighted code display with copy button.                                                                                  |
+| CodePreview       | `CodeBlock.tsx`        | Live component preview with toggleable code view.                                                                                  |
+| PropsTable        | `PropsTable.tsx`       | Table for documenting component props.                                                                                             |
+| VariantTable      | `PropsTable.tsx`       | Table for showing component variants with previews.                                                                                |
+| UsageGuide        | `ComponentSection.tsx` | Do's and Don'ts guidance cards.                                                                                                    |
+| AccessibilityInfo | `ComponentSection.tsx` | Accessibility notes card.                                                                                                          |
 
 #### Dark Mode Implementation
 
@@ -969,10 +974,10 @@ A comprehensive, functional design system documentation page has been built. It 
 
 ```tsx
 // CORRECT - Direct hex values for dark mode
-className="bg-neutral-white dark:bg-[#1A1A1A] border-neutral-200 dark:border-[#3D3D3D]"
+className = "bg-neutral-white dark:bg-[#1A1A1A] border-neutral-200 dark:border-[#3D3D3D]";
 
 // INCORRECT - CSS variable classes (colors invert unexpectedly)
-className="bg-neutral-white dark:bg-neutral-800"
+className = "bg-neutral-white dark:bg-neutral-800";
 ```
 
 **Dark Mode Color Reference:**
@@ -987,6 +992,7 @@ className="bg-neutral-white dark:bg-neutral-800"
 | Secondary text | `text-neutral-600` | `dark:text-neutral-400` |
 
 **Files with dark mode fixes applied:**
+
 - `Header.tsx` - NavLinks, search button, GitHub link
 - `Sidebar.tsx` - Navigation items, section headers, borders
 - `SearchModal.tsx` - Modal container, results, footer, keyboard badges
@@ -1017,6 +1023,7 @@ All three navigation systems are synchronized and functional:
    - All hrefs verified to match actual section IDs
 
 **Section ID Mapping:**
+
 ```
 Components (id="components"):
 ├── buttons
@@ -1073,15 +1080,15 @@ Comprehensive motion system defined in `globals.css` (lines 712-762):
 
 All components are fully functional with dark mode support:
 
-| Category | Components |
-|----------|------------|
-| **Buttons** | Button (primary, secondary, tertiary, destructive, ghost, inverse, icon sizes) |
+| Category          | Components                                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Buttons**       | Button (primary, secondary, tertiary, destructive, ghost, inverse, icon sizes)                                         |
 | **Form Controls** | Input, Textarea, Label, Select, Checkbox, RadioGroup, Switch, Slider, SegmentedController, SearchInput, Chip/ChipGroup |
-| **Data Display** | Badge, Avatar/AvatarGroup, Card, Toast |
-| **Overlays** | Dialog, Modal, Tooltip |
-| **Navigation** | Tabs (pill & underline variants), Breadcrumbs, Pagination, DropdownMenu |
-| **Editor** | Toolbar, ToolbarButton, ToolbarToggleGroup |
-| **ATS-Specific** | KanbanBoard/Column/Card, CandidateCard, StageBadge/StageProgress, Scorecard/StarRating |
+| **Data Display**  | Badge, Avatar/AvatarGroup, Card, Toast                                                                                 |
+| **Overlays**      | Dialog, Modal, Tooltip                                                                                                 |
+| **Navigation**    | Tabs (pill & underline variants), Breadcrumbs, Pagination, DropdownMenu                                                |
+| **Editor**        | Toolbar, ToolbarButton, ToolbarToggleGroup                                                                             |
+| **ATS-Specific**  | KanbanBoard/Column/Card, CandidateCard, StageBadge/StageProgress, Scorecard/StarRating                                 |
 
 ### Build Verification
 
@@ -1089,6 +1096,47 @@ All components are fully functional with dark mode support:
 pnpm build  # ✓ Compiled successfully
 pnpm dev    # Design system available at localhost:3000
 ```
+
+---
+
+## Documentation Organization
+
+### Docs Folder Structure
+
+All project documentation (`.md` files) is organized in the `docs/` folder with topic-based subfolders:
+
+```
+docs/
+├── design-system/       # Gradient system, design tokens, visual references
+├── candid-platform/     # Candid coaching platform features and specs
+├── job-seeker/          # Job seeker portal, Green Jobs Board PRD
+├── implementation/      # Checklists, status summaries, remediation
+├── ux-audits/           # UI/UX audits and improvement plans
+├── other/               # Miscellaneous documentation
+└── interview-scheduler-ux-improvements.md
+```
+
+### Auto-Organization Rule
+
+**When creating new `.md` documentation files:**
+
+1. **Review the file** - After creating any new `.md` documentation file at the project root, review its content and purpose
+2. **Categorize appropriately** - Move the file to the correct `docs/` subfolder based on its topic:
+   - Design/gradient/visual → `docs/design-system/`
+   - Candid coaching/platform features → `docs/candid-platform/`
+   - Job seeker/portal/Green Jobs Board → `docs/job-seeker/`
+   - Checklists/status/implementation → `docs/implementation/`
+   - UI/UX audits/improvements → `docs/ux-audits/`
+   - Other topics → `docs/other/`
+3. **Create new subfolders if needed** - If a new topic emerges that doesn't fit existing categories, create a new descriptive subfolder
+
+**Files that stay at root:**
+
+- `CLAUDE.md` - This project context file
+- `README.md` - Project readme (if exists)
+- Configuration files
+
+---
 
 ### Known Issues & Future Work
 

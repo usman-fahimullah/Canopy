@@ -71,24 +71,12 @@ import {
   Copy,
   Link,
 } from "@phosphor-icons/react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "./sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "./sheet";
 import { Input } from "./input";
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { Badge } from "./badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./dropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./dropdown";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,17 +89,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "./dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./tooltip";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
 // ============================================
@@ -121,7 +100,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 export type ViewType = "table" | "kanban" | "calendar" | "cards";
 export type TableDensity = "compact" | "default" | "comfortable";
 export type ColumnFilterType = "text" | "select" | "number" | "date" | "dateRange" | "multiSelect";
-export type FieldType = "text" | "number" | "select" | "multiSelect" | "date" | "user" | "badge" | "link" | "email" | "phone" | "currency" | "percent" | "rating" | "checkbox" | "progress";
+export type FieldType =
+  | "text"
+  | "number"
+  | "select"
+  | "multiSelect"
+  | "date"
+  | "user"
+  | "badge"
+  | "link"
+  | "email"
+  | "phone"
+  | "currency"
+  | "percent"
+  | "rating"
+  | "checkbox"
+  | "progress";
 
 // Quick filter preset
 export interface QuickFilter {
@@ -245,7 +239,7 @@ interface ViewSwitcherProps {
 const ViewSwitcher = React.memo(function ViewSwitcher({
   currentView,
   onViewChange,
-  availableViews = ["table", "kanban", "cards"]
+  availableViews = ["table", "kanban", "cards"],
 }: ViewSwitcherProps) {
   const viewIcons: Record<ViewType, React.ReactNode> = {
     table: <TableIcon className="h-4 w-4" weight="regular" />,
@@ -263,23 +257,19 @@ const ViewSwitcher = React.memo(function ViewSwitcher({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div
-        className="flex items-center gap-0.5"
-        role="tablist"
-        aria-label="View options"
-      >
+      <div className="flex items-center gap-0.5" role="tablist" aria-label="View options">
         {availableViews.map((view) => (
           <Tooltip key={view}>
             <TooltipTrigger asChild>
               <button
                 onClick={() => onViewChange(view)}
                 className={cn(
-                  "flex items-center justify-center h-8 w-8 rounded-md",
+                  "flex h-8 w-8 items-center justify-center rounded-md",
                   "transition-colors duration-150",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-1",
                   currentView === view
-                    ? "text-[var(--foreground-default)] bg-[var(--background-subtle)]"
-                    : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] hover:bg-[var(--background-subtle)]/50"
+                    ? "bg-[var(--background-subtle)] text-[var(--foreground-default)]"
+                    : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
                 )}
                 aria-selected={currentView === view}
                 aria-label={viewLabels[view]}
@@ -296,7 +286,7 @@ const ViewSwitcher = React.memo(function ViewSwitcher({
       </div>
     </TooltipProvider>
   );
-})
+});
 
 // ============================================
 // Quick Filters Bar
@@ -317,21 +307,20 @@ const QuickFiltersBar = React.memo(function QuickFiltersBar({
 }: QuickFiltersBarProps) {
   return (
     <div
-      className="flex items-center gap-1 overflow-x-auto scrollbar-thin"
+      className="scrollbar-thin flex items-center gap-1 overflow-x-auto"
       role="tablist"
       aria-label="Quick filters"
     >
       <button
         onClick={() => onFilterSelect(null)}
         className={cn(
-          "relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap",
+          "relative flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium",
           "transition-all duration-150 ease-out",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-1",
           activeFilterId === null
-            ? "bg-[var(--background-subtle)] text-[var(--foreground-default)] border border-[var(--border-default)]"
-            : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] hover:bg-[var(--background-subtle)]/50"
+            ? "border border-[var(--border-default)] bg-[var(--background-subtle)] text-[var(--foreground-default)]"
+            : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
         )}
-        aria-pressed={activeFilterId === null}
         aria-selected={activeFilterId === null}
         role="tab"
       >
@@ -343,22 +332,17 @@ const QuickFiltersBar = React.memo(function QuickFiltersBar({
           key={filter.id}
           onClick={() => onFilterSelect(filter.id)}
           className={cn(
-            "relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap",
+            "relative flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium",
             "transition-all duration-150 ease-out",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-1",
             activeFilterId === filter.id
-              ? "bg-[var(--background-subtle)] text-[var(--foreground-default)] border border-[var(--border-default)]"
-              : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] hover:bg-[var(--background-subtle)]/50"
+              ? "border border-[var(--border-default)] bg-[var(--background-subtle)] text-[var(--foreground-default)]"
+              : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
           )}
-          aria-pressed={activeFilterId === filter.id}
           aria-selected={activeFilterId === filter.id}
           role="tab"
         >
-          {filter.icon && (
-            <span aria-hidden="true">
-              {filter.icon}
-            </span>
-          )}
+          {filter.icon && <span aria-hidden="true">{filter.icon}</span>}
           {filter.label}
         </button>
       ))}
@@ -370,7 +354,7 @@ const QuickFiltersBar = React.memo(function QuickFiltersBar({
               <button
                 onClick={onSaveCurrentFilter}
                 className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-lg",
+                  "flex h-8 w-8 items-center justify-center rounded-lg",
                   "text-[var(--foreground-muted)] hover:text-[var(--foreground-brand)]",
                   "hover:bg-[var(--background-brand-subtle)]",
                   "transition-all duration-200",
@@ -387,7 +371,7 @@ const QuickFiltersBar = React.memo(function QuickFiltersBar({
       )}
     </div>
   );
-})
+});
 
 // ============================================
 // Saved Views Dropdown
@@ -421,30 +405,30 @@ const SavedViewsDropdown = React.memo(function SavedViewsDropdown({
     }
   };
 
-  const currentView = views.find(v => v.id === currentViewId);
+  const currentView = views.find((v) => v.id === currentViewId);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 h-9">
+        <Button variant="outline" size="sm" className="h-9 gap-2">
           <BookmarkSimple className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline max-w-[100px] truncate">
+          <span className="hidden max-w-[100px] truncate sm:inline">
             {currentView?.name || "Views"}
           </span>
           <ChevronRight className="h-3 w-3 rotate-90 opacity-50" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-60">
-        <DropdownMenuLabel className="text-[var(--foreground-muted)] font-normal">
+        <DropdownMenuLabel className="font-normal text-[var(--foreground-muted)]">
           Saved Views
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         {views.length === 0 ? (
           <div className="px-3 py-6 text-center">
-            <BookmarkSimple className="h-8 w-8 text-[var(--foreground-muted)] opacity-50 mx-auto mb-2" />
+            <BookmarkSimple className="mx-auto mb-2 h-8 w-8 text-[var(--foreground-muted)] opacity-50" />
             <p className="text-sm text-[var(--foreground-muted)]">No saved views yet</p>
-            <p className="text-xs text-[var(--foreground-muted)] opacity-70 mt-1">
+            <p className="mt-1 text-xs text-[var(--foreground-muted)] opacity-70">
               Save your current configuration as a view
             </p>
           </div>
@@ -456,19 +440,22 @@ const SavedViewsDropdown = React.memo(function SavedViewsDropdown({
                 onClick={() => onViewSelect(view.id)}
                 className="flex items-center justify-between py-2.5"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex min-w-0 items-center gap-2.5">
                   <span className="text-[var(--foreground-muted)]">
                     {view.icon || <Bookmark className="h-4 w-4" />}
                   </span>
                   <span className="truncate">{view.name}</span>
                   {view.isDefault && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0">
+                    <Badge variant="secondary" className="shrink-0 px-1.5 py-0 text-[10px]">
                       Default
                     </Badge>
                   )}
                 </div>
                 {currentViewId === view.id && (
-                  <Check className="h-4 w-4 text-[var(--foreground-brand)] shrink-0 ml-2" aria-label="Current view" />
+                  <Check
+                    className="ml-2 h-4 w-4 shrink-0 text-[var(--foreground-brand)]"
+                    aria-label="Current view"
+                  />
                 )}
               </DropdownMenuItem>
             ))}
@@ -478,7 +465,7 @@ const SavedViewsDropdown = React.memo(function SavedViewsDropdown({
         <DropdownMenuSeparator />
 
         {isCreating ? (
-          <div className="px-2 py-2 space-y-2">
+          <div className="space-y-2 px-2 py-2">
             <Input
               value={newViewName}
               onChange={(e) => setNewViewName(e.target.value)}
@@ -524,7 +511,7 @@ const SavedViewsDropdown = React.memo(function SavedViewsDropdown({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-})
+});
 
 // ============================================
 // Enhanced Search with Suggestions
@@ -589,9 +576,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
+        setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
         break;
       case "ArrowUp":
         e.preventDefault();
@@ -633,7 +618,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
 
   return (
     <div className="relative">
-      <div className="relative group">
+      <div className="group relative">
         <MagnifyingGlass
           className={cn(
             "absolute top-1/2 -translate-y-1/2",
@@ -652,9 +637,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
           placeholder={placeholder}
           className={cn(
             "transition-all duration-200",
-            isSmall
-              ? "pl-8 pr-8 h-8 text-sm rounded-lg"
-              : "pl-10 pr-24 h-10 rounded-xl",
+            isSmall ? "h-8 rounded-lg pl-8 pr-8 text-sm" : "h-10 rounded-xl pl-10 pr-24",
             isFocused && "ring-2 ring-[var(--border-interactive-focus)]"
           )}
           onFocus={handleFocus}
@@ -664,13 +647,17 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
           aria-expanded={showSuggestions}
           aria-haspopup="listbox"
           aria-controls={showSuggestions ? listboxId : undefined}
-          aria-activedescendant={selectedIndex >= 0 ? `${listboxId}-option-${selectedIndex}` : undefined}
+          aria-activedescendant={
+            selectedIndex >= 0 ? `${listboxId}-option-${selectedIndex}` : undefined
+          }
           aria-autocomplete="list"
         />
-        <div className={cn(
-          "absolute top-1/2 -translate-y-1/2 flex items-center gap-2",
-          isSmall ? "right-2" : "right-3"
-        )}>
+        <div
+          className={cn(
+            "absolute top-1/2 flex -translate-y-1/2 items-center gap-2",
+            isSmall ? "right-2" : "right-3"
+          )}
+        >
           {isSearching && (
             <CircleNotch
               className={cn(
@@ -699,10 +686,10 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
           {!isSmall && (
             <kbd
               className={cn(
-                "hidden sm:inline-flex items-center gap-0.5",
-                "px-2 py-1 text-xs font-mono",
+                "hidden items-center gap-0.5 sm:inline-flex",
+                "px-2 py-1 font-mono text-xs",
                 "text-[var(--foreground-muted)]",
-                "bg-[var(--background-subtle)] rounded-md",
+                "rounded-md bg-[var(--background-subtle)]",
                 "border border-[var(--border-muted)]",
                 "transition-opacity duration-150",
                 value && "opacity-0"
@@ -722,7 +709,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
           role="listbox"
           aria-label="Search suggestions"
           className={cn(
-            "absolute top-full left-0 right-0 mt-2",
+            "absolute left-0 right-0 top-full mt-2",
             "bg-[var(--background-default)]",
             "border border-[var(--border-default)]",
             "rounded-xl shadow-xl",
@@ -743,7 +730,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={cn(
-                  "flex items-center gap-3 w-full px-4 py-2.5 text-left text-sm",
+                  "flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm",
                   "transition-colors duration-100",
                   "focus-visible:outline-none",
                   selectedIndex === index
@@ -751,10 +738,10 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
                     : "hover:bg-[var(--background-muted)]"
                 )}
               >
-                <span className="px-2 py-0.5 text-xs font-medium text-[var(--foreground-muted)] bg-[var(--background-subtle)] rounded">
+                <span className="rounded bg-[var(--background-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--foreground-muted)]">
                   {suggestion.type}
                 </span>
-                <span className="text-[var(--foreground-default)] font-medium">
+                <span className="font-medium text-[var(--foreground-default)]">
                   {suggestion.label}
                 </span>
               </button>
@@ -764,7 +751,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
       )}
     </div>
   );
-})
+});
 
 // ============================================
 // Column Header with Enhanced Features
@@ -813,21 +800,24 @@ function EnhancedTableHead<T>({
         uniqueValues.add(String(val));
       }
     });
-    return Array.from(uniqueValues).sort().map((v) => ({ label: v, value: v }));
+    return Array.from(uniqueValues)
+      .sort()
+      .map((v) => ({ label: v, value: v }));
   }, [data, column.accessorKey, column.filterConfig?.options]);
 
   return (
     <th
       className={cn(
-        "group relative h-10 px-4 text-left align-middle font-medium text-[var(--table-foreground-header)] text-caption whitespace-nowrap",
+        "group relative h-10 whitespace-nowrap px-4 text-left align-middle text-caption font-medium text-[var(--table-foreground-header)]",
         "border-b border-[var(--table-border)]",
         "bg-[var(--table-background-header)]",
         column.sticky && "sticky left-0 z-20",
-        (column.sortable || column.filterConfig) && "cursor-pointer select-none hover:bg-[var(--background-subtle)] transition-colors duration-150"
+        (column.sortable || column.filterConfig) &&
+          "cursor-pointer select-none transition-colors duration-150 hover:bg-[var(--background-subtle)]"
       )}
       style={{
         width: columnWidth ? `${columnWidth}px` : column.width,
-        minWidth: column.minWidth
+        minWidth: column.minWidth,
       }}
       onClick={column.sortable ? () => onSort(column.id) : undefined}
       scope="col"
@@ -836,9 +826,13 @@ function EnhancedTableHead<T>({
         {isReordering && dragHandleProps && (
           <button
             {...dragHandleProps}
-            className="p-0.5 -ml-1 rounded cursor-grab active:cursor-grabbing hover:bg-[var(--background-interactive-hover)] transition-colors"
+            className="-ml-1 cursor-grab rounded p-0.5 transition-colors hover:bg-[var(--background-interactive-hover)] active:cursor-grabbing"
           >
-            <DotsSixVertical className="h-3.5 w-3.5 text-[var(--foreground-muted)]" weight="bold" aria-hidden="true" />
+            <DotsSixVertical
+              className="h-3.5 w-3.5 text-[var(--foreground-muted)]"
+              weight="bold"
+              aria-hidden="true"
+            />
           </button>
         )}
 
@@ -851,11 +845,11 @@ function EnhancedTableHead<T>({
               <button
                 onClick={(e) => e.stopPropagation()}
                 className={cn(
-                  "flex items-center justify-center w-5 h-5 rounded -mr-1",
+                  "-mr-1 flex h-5 w-5 items-center justify-center rounded",
                   "transition-all duration-150",
                   "hover:bg-[var(--background-interactive-hover)]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)]",
-                  (sortDirection || hasFilter)
+                  sortDirection || hasFilter
                     ? "text-[var(--foreground-default)]"
                     : "text-[var(--foreground-muted)]"
                 )}
@@ -881,12 +875,16 @@ function EnhancedTableHead<T>({
                         }
                       }}
                       className={cn(
-                        "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded",
-                        "hover:bg-[var(--background-interactive-hover)] transition-colors",
-                        sortDirection === "asc" && "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                        "flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm",
+                        "transition-colors hover:bg-[var(--background-interactive-hover)]",
+                        sortDirection === "asc" &&
+                          "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
                       )}
                     >
-                      <SortAscending className="h-4 w-4" weight={sortDirection === "asc" ? "bold" : "regular"} />
+                      <SortAscending
+                        className="h-4 w-4"
+                        weight={sortDirection === "asc" ? "bold" : "regular"}
+                      />
                       <span>Sort ascending</span>
                     </button>
                     <button
@@ -897,12 +895,16 @@ function EnhancedTableHead<T>({
                         }
                       }}
                       className={cn(
-                        "w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded",
-                        "hover:bg-[var(--background-interactive-hover)] transition-colors",
-                        sortDirection === "desc" && "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                        "flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm",
+                        "transition-colors hover:bg-[var(--background-interactive-hover)]",
+                        sortDirection === "desc" &&
+                          "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
                       )}
                     >
-                      <SortDescending className="h-4 w-4" weight={sortDirection === "desc" ? "bold" : "regular"} />
+                      <SortDescending
+                        className="h-4 w-4"
+                        weight={sortDirection === "desc" ? "bold" : "regular"}
+                      />
                       <span>Sort descending</span>
                     </button>
                     {sortDirection && (
@@ -912,7 +914,7 @@ function EnhancedTableHead<T>({
                           onSort(column.id);
                           onSort(column.id);
                         }}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded hover:bg-[var(--background-interactive-hover)] transition-colors text-[var(--foreground-muted)]"
+                        className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)]"
                       >
                         <X className="h-4 w-4" />
                         <span>Clear sort</span>
@@ -923,7 +925,7 @@ function EnhancedTableHead<T>({
 
                 {/* Divider if both sort and filter */}
                 {column.sortable && column.filterConfig && (
-                  <div className="h-px bg-[var(--border-muted)] my-1" />
+                  <div className="my-1 h-px bg-[var(--border-muted)]" />
                 )}
 
                 {/* Filter content */}
@@ -947,9 +949,9 @@ function EnhancedTableHead<T>({
       {column.resizable !== false && onResize && (
         <div
           className={cn(
-            "absolute right-0 top-3 bottom-3 w-0.5 cursor-col-resize rounded-full",
+            "absolute bottom-3 right-0 top-3 w-0.5 cursor-col-resize rounded-full",
             "opacity-0 group-hover:opacity-100",
-            "bg-[var(--border-muted)] hover:bg-[var(--border-brand)] hover:w-1",
+            "bg-[var(--border-muted)] hover:w-1 hover:bg-[var(--border-brand)]",
             "transition-all duration-150"
           )}
           role="separator"
@@ -992,12 +994,7 @@ interface ColumnFilterContentProps<T> {
   options: { label: string; value: string; icon?: React.ReactNode; color?: string }[];
 }
 
-function ColumnFilterContent<T>({
-  column,
-  value,
-  onChange,
-  options,
-}: ColumnFilterContentProps<T>) {
+function ColumnFilterContent<T>({ column, value, onChange, options }: ColumnFilterContentProps<T>) {
   const [localValue, setLocalValue] = React.useState<ColumnFilterValue>(value);
   const filterType = column.filterConfig?.type || "text";
 
@@ -1048,13 +1045,13 @@ function ColumnFilterContent<T>({
       )}
 
       {filterType === "multiSelect" && (
-        <div className="space-y-2 max-h-48 overflow-y-auto">
+        <div className="max-h-48 space-y-2 overflow-y-auto">
           {options.map((option) => {
             const selected = Array.isArray(localValue) && localValue.includes(option.value);
             return (
               <label
                 key={option.value}
-                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-[var(--background-muted)] cursor-pointer"
+                className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-[var(--background-muted)]"
               >
                 <Checkbox
                   checked={selected}
@@ -1063,7 +1060,7 @@ function ColumnFilterContent<T>({
                     if (checked) {
                       setLocalValue([...current, option.value]);
                     } else {
-                      setLocalValue(current.filter(v => v !== option.value));
+                      setLocalValue(current.filter((v) => v !== option.value));
                     }
                   }}
                 />
@@ -1080,11 +1077,16 @@ function ColumnFilterContent<T>({
           <Input
             type="number"
             placeholder="Min"
-            value={typeof localValue === "object" && localValue !== null && "min" in localValue ? (localValue as { min?: number }).min ?? "" : ""}
+            value={
+              typeof localValue === "object" && localValue !== null && "min" in localValue
+                ? ((localValue as { min?: number }).min ?? "")
+                : ""
+            }
             onChange={(e) => {
               const min = e.target.value ? Number(e.target.value) : undefined;
               setLocalValue((prev) => {
-                const prevObj = typeof prev === "object" && prev !== null && "min" in prev ? prev : {};
+                const prevObj =
+                  typeof prev === "object" && prev !== null && "min" in prev ? prev : {};
                 return { ...prevObj, min };
               });
             }}
@@ -1094,11 +1096,16 @@ function ColumnFilterContent<T>({
           <Input
             type="number"
             placeholder="Max"
-            value={typeof localValue === "object" && localValue !== null && "max" in localValue ? (localValue as { max?: number }).max ?? "" : ""}
+            value={
+              typeof localValue === "object" && localValue !== null && "max" in localValue
+                ? ((localValue as { max?: number }).max ?? "")
+                : ""
+            }
             onChange={(e) => {
               const max = e.target.value ? Number(e.target.value) : undefined;
               setLocalValue((prev) => {
-                const prevObj = typeof prev === "object" && prev !== null && "max" in prev ? prev : {};
+                const prevObj =
+                  typeof prev === "object" && prev !== null && "max" in prev ? prev : {};
                 return { ...prevObj, max };
               });
             }}
@@ -1107,7 +1114,7 @@ function ColumnFilterContent<T>({
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-2 border-t border-[var(--border-muted)]">
+      <div className="flex items-center justify-between border-t border-[var(--border-muted)] pt-2">
         <Button variant="ghost" size="sm" onClick={handleClear}>
           Clear
         </Button>
@@ -1151,16 +1158,16 @@ const ActiveFiltersDisplay = React.memo(function ActiveFiltersDisplay({
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap" role="list" aria-label="Active filters">
+    <div className="flex flex-wrap items-center gap-2" role="list" aria-label="Active filters">
       <Funnel className="h-4 w-4 text-[var(--foreground-muted)]" aria-hidden="true" />
       {filters.map((filter, index) => (
         <div
           key={filter.columnId}
           role="listitem"
           className={cn(
-            "group inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5",
+            "group inline-flex items-center gap-1.5 py-1.5 pl-3 pr-1.5",
             "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
-            "rounded-lg border border-[var(--border-brand)]/30",
+            "border-[var(--border-brand)]/30 rounded-lg border",
             "text-sm",
             "animate-in fade-in-0 slide-in-from-left-2 duration-200"
           )}
@@ -1174,9 +1181,9 @@ const ActiveFiltersDisplay = React.memo(function ActiveFiltersDisplay({
           <button
             onClick={() => onRemoveFilter(filter.columnId)}
             className={cn(
-              "ml-1 p-1 rounded-md",
+              "ml-1 rounded-md p-1",
               "text-[var(--foreground-brand)] opacity-60",
-              "hover:opacity-100 hover:bg-[var(--background-brand-muted)]",
+              "hover:bg-[var(--background-brand-muted)] hover:opacity-100",
               "transition-all duration-150",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)]"
             )}
@@ -1192,14 +1199,14 @@ const ActiveFiltersDisplay = React.memo(function ActiveFiltersDisplay({
           "text-sm font-medium text-[var(--foreground-muted)]",
           "hover:text-[var(--foreground-error)]",
           "transition-colors duration-150",
-          "focus-visible:outline-none focus-visible:underline"
+          "focus-visible:underline focus-visible:outline-none"
         )}
       >
         Clear all
       </button>
     </div>
   );
-})
+});
 
 // ============================================
 // Bulk Actions Toolbar (Enhanced)
@@ -1223,8 +1230,8 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
   onSelectAll,
 }: BulkActionsToolbarProps<T>) {
   const [loadingActionId, setLoadingActionId] = React.useState<string | null>(null);
-  const toolbarActions = actions.filter(a => a.showInToolbar !== false);
-  const overflowActions = actions.filter(a => a.showInToolbar === false);
+  const toolbarActions = actions.filter((a) => a.showInToolbar !== false);
+  const overflowActions = actions.filter((a) => a.showInToolbar === false);
 
   const handleAction = async (action: BulkAction<T>) => {
     setLoadingActionId(action.id);
@@ -1239,7 +1246,7 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
     <div
       className={cn(
         "flex items-center gap-4 px-5 py-3.5",
-        "bg-[var(--background-subtle)] border border-[var(--border-default)]",
+        "border border-[var(--border-default)] bg-[var(--background-subtle)]",
         "rounded-xl shadow-md",
         "animate-in slide-in-from-top-2 fade-in-0 duration-300 ease-out"
       )}
@@ -1259,16 +1266,14 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
           <span className="text-sm font-semibold text-[var(--foreground-default)]">
             {selectedCount}
           </span>
-          <span className="text-sm text-[var(--foreground-muted)]">
-            of {totalCount} selected
-          </span>
+          <span className="text-sm text-[var(--foreground-muted)]">of {totalCount} selected</span>
         </div>
         {selectedCount < totalCount && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onSelectAll}
-            className="text-[var(--foreground-link)] hover:text-[var(--foreground-link-hover)] hover:bg-[var(--background-interactive-hover)] ml-1"
+            className="ml-1 text-[var(--foreground-link)] hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-link-hover)]"
           >
             Select all {totalCount}
           </Button>
@@ -1293,8 +1298,8 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
                       "h-8 w-8",
                       "transition-all duration-150",
                       action.variant === "destructive"
-                        ? "text-[var(--foreground-error)] hover:bg-[var(--background-error)]/10"
-                        : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] hover:bg-[var(--background-interactive-hover)]",
+                        ? "hover:bg-[var(--background-error)]/10 text-[var(--foreground-error)]"
+                        : "text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]",
                       isLoading && "opacity-60"
                     )}
                     aria-label={action.label}
@@ -1306,18 +1311,14 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
                       )}
                       aria-hidden="true"
                     >
-                      {isLoading ? (
-                        <CircleNotch className="h-4 w-4" />
-                      ) : (
-                        action.icon
-                      )}
+                      {isLoading ? <CircleNotch className="h-4 w-4" /> : action.icon}
                     </span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent sideOffset={8}>
                   <span>{action.label}</span>
                   {action.shortcut && (
-                    <kbd className="ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-muted)] rounded">
+                    <kbd className="ml-2 rounded bg-[var(--background-muted)] px-1.5 py-0.5 font-mono text-[10px]">
                       {action.shortcut}
                     </kbd>
                   )}
@@ -1330,12 +1331,7 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
         {overflowActions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                aria-label="More actions"
-              >
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="More actions">
                 <DotsThree className="h-4 w-4" weight="bold" aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
@@ -1346,7 +1342,8 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
                   onClick={() => action.onAction(selectedRows)}
                   className={cn(
                     "flex items-center justify-between gap-4",
-                    action.variant === "destructive" && "text-[var(--foreground-error)] focus:text-[var(--foreground-error)]"
+                    action.variant === "destructive" &&
+                      "text-[var(--foreground-error)] focus:text-[var(--foreground-error)]"
                   )}
                 >
                   <span className="flex items-center gap-2">
@@ -1354,7 +1351,7 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
                     {action.label}
                   </span>
                   {action.shortcut && (
-                    <kbd className="text-[10px] font-mono opacity-50">{action.shortcut}</kbd>
+                    <kbd className="font-mono text-[10px] opacity-50">{action.shortcut}</kbd>
                   )}
                 </DropdownMenuItem>
               ))}
@@ -1377,7 +1374,7 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
       </div>
     </div>
   );
-}) as <T>(props: BulkActionsToolbarProps<T>) => React.ReactElement
+}) as <T>(props: BulkActionsToolbarProps<T>) => React.ReactElement;
 
 // ============================================
 // Empty State
@@ -1399,11 +1396,17 @@ interface EmptyStateProps {
   };
 }
 
-const EmptyState = React.memo(function EmptyState({ icon, title, description, action, secondaryAction }: EmptyStateProps) {
+const EmptyState = React.memo(function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+  secondaryAction,
+}: EmptyStateProps) {
   return (
-    <div className="relative flex flex-col items-center justify-center py-24 px-6 text-center overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center overflow-hidden px-6 py-24 text-center">
       {/* Decorative background pattern - more visible */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--background-brand-subtle)_0%,transparent_70%)] opacity-40" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,var(--border-muted)_1px,transparent_0)] bg-[size:32px_32px] opacity-30" />
       </div>
@@ -1415,18 +1418,18 @@ const EmptyState = React.memo(function EmptyState({ icon, title, description, ac
           {/* Middle ring */}
           <div className="absolute inset-0 -m-2 rounded-full border-2 border-dashed border-[var(--border-muted)] opacity-50" />
           {/* Inner container - clean, elevated */}
-          <div className="relative p-6 bg-[var(--background-default)] rounded-2xl shadow-lg border border-[var(--border-muted)]">
+          <div className="relative rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-6 shadow-lg">
             <span className="text-[var(--foreground-muted)]">{icon}</span>
           </div>
         </div>
       )}
 
-      <h3 className="text-xl font-semibold text-[var(--foreground-default)] mb-3 tracking-tight">
+      <h3 className="mb-3 text-xl font-semibold tracking-tight text-[var(--foreground-default)]">
         {title}
       </h3>
 
       {description && (
-        <p className="text-sm text-[var(--foreground-muted)] max-w-sm mb-8 leading-relaxed">
+        <p className="mb-8 max-w-sm text-sm leading-relaxed text-[var(--foreground-muted)]">
           {description}
         </p>
       )}
@@ -1448,7 +1451,7 @@ const EmptyState = React.memo(function EmptyState({ icon, title, description, ac
       )}
     </div>
   );
-})
+});
 
 // ============================================
 // Skeleton Loading State
@@ -1459,12 +1462,15 @@ interface SkeletonTableProps {
   columns?: number;
 }
 
-const SkeletonTable = React.memo(function SkeletonTable({ rows = 5, columns = 5 }: SkeletonTableProps) {
+const SkeletonTable = React.memo(function SkeletonTable({
+  rows = 5,
+  columns = 5,
+}: SkeletonTableProps) {
   // Consistent widths to avoid layout shift
   const columnWidths = React.useMemo(() => {
     const widths = [180]; // First column is always wider
     for (let i = 1; i < columns; i++) {
-      widths.push(100 + (i * 20) % 60); // Deterministic widths: 100, 120, 140, 100, 120...
+      widths.push(100 + ((i * 20) % 60)); // Deterministic widths: 100, 120, 140, 100, 120...
     }
     return widths;
   }, [columns]);
@@ -1472,17 +1478,14 @@ const SkeletonTable = React.memo(function SkeletonTable({ rows = 5, columns = 5 
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--table-border)]">
       {/* Header skeleton */}
-      <div className="flex bg-[var(--table-background-header)] border-b border-[var(--table-border)]">
+      <div className="flex border-b border-[var(--table-border)] bg-[var(--table-background-header)]">
         {Array.from({ length: columns }).map((_, i) => (
-          <div
-            key={i}
-            className="flex-1 px-4 py-2.5"
-          >
+          <div key={i} className="flex-1 px-4 py-2.5">
             <div
-              className="h-3 bg-[var(--background-muted)] rounded skeleton-shimmer"
+              className="skeleton-shimmer h-3 rounded bg-[var(--background-muted)]"
               style={{
                 width: `${Math.min(columnWidths[i], 80)}px`,
-                animationDelay: `${i * 100}ms`
+                animationDelay: `${i * 100}ms`,
               }}
             />
           </div>
@@ -1500,19 +1503,19 @@ const SkeletonTable = React.memo(function SkeletonTable({ rows = 5, columns = 5 
           style={{
             animationDelay: `${rowIndex * 75}ms`,
             animationDuration: "300ms",
-            animationFillMode: "backwards"
+            animationFillMode: "backwards",
           }}
         >
           {Array.from({ length: columns }).map((_, colIndex) => (
-            <div
-              key={colIndex}
-              className="flex-1 px-4 py-3.5"
-            >
+            <div key={colIndex} className="flex-1 px-4 py-3.5">
               <div
-                className="h-4 bg-[var(--background-muted)] rounded skeleton-shimmer"
+                className="skeleton-shimmer h-4 rounded bg-[var(--background-muted)]"
                 style={{
-                  width: colIndex === 0 ? `${Math.min(columnWidths[0] + 40, 160)}px` : `${Math.min(columnWidths[colIndex], 100)}px`,
-                  animationDelay: `${(rowIndex * columns + colIndex) * 50}ms`
+                  width:
+                    colIndex === 0
+                      ? `${Math.min(columnWidths[0] + 40, 160)}px`
+                      : `${Math.min(columnWidths[colIndex], 100)}px`,
+                  animationDelay: `${(rowIndex * columns + colIndex) * 50}ms`,
                 }}
               />
             </div>
@@ -1521,7 +1524,7 @@ const SkeletonTable = React.memo(function SkeletonTable({ rows = 5, columns = 5 
       ))}
     </div>
   );
-})
+});
 
 // ============================================
 // Pagination Component
@@ -1551,7 +1554,7 @@ const Pagination = React.memo(function Pagination({
 
   return (
     <div
-      className="flex items-center justify-between px-5 py-4 border-t border-[var(--table-border)] bg-[var(--table-background)]"
+      className="flex items-center justify-between border-t border-[var(--table-border)] bg-[var(--table-background)] px-5 py-4"
       role="navigation"
       aria-label="Table pagination"
     >
@@ -1563,17 +1566,15 @@ const Pagination = React.memo(function Pagination({
           aria-atomic="true"
           className="text-sm text-[var(--foreground-muted)]"
         >
-          <span className="font-medium text-[var(--foreground-default)]">{startItem}–{endItem}</span>
-          {" "}of{" "}
-          <span className="font-medium text-[var(--foreground-default)]">{totalItems}</span>
-          {" "}items
+          <span className="font-medium text-[var(--foreground-default)]">
+            {startItem}–{endItem}
+          </span>{" "}
+          of <span className="font-medium text-[var(--foreground-default)]">{totalItems}</span>{" "}
+          items
         </div>
 
-        <div className="hidden sm:flex items-center gap-2">
-          <label
-            htmlFor="page-size-select"
-            className="text-sm text-[var(--foreground-muted)]"
-          >
+        <div className="hidden items-center gap-2 sm:flex">
+          <label htmlFor="page-size-select" className="text-sm text-[var(--foreground-muted)]">
             Show:
           </label>
           <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
@@ -1621,7 +1622,7 @@ const Pagination = React.memo(function Pagination({
           <CaretLeft className="h-4 w-4" aria-hidden="true" />
         </Button>
 
-        <div className="flex items-center gap-0.5 mx-1" role="group" aria-label="Page numbers">
+        <div className="mx-1 flex items-center gap-0.5" role="group" aria-label="Page numbers">
           {/* Page numbers with smart ellipsis */}
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
             let pageNum: number;
@@ -1642,12 +1643,12 @@ const Pagination = React.memo(function Pagination({
                 key={pageNum}
                 onClick={() => onPageChange(pageNum)}
                 className={cn(
-                  "min-w-[32px] h-8 px-2 text-sm font-medium rounded-lg",
+                  "h-8 min-w-[32px] rounded-lg px-2 text-sm font-medium",
                   "transition-all duration-150",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)]",
                   isCurrentPage
                     ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)] shadow-sm"
-                    : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] hover:bg-[var(--background-muted)]"
+                    : "text-[var(--foreground-muted)] hover:bg-[var(--background-muted)] hover:text-[var(--foreground-default)]"
                 )}
                 aria-label={`Page ${pageNum}`}
                 aria-current={isCurrentPage ? "page" : undefined}
@@ -1689,7 +1690,7 @@ const Pagination = React.memo(function Pagination({
       </div>
     </div>
   );
-})
+});
 
 // ============================================
 // Row Actions Cell
@@ -1700,15 +1701,18 @@ interface RowActionsCellProps<T> {
   actions: RowAction<T>[];
 }
 
-const RowActionsCell = React.memo(function RowActionsCell<T>({ row, actions }: RowActionsCellProps<T>) {
-  const visibleActions = actions.filter(action => !action.hidden?.(row));
+const RowActionsCell = React.memo(function RowActionsCell<T>({
+  row,
+  actions,
+}: RowActionsCellProps<T>) {
+  const visibleActions = actions.filter((action) => !action.hidden?.(row));
 
   if (visibleActions.length === 0) return null;
 
   // If only 1-2 actions, show them inline
   if (visibleActions.length <= 2) {
     return (
-      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150">
+      <div className="flex items-center gap-0.5 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
         {visibleActions.map((action) => (
           <TooltipProvider key={action.id} delayDuration={300}>
             <Tooltip>
@@ -1720,13 +1724,14 @@ const RowActionsCell = React.memo(function RowActionsCell<T>({ row, actions }: R
                   }}
                   disabled={action.disabled?.(row)}
                   className={cn(
-                    "p-2 rounded-lg transition-all duration-150",
+                    "rounded-lg p-2 transition-all duration-150",
                     "text-[var(--foreground-muted)]",
                     "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)]",
-                    "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent",
+                    "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent",
                     "active:scale-95",
-                    action.variant === "destructive" && "hover:text-[var(--foreground-error)] hover:bg-[var(--background-error)]"
+                    action.variant === "destructive" &&
+                      "hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]"
                   )}
                   aria-label={action.label}
                 >
@@ -1738,7 +1743,7 @@ const RowActionsCell = React.memo(function RowActionsCell<T>({ row, actions }: R
               <TooltipContent sideOffset={8}>
                 <span>{action.label}</span>
                 {action.shortcut && (
-                  <kbd className="ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-[var(--background-default)]/20 rounded">
+                  <kbd className="bg-[var(--background-default)]/20 ml-2 rounded px-1.5 py-0.5 font-mono text-[10px]">
                     {action.shortcut}
                   </kbd>
                 )}
@@ -1757,9 +1762,9 @@ const RowActionsCell = React.memo(function RowActionsCell<T>({ row, actions }: R
         <button
           onClick={(e) => e.stopPropagation()}
           className={cn(
-            "p-2 rounded-lg transition-all duration-150",
+            "rounded-lg p-2 transition-all duration-150",
             "text-[var(--foreground-muted)]",
-            "opacity-0 group-hover:opacity-100 focus-visible:opacity-100",
+            "opacity-0 focus-visible:opacity-100 group-hover:opacity-100",
             "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)]",
             "active:scale-95"
@@ -1772,15 +1777,14 @@ const RowActionsCell = React.memo(function RowActionsCell<T>({ row, actions }: R
       <DropdownMenuContent align="end" className="min-w-[160px]">
         {visibleActions.map((action, index) => (
           <React.Fragment key={action.id}>
-            {index > 0 && action.variant === "destructive" && (
-              <DropdownMenuSeparator />
-            )}
+            {index > 0 && action.variant === "destructive" && <DropdownMenuSeparator />}
             <DropdownMenuItem
               onClick={() => action.onAction(row)}
               disabled={action.disabled?.(row)}
               className={cn(
                 "flex items-center justify-between gap-4",
-                action.variant === "destructive" && "text-[var(--foreground-error)] focus:text-[var(--foreground-error)]"
+                action.variant === "destructive" &&
+                  "text-[var(--foreground-error)] focus:text-[var(--foreground-error)]"
               )}
             >
               <span className="flex items-center gap-2">
@@ -1788,7 +1792,7 @@ const RowActionsCell = React.memo(function RowActionsCell<T>({ row, actions }: R
                 {action.label}
               </span>
               {action.shortcut && (
-                <kbd className="text-[10px] font-mono opacity-50">{action.shortcut}</kbd>
+                <kbd className="font-mono text-[10px] opacity-50">{action.shortcut}</kbd>
               )}
             </DropdownMenuItem>
           </React.Fragment>
@@ -1796,7 +1800,7 @@ const RowActionsCell = React.memo(function RowActionsCell<T>({ row, actions }: R
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}) as <T>(props: RowActionsCellProps<T>) => React.ReactElement | null
+}) as <T>(props: RowActionsCellProps<T>) => React.ReactElement | null;
 
 // ============================================
 // Main Enhanced DataTable Component
@@ -1926,16 +1930,19 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
 }: EnhancedDataTableProps<T>) {
   // State
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [sortConfig, setSortConfig] = React.useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+  const [sortConfig, setSortConfig] = React.useState<{
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(initialPageSize);
   const [selectedRows, setSelectedRows] = React.useState<Set<string>>(new Set());
-  const [visibleColumns, setVisibleColumns] = React.useState<Set<string>>(() =>
-    new Set(columns.filter(c => c.defaultVisible !== false).map(c => c.id))
+  const [visibleColumns, setVisibleColumns] = React.useState<Set<string>>(
+    () => new Set(columns.filter((c) => c.defaultVisible !== false).map((c) => c.id))
   );
   const [filterValues, setFilterValues] = React.useState<Record<string, ColumnFilterValue>>({});
   const [columnWidths, setColumnWidths] = React.useState<Record<string, number>>({});
-  const [columnOrder, setColumnOrder] = React.useState<string[]>(() => columns.map(c => c.id));
+  const [columnOrder, setColumnOrder] = React.useState<string[]>(() => columns.map((c) => c.id));
   const [focusedRowIndex, setFocusedRowIndex] = React.useState<number>(-1);
 
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
@@ -1946,7 +1953,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
     const filters: ActiveFilter[] = [];
     Object.entries(filterValues).forEach(([columnId, value]) => {
       if (value !== null && value !== undefined) {
-        const column = columns.find(c => c.id === columnId);
+        const column = columns.find((c) => c.id === columnId);
         if (column) {
           filters.push({
             columnId,
@@ -1970,10 +1977,10 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
       result = result.filter((row) => {
         return columns.some((column) => {
           if (column.filterable === false) return false;
-          const value = column.accessorKey
-            ? row[column.accessorKey]
-            : column.accessorFn?.(row);
-          return String(value ?? "").toLowerCase().includes(query);
+          const value = column.accessorKey ? row[column.accessorKey] : column.accessorFn?.(row);
+          return String(value ?? "")
+            .toLowerCase()
+            .includes(query);
         });
       });
     }
@@ -1982,7 +1989,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
     Object.entries(filterValues).forEach(([columnId, filterValue]) => {
       if (filterValue === null || filterValue === undefined) return;
 
-      const column = columns.find(c => c.id === columnId);
+      const column = columns.find((c) => c.id === columnId);
       if (!column || !column.accessorKey) return;
 
       const filterType = column.filterConfig?.type || "text";
@@ -2027,12 +2034,8 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
     if (!column) return filteredData;
 
     return [...filteredData].sort((a, b) => {
-      const aValue = column.accessorKey
-        ? a[column.accessorKey]
-        : column.accessorFn?.(a);
-      const bValue = column.accessorKey
-        ? b[column.accessorKey]
-        : column.accessorFn?.(b);
+      const aValue = column.accessorKey ? a[column.accessorKey] : column.accessorFn?.(a);
+      const bValue = column.accessorKey ? b[column.accessorKey] : column.accessorFn?.(b);
 
       if (aValue === bValue) return 0;
       if (aValue === null || aValue === undefined) return 1;
@@ -2054,7 +2057,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
 
   // Get visible columns in order
   const displayColumns = React.useMemo(() => {
-    let cols = columns.filter(c => visibleColumns.has(c.id));
+    let cols = columns.filter((c) => visibleColumns.has(c.id));
 
     if (reorderable) {
       cols = cols.sort((a, b) => {
@@ -2090,17 +2093,17 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
     });
   };
 
-  const handleSelectAll = () => {
+  const handleSelectAll = React.useCallback(() => {
     const allIds = paginatedData.map(getRowId);
     setSelectedRows(new Set(allIds));
-  };
+  }, [paginatedData, getRowId]);
 
-  const handleClearSelection = () => {
+  const handleClearSelection = React.useCallback(() => {
     setSelectedRows(new Set());
-  };
+  }, []);
 
   const handleFilterChange = (columnId: string, value: ColumnFilterValue) => {
-    setFilterValues(prev => ({
+    setFilterValues((prev) => ({
       ...prev,
       [columnId]: value,
     }));
@@ -2108,7 +2111,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
   };
 
   const handleRemoveFilter = (columnId: string) => {
-    setFilterValues(prev => {
+    setFilterValues((prev) => {
       const newFilters = { ...prev };
       delete newFilters[columnId];
       return newFilters;
@@ -2120,7 +2123,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
   };
 
   const handleToggleColumn = (columnId: string) => {
-    setVisibleColumns(prev => {
+    setVisibleColumns((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(columnId)) {
         newSet.delete(columnId);
@@ -2132,57 +2135,60 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
   };
 
   const handleResetColumns = () => {
-    setVisibleColumns(new Set(columns.filter(c => c.defaultVisible !== false).map(c => c.id)));
+    setVisibleColumns(new Set(columns.filter((c) => c.defaultVisible !== false).map((c) => c.id)));
   };
 
   // Get selected rows data
   const selectedRowsData = React.useMemo(() => {
-    return paginatedData.filter(row => selectedRows.has(getRowId(row)));
+    return paginatedData.filter((row) => selectedRows.has(getRowId(row)));
   }, [paginatedData, selectedRows, getRowId]);
 
   // Keyboard navigation for table rows
-  const handleTableKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLTableSectionElement>) => {
-    if (paginatedData.length === 0) return;
+  const handleTableKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLTableSectionElement>) => {
+      if (paginatedData.length === 0) return;
 
-    const currentIndex = focusedRowIndex;
-    let newIndex = currentIndex;
+      const currentIndex = focusedRowIndex;
+      let newIndex = currentIndex;
 
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        newIndex = currentIndex < paginatedData.length - 1 ? currentIndex + 1 : currentIndex;
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
-        break;
-      case "Home":
-        e.preventDefault();
-        newIndex = 0;
-        break;
-      case "End":
-        e.preventDefault();
-        newIndex = paginatedData.length - 1;
-        break;
-      case "Enter":
-      case " ":
-        if (currentIndex >= 0 && onRowClick) {
+      switch (e.key) {
+        case "ArrowDown":
           e.preventDefault();
-          onRowClick(paginatedData[currentIndex]);
-        } else if (currentIndex >= 0 && selectable) {
+          newIndex = currentIndex < paginatedData.length - 1 ? currentIndex + 1 : currentIndex;
+          break;
+        case "ArrowUp":
           e.preventDefault();
-          handleRowSelect(getRowId(paginatedData[currentIndex]));
-        }
-        return;
-      default:
-        return;
-    }
+          newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+          break;
+        case "Home":
+          e.preventDefault();
+          newIndex = 0;
+          break;
+        case "End":
+          e.preventDefault();
+          newIndex = paginatedData.length - 1;
+          break;
+        case "Enter":
+        case " ":
+          if (currentIndex >= 0 && onRowClick) {
+            e.preventDefault();
+            onRowClick(paginatedData[currentIndex]);
+          } else if (currentIndex >= 0 && selectable) {
+            e.preventDefault();
+            handleRowSelect(getRowId(paginatedData[currentIndex]));
+          }
+          return;
+        default:
+          return;
+      }
 
-    if (newIndex !== currentIndex) {
-      setFocusedRowIndex(newIndex);
-      rowRefs.current.get(newIndex)?.focus();
-    }
-  }, [focusedRowIndex, paginatedData, onRowClick, selectable, getRowId]);
+      if (newIndex !== currentIndex) {
+        setFocusedRowIndex(newIndex);
+        rowRefs.current.get(newIndex)?.focus();
+      }
+    },
+    [focusedRowIndex, paginatedData, onRowClick, selectable, getRowId]
+  );
 
   // Keyboard shortcuts
   React.useEffect(() => {
@@ -2201,7 +2207,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [selectedRows, selectable]);
+  }, [selectedRows, selectable, handleSelectAll, handleClearSelection]);
 
   // Density classes - more breathing room for cleaner look
   const densityClasses = {
@@ -2215,8 +2221,8 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
       <div className={cn("space-y-4", className)}>
         {showToolbar && (
           <div className="flex items-center gap-4">
-            <div className="h-9 w-64 bg-[var(--background-muted)] rounded-lg animate-pulse" />
-            <div className="h-9 w-24 bg-[var(--background-muted)] rounded-lg animate-pulse" />
+            <div className="h-9 w-64 animate-pulse rounded-lg bg-[var(--background-muted)]" />
+            <div className="h-9 w-24 animate-pulse rounded-lg bg-[var(--background-muted)]" />
           </div>
         )}
         <SkeletonTable rows={pageSize} columns={displayColumns.length} />
@@ -2230,7 +2236,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
       {showToolbar && (
         <div className="space-y-3">
           {/* Top row: Search, Quick Filters, Views, Actions */}
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3">
             {/* Search - shrunk */}
             {searchable && (
               <div className="w-48">
@@ -2304,7 +2310,7 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
                       ))}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleResetColumns}>
-                        <ArrowClockwise className="h-4 w-4 mr-2" />
+                        <ArrowClockwise className="mr-2 h-4 w-4" />
                         Reset to default
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -2359,9 +2365,11 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
                 <tr>
                   {/* Selection checkbox */}
                   {selectable && (
-                    <th className="h-10 w-12 px-4 border-b border-[var(--table-border)] bg-[var(--table-background-header)]">
+                    <th className="h-10 w-12 border-b border-[var(--table-border)] bg-[var(--table-background-header)] px-4">
                       <Checkbox
-                        checked={selectedRows.size === paginatedData.length && paginatedData.length > 0}
+                        checked={
+                          selectedRows.size === paginatedData.length && paginatedData.length > 0
+                        }
                         onCheckedChange={(checked) => {
                           if (checked) handleSelectAll();
                           else handleClearSelection();
@@ -2382,19 +2390,23 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
                       onFilterChange={(value) => handleFilterChange(column.id, value)}
                       data={data}
                       columnWidth={columnWidths[column.id]}
-                      onResize={resizable ? (delta) => {
-                        const currentWidth = columnWidths[column.id] ?? 150;
-                        setColumnWidths(prev => ({
-                          ...prev,
-                          [column.id]: Math.max(50, currentWidth + delta),
-                        }));
-                      } : undefined}
+                      onResize={
+                        resizable
+                          ? (delta) => {
+                              const currentWidth = columnWidths[column.id] ?? 150;
+                              setColumnWidths((prev) => ({
+                                ...prev,
+                                [column.id]: Math.max(50, currentWidth + delta),
+                              }));
+                            }
+                          : undefined
+                      }
                     />
                   ))}
 
                   {/* Row actions header */}
                   {rowActions.length > 0 && (
-                    <th className="h-10 w-16 px-4 border-b border-[var(--table-border)] bg-[var(--table-background-header)]" />
+                    <th className="h-10 w-16 border-b border-[var(--table-border)] bg-[var(--table-background-header)] px-4" />
                   )}
                 </tr>
               </thead>
@@ -2417,8 +2429,9 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
                         "group border-b border-[var(--table-border)] last:border-b-0",
                         "transition-colors duration-100 ease-out",
                         "hover:bg-[var(--table-background-row-hover)]",
-                        "focus-visible:outline-none focus-visible:bg-[var(--table-background-row-hover)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--border-interactive-focus)]",
-                        isSelected && "bg-[var(--table-background-row-selected)] hover:bg-[var(--table-background-row-selected)]",
+                        "focus-visible:bg-[var(--table-background-row-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--border-interactive-focus)]",
+                        isSelected &&
+                          "bg-[var(--table-background-row-selected)] hover:bg-[var(--table-background-row-selected)]",
                         onRowClick && "cursor-pointer"
                       )}
                       onClick={() => onRowClick?.(row)}
@@ -2457,11 +2470,15 @@ export function EnhancedDataTable<T extends Record<string, unknown>>({
                               densityClasses[density],
                               "text-[var(--table-foreground)]",
                               column.sticky && "sticky left-0 z-10 bg-[var(--table-background)]",
-                              column.sticky && isSelected && "bg-[var(--table-background-row-selected)]",
+                              column.sticky &&
+                                isSelected &&
+                                "bg-[var(--table-background-row-selected)]",
                               column.className
                             )}
                             style={{
-                              width: columnWidths[column.id] ? `${columnWidths[column.id]}px` : column.width,
+                              width: columnWidths[column.id]
+                                ? `${columnWidths[column.id]}px`
+                                : column.width,
                               minWidth: column.minWidth,
                             }}
                           >

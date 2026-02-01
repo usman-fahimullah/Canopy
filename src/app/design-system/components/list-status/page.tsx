@@ -12,20 +12,15 @@ import {
 import { CodePreview } from "@/components/design-system/CodeBlock";
 import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
-import {
-  CheckCircle,
-  Warning,
-  Star,
-  BookmarkSimple,
-  Heart,
-} from "@phosphor-icons/react";
+import { CheckCircle, Warning, Star, BookmarkSimple, Heart } from "@phosphor-icons/react";
 
 const listStatusProps = [
   {
     name: "variant",
     type: '"critical" | "favorite" | "success" | "bipoc" | "bookmark"',
     default: "-",
-    description: "The status variant to display. Each variant has a unique color scheme and default icon.",
+    description:
+      "The status variant to display. Each variant has a unique color scheme and default icon.",
   },
   {
     name: "size",
@@ -101,37 +96,30 @@ export default function ListStatusPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1
-          id="overview"
-          className="text-heading-lg text-foreground mb-2"
-        >
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           List Status
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          Circular status indicator badges with icons, used to show different
-          states like critical alerts, favorites, success, BIPOC-owned businesses,
-          or bookmarks. Commonly positioned on avatars or list items.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          Circular status indicator badges with icons, used to show different states like critical
+          alerts, favorites, success, BIPOC-owned businesses, or bookmarks. Commonly positioned on
+          avatars or list items.
         </p>
       </div>
 
       {/* When to use */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 bg-background-success/10 rounded-lg border border-border-success">
-          <h3 className="font-semibold text-foreground-success mb-2">
-            When to use
-          </h3>
-          <ul className="text-sm space-y-1 text-foreground-muted">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
+          <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+          <ul className="space-y-1 text-sm text-foreground-muted">
             <li>Indicate special status on user avatars</li>
             <li>Show favorited or bookmarked items in lists</li>
             <li>Highlight verified or certified entities</li>
             <li>Display urgent alerts requiring attention</li>
           </ul>
         </div>
-        <div className="p-4 bg-background-error/10 rounded-lg border border-border-error">
-          <h3 className="font-semibold text-foreground-error mb-2">
-            When not to use
-          </h3>
-          <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
+          <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+          <ul className="space-y-1 text-sm text-foreground-muted">
             <li>For general content badges (use Badge instead)</li>
             <li>For counts or notifications (use NotificationBadge)</li>
             <li>When the status needs text labels</li>
@@ -191,19 +179,17 @@ export default function ListStatusPage() {
           {variantDetails.map(({ variant, label, description, bgColor, iconColor, icon }) => (
             <div
               key={variant}
-              className="flex items-start gap-4 p-4 bg-background-subtle rounded-lg"
+              className="flex items-start gap-4 rounded-lg bg-background-subtle p-4"
             >
               <ListStatus variant={variant} size="lg" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-center gap-2">
                   <span className="font-semibold text-foreground">{label}</span>
-                  <code className="text-caption bg-background-muted px-1.5 py-0.5 rounded">
-                    variant="{variant}"
+                  <code className="rounded bg-background-muted px-1.5 py-0.5 text-caption">
+                    variant=&quot;{variant}&quot;
                   </code>
                 </div>
-                <p className="text-body-sm text-foreground-muted mb-2">
-                  {description}
-                </p>
+                <p className="mb-2 text-body-sm text-foreground-muted">{description}</p>
                 <div className="flex items-center gap-4 text-caption text-foreground-muted">
                   <span>Background: {bgColor}</span>
                   <span>Icon: {iconColor}</span>
@@ -257,12 +243,7 @@ export default function ListStatusPage() {
             <div className="flex flex-col items-center gap-2">
               <ListStatus
                 variant="favorite"
-                icon={
-                  <Heart
-                    weight="fill"
-                    className="size-3.5 text-[var(--primitive-red-500)]"
-                  />
-                }
+                icon={<Heart weight="fill" className="size-3.5 text-[var(--primitive-red-500)]" />}
               />
               <span className="text-caption text-foreground-muted">Heart icon</span>
             </div>
@@ -298,18 +279,14 @@ export default function ListStatusPage() {
                 <ListStatus variant="success" bordered />
                 <ListStatus variant="success" bordered={false} />
               </div>
-              <span className="text-caption text-foreground-muted">
-                With border vs without
-              </span>
+              <span className="text-caption text-foreground-muted">With border vs without</span>
             </div>
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-4">
                 <ListStatus variant="favorite" bordered />
                 <ListStatus variant="favorite" bordered={false} />
               </div>
-              <span className="text-caption text-foreground-muted">
-                With border vs without
-              </span>
+              <span className="text-caption text-foreground-muted">With border vs without</span>
             </div>
           </div>
         </CodePreview>
@@ -371,7 +348,7 @@ export default function ListStatusPage() {
         title="In a List Context"
         description="Show status indicators alongside list items"
       >
-        <div className="space-y-3 max-w-md">
+        <div className="max-w-md space-y-3">
           {[
             { name: "Climate Solutions Inc.", status: "bipoc" as const, role: "Senior Developer" },
             { name: "Green Energy Co.", status: "favorite" as const, role: "Product Manager" },
@@ -380,7 +357,7 @@ export default function ListStatusPage() {
           ].map((item, index) => (
             <div
               key={index}
-              className="flex items-center gap-3 p-3 bg-background-subtle rounded-lg"
+              className="flex items-center gap-3 rounded-lg bg-background-subtle p-3"
             >
               <div className="relative">
                 <Avatar name={item.name} size="default" />
@@ -388,8 +365,8 @@ export default function ListStatusPage() {
                   <ListStatus variant={item.status} size="xs" />
                 </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground truncate">{item.name}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-foreground">{item.name}</p>
                 <p className="text-caption text-foreground-muted">{item.role}</p>
               </div>
             </div>
@@ -406,14 +383,12 @@ export default function ListStatusPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-left border-b border-border-muted">
-                <th className="py-2 pr-4 text-caption-strong text-foreground-muted">
-                  Variant
-                </th>
+              <tr className="border-b border-border-muted text-left">
+                <th className="py-2 pr-4 text-caption-strong text-foreground-muted">Variant</th>
                 {(["xs", "sm", "default", "lg", "xl"] as const).map((size) => (
                   <th
                     key={size}
-                    className="py-2 px-4 text-caption-strong text-foreground-muted text-center"
+                    className="px-4 py-2 text-center text-caption-strong text-foreground-muted"
                   >
                     {size}
                   </th>
@@ -425,12 +400,12 @@ export default function ListStatusPage() {
                 (variant) => (
                   <tr key={variant} className="border-b border-border-muted last:border-0">
                     <td className="py-3 pr-4">
-                      <code className="text-caption bg-background-muted px-1.5 py-0.5 rounded">
+                      <code className="rounded bg-background-muted px-1.5 py-0.5 text-caption">
                         {variant}
                       </code>
                     </td>
                     {(["xs", "sm", "default", "lg", "xl"] as const).map((size) => (
-                      <td key={size} className="py-3 px-4 text-center">
+                      <td key={size} className="px-4 py-3 text-center">
                         <ListStatus variant={variant} size={size} />
                       </td>
                     ))}
@@ -468,10 +443,10 @@ export default function ListStatusPage() {
       {/* Accessibility */}
       <AccessibilityInfo
         items={[
-          "Uses role=\"status\" for semantic meaning",
-          "Each variant has a built-in aria-label (e.g., \"Critical\", \"Success\")",
+          'Uses role="status" for semantic meaning',
+          'Each variant has a built-in aria-label (e.g., "Critical", "Success")',
           "Includes a title attribute for hover tooltips",
-          "Icons are marked with aria-hidden=\"true\" since status is conveyed via role and label",
+          'Icons are marked with aria-hidden="true" since status is conveyed via role and label',
           "Color is not the only indicator - icons provide additional visual distinction",
           "Sufficient color contrast between icon and background colors",
         ]}

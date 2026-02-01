@@ -75,7 +75,8 @@ const bannerProps = [
     name: "actionButtonProps",
     type: "ButtonProps",
     default: "undefined",
-    description: "Additional props to pass to the action button (variant, size, leftIcon, rightIcon, loading, etc.)",
+    description:
+      "Additional props to pass to the action button (variant, size, leftIcon, rightIcon, loading, etc.)",
   },
   {
     name: "action",
@@ -111,7 +112,8 @@ const bannerProps = [
     name: "subtle",
     type: "boolean",
     default: "false",
-    description: "Use subtle styling (tinted background with dark text) instead of bold solid colors",
+    description:
+      "Use subtle styling (tinted background with dark text) instead of bold solid colors",
   },
   {
     name: "className",
@@ -142,38 +144,30 @@ export default function BannerPage() {
           SECTION 1: OVERVIEW
           ============================================ */}
       <div>
-        <h1
-          id="overview"
-          className="text-heading-lg text-foreground mb-2"
-        >
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Banner
         </h1>
-        <p className="text-body text-foreground-muted mb-4 max-w-2xl">
-          Banners are full-width notification components for displaying important
-          messages, alerts, or promotional content. They support multiple severity
-          levels and can include actions and dismissal controls.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Banners are full-width notification components for displaying important messages, alerts,
+          or promotional content. They support multiple severity levels and can include actions and
+          dismissal controls.
         </p>
 
         {/* Category Tags */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="mb-6 flex flex-wrap gap-2">
           <Badge variant="feature" icon={<Info size={14} weight="bold" />}>
             Feedback
           </Badge>
-          <Badge
-            variant="neutral"
-            icon={<CheckCircle size={14} weight="bold" />}
-          >
+          <Badge variant="neutral" icon={<CheckCircle size={14} weight="bold" />}>
             Stable
           </Badge>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-[var(--background-success)]/30 rounded-lg border border-[var(--border-success)]">
-            <h3 className="font-semibold text-[var(--foreground-success)] mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-[var(--background-success)]/30 rounded-lg border border-[var(--border-success)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-success)]">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>* System-wide announcements or alerts</li>
               <li>* Important status messages that affect user workflow</li>
               <li>* Promotional messages or feature announcements</li>
@@ -181,11 +175,9 @@ export default function BannerPage() {
               <li>* Success confirmations for major actions</li>
             </ul>
           </div>
-          <div className="p-4 bg-[var(--background-error)]/30 rounded-lg border border-[var(--border-error)]">
-            <h3 className="font-semibold text-[var(--foreground-error)] mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-[var(--background-error)]/30 rounded-lg border border-[var(--border-error)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-error)]">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>* For inline form validation (use InlineMessage)</li>
               <li>* For transient notifications (use Toast)</li>
               <li>* For contextual help text (use Tooltip)</li>
@@ -212,8 +204,8 @@ export default function BannerPage() {
             { name: "Dismiss", description: "Close button to dismiss the banner" },
           ]}
         />
-        <div className="mt-6 p-4 bg-background-subtle rounded-lg">
-          <p className="text-caption text-foreground-muted mb-4">Live anatomy example:</p>
+        <div className="mt-6 rounded-lg bg-background-subtle p-4">
+          <p className="mb-4 text-caption text-foreground-muted">Live anatomy example:</p>
           <div className="relative">
             <Banner
               type="feature"
@@ -222,13 +214,13 @@ export default function BannerPage() {
               actionLabel="Learn More"
               dismissible={false}
             />
-            <div className="absolute -top-2 left-2 w-5 h-5 bg-[var(--foreground-brand)] text-white rounded-full flex items-center justify-center text-xs font-medium z-10">
+            <div className="absolute -top-2 left-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--foreground-brand)] text-xs font-medium text-white">
               1
             </div>
-            <div className="absolute -top-2 left-9 w-5 h-5 bg-[var(--foreground-brand)] text-white rounded-full flex items-center justify-center text-xs font-medium z-10">
+            <div className="absolute -top-2 left-9 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--foreground-brand)] text-xs font-medium text-white">
               2
             </div>
-            <div className="absolute -top-2 left-36 w-5 h-5 bg-[var(--foreground-brand)] text-white rounded-full flex items-center justify-center text-xs font-medium z-10">
+            <div className="absolute -top-2 left-36 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--foreground-brand)] text-xs font-medium text-white">
               3
             </div>
           </div>
@@ -261,7 +253,11 @@ export default function BannerPage() {
           <div className="space-y-4">
             <Banner title="This is an informational banner" dismissible={false} />
             <Banner type="success" title="Changes saved successfully" dismissible={false} />
-            <Banner type="warning" title="Your session will expire in 5 minutes" dismissible={false} />
+            <Banner
+              type="warning"
+              title="Your session will expire in 5 minutes"
+              dismissible={false}
+            />
           </div>
         </CodePreview>
       </ComponentCard>
@@ -277,9 +273,11 @@ export default function BannerPage() {
         <div className="space-y-6">
           {/* Info */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               <Label className="font-semibold">Info (Default)</Label>
-              <span className="text-caption text-foreground-muted">- General information and announcements</span>
+              <span className="text-caption text-foreground-muted">
+                - General information and announcements
+              </span>
             </div>
             <Banner
               type="info"
@@ -291,9 +289,11 @@ export default function BannerPage() {
 
           {/* Feature */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               <Label className="font-semibold">Feature</Label>
-              <span className="text-caption text-foreground-muted">- Promotional content and new features</span>
+              <span className="text-caption text-foreground-muted">
+                - Promotional content and new features
+              </span>
             </div>
             <Banner
               type="feature"
@@ -305,9 +305,11 @@ export default function BannerPage() {
 
           {/* Success */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               <Label className="font-semibold">Success</Label>
-              <span className="text-caption text-foreground-muted">- Successful actions and confirmations</span>
+              <span className="text-caption text-foreground-muted">
+                - Successful actions and confirmations
+              </span>
             </div>
             <Banner
               type="success"
@@ -319,9 +321,11 @@ export default function BannerPage() {
 
           {/* Warning */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               <Label className="font-semibold">Warning</Label>
-              <span className="text-caption text-foreground-muted">- Warnings that need attention</span>
+              <span className="text-caption text-foreground-muted">
+                - Warnings that need attention
+              </span>
             </div>
             <Banner
               type="warning"
@@ -333,9 +337,11 @@ export default function BannerPage() {
 
           {/* Critical */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="mb-2 flex items-center gap-2">
               <Label className="font-semibold">Critical</Label>
-              <span className="text-caption text-foreground-muted">- Critical errors and urgent alerts</span>
+              <span className="text-caption text-foreground-muted">
+                - Critical errors and urgent alerts
+              </span>
             </div>
             <Banner
               type="critical"
@@ -356,10 +362,10 @@ export default function BannerPage() {
         description="A less visually intense version with tinted backgrounds and dark text"
       >
         <div className="space-y-4">
-          <p className="text-body-sm text-foreground-muted mb-4">
-            Use the <code className="bg-background-muted px-1 rounded">subtle</code> prop for banners that need
-            to be present but shouldn&apos;t dominate the interface. Ideal for informational messages, hints,
-            or secondary notifications.
+          <p className="mb-4 text-body-sm text-foreground-muted">
+            Use the <code className="rounded bg-background-muted px-1">subtle</code> prop for
+            banners that need to be present but shouldn&apos;t dominate the interface. Ideal for
+            informational messages, hints, or secondary notifications.
           </p>
           <CodePreview
             code={`// Subtle banners have tinted backgrounds with dark text
@@ -370,28 +376,48 @@ export default function BannerPage() {
 <Banner type="feature" title="New: Dark mode is available" subtle />`}
           >
             <div className="space-y-3">
-              <Banner type="info" title="Tip: Use keyboard shortcuts to navigate faster" subtle dismissible={false} />
+              <Banner
+                type="info"
+                title="Tip: Use keyboard shortcuts to navigate faster"
+                subtle
+                dismissible={false}
+              />
               <Banner type="success" title="Changes auto-saved" subtle dismissible={false} />
-              <Banner type="warning" title="Your session will expire in 5 minutes" subtle dismissible={false} />
-              <Banner type="critical" title="Some required fields need attention" subtle dismissible={false} />
-              <Banner type="feature" title="New: Dark mode is now available in settings" subtle dismissible={false} />
+              <Banner
+                type="warning"
+                title="Your session will expire in 5 minutes"
+                subtle
+                dismissible={false}
+              />
+              <Banner
+                type="critical"
+                title="Some required fields need attention"
+                subtle
+                dismissible={false}
+              />
+              <Banner
+                type="feature"
+                title="New: Dark mode is now available in settings"
+                subtle
+                dismissible={false}
+              />
             </div>
           </CodePreview>
         </div>
 
         {/* Comparison */}
-        <div className="mt-8 pt-6 border-t border-border-muted">
-          <h4 className="text-body-strong text-foreground mb-4">Bold vs Subtle Comparison</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-8 border-t border-border-muted pt-6">
+          <h4 className="mb-4 text-body-strong text-foreground">Bold vs Subtle Comparison</h4>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <p className="text-caption-strong text-foreground-muted mb-3">Bold (Default)</p>
+              <p className="mb-3 text-caption-strong text-foreground-muted">Bold (Default)</p>
               <div className="space-y-3">
                 <Banner type="feature" title="New feature available" dismissible={false} />
                 <Banner type="success" title="Changes saved" dismissible={false} />
               </div>
             </div>
             <div>
-              <p className="text-caption-strong text-foreground-muted mb-3">Subtle</p>
+              <p className="mb-3 text-caption-strong text-foreground-muted">Subtle</p>
               <div className="space-y-3">
                 <Banner type="feature" title="New feature available" subtle dismissible={false} />
                 <Banner type="success" title="Changes saved" subtle dismissible={false} />
@@ -436,11 +462,11 @@ export default function BannerPage() {
         <div className="space-y-6">
           {/* Themed Action Buttons */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Themed Action Buttons</h4>
-            <p className="text-body-sm text-foreground-muted mb-4">
-              Action buttons automatically use themed styling that matches the banner variant.
-              For bold banners, buttons use contrasting colors. For subtle banners, buttons use
-              a lighter tint of the variant color.
+            <h4 className="mb-3 text-body-strong text-foreground">Themed Action Buttons</h4>
+            <p className="mb-4 text-body-sm text-foreground-muted">
+              Action buttons automatically use themed styling that matches the banner variant. For
+              bold banners, buttons use contrasting colors. For subtle banners, buttons use a
+              lighter tint of the variant color.
             </p>
             <CodePreview
               code={`// Themed buttons match each banner variant automatically
@@ -487,8 +513,8 @@ export default function BannerPage() {
 
           {/* Themed Subtle Buttons */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Themed Buttons (Subtle Style)</h4>
-            <p className="text-body-sm text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong text-foreground">Themed Buttons (Subtle Style)</h4>
+            <p className="mb-4 text-body-sm text-foreground-muted">
               Subtle banners also get themed action buttons with a softer appearance.
             </p>
             <CodePreview
@@ -541,7 +567,7 @@ export default function BannerPage() {
 
           {/* Simple Action */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Using actionLabel</h4>
+            <h4 className="mb-3 text-body-strong text-foreground">Using actionLabel</h4>
             <CodePreview
               code={`<Banner
   type="feature"
@@ -554,6 +580,7 @@ export default function BannerPage() {
                 type="feature"
                 title="New reporting features available"
                 actionLabel="Learn More"
+                // eslint-disable-next-line no-console
                 onAction={() => console.log("Action clicked")}
                 dismissible={false}
               />
@@ -562,10 +589,16 @@ export default function BannerPage() {
 
           {/* With actionButtonProps */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Using actionButtonProps</h4>
-            <p className="text-body-sm text-foreground-muted mb-4">
-              Customize the action button&apos;s appearance using <code className="bg-background-muted px-1 rounded">actionButtonProps</code>.
-              You can pass any Button prop like <code className="bg-background-muted px-1 rounded">variant</code>, <code className="bg-background-muted px-1 rounded">size</code>, <code className="bg-background-muted px-1 rounded">leftIcon</code>, <code className="bg-background-muted px-1 rounded">rightIcon</code>, or <code className="bg-background-muted px-1 rounded">loading</code>.
+            <h4 className="mb-3 text-body-strong text-foreground">Using actionButtonProps</h4>
+            <p className="mb-4 text-body-sm text-foreground-muted">
+              Customize the action button&apos;s appearance using{" "}
+              <code className="rounded bg-background-muted px-1">actionButtonProps</code>. You can
+              pass any Button prop like{" "}
+              <code className="rounded bg-background-muted px-1">variant</code>,{" "}
+              <code className="rounded bg-background-muted px-1">size</code>,{" "}
+              <code className="rounded bg-background-muted px-1">leftIcon</code>,{" "}
+              <code className="rounded bg-background-muted px-1">rightIcon</code>, or{" "}
+              <code className="rounded bg-background-muted px-1">loading</code>.
             </p>
             <CodePreview
               code={`import { ArrowRight, Sparkle } from "@phosphor-icons/react";
@@ -615,7 +648,7 @@ export default function BannerPage() {
                   actionLabel="View Profile"
                   actionButtonProps={{
                     variant: "secondary",
-                    rightIcon: <ArrowRight size={16} />
+                    rightIcon: <ArrowRight size={16} />,
                   }}
                   dismissible={false}
                 />
@@ -625,7 +658,7 @@ export default function BannerPage() {
                   actionLabel="Upgrade"
                   actionButtonProps={{
                     variant: "primary",
-                    leftIcon: <Sparkle size={16} weight="fill" />
+                    leftIcon: <Sparkle size={16} weight="fill" />,
                   }}
                   subtle
                   dismissible={false}
@@ -636,9 +669,11 @@ export default function BannerPage() {
 
           {/* Custom Action */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Using custom action element</h4>
-            <p className="text-body-sm text-foreground-muted mb-4">
-              For complete control, use the <code className="bg-background-muted px-1 rounded">action</code> prop to render any custom element.
+            <h4 className="mb-3 text-body-strong text-foreground">Using custom action element</h4>
+            <p className="mb-4 text-body-sm text-foreground-muted">
+              For complete control, use the{" "}
+              <code className="rounded bg-background-muted px-1">action</code> prop to render any
+              custom element.
             </p>
             <CodePreview
               code={`<Banner
@@ -692,24 +727,26 @@ export default function BannerPage() {
                 <Banner
                   type="info"
                   title="Click the X to dismiss this banner"
-                  onDismiss={() => setShowBanners(prev => ({ ...prev, dismissible1: false }))}
+                  onDismiss={() => setShowBanners((prev) => ({ ...prev, dismissible1: false }))}
                 />
               )}
               {showBanners.dismissible2 && (
                 <Banner
                   type="success"
                   title="This banner can also be dismissed"
-                  onDismiss={() => setShowBanners(prev => ({ ...prev, dismissible2: false }))}
+                  onDismiss={() => setShowBanners((prev) => ({ ...prev, dismissible2: false }))}
                 />
               )}
               {showBanners.dismissible3 && (
                 <Banner
                   type="warning"
                   title="All banners are dismissible by default"
-                  onDismiss={() => setShowBanners(prev => ({ ...prev, dismissible3: false }))}
+                  onDismiss={() => setShowBanners((prev) => ({ ...prev, dismissible3: false }))}
                 />
               )}
-              {(!showBanners.dismissible1 || !showBanners.dismissible2 || !showBanners.dismissible3) && (
+              {(!showBanners.dismissible1 ||
+                !showBanners.dismissible2 ||
+                !showBanners.dismissible3) && (
                 <Button variant="secondary" size="sm" onClick={resetBanners}>
                   Reset Banners
                 </Button>
@@ -718,7 +755,7 @@ export default function BannerPage() {
           </CodePreview>
 
           <div className="mt-4">
-            <h4 className="text-body-strong text-foreground mb-3">Non-dismissible</h4>
+            <h4 className="mb-3 text-body-strong text-foreground">Non-dismissible</h4>
             <CodePreview
               code={`<Banner
   type="critical"
@@ -749,10 +786,10 @@ export default function BannerPage() {
         <div className="space-y-6">
           {/* Custom Icon */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Custom Icon</h4>
-            <p className="text-body-sm text-foreground-muted mb-4">
-              Custom icons automatically inherit the banner&apos;s icon color. Just pass the icon component
-              without any color classes — the banner will handle the styling.
+            <h4 className="mb-3 text-body-strong text-foreground">Custom Icon</h4>
+            <p className="mb-4 text-body-sm text-foreground-muted">
+              Custom icons automatically inherit the banner&apos;s icon color. Just pass the icon
+              component without any color classes — the banner will handle the styling.
             </p>
             <CodePreview
               code={`import { Megaphone, Gift, Sparkle } from "@phosphor-icons/react";
@@ -801,7 +838,7 @@ export default function BannerPage() {
 
           {/* Hidden Icon */}
           <div>
-            <h4 className="text-body-strong text-foreground mb-3">Hidden Icon</h4>
+            <h4 className="mb-3 text-body-strong text-foreground">Hidden Icon</h4>
             <CodePreview
               code={`<Banner
   type="info"
@@ -809,12 +846,7 @@ export default function BannerPage() {
   hideIcon
 />`}
             >
-              <Banner
-                type="info"
-                title="This banner has no icon"
-                hideIcon
-                dismissible={false}
-              />
+              <Banner type="info" title="This banner has no icon" hideIcon dismissible={false} />
             </CodePreview>
           </div>
         </div>
@@ -843,6 +875,7 @@ export default function BannerPage() {
               title="New reporting features available"
               actionLabel="Learn more"
               linkStyle
+              // eslint-disable-next-line no-console
               onAction={() => console.log("Link clicked")}
               dismissible={false}
             />
@@ -852,6 +885,7 @@ export default function BannerPage() {
               description="Learn how to make the most of Canopy's features."
               actionLabel="View docs"
               linkStyle
+              // eslint-disable-next-line no-console
               onAction={() => console.log("Link clicked")}
               dismissible={false}
             />
@@ -884,9 +918,9 @@ export default function BannerPage() {
             />
           </div>
         </CodePreview>
-        <p className="text-caption text-foreground-muted mt-4">
-          Use <code className="bg-background-muted px-1 rounded">fullWidth</code> for banners
-          that span the full width of the page, typically placed at the very top of the viewport.
+        <p className="mt-4 text-caption text-foreground-muted">
+          Use <code className="rounded bg-background-muted px-1">fullWidth</code> for banners that
+          span the full width of the page, typically placed at the very top of the viewport.
         </p>
       </ComponentCard>
 
@@ -900,23 +934,23 @@ export default function BannerPage() {
       >
         <div className="space-y-6">
           <div>
-            <p className="text-body-sm text-foreground-muted mb-4">
+            <p className="mb-4 text-body-sm text-foreground-muted">
               Banners use subtle slide and fade animations for a polished feel. The enter animation
               plays when the banner mounts, and the exit animation plays when dismissed.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 bg-background-subtle rounded-lg">
-                <p className="text-caption-strong text-foreground mb-2">Enter Animation</p>
-                <ul className="text-caption text-foreground-muted space-y-1">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-lg bg-background-subtle p-4">
+                <p className="mb-2 text-caption-strong text-foreground">Enter Animation</p>
+                <ul className="space-y-1 text-caption text-foreground-muted">
                   <li>• Fade in from 0% to 100% opacity</li>
                   <li>• Slide down from -8px offset</li>
                   <li>• Duration: 200ms</li>
                   <li>• Easing: ease-out</li>
                 </ul>
               </div>
-              <div className="p-4 bg-background-subtle rounded-lg">
-                <p className="text-caption-strong text-foreground mb-2">Exit Animation</p>
-                <ul className="text-caption text-foreground-muted space-y-1">
+              <div className="rounded-lg bg-background-subtle p-4">
+                <p className="mb-2 text-caption-strong text-foreground">Exit Animation</p>
+                <ul className="space-y-1 text-caption text-foreground-muted">
                   <li>• Fade out from 100% to 0% opacity</li>
                   <li>• Slide up to -8px offset</li>
                   <li>• Duration: 200ms</li>
@@ -925,11 +959,12 @@ export default function BannerPage() {
               </div>
             </div>
           </div>
-          <div className="p-4 border border-border-muted rounded-lg">
-            <p className="text-caption-strong text-foreground mb-2">Reduced Motion</p>
+          <div className="rounded-lg border border-border-muted p-4">
+            <p className="mb-2 text-caption-strong text-foreground">Reduced Motion</p>
             <p className="text-caption text-foreground-muted">
-              Animations automatically respect the user&apos;s <code className="bg-background-muted px-1 rounded">prefers-reduced-motion</code> setting.
-              When enabled, animations are disabled for accessibility.
+              Animations automatically respect the user&apos;s{" "}
+              <code className="rounded bg-background-muted px-1">prefers-reduced-motion</code>{" "}
+              setting. When enabled, animations are disabled for accessibility.
             </p>
           </div>
         </div>
@@ -969,10 +1004,10 @@ export default function BannerPage() {
           ============================================ */}
       <AccessibilityInfo
         items={[
-          "**Role**: Uses `role=\"alert\"` for immediate screen reader announcement",
+          '**Role**: Uses `role="alert"` for immediate screen reader announcement',
           "**Color contrast**: All variants meet WCAG AA standards (4.5:1 minimum)",
-          "**Icons**: Decorative icons use `aria-hidden=\"true\"`",
-          "**Dismiss button**: Has `aria-label=\"Dismiss banner\"` for screen readers",
+          '**Icons**: Decorative icons use `aria-hidden="true"`',
+          '**Dismiss button**: Has `aria-label="Dismiss banner"` for screen readers',
           "**Focus management**: Dismiss button is keyboard accessible",
           "**Not color alone**: Icons and text convey meaning alongside color",
         ]}
@@ -1055,8 +1090,12 @@ export default function BannerPage() {
             description="Upgrade to Pro to keep access to unlimited job postings, AI sourcing, and your candidate database."
             action={
               <div className="flex gap-2">
-                <Button variant="primary" size="sm">Upgrade Now</Button>
-                <Button variant="ghost" size="sm">View Plans</Button>
+                <Button variant="primary" size="sm">
+                  Upgrade Now
+                </Button>
+                <Button variant="ghost" size="sm">
+                  View Plans
+                </Button>
               </div>
             }
             dismissible={false}

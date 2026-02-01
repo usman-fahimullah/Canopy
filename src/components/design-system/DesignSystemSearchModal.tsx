@@ -29,33 +29,37 @@ export function SearchModalProvider({ children }: { children: React.ReactNode })
   }, []);
 
   return (
-    <SearchModalContext.Provider value={{ open, setOpen }}>
-      {children}
-    </SearchModalContext.Provider>
+    <SearchModalContext.Provider value={{ open, setOpen }}>{children}</SearchModalContext.Provider>
   );
 }
 
 export function useSearchModal() {
   const context = React.useContext(SearchModalContext);
-  if (!context) {
-    // Fallback for usage outside provider
-    const [open, setOpen] = React.useState(false);
 
-    React.useEffect(() => {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-          e.preventDefault();
-          setOpen(true);
-        }
-      };
+  // Always call hooks unconditionally (React rules of hooks)
+  const [fallbackOpen, setFallbackOpen] = React.useState(false);
 
-      document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
-    }, []);
+  React.useEffect(() => {
+    // Only attach the listener if there's no provider
+    if (context) return;
 
-    return { open, setOpen };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setFallbackOpen(true);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [context]);
+
+  if (context) {
+    return context;
   }
-  return context;
+
+  // Fallback for usage outside provider
+  return { open: fallbackOpen, setOpen: setFallbackOpen };
 }
 
 interface DesignSystemSearchModalProps {
@@ -128,16 +132,16 @@ export function DesignSystemSearchModal({ open, onOpenChange }: DesignSystemSear
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/50 animate-fade-in"
+        className="fixed inset-0 z-50 animate-fade-in bg-black/50"
         onClick={() => onOpenChange(false)}
       />
 
       {/* Modal */}
       <div className="fixed inset-x-4 top-[20%] z-50 mx-auto max-w-xl animate-scale-in">
-        <div className="overflow-hidden rounded-xl bg-surface shadow-2xl border border-border">
+        <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-2xl">
           {/* Search Input */}
-          <div className="flex items-center gap-3 px-4 border-b border-border">
-            <Search className="w-5 h-5 text-foreground-subtle" />
+          <div className="flex items-center gap-3 border-b border-border px-4">
+            <Search className="h-5 w-5 text-foreground-subtle" />
             <input
               ref={inputRef}
               type="text"
@@ -145,9 +149,9 @@ export function DesignSystemSearchModal({ open, onOpenChange }: DesignSystemSear
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 py-4 text-body bg-transparent outline-none placeholder:text-foreground-subtle text-foreground"
+              className="flex-1 bg-transparent py-4 text-body text-foreground outline-none placeholder:text-foreground-subtle"
             />
-            <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs text-foreground-muted bg-background-muted rounded">
+            <kbd className="hidden items-center gap-1 rounded bg-background-muted px-2 py-1 text-xs text-foreground-muted sm:inline-flex">
               ESC
             </kbd>
           </div>
@@ -165,16 +169,14 @@ export function DesignSystemSearchModal({ open, onOpenChange }: DesignSystemSear
                     key={item.id}
                     onClick={() => navigateToItem(item)}
                     className={cn(
-                      "w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors text-left",
+                      "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors",
                       index === selectedIndex
                         ? "bg-background-interactive-selected text-foreground-brand"
                         : "text-foreground hover:bg-background-interactive-hover"
                     )}
                   >
                     <span className="font-medium">{item.title}</span>
-                    <span className="text-sm text-foreground-muted">
-                      {item.category}
-                    </span>
+                    <span className="text-sm text-foreground-muted">{item.category}</span>
                   </button>
                 ))}
               </div>
@@ -182,21 +184,15 @@ export function DesignSystemSearchModal({ open, onOpenChange }: DesignSystemSear
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-background-subtle text-xs text-foreground-muted">
+          <div className="flex items-center justify-between border-t border-border bg-background-subtle px-4 py-3 text-xs text-foreground-muted">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-surface rounded border border-border">
-                  ↑
-                </kbd>
-                <kbd className="px-1.5 py-0.5 bg-surface rounded border border-border">
-                  ↓
-                </kbd>
+                <kbd className="rounded border border-border bg-surface px-1.5 py-0.5">↑</kbd>
+                <kbd className="rounded border border-border bg-surface px-1.5 py-0.5">↓</kbd>
                 <span>Navigate</span>
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-surface rounded border border-border">
-                  ↵
-                </kbd>
+                <kbd className="rounded border border-border bg-surface px-1.5 py-0.5">↵</kbd>
                 <span>Select</span>
               </span>
             </div>

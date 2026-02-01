@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
-import type {
-  Shell,
-  EntryIntent,
-  OnboardingProgress,
-} from "@/lib/onboarding/types";
+import type { Shell, EntryIntent, OnboardingProgress } from "@/lib/onboarding/types";
 
 export type CandidRole = "seeker" | "mentor" | "coach" | "admin";
 
@@ -78,17 +74,14 @@ export async function GET() {
     const candidRoles: CandidRole[] = [];
     let primaryCandidRole: CandidRole = "seeker";
 
-    const isAdmin = account.orgMemberships.some(
-      (m) => m.role === "OWNER" || m.role === "ADMIN",
-    );
+    const isAdmin = account.orgMemberships.some((m) => m.role === "OWNER" || m.role === "ADMIN");
     if (isAdmin) {
       candidRoles.push("admin");
     }
 
     const hasCoachProfile = !!account.coachProfile;
     const isActiveCoach =
-      account.coachProfile?.status === "ACTIVE" ||
-      account.coachProfile?.status === "APPROVED";
+      account.coachProfile?.status === "ACTIVE" || account.coachProfile?.status === "APPROVED";
     if (isActiveCoach) {
       candidRoles.push("coach");
       primaryCandidRole = "coach";
@@ -113,20 +106,18 @@ export async function GET() {
     const activeShells = (account.activeRoles || []) as Shell[];
     const primaryShell = (account.primaryRole || null) as Shell | null;
     const entryIntent = (account.entryIntent || null) as EntryIntent | null;
-    const onboardingProgress =
-      (account.onboardingProgress as OnboardingProgress | null) || null;
+    const onboardingProgress = (account.onboardingProgress as OnboardingProgress | null) || null;
 
     // Employer org role — first membership's role (if any)
-    const employerOrgRole = account.orgMemberships.length > 0
-      ? account.orgMemberships[0].role
-      : null;
+    const employerOrgRole =
+      account.orgMemberships.length > 0 ? account.orgMemberships[0].role : null;
 
     const response: RoleResponse = {
       // Account identity
       id: account.id,
       email: account.email,
       name: account.name || "",
-      avatar: account.avatarUrl || null,
+      avatar: account.avatar || null,
 
       // Legacy
       role: primaryCandidRole,
@@ -149,9 +140,6 @@ export async function GET() {
     return NextResponse.json(response);
   } catch (error) {
     console.error("Fetch role error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch role" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 });
   }
 }

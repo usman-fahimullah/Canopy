@@ -8,10 +8,30 @@ import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
 
 const roleTemplateCardProps = [
-  { name: "onSaveTemplate", type: "() => void", required: true, description: "Callback when 'Save as Role Template' is clicked" },
-  { name: "isSaved", type: "boolean", default: "false", description: "Whether the role is already saved as a template" },
-  { name: "loading", type: "boolean", default: "false", description: "Loading state for the save action" },
-  { name: "className", type: "string", default: "undefined", description: "Additional CSS classes" },
+  {
+    name: "onSaveTemplate",
+    type: "() => void",
+    required: true,
+    description: "Callback when 'Save as Role Template' is clicked",
+  },
+  {
+    name: "isSaved",
+    type: "boolean",
+    default: "false",
+    description: "Whether the role is already saved as a template",
+  },
+  {
+    name: "loading",
+    type: "boolean",
+    default: "false",
+    description: "Loading state for the save action",
+  },
+  {
+    name: "className",
+    type: "string",
+    default: "undefined",
+    description: "Additional CSS classes",
+  },
 ];
 
 export default function RoleTemplateCardPage() {
@@ -34,13 +54,13 @@ export default function RoleTemplateCardPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Role Template Card
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          RoleTemplateCard is a promotional card that encourages users to save
-          their role configuration as a reusable template. Features an engaging
-          design with clear call-to-action.
+        <p className="max-w-2xl text-body text-foreground-muted">
+          RoleTemplateCard is a promotional card that encourages users to save their role
+          configuration as a reusable template. Features an engaging design with clear
+          call-to-action.
         </p>
       </div>
 
@@ -57,6 +77,7 @@ export default function RoleTemplateCardPage() {
         >
           <div className="max-w-md">
             <RoleTemplateCard
+              // eslint-disable-next-line no-console
               onSaveTemplate={() => console.log("Save template")}
             />
           </div>
@@ -70,16 +91,9 @@ export default function RoleTemplateCardPage() {
         description="Click to save and see the saved state"
       >
         <div className="max-w-md space-y-4">
-          <RoleTemplateCard
-            onSaveTemplate={handleSave}
-            isSaved={isSaved}
-            loading={loading}
-          />
+          <RoleTemplateCard onSaveTemplate={handleSave} isSaved={isSaved} loading={loading} />
           {isSaved && (
-            <button
-              onClick={handleReset}
-              className="text-sm text-primary-600 hover:underline"
-            >
+            <button onClick={handleReset} className="text-sm text-primary-600 hover:underline">
               Reset to unsaved state
             </button>
           )}
@@ -87,53 +101,38 @@ export default function RoleTemplateCardPage() {
       </ComponentCard>
 
       {/* States */}
-      <ComponentCard
-        id="states"
-        title="States"
-        description="Different card states"
-      >
+      <ComponentCard id="states" title="States" description="Different card states">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-3">Default</p>
-            <RoleTemplateCard
-              onSaveTemplate={() => {}}
-            />
+            <p className="mb-3 text-caption-strong text-foreground-muted">Default</p>
+            <RoleTemplateCard onSaveTemplate={() => {}} />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-3">Loading</p>
-            <RoleTemplateCard
-              onSaveTemplate={() => {}}
-              loading
-            />
+            <p className="mb-3 text-caption-strong text-foreground-muted">Loading</p>
+            <RoleTemplateCard onSaveTemplate={() => {}} loading />
           </div>
           <div>
-            <p className="text-caption-strong text-foreground-muted mb-3">Saved</p>
-            <RoleTemplateCard
-              onSaveTemplate={() => {}}
-              isSaved
-            />
+            <p className="mb-3 text-caption-strong text-foreground-muted">Saved</p>
+            <RoleTemplateCard onSaveTemplate={() => {}} isSaved />
           </div>
         </div>
       </ComponentCard>
 
       {/* In Context */}
-      <ComponentCard
-        id="in-context"
-        title="In Context"
-        description="Card in a job form sidebar"
-      >
-        <div className="max-w-sm p-4 border border-border rounded-lg space-y-4">
+      <ComponentCard id="in-context" title="In Context" description="Card in a job form sidebar">
+        <div className="max-w-sm space-y-4 rounded-lg border border-border p-4">
           <h3 className="font-medium">Form Actions</h3>
           <div className="space-y-2">
-            <button className="w-full px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+            <button className="w-full rounded-lg bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700">
               Save Draft
             </button>
-            <button className="w-full px-4 py-2 text-sm border border-border rounded-lg hover:bg-background-subtle">
+            <button className="w-full rounded-lg border border-border px-4 py-2 text-sm hover:bg-background-subtle">
               Preview
             </button>
           </div>
           <div className="border-t border-border pt-4">
             <RoleTemplateCard
+              // eslint-disable-next-line no-console
               onSaveTemplate={() => console.log("Save template")}
             />
           </div>

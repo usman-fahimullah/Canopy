@@ -14,7 +14,17 @@ import {
   type RecruiterEvent,
   type TimeSlot,
 } from "@/components/ui";
-import { CalendarPlus, ArrowSquareOut, CheckCircle, Warning, XCircle, Eye, Clock, Lightning, CalendarBlank } from "@phosphor-icons/react";
+import {
+  CalendarPlus,
+  ArrowSquareOut,
+  CheckCircle,
+  Warning,
+  XCircle,
+  Eye,
+  Clock,
+  Lightning,
+  CalendarBlank,
+} from "@phosphor-icons/react";
 import { addDays, setHours, setMinutes, startOfWeek, addWeeks, addMinutes } from "date-fns";
 
 /**
@@ -64,27 +74,52 @@ const sampleTeamMembers: Attendee[] = [
       createAvailabilityBlock(0, 9, 10, { title: "Team Standup" }),
       createAvailabilityBlock(0, 14, 15, { title: "1:1 with Manager" }),
       createAvailabilityBlock(0, 18, 19, { title: "APAC Sync", responseStatus: "needsAction" }),
-      createAvailabilityBlock(0, 21, 22, { title: "Late Night Deploy", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(0, 21, 22, {
+        title: "Late Night Deploy",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(1, 10, 11, { title: "Code Review" }),
       createAvailabilityBlock(1, 14, 16, { title: "Sprint Planning" }),
       createAvailabilityBlock(1, 20, 21, { title: "US West Coast Sync" }),
-      createAvailabilityBlock(2, 8, 9, { title: "Morning Coffee Chat", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(2, 8, 9, {
+        title: "Morning Coffee Chat",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(2, 11, 12, { title: "Tech Sync", responseStatus: "needsAction" }),
       createAvailabilityBlock(3, 5, 6, { title: "Early Bird Standup (Asia)" }),
       createAvailabilityBlock(3, 9, 10, { title: "Daily Standup" }),
-      createAvailabilityBlock(3, 15, 16, { title: "Optional: AMA Session", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(3, 15, 16, {
+        title: "Optional: AMA Session",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(3, 18, 19, { title: "Client Call (PST)" }),
       createAvailabilityBlock(4, 10, 11, { title: "Architecture Review" }),
       createAvailabilityBlock(4, 17, 18, { title: "Week Wrap-up" }),
       createAvailabilityBlock(4, 22, 23, { title: "Production Deployment Window" }),
       // Next week
       createAvailabilityBlock(0, 9, 11, { weekOffset: 1, title: "Workshop: New Framework" }),
-      createAvailabilityBlock(0, 15, 17, { weekOffset: 1, title: "Training Session", responseStatus: "needsAction" }),
+      createAvailabilityBlock(0, 15, 17, {
+        weekOffset: 1,
+        title: "Training Session",
+        responseStatus: "needsAction",
+      }),
       createAvailabilityBlock(1, 7, 8, { weekOffset: 1, title: "Early Morning Sync" }),
       createAvailabilityBlock(1, 9, 10, { weekOffset: 1, title: "Team Standup" }),
-      createAvailabilityBlock(1, 13, 14, { weekOffset: 1, title: "Lunch & Learn", responseStatus: "tentative" }),
+      createAvailabilityBlock(1, 13, 14, {
+        weekOffset: 1,
+        title: "Lunch & Learn",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(2, 10, 12, { weekOffset: 1, title: "Deep Work Block" }),
-      createAvailabilityBlock(3, 14, 16, { weekOffset: 1, title: "Optional: Demo Day", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(3, 14, 16, {
+        weekOffset: 1,
+        title: "Optional: Demo Day",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(4, 9, 10, { weekOffset: 1, title: "Sprint Retro" }),
       createAvailabilityBlock(4, 15, 17, { weekOffset: 1, title: "Hackathon Kickoff" }),
       createAvailabilityBlock(4, 18, 20, { weekOffset: 1, title: "Hackathon Evening" }),
@@ -112,14 +147,27 @@ const sampleTeamMembers: Attendee[] = [
       createAvailabilityBlock(2, 15, 17, { title: "Focus Time" }),
       createAvailabilityBlock(3, 11, 13, { title: "Stakeholder Meeting" }),
       createAvailabilityBlock(4, 9, 10, { title: "Weekly Sync" }),
-      createAvailabilityBlock(4, 14, 15, { title: "Optional: Coffee Chat", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(4, 14, 15, {
+        title: "Optional: Coffee Chat",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       // Next week
       createAvailabilityBlock(0, 10, 12, { weekOffset: 1, title: "Product Roadmap" }),
       createAvailabilityBlock(0, 14, 16, { weekOffset: 1, title: "Design Sprint" }),
       createAvailabilityBlock(1, 9, 11, { weekOffset: 1, title: "User Research Debrief" }),
-      createAvailabilityBlock(2, 13, 15, { weekOffset: 1, title: "Team Offsite Prep", responseStatus: "needsAction" }),
+      createAvailabilityBlock(2, 13, 15, {
+        weekOffset: 1,
+        title: "Team Offsite Prep",
+        responseStatus: "needsAction",
+      }),
       createAvailabilityBlock(3, 9, 10, { weekOffset: 1, title: "Daily Standup" }),
-      createAvailabilityBlock(3, 15, 17, { weekOffset: 1, title: "Optional: Tech Talk", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(3, 15, 17, {
+        weekOffset: 1,
+        title: "Optional: Tech Talk",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(4, 10, 12, { weekOffset: 1, title: "Design Critique" }),
       // Week after next
       createAvailabilityBlock(0, 9, 10, { weekOffset: 2, title: "Morning Standup" }),
@@ -142,7 +190,11 @@ const sampleTeamMembers: Attendee[] = [
       createAvailabilityBlock(0, 15, 16, { title: "Hiring Review" }),
       createAvailabilityBlock(1, 10, 12, { title: "Budget Planning" }),
       createAvailabilityBlock(2, 9, 11, { title: "Board Prep" }),
-      createAvailabilityBlock(2, 14, 15, { title: "Optional: Webinar", status: "tentative", responseStatus: "needsAction" }),
+      createAvailabilityBlock(2, 14, 15, {
+        title: "Optional: Webinar",
+        status: "tentative",
+        responseStatus: "needsAction",
+      }),
       createAvailabilityBlock(3, 9, 10, { title: "Exec Standup" }),
       createAvailabilityBlock(3, 14, 16, { title: "Candidate Review" }),
       createAvailabilityBlock(4, 11, 12, { title: "Weekly Report" }),
@@ -153,13 +205,22 @@ const sampleTeamMembers: Attendee[] = [
       createAvailabilityBlock(1, 11, 12, { weekOffset: 1, title: "1:1 with CEO" }),
       createAvailabilityBlock(1, 15, 17, { weekOffset: 1, title: "Team Performance Review" }),
       createAvailabilityBlock(2, 9, 10, { weekOffset: 1, title: "Daily Sync" }),
-      createAvailabilityBlock(2, 14, 16, { weekOffset: 1, title: "Optional: Industry Event", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(2, 14, 16, {
+        weekOffset: 1,
+        title: "Optional: Industry Event",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(3, 10, 12, { weekOffset: 1, title: "Pipeline Review" }),
       createAvailabilityBlock(4, 9, 11, { weekOffset: 1, title: "Offsite Planning" }),
       // Week after next
       createAvailabilityBlock(0, 14, 16, { weekOffset: 2, title: "Strategy Session" }),
       createAvailabilityBlock(1, 9, 10, { weekOffset: 2, title: "Morning Standup" }),
-      createAvailabilityBlock(1, 13, 14, { weekOffset: 2, title: "Quick Sync", responseStatus: "needsAction" }),
+      createAvailabilityBlock(1, 13, 14, {
+        weekOffset: 2,
+        title: "Quick Sync",
+        responseStatus: "needsAction",
+      }),
       createAvailabilityBlock(2, 15, 17, { weekOffset: 2, title: "Quarterly Review Prep" }),
       createAvailabilityBlock(3, 11, 13, { weekOffset: 2, title: "Town Hall" }),
       createAvailabilityBlock(4, 10, 11, { weekOffset: 2, title: "Feedback Session" }),
@@ -177,18 +238,34 @@ const sampleTeamMembers: Attendee[] = [
       createAvailabilityBlock(0, 6, 7, { title: "Morning Run" }),
       createAvailabilityBlock(0, 13, 14, { title: "Cross-team Sync" }),
       createAvailabilityBlock(0, 19, 20, { title: "Dinner with Team" }),
-      createAvailabilityBlock(1, 11, 12, { title: "Optional: Yoga Class", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(1, 11, 12, {
+        title: "Optional: Yoga Class",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       createAvailabilityBlock(2, 14, 16, { title: "Product Demo" }),
-      createAvailabilityBlock(2, 22, 23, { title: "Late EU Handoff Call", responseStatus: "needsAction" }),
+      createAvailabilityBlock(2, 22, 23, {
+        title: "Late EU Handoff Call",
+        responseStatus: "needsAction",
+      }),
       createAvailabilityBlock(4, 9, 11, { title: "Sprint Review" }),
       // Next week
       createAvailabilityBlock(0, 7, 8, { weekOffset: 1, title: "Early AM Standup" }),
       createAvailabilityBlock(0, 10, 12, { weekOffset: 1, title: "Feature Planning" }),
-      createAvailabilityBlock(1, 14, 15, { weekOffset: 1, title: "Stakeholder Check-in", responseStatus: "needsAction" }),
+      createAvailabilityBlock(1, 14, 15, {
+        weekOffset: 1,
+        title: "Stakeholder Check-in",
+        responseStatus: "needsAction",
+      }),
       createAvailabilityBlock(2, 9, 10, { weekOffset: 1, title: "Team Standup" }),
       createAvailabilityBlock(3, 13, 15, { weekOffset: 1, title: "User Testing" }),
       createAvailabilityBlock(3, 20, 21, { weekOffset: 1, title: "APAC Engineering Sync" }),
-      createAvailabilityBlock(4, 11, 12, { weekOffset: 1, title: "Optional: Book Club", status: "tentative", responseStatus: "tentative" }),
+      createAvailabilityBlock(4, 11, 12, {
+        weekOffset: 1,
+        title: "Optional: Book Club",
+        status: "tentative",
+        responseStatus: "tentative",
+      }),
       // Week after next
       createAvailabilityBlock(0, 9, 10, { weekOffset: 2, title: "Morning Sync" }),
       createAvailabilityBlock(1, 10, 11, { weekOffset: 2, title: "Design Handoff" }),
@@ -207,7 +284,11 @@ const sampleTeamMembers: Attendee[] = [
       // This week
       createAvailabilityBlock(0, 11, 12, { title: "Candidate Sourcing" }),
       createAvailabilityBlock(1, 15, 17, { title: "Interview Training" }),
-      createAvailabilityBlock(3, 10, 11, { title: "Optional: HR Social", status: "tentative", responseStatus: "needsAction" }),
+      createAvailabilityBlock(3, 10, 11, {
+        title: "Optional: HR Social",
+        status: "tentative",
+        responseStatus: "needsAction",
+      }),
       // Next week
       createAvailabilityBlock(0, 9, 10, { weekOffset: 1, title: "Recruiting Standup" }),
       createAvailabilityBlock(1, 13, 14, { weekOffset: 1, title: "Agency Call" }),
@@ -571,17 +652,19 @@ const getStageClasses = (status: "completed" | "current" | "pending") => {
 
 export default function InterviewSchedulingDemoPage() {
   const [isOpen, setIsOpen] = React.useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [lastScheduledData, setLastScheduledData] = React.useState<Record<string, any> | null>(null);
+  const [lastScheduledData, setLastScheduledData] = React.useState<Record<string, unknown> | null>(
+    null
+  );
 
   const handleSchedule = (data: unknown) => {
+    // eslint-disable-next-line no-console
     console.log("Interview scheduled:", data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setLastScheduledData(data as Record<string, any>);
+    setLastScheduledData(data as Record<string, unknown>);
     setIsOpen(false);
   };
 
   const handlePreview = (data: unknown) => {
+    // eslint-disable-next-line no-console
     console.log("Preview requested:", data);
     // In production, this would navigate to a preview step
     handleSchedule(data);
@@ -590,8 +673,8 @@ export default function InterviewSchedulingDemoPage() {
   return (
     <div className="min-h-screen bg-[var(--background-subtle)]">
       {/* Header */}
-      <header className="bg-[var(--background-default)] border-b border-[var(--border-muted)]">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+      <header className="border-b border-[var(--border-muted)] bg-[var(--background-default)]">
+        <div className="mx-auto max-w-5xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-lg font-semibold text-[var(--foreground-default)]">
@@ -605,24 +688,21 @@ export default function InterviewSchedulingDemoPage() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-8 space-y-6">
+      <main className="mx-auto max-w-5xl space-y-6 px-6 py-8">
         {/* Demo Card */}
         <Card className="overflow-hidden">
-          <CardHeader className="flex-row items-center gap-4 p-5 border-b border-[var(--border-muted)]">
-            <Avatar
-              src={sampleCandidate.avatar}
-              name={sampleCandidate.name}
-              size="lg"
-            />
-            <div className="flex-1 min-w-0">
+          <CardHeader className="flex-row items-center gap-4 border-b border-[var(--border-muted)] p-5">
+            <Avatar src={sampleCandidate.avatar} name={sampleCandidate.name} size="lg" />
+            <div className="min-w-0 flex-1">
               <h3 className="text-base font-semibold text-[var(--foreground-default)]">
                 {sampleCandidate.name}
               </h3>
-              <p className="text-sm text-[var(--foreground-muted)]">
-                {sampleCandidate.email}
-              </p>
-              <p className="text-sm text-[var(--foreground-muted)] mt-0.5">
-                Applied for <span className="font-medium text-[var(--foreground-default)]">{sampleJob.title}</span>
+              <p className="text-sm text-[var(--foreground-muted)]">{sampleCandidate.email}</p>
+              <p className="mt-0.5 text-sm text-[var(--foreground-muted)]">
+                Applied for{" "}
+                <span className="font-medium text-[var(--foreground-default)]">
+                  {sampleJob.title}
+                </span>
               </p>
             </div>
             <Button
@@ -634,17 +714,17 @@ export default function InterviewSchedulingDemoPage() {
           </CardHeader>
 
           {/* Pipeline stages visualization */}
-          <CardContent className="px-5 py-4 bg-[var(--background-subtle)]">
+          <CardContent className="bg-[var(--background-subtle)] px-5 py-4">
             <div className="flex items-center gap-2">
               {pipelineStages.map((stage, i) => (
                 <React.Fragment key={stage.name}>
                   <div
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium ${getStageClasses(stage.status)}`}
+                    className={`rounded-full px-3 py-1.5 text-xs font-medium ${getStageClasses(stage.status)}`}
                   >
                     {stage.name}
                   </div>
                   {i < pipelineStages.length - 1 && (
-                    <div className="w-8 h-[2px] bg-[var(--background-emphasized)]" />
+                    <div className="h-[2px] w-8 bg-[var(--background-emphasized)]" />
                   )}
                 </React.Fragment>
               ))}
@@ -659,68 +739,114 @@ export default function InterviewSchedulingDemoPage() {
           dismissible={false}
           title="UX Improvements Implemented"
           description={
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-3">
+            <div className="mt-3 grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
-                    <strong>Visual selection feedback</strong> — Selected slots highlighted on calendar with checkmark and duration block
+                    <strong>Visual selection feedback</strong> — Selected slots highlighted on
+                    calendar with checkmark and duration block
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
                     <strong>Duration preview on hover</strong> — See full time block before clicking
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
-                    <strong>30-min granularity indicators</strong> — Dashed lines separate half-hour slots
+                    <strong>30-min granularity indicators</strong> — Dashed lines separate half-hour
+                    slots
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
-                    <strong>Role labels for all attendees</strong> — Candidate, Interviewer, Hiring Manager, Recruiter
+                    <strong>Role labels for all attendees</strong> — Candidate, Interviewer, Hiring
+                    Manager, Recruiter
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
-                    <strong>Prominent "Add interviewer" button</strong> — Dashed border, clearer affordance
+                    <strong>Prominent &quot;Add interviewer&quot; button</strong> — Dashed border,
+                    clearer affordance
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
-                    <strong>Internal notes indicator</strong> — Badge shows when notes exist (collapsed)
+                    <strong>Internal notes indicator</strong> — Badge shows when notes exist
+                    (collapsed)
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
                     <strong>Calendar selector moved up</strong> — More visible in form hierarchy
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
                     <strong>Today button highlights</strong> — Emphasized when outside current view
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
                     <strong>Scroll fade indicators</strong> — Know when more content exists
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-success)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-success)]"
+                  />
                   <span>
-                    <strong>"Preview & Send" button</strong> — Clear next action with icon
+                    <strong>&quot;Preview &amp; Send&quot; button</strong> — Clear next action with
+                    icon
                   </span>
                 </div>
               </div>
@@ -736,34 +862,50 @@ export default function InterviewSchedulingDemoPage() {
           icon={<CalendarBlank weight="fill" />}
           title="New Calendar Features"
           actionLabel="View full Recruiter Calendar demo"
-          onAction={() => window.location.href = "/demo/recruiter-calendar"}
+          onAction={() => (window.location.href = "/demo/recruiter-calendar")}
           description={
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mt-3">
+            <div className="mt-3 grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <Lightning size={14} weight="fill" className="text-[var(--primitive-purple-600)] mt-0.5 flex-shrink-0" />
+                  <Lightning
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--primitive-purple-600)]"
+                  />
                   <span>
-                    <strong>"Suggest times" AI button</strong> — Automatically finds optimal times when everyone is free
+                    <strong>&quot;Suggest times&quot; AI button</strong> — Automatically finds
+                    optimal times when everyone is free
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Eye size={14} className="text-[var(--foreground-info)] mt-0.5 flex-shrink-0" />
+                  <Eye size={14} className="mt-0.5 flex-shrink-0 text-[var(--foreground-info)]" />
                   <span>
-                    <strong>"Your Calendar" tab</strong> — See your own schedule while picking interview times
+                    <strong>&quot;Your Calendar&quot; tab</strong> — See your own schedule while
+                    picking interview times
                   </span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-info)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-info)]"
+                  />
                   <span>
-                    <strong>Calendar overlay toggle</strong> — Transpose your calendar over team availability
+                    <strong>Calendar overlay toggle</strong> — Transpose your calendar over team
+                    availability
                   </span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <CheckCircle size={14} weight="fill" className="text-[var(--foreground-info)] mt-0.5 flex-shrink-0" />
+                  <CheckCircle
+                    size={14}
+                    weight="fill"
+                    className="mt-0.5 flex-shrink-0 text-[var(--foreground-info)]"
+                  />
                   <span>
-                    <strong>Tab-based interface</strong> — Switch between "Find a Time" and "Your Calendar" views
+                    <strong>Tab-based interface</strong> — Switch between &quot;Find a Time&quot;
+                    and &quot;Your Calendar&quot; views
                   </span>
                 </div>
               </div>
@@ -773,15 +915,19 @@ export default function InterviewSchedulingDemoPage() {
 
         {/* Accessibility Features */}
         <Card className="p-5">
-          <h3 className="text-sm font-semibold text-[var(--foreground-default)] mb-4 flex items-center gap-2">
+          <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--foreground-default)]">
             <Eye size={18} />
             Accessibility Improvements
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-lg bg-[var(--background-subtle)] border border-[var(--border-muted)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="relative w-4 h-4 rounded bg-[var(--background-brand-subtle)] border border-[var(--border-brand)]">
-                  <CheckCircle size={10} weight="fill" className="absolute -top-0.5 -right-0.5 text-[var(--foreground-success)]" />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <div className="relative h-4 w-4 rounded border border-[var(--border-brand)] bg-[var(--background-brand-subtle)]">
+                  <CheckCircle
+                    size={10}
+                    weight="fill"
+                    className="absolute -right-0.5 -top-0.5 text-[var(--foreground-success)]"
+                  />
                 </div>
                 <span className="text-sm font-medium">Available</span>
               </div>
@@ -789,10 +935,14 @@ export default function InterviewSchedulingDemoPage() {
                 Solid green with checkmark icon in legend. Everyone is free.
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-[var(--background-subtle)] border border-[var(--border-muted)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="relative w-4 h-4 rounded bg-[var(--background-warning)] border border-[var(--border-warning)]">
-                  <Warning size={10} weight="fill" className="absolute -top-0.5 -right-0.5 text-[var(--foreground-warning)]" />
+            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <div className="relative h-4 w-4 rounded border border-[var(--border-warning)] bg-[var(--background-warning)]">
+                  <Warning
+                    size={10}
+                    weight="fill"
+                    className="absolute -right-0.5 -top-0.5 text-[var(--foreground-warning)]"
+                  />
                 </div>
                 <span className="text-sm font-medium">Partial</span>
               </div>
@@ -800,10 +950,14 @@ export default function InterviewSchedulingDemoPage() {
                 Yellow with warning icon + diagonal stripe pattern for color-blind users.
               </p>
             </div>
-            <div className="p-4 rounded-lg bg-[var(--background-subtle)] border border-[var(--border-muted)]">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="relative w-4 h-4 rounded bg-[var(--background-muted)] border border-[var(--border-default)]">
-                  <XCircle size={10} weight="fill" className="absolute -top-0.5 -right-0.5 text-[var(--foreground-muted)]" />
+            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <div className="relative h-4 w-4 rounded border border-[var(--border-default)] bg-[var(--background-muted)]">
+                  <XCircle
+                    size={10}
+                    weight="fill"
+                    className="absolute -right-0.5 -top-0.5 text-[var(--foreground-muted)]"
+                  />
                 </div>
                 <span className="text-sm font-medium">Busy</span>
               </div>
@@ -825,7 +979,7 @@ export default function InterviewSchedulingDemoPage() {
 
         {/* Candidate Preview Card */}
         <Card className="p-5">
-          <h3 className="text-sm font-semibold text-[var(--foreground-default)] mb-4 flex items-center gap-2">
+          <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--foreground-default)]">
             <Clock size={18} />
             Candidate Experience Preview
           </h3>
@@ -842,10 +996,10 @@ export default function InterviewSchedulingDemoPage() {
         {/* Last scheduled data */}
         {lastScheduledData && (
           <Card className="p-5">
-            <h3 className="text-sm font-semibold text-[var(--foreground-default)] mb-3">
+            <h3 className="mb-3 text-sm font-semibold text-[var(--foreground-default)]">
               Last Scheduled Data
             </h3>
-            <pre className="p-4 bg-[var(--background-subtle)] rounded-lg overflow-auto text-xs text-[var(--foreground-muted)]">
+            <pre className="overflow-auto rounded-lg bg-[var(--background-subtle)] p-4 text-xs text-[var(--foreground-muted)]">
               {JSON.stringify(lastScheduledData, null, 2)}
             </pre>
           </Card>
@@ -853,33 +1007,41 @@ export default function InterviewSchedulingDemoPage() {
 
         {/* Implementation notes */}
         <Card className="p-5">
-          <h3 className="text-sm font-semibold text-[var(--foreground-default)] mb-3">
+          <h3 className="mb-3 text-sm font-semibold text-[var(--foreground-default)]">
             Technical Implementation
           </h3>
           <ul className="space-y-2 text-sm text-[var(--foreground-muted)]">
             <li className="flex items-start gap-2">
-              <span className="text-[var(--foreground-success)] mt-0.5">•</span>
-              <span>Attendees have simulated availability data with overlapping schedules—add team members to see conflicts</span>
+              <span className="mt-0.5 text-[var(--foreground-success)]">•</span>
+              <span>
+                Attendees have simulated availability data with overlapping schedules—add team
+                members to see conflicts
+              </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[var(--foreground-success)] mt-0.5">•</span>
-              <span>Click the <strong>"Calendars"</strong> toggle to see each attendee's busy blocks as colored overlays</span>
+              <span className="mt-0.5 text-[var(--foreground-success)]">•</span>
+              <span>
+                Click the <strong>&quot;Calendars&quot;</strong> toggle to see each attendee&apos;s
+                busy blocks as colored overlays
+              </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[var(--foreground-success)] mt-0.5">•</span>
-              <span>Hover over partial (orange) slots to see who's busy in the tooltip</span>
+              <span className="mt-0.5 text-[var(--foreground-success)]">•</span>
+              <span>Hover over partial (orange) slots to see who&apos;s busy in the tooltip</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[var(--foreground-success)] mt-0.5">•</span>
+              <span className="mt-0.5 text-[var(--foreground-success)]">•</span>
               <span>Duration block preview appears on hover before clicking (blue highlight)</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[var(--foreground-success)] mt-0.5">•</span>
+              <span className="mt-0.5 text-[var(--foreground-success)]">•</span>
               <span>Candidate cannot be removed from attendees list (protected)</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-[var(--foreground-success)] mt-0.5">•</span>
-              <span>Available slots now use neutral white/gray instead of green for less visual noise</span>
+              <span className="mt-0.5 text-[var(--foreground-success)]">•</span>
+              <span>
+                Available slots now use neutral white/gray instead of green for less visual noise
+              </span>
             </li>
           </ul>
         </Card>

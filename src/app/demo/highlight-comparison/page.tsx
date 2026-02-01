@@ -5,19 +5,8 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import { cn } from "@/lib/utils";
-import {
-  Toolbar,
-  ToolbarGroup,
-  ToolbarButton,
-  ToolbarSpacer,
-} from "@/components/ui/toolbar";
-import {
-  TextB,
-  TextItalic,
-  Highlighter,
-  ArrowUUpLeft,
-  ArrowUUpRight,
-} from "@phosphor-icons/react";
+import { Toolbar, ToolbarGroup, ToolbarButton, ToolbarSpacer } from "@/components/ui/toolbar";
+import { TextB, TextItalic, Highlighter, ArrowUUpLeft, ArrowUUpRight } from "@phosphor-icons/react";
 
 /**
  * Demo page comparing highlight color options:
@@ -47,8 +36,8 @@ function NeutralHighlightEditor() {
   if (!editor) return null;
 
   return (
-    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] overflow-hidden">
-      <div className="pt-4 px-4 pb-2">
+    <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)]">
+      <div className="px-4 pb-2 pt-4">
         <Toolbar className="w-full">
           <ToolbarGroup variant="plain">
             <ToolbarButton
@@ -131,8 +120,8 @@ function BlueHighlightEditor() {
   if (!editor) return null;
 
   return (
-    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] overflow-hidden">
-      <div className="pt-4 px-4 pb-2">
+    <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)]">
+      <div className="px-4 pb-2 pt-4">
         <Toolbar className="w-full">
           <ToolbarGroup variant="plain">
             <ToolbarButton
@@ -195,12 +184,10 @@ function BlueHighlightEditor() {
 
 export default function HighlightComparisonPage() {
   return (
-    <div className="min-h-screen bg-[var(--primitive-neutral-100)] py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[var(--primitive-neutral-100)] px-4 py-8">
+      <div className="mx-auto max-w-4xl space-y-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">
-            Highlight Color Comparison
-          </h1>
+          <h1 className="mb-2 text-3xl font-bold text-black">Highlight Color Comparison</h1>
           <p className="text-[var(--primitive-neutral-600)]">
             Compare the two highlight options to see which fits better with your design system.
           </p>
@@ -208,32 +195,32 @@ export default function HighlightComparisonPage() {
 
         {/* Color Swatches */}
         <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-200)] p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-[#e5dfd8] border border-[var(--primitive-neutral-300)]" />
+          <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
+            <div className="mb-4 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl border border-[var(--primitive-neutral-300)] bg-[#e5dfd8]" />
               <div>
                 <h3 className="font-medium text-black">Option 1: Neutral Warm</h3>
                 <p className="text-sm text-[var(--primitive-neutral-600)]">#e5dfd8 (neutral-300)</p>
               </div>
             </div>
-            <ul className="text-sm text-[var(--primitive-neutral-600)] space-y-1">
+            <ul className="space-y-1 text-sm text-[var(--primitive-neutral-600)]">
               <li>✓ Matches existing design tokens</li>
               <li>✓ Warm, earthy tone fits brand</li>
-              <li>✓ Subtle, doesn't compete with content</li>
-              <li>○ Less visually distinct as "highlighted"</li>
+              <li>✓ Subtle, doesn&apos;t compete with content</li>
+              <li>○ Less visually distinct as &quot;highlighted&quot;</li>
             </ul>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-200)] p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-[#DBEAFE] border border-blue-200" />
+          <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
+            <div className="mb-4 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl border border-blue-200 bg-[#DBEAFE]" />
               <div>
                 <h3 className="font-medium text-black">Option 3: Light Blue</h3>
                 <p className="text-sm text-[var(--primitive-neutral-600)]">#DBEAFE (blue-100)</p>
               </div>
             </div>
-            <ul className="text-sm text-[var(--primitive-neutral-600)] space-y-1">
-              <li>✓ Clearly stands out as "marked"</li>
+            <ul className="space-y-1 text-sm text-[var(--primitive-neutral-600)]">
+              <li>✓ Clearly stands out as &quot;marked&quot;</li>
               <li>✓ Familiar convention (Google Docs, Notion)</li>
               <li>✓ Good contrast without being harsh</li>
               <li>○ Introduces new color to palette</li>
@@ -244,31 +231,36 @@ export default function HighlightComparisonPage() {
         {/* Editor Demos */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-medium text-black mb-3">
+            <h2 className="mb-3 text-xl font-medium text-black">
               Option 1: Neutral Warm Highlight
             </h2>
             <NeutralHighlightEditor />
           </div>
 
           <div>
-            <h2 className="text-xl font-medium text-black mb-3">
-              Option 3: Light Blue Highlight
-            </h2>
+            <h2 className="mb-3 text-xl font-medium text-black">Option 3: Light Blue Highlight</h2>
             <BlueHighlightEditor />
           </div>
         </div>
 
         {/* Usage Context */}
-        <div className="bg-white rounded-2xl border border-[var(--primitive-neutral-200)] p-6">
-          <h2 className="text-xl font-medium text-black mb-4">Usage Context</h2>
+        <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
+          <h2 className="mb-4 text-xl font-medium text-black">Usage Context</h2>
           <div className="prose prose-sm max-w-none text-[var(--primitive-neutral-700)]">
-            <p>
-              Consider how highlights will be used in your application:
-            </p>
+            <p>Consider how highlights will be used in your application:</p>
             <ul>
-              <li><strong>For emphasis in job descriptions:</strong> Light blue may help key requirements stand out to candidates scanning listings.</li>
-              <li><strong>For internal notes:</strong> Neutral fits better as it's less visually aggressive for frequent use.</li>
-              <li><strong>For AI-suggested content:</strong> Either could work, but blue might better signal "AI marked this" vs user-written content.</li>
+              <li>
+                <strong>For emphasis in job descriptions:</strong> Light blue may help key
+                requirements stand out to candidates scanning listings.
+              </li>
+              <li>
+                <strong>For internal notes:</strong> Neutral fits better as it&apos;s less visually
+                aggressive for frequent use.
+              </li>
+              <li>
+                <strong>For AI-suggested content:</strong> Either could work, but blue might better
+                signal &quot;AI marked this&quot; vs user-written content.
+              </li>
             </ul>
           </div>
         </div>

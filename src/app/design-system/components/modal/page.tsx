@@ -167,38 +167,30 @@ export default function ModalPage() {
           SECTION 1: OVERVIEW
           ============================================ */}
       <div>
-        <h1
-          id="overview"
-          className="text-heading-lg text-foreground mb-2"
-        >
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Modal
         </h1>
-        <p className="text-body text-foreground-muted mb-4 max-w-2xl">
-          Modals are larger overlay panels for complex content like forms,
-          previews, or multi-step workflows. They block interaction with the
-          page until dismissed, making them suitable for focused tasks.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Modals are larger overlay panels for complex content like forms, previews, or multi-step
+          workflows. They block interaction with the page until dismissed, making them suitable for
+          focused tasks.
         </p>
 
         {/* Category Tags */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="mb-6 flex flex-wrap gap-2">
           <Badge variant="feature" icon={<Info size={14} weight="bold" />}>
             Overlay
           </Badge>
-          <Badge
-            variant="neutral"
-            icon={<CheckCircle size={14} weight="bold" />}
-          >
+          <Badge variant="neutral" icon={<CheckCircle size={14} weight="bold" />}>
             Stable
           </Badge>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-[var(--background-success)]/30 rounded-lg border border-[var(--border-success)]">
-            <h3 className="font-semibold text-[var(--foreground-success)] mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-[var(--background-success)]/30 rounded-lg border border-[var(--border-success)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-success)]">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Complex forms (job posting, candidate profile)</li>
               <li>• Multi-step workflows</li>
               <li>• Content previews (resume viewer, document)</li>
@@ -206,11 +198,9 @@ export default function ModalPage() {
               <li>• Tasks requiring focused attention</li>
             </ul>
           </div>
-          <div className="p-4 bg-[var(--background-error)]/30 rounded-lg border border-[var(--border-error)]">
-            <h3 className="font-semibold text-[var(--foreground-error)] mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-[var(--background-error)]/30 rounded-lg border border-[var(--border-error)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-error)]">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Simple confirmations (use Dialog instead)</li>
               <li>• Brief messages or alerts</li>
               <li>• Actions that need quick dismiss</li>
@@ -231,7 +221,10 @@ export default function ModalPage() {
       >
         <ComponentAnatomy
           parts={[
-            { name: "Overlay", description: "Semi-transparent backdrop that blocks page interaction" },
+            {
+              name: "Overlay",
+              description: "Semi-transparent backdrop that blocks page interaction",
+            },
             { name: "Container", description: "Main modal panel with rounded corners and shadow" },
             { name: "Header", description: "Contains close button and title" },
             { name: "Close Button", description: "Button to dismiss the modal" },
@@ -241,24 +234,24 @@ export default function ModalPage() {
             { name: "Footer", description: "Action buttons area" },
           ]}
         />
-        <div className="mt-6 p-4 bg-background-subtle rounded-lg">
-          <p className="text-caption text-foreground-muted mb-4">Structure overview:</p>
-          <div className="bg-surface border rounded-xl p-4 max-w-sm">
+        <div className="mt-6 rounded-lg bg-background-subtle p-4">
+          <p className="mb-4 text-caption text-foreground-muted">Structure overview:</p>
+          <div className="max-w-sm rounded-xl border bg-surface p-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-lg bg-background-muted flex items-center justify-center">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-muted">
                   <X size={16} className="text-foreground-muted" />
                 </div>
                 <span className="text-caption-sm text-foreground-muted">Close</span>
               </div>
-              <div className="h-6 bg-background-muted rounded w-2/3" />
-              <div className="p-4 bg-background-subtle rounded-lg space-y-2">
-                <div className="h-3 bg-background-muted rounded w-full" />
-                <div className="h-3 bg-background-muted rounded w-4/5" />
+              <div className="h-6 w-2/3 rounded bg-background-muted" />
+              <div className="space-y-2 rounded-lg bg-background-subtle p-4">
+                <div className="h-3 w-full rounded bg-background-muted" />
+                <div className="h-3 w-4/5 rounded bg-background-muted" />
               </div>
-              <div className="flex justify-end gap-2 pt-2 border-t">
-                <div className="h-8 w-16 bg-background-muted rounded" />
-                <div className="h-8 w-16 bg-[var(--background-brand)] rounded" />
+              <div className="flex justify-end gap-2 border-t pt-2">
+                <div className="h-8 w-16 rounded bg-background-muted" />
+                <div className="h-8 w-16 rounded bg-[var(--background-brand)]" />
               </div>
             </div>
           </div>
@@ -313,8 +306,8 @@ export default function ModalPage() {
               </ModalHeader>
               <ModalBody>
                 <p className="text-body text-foreground-muted">
-                  This is the modal body content. It can contain any content
-                  including forms, previews, or complex layouts.
+                  This is the modal body content. It can contain any content including forms,
+                  previews, or complex layouts.
                 </p>
               </ModalBody>
               <ModalFooter>
@@ -331,11 +324,7 @@ export default function ModalPage() {
       {/* ============================================
           SECTION 4: SIZES
           ============================================ */}
-      <ComponentCard
-        id="sizes"
-        title="Sizes"
-        description="Available modal size variants"
-      >
+      <ComponentCard id="sizes" title="Sizes" description="Available modal size variants">
         <CodePreview
           code={`<ModalContent size="default">  {/* 640px */}
 <ModalContent size="lg">       {/* 800px */}
@@ -345,7 +334,9 @@ export default function ModalPage() {
           <div className="flex flex-wrap gap-3">
             <Modal>
               <ModalTrigger asChild>
-                <Button variant="secondary" size="sm">Default (640px)</Button>
+                <Button variant="secondary" size="sm">
+                  Default (640px)
+                </Button>
               </ModalTrigger>
               <ModalContent size="default">
                 <ModalHeader>
@@ -353,8 +344,8 @@ export default function ModalPage() {
                 </ModalHeader>
                 <ModalBody>
                   <p className="text-body text-foreground-muted">
-                    This is the default modal size at 640px width. Suitable for
-                    most forms and simple content.
+                    This is the default modal size at 640px width. Suitable for most forms and
+                    simple content.
                   </p>
                 </ModalBody>
                 <ModalFooter>
@@ -367,7 +358,9 @@ export default function ModalPage() {
 
             <Modal>
               <ModalTrigger asChild>
-                <Button variant="secondary" size="sm">Large (800px)</Button>
+                <Button variant="secondary" size="sm">
+                  Large (800px)
+                </Button>
               </ModalTrigger>
               <ModalContent size="lg">
                 <ModalHeader>
@@ -375,8 +368,8 @@ export default function ModalPage() {
                 </ModalHeader>
                 <ModalBody>
                   <p className="text-body text-foreground-muted">
-                    Large modal at 800px width. Good for more complex forms
-                    with multiple columns or larger content areas.
+                    Large modal at 800px width. Good for more complex forms with multiple columns or
+                    larger content areas.
                   </p>
                 </ModalBody>
                 <ModalFooter>
@@ -389,7 +382,9 @@ export default function ModalPage() {
 
             <Modal>
               <ModalTrigger asChild>
-                <Button variant="secondary" size="sm">XL (1024px)</Button>
+                <Button variant="secondary" size="sm">
+                  XL (1024px)
+                </Button>
               </ModalTrigger>
               <ModalContent size="xl">
                 <ModalHeader>
@@ -397,8 +392,8 @@ export default function ModalPage() {
                 </ModalHeader>
                 <ModalBody>
                   <p className="text-body text-foreground-muted">
-                    Extra large modal at 1024px width. Ideal for complex layouts,
-                    side-by-side content, or document previews.
+                    Extra large modal at 1024px width. Ideal for complex layouts, side-by-side
+                    content, or document previews.
                   </p>
                 </ModalBody>
                 <ModalFooter>
@@ -411,7 +406,9 @@ export default function ModalPage() {
 
             <Modal>
               <ModalTrigger asChild>
-                <Button variant="secondary" size="sm">Full Screen</Button>
+                <Button variant="secondary" size="sm">
+                  Full Screen
+                </Button>
               </ModalTrigger>
               <ModalContent size="full">
                 <ModalHeader>
@@ -419,8 +416,8 @@ export default function ModalPage() {
                 </ModalHeader>
                 <ModalBody>
                   <p className="text-body text-foreground-muted">
-                    Full screen modal that takes up the entire viewport minus margins.
-                    Use sparingly for immersive experiences like document editors.
+                    Full screen modal that takes up the entire viewport minus margins. Use sparingly
+                    for immersive experiences like document editors.
                   </p>
                 </ModalBody>
                 <ModalFooter>
@@ -522,13 +519,15 @@ export default function ModalPage() {
               </ModalHeader>
               <ModalBody>
                 <ModalContentBox>
-                  <CheckCircle size={48} weight="fill" className="text-[var(--foreground-success)]" />
-                  <h3 className="text-heading-sm text-foreground">
-                    Application Submitted
-                  </h3>
+                  <CheckCircle
+                    size={48}
+                    weight="fill"
+                    className="text-[var(--foreground-success)]"
+                  />
+                  <h3 className="text-heading-sm text-foreground">Application Submitted</h3>
                   <p className="text-body text-foreground-muted">
-                    Your job posting has been submitted for review.
-                    You'll receive a notification once it's approved.
+                    Your job posting has been submitted for review. You&apos;ll receive a
+                    notification once it&apos;s approved.
                   </p>
                 </ModalContentBox>
               </ModalBody>
@@ -585,8 +584,10 @@ export default function ModalPage() {
                 </ModalHeader>
                 <ModalBody>
                   <p className="text-body text-foreground-muted">
-                    This modal's open state is controlled programmatically.
-                    Current state: <code className="bg-background-muted px-1 rounded">{isControlledOpen.toString()}</code>
+                    This modal&apos;s open state is controlled programmatically. Current state:{" "}
+                    <code className="rounded bg-background-muted px-1">
+                      {isControlledOpen.toString()}
+                    </code>
                   </p>
                 </ModalBody>
                 <ModalFooter>
@@ -624,8 +625,11 @@ export default function ModalPage() {
       <ComponentCard id="sub-components" title="Sub-Components">
         <div className="space-y-3">
           {subComponentProps.map((comp) => (
-            <div key={comp.name} className="flex items-start gap-4 p-3 bg-background-subtle rounded-lg">
-              <code className="text-caption font-mono text-[var(--foreground-brand)] bg-background-muted px-2 py-1 rounded whitespace-nowrap">
+            <div
+              key={comp.name}
+              className="flex items-start gap-4 rounded-lg bg-background-subtle p-3"
+            >
+              <code className="whitespace-nowrap rounded bg-background-muted px-2 py-1 font-mono text-caption text-[var(--foreground-brand)]">
                 {comp.name}
               </code>
               <p className="text-caption text-foreground-muted">{comp.description}</p>
@@ -712,7 +716,9 @@ export default function ModalPage() {
             <ModalBody>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="job-title" required>Job Title</Label>
+                  <Label htmlFor="job-title" required>
+                    Job Title
+                  </Label>
                   <Input id="job-title" placeholder="e.g., Solar Energy Engineer" />
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -736,7 +742,9 @@ export default function ModalPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description" required>Job Description</Label>
+                  <Label htmlFor="description" required>
+                    Job Description
+                  </Label>
                   <Textarea
                     id="description"
                     rows={4}
@@ -769,17 +777,19 @@ export default function ModalPage() {
                 <Avatar name="Sarah Johnson" />
                 <div>
                   <ModalTitle>Sarah Johnson</ModalTitle>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="feature" size="sm">Interview</Badge>
+                  <div className="mt-1 flex items-center gap-2">
+                    <Badge variant="feature" size="sm">
+                      Interview
+                    </Badge>
                     <span className="text-caption text-foreground-muted">Match Score: 92%</span>
                   </div>
                 </div>
               </div>
             </ModalHeader>
             <ModalBody>
-              <div className="space-y-4 w-full">
+              <div className="w-full space-y-4">
                 <ModalContentBox>
-                  <div className="grid gap-3 text-sm w-full text-left">
+                  <div className="grid w-full gap-3 text-left text-sm">
                     <div className="flex items-center gap-2">
                       <EnvelopeSimple size={16} className="text-foreground-muted" />
                       <span>sarah.johnson@email.com</span>
@@ -794,20 +804,32 @@ export default function ModalPage() {
                     </div>
                   </div>
                 </ModalContentBox>
-                <div className="p-4 bg-background-subtle rounded-lg">
-                  <h4 className="text-body-strong text-foreground mb-2">Experience</h4>
+                <div className="rounded-lg bg-background-subtle p-4">
+                  <h4 className="mb-2 text-body-strong text-foreground">Experience</h4>
                   <p className="text-body-sm text-foreground-muted">
                     5+ years in solar energy systems. Previously at SunPower and Tesla Energy.
                     Specialized in commercial installations and NABCEP certified.
                   </p>
                 </div>
-                <div className="p-4 bg-background-subtle rounded-lg">
-                  <h4 className="text-body-strong text-foreground mb-2">Skills</h4>
+                <div className="rounded-lg bg-background-subtle p-4">
+                  <h4 className="mb-2 text-body-strong text-foreground">Skills</h4>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" size="sm">Solar PV</Badge>
-                    <Badge variant="secondary" size="sm">AutoCAD</Badge>
-                    <Badge variant="secondary" size="sm">Project Management</Badge>
-                    <Badge variant="success" size="sm" icon={<CheckCircle size={12} weight="bold" />}>NABCEP Certified</Badge>
+                    <Badge variant="secondary" size="sm">
+                      Solar PV
+                    </Badge>
+                    <Badge variant="secondary" size="sm">
+                      AutoCAD
+                    </Badge>
+                    <Badge variant="secondary" size="sm">
+                      Project Management
+                    </Badge>
+                    <Badge
+                      variant="success"
+                      size="sm"
+                      icon={<CheckCircle size={12} weight="bold" />}
+                    >
+                      NABCEP Certified
+                    </Badge>
                   </div>
                 </div>
               </div>
@@ -837,12 +859,10 @@ export default function ModalPage() {
             <ModalBody>
               <ModalContentBox>
                 <CheckCircle size={56} weight="fill" className="text-[var(--foreground-success)]" />
-                <h3 className="text-heading-sm text-foreground">
-                  Successfully Published!
-                </h3>
-                <p className="text-body text-foreground-muted max-w-sm">
-                  Your job posting "Senior Solar Engineer" is now live and visible
-                  to candidates on the Green Jobs Board.
+                <h3 className="text-heading-sm text-foreground">Successfully Published!</h3>
+                <p className="max-w-sm text-body text-foreground-muted">
+                  Your job posting &quot;Senior Solar Engineer&quot; is now live and visible to
+                  candidates on the Green Jobs Board.
                 </p>
               </ModalContentBox>
             </ModalBody>

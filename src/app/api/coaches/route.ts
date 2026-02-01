@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get("featured");
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       status: "ACTIVE",
       isActive: true,
     };
@@ -29,9 +29,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (minPrice || maxPrice) {
-      where.sessionRate = {};
-      if (minPrice) where.sessionRate.gte = parseInt(minPrice) * 100;
-      if (maxPrice) where.sessionRate.lte = parseInt(maxPrice) * 100;
+      const sessionRate: Record<string, number> = {};
+      if (minPrice) sessionRate.gte = parseInt(minPrice) * 100;
+      if (maxPrice) sessionRate.lte = parseInt(maxPrice) * 100;
+      where.sessionRate = sessionRate;
     }
 
     if (minRating) {
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy
-    let orderBy: any = { rating: "desc" };
+    let orderBy: Record<string, string> | Record<string, string>[] = { rating: "desc" };
     switch (sort) {
       case "price_low":
         orderBy = { sessionRate: "asc" };

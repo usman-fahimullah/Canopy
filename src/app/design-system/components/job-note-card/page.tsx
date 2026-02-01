@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  JobNoteCard,
-  type JobNoteType,
-} from "@/components/ui";
+import { JobNoteCard, type JobNoteType } from "@/components/ui";
 import { Label } from "@/components/ui/label";
 import {
   ComponentCard,
@@ -129,29 +126,28 @@ export default function JobNoteCardPage() {
     <div className="space-y-12">
       {/* Overview */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Job Note Card
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl mb-4">
-          Colorful cards for career guidance, advice, and educational content.
-          Each note type has a distinct color theme to help users quickly identify
-          content categories.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Colorful cards for career guidance, advice, and educational content. Each note type has a
+          distinct color theme to help users quickly identify content categories.
         </p>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success/10 rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">When to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Career guidance articles and tips</li>
               <li>Educational content on job platforms</li>
               <li>Featured advice columns</li>
               <li>Resource library displays</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error/10 rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">When not to use</h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Job listings (use JobPostCard)</li>
               <li>Company profiles (use CompanyCard)</li>
               <li>User-generated content without categories</li>
@@ -161,47 +157,58 @@ export default function JobNoteCardPage() {
       </div>
 
       {/* Anatomy */}
-      <ComponentCard
-        id="anatomy"
-        title="Anatomy"
-        description="The job note card structure"
-      >
-        <div className="relative p-6 bg-background-subtle rounded-lg">
+      <ComponentCard id="anatomy" title="Anatomy" description="The job note card structure">
+        <div className="relative rounded-lg bg-background-subtle p-6">
           <div className="max-w-[350px]">
-            <div className="relative bg-[var(--primitive-green-200)] rounded-[12px] p-6 h-[200px] flex flex-col">
+            <div className="relative flex h-[200px] flex-col rounded-[12px] bg-[var(--primitive-green-200)] p-6">
               {/* Tag */}
               <div className="relative inline-flex self-start">
-                <div className="px-2 py-1 rounded-lg bg-[var(--primitive-green-500)]">
+                <div className="rounded-lg bg-[var(--primitive-green-500)] px-2 py-1">
                   <span className="text-sm font-bold text-white">Building Paths</span>
                 </div>
-                <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">1</div>
+                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                  1
+                </div>
               </div>
               {/* Title */}
               <div className="relative mt-2 flex-1">
                 <h3 className="text-2xl font-medium text-[var(--primitive-neutral-800)]">
                   How to transition into renewable energy
                 </h3>
-                <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">2</div>
+                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                  2
+                </div>
               </div>
               {/* Author */}
-              <div className="relative flex items-center justify-between mt-auto">
+              <div className="relative mt-auto flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[var(--primitive-neutral-200)] flex items-center justify-center text-xs font-medium">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primitive-neutral-200)] text-xs font-medium">
                     SC
                   </div>
                   <span className="text-sm text-[var(--primitive-neutral-800)]">Sarah Chen</span>
                 </div>
-                <div className="p-3 rounded-2xl bg-[var(--primitive-neutral-200)]">
+                <div className="rounded-2xl bg-[var(--primitive-neutral-200)] p-3">
                   <span className="text-sm">Bookmark</span>
                 </div>
-                <div className="absolute -top-2 -left-2 w-5 h-5 bg-foreground-brand text-white rounded-full flex items-center justify-center text-xs font-medium">3</div>
+                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                  3
+                </div>
               </div>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-3 gap-2 text-sm">
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">1</span> Category Tag</div>
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">2</span> Title Content</div>
-            <div><span className="font-mono bg-background-muted px-1.5 py-0.5 rounded">3</span> Author + Action</div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">1</span>{" "}
+              Category Tag
+            </div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">2</span> Title
+              Content
+            </div>
+            <div>
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">3</span> Author
+              + Action
+            </div>
           </div>
         </div>
       </ComponentCard>
@@ -227,6 +234,7 @@ export default function JobNoteCardPage() {
               type="building-paths"
               title="How to transition into the renewable energy sector"
               authorName="Sarah Chen"
+              // eslint-disable-next-line no-console
               onClick={() => console.log("Read article")}
             />
           </div>
@@ -239,7 +247,7 @@ export default function JobNoteCardPage() {
         title="Note Types"
         description="Six distinct color themes for different content categories"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {noteTypes.map((type) => (
             <JobNoteCard
               key={type}
@@ -296,23 +304,15 @@ export default function JobNoteCardPage() {
           <div>
             <Label className="mb-3 block">Small (171x200px) - Grid thumbnails</Label>
             <div className="flex gap-4">
-              <JobNoteCard
-                type="skill-building"
-                title="Top certifications"
-                size="small"
-              />
-              <JobNoteCard
-                type="growth-mindset"
-                title="Overcoming challenges"
-                size="small"
-              />
+              <JobNoteCard type="skill-building" title="Top certifications" size="small" />
+              <JobNoteCard type="growth-mindset" title="Overcoming challenges" size="small" />
             </div>
           </div>
 
           {/* Full Width Variants */}
           <div>
             <Label className="mb-3 block">Full Width Variants</Label>
-            <div className="space-y-4 max-w-2xl">
+            <div className="max-w-2xl space-y-4">
               <JobNoteCard
                 type="write-your-story"
                 title="Crafting a compelling sustainability-focused resume"
@@ -431,7 +431,7 @@ export default function JobNoteCardPage() {
         <div className="space-y-8">
           {/* Featured Content Section */}
           <div>
-            <h4 className="text-body-strong mb-4">Featured Content Section</h4>
+            <h4 className="mb-4 text-body-strong">Featured Content Section</h4>
             <div className="flex gap-4 overflow-x-auto pb-2">
               <JobNoteCard
                 type="building-paths"
@@ -439,6 +439,7 @@ export default function JobNoteCardPage() {
                 authorName="Sarah Chen"
                 bookmarked={bookmarked.has("featured-1")}
                 onBookmark={() => toggleBookmark("featured-1")}
+                // eslint-disable-next-line no-console
                 onClick={() => console.log("Read article")}
               />
               <JobNoteCard
@@ -447,6 +448,7 @@ export default function JobNoteCardPage() {
                 authorName="Michael Park"
                 bookmarked={bookmarked.has("featured-2")}
                 onBookmark={() => toggleBookmark("featured-2")}
+                // eslint-disable-next-line no-console
                 onClick={() => console.log("Read article")}
               />
             </div>
@@ -454,8 +456,8 @@ export default function JobNoteCardPage() {
 
           {/* Resource Library Grid */}
           <div>
-            <h4 className="text-body-strong mb-4">Resource Library Grid</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <h4 className="mb-4 text-body-strong">Resource Library Grid</h4>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {noteTypes.map((type, i) => (
                 <JobNoteCard
                   key={type}
@@ -472,8 +474,8 @@ export default function JobNoteCardPage() {
 
           {/* Compact List */}
           <div>
-            <h4 className="text-body-strong mb-4">Compact Article List</h4>
-            <div className="space-y-3 max-w-lg">
+            <h4 className="mb-4 text-body-strong">Compact Article List</h4>
+            <div className="max-w-lg space-y-3">
               <JobNoteCard
                 type="the-search"
                 title="Where to find hidden green job opportunities"
@@ -538,31 +540,31 @@ export default function JobNoteCardPage() {
         title="Related Components"
         description="Components commonly used with Job Note Card"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <a
             href="/design-system/components/job-post-card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Job Post Card</p>
             <p className="text-caption text-foreground-muted">Job listings</p>
           </a>
           <a
             href="/design-system/components/company-card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Company Card</p>
             <p className="text-caption text-foreground-muted">Company profiles</p>
           </a>
           <a
             href="/design-system/components/card"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Card</p>
             <p className="text-caption text-foreground-muted">Generic container</p>
           </a>
           <a
             href="/design-system/components/avatar"
-            className="p-4 border border-border-muted rounded-lg hover:border-border-brand transition-colors"
+            className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
             <p className="font-medium">Avatar</p>
             <p className="text-caption text-foreground-muted">Author images</p>

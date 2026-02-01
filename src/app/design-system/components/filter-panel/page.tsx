@@ -28,14 +28,7 @@ import {
 import { CodePreview } from "@/components/design-system/CodeBlock";
 import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
-import {
-  Funnel,
-  FunnelSimple,
-  Users,
-  Briefcase,
-  MagnifyingGlass,
-  X,
-} from "@phosphor-icons/react";
+import { Funnel, FunnelSimple, Users, Briefcase, MagnifyingGlass, X } from "@phosphor-icons/react";
 
 // ============================================
 // SAMPLE DATA
@@ -342,34 +335,29 @@ export default function FilterPanelPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Filter Panel
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Advanced filtering interface for narrowing down candidates, jobs, or
-          other data with multiple criteria. Supports checkbox, radio
-          select, range sliders, date ranges, and boolean filters. Available as
-          inline panel, slide-out sheet, or individual filter groups.
+        <h1 className="mb-2 text-heading-lg text-foreground">Filter Panel</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Advanced filtering interface for narrowing down candidates, jobs, or other data with
+          multiple criteria. Supports checkbox, radio select, range sliders, date ranges, and
+          boolean filters. Available as inline panel, slide-out sheet, or individual filter groups.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Data Display
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Search & Filter
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             ATS Feature
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Candidate pipeline filtering by status, skills, etc.</li>
               <li>Job listing search with multiple criteria</li>
               <li>Data tables needing complex filtering</li>
@@ -377,11 +365,9 @@ export default function FilterPanelPage() {
               <li>Dashboard data exploration</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Simple search (use SearchInput)</li>
               <li>Single criterion selection (use Select)</li>
               <li>Form data entry (use form controls)</li>
@@ -399,45 +385,37 @@ export default function FilterPanelPage() {
         parts={[
           {
             name: "Header",
-            description:
-              "Title showing filter count and clear all button",
+            description: "Title showing filter count and clear all button",
             required: true,
           },
           {
             name: "Filter Groups",
-            description:
-              "Individual filter sections with labels and controls",
+            description: "Individual filter sections with labels and controls",
             required: true,
           },
           {
             name: "Multi-Select",
-            description:
-              "Checkbox group for selecting multiple options",
+            description: "Checkbox group for selecting multiple options",
           },
           {
             name: "Single-Select",
-            description:
-              "Radio group or dropdown for single selection",
+            description: "Radio group or dropdown for single selection",
           },
           {
             name: "Range Slider",
-            description:
-              "Dual-thumb slider for numeric ranges",
+            description: "Dual-thumb slider for numeric ranges",
           },
           {
             name: "Date Range Picker",
-            description:
-              "Start/end date selection",
+            description: "Start/end date selection",
           },
           {
             name: "Active Filters Bar",
-            description:
-              "Shows applied filters as removable chips",
+            description: "Shows applied filters as removable chips",
           },
           {
             name: "Apply/Clear Actions",
-            description:
-              "Footer buttons for applying or clearing filters",
+            description: "Footer buttons for applying or clearing filters",
           },
         ]}
       />
@@ -490,9 +468,7 @@ const filters: FilterConfig[] = [
               onChange={setFilterValues}
               onReset={handleClearAll}
             />
-            <p className="text-caption text-foreground-muted mt-4">
-              Active filters: {activeCount}
-            </p>
+            <p className="mt-4 text-caption text-foreground-muted">Active filters: {activeCount}</p>
           </div>
         </CodePreview>
       </ComponentCard>
@@ -509,10 +485,10 @@ const filters: FilterConfig[] = [
           {/* Inline Panel */}
           <div className="space-y-2">
             <Label className="font-semibold">FilterPanelInline</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Sidebar-style panel for persistent filtering. Collapsible filter groups.
             </p>
-            <div className="max-w-xs border border-border-muted rounded-lg p-4">
+            <div className="max-w-xs rounded-lg border border-border-muted p-4">
               <FilterPanelInline
                 filters={sampleFilterConfigs.slice(0, 3)}
                 value={presetValues}
@@ -526,7 +502,7 @@ const filters: FilterConfig[] = [
           {/* Sheet Panel */}
           <div className="space-y-2">
             <Label className="font-semibold">FilterPanelSheet</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Slide-out sheet for mobile or space-constrained layouts.
             </p>
             <FilterPanelSheet
@@ -540,10 +516,10 @@ const filters: FilterConfig[] = [
           {/* Individual Filter Group */}
           <div className="space-y-2">
             <Label className="font-semibold">FilterGroup (Individual)</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Single filter control for custom layouts.
             </p>
-            <div className="max-w-xs p-4 border border-border-muted rounded-lg">
+            <div className="max-w-xs rounded-lg border border-border-muted p-4">
               <FilterGroup
                 filter={sampleFilterConfigs[0]}
                 value={filterValues.status || []}
@@ -564,11 +540,11 @@ const filters: FilterConfig[] = [
         title="Filter Types"
         description="All available filter control types"
       >
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Multi-Select */}
-          <div className="space-y-2 p-4 border border-border-muted rounded-lg">
+          <div className="space-y-2 rounded-lg border border-border-muted p-4">
             <Label className="font-semibold">Multi-Select</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Checkbox group for multiple selections
             </p>
             <FilterGroup
@@ -588,9 +564,9 @@ const filters: FilterConfig[] = [
           </div>
 
           {/* Single-Select */}
-          <div className="space-y-2 p-4 border border-border-muted rounded-lg">
+          <div className="space-y-2 rounded-lg border border-border-muted p-4">
             <Label className="font-semibold">Single-Select</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Radio group for exclusive selection
             </p>
             <FilterGroup
@@ -610,9 +586,9 @@ const filters: FilterConfig[] = [
           </div>
 
           {/* Range */}
-          <div className="space-y-2 p-4 border border-border-muted rounded-lg">
+          <div className="space-y-2 rounded-lg border border-border-muted p-4">
             <Label className="font-semibold">Range</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Dual-thumb slider for numeric ranges
             </p>
             <FilterGroup
@@ -630,11 +606,9 @@ const filters: FilterConfig[] = [
           </div>
 
           {/* Date Range */}
-          <div className="space-y-2 p-4 border border-border-muted rounded-lg">
+          <div className="space-y-2 rounded-lg border border-border-muted p-4">
             <Label className="font-semibold">Date Range</Label>
-            <p className="text-caption text-foreground-muted mb-2">
-              Start and end date selection
-            </p>
+            <p className="mb-2 text-caption text-foreground-muted">Start and end date selection</p>
             <FilterGroup
               filter={{
                 id: "demo-date",
@@ -647,9 +621,9 @@ const filters: FilterConfig[] = [
           </div>
 
           {/* Boolean */}
-          <div className="space-y-2 p-4 border border-border-muted rounded-lg">
+          <div className="space-y-2 rounded-lg border border-border-muted p-4">
             <Label className="font-semibold">Boolean</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Toggle switch for yes/no filters
             </p>
             <FilterGroup
@@ -665,9 +639,9 @@ const filters: FilterConfig[] = [
           </div>
 
           {/* Search */}
-          <div className="space-y-2 p-4 border border-border-muted rounded-lg">
+          <div className="space-y-2 rounded-lg border border-border-muted p-4">
             <Label className="font-semibold">Search</Label>
-            <p className="text-caption text-foreground-muted mb-2">
+            <p className="mb-2 text-caption text-foreground-muted">
               Text input for keyword filtering
             </p>
             <FilterGroup
@@ -709,7 +683,7 @@ const filters: FilterConfig[] = [
               onReset={() => setPresetValues({})}
             />
             <p className="text-caption text-foreground-muted">
-              Click chips to remove individual filters, or "Clear all" to reset
+              Click chips to remove individual filters, or &quot;Clear all&quot; to reset
             </p>
           </div>
         </CodePreview>
@@ -743,24 +717,24 @@ const labels = getActiveFilterLabels(filters, filterValues);
 <FilterPanel filters={atsFilterConfigs} ... />`}
           >
             <div className="space-y-4">
-              <div className="p-4 bg-background-subtle rounded-lg">
-                <p className="text-sm font-medium mb-2">
+              <div className="rounded-lg bg-background-subtle p-4">
+                <p className="mb-2 text-sm font-medium">
                   countActiveFilters(sampleFilterConfigs, presetValues):
                 </p>
-                <code className="text-sm">{countActiveFilters(sampleFilterConfigs, presetValues)}</code>
+                <code className="text-sm">
+                  {countActiveFilters(sampleFilterConfigs, presetValues)}
+                </code>
               </div>
-              <div className="p-4 bg-background-subtle rounded-lg">
-                <p className="text-sm font-medium mb-2">
+              <div className="rounded-lg bg-background-subtle p-4">
+                <p className="mb-2 text-sm font-medium">
                   getActiveFilterLabels(filters, presetValues):
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {getActiveFilterLabels(sampleFilterConfigs, presetValues).map(
-                    (item, i) => (
-                      <Badge key={i} variant="secondary">
-                        {item.label}: {item.value}
-                      </Badge>
-                    )
-                  )}
+                  {getActiveFilterLabels(sampleFilterConfigs, presetValues).map((item, i) => (
+                    <Badge key={i} variant="secondary">
+                      {item.label}: {item.value}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             </div>
@@ -778,16 +752,16 @@ const labels = getActiveFilterLabels(filters, filterValues);
       >
         <div className="space-y-4">
           <p className="text-sm text-foreground-muted">
-            Use <code className="px-1 bg-background-muted rounded">atsFilterConfigs</code>{" "}
-            for ready-to-use filter configurations for candidate and job filtering.
+            Use <code className="rounded bg-background-muted px-1">atsFilterConfigs</code> for
+            ready-to-use filter configurations for candidate and job filtering.
           </p>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 border border-border-muted rounded-lg">
-              <h4 className="font-medium mb-2 flex items-center gap-2">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-border-muted p-4">
+              <h4 className="mb-2 flex items-center gap-2 font-medium">
                 <Users className="h-4 w-4 text-foreground-brand" />
                 Candidate Filters
               </h4>
-              <ul className="text-sm text-foreground-muted space-y-1">
+              <ul className="space-y-1 text-sm text-foreground-muted">
                 <li>Pipeline Stage (multi-select)</li>
                 <li>Skills (multi-select)</li>
                 <li>Experience Range (range)</li>
@@ -797,12 +771,12 @@ const labels = getActiveFilterLabels(filters, filterValues);
                 <li>Has Resume (boolean)</li>
               </ul>
             </div>
-            <div className="p-4 border border-border-muted rounded-lg">
-              <h4 className="font-medium mb-2 flex items-center gap-2">
+            <div className="rounded-lg border border-border-muted p-4">
+              <h4 className="mb-2 flex items-center gap-2 font-medium">
                 <Briefcase className="h-4 w-4 text-foreground-brand" />
                 Job Filters
               </h4>
-              <ul className="text-sm text-foreground-muted space-y-1">
+              <ul className="space-y-1 text-sm text-foreground-muted">
                 <li>Status (multi-select)</li>
                 <li>Department (multi-select)</li>
                 <li>Location Type (multi-select)</li>
@@ -819,9 +793,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
       {/* 9. PROPS TABLES */}
       {/* ============================================ */}
       <div id="props" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Props Reference
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Props Reference</h2>
 
         <ComponentCard title="FilterPanel Props">
           <PropsTable props={filterPanelProps} />
@@ -856,9 +828,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
       {/* 10. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use FilterPanelSheet on mobile for better UX",
@@ -934,9 +904,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
       {/* 13. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Candidate Pipeline Sidebar"
@@ -947,11 +915,9 @@ const labels = getActiveFilterLabels(filters, filterValues);
               <div className="flex gap-6">
                 {/* Filter Sidebar */}
                 <div className="w-64 shrink-0 border-r border-border-muted pr-4">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="mb-4 flex items-center gap-2">
                     <Funnel className="h-5 w-5 text-foreground-brand" />
-                    <h3 className="text-body-strong text-foreground">
-                      Filter Candidates
-                    </h3>
+                    <h3 className="text-body-strong text-foreground">Filter Candidates</h3>
                   </div>
                   <FilterPanelInline
                     filters={sampleFilterConfigs.slice(0, 4)}
@@ -964,11 +930,9 @@ const labels = getActiveFilterLabels(filters, filterValues);
 
                 {/* Results Area */}
                 <div className="flex-1">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="mb-4 flex items-center justify-between">
                     <div>
-                      <h3 className="text-body-strong text-foreground">
-                        Candidates
-                      </h3>
+                      <h3 className="text-body-strong text-foreground">Candidates</h3>
                       <p className="text-caption text-foreground-muted">
                         Showing 24 of 156 candidates
                       </p>
@@ -987,7 +951,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
                       onReset={handleClearAll}
                     />
                   )}
-                  <div className="mt-4 p-8 border border-dashed border-border-muted rounded-lg text-center text-foreground-muted">
+                  <div className="mt-4 rounded-lg border border-dashed border-border-muted p-8 text-center text-foreground-muted">
                     Candidate cards would appear here
                   </div>
                 </div>
@@ -1006,9 +970,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <MagnifyingGlass className="h-5 w-5 text-foreground-brand" />
-                    <h3 className="text-body-strong text-foreground">
-                      Job Search
-                    </h3>
+                    <h3 className="text-body-strong text-foreground">Job Search</h3>
                   </div>
                   <FilterPanelSheet
                     filters={sampleFilterConfigs}
@@ -1017,7 +979,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
                     onReset={() => setSheetValues({})}
                     trigger={
                       <Button variant="secondary" size="sm">
-                        <FunnelSimple className="h-4 w-4 mr-2" />
+                        <FunnelSimple className="mr-2 h-4 w-4" />
                         Filters
                         {countActiveFilters(sampleFilterConfigs, sheetValues) > 0 && (
                           <Badge variant="info" className="ml-2">
@@ -1038,7 +1000,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
                   />
                 )}
 
-                <div className="p-8 border border-dashed border-border-muted rounded-lg text-center text-foreground-muted">
+                <div className="rounded-lg border border-dashed border-border-muted p-8 text-center text-foreground-muted">
                   Job listings would appear here
                 </div>
               </div>
@@ -1053,7 +1015,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Label className="text-sm">Status:</Label>
                     <div className="flex gap-1">
@@ -1087,7 +1049,7 @@ const labels = getActiveFilterLabels(filters, filterValues);
                   />
                 </div>
 
-                <div className="p-8 border border-dashed border-border-muted rounded-lg text-center text-foreground-muted">
+                <div className="rounded-lg border border-dashed border-border-muted p-8 text-center text-foreground-muted">
                   Data table would appear here
                 </div>
               </div>

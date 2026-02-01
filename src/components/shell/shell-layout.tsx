@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Shell } from "@/lib/onboarding/types";
-import type { ShellNavConfig } from "@/lib/shell/types";
+import { shellNavConfigs } from "@/lib/shell/nav-config";
 import { ShellProvider } from "@/lib/shell/shell-context";
 import { SidebarProvider, useSidebar } from "./sidebar-context";
 import { ShellSidebar } from "./shell-sidebar";
@@ -11,18 +11,12 @@ import { cn } from "@/lib/utils";
 
 interface ShellLayoutProps {
   shell: Shell;
-  config: ShellNavConfig;
   children: ReactNode;
 }
 
-function ShellLayoutInner({
-  config,
-  children,
-}: {
-  config: ShellNavConfig;
-  children: ReactNode;
-}) {
+function ShellLayoutInner({ shell, children }: { shell: Shell; children: ReactNode }) {
   const { collapsed } = useSidebar();
+  const config = shellNavConfigs[shell];
 
   return (
     <div className="min-h-screen bg-[#FAF9F7]">
@@ -35,7 +29,7 @@ function ShellLayoutInner({
       {/* Main content area */}
       <main
         className={cn(
-          "pb-20 lg:pb-0 transition-[padding-left] duration-200 ease-in-out",
+          "pb-20 transition-[padding-left] duration-200 ease-in-out lg:pb-0",
           collapsed ? "lg:pl-[72px]" : "lg:pl-[280px]"
         )}
       >
@@ -45,11 +39,11 @@ function ShellLayoutInner({
   );
 }
 
-export function ShellLayout({ shell, config, children }: ShellLayoutProps) {
+export function ShellLayout({ shell, children }: ShellLayoutProps) {
   return (
     <ShellProvider shell={shell}>
       <SidebarProvider shell={shell}>
-        <ShellLayoutInner config={config}>{children}</ShellLayoutInner>
+        <ShellLayoutInner shell={shell}>{children}</ShellLayoutInner>
       </SidebarProvider>
     </ShellProvider>
   );

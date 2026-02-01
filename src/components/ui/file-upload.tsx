@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Upload, File, X, AlertCircle, CheckCircle2 } from "lucide-react";
+import { UploadSimple, File, X, WarningCircle, CheckCircle } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 
@@ -29,8 +29,7 @@ const dropzoneVariants = cva(
       },
       state: {
         idle: "border-border-default bg-background-subtle hover:border-border-interactive-hover hover:bg-background-interactive-hover",
-        dragover:
-          "border-border-interactive-focus bg-background-interactive-selected",
+        dragover: "border-border-interactive-focus bg-background-interactive-selected",
         uploading: "border-border-brand bg-background-brand-subtle",
         success: "border-border-success bg-background-success",
         error: "border-border-error bg-background-error",
@@ -46,7 +45,8 @@ const dropzoneVariants = cva(
 );
 
 export interface FileUploadProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "onError">,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "onError">,
     VariantProps<typeof dropzoneVariants> {
   /** Accepted file types (e.g., "image/*,.pdf") */
   accept?: string;
@@ -123,9 +123,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
         // Validate file sizes
         const oversizedFiles = fileArray.filter((f) => f.size > maxSize);
         if (oversizedFiles.length > 0) {
-          onError?.(
-            `Files must be smaller than ${Math.round(maxSize / 1024 / 1024)}MB`
-          );
+          onError?.(`Files must be smaller than ${Math.round(maxSize / 1024 / 1024)}MB`);
           return;
         }
 
@@ -145,9 +143,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
         if (onUpload) {
           setFiles((prev) =>
             prev.map((f) =>
-              filesWithIds.find((nf) => nf.id === f.id)
-                ? { ...f, status: "uploading" as const }
-                : f
+              filesWithIds.find((nf) => nf.id === f.id) ? { ...f, status: "uploading" as const } : f
             )
           );
 
@@ -242,18 +238,16 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
           {children || (
             <>
               <div className="rounded-full bg-background-muted p-3">
-                <Upload className="h-6 w-6 text-foreground-muted" />
+                <UploadSimple className="h-6 w-6 text-foreground-muted" />
               </div>
               <div className="text-center">
-                <p className="text-body-sm font-medium text-foreground-default">
+                <p className="text-foreground-default text-body-sm font-medium">
                   Drop files here or click to upload
                 </p>
-                <p className="text-caption text-foreground-muted mt-1">
-                  {accept
-                    ? `Accepted: ${accept}`
-                    : "All file types supported"}
+                <p className="mt-1 text-caption text-foreground-muted">
+                  {accept ? `Accepted: ${accept}` : "All file types supported"}
                 </p>
-                <p className="text-caption-sm text-foreground-subtle mt-0.5">
+                <p className="mt-0.5 text-caption-sm text-foreground-subtle">
                   Max {Math.round(maxSize / 1024 / 1024)}MB per file
                 </p>
               </div>
@@ -265,11 +259,7 @@ const FileUpload = React.forwardRef<HTMLDivElement, FileUploadProps>(
         {files.length > 0 && (
           <div className="space-y-2">
             {files.map((file) => (
-              <FileItem
-                key={file.id}
-                file={file}
-                onRemove={() => removeFile(file.id)}
-              />
+              <FileItem key={file.id} file={file} onRemove={() => removeFile(file.id)} />
             ))}
           </div>
         )}
@@ -296,7 +286,7 @@ const FileItem = ({ file, onRemove }: FileItemProps) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3 rounded-lg border",
+        "flex items-center gap-3 rounded-lg border p-3",
         file.status === "error"
           ? "border-border-error bg-background-error"
           : file.status === "success"
@@ -306,34 +296,28 @@ const FileItem = ({ file, onRemove }: FileItemProps) => {
     >
       <div className="flex-shrink-0">
         {file.status === "error" ? (
-          <AlertCircle className="h-5 w-5 text-foreground-error" />
+          <WarningCircle className="h-5 w-5 text-foreground-error" />
         ) : file.status === "success" ? (
-          <CheckCircle2 className="h-5 w-5 text-foreground-success" />
+          <CheckCircle className="h-5 w-5 text-foreground-success" />
         ) : (
           <File className="h-5 w-5 text-foreground-muted" />
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <p className="text-caption font-medium text-foreground-default truncate">
-          {file.name}
-        </p>
+      <div className="min-w-0 flex-1">
+        <p className="text-foreground-default truncate text-caption font-medium">{file.name}</p>
         <p className="text-caption-sm text-foreground-muted">
           {file.error || formatSize(file.size)}
         </p>
         {file.status === "uploading" && (
-          <Progress
-            value={file.progress}
-            size="sm"
-            className="mt-1"
-          />
+          <Progress value={file.progress} size="sm" className="mt-1" />
         )}
       </div>
 
       <button
         type="button"
         onClick={onRemove}
-        className="flex-shrink-0 rounded-md p-1 hover:bg-background-interactive-hover transition-colors"
+        className="flex-shrink-0 rounded-md p-1 transition-colors hover:bg-background-interactive-hover"
       >
         <X className="h-4 w-4 text-foreground-muted" />
       </button>

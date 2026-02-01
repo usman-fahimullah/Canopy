@@ -9,8 +9,8 @@ export default function MotionPage() {
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 className="text-heading-lg text-foreground mb-2">Motion Tokens</h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
+        <h1 className="mb-2 text-heading-lg text-foreground">Motion Tokens</h1>
+        <p className="max-w-2xl text-body text-foreground-muted">
           Animation and transition tokens for consistent, accessible motion throughout the
           application. All durations respect prefers-reduced-motion.
         </p>
@@ -23,33 +23,52 @@ export default function MotionPage() {
       >
         <div className="space-y-4">
           {[
-            { name: "--duration-instant", value: "0ms", usage: "Immediate feedback, no transition" },
+            {
+              name: "--duration-instant",
+              value: "0ms",
+              usage: "Immediate feedback, no transition",
+            },
             { name: "--duration-fast", value: "100ms", usage: "Micro-interactions, hover states" },
-            { name: "--duration-normal", value: "200ms", usage: "Default transitions, state changes" },
+            {
+              name: "--duration-normal",
+              value: "200ms",
+              usage: "Default transitions, state changes",
+            },
             { name: "--duration-slow", value: "300ms", usage: "Modal/dropdown animations" },
-            { name: "--duration-slower", value: "400ms", usage: "Page transitions, large elements" },
+            {
+              name: "--duration-slower",
+              value: "400ms",
+              usage: "Page transitions, large elements",
+            },
             { name: "--duration-slowest", value: "500ms", usage: "Complex animations, emphasis" },
           ].map(({ name, value, usage }) => (
-            <div key={name} className="flex items-center gap-4 p-3 bg-background-muted rounded-lg">
+            <div key={name} className="flex items-center gap-4 rounded-lg bg-background-muted p-3">
               <div
-                className="w-16 h-8 bg-primary-500 rounded transition-transform hover:translate-x-4"
+                className="h-8 w-16 rounded bg-primary-500 transition-transform hover:translate-x-4"
                 style={{ transitionDuration: value }}
               />
-              <div className="flex-1 min-w-0">
-                <code className="text-caption font-mono text-foreground">{name}</code>
+              <div className="min-w-0 flex-1">
+                <code className="font-mono text-caption text-foreground">{name}</code>
                 <p className="text-caption text-foreground-muted">{value}</p>
               </div>
-              <p className="text-caption text-foreground-subtle hidden sm:block">{usage}</p>
+              <p className="hidden text-caption text-foreground-subtle sm:block">{usage}</p>
             </div>
           ))}
         </div>
       </ComponentCard>
 
       {/* Easing Tokens */}
-      <ComponentCard title="Easing Tokens" description="Predefined easing curves for natural motion.">
+      <ComponentCard
+        title="Easing Tokens"
+        description="Predefined easing curves for natural motion."
+      >
         <div className="space-y-4">
           {[
-            { name: "--ease-linear", value: "linear", description: "Constant speed, mechanical feel" },
+            {
+              name: "--ease-linear",
+              value: "linear",
+              description: "Constant speed, mechanical feel",
+            },
             {
               name: "--ease-default",
               value: "cubic-bezier(0.4, 0, 0.2, 1)",
@@ -83,17 +102,17 @@ export default function MotionPage() {
           ].map(({ name, value, description }) => (
             <div
               key={name}
-              className="flex items-center gap-4 p-3 bg-background-muted rounded-lg group"
+              className="group flex items-center gap-4 rounded-lg bg-background-muted p-3"
             >
               <div
-                className="w-16 h-8 bg-primary-500 rounded transition-transform duration-500 group-hover:translate-x-4"
+                className="h-8 w-16 rounded bg-primary-500 transition-transform duration-500 group-hover:translate-x-4"
                 style={{ transitionTimingFunction: value }}
               />
-              <div className="flex-1 min-w-0">
-                <code className="text-caption font-mono text-foreground">{name}</code>
-                <p className="text-caption text-foreground-muted truncate">{value}</p>
+              <div className="min-w-0 flex-1">
+                <code className="font-mono text-caption text-foreground">{name}</code>
+                <p className="truncate text-caption text-foreground-muted">{value}</p>
               </div>
-              <p className="text-caption text-foreground-subtle hidden sm:block">{description}</p>
+              <p className="hidden text-caption text-foreground-subtle sm:block">{description}</p>
             </div>
           ))}
         </div>
@@ -104,20 +123,22 @@ export default function MotionPage() {
         title="Accessibility"
         description="Motion tokens respect user preferences for reduced motion."
       >
-        <div className="p-4 bg-background-info rounded-lg">
+        <div className="rounded-lg bg-background-info p-4">
           <p className="text-body-sm text-foreground">
-            All motion tokens automatically respect the <code className="bg-background-muted px-1 rounded">prefers-reduced-motion</code> media query. When users have
-            enabled reduced motion in their system preferences, all durations are set to 0ms.
+            All motion tokens automatically respect the{" "}
+            <code className="rounded bg-background-muted px-1">prefers-reduced-motion</code> media
+            query. When users have enabled reduced motion in their system preferences, all durations
+            are set to 0ms.
           </p>
-          <div className="mt-4 p-3 bg-surface rounded border border-border">
-            <code className="text-caption font-mono text-foreground-muted">
+          <div className="mt-4 rounded border border-border bg-surface p-3">
+            <code className="font-mono text-caption text-foreground-muted">
               @media (prefers-reduced-motion: reduce) {"{"}
               <br />
               {"  "}--duration-fast: 0ms;
               <br />
               {"  "}--duration-normal: 0ms;
               <br />
-              {"  "}/* ... all durations set to 0ms */
+              {"  /* ... all durations set to 0ms */"}
               <br />
               {"}"}
             </code>

@@ -3,10 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  MyCoachCard,
-  GettingStartedChecklist,
-} from "../components";
+import { MyCoachCard, GettingStartedChecklist } from "../components";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { ProgressMeterCircular } from "@/components/ui/progress-meter";
@@ -76,25 +73,40 @@ export default function DashboardPage() {
         const allSessions = sessionsData.sessions || [];
         const upcomingSessions = allSessions
           .filter((s: Session) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date())
-          .sort((a: Session, b: Session) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+          .sort(
+            (a: Session, b: Session) =>
+              new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+          );
 
         const completedSessionsCount = allSessions.filter(
           (s: Session) => s.status === "COMPLETED"
         ).length;
 
         // Calculate action items completed from session action items
-        const actionItemsCompleted = allSessions.reduce((count: number, s: any) => {
-          return count + (s.actionItems?.filter((ai: any) => ai.status === "COMPLETED").length || 0);
-        }, 0);
-        const actionItemsTotal = allSessions.reduce((count: number, s: any) => {
-          return count + (s.actionItems?.length || 0);
-        }, 0);
+        const actionItemsCompleted = allSessions.reduce(
+          (count: number, s: Session & { actionItems?: { status: string }[] }) => {
+            return count + (s.actionItems?.filter((ai) => ai.status === "COMPLETED").length || 0);
+          },
+          0
+        );
+        const actionItemsTotal = allSessions.reduce(
+          (count: number, s: Session & { actionItems?: unknown[] }) => {
+            return count + (s.actionItems?.length || 0);
+          },
+          0
+        );
 
         // Calculate goals/milestones progress
         const allGoals = goalsData.goals || [];
-        const completedGoals = allGoals.filter((g: any) => g.status === "COMPLETED").length;
-        const allMilestones = allGoals.flatMap((g: any) => g.milestones || []);
-        const completedMilestones = allMilestones.filter((m: any) => m.completed).length;
+        const completedGoals = allGoals.filter(
+          (g: { status: string }) => g.status === "COMPLETED"
+        ).length;
+        const allMilestones = allGoals.flatMap(
+          (g: { milestones?: { completed: boolean }[] }) => g.milestones || []
+        );
+        const completedMilestones = allMilestones.filter(
+          (m: { completed: boolean }) => m.completed
+        ).length;
 
         setData({
           user: null,
@@ -118,7 +130,10 @@ export default function DashboardPage() {
   }, []);
 
   const progressData = {
-    sessions: { current: data.completedSessionsCount, total: Math.max(data.completedSessionsCount + data.upcomingSessions.length, 1) },
+    sessions: {
+      current: data.completedSessionsCount,
+      total: Math.max(data.completedSessionsCount + data.upcomingSessions.length, 1),
+    },
     actions: progressFromApi?.actions || { current: 0, total: 1 },
     skills: progressFromApi?.goals || { current: 0, total: 1 },
     milestones: progressFromApi?.milestones || { current: 0, total: 1 },
@@ -192,7 +207,7 @@ export default function DashboardPage() {
   const sessionGroups = groupSessionsByDate();
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -201,7 +216,7 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen">
       {/* Main Content */}
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         {/* Page Header — 108px white bar */}
         <div className="flex h-[108px] items-center border-b border-[var(--primitive-neutral-200)] bg-white px-8 lg:px-12">
           <h1 className="text-heading-md font-medium text-[var(--primitive-green-800)]">Home</h1>
@@ -253,8 +268,8 @@ export default function DashboardPage() {
 
         {/* My Progress */}
         <section className="px-8 py-6 lg:px-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-heading-sm font-medium text-foreground-default">My Progress</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-foreground-default text-heading-sm font-medium">My Progress</h2>
             <Link
               href="/candid/profile"
               className={cn(
@@ -283,7 +298,9 @@ export default function DashboardPage() {
                   value={(item.data.current / item.data.total) * 100}
                 />
                 <div className="flex flex-col items-center gap-1">
-                  <p className="text-body font-normal text-[var(--primitive-green-800)]">{item.label}</p>
+                  <p className="text-body font-normal text-[var(--primitive-green-800)]">
+                    {item.label}
+                  </p>
                   <p className="text-caption font-bold text-[var(--primitive-green-800)]">
                     {item.data.current}/{item.data.total}
                   </p>
@@ -295,7 +312,7 @@ export default function DashboardPage() {
 
         {/* Today's Action Items */}
         <section className="px-8 py-6 lg:px-12">
-          <h2 className="mb-3 text-heading-sm font-medium text-foreground-default">
+          <h2 className="text-foreground-default mb-3 text-heading-sm font-medium">
             Today&apos;s Action Items
           </h2>
 
@@ -312,7 +329,7 @@ export default function DashboardPage() {
                     className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white"
                   >
                     {/* Session header */}
-                    <div className="flex items-center gap-3 px-6 pt-4 pb-2">
+                    <div className="flex items-center gap-3 px-6 pb-2 pt-4">
                       <div className="flex flex-1 items-center gap-1 text-body font-medium">
                         <span className="text-foreground-default">
                           {session.title || "1:1 Session"}
@@ -332,11 +349,11 @@ export default function DashboardPage() {
                           name={`${session.coach.firstName} ${session.coach.lastName}`}
                           color="green"
                         />
-                        <span className="text-caption font-medium text-foreground-default">
+                        <span className="text-foreground-default text-caption font-medium">
                           {session.coach.firstName} {session.coach.lastName}
                         </span>
                       </div>
-                      <span className="text-caption font-medium text-foreground-default">
+                      <span className="text-foreground-default text-caption font-medium">
                         {format(sessionDate, "h:mma")}
                       </span>
                       <span className="text-caption font-medium text-foreground-muted">
@@ -346,9 +363,8 @@ export default function DashboardPage() {
 
                     {/* Action item — placeholder */}
                     <div className="flex items-center gap-3 border-t border-[var(--primitive-neutral-200)] px-6 py-6">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--primitive-neutral-300)] bg-white">
-                      </div>
-                      <span className="text-body font-medium text-foreground-default">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--primitive-neutral-300)] bg-white"></div>
+                      <span className="text-foreground-default text-body font-medium">
                         Send meeting notes to{" "}
                         <span className="text-[var(--primitive-blue-500)]">
                           {session.coach.firstName}
@@ -368,19 +384,19 @@ export default function DashboardPage() {
 
         {/* My Coach */}
         <section className="px-8 py-6 lg:px-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-heading-sm font-medium text-foreground-default">My Coach</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-foreground-default text-heading-sm font-medium">My Coach</h2>
           </div>
           <MyCoachCard />
         </section>
       </div>
 
       {/* Right Sidebar - Schedule (Large Desktop only) */}
-      <aside className="hidden xl:block w-[375px] flex-shrink-0 border-l border-[var(--candid-schedule-border)] bg-white">
+      <aside className="hidden w-[375px] flex-shrink-0 border-l border-[var(--candid-schedule-border)] bg-white xl:block">
         <div className="sticky top-0 h-screen overflow-y-auto">
           {/* Schedule Header */}
           <div className="flex h-[108px] items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6">
-            <h2 className="text-heading-sm font-medium text-foreground-default">Your Schedule</h2>
+            <h2 className="text-foreground-default text-heading-sm font-medium">Your Schedule</h2>
             <button className="flex items-center justify-center rounded-[16px] bg-[var(--primitive-neutral-200)] p-2.5 transition-colors hover:bg-[var(--primitive-neutral-300)]">
               <CalendarDots size={20} weight="regular" />
             </button>
@@ -389,10 +405,13 @@ export default function DashboardPage() {
           {/* Schedule Content */}
           <div>
             {sessionGroups.map((group) => (
-              <div key={group.label} className="border-b border-[var(--primitive-neutral-200)] px-6 py-3">
+              <div
+                key={group.label}
+                className="border-b border-[var(--primitive-neutral-200)] px-6 py-3"
+              >
                 {/* Date Header */}
                 <div className="mb-4 flex items-center gap-2">
-                  <span className="text-body font-normal text-foreground-default">
+                  <span className="text-foreground-default text-body font-normal">
                     {group.isToday ? format(group.date, "EEEE") : group.label}
                   </span>
                   {group.isToday && (
@@ -408,7 +427,9 @@ export default function DashboardPage() {
                     {group.sessions.map((session) => {
                       const sessionDate = new Date(session.scheduledAt);
                       const endTime = new Date(sessionDate.getTime() + session.duration * 60000);
-                      const roleLabel = session.coach.headline?.toLowerCase().includes("mentor") ? "Mentor" : "Coach";
+                      const roleLabel = session.coach.headline?.toLowerCase().includes("mentor")
+                        ? "Mentor"
+                        : "Coach";
 
                       if (group.isToday) {
                         /* Today's session card — DARK GREEN */
@@ -434,7 +455,11 @@ export default function DashboardPage() {
                               </p>
                             </div>
                             <Button variant="inverse" className="w-full" asChild>
-                              <a href={session.meetingLink || "#"} target="_blank" rel="noopener noreferrer">
+                              <a
+                                href={session.meetingLink || "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
                                 <VideoCamera size={20} weight="fill" />
                                 Join Meeting
                               </a>
@@ -463,7 +488,11 @@ export default function DashboardPage() {
                             </p>
                           </div>
                           <Button variant="inverse" className="w-full" asChild>
-                            <a href={session.meetingLink || "#"} target="_blank" rel="noopener noreferrer">
+                            <a
+                              href={session.meetingLink || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               <VideoCamera size={20} weight="fill" />
                               Join Meeting
                             </a>
@@ -475,7 +504,7 @@ export default function DashboardPage() {
                 ) : (
                   /* Empty day card */
                   <div className="flex h-[240px] items-center justify-center rounded-lg bg-[var(--candid-schedule-card-empty-bg)]">
-                    <p className="text-heading-sm font-medium text-foreground-default">
+                    <p className="text-foreground-default text-heading-sm font-medium">
                       No sessions today
                     </p>
                   </div>

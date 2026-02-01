@@ -165,46 +165,38 @@ export default function DialogPage() {
           SECTION 1: OVERVIEW
           ============================================ */}
       <div>
-        <h1
-          id="overview"
-          className="text-heading-lg text-foreground mb-2"
-        >
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Dialog
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl mb-4">
-          A modal window that interrupts user flow to convey important
-          information or require a decision. Dialogs block interaction with the
-          rest of the page until dismissed.
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          A modal window that interrupts user flow to convey important information or require a
+          decision. Dialogs block interaction with the rest of the page until dismissed.
         </p>
 
         {/* Component Metadata */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="mb-6 flex flex-wrap gap-2">
           <Badge variant="secondary">Overlay</Badge>
           <Badge variant="secondary">Radix UI</Badge>
           <Badge variant="secondary">Accessible</Badge>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-[var(--background-success)] rounded-lg border border-[var(--border-success)]">
-            <h3 className="font-semibold text-[var(--foreground-success)] mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-[var(--border-success)] bg-[var(--background-success)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-success)]">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Confirmations for destructive actions</li>
               <li>• Important alerts requiring acknowledgment</li>
               <li>• Quick data entry (1-3 fields)</li>
               <li>• Focused tasks that need user attention</li>
             </ul>
           </div>
-          <div className="p-4 bg-[var(--background-error)] rounded-lg border border-[var(--border-error)]">
-            <h3 className="font-semibold text-[var(--foreground-error)] mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-[var(--border-error)] bg-[var(--background-error)] p-4">
+            <h3 className="mb-2 font-semibold text-[var(--foreground-error)]">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>• Simple notifications (use Toast instead)</li>
               <li>• Long forms (use a page or Modal)</li>
-              <li>• Content that doesn't require acknowledgment</li>
+              <li>• Content that doesn&apos;t require acknowledgment</li>
               <li>• Frequent, non-critical updates</li>
             </ul>
           </div>
@@ -233,8 +225,7 @@ export default function DialogPage() {
             },
             {
               name: "DialogContent",
-              description:
-                "Container for the dialog content, rendered in a portal",
+              description: "Container for the dialog content, rendered in a portal",
               required: true,
             },
             {
@@ -330,8 +321,8 @@ export default function DialogPage() {
         <div className="space-y-8">
           {/* Confirmation Dialog */}
           <div>
-            <h4 className="text-body-strong mb-3">Confirmation Dialog</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong">Confirmation Dialog</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Use for actions that need explicit user confirmation
             </p>
             <Dialog>
@@ -341,12 +332,8 @@ export default function DialogPage() {
               <DialogContent>
                 <DialogHeader>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-[var(--background-info)]">
-                      <Info
-                        size={20}
-                        weight="fill"
-                        className="text-[var(--foreground-info)]"
-                      />
+                    <div className="rounded-full bg-[var(--background-info)] p-2">
+                      <Info size={20} weight="fill" className="text-[var(--foreground-info)]" />
                     </div>
                     <DialogTitle>Confirm Action</DialogTitle>
                   </div>
@@ -366,8 +353,8 @@ export default function DialogPage() {
 
           {/* Destructive Dialog */}
           <div>
-            <h4 className="text-body-strong mb-3">Destructive Dialog</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong">Destructive Dialog</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Use for dangerous or irreversible actions
             </p>
             <Dialog>
@@ -379,7 +366,7 @@ export default function DialogPage() {
               <DialogContent>
                 <DialogHeader>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-[var(--background-error)]">
+                    <div className="rounded-full bg-[var(--background-error)] p-2">
                       <WarningCircle
                         size={20}
                         weight="fill"
@@ -389,8 +376,8 @@ export default function DialogPage() {
                     <DialogTitle>Delete Job Posting</DialogTitle>
                   </div>
                   <DialogDescription>
-                    This action cannot be undone. All associated candidates and
-                    application data will be permanently removed.
+                    This action cannot be undone. All associated candidates and application data
+                    will be permanently removed.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -405,8 +392,8 @@ export default function DialogPage() {
 
           {/* Success Dialog */}
           <div>
-            <h4 className="text-body-strong mb-3">Success Dialog</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong">Success Dialog</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Use to confirm successful completion of an action
             </p>
             <Dialog>
@@ -416,7 +403,7 @@ export default function DialogPage() {
               <DialogContent>
                 <DialogHeader>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-[var(--background-success)]">
+                    <div className="rounded-full bg-[var(--background-success)] p-2">
                       <CheckCircle
                         size={20}
                         weight="fill"
@@ -440,8 +427,8 @@ export default function DialogPage() {
 
           {/* Warning Dialog */}
           <div>
-            <h4 className="text-body-strong mb-3">Warning Dialog</h4>
-            <p className="text-caption text-foreground-muted mb-4">
+            <h4 className="mb-3 text-body-strong">Warning Dialog</h4>
+            <p className="mb-4 text-caption text-foreground-muted">
               Use to warn about potential issues before proceeding
             </p>
             <Dialog>
@@ -451,7 +438,7 @@ export default function DialogPage() {
               <DialogContent>
                 <DialogHeader>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full bg-[var(--background-warning)]">
+                    <div className="rounded-full bg-[var(--background-warning)] p-2">
                       <Warning
                         size={20}
                         weight="fill"
@@ -461,8 +448,8 @@ export default function DialogPage() {
                     <DialogTitle>Unsaved Changes</DialogTitle>
                   </div>
                   <DialogDescription>
-                    You have unsaved changes. Are you sure you want to leave
-                    this page? Your progress will be lost.
+                    You have unsaved changes. Are you sure you want to leave this page? Your
+                    progress will be lost.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -526,25 +513,17 @@ export default function DialogPage() {
         >
           <Dialog>
             <DialogTrigger asChild>
-              <Button leftIcon={<UserPlus size={16} />}>
-                Invite Team Member
-              </Button>
+              <Button leftIcon={<UserPlus size={16} />}>Invite Team Member</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Invite Team Member</DialogTitle>
-                <DialogDescription>
-                  Send an invitation to join your organization.
-                </DialogDescription>
+                <DialogDescription>Send an invitation to join your organization.</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="colleague@company.com"
-                  />
+                  <Input id="email" type="email" placeholder="colleague@company.com" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">Role</Label>
@@ -555,9 +534,7 @@ export default function DialogPage() {
                 <DialogClose asChild>
                   <Button variant="secondary">Cancel</Button>
                 </DialogClose>
-                <Button leftIcon={<PaperPlaneTilt size={16} />}>
-                  Send Invite
-                </Button>
+                <Button leftIcon={<PaperPlaneTilt size={16} />}>Send Invite</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -597,17 +574,14 @@ export default function DialogPage() {
 </Dialog>`}
         >
           <div className="space-y-4">
-            <Button onClick={() => setIsOpen(true)}>
-              Open Controlled Dialog
-            </Button>
+            <Button onClick={() => setIsOpen(true)}>Open Controlled Dialog</Button>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Controlled Dialog</DialogTitle>
                   <DialogDescription>
-                    This dialog&apos;s state is managed by React state. You can
-                    close it by clicking outside, pressing Escape, or using the
-                    button below.
+                    This dialog&apos;s state is managed by React state. You can close it by clicking
+                    outside, pressing Escape, or using the button below.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -617,7 +591,7 @@ export default function DialogPage() {
             </Dialog>
             <p className="text-caption text-foreground-muted">
               Dialog state:{" "}
-              <code className="bg-[var(--background-muted)] px-1.5 py-0.5 rounded">
+              <code className="rounded bg-[var(--background-muted)] px-1.5 py-0.5">
                 {isOpen ? "open" : "closed"}
               </code>
             </p>
@@ -655,8 +629,7 @@ export default function DialogPage() {
               <DialogHeader>
                 <DialogTitle>No Default Close Button</DialogTitle>
                 <DialogDescription>
-                  The default X button is hidden. Use the footer buttons to
-                  close.
+                  The default X button is hidden. Use the footer buttons to close.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -802,7 +775,7 @@ export default function DialogPage() {
             <DialogContent>
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-[var(--background-error)]">
+                  <div className="rounded-full bg-[var(--background-error)] p-2">
                     <WarningCircle
                       size={20}
                       weight="fill"
@@ -812,9 +785,8 @@ export default function DialogPage() {
                   <DialogTitle>Remove Candidate</DialogTitle>
                 </div>
                 <DialogDescription>
-                  Are you sure you want to remove Sarah Chen from the Solar
-                  Installation Manager position? This will delete all their
-                  application data and cannot be undone.
+                  Are you sure you want to remove Sarah Chen from the Solar Installation Manager
+                  position? This will delete all their application data and cannot be undone.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -876,19 +848,14 @@ export default function DialogPage() {
             <DialogContent>
               <DialogHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-[var(--background-warning)]">
-                    <Archive
-                      size={20}
-                      weight="fill"
-                      className="text-[var(--foreground-warning)]"
-                    />
+                  <div className="rounded-full bg-[var(--background-warning)] p-2">
+                    <Archive size={20} weight="fill" className="text-[var(--foreground-warning)]" />
                   </div>
                   <DialogTitle>Archive Job Posting</DialogTitle>
                 </div>
                 <DialogDescription>
-                  Archiving will close this job to new applications. Existing
-                  candidates will remain in the pipeline. You can restore
-                  archived jobs at any time.
+                  Archiving will close this job to new applications. Existing candidates will remain
+                  in the pipeline. You can restore archived jobs at any time.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -908,19 +875,20 @@ export default function DialogPage() {
       >
         <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
           <DialogTrigger asChild>
-            <Button variant="tertiary" size="sm">Add Quick Note</Button>
+            <Button variant="tertiary" size="sm">
+              Add Quick Note
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Add Note</DialogTitle>
               <DialogDescription>
-                Add a quick note about this candidate. Notes are visible to your
-                team.
+                Add a quick note about this candidate. Notes are visible to your team.
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
               <textarea
-                className="w-full h-24 px-3 py-2 text-sm border border-[var(--border-default)] rounded-lg bg-[var(--background-default)] focus:outline-none focus:ring-2 focus:ring-[var(--border-interactive-focus)]"
+                className="h-24 w-full rounded-lg border border-[var(--border-default)] bg-[var(--background-default)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--border-interactive-focus)]"
                 placeholder="Enter your note..."
               />
             </div>
