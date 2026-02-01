@@ -154,10 +154,9 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
       <nav className="flex-1 overflow-y-auto px-3 space-y-1">
         {config.sections
           .filter((section) => {
-            // Filter progressive sections
             if (!section.progressive) return true;
-            // TODO: Check if user has activated the feature
-            return false;
+            if (!section.progressiveFeature) return true;
+            return user?.progressiveFeatures?.includes(section.progressiveFeature) ?? false;
           })
           .map((section) => (
             <div key={section.id}>

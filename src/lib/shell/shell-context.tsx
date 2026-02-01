@@ -61,6 +61,7 @@ export function ShellProvider({ shell, children }: ShellProviderProps) {
           currentShell: shell,
           employerOrgRole: data.employerOrgRole as EmployerOrgRole | undefined,
           badges: {},
+          progressiveFeatures: data.progressiveFeatures || (shell === "talent" ? ["coaching", "mentoring"] : []),
         };
 
         setUser(shellUser);

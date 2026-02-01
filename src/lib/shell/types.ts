@@ -87,6 +87,8 @@ export interface ShellUser {
   employerOrgRole?: EmployerOrgRole;
   /** Badge counts by key */
   badges: Record<string, number>;
+  /** Activated progressive features, e.g. ["coaching", "mentoring"] */
+  progressiveFeatures?: string[];
 }
 
 // ---------------------------------------------------------------------------

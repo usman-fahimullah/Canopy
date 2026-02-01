@@ -58,9 +58,13 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
     return pathname === href || pathname.startsWith(href + "/");
   }
 
-  // First 4 visible nav items for bottom tab bar
+  // First 4 visible nav items for bottom tab bar (exclude progressive sections)
   const allVisibleItems = config.sections
-    .filter((s) => !s.progressive)
+    .filter((s) => {
+      if (!s.progressive) return true;
+      if (!s.progressiveFeature) return true;
+      return user?.progressiveFeatures?.includes(s.progressiveFeature) ?? false;
+    })
     .flatMap((s) => s.items)
     .filter(isItemVisible);
   const tabBarItems = allVisibleItems.slice(0, 4);
@@ -175,7 +179,11 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
             {/* Full nav */}
             <nav className="overflow-y-auto p-3 space-y-1" style={{ maxHeight: "calc(100vh - 56px)" }}>
               {config.sections
-                .filter((s) => !s.progressive)
+                .filter((s) => {
+                  if (!s.progressive) return true;
+                  if (!s.progressiveFeature) return true;
+                  return user?.progressiveFeatures?.includes(s.progressiveFeature) ?? false;
+                })
                 .map((section) => (
                   <div key={section.id}>
                     {section.label && (
