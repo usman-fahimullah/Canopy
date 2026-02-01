@@ -10,6 +10,12 @@ import type {
 export type CandidRole = "seeker" | "mentor" | "coach" | "admin";
 
 interface RoleResponse {
+  // Account identity fields (used by ShellProvider)
+  id: string;
+  email: string;
+  name: string;
+  avatar: string | null;
+
   // Legacy Candid role fields (kept for backward compat with existing Candid UI)
   role: CandidRole;
   roles: CandidRole[];
@@ -23,6 +29,9 @@ interface RoleResponse {
   primaryShell: Shell | null;
   entryIntent: EntryIntent | null;
   onboardingProgress: OnboardingProgress | null;
+
+  // Employer org role — used for nav permission filtering
+  employerOrgRole: string | null;
 }
 
 // GET - Get the current user's role(s) across all shells
@@ -107,7 +116,18 @@ export async function GET() {
     const onboardingProgress =
       (account.onboardingProgress as OnboardingProgress | null) || null;
 
+    // Employer org role — first membership's role (if any)
+    const employerOrgRole = account.orgMemberships.length > 0
+      ? account.orgMemberships[0].role
+      : null;
+
     const response: RoleResponse = {
+      // Account identity
+      id: account.id,
+      email: account.email,
+      name: account.name || "",
+      avatar: account.avatarUrl || null,
+
       // Legacy
       role: primaryCandidRole,
       roles: candidRoles,
@@ -121,6 +141,9 @@ export async function GET() {
       primaryShell,
       entryIntent,
       onboardingProgress,
+
+      // Employer
+      employerOrgRole,
     };
 
     return NextResponse.json(response);
