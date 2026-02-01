@@ -6,9 +6,48 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input, InputMessage } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
-import { EnvelopeSimple, Lock, User, GoogleLogo, LinkedinLogo } from "@phosphor-icons/react";
+import {
+  EnvelopeSimple,
+  Lock,
+  User,
+  GoogleLogo,
+  LinkedinLogo,
+  MagnifyingGlass,
+  GraduationCap,
+  Buildings,
+} from "@phosphor-icons/react";
 
-type AccountType = "mentee" | "coach";
+type AccountType = "talent" | "coach" | "employer";
+
+const typeOptions: {
+  value: AccountType;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  iconBg: string;
+}[] = [
+  {
+    value: "talent",
+    title: "I'm looking for a climate job",
+    description: "Search jobs, get matched with opportunities, and connect with career coaches",
+    icon: MagnifyingGlass,
+    iconBg: "var(--primitive-green-100)",
+  },
+  {
+    value: "coach",
+    title: "I want to coach others",
+    description: "Share your expertise and help career changers transition into climate work",
+    icon: GraduationCap,
+    iconBg: "var(--primitive-yellow-100)",
+  },
+  {
+    value: "employer",
+    title: "I'm hiring climate talent",
+    description: "Post roles, manage candidates, and build your team with AI-powered sourcing",
+    icon: Buildings,
+    iconBg: "var(--primitive-blue-100)",
+  },
+];
 
 export default function SignupPage() {
   const router = useRouter();
@@ -32,13 +71,11 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    // Validate password strength
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
       return;
@@ -56,7 +93,7 @@ export default function SignupPage() {
             name,
             account_type: accountType,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/auth/redirect`,
         },
       });
 
@@ -66,7 +103,7 @@ export default function SignupPage() {
       }
 
       setSuccess(true);
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -87,7 +124,7 @@ export default function SignupPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?type=${accountType}`,
+          redirectTo: `${window.location.origin}/auth/callback?redirect=/auth/redirect&type=${accountType}`,
         },
       });
 
@@ -95,7 +132,7 @@ export default function SignupPage() {
         setError(error.message);
         setLoading(false);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
@@ -140,55 +177,41 @@ export default function SignupPage() {
       <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
-            Join Candid
+            Get started
           </h1>
           <p className="text-[var(--primitive-neutral-600)]">
-            How would you like to participate?
+            What brings you here?
           </p>
         </div>
 
-        <div className="space-y-4">
-          {/* Mentee option */}
-          <button
-            onClick={() => handleTypeSelect("mentee")}
-            className="w-full p-6 rounded-xl border-2 border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-green-600)] hover:bg-[var(--primitive-green-100)] transition-all text-left group"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center shrink-0 group-hover:bg-[var(--primitive-green-200)]">
-                <User className="w-6 h-6 text-[var(--primitive-green-700)]" weight="bold" />
-              </div>
-              <div>
-                <h3 className="font-bold text-[var(--primitive-green-800)] mb-1">
-                  I&apos;m looking for guidance
-                </h3>
-                <p className="text-sm text-[var(--primitive-neutral-600)]">
-                  Connect with coaches and mentors to accelerate your climate career transition
-                </p>
-              </div>
-            </div>
-          </button>
-
-          {/* Coach option */}
-          <button
-            onClick={() => handleTypeSelect("coach")}
-            className="w-full p-6 rounded-xl border-2 border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-green-600)] hover:bg-[var(--primitive-green-100)] transition-all text-left group"
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-[var(--primitive-blue-100)] rounded-full flex items-center justify-center shrink-0 group-hover:bg-[var(--primitive-blue-200)]">
-                <svg className="w-6 h-6 text-[var(--primitive-blue-700)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-[var(--primitive-green-800)] mb-1">
-                  I want to coach others
-                </h3>
-                <p className="text-sm text-[var(--primitive-neutral-600)]">
-                  Share your expertise and help career changers transition into climate work
-                </p>
-              </div>
-            </div>
-          </button>
+        <div className="space-y-3">
+          {typeOptions.map((option) => {
+            const Icon = option.icon;
+            return (
+              <button
+                key={option.value}
+                onClick={() => handleTypeSelect(option.value)}
+                className="w-full p-5 rounded-xl border-2 border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-green-600)] hover:bg-[var(--primitive-green-100)] transition-all text-left group"
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: option.iconBg }}
+                  >
+                    <Icon className="w-5 h-5 text-foreground-default" weight="bold" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-[var(--primitive-green-800)] mb-0.5">
+                      {option.title}
+                    </h3>
+                    <p className="text-sm text-[var(--primitive-neutral-600)]">
+                      {option.description}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Sign in link */}
@@ -206,17 +229,27 @@ export default function SignupPage() {
   }
 
   // Details form
+  const typeLabel =
+    accountType === "talent"
+      ? "Start your climate career journey"
+      : accountType === "coach"
+        ? "Apply to become a coach"
+        : "Start hiring climate talent";
+
+  const buttonLabel =
+    accountType === "talent"
+      ? "Create account"
+      : accountType === "coach"
+        ? "Apply to coach"
+        : "Create account";
+
   return (
     <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
           Create your account
         </h1>
-        <p className="text-[var(--primitive-neutral-600)]">
-          {accountType === "mentee"
-            ? "Start your climate career journey"
-            : "Apply to become a coach"}
-        </p>
+        <p className="text-[var(--primitive-neutral-600)]">{typeLabel}</p>
       </div>
 
       {/* OAuth Buttons */}
@@ -332,7 +365,7 @@ export default function SignupPage() {
           loading={loading}
           disabled={loading}
         >
-          {accountType === "mentee" ? "Create account" : "Apply to coach"}
+          {buttonLabel}
         </Button>
       </form>
 
@@ -344,7 +377,7 @@ export default function SignupPage() {
           className="w-full"
           onClick={() => setStep("type")}
         >
-          ← Back to account type
+          Back
         </Button>
       </div>
 
