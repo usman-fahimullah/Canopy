@@ -4,10 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
-import {
-  useOnboardingForm,
-  type TeamInviteEntry,
-} from "@/components/onboarding/form-context";
+import { useOnboardingForm, type TeamInviteEntry } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormCard, FormField } from "@/components/ui/form-section";
@@ -39,15 +36,11 @@ export default function EmployerInviteTeamPage() {
   const step = EMPLOYER_STEPS[5]; // invite-team
 
   // Initialize with one empty row if no invites yet
-  const invites =
-    employerData.teamInvites.length > 0
-      ? employerData.teamInvites
-      : [createEmptyInvite()];
+  const teamInvites = employerData.teamInvites ?? [];
+  const invites = teamInvites.length > 0 ? teamInvites : [createEmptyInvite()];
 
   function updateInvite(index: number, updates: Partial<TeamInviteEntry>) {
-    const updated = invites.map((inv, i) =>
-      i === index ? { ...inv, ...updates } : inv
-    );
+    const updated = invites.map((inv, i) => (i === index ? { ...inv, ...updates } : inv));
     setEmployerData({ teamInvites: updated });
   }
 
@@ -88,9 +81,7 @@ export default function EmployerInviteTeamPage() {
           companyLocation: employerData.companyLocation || undefined,
           companySize: employerData.companySize || undefined,
           industries:
-            employerData.industries.length > 0
-              ? employerData.industries
-              : undefined,
+            (employerData.industries ?? []).length > 0 ? employerData.industries : undefined,
           userTitle: employerData.userTitle,
           hiringGoal: employerData.hiringGoal || undefined,
           firstRole: employerData.firstRole
@@ -99,14 +90,10 @@ export default function EmployerInviteTeamPage() {
                 category: employerData.firstRole.category || undefined,
                 location: employerData.firstRole.location || undefined,
                 workType: employerData.firstRole.workType || undefined,
-                employmentType:
-                  employerData.firstRole.employmentType || undefined,
+                employmentType: employerData.firstRole.employmentType || undefined,
               }
             : undefined,
-          teamInvites:
-            includeInvites && validInvites.length > 0
-              ? validInvites
-              : undefined,
+          teamInvites: includeInvites && validInvites.length > 0 ? validInvites : undefined,
         }),
       });
 
@@ -162,9 +149,7 @@ export default function EmployerInviteTeamPage() {
                       type="email"
                       placeholder="colleague@company.com"
                       value={invite.email}
-                      onChange={(e) =>
-                        updateInvite(index, { email: e.target.value })
-                      }
+                      onChange={(e) => updateInvite(index, { email: e.target.value })}
                       autoFocus={index === 0}
                     />
                   </div>
@@ -205,13 +190,7 @@ export default function EmployerInviteTeamPage() {
             </div>
           </FormField>
 
-          <Button
-            type="button"
-            variant="tertiary"
-            size="sm"
-            onClick={addRow}
-            className="mt-2"
-          >
+          <Button type="button" variant="tertiary" size="sm" onClick={addRow} className="mt-2">
             <Plus size={16} weight="bold" className="mr-1.5" />
             Add another person
           </Button>
@@ -219,7 +198,7 @@ export default function EmployerInviteTeamPage() {
 
         {/* Role descriptions */}
         <div className="rounded-[var(--radius-card)] border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
-          <p className="text-[var(--foreground-default)] mb-3 text-caption font-medium">
+          <p className="mb-3 text-caption font-medium text-[var(--foreground-default)]">
             Team roles
           </p>
           <div className="space-y-3">
@@ -249,8 +228,7 @@ export default function EmployerInviteTeamPage() {
                   Hiring Team
                 </p>
                 <p className="text-caption text-[var(--foreground-muted)]">
-                  Can view candidates assigned to their roles and leave
-                  feedback
+                  Can view candidates assigned to their roles and leave feedback
                 </p>
               </div>
             </div>
@@ -258,11 +236,7 @@ export default function EmployerInviteTeamPage() {
         </div>
       </div>
 
-      {error && (
-        <p className="mt-4 text-caption text-[var(--foreground-error)]">
-          {error}
-        </p>
-      )}
+      {error && <p className="mt-4 text-caption text-[var(--foreground-error)]">{error}</p>}
     </OnboardingShell>
   );
 }

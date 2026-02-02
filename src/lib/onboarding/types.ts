@@ -321,7 +321,19 @@ export function getOnboardingRedirect(
   }
 
   if (!progress.baseProfileComplete) {
-    return "/onboarding/profile";
+    // Profile fields are merged into each shell's first step.
+    // Route to the shell's first step if an active role exists.
+    if (entryIntent) {
+      const roleState = progress.roles[entryIntent];
+      if (roleState) {
+        const step = roleState.currentStep || STEPS_BY_SHELL[entryIntent][0]?.id;
+        if (step) {
+          return `/onboarding/${SHELL_ONBOARDING_SLUGS[entryIntent]}/${step}`;
+        }
+      }
+    }
+    // No active role — send to role selection
+    return "/onboarding";
   }
 
   // Check if the entry intent's role needs onboarding

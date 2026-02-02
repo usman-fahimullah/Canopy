@@ -32,30 +32,28 @@ const skillSuggestions = [
 export default function TalentSkillsPage() {
   const router = useRouter();
   const { talentData, setTalentData } = useOnboardingForm();
+  const skills = talentData.skills ?? [];
+  const pathways = talentData.pathways ?? [];
+  const categories = talentData.categories ?? [];
   const [skillInput, setSkillInput] = useState("");
-  const [showCustomSkills, setShowCustomSkills] = useState(
-    talentData.skills.length > 0
-  );
+  const [showCustomSkills, setShowCustomSkills] = useState(skills.length > 0);
 
   const step = TALENT_STEPS[1]; // skills
-  const canContinue =
-    talentData.pathways.length > 0 && talentData.categories.length > 0;
+  const canContinue = pathways.length > 0 && categories.length > 0;
 
   function addSkill(skill: string) {
     const trimmed = skill.trim();
-    if (trimmed && !talentData.skills.includes(trimmed)) {
-      setTalentData({ skills: [...talentData.skills, trimmed] });
+    if (trimmed && !skills.includes(trimmed)) {
+      setTalentData({ skills: [...skills, trimmed] });
     }
     setSkillInput("");
   }
 
   function removeSkill(skill: string) {
-    setTalentData({ skills: talentData.skills.filter((s) => s !== skill) });
+    setTalentData({ skills: skills.filter((s) => s !== skill) });
   }
 
-  const availableSuggestions = skillSuggestions.filter(
-    (s) => !talentData.skills.includes(s)
-  );
+  const availableSuggestions = skillSuggestions.filter((s) => !skills.includes(s));
 
   return (
     <OnboardingShell
@@ -80,7 +78,7 @@ export default function TalentSkillsPage() {
             required
           >
             <PathwaySelector
-              selected={talentData.pathways}
+              selected={pathways}
               onChange={(pathways) => setTalentData({ pathways })}
               max={5}
             />
@@ -89,13 +87,9 @@ export default function TalentSkillsPage() {
 
         {/* Job functions — CategoryTag multi-select */}
         <FormCard>
-          <FormField
-            label="What type of work do you do?"
-            helpText="Select up to 3"
-            required
-          >
+          <FormField label="What type of work do you do?" helpText="Select up to 3" required>
             <CategorySelector
-              selected={talentData.categories}
+              selected={categories}
               onChange={(categories) => setTalentData({ categories })}
               max={3}
             />
@@ -109,7 +103,7 @@ export default function TalentSkillsPage() {
               type="button"
               onClick={() => setShowCustomSkills(true)}
               className={cn(
-                "flex items-center gap-2 text-caption font-medium rounded-lg",
+                "flex items-center gap-2 rounded-lg text-caption font-medium",
                 "text-foreground-muted transition-colors",
                 "hover:text-[var(--candid-foreground-brand)]",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2"
@@ -119,10 +113,7 @@ export default function TalentSkillsPage() {
               Add custom skills (optional)
             </button>
           ) : (
-            <FormField
-              label="Custom skills"
-              helpText="Add skills that showcase your strengths"
-            >
+            <FormField label="Custom skills" helpText="Add skills that showcase your strengths">
               <div className="space-y-3">
                 <div className="flex gap-2">
                   <Input
@@ -140,9 +131,9 @@ export default function TalentSkillsPage() {
                 </div>
 
                 {/* Added skills */}
-                {talentData.skills.length > 0 && (
+                {skills.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {talentData.skills.map((skill) => (
+                    {skills.map((skill) => (
                       <span
                         key={skill}
                         className="inline-flex items-center gap-1 rounded-lg bg-[var(--background-brand-subtle)] px-3 py-1 text-caption font-medium text-[var(--candid-foreground-brand)]"
@@ -163,9 +154,7 @@ export default function TalentSkillsPage() {
                 {/* Suggestions */}
                 {availableSuggestions.length > 0 && (
                   <div>
-                    <p className="mb-2 text-caption-sm text-foreground-muted">
-                      Suggestions:
-                    </p>
+                    <p className="mb-2 text-caption-sm text-foreground-muted">Suggestions:</p>
                     <div className="flex flex-wrap gap-2">
                       {availableSuggestions.slice(0, 8).map((skill) => (
                         <button

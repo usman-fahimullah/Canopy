@@ -319,14 +319,16 @@ export function OnboardingFormProvider({ children }: OnboardingFormProviderProps
   const [hydrated, setHydrated] = useState(false);
 
   // Restore from localStorage on mount
+  // Merge stored data with defaults so any fields added after the user
+  // first saved their data still get sensible initial values.
   useEffect(() => {
     const stored = loadFromStorage();
     if (stored) {
       setSelectedShellState(stored.selectedShell ?? null);
-      setBaseProfileState(stored.baseProfile);
-      setTalentDataState(stored.talent);
-      setCoachDataState(stored.coach);
-      setEmployerDataState(stored.employer);
+      setBaseProfileState({ ...INITIAL_BASE, ...stored.baseProfile });
+      setTalentDataState({ ...INITIAL_TALENT, ...stored.talent });
+      setCoachDataState({ ...INITIAL_COACH, ...stored.coach });
+      setEmployerDataState({ ...INITIAL_EMPLOYER, ...stored.employer });
     }
     setHydrated(true);
   }, []);

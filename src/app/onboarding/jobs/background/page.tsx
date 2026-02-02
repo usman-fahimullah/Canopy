@@ -2,19 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Plus,
-  Trash,
-  Briefcase,
-  CaretDown,
-  CaretUp,
-} from "@phosphor-icons/react";
+import { Plus, Trash, Briefcase, CaretDown, CaretUp } from "@phosphor-icons/react";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
-import {
-  useOnboardingForm,
-  type WorkExperience,
-} from "@/components/onboarding/form-context";
+import { useOnboardingForm, type WorkExperience } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCard, FormField } from "@/components/ui/form-section";
@@ -70,33 +61,27 @@ function createWorkExperience(): WorkExperience {
 export default function TalentBackgroundPage() {
   const router = useRouter();
   const { talentData, setTalentData } = useOnboardingForm();
-  const [showWorkExperience, setShowWorkExperience] = useState(
-    talentData.workExperience.length > 0
-  );
+  const workExperience = talentData.workExperience ?? [];
+  const [showWorkExperience, setShowWorkExperience] = useState(workExperience.length > 0);
 
   const step = TALENT_STEPS[0]; // background
   const canContinue = talentData.careerStage !== null;
 
   function addWorkExperience() {
     setTalentData({
-      workExperience: [...talentData.workExperience, createWorkExperience()],
+      workExperience: [...workExperience, createWorkExperience()],
     });
     setShowWorkExperience(true);
   }
 
-  function updateWorkExperience(
-    id: string,
-    updates: Partial<WorkExperience>
-  ) {
+  function updateWorkExperience(id: string, updates: Partial<WorkExperience>) {
     setTalentData({
-      workExperience: talentData.workExperience.map((exp) =>
-        exp.id === id ? { ...exp, ...updates } : exp
-      ),
+      workExperience: workExperience.map((exp) => (exp.id === id ? { ...exp, ...updates } : exp)),
     });
   }
 
   function removeWorkExperience(id: string) {
-    const updated = talentData.workExperience.filter((exp) => exp.id !== id);
+    const updated = workExperience.filter((exp) => exp.id !== id);
     setTalentData({ workExperience: updated });
     if (updated.length === 0) setShowWorkExperience(false);
   }
@@ -124,9 +109,7 @@ export default function TalentBackgroundPage() {
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() =>
-                    setTalentData({ careerStage: option.value })
-                  }
+                  onClick={() => setTalentData({ careerStage: option.value })}
                   className={cn(
                     "rounded-xl border-2 p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2",
                     talentData.careerStage === option.value
@@ -134,9 +117,7 @@ export default function TalentBackgroundPage() {
                       : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] hover:border-[var(--border-interactive-hover)]"
                   )}
                 >
-                  <p className="text-foreground-default text-body-sm font-medium">
-                    {option.label}
-                  </p>
+                  <p className="text-foreground-default text-body-sm font-medium">{option.label}</p>
                   <p className="mt-0.5 text-caption-sm text-foreground-muted">
                     {option.description}
                   </p>
@@ -148,18 +129,13 @@ export default function TalentBackgroundPage() {
 
         {/* Years of experience */}
         <FormCard>
-          <FormField
-            label="Years of experience"
-            helpText="In any field, not just climate"
-          >
+          <FormField label="Years of experience" helpText="In any field, not just climate">
             <div className="flex flex-wrap gap-2">
               {yearsOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() =>
-                    setTalentData({ yearsExperience: option.value })
-                  }
+                  onClick={() => setTalentData({ yearsExperience: option.value })}
                   className={cn(
                     "rounded-lg border px-4 py-2 text-caption font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2",
                     talentData.yearsExperience === option.value
@@ -176,10 +152,7 @@ export default function TalentBackgroundPage() {
 
         {/* Job title */}
         <FormCard>
-          <FormField
-            label="Current or most recent job title"
-            helpText="Optional"
-          >
+          <FormField label="Current or most recent job title" helpText="Optional">
             <Input
               placeholder="e.g. Software Engineer, Policy Analyst"
               value={talentData.jobTitle}
@@ -193,7 +166,7 @@ export default function TalentBackgroundPage() {
 
         {/* Optional profile building section */}
         <div className="space-y-1">
-          <h3 className="text-body-sm font-medium text-foreground-default">
+          <h3 className="text-foreground-default text-body-sm font-medium">
             Build your profile (optional)
           </h3>
           <p className="text-caption text-foreground-muted">
@@ -214,7 +187,7 @@ export default function TalentBackgroundPage() {
               maxLength={500}
               rows={3}
             />
-            <p className="text-caption-sm text-foreground-muted text-right">
+            <p className="text-right text-caption-sm text-foreground-muted">
               {talentData.goals.length}/500
             </p>
           </FormField>
@@ -238,14 +211,12 @@ export default function TalentBackgroundPage() {
           </button>
         ) : (
           <div className="space-y-4">
-            {talentData.workExperience.map((exp, index) => (
+            {workExperience.map((exp, index) => (
               <WorkExperienceEntry
                 key={exp.id}
                 experience={exp}
                 index={index}
-                onChange={(updates) =>
-                  updateWorkExperience(exp.id, updates)
-                }
+                onChange={(updates) => updateWorkExperience(exp.id, updates)}
                 onRemove={() => removeWorkExperience(exp.id)}
               />
             ))}
@@ -257,7 +228,7 @@ export default function TalentBackgroundPage() {
                 "flex items-center gap-2 text-caption font-medium",
                 "text-foreground-muted transition-colors",
                 "hover:text-[var(--candid-foreground-brand)]",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2 rounded-lg"
+                "rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2"
               )}
             >
               <Plus size={16} weight="bold" />
@@ -290,18 +261,12 @@ function WorkExperienceEntry({
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-2 text-body-sm font-medium text-foreground-default rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2"
+          className="text-foreground-default flex items-center gap-2 rounded-lg text-body-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2"
         >
-          {collapsed ? (
-            <CaretDown size={16} weight="bold" />
-          ) : (
-            <CaretUp size={16} weight="bold" />
-          )}
+          {collapsed ? <CaretDown size={16} weight="bold" /> : <CaretUp size={16} weight="bold" />}
           {experience.title || `Position ${index + 1}`}
           {experience.company && (
-            <span className="font-normal text-foreground-muted">
-              at {experience.company}
-            </span>
+            <span className="font-normal text-foreground-muted">at {experience.company}</span>
           )}
         </button>
         <button
@@ -317,9 +282,7 @@ function WorkExperienceEntry({
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-caption font-medium text-foreground-default">
-                Job title
-              </label>
+              <label className="text-foreground-default text-caption font-medium">Job title</label>
               <Input
                 placeholder="e.g. Software Engineer"
                 value={experience.title}
@@ -327,9 +290,7 @@ function WorkExperienceEntry({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-caption font-medium text-foreground-default">
-                Company
-              </label>
+              <label className="text-foreground-default text-caption font-medium">Company</label>
               <Input
                 placeholder="e.g. Solaris Energy Co."
                 value={experience.company}
@@ -340,9 +301,7 @@ function WorkExperienceEntry({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-caption font-medium text-foreground-default">
-                Start date
-              </label>
+              <label className="text-foreground-default text-caption font-medium">Start date</label>
               <Input
                 type="month"
                 value={experience.startDate}
@@ -350,9 +309,7 @@ function WorkExperienceEntry({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-caption font-medium text-foreground-default">
-                End date
-              </label>
+              <label className="text-foreground-default text-caption font-medium">End date</label>
               <Input
                 type="month"
                 value={experience.endDate}
@@ -374,7 +331,7 @@ function WorkExperienceEntry({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-caption font-medium text-foreground-default">
+            <label className="text-foreground-default text-caption font-medium">
               Description (optional)
             </label>
             <Textarea
