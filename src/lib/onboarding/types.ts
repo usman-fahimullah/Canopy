@@ -239,6 +239,24 @@ export const SHELL_CONFIGS: Record<Shell, ShellConfig> = {
   },
 };
 
+// ─── Legacy Step Migration ────────────────────────────────────────
+// Maps old talent step names (stored in DB) to their new equivalents.
+// Users who started onboarding before the 3-step redesign may have
+// "background" or "preferences" as their currentStep.
+
+const LEGACY_TALENT_STEP_MAP: Record<string, string> = {
+  background: "profile",
+  preferences: "skills",
+};
+
+/** Resolve a step ID, migrating legacy names to current ones */
+function resolveStepId(shell: Shell, stepId: string): string {
+  if (shell === "talent" && LEGACY_TALENT_STEP_MAP[stepId]) {
+    return LEGACY_TALENT_STEP_MAP[stepId];
+  }
+  return stepId;
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────
 
 /** Create a fresh onboarding progress object */
@@ -290,7 +308,8 @@ export function advanceOnboardingStep(
   if (!roleState || roleState.complete) return progress;
 
   const steps = STEPS_BY_SHELL[shell];
-  const currentIndex = steps.findIndex((s) => s.id === roleState.currentStep);
+  const resolvedStep = roleState.currentStep ? resolveStepId(shell, roleState.currentStep) : null;
+  const currentIndex = steps.findIndex((s) => s.id === resolvedStep);
   const nextStep = steps[currentIndex + 1];
 
   if (!nextStep) {
@@ -326,7 +345,8 @@ export function getOnboardingRedirect(
     if (entryIntent) {
       const roleState = progress.roles[entryIntent];
       if (roleState) {
-        const step = roleState.currentStep || STEPS_BY_SHELL[entryIntent][0]?.id;
+        const rawStep = roleState.currentStep || STEPS_BY_SHELL[entryIntent][0]?.id;
+        const step = rawStep ? resolveStepId(entryIntent, rawStep) : null;
         if (step) {
           return `/onboarding/${SHELL_ONBOARDING_SLUGS[entryIntent]}/${step}`;
         }
@@ -340,7 +360,8 @@ export function getOnboardingRedirect(
   if (entryIntent) {
     const roleState = progress.roles[entryIntent];
     if (roleState && !roleState.complete && roleState.currentStep) {
-      return `/onboarding/${SHELL_ONBOARDING_SLUGS[entryIntent]}/${roleState.currentStep}`;
+      const step = resolveStepId(entryIntent, roleState.currentStep);
+      return `/onboarding/${SHELL_ONBOARDING_SLUGS[entryIntent]}/${step}`;
     }
   }
 
@@ -348,7 +369,8 @@ export function getOnboardingRedirect(
   for (const shell of ["talent", "coach", "employer"] as Shell[]) {
     const roleState = progress.roles[shell];
     if (roleState && !roleState.complete && roleState.currentStep) {
-      return `/onboarding/${SHELL_ONBOARDING_SLUGS[shell]}/${roleState.currentStep}`;
+      const step = resolveStepId(shell, roleState.currentStep);
+      return `/onboarding/${SHELL_ONBOARDING_SLUGS[shell]}/${step}`;
     }
   }
 
