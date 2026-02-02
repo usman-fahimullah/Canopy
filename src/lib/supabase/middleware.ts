@@ -6,7 +6,6 @@ const PROTECTED_PREFIXES = [
   "/jobs",
   "/candid/coach",
   "/canopy",
-  "/onboarding/profile",
   "/onboarding/coach",
   "/onboarding/canopy",
   "/onboarding/jobs",

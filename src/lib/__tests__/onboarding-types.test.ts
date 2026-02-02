@@ -1,37 +1,73 @@
 import { describe, it, expect } from "vitest";
 import {
-  getShellSlug, getShellFromSlug, SHELL_URL_SLUGS, URL_SLUG_TO_SHELL,
-  createOnboardingProgress, createRoleOnboardingState, completeRoleOnboarding,
-  advanceOnboardingStep, getOnboardingRedirect, getDashboardPath,
-  hasCompletedAnyOnboarding, getActiveShells, STEPS_BY_SHELL, SHELL_CONFIGS,
-  TALENT_STEPS, COACH_STEPS, EMPLOYER_STEPS,
+  getShellSlug,
+  getShellFromSlug,
+  SHELL_URL_SLUGS,
+  URL_SLUG_TO_SHELL,
+  createOnboardingProgress,
+  createRoleOnboardingState,
+  completeRoleOnboarding,
+  advanceOnboardingStep,
+  getOnboardingRedirect,
+  getDashboardPath,
+  hasCompletedAnyOnboarding,
+  getActiveShells,
+  STEPS_BY_SHELL,
+  SHELL_CONFIGS,
+  TALENT_STEPS,
+  COACH_STEPS,
+  EMPLOYER_STEPS,
 } from "../onboarding/types";
 
 describe("SHELL_URL_SLUGS", () => {
-  it("maps talent to jobs", () => { expect(SHELL_URL_SLUGS.talent).toBe("jobs"); });
-  it("maps coach to candid/coach", () => { expect(SHELL_URL_SLUGS.coach).toBe("candid/coach"); });
-  it("maps employer to canopy", () => { expect(SHELL_URL_SLUGS.employer).toBe("canopy"); });
+  it("maps talent to jobs", () => {
+    expect(SHELL_URL_SLUGS.talent).toBe("jobs");
+  });
+  it("maps coach to candid/coach", () => {
+    expect(SHELL_URL_SLUGS.coach).toBe("candid/coach");
+  });
+  it("maps employer to canopy", () => {
+    expect(SHELL_URL_SLUGS.employer).toBe("canopy");
+  });
 });
 
 describe("URL_SLUG_TO_SHELL", () => {
-  it("maps jobs to talent", () => { expect(URL_SLUG_TO_SHELL.jobs).toBe("talent"); });
-  it("maps canopy to employer", () => { expect(URL_SLUG_TO_SHELL.canopy).toBe("employer"); });
+  it("maps jobs to talent", () => {
+    expect(URL_SLUG_TO_SHELL.jobs).toBe("talent");
+  });
+  it("maps canopy to employer", () => {
+    expect(URL_SLUG_TO_SHELL.canopy).toBe("employer");
+  });
 });
 
 describe("getShellSlug", () => {
-  it("returns jobs for talent", () => { expect(getShellSlug("talent")).toBe("jobs"); });
-  it("returns canopy for employer", () => { expect(getShellSlug("employer")).toBe("canopy"); });
+  it("returns jobs for talent", () => {
+    expect(getShellSlug("talent")).toBe("jobs");
+  });
+  it("returns canopy for employer", () => {
+    expect(getShellSlug("employer")).toBe("canopy");
+  });
 });
 
 describe("getShellFromSlug", () => {
-  it("returns talent for jobs", () => { expect(getShellFromSlug("jobs")).toBe("talent"); });
-  it("returns null for unknown slug", () => { expect(getShellFromSlug("unknown")).toBeNull(); });
+  it("returns talent for jobs", () => {
+    expect(getShellFromSlug("jobs")).toBe("talent");
+  });
+  it("returns null for unknown slug", () => {
+    expect(getShellFromSlug("unknown")).toBeNull();
+  });
 });
 
 describe("STEPS_BY_SHELL", () => {
-  it("has 3 talent steps", () => { expect(STEPS_BY_SHELL.talent).toHaveLength(3); });
-  it("has 6 coach steps", () => { expect(STEPS_BY_SHELL.coach).toHaveLength(6); });
-  it("has 6 employer steps", () => { expect(STEPS_BY_SHELL.employer).toHaveLength(6); });
+  it("has 3 talent steps", () => {
+    expect(STEPS_BY_SHELL.talent).toHaveLength(3);
+  });
+  it("has 6 coach steps", () => {
+    expect(STEPS_BY_SHELL.coach).toHaveLength(6);
+  });
+  it("has 6 employer steps", () => {
+    expect(STEPS_BY_SHELL.employer).toHaveLength(6);
+  });
 });
 
 describe("SHELL_CONFIGS", () => {
@@ -103,9 +139,14 @@ describe("getOnboardingRedirect", () => {
   it("returns /onboarding for null progress", () => {
     expect(getOnboardingRedirect(null, null)).toBe("/onboarding");
   });
-  it("returns /onboarding/profile when base not complete", () => {
+  it("returns /onboarding when base not complete and no intent", () => {
     const p = createOnboardingProgress();
-    expect(getOnboardingRedirect(p, null)).toBe("/onboarding/profile");
+    expect(getOnboardingRedirect(p, null)).toBe("/onboarding");
+  });
+  it("returns shell first step when base not complete but role active", () => {
+    const p = createOnboardingProgress();
+    p.roles.talent = createRoleOnboardingState("talent");
+    expect(getOnboardingRedirect(p, "talent")).toBe("/onboarding/jobs/background");
   });
   it("returns null when all complete", () => {
     const p = createOnboardingProgress();

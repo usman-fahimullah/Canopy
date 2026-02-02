@@ -7,7 +7,7 @@ import { GraduationCap, Buildings } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
 import { Button, Card } from "@/components/ui";
 import { useOnboardingForm } from "@/components/onboarding/form-context";
-import type { Shell } from "@/lib/onboarding/types";
+import { SHELL_ONBOARDING_SLUGS, STEPS_BY_SHELL, type Shell } from "@/lib/onboarding/types";
 
 const roleCards: {
   shell: Shell;
@@ -78,9 +78,11 @@ export default function OnboardingIntentPage() {
         return;
       }
 
-      // Store selected shell in form context so the profile page can route correctly
+      // Store selected shell in form context and route to the shell's first step
       setSelectedShell(shell);
-      router.push("/onboarding/profile");
+      const slug = SHELL_ONBOARDING_SLUGS[shell];
+      const firstStep = STEPS_BY_SHELL[shell][0];
+      router.push(`/onboarding/${slug}/${firstStep.path}`);
     } catch {
       setError("Network error. Please try again.");
     } finally {

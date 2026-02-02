@@ -8,7 +8,7 @@ import { StepNavigation } from "@/components/onboarding/step-navigation";
 import { useOnboardingForm, type WorkExperience } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FormCard, FormField } from "@/components/ui/form-section";
+import { FormCard, FormField, FormRow } from "@/components/ui/form-section";
 import { CheckboxWithLabel } from "@/components/ui/checkbox";
 import { TALENT_STEPS } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
@@ -60,12 +60,17 @@ function createWorkExperience(): WorkExperience {
 
 export default function TalentBackgroundPage() {
   const router = useRouter();
-  const { talentData, setTalentData } = useOnboardingForm();
+  const { talentData, setTalentData, baseProfile, setBaseProfile } = useOnboardingForm();
   const workExperience = talentData.workExperience ?? [];
   const [showWorkExperience, setShowWorkExperience] = useState(workExperience.length > 0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const step = TALENT_STEPS[0]; // background
-  const canContinue = talentData.careerStage !== null;
+  const canContinue =
+    baseProfile.firstName.trim().length > 0 &&
+    baseProfile.lastName.trim().length > 0 &&
+    talentData.careerStage !== null;
 
   function addWorkExperience() {
     setTalentData({
@@ -86,6 +91,43 @@ export default function TalentBackgroundPage() {
     if (updated.length === 0) setShowWorkExperience(false);
   }
 
+  async function handleContinue() {
+    if (!canContinue) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "complete-profile",
+          firstName: baseProfile.firstName,
+          lastName: baseProfile.lastName,
+          linkedinUrl: baseProfile.linkedinUrl || undefined,
+          bio: talentData.goals || undefined,
+        }),
+      });
+
+      if (res.status === 401) {
+        router.push("/auth/redirect");
+        return;
+      }
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Something went wrong");
+        return;
+      }
+
+      router.push("/onboarding/jobs/skills");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <OnboardingShell
       shell="talent"
@@ -94,13 +136,49 @@ export default function TalentBackgroundPage() {
       totalSteps={TALENT_STEPS.length}
       footer={
         <StepNavigation
-          onBack={() => router.push("/onboarding/profile")}
-          onContinue={() => router.push("/onboarding/jobs/skills")}
+          onBack={() => router.push("/onboarding")}
+          onContinue={handleContinue}
           canContinue={canContinue}
+          loading={loading}
         />
       }
     >
       <div className="space-y-6">
+        {/* About you */}
+        <FormCard>
+          <FormRow>
+            <FormField label="First name" required>
+              <Input
+                placeholder="Jane"
+                value={baseProfile.firstName}
+                onChange={(e) => setBaseProfile({ firstName: e.target.value })}
+                autoComplete="given-name"
+                autoFocus
+              />
+            </FormField>
+            <FormField label="Last name" required>
+              <Input
+                placeholder="Doe"
+                value={baseProfile.lastName}
+                onChange={(e) => setBaseProfile({ lastName: e.target.value })}
+                autoComplete="family-name"
+              />
+            </FormField>
+          </FormRow>
+
+          <FormField
+            label="LinkedIn URL"
+            helpText="Optional, but helps us personalize your experience"
+          >
+            <Input
+              placeholder="https://linkedin.com/in/your-profile"
+              value={baseProfile.linkedinUrl}
+              onChange={(e) => setBaseProfile({ linkedinUrl: e.target.value })}
+              autoComplete="url"
+            />
+          </FormField>
+        </FormCard>
+
         {/* Career stage */}
         <FormCard>
           <FormField label="Where are you in your career?" required>
@@ -236,6 +314,8 @@ export default function TalentBackgroundPage() {
             </button>
           </div>
         )}
+
+        {error && <p className="text-caption text-[var(--foreground-error)]">{error}</p>}
       </div>
     </OnboardingShell>
   );
