@@ -12,7 +12,7 @@ export type EntryIntent = "talent" | "coach" | "employer";
 // ─── Onboarding Steps ──────────────────────────────────────────────
 
 /** Steps in the talent (job seeker) onboarding */
-export type TalentOnboardingStep = "background" | "skills" | "preferences";
+export type TalentOnboardingStep = "profile" | "career" | "skills";
 
 /** Steps in the coach onboarding */
 export type CoachOnboardingStep =
@@ -66,22 +66,22 @@ export interface StepConfig {
 /** Step definitions per shell */
 export const TALENT_STEPS: StepConfig[] = [
   {
-    id: "background",
-    path: "background",
-    title: "Your background",
-    subtitle: "Help us understand where you are in your career",
+    id: "profile",
+    path: "profile",
+    title: "Build your profile",
+    subtitle: "Let's get to know you",
+  },
+  {
+    id: "career",
+    path: "career",
+    title: "Your Career Journey",
+    subtitle: "Help us understand where you are",
   },
   {
     id: "skills",
     path: "skills",
-    title: "Skills & sectors",
-    subtitle: "What climate sectors interest you?",
-  },
-  {
-    id: "preferences",
-    path: "preferences",
-    title: "What you're looking for",
-    subtitle: "Help us match you with the right opportunities",
+    title: "Skills & Preferences",
+    subtitle: "Tell us what you're looking for",
   },
 ];
 

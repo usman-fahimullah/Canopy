@@ -33,6 +33,11 @@ const setIntentSchema = z.object({
 const completeProfileSchema = z.object({
   action: z.literal("complete-profile"),
   ...baseProfileFields,
+  pronouns: z.string().max(100).optional(),
+  ethnicity: z.string().max(100).optional(),
+  phone: z.string().max(50).optional(),
+  location: z.string().max(300).optional(),
+  profilePhotoUrl: z.string().max(500000).optional(), // data URL or uploaded URL
 });
 
 const workExperienceSchema = z.object({
@@ -67,6 +72,7 @@ const talentFields = {
   categories: z.array(z.string().max(100)).max(15).optional(),
   workExperience: z.array(workExperienceSchema).max(20).optional(),
   remotePreference: z.string().max(100).optional(),
+  jobTypeInterests: z.array(z.string().max(100)).max(20).optional(),
 };
 
 const coachFields = {
@@ -164,6 +170,11 @@ interface AccountUpdate {
   entryIntent?: string;
   activeRoles?: string[];
   primaryRole?: string;
+  pronouns?: string;
+  ethnicity?: string;
+  phone?: string;
+  location?: string;
+  avatar?: string;
 }
 
 /** Convert OnboardingProgress to a plain JSON object for Prisma's Json field */
@@ -340,6 +351,11 @@ export async function POST(request: NextRequest) {
       }
       if (body.linkedinUrl) accountUpdate.linkedinUrl = body.linkedinUrl;
       if (body.bio) accountUpdate.bio = body.bio;
+      if (body.pronouns) accountUpdate.pronouns = body.pronouns;
+      if (body.ethnicity) accountUpdate.ethnicity = body.ethnicity;
+      if (body.phone) accountUpdate.phone = body.phone;
+      if (body.location) accountUpdate.location = body.location;
+      if (body.profilePhotoUrl) accountUpdate.avatar = body.profilePhotoUrl;
 
       progress.baseProfileComplete = true;
 
@@ -367,13 +383,19 @@ export async function POST(request: NextRequest) {
       // Normalize goals to a string for headline usage
       const goalsText = typeof body.goals === "string" ? body.goals : body.goals?.[0] || null;
 
-      // Build motivations array from preferences
+      // Build motivations array from preferences and goals
       const motivations: string[] = [];
+      if (Array.isArray(body.goals) && body.goals.length > 0) {
+        body.goals.forEach((g) => motivations.push(`goal:${g}`));
+      }
       if (body.remotePreference) motivations.push(`remote:${body.remotePreference}`);
       if (body.locationPreference) motivations.push(`location:${body.locationPreference}`);
       if (body.transitionTimeline) motivations.push(`timeline:${body.transitionTimeline}`);
       if (body.roleTypes && body.roleTypes.length > 0) {
         body.roleTypes.forEach((rt) => motivations.push(`roleType:${rt}`));
+      }
+      if (body.jobTypeInterests && body.jobTypeInterests.length > 0) {
+        body.jobTypeInterests.forEach((jt) => motivations.push(`jobType:${jt}`));
       }
       if (typeof body.salaryRange === "object" && body.salaryRange) {
         const { min, max } = body.salaryRange;

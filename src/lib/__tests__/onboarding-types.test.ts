@@ -93,7 +93,7 @@ describe("createRoleOnboardingState", () => {
     const s = createRoleOnboardingState("talent");
     expect(s.complete).toBe(false);
     expect(s.completedAt).toBeNull();
-    expect(s.currentStep).toBe("background");
+    expect(s.currentStep).toBe("profile");
   });
   it("initializes coach with first step", () => {
     expect(createRoleOnboardingState("coach").currentStep).toBe("about");
@@ -119,11 +119,11 @@ describe("advanceOnboardingStep", () => {
     const p = createOnboardingProgress();
     p.roles.talent = createRoleOnboardingState("talent");
     const updated = advanceOnboardingStep(p, "talent");
-    expect(updated.roles.talent!.currentStep).toBe("skills");
+    expect(updated.roles.talent!.currentStep).toBe("career");
   });
   it("marks complete when no more steps", () => {
     const p = createOnboardingProgress();
-    p.roles.talent = { complete: false, completedAt: null, currentStep: "preferences" };
+    p.roles.talent = { complete: false, completedAt: null, currentStep: "skills" };
     const updated = advanceOnboardingStep(p, "talent");
     expect(updated.roles.talent!.complete).toBe(true);
   });
@@ -146,7 +146,7 @@ describe("getOnboardingRedirect", () => {
   it("returns shell first step when base not complete but role active", () => {
     const p = createOnboardingProgress();
     p.roles.talent = createRoleOnboardingState("talent");
-    expect(getOnboardingRedirect(p, "talent")).toBe("/onboarding/jobs/background");
+    expect(getOnboardingRedirect(p, "talent")).toBe("/onboarding/jobs/profile");
   });
   it("returns null when all complete", () => {
     const p = createOnboardingProgress();
@@ -158,7 +158,7 @@ describe("getOnboardingRedirect", () => {
     p.baseProfileComplete = true;
     p.roles.talent = createRoleOnboardingState("talent");
     const url = getOnboardingRedirect(p, "talent");
-    expect(url).toContain("/onboarding/jobs/background");
+    expect(url).toContain("/onboarding/jobs/profile");
   });
 });
 

@@ -10,6 +10,11 @@ export interface BaseProfileData {
   lastName: string;
   linkedinUrl: string;
   bio: string;
+  pronouns: string;
+  ethnicity: string;
+  phone: string;
+  location: string;
+  profilePhotoUrl: string;
 }
 
 export interface WorkExperience {
@@ -33,7 +38,8 @@ export interface TalentFormData {
   locationPreference: string | null;
   salaryMin: string;
   salaryMax: string;
-  goals: string;
+  goals: string[];
+  jobTypeInterests: string[];
   workExperience: WorkExperience[];
   pathways: string[];
   categories: string[];
@@ -132,6 +138,11 @@ const INITIAL_BASE: BaseProfileData = {
   lastName: "",
   linkedinUrl: "",
   bio: "",
+  pronouns: "",
+  ethnicity: "",
+  phone: "",
+  location: "",
+  profilePhotoUrl: "",
 };
 
 const INITIAL_TALENT: TalentFormData = {
@@ -145,7 +156,8 @@ const INITIAL_TALENT: TalentFormData = {
   locationPreference: null,
   salaryMin: "",
   salaryMax: "",
-  goals: "",
+  goals: [],
+  jobTypeInterests: [],
   workExperience: [],
   pathways: [],
   categories: [],
