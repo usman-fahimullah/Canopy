@@ -71,8 +71,8 @@ export default function TalentProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "complete-profile",
-          firstName: baseProfile.firstName,
-          lastName: baseProfile.lastName,
+          firstName: baseProfile.firstName || undefined,
+          lastName: baseProfile.lastName || undefined,
           pronouns: baseProfile.pronouns || undefined,
           ethnicity: baseProfile.ethnicity || undefined,
           phone: baseProfile.phone || undefined,
