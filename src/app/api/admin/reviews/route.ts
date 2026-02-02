@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { AdminReviewActionSchema } from "@/lib/validators/api";
 
 // GET — list reviews for admin (with optional flagged filter)
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -26,9 +29,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const isAdmin = account.orgMemberships.some(
-      (m) => m.role === "OWNER" || m.role === "ADMIN"
-    );
+    const isAdmin = account.orgMemberships.some((m) => m.role === "OWNER" || m.role === "ADMIN");
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -62,19 +63,31 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ reviews });
   } catch (error) {
-    logger.error("Admin fetch reviews error", { error: formatError(error), endpoint: "/api/admin/reviews" });
-    return NextResponse.json(
-      { error: "Failed to fetch reviews" },
-      { status: 500 }
-    );
+    logger.error("Admin fetch reviews error", {
+      error: formatError(error),
+      endpoint: "/api/admin/reviews",
+    });
+    return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
   }
 }
 
 // PATCH — admin hide/unhide/unflag review
 export async function PATCH(request: NextRequest) {
   try {
+    // Rate limit: 10 admin review actions per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `admin-reviews:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -91,9 +104,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const isAdmin = account.orgMemberships.some(
-      (m) => m.role === "OWNER" || m.role === "ADMIN"
-    );
+    const isAdmin = account.orgMemberships.some((m) => m.role === "OWNER" || m.role === "ADMIN");
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -138,9 +149,10 @@ export async function PATCH(request: NextRequest) {
           select: { rating: true },
         });
 
-        const avgRating = visibleReviews.length > 0
-          ? visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length
-          : 0;
+        const avgRating =
+          visibleReviews.length > 0
+            ? visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length
+            : 0;
 
         await tx.coachProfile.update({
           where: { id: updated.coachId },
@@ -156,10 +168,10 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, review: updated });
   } catch (error) {
-    logger.error("Admin update review error", { error: formatError(error), endpoint: "/api/admin/reviews" });
-    return NextResponse.json(
-      { error: "Failed to update review" },
-      { status: 500 }
-    );
+    logger.error("Admin update review error", {
+      error: formatError(error),
+      endpoint: "/api/admin/reviews",
+    });
+    return NextResponse.json({ error: "Failed to update review" }, { status: 500 });
   }
 }

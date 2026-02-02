@@ -11,7 +11,7 @@ interface CandidSymbolProps {
 export function CandidSymbol({
   className = "",
   size = 32,
-  color = "#072924",
+  color = "currentColor",
 }: CandidSymbolProps) {
   return (
     <svg

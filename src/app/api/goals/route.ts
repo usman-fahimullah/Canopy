@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { CreateGoalSchema } from "@/lib/validators/api";
 
 // GET — list seeker's goals with milestones
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -35,18 +38,27 @@ export async function GET() {
     return NextResponse.json({ goals });
   } catch (error) {
     logger.error("Fetch goals error", { error: formatError(error), endpoint: "/api/goals" });
-    return NextResponse.json(
-      { error: "Failed to fetch goals" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 });
   }
 }
 
 // POST — create new goal
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 goal creates per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `goals-create:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -78,12 +90,15 @@ export async function POST(request: NextRequest) {
         description: description || null,
         icon: icon || null,
         targetDate: targetDate ? new Date(targetDate) : null,
-        milestones: milestones && milestones.length > 0 ? {
-          create: milestones.map((m: { title: string }, i: number) => ({
-            title: m.title,
-            order: i,
-          })),
-        } : undefined,
+        milestones:
+          milestones && milestones.length > 0
+            ? {
+                create: milestones.map((m: { title: string }, i: number) => ({
+                  title: m.title,
+                  order: i,
+                })),
+              }
+            : undefined,
       },
       include: { milestones: true },
     });
@@ -91,9 +106,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ goal }, { status: 201 });
   } catch (error) {
     logger.error("Create goal error", { error: formatError(error), endpoint: "/api/goals" });
-    return NextResponse.json(
-      { error: "Failed to create goal" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
   }
 }

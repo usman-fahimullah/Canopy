@@ -2,17 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { UpdateGoalSchema, AddMilestoneSchema } from "@/lib/validators/api";
 
 // PATCH — update goal (title, progress, status)
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Rate limit: 20 goal updates per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(20, `goals-update:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id: goalId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -68,22 +78,28 @@ export async function PATCH(
     return NextResponse.json({ goal: updated });
   } catch (error) {
     logger.error("Update goal error", { error: formatError(error), endpoint: "/api/goals/[id]" });
-    return NextResponse.json(
-      { error: "Failed to update goal" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update goal" }, { status: 500 });
   }
 }
 
 // POST — add milestone to goal
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Rate limit: 10 milestone creates per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `milestone-create:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id: goalId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -128,9 +144,6 @@ export async function POST(
     return NextResponse.json({ milestone }, { status: 201 });
   } catch (error) {
     logger.error("Add milestone error", { error: formatError(error), endpoint: "/api/goals/[id]" });
-    return NextResponse.json(
-      { error: "Failed to add milestone" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to add milestone" }, { status: 500 });
   }
 }

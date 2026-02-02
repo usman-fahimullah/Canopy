@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { CreateExperienceSchema } from "@/lib/validators/api";
 
 // GET — list experiences for current user
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,19 +34,31 @@ export async function GET() {
 
     return NextResponse.json({ experiences });
   } catch (error) {
-    logger.error("Fetch experiences error", { error: formatError(error), endpoint: "/api/experience" });
-    return NextResponse.json(
-      { error: "Failed to fetch experiences" },
-      { status: 500 }
-    );
+    logger.error("Fetch experiences error", {
+      error: formatError(error),
+      endpoint: "/api/experience",
+    });
+    return NextResponse.json({ error: "Failed to fetch experiences" }, { status: 500 });
   }
 }
 
 // POST — create new experience
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 experience creates per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `experience-create:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -83,7 +98,11 @@ export async function POST(request: NextRequest) {
         seekerId: account.seekerProfile.id,
         companyName: companyName.trim(),
         jobTitle: jobTitle.trim(),
-        employmentType: (employmentType || "FULL_TIME") as "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP",
+        employmentType: (employmentType || "FULL_TIME") as
+          | "FULL_TIME"
+          | "PART_TIME"
+          | "CONTRACT"
+          | "INTERNSHIP",
         workType: (workType || "ONSITE") as "ONSITE" | "REMOTE" | "HYBRID",
         startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
@@ -95,10 +114,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ experience }, { status: 201 });
   } catch (error) {
-    logger.error("Create experience error", { error: formatError(error), endpoint: "/api/experience" });
-    return NextResponse.json(
-      { error: "Failed to create experience" },
-      { status: 500 }
-    );
+    logger.error("Create experience error", {
+      error: formatError(error),
+      endpoint: "/api/experience",
+    });
+    return NextResponse.json({ error: "Failed to create experience" }, { status: 500 });
   }
 }

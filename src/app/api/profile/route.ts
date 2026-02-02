@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { UpdateProfileSchema } from "@/lib/validators/api";
 
 // GET — current user's account + seekerProfile + coachProfile
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -29,18 +32,27 @@ export async function GET() {
     return NextResponse.json({ account });
   } catch (error) {
     logger.error("Fetch profile error", { error: formatError(error), endpoint: "/api/profile" });
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch profile" }, { status: 500 });
   }
 }
 
 // PATCH — update account and profile fields
 export async function PATCH(request: NextRequest) {
   try {
+    // Rate limit: 10 profile updates per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `profile-update:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -64,12 +76,28 @@ export async function PATCH(request: NextRequest) {
       );
     }
     const {
-      name, avatar, phone, location, timezone, bio,
-      pronouns, ethnicity, linkedinUrl,
+      name,
+      avatar,
+      phone,
+      location,
+      timezone,
+      bio,
+      pronouns,
+      ethnicity,
+      linkedinUrl,
       // Seeker profile fields
-      headline, skills, greenSkills, certifications,
-      yearsExperience, targetSectors, resumeUrl, portfolioUrl,
-      summary, isMentor, mentorBio, mentorTopics,
+      headline,
+      skills,
+      greenSkills,
+      certifications,
+      yearsExperience,
+      targetSectors,
+      resumeUrl,
+      portfolioUrl,
+      summary,
+      isMentor,
+      mentorBio,
+      mentorTopics,
     } = result.data;
 
     // Update account
@@ -124,9 +152,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ account: updated });
   } catch (error) {
     logger.error("Update profile error", { error: formatError(error), endpoint: "/api/profile" });
-    return NextResponse.json(
-      { error: "Failed to update profile" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
   }
 }

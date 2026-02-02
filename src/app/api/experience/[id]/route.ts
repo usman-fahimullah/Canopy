@@ -2,16 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { UpdateExperienceSchema } from "@/lib/validators/api";
 
 // PATCH — update experience
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Rate limit: 10 experience updates per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `experience-update:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -96,22 +106,31 @@ export async function PATCH(
 
     return NextResponse.json({ experience: updated });
   } catch (error) {
-    logger.error("Update experience error", { error: formatError(error), endpoint: "/api/experience/[id]" });
-    return NextResponse.json(
-      { error: "Failed to update experience" },
-      { status: 500 }
-    );
+    logger.error("Update experience error", {
+      error: formatError(error),
+      endpoint: "/api/experience/[id]",
+    });
+    return NextResponse.json({ error: "Failed to update experience" }, { status: 500 });
   }
 }
 
 // DELETE — delete experience
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    // Rate limit: 10 experience deletes per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `experience-delete:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -141,10 +160,10 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error("Delete experience error", { error: formatError(error), endpoint: "/api/experience/[id]" });
-    return NextResponse.json(
-      { error: "Failed to delete experience" },
-      { status: 500 }
-    );
+    logger.error("Delete experience error", {
+      error: formatError(error),
+      endpoint: "/api/experience/[id]",
+    });
+    return NextResponse.json({ error: "Failed to delete experience" }, { status: 500 });
   }
 }

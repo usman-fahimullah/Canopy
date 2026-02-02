@@ -48,21 +48,20 @@ const talentFields = {
   careerStage: z.string().max(100).optional().nullable(),
   skills: z.array(z.string().max(200)).max(50).optional(),
   sectors: z.array(z.string().max(200)).max(50).optional(),
-  goals: z.union([
-    z.string().max(2000),
-    z.array(z.string().max(500)).max(20),
-  ]).optional(),
+  goals: z.union([z.string().max(2000), z.array(z.string().max(500)).max(20)]).optional(),
   yearsExperience: z.enum(["less-than-1", "1-3", "3-7", "7-10", "10+"]).optional(),
   roleTypes: z.array(z.string().max(100)).max(20).optional(),
   transitionTimeline: z.string().max(100).optional(),
   locationPreference: z.string().max(200).optional(),
-  salaryRange: z.union([
-    z.string().max(100),
-    z.object({
-      min: z.number().nullable().optional(),
-      max: z.number().nullable().optional(),
-    }),
-  ]).optional(),
+  salaryRange: z
+    .union([
+      z.string().max(100),
+      z.object({
+        min: z.number().nullable().optional(),
+        max: z.number().nullable().optional(),
+      }),
+    ])
+    .optional(),
   jobTitle: z.string().max(200).optional(),
   pathways: z.array(z.string().max(100)).max(20).optional(),
   categories: z.array(z.string().max(100)).max(15).optional(),
@@ -366,9 +365,7 @@ export async function POST(request: NextRequest) {
       const legacyRole = body.role;
 
       // Normalize goals to a string for headline usage
-      const goalsText = typeof body.goals === "string"
-        ? body.goals
-        : body.goals?.[0] || null;
+      const goalsText = typeof body.goals === "string" ? body.goals : body.goals?.[0] || null;
 
       // Build motivations array from preferences
       const motivations: string[] = [];
@@ -395,9 +392,7 @@ export async function POST(request: NextRequest) {
         skills: body.skills || [],
         greenSkills: body.categories || [],
         careerStage: (body.careerStage as CareerStage) || null,
-        yearsExperience: body.yearsExperience
-          ? parseYearsExperience(body.yearsExperience)
-          : null,
+        yearsExperience: body.yearsExperience ? parseYearsExperience(body.yearsExperience) : null,
         motivations,
         summary: goalsText || null,
       };
@@ -419,25 +414,23 @@ export async function POST(request: NextRequest) {
           await tx.seekerProfile.update({
             where: { id: profileId },
             data: {
-              targetSectors: seekerData.targetSectors.length > 0
-                ? seekerData.targetSectors
-                : account.seekerProfile.targetSectors,
+              targetSectors:
+                seekerData.targetSectors.length > 0
+                  ? seekerData.targetSectors
+                  : account.seekerProfile.targetSectors,
               headline: seekerData.headline || account.seekerProfile.headline,
               isMentor: legacyRole === "mentor" ? true : account.seekerProfile.isMentor,
-              mentorTopics: legacyRole === "mentor"
-                ? body.sectors || []
-                : account.seekerProfile.mentorTopics,
-              skills: seekerData.skills.length > 0
-                ? seekerData.skills
-                : account.seekerProfile.skills,
-              greenSkills: seekerData.greenSkills.length > 0
-                ? seekerData.greenSkills
-                : account.seekerProfile.greenSkills,
+              mentorTopics:
+                legacyRole === "mentor" ? body.sectors || [] : account.seekerProfile.mentorTopics,
+              skills:
+                seekerData.skills.length > 0 ? seekerData.skills : account.seekerProfile.skills,
+              greenSkills:
+                seekerData.greenSkills.length > 0
+                  ? seekerData.greenSkills
+                  : account.seekerProfile.greenSkills,
               careerStage: seekerData.careerStage || account.seekerProfile.careerStage,
               yearsExperience: seekerData.yearsExperience ?? account.seekerProfile.yearsExperience,
-              motivations: motivations.length > 0
-                ? motivations
-                : account.seekerProfile.motivations,
+              motivations: motivations.length > 0 ? motivations : account.seekerProfile.motivations,
               summary: seekerData.summary || account.seekerProfile.summary,
             },
           });
@@ -476,12 +469,8 @@ export async function POST(request: NextRequest) {
               seekerId: profileId,
               jobTitle: exp.title,
               companyName: exp.company,
-              startDate: exp.startDate
-                ? new Date(`${exp.startDate}-01`)
-                : new Date(),
-              endDate: exp.endDate && !exp.isCurrent
-                ? new Date(`${exp.endDate}-01`)
-                : null,
+              startDate: exp.startDate ? new Date(`${exp.startDate}-01`) : new Date(),
+              endDate: exp.endDate && !exp.isCurrent ? new Date(`${exp.endDate}-01`) : null,
               isCurrent: exp.isCurrent ?? false,
               description: exp.description || null,
               employmentType: "FULL_TIME" as const,
@@ -517,45 +506,48 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      if (!account.coachProfile) {
-        await prisma.coachProfile.create({
-          data: {
-            accountId: account.id,
-            firstName: body.firstName || null,
-            lastName: body.lastName || null,
-            bio: body.bio || null,
-            headline: body.headline || null,
-            photoUrl: body.photoUrl || null,
-            sectors: body.sectors || [],
-            expertise: body.expertise || [],
-            sessionTypes: body.sessionTypes || [],
-            sessionRate: body.sessionRate || 15000,
-            yearsInClimate: body.yearsInClimate || null,
-            availability: body.availability || null,
-            bufferTime: bufferTime ?? 15,
-            status: "PENDING",
-            applicationDate: new Date(),
-          },
-        });
-      } else {
-        await prisma.coachProfile.update({
-          where: { id: account.coachProfile.id },
-          data: {
-            firstName: body.firstName || account.coachProfile.firstName,
-            lastName: body.lastName || account.coachProfile.lastName,
-            bio: body.bio || account.coachProfile.bio,
-            headline: body.headline || account.coachProfile.headline,
-            photoUrl: body.photoUrl || account.coachProfile.photoUrl,
-            sectors: body.sectors || account.coachProfile.sectors,
-            expertise: body.expertise || account.coachProfile.expertise,
-            sessionTypes: body.sessionTypes || account.coachProfile.sessionTypes,
-            sessionRate: body.sessionRate || account.coachProfile.sessionRate,
-            yearsInClimate: body.yearsInClimate || account.coachProfile.yearsInClimate,
-            availability: body.availability || account.coachProfile.availability,
-            bufferTime: bufferTime ?? account.coachProfile.bufferTime,
-          },
-        });
-      }
+      // Wrap coach profile + account update in a transaction for consistency
+      await prisma.$transaction(async (tx) => {
+        if (!account.coachProfile) {
+          await tx.coachProfile.create({
+            data: {
+              accountId: account.id,
+              firstName: body.firstName || null,
+              lastName: body.lastName || null,
+              bio: body.bio || null,
+              headline: body.headline || null,
+              photoUrl: body.photoUrl || null,
+              sectors: body.sectors || [],
+              expertise: body.expertise || [],
+              sessionTypes: body.sessionTypes || [],
+              sessionRate: body.sessionRate || 15000,
+              yearsInClimate: body.yearsInClimate || null,
+              availability: body.availability || null,
+              bufferTime: bufferTime ?? 15,
+              status: "PENDING",
+              applicationDate: new Date(),
+            },
+          });
+        } else {
+          await tx.coachProfile.update({
+            where: { id: account.coachProfile.id },
+            data: {
+              firstName: body.firstName || account.coachProfile.firstName,
+              lastName: body.lastName || account.coachProfile.lastName,
+              bio: body.bio || account.coachProfile.bio,
+              headline: body.headline || account.coachProfile.headline,
+              photoUrl: body.photoUrl || account.coachProfile.photoUrl,
+              sectors: body.sectors || account.coachProfile.sectors,
+              expertise: body.expertise || account.coachProfile.expertise,
+              sessionTypes: body.sessionTypes || account.coachProfile.sessionTypes,
+              sessionRate: body.sessionRate || account.coachProfile.sessionRate,
+              yearsInClimate: body.yearsInClimate || account.coachProfile.yearsInClimate,
+              availability: body.availability || account.coachProfile.availability,
+              bufferTime: bufferTime ?? account.coachProfile.bufferTime,
+            },
+          });
+        }
+      });
 
       return finishRoleOnboarding(account, progress, "coach", accountUpdate, body.action);
     }
@@ -576,85 +568,93 @@ export async function POST(request: NextRequest) {
         include: { organization: true },
       });
 
-      let orgId: string;
+      // Wrap org create/update, member create, and job create in a transaction
+      const orgId = await prisma.$transaction(async (tx) => {
+        let txOrgId: string;
 
-      if (existingMembership) {
-        orgId = existingMembership.organizationId;
-        await prisma.organization.update({
-          where: { id: orgId },
-          data: {
-            name: body.companyName,
-            description: body.companyDescription || undefined,
-            website: body.companyWebsite || undefined,
-            location: body.companyLocation || undefined,
-            size: body.companySize || undefined,
-            industries: body.industries || undefined,
-            hiringGoal: body.hiringGoal || undefined,
-          },
-        });
-      } else {
-        const org = await prisma.organization.create({
-          data: {
-            name: body.companyName,
-            slug,
-            description: body.companyDescription || null,
-            website: body.companyWebsite || null,
-            location: body.companyLocation || null,
-            size: body.companySize || null,
-            industries: body.industries || [],
-            hiringGoal: body.hiringGoal || null,
-          },
-        });
-        orgId = org.id;
+        if (existingMembership) {
+          txOrgId = existingMembership.organizationId;
+          await tx.organization.update({
+            where: { id: txOrgId },
+            data: {
+              name: body.companyName,
+              description: body.companyDescription || undefined,
+              website: body.companyWebsite || undefined,
+              location: body.companyLocation || undefined,
+              size: body.companySize || undefined,
+              industries: body.industries || undefined,
+              hiringGoal: body.hiringGoal || undefined,
+            },
+          });
+        } else {
+          const org = await tx.organization.create({
+            data: {
+              name: body.companyName,
+              slug,
+              description: body.companyDescription || null,
+              website: body.companyWebsite || null,
+              location: body.companyLocation || null,
+              size: body.companySize || null,
+              industries: body.industries || [],
+              hiringGoal: body.hiringGoal || null,
+            },
+          });
+          txOrgId = org.id;
 
-        await prisma.organizationMember.create({
-          data: {
-            accountId: account.id,
-            organizationId: org.id,
-            role: "OWNER",
-            title: body.userTitle || null,
-          },
-        });
-      }
+          await tx.organizationMember.create({
+            data: {
+              accountId: account.id,
+              organizationId: org.id,
+              role: "OWNER",
+              title: body.userTitle || null,
+            },
+          });
+        }
 
-      // Create a draft job if firstRole is provided
-      if (body.firstRole) {
-        const jobSlug = body.firstRole.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-|-$/g, "");
+        // Create a draft job if firstRole is provided
+        if (body.firstRole) {
+          const jobSlug = body.firstRole.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
 
-        const workTypeMap: Record<string, "ONSITE" | "HYBRID" | "REMOTE"> = {
-          onsite: "ONSITE",
-          hybrid: "HYBRID",
-          remote: "REMOTE",
-        };
+          const workTypeMap: Record<string, "ONSITE" | "HYBRID" | "REMOTE"> = {
+            onsite: "ONSITE",
+            hybrid: "HYBRID",
+            remote: "REMOTE",
+          };
 
-        const employmentTypeMap: Record<string, "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP"> = {
-          "full-time": "FULL_TIME",
-          "part-time": "PART_TIME",
-          contract: "CONTRACT",
-          internship: "INTERNSHIP",
-        };
+          const employmentTypeMap: Record<
+            string,
+            "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP"
+          > = {
+            "full-time": "FULL_TIME",
+            "part-time": "PART_TIME",
+            contract: "CONTRACT",
+            internship: "INTERNSHIP",
+          };
 
-        await prisma.job.create({
-          data: {
-            title: body.firstRole.title,
-            slug: jobSlug,
-            description: "",
-            organizationId: orgId,
-            location: body.firstRole.location || null,
-            locationType: body.firstRole.workType
-              ? workTypeMap[body.firstRole.workType]
-              : undefined,
-            employmentType: body.firstRole.employmentType
-              ? employmentTypeMap[body.firstRole.employmentType]
-              : undefined,
-            climateCategory: body.firstRole.category || null,
-            status: "DRAFT",
-          },
-        });
-      }
+          await tx.job.create({
+            data: {
+              title: body.firstRole.title,
+              slug: jobSlug,
+              description: "",
+              organizationId: txOrgId,
+              location: body.firstRole.location || null,
+              locationType: body.firstRole.workType
+                ? workTypeMap[body.firstRole.workType]
+                : undefined,
+              employmentType: body.firstRole.employmentType
+                ? employmentTypeMap[body.firstRole.employmentType]
+                : undefined,
+              climateCategory: body.firstRole.category || null,
+              status: "DRAFT",
+            },
+          });
+        }
+
+        return txOrgId;
+      });
 
       // Send team invites (non-blocking)
       if (body.teamInvites && body.teamInvites.length > 0) {
@@ -798,7 +798,10 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    logger.error("Onboarding POST error", { error: formatError(error), endpoint: "/api/onboarding" });
+    logger.error("Onboarding POST error", {
+      error: formatError(error),
+      endpoint: "/api/onboarding",
+    });
     return NextResponse.json({ error: "Failed to complete onboarding" }, { status: 500 });
   }
 }

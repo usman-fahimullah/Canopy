@@ -2,16 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 
 // PUT — mark a single notification as read
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Rate limit: 30 notification read marks per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(30, `notification-read:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id: notificationId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -31,10 +41,7 @@ export async function PUT(
     });
 
     if (!notification) {
-      return NextResponse.json(
-        { error: "Notification not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Notification not found" }, { status: 404 });
     }
 
     if (notification.accountId !== account.id) {
@@ -50,10 +57,10 @@ export async function PUT(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error("Mark notification read error", { error: formatError(error), endpoint: "/api/notifications/[id]/read" });
-    return NextResponse.json(
-      { error: "Failed to mark notification as read" },
-      { status: 500 }
-    );
+    logger.error("Mark notification read error", {
+      error: formatError(error),
+      endpoint: "/api/notifications/[id]/read",
+    });
+    return NextResponse.json({ error: "Failed to mark notification as read" }, { status: 500 });
   }
 }

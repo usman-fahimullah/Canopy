@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 
 // GET — list notifications for current user
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -44,19 +47,31 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ notifications, unreadCount });
   } catch (error) {
-    logger.error("Fetch notifications error", { error: formatError(error), endpoint: "/api/notifications" });
-    return NextResponse.json(
-      { error: "Failed to fetch notifications" },
-      { status: 500 }
-    );
+    logger.error("Fetch notifications error", {
+      error: formatError(error),
+      endpoint: "/api/notifications",
+    });
+    return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 });
   }
 }
 
 // PUT — mark all notifications as read
 export async function PUT(request: NextRequest) {
   try {
+    // Rate limit: 10 mark-all-read actions per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `notifications-read-all:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -80,10 +95,10 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error("Mark all read error", { error: formatError(error), endpoint: "/api/notifications" });
-    return NextResponse.json(
-      { error: "Failed to mark notifications as read" },
-      { status: 500 }
-    );
+    logger.error("Mark all read error", {
+      error: formatError(error),
+      endpoint: "/api/notifications",
+    });
+    return NextResponse.json({ error: "Failed to mark notifications as read" }, { status: 500 });
   }
 }

@@ -14,7 +14,12 @@ vi.mock("@/lib/db", () => ({
 }));
 
 // Must import after mocks are set up
-import { isAdminAccount, getAuthenticatedAccount, unauthorizedResponse, forbiddenResponse } from "../auth-helpers";
+import {
+  isAdminAccount,
+  getAuthenticatedAccount,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from "../auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 
@@ -70,16 +75,16 @@ describe("isAdminAccount - platform admin emails", () => {
     expect(isAdminAccount(account)).toBe(false);
   });
 
-  it("falls back to org role check when email not in admin list", () => {
+  it("does NOT fall back to org role — OWNER alone is not enough", () => {
     process.env.PLATFORM_ADMIN_EMAILS = "admin@greenjobsboard.us";
     const account = { email: "other@example.com", orgMemberships: [{ role: "OWNER" }] };
-    expect(isAdminAccount(account)).toBe(true);
+    expect(isAdminAccount(account)).toBe(false);
   });
 
-  it("returns true for ADMIN org role even without matching email", () => {
+  it("returns false for ADMIN org role without matching admin email", () => {
     process.env.PLATFORM_ADMIN_EMAILS = "";
     const account = { email: "user@example.com", orgMemberships: [{ role: "ADMIN" }] };
-    expect(isAdminAccount(account)).toBe(true);
+    expect(isAdminAccount(account)).toBe(false);
   });
 
   it("returns false for MEMBER role with no admin email match", () => {
@@ -88,16 +93,12 @@ describe("isAdminAccount - platform admin emails", () => {
     expect(isAdminAccount(account)).toBe(false);
   });
 
-  it("returns true when one of multiple memberships has OWNER role", () => {
+  it("returns false for multiple org memberships without admin email", () => {
     const account = {
       email: "user@example.com",
-      orgMemberships: [
-        { role: "VIEWER" },
-        { role: "MEMBER" },
-        { role: "OWNER" },
-      ],
+      orgMemberships: [{ role: "VIEWER" }, { role: "MEMBER" }, { role: "OWNER" }],
     };
-    expect(isAdminAccount(account)).toBe(true);
+    expect(isAdminAccount(account)).toBe(false);
   });
 
   it("handles empty orgMemberships array with no matching email", () => {

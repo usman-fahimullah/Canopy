@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { sendEmail, teamInviteEmail } from "@/lib/email";
 
 const inviteSchema = z.object({
@@ -21,6 +22,16 @@ const inviteSchema = z.object({
 // POST — Send team invitations
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 invite batches per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(5, `team-invite:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -121,18 +132,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      { invites: created, count: created.length },
-      { status: 201 }
-    );
+    return NextResponse.json({ invites: created, count: created.length }, { status: 201 });
   } catch (error) {
     logger.error("Team invite error", {
       error: formatError(error),
       endpoint: "/api/canopy/team/invite",
     });
-    return NextResponse.json(
-      { error: "Failed to send invitations" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to send invitations" }, { status: 500 });
   }
 }

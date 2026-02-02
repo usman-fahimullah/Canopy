@@ -1,19 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { getAuthenticatedAccount, isAdminAccount, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
+import {
+  getAuthenticatedAccount,
+  isAdminAccount,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from "@/lib/auth-helpers";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { createCoachStatusNotification } from "@/lib/notifications";
 
 const rejectBodySchema = z.object({
   reason: z.string().max(2000).optional().default(""),
-}).optional().default({});
+});
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Rate limit: 10 admin actions per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `admin-reject:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id } = await params;
 
     const account = await getAuthenticatedAccount();
@@ -41,17 +54,11 @@ export async function POST(
     });
 
     if (!coach) {
-      return NextResponse.json(
-        { error: "Coach not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Coach not found" }, { status: 404 });
     }
 
     if (coach.status !== "PENDING") {
-      return NextResponse.json(
-        { error: "Coach is not in pending status" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Coach is not in pending status" }, { status: 400 });
     }
 
     // Update coach status to REJECTED
@@ -73,7 +80,10 @@ export async function POST(
       coachName: coach.firstName || coach.account.name || "Coach",
       email: coach.account.email,
     }).catch((err) => {
-      logger.error("Failed to send rejection notification", { error: formatError(err), endpoint: "/api/admin/coaches/[id]/reject" });
+      logger.error("Failed to send rejection notification", {
+        error: formatError(err),
+        endpoint: "/api/admin/coaches/[id]/reject",
+      });
     });
 
     return NextResponse.json({
@@ -82,10 +92,10 @@ export async function POST(
       message: "Coach rejected",
     });
   } catch (error) {
-    logger.error("Reject coach error", { error: formatError(error), endpoint: "/api/admin/coaches/[id]/reject" });
-    return NextResponse.json(
-      { error: "Failed to reject coach" },
-      { status: 500 }
-    );
+    logger.error("Reject coach error", {
+      error: formatError(error),
+      endpoint: "/api/admin/coaches/[id]/reject",
+    });
+    return NextResponse.json({ error: "Failed to reject coach" }, { status: 500 });
   }
 }

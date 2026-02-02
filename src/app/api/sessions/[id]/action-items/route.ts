@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 import { CreateActionItemSchema } from "@/lib/validators/api";
 
 // GET — list action items for a session
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: sessionId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -52,23 +52,32 @@ export async function GET(
 
     return NextResponse.json({ actionItems });
   } catch (error) {
-    logger.error("Fetch action items error", { error: formatError(error), endpoint: "/api/sessions/[id]/action-items" });
-    return NextResponse.json(
-      { error: "Failed to fetch action items" },
-      { status: 500 }
-    );
+    logger.error("Fetch action items error", {
+      error: formatError(error),
+      endpoint: "/api/sessions/[id]/action-items",
+    });
+    return NextResponse.json({ error: "Failed to fetch action items" }, { status: 500 });
   }
 }
 
 // POST — create action item (coach only)
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Rate limit: 10 action item creates per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `action-item-create:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id: sessionId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -118,10 +127,10 @@ export async function POST(
 
     return NextResponse.json({ actionItem }, { status: 201 });
   } catch (error) {
-    logger.error("Create action item error", { error: formatError(error), endpoint: "/api/sessions/[id]/action-items" });
-    return NextResponse.json(
-      { error: "Failed to create action item" },
-      { status: 500 }
-    );
+    logger.error("Create action item error", {
+      error: formatError(error),
+      endpoint: "/api/sessions/[id]/action-items",
+    });
+    return NextResponse.json({ error: "Failed to create action item" }, { status: 500 });
   }
 }

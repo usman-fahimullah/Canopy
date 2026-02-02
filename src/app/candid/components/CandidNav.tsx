@@ -62,13 +62,19 @@ export function CandidNav() {
     const supabase = createClient();
 
     const getUser = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
 
       if (authUser) {
         setUser({
           id: authUser.id,
           email: authUser.email || "",
-          name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User",
+          name:
+            authUser.user_metadata?.full_name ||
+            authUser.user_metadata?.name ||
+            authUser.email?.split("@")[0] ||
+            "User",
           avatar: authUser.user_metadata?.avatar_url || null,
         });
       }
@@ -77,12 +83,18 @@ export function CandidNav() {
 
     getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser({
           id: session.user.id,
           email: session.user.email || "",
-          name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split("@")[0] || "User",
+          name:
+            session.user.user_metadata?.full_name ||
+            session.user.user_metadata?.name ||
+            session.user.email?.split("@")[0] ||
+            "User",
           avatar: session.user.user_metadata?.avatar_url || null,
         });
       } else {
@@ -121,19 +133,22 @@ export function CandidNav() {
       {/* Header */}
       <header
         className={cn(
-          "sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md transition-all duration-200",
+          "bg-[var(--background-default)]/95 sticky top-0 z-50 w-full border-b backdrop-blur-md transition-all duration-200",
           hasScrolled ? "border-[var(--candid-nav-border)]" : "border-transparent"
         )}
       >
         <div className="mx-auto flex h-14 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <Link href="/candid" className="flex items-center gap-1.5 transition-opacity hover:opacity-80">
+          <Link
+            href="/candid"
+            className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
+          >
             <CandidSymbol size={24} />
-            <CandidLogo className="hidden sm:block h-5" />
+            <CandidLogo className="hidden h-5 sm:block" />
           </Link>
 
           {/* Main Nav (Desktop) - Centered */}
-          <nav className="hidden md:flex items-center justify-center flex-1 gap-1">
+          <nav className="hidden flex-1 items-center justify-center gap-1 md:flex">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = item.icon;
@@ -146,13 +161,13 @@ export function CandidNav() {
                     "relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-caption font-medium transition-all duration-200",
                     isActive
                       ? "bg-[var(--candid-nav-item-active)] text-[var(--candid-foreground-brand)]"
-                      : "text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default"
+                      : "hover:text-foreground-default text-foreground-muted hover:bg-[var(--candid-nav-item-hover)]"
                   )}
                 >
                   <Icon size={16} weight={isActive ? "fill" : "regular"} />
                   {item.label}
                   {showBadge && (
-                    <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primitive-red-500)] text-[9px] font-bold text-white ring-2 ring-white">
+                    <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primitive-red-500)] text-[9px] font-bold text-white ring-2 ring-white">
                       {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
@@ -169,23 +184,16 @@ export function CandidNav() {
             {/* Settings (Desktop) */}
             <Link
               href="/candid/settings"
-              className="hidden sm:flex rounded-full p-2 text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default transition-colors duration-200"
+              className="hover:text-foreground-default hidden rounded-full p-2 text-foreground-muted transition-colors duration-200 hover:bg-[var(--candid-nav-item-hover)] sm:flex"
             >
               <Gear size={18} />
             </Link>
 
             {/* User Menu (Desktop) */}
             {user ? (
-              <button
-                className="hidden sm:flex ml-2 items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-[var(--background-subtle)] transition-all duration-200"
-              >
-                <Avatar
-                  size="sm"
-                  src={user.avatar || undefined}
-                  name={displayName}
-                  color="green"
-                />
-                <span className="hidden lg:block text-caption font-medium text-foreground-default">
+              <button className="ml-2 hidden items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-all duration-200 hover:bg-[var(--background-subtle)] sm:flex">
+                <Avatar size="sm" src={user.avatar || undefined} name={displayName} color="green" />
+                <span className="text-foreground-default hidden text-caption font-medium lg:block">
                   {firstName}
                 </span>
                 <CaretDown size={12} className="text-foreground-muted" />
@@ -193,7 +201,7 @@ export function CandidNav() {
             ) : (
               <Link
                 href="/login"
-                className="hidden sm:flex ml-2 items-center gap-2 rounded-full py-1.5 px-3 bg-[var(--candid-dark)] text-white text-caption font-medium hover:opacity-90 transition-all duration-200"
+                className="ml-2 hidden items-center gap-2 rounded-full bg-[var(--candid-dark)] px-3 py-1.5 text-caption font-medium text-white transition-all duration-200 hover:opacity-90 sm:flex"
               >
                 Sign In
               </Link>
@@ -202,7 +210,7 @@ export function CandidNav() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden rounded-lg p-2 text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] hover:text-foreground-default transition-colors duration-200"
+              className="hover:text-foreground-default rounded-lg p-2 text-foreground-muted transition-colors duration-200 hover:bg-[var(--candid-nav-item-hover)] md:hidden"
             >
               {mobileMenuOpen ? <X size={24} /> : <List size={24} />}
             </button>
@@ -213,7 +221,7 @@ export function CandidNav() {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden animate-in fade-in duration-200"
+          className="animate-in fade-in fixed inset-0 z-40 bg-black/50 duration-200 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -221,7 +229,7 @@ export function CandidNav() {
       {/* Mobile Menu Sheet */}
       <div
         className={cn(
-          "fixed top-0 right-0 z-50 h-full w-[280px] bg-[var(--background-default)] shadow-xl md:hidden transition-transform duration-300 ease-out",
+          "fixed right-0 top-0 z-50 h-full w-[280px] bg-[var(--background-default)] shadow-xl transition-transform duration-300 ease-out md:hidden",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
@@ -236,9 +244,7 @@ export function CandidNav() {
                 color="green"
               />
               <div>
-                <p className="font-semibold text-foreground-default">
-                  {displayName}
-                </p>
+                <p className="text-foreground-default font-semibold">{displayName}</p>
                 <p className="text-caption-sm text-foreground-muted">{user.email}</p>
               </div>
             </div>
@@ -246,8 +252,11 @@ export function CandidNav() {
             <div className="flex items-center gap-3">
               <Avatar size="default" name="Guest" color="green" />
               <div>
-                <p className="font-semibold text-foreground-default">Guest</p>
-                <Link href="/login" className="text-caption-sm text-[var(--candid-foreground-brand)]">
+                <p className="text-foreground-default font-semibold">Guest</p>
+                <Link
+                  href="/login"
+                  className="text-caption-sm text-[var(--candid-foreground-brand)]"
+                >
                   Sign in
                 </Link>
               </div>
@@ -262,9 +271,9 @@ export function CandidNav() {
         </div>
 
         {/* Menu Content */}
-        <div className="flex flex-col h-[calc(100%-80px)]">
+        <div className="flex h-[calc(100%-80px)] flex-col">
           {/* Nav Links */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 space-y-1 p-4">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               const Icon = item.icon;
@@ -276,7 +285,7 @@ export function CandidNav() {
                     "flex items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium transition-colors",
                     isActive
                       ? "bg-[var(--candid-background-subtle)] text-[var(--candid-foreground-brand)]"
-                      : "text-foreground-muted hover:bg-[var(--background-subtle)] hover:text-foreground-default"
+                      : "hover:text-foreground-default text-foreground-muted hover:bg-[var(--background-subtle)]"
                   )}
                 >
                   <Icon size={20} weight={isActive ? "fill" : "regular"} />
@@ -294,7 +303,7 @@ export function CandidNav() {
 
             <Link
               href="/candid/settings"
-              className="flex items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted hover:bg-[var(--background-subtle)] hover:text-foreground-default transition-colors"
+              className="hover:text-foreground-default flex items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted transition-colors hover:bg-[var(--background-subtle)]"
             >
               <Gear size={20} />
               Settings
@@ -302,7 +311,7 @@ export function CandidNav() {
 
             <Link
               href="/candid/help"
-              className="flex items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted hover:bg-[var(--background-subtle)] hover:text-foreground-default transition-colors"
+              className="hover:text-foreground-default flex items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted transition-colors hover:bg-[var(--background-subtle)]"
             >
               <Question size={20} />
               Help & Support
@@ -314,7 +323,7 @@ export function CandidNav() {
             {user ? (
               <button
                 onClick={handleSignOut}
-                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)] transition-colors"
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-body-sm font-medium text-foreground-muted transition-colors hover:bg-[var(--primitive-red-50)] hover:text-[var(--primitive-red-600)]"
               >
                 <SignOut size={20} />
                 Sign Out
@@ -322,7 +331,7 @@ export function CandidNav() {
             ) : (
               <Link
                 href="/login"
-                className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 bg-[var(--candid-dark)] text-white text-body-sm font-medium hover:opacity-90 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--candid-dark)] px-4 py-3 text-body-sm font-medium text-white transition-colors hover:opacity-90"
               >
                 Sign In
                 <ArrowRight size={16} />
@@ -333,7 +342,7 @@ export function CandidNav() {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--border-default)] bg-white/95 backdrop-blur-md md:hidden safe-area-inset-bottom">
+      <nav className="bg-[var(--background-default)]/95 safe-area-inset-bottom fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--border-default)] backdrop-blur-md md:hidden">
         <div className="flex items-center justify-around px-2 py-2">
           {mobileNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -351,7 +360,7 @@ export function CandidNav() {
                 <div className="relative">
                   <Icon size={22} weight={isActive ? "fill" : "regular"} />
                   {showBadge && (
-                    <span className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primitive-red-500)] text-[9px] font-bold text-white">
+                    <span className="absolute -right-2 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--primitive-red-500)] text-[9px] font-bold text-white">
                       {unreadMessages > 9 ? "9+" : unreadMessages}
                     </span>
                   )}
@@ -360,7 +369,7 @@ export function CandidNav() {
                   {item.label}
                 </span>
                 {isActive && (
-                  <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-[var(--candid-dark)]" />
+                  <div className="absolute -top-0.5 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-[var(--candid-dark)]" />
                 )}
               </Link>
             );

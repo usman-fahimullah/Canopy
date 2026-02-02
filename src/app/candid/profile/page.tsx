@@ -12,7 +12,13 @@ import { ProgressMeterLinear } from "@/components/ui/progress-meter";
 import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
 import {
   CalendarBlank,
@@ -102,41 +108,31 @@ export default function MyProfilePage() {
 
   // Save experience (create or update)
   const handleSaveExperience = async (experience: Experience) => {
-    try {
-      const method = experience.id ? "PATCH" : "POST";
-      const url = experience.id
-        ? `/api/experience/${experience.id}`
-        : "/api/experience";
+    const method = experience.id ? "PATCH" : "POST";
+    const url = experience.id ? `/api/experience/${experience.id}` : "/api/experience";
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(experience),
-      });
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(experience),
+    });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || "Failed to save experience");
-      }
-
-      await fetchExperiences();
-    } catch (error) {
-      throw error;
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Failed to save experience");
     }
+
+    await fetchExperiences();
   };
 
   // Delete experience
   const handleDeleteExperience = async (id: string) => {
-    try {
-      const res = await fetch(`/api/experience/${id}`, { method: "DELETE" });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || "Failed to delete experience");
-      }
-      await fetchExperiences();
-    } catch (error) {
-      throw error;
+    const res = await fetch(`/api/experience/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Failed to delete experience");
     }
+    await fetchExperiences();
   };
 
   useEffect(() => {
@@ -175,10 +171,17 @@ export default function MyProfilePage() {
       if (!profileLoaded) {
         try {
           const supabase = createClient();
-          const { data: { user: authUser } } = await supabase.auth.getUser();
+          const {
+            data: { user: authUser },
+          } = await supabase.auth.getUser();
 
           if (authUser) {
-            const nameParts = (authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email?.split("@")[0] || "User").split(" ");
+            const nameParts = (
+              authUser.user_metadata?.full_name ||
+              authUser.user_metadata?.name ||
+              authUser.email?.split("@")[0] ||
+              "User"
+            ).split(" ");
             setUser({
               id: authUser.id,
               firstName: nameParts[0] || "User",
@@ -230,7 +233,7 @@ export default function MyProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -238,12 +241,9 @@ export default function MyProfilePage() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <p className="text-foreground-muted">Unable to load your profile. Please try again.</p>
-        <Button
-          variant="primary"
-          onClick={() => window.location.reload()}
-        >
+        <Button variant="primary" onClick={() => window.location.reload()}>
           Retry
         </Button>
       </div>
@@ -251,13 +251,13 @@ export default function MyProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 pb-24 md:pb-8">
+    <div className="mx-auto max-w-5xl px-4 py-8 pb-24 sm:px-6 md:pb-8 lg:px-8">
       {/* ================================================================
           PROFILE HEADER (Exception - gets special visual treatment)
           ================================================================ */}
 
       {/* Banner */}
-      <div className="relative h-48 rounded-t-xl bg-[var(--primitive-green-800)] overflow-hidden">
+      <div className="relative h-48 overflow-hidden rounded-t-xl bg-[var(--primitive-green-800)]">
         {/* Edit/Upload buttons on banner - using inverse variant */}
         <div className="absolute right-4 top-4 flex gap-2">
           <Button variant="inverse" size="icon-sm">
@@ -278,7 +278,7 @@ export default function MyProfilePage() {
               src={user.avatar || undefined}
               name={`${user.firstName} ${user.lastName}`}
               color="green"
-              className="ring-4 ring-white h-24 w-24"
+              className="h-24 w-24 ring-4 ring-white"
             />
             <Button
               variant="secondary"
@@ -296,7 +296,7 @@ export default function MyProfilePage() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-heading-md font-semibold text-foreground-default">
+              <h1 className="text-foreground-default text-heading-md font-semibold">
                 {user.firstName} {user.lastName}
               </h1>
               <Chip variant="blue" size="sm">
@@ -311,16 +311,15 @@ export default function MyProfilePage() {
             )}
           </div>
           <Button variant="link" asChild>
-            <Link href="/candid/settings">
-              Contact Info
-            </Link>
+            <Link href="/candid/settings">Contact Info</Link>
           </Button>
         </div>
 
         {/* Social Links */}
         <div className="mt-4 flex items-center gap-2">
           <Chip variant="neutral" size="sm">
-            @{user.firstName.toLowerCase()}{user.lastName.toLowerCase()}
+            @{user.firstName.toLowerCase()}
+            {user.lastName.toLowerCase()}
           </Chip>
           <Button variant="tertiary" size="icon-sm">
             <LinkedinLogo size={18} />
@@ -332,11 +331,11 @@ export default function MyProfilePage() {
       </div>
 
       {/* Summary and Skills Cards (Blue 200 - no shadow, no border) */}
-      <div className="mt-8 px-6 grid gap-4 md:grid-cols-2">
+      <div className="mt-8 grid gap-4 px-6 md:grid-cols-2">
         {/* Summary Card */}
         <div className="rounded-xl bg-[var(--primitive-blue-200)] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-body-strong font-semibold text-foreground-default">Your Summary</h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-foreground-default text-body-strong font-semibold">Your Summary</h2>
             <Button
               variant="ghost"
               size="sm"
@@ -346,15 +345,18 @@ export default function MyProfilePage() {
               Edit
             </Button>
           </div>
-          <p className="text-body text-foreground-default leading-relaxed">
-            {user.bio || "Add a summary to tell coaches about yourself, your background, and what you're looking for in your climate career journey."}
+          <p className="text-foreground-default text-body leading-relaxed">
+            {user.bio ||
+              "Add a summary to tell coaches about yourself, your background, and what you're looking for in your climate career journey."}
           </p>
         </div>
 
         {/* Skills Card */}
         <div className="rounded-xl bg-[var(--primitive-blue-200)] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-body-strong font-semibold text-foreground-default">Skills & Interests</h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-foreground-default text-body-strong font-semibold">
+              Skills & Interests
+            </h2>
             <Button
               variant="ghost"
               size="sm"
@@ -384,7 +386,7 @@ export default function MyProfilePage() {
 
       {/* My Progress - Container */}
       <section className="mt-10 px-6">
-        <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">My Progress</h2>
+        <h2 className="text-foreground-default mb-4 text-heading-sm font-semibold">My Progress</h2>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Sessions Progress Card */}
@@ -394,7 +396,7 @@ export default function MyProfilePage() {
               value={(progressData.sessions.current / progressData.sessions.total) * 100}
               labelText="Sessions"
             />
-            <p className="text-caption text-foreground-muted mt-1">
+            <p className="mt-1 text-caption text-foreground-muted">
               {progressData.sessions.current} of {progressData.sessions.total} completed
             </p>
           </Card>
@@ -406,7 +408,7 @@ export default function MyProfilePage() {
               value={(progressData.actions.current / progressData.actions.total) * 100}
               labelText="Actions"
             />
-            <p className="text-caption text-foreground-muted mt-1">
+            <p className="mt-1 text-caption text-foreground-muted">
               {progressData.actions.current} of {progressData.actions.total} completed
             </p>
           </Card>
@@ -418,7 +420,7 @@ export default function MyProfilePage() {
               value={(progressData.skills.current / progressData.skills.total) * 100}
               labelText="Skills"
             />
-            <p className="text-caption text-foreground-muted mt-1">
+            <p className="mt-1 text-caption text-foreground-muted">
               {progressData.skills.current} of {progressData.skills.total} developed
             </p>
           </Card>
@@ -430,7 +432,7 @@ export default function MyProfilePage() {
               value={(progressData.milestones.current / progressData.milestones.total) * 100}
               labelText="Milestones"
             />
-            <p className="text-caption text-foreground-muted mt-1">
+            <p className="mt-1 text-caption text-foreground-muted">
               {progressData.milestones.current} of {progressData.milestones.total} achieved
             </p>
           </Card>
@@ -440,7 +442,7 @@ export default function MyProfilePage() {
       {/* My Coach - Container with white card */}
       {matchedCoach && (
         <section className="mt-10 px-6">
-          <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">My Coach</h2>
+          <h2 className="text-foreground-default mb-4 text-heading-sm font-semibold">My Coach</h2>
 
           {/* Coach card */}
           <Card className="p-5">
@@ -451,16 +453,12 @@ export default function MyProfilePage() {
                 name={`${matchedCoach.firstName} ${matchedCoach.lastName}`}
                 color="green"
               />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-body-strong font-semibold text-foreground-default">
+              <div className="min-w-0 flex-1">
+                <h3 className="text-foreground-default text-body-strong font-semibold">
                   {matchedCoach.firstName} {matchedCoach.lastName}
                 </h3>
-                <p className="text-caption text-foreground-muted">
-                  {matchedCoach.currentRole}
-                </p>
-                <p className="text-caption text-foreground-muted">
-                  {matchedCoach.currentCompany}
-                </p>
+                <p className="text-caption text-foreground-muted">{matchedCoach.currentRole}</p>
+                <p className="text-caption text-foreground-muted">{matchedCoach.currentCompany}</p>
               </div>
               <div className="flex gap-2">
                 <Button variant="tertiary" size="icon" asChild>
@@ -481,8 +479,8 @@ export default function MyProfilePage() {
 
       {/* Goals - Container */}
       <section className="mt-10 px-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-heading-sm font-semibold text-foreground-default">My Goals</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-foreground-default text-heading-sm font-semibold">My Goals</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -501,7 +499,7 @@ export default function MyProfilePage() {
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-blue-200)]">
                   <Target size={14} className="text-[var(--primitive-green-800)]" />
                 </div>
-                <span className="text-body text-foreground-default">{goal}</span>
+                <span className="text-foreground-default text-body">{goal}</span>
               </div>
             ))
           ) : (
@@ -512,8 +510,8 @@ export default function MyProfilePage() {
 
       {/* Experience - Container */}
       <section className="mt-10 px-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-heading-sm font-semibold text-foreground-default">Experience</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-foreground-default text-heading-sm font-semibold">Experience</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -535,29 +533,28 @@ export default function MyProfilePage() {
             </div>
           ) : experiences.length > 0 ? (
             experiences.map((exp) => (
-              <div key={exp.id} className="flex gap-4 pb-6 border-b border-border-muted last:border-b-0 last:pb-0">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--background-subtle)] flex-shrink-0">
+              <div
+                key={exp.id}
+                className="flex gap-4 border-b border-border-muted pb-6 last:border-b-0 last:pb-0"
+              >
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[var(--background-subtle)]">
                   <Briefcase size={20} className="text-foreground-muted" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <h3 className="text-body-strong font-semibold text-foreground-default">
+                      <h3 className="text-foreground-default text-body-strong font-semibold">
                         {exp.jobTitle}
                       </h3>
-                      <p className="text-caption text-foreground-muted">
-                        {exp.companyName}
-                      </p>
-                      <p className="text-caption text-foreground-muted mt-1">
+                      <p className="text-caption text-foreground-muted">{exp.companyName}</p>
+                      <p className="mt-1 text-caption text-foreground-muted">
                         {exp.employmentType.replace("_", "-")} · {exp.workType}
                       </p>
                       {exp.description && (
-                        <p className="text-body text-foreground-default mt-2">
-                          {exp.description}
-                        </p>
+                        <p className="text-foreground-default mt-2 text-body">{exp.description}</p>
                       )}
                       {exp.skills.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2">
+                        <div className="mt-2 flex flex-wrap gap-1.5">
                           {exp.skills.map((skill) => (
                             <Chip key={skill} variant="neutral" size="sm">
                               {skill}
@@ -565,7 +562,7 @@ export default function MyProfilePage() {
                           ))}
                         </div>
                       )}
-                      <p className="text-caption text-foreground-muted mt-2">
+                      <p className="mt-2 text-caption text-foreground-muted">
                         {new Date(exp.startDate).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "short",
@@ -574,14 +571,14 @@ export default function MyProfilePage() {
                         {exp.isCurrent
                           ? "Present"
                           : exp.endDate
-                          ? new Date(exp.endDate).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                            })
-                          : ""}
+                            ? new Date(exp.endDate).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                              })
+                            : ""}
                       </p>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div className="flex flex-shrink-0 gap-2">
                       <Button
                         variant="ghost"
                         size="icon-sm"
@@ -616,7 +613,9 @@ export default function MyProfilePage() {
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-body-strong font-semibold text-foreground-default">Add your work experience</h3>
+                    <h3 className="text-foreground-default text-body-strong font-semibold">
+                      Add your work experience
+                    </h3>
                     <p className="text-caption text-foreground-muted">
                       Help coaches understand your background
                     </p>
@@ -697,7 +696,7 @@ export default function MyProfilePage() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-foreground-muted mb-2">
+              <p className="mb-2 text-sm text-foreground-muted">
                 Enter sectors/skills separated by commas
               </p>
               <Textarea
@@ -759,9 +758,7 @@ export default function MyProfilePage() {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-foreground-muted mb-2">
-                Enter each goal on a new line
-              </p>
+              <p className="mb-2 text-sm text-foreground-muted">Enter each goal on a new line</p>
               <Textarea
                 placeholder="e.g., Land a job in climate tech&#10;Build my network in sustainability&#10;Learn about renewable energy"
                 value={goalsText}

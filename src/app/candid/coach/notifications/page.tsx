@@ -79,7 +79,12 @@ export default function CoachNotificationsPage() {
 
   const markRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch(() => {});
+    fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch((err) => {
+      logger.error("Failed to mark notification as read", {
+        error: formatError(err),
+        notificationId: id,
+      });
+    });
   };
 
   if (loading) {

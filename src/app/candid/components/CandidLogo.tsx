@@ -13,7 +13,7 @@ export function CandidLogo({
   className = "",
   width = 128,
   height = 32,
-  color = "#072924",
+  color = "currentColor",
 }: CandidLogoProps) {
   return (
     <svg
