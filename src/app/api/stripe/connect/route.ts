@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 // POST - Create or update Stripe Connect account and return onboarding link
 export async function POST(request: NextRequest) {
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       accountId: stripeAccountId,
     });
   } catch (error) {
-    console.error("Stripe Connect error:", error);
+    logger.error("Stripe Connect error", { error: formatError(error), endpoint: "/api/stripe/connect" });
     return NextResponse.json(
       { error: "Failed to create Stripe Connect account" },
       { status: 500 }
@@ -133,7 +134,7 @@ export async function GET(request: NextRequest) {
       accountId: account.id,
     });
   } catch (error) {
-    console.error("Stripe Connect status error:", error);
+    logger.error("Stripe Connect status error", { error: formatError(error), endpoint: "/api/stripe/connect" });
     return NextResponse.json(
       { error: "Failed to get Stripe Connect status" },
       { status: 500 }

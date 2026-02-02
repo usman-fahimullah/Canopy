@@ -142,7 +142,7 @@ const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
               // Figma: white bg, rounded-2xl (16px), shadow 1px 3px 16px rgba(31,29,28,0.08), px-3 (12px) py-2 (8px)
               "inline-flex items-center",
               "px-3 py-2",
-              "bg-white rounded-2xl",
+              "bg-[var(--background-default)] rounded-2xl",
               "shadow-[1px_3px_16px_0px_rgba(31,29,28,0.08)]",
               // Figma: gap-6 (24px) between major sections
               "gap-6",
@@ -262,7 +262,7 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
           // Figma: Selected states differ based on grouped vs standalone
           selected && grouped && [
             // Grouped selected: white bg with shadow (inside toggle groups)
-            "bg-white",
+            "bg-[var(--background-default)]",
             "shadow-[1px_2px_16px_0px_rgba(31,29,28,0.08)]",
             "text-[var(--primitive-green-900)]",
           ],
@@ -516,7 +516,7 @@ const ToolbarActions = React.forwardRef<HTMLDivElement, ToolbarActionsProps>(
       ref={ref}
       className={cn(
         "flex items-center",
-        "p-1 bg-white rounded-lg overflow-clip",
+        "p-1 bg-[var(--background-default)] rounded-lg overflow-clip",
         className
       )}
       {...props}

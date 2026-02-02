@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { logger, formatError } from "@/lib/logger";
 
 export interface UseAuthReturn {
   user: User | null;
@@ -28,7 +29,7 @@ export function useAuth(): UseAuthReturn {
         setSession(session);
         setUser(session?.user ?? null);
       } catch (error) {
-        console.error("Error getting session:", error);
+        logger.error("Error getting session", { error: formatError(error), endpoint: "hooks/use-auth" });
       } finally {
         setLoading(false);
       }
@@ -61,7 +62,7 @@ export function useAuth(): UseAuthReturn {
       router.push("/login");
       router.refresh();
     } catch (error) {
-      console.error("Error signing out:", error);
+      logger.error("Error signing out", { error: formatError(error), endpoint: "hooks/use-auth" });
     }
   }, [supabase, router]);
 
@@ -71,7 +72,7 @@ export function useAuth(): UseAuthReturn {
       setSession(session);
       setUser(session?.user ?? null);
     } catch (error) {
-      console.error("Error refreshing session:", error);
+      logger.error("Error refreshing session", { error: formatError(error), endpoint: "hooks/use-auth" });
     }
   }, [supabase]);
 

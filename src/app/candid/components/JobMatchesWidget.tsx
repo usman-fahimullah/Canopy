@@ -8,6 +8,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Briefcase, MapPin, CaretRight, BookmarkSimple, Buildings } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface Job {
   id: string;
@@ -91,7 +92,7 @@ export function JobMatchesWidget({
           throw new Error("Failed to fetch jobs");
         }
       } catch (error) {
-        console.error("Error fetching jobs:", error);
+        logger.error("Error fetching jobs", { error: formatError(error) });
         setJobs([]);
       } finally {
         setLoading(false);
@@ -165,7 +166,7 @@ export function JobMatchesWidget({
         });
       }
     } catch (error) {
-      console.error("Error saving job:", error);
+      logger.error("Error saving job", { error: formatError(error) });
       // Revert on error
       setSavedJobs((prev) => {
         const newSet = new Set(prev);

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
+import { FlagReviewSchema } from "@/lib/validators/api";
 
 // POST — flag a review with reason
 export async function POST(
@@ -8,6 +11,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Rate limit: 5 flags per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(5, `flag:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id: reviewId } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -33,11 +46,14 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { reason } = body;
-
-    if (!reason?.trim()) {
-      return NextResponse.json({ error: "Flag reason is required" }, { status: 400 });
+    const result = FlagReviewSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { reason } = result.data;
 
     await prisma.review.update({
       where: { id: reviewId },
@@ -49,7 +65,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Flag review error:", error);
+    logger.error("Flag review error", { error: formatError(error), endpoint: "/api/reviews/[id]/flag" });
     return NextResponse.json(
       { error: "Failed to flag review" },
       { status: 500 }

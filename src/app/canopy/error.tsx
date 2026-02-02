@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { WarningCircle } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 export default function EmployerError({
   error,
@@ -13,7 +14,7 @@ export default function EmployerError({
 }) {
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      console.error("Employer shell error:", error);
+      logger.error("Employer shell error", { error: formatError(error) });
     }
   }, [error]);
 

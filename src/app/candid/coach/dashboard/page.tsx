@@ -17,6 +17,7 @@ import {
   ArrowCircleRight,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow, isSameDay } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 interface Session {
   id: string;
@@ -112,7 +113,7 @@ export default function CoachDashboardPage() {
           },
         });
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        logger.error("Error fetching dashboard data", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -241,7 +242,7 @@ export default function CoachDashboardPage() {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-4 py-5"
+                className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-5"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-caption text-foreground-muted">{stat.label}</p>
@@ -289,7 +290,7 @@ export default function CoachDashboardPage() {
                 return (
                   <div
                     key={session.id}
-                    className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-4"
+                    className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-4"
                   >
                     {client && (
                       <Avatar
@@ -321,7 +322,7 @@ export default function CoachDashboardPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+            <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
               <p className="text-body text-foreground-muted">
                 No upcoming sessions. Your schedule is clear.
               </p>
@@ -331,7 +332,7 @@ export default function CoachDashboardPage() {
       </div>
 
       {/* Right Sidebar - Schedule (Large Desktop only) */}
-      <aside className="hidden w-[375px] flex-shrink-0 border-l border-[var(--primitive-neutral-200)] bg-white xl:block">
+      <aside className="hidden w-[375px] flex-shrink-0 border-l border-[var(--primitive-neutral-200)] bg-[var(--background-default)] xl:block">
         <div className="sticky top-0 h-screen overflow-y-auto">
           <div className="flex h-[108px] items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6">
             <h2 className="text-foreground-default text-heading-sm font-medium">Your Schedule</h2>

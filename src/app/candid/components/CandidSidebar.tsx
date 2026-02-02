@@ -180,7 +180,7 @@ export function CandidSidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-[var(--candid-nav-sidebar-border)] bg-white transition-[width] duration-200 ease-in-out lg:flex",
+        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-[var(--candid-nav-sidebar-border)] bg-[var(--background-default)] transition-[width] duration-200 ease-in-out lg:flex",
         collapsed ? "w-[72px]" : "w-[280px]"
       )}
     >

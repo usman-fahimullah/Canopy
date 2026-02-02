@@ -33,6 +33,7 @@ import {
   Check,
 } from "@phosphor-icons/react";
 import { format } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 interface ActionItem {
   id: string;
@@ -707,9 +708,9 @@ export default function SessionDetailPage() {
                 <Star
                   key={i}
                   size={18}
-                  weight={i < session.review!.rating ? "fill" : "regular"}
+                  weight={i < (session.review?.rating ?? 0) ? "fill" : "regular"}
                   className={
-                    i < session.review!.rating
+                    i < (session.review?.rating ?? 0)
                       ? "text-[var(--primitive-yellow-500)]"
                       : "text-foreground-subtle"
                   }

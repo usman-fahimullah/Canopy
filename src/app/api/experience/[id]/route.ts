@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateExperienceSchema } from "@/lib/validators/api";
 
 // PATCH — update experience
 export async function PATCH(
@@ -34,6 +36,13 @@ export async function PATCH(
     }
 
     const body = await request.json();
+    const result = UpdateExperienceSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
     const {
       companyName,
       jobTitle,
@@ -44,7 +53,7 @@ export async function PATCH(
       isCurrent,
       description,
       skills,
-    } = body;
+    } = result.data;
 
     // Build update object
     const updateData: Record<string, unknown> = {};
@@ -87,7 +96,7 @@ export async function PATCH(
 
     return NextResponse.json({ experience: updated });
   } catch (error) {
-    console.error("Update experience error:", error);
+    logger.error("Update experience error", { error: formatError(error), endpoint: "/api/experience/[id]" });
     return NextResponse.json(
       { error: "Failed to update experience" },
       { status: 500 }
@@ -132,7 +141,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete experience error:", error);
+    logger.error("Delete experience error", { error: formatError(error), endpoint: "/api/experience/[id]" });
     return NextResponse.json(
       { error: "Failed to delete experience" },
       { status: 500 }

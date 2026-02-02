@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 // GET - List published jobs with filters for the jobs page
 export async function GET(request: NextRequest) {
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     // Pagination
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
     const skip = (page - 1) * limit;
 
     // Sort
@@ -157,7 +158,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Fetch jobs error:", error);
+    logger.error("Fetch jobs error", { error: formatError(error), endpoint: "/api/jobs" });
     return NextResponse.json({ error: "Failed to fetch jobs" }, { status: 500 });
   }
 }

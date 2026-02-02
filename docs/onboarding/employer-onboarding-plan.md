@@ -147,14 +147,44 @@ finance-compliance | operations | science
 
 **Route:** `/onboarding/profile`
 
-| Element      | Type       | Required | Notes                     |
-| ------------ | ---------- | -------- | ------------------------- |
-| First name   | Text input | Yes      |                           |
-| Last name    | Text input | Yes      |                           |
-| Job title    | Text input | Yes      | Their role at the company |
-| LinkedIn URL | Text input | No       |                           |
+| Element       | Type         | Required | Notes                                       |
+| ------------- | ------------ | -------- | ------------------------------------------- |
+| First name    | Text input   | Yes      |                                             |
+| Last name     | Text input   | Yes      |                                             |
+| Job title     | Text input   | Yes      | Their role at the company                   |
+| Profile photo | Image upload | No       | "Candidates like seeing who they'll work with" |
+| Phone         | Text input   | No       | For candidate contact                       |
+| LinkedIn URL  | Text input   | No       | Adds credibility                            |
 
-**Note:** This is the person setting up the account, not the company info.
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Your role                                              │
+│                                                         │
+│  First name *              Last name *                  │
+│  [Sarah______________]    [Chen_______________]         │
+│                                                         │
+│  Your job title *                                       │
+│  [Head of Talent_________________________]              │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  Add more details (optional)                            │
+│                                                         │
+│  ┌─────────┐                                            │
+│  │   [+]   │  Your photo                                │
+│  │  Photo  │  Candidates like seeing who they'll        │
+│  └─────────┘  work with                                 │
+│                                                         │
+│  Phone                           LinkedIn URL           │
+│  [____________________]         [____________________]  │
+│                                                         │
+│                                        [Continue →]     │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Note:** This is the person setting up the account, not the company info. Optional fields let employers present more professionally if they choose.
 
 ---
 
@@ -837,20 +867,27 @@ import { PathwayType } from "@/components/ui/pathway-tag";
 import { JobCategoryType } from "@/components/ui/category-tag";
 
 interface EmployerOnboardingData {
-  // Profile (all flows)
+  // Profile - Required (all flows)
   firstName: string;
   lastName: string;
   jobTitle?: string; // Not required for Hiring Team
 
-  // Company (Admin only)
+  // Profile - Optional (all flows)
+  photoUrl?: string;
+  phone?: string;
+  linkedInUrl?: string;
+
+  // Company - Required (Admin only)
   company?: {
     id: string;
     name: string;
+    size: "1-10" | "11-50" | "51-200" | "201-500" | "500+";
+    industries: PathwayType[]; // Uses design system PathwayType (1-3)
+
+    // Company - Optional
     logoUrl?: string;
     website?: string;
     description?: string;
-    size: "1-10" | "11-50" | "51-200" | "201-500" | "500+";
-    industries: PathwayType[]; // Uses design system PathwayType
   };
 
   // Role context

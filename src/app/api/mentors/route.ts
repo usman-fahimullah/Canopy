@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
 
 interface MatchReason {
   type: "shared_interest" | "common_skill" | "ask_about";
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
         seekerProfile = account?.seekerProfile || null;
       }
     } catch {
-      // Auth is optional for match computation; continue without it
+      // Auth is optional for mentor match scoring — unauthenticated users see unranked results
     }
 
     const mentors = await prisma.seekerProfile.findMany({
@@ -153,6 +154,7 @@ export async function GET(request: NextRequest) {
         { mentorAssignmentsAsMentor: { _count: "desc" } },
         { createdAt: "desc" },
       ],
+      take: 100,
     });
 
     const result = mentors.map((m) => {
@@ -196,7 +198,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ mentors: result });
   } catch (error) {
-    console.error("Error fetching mentors:", error);
+    logger.error("Error fetching mentors", { error: formatError(error), endpoint: "/api/mentors" });
     return NextResponse.json(
       { error: "Failed to fetch mentors" },
       { status: 500 }

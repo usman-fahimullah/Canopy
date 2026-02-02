@@ -41,7 +41,7 @@ export function SessionCard({ session }: SessionCardProps) {
   const showJoinButton = session.status === "scheduled" && isToday(scheduledDate);
 
   return (
-    <div className="flex items-start gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-5">
+    <div className="flex items-start gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-5">
       <Avatar src={session.coach.avatar ?? undefined} name={session.coach.name} size="default" />
 
       <div className="min-w-0 flex-1">

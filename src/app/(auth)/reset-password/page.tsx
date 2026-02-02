@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
   // Success state
   if (success) {
     return (
-      <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
+      <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
         <div className="text-center">
           <div className="w-16 h-16 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-[var(--primitive-green-600)]" weight="bold" />
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
+    <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
           Set new password

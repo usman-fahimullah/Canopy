@@ -12,6 +12,7 @@ import {
   ArrowRight,
   TrendUp,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface DashboardMetrics {
   pendingApplications: number;
@@ -43,7 +44,7 @@ export default function AdminDashboardPage() {
         setMetrics(data);
       }
     } catch (error) {
-      console.error("Failed to fetch metrics:", error);
+      logger.error("Failed to fetch metrics", { error: formatError(error) });
     } finally {
       setLoading(false);
     }
@@ -103,7 +104,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         {metricCards.map((card) => (
           <Link key={card.title} href={card.link}>
-            <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-5 hover:shadow-md transition-shadow">
+            <div className="bg-[var(--card-background)] rounded-xl border border-[var(--primitive-neutral-200)] p-5 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-3">
                 <card.icon
                   size={24}
@@ -126,7 +127,7 @@ export default function AdminDashboardPage() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pending Applications */}
-        <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-6">
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--primitive-neutral-200)] p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-[var(--primitive-green-800)]">
               Pending Applications
@@ -166,7 +167,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Platform Health */}
-        <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-6">
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--primitive-neutral-200)] p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-[var(--primitive-green-800)]">
               Platform Health

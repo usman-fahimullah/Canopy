@@ -76,7 +76,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
           <div className="mb-4 flex items-center gap-4 text-caption">
             {mentor.rating && (
               <span className="flex items-center gap-1">
-                <Star size={16} weight="fill" className="text-[#FFD700]" />
+                <Star size={16} weight="fill" className="text-[var(--primitive-yellow-400)]" />
                 <span className="font-semibold">{mentor.rating.toFixed(1)}</span>
               </span>
             )}
@@ -123,7 +123,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
       <Link
         href={`/candid/coach/${mentor.id}`}
         className={cn(
-          "group block rounded-card bg-white p-5 shadow-card transition-all hover:shadow-card-hover",
+          "group block rounded-card bg-[var(--card-background)] p-5 shadow-card transition-all hover:shadow-card-hover",
           className
         )}
       >
@@ -141,7 +141,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
               </p>
               {mentor.rating && (
                 <span className="flex items-center gap-1 text-caption text-foreground-muted">
-                  <Star size={12} weight="fill" className="text-[#F59E0B]" />
+                  <Star size={12} weight="fill" className="text-[var(--primitive-yellow-500)]" />
                   {mentor.rating.toFixed(1)}
                 </span>
               )}
@@ -164,7 +164,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-card bg-white shadow-card transition-all hover:shadow-card-hover p-6",
+        "group relative overflow-hidden rounded-card bg-[var(--card-background)] shadow-card transition-all hover:shadow-card-hover p-6",
         className
       )}
     >
@@ -215,7 +215,7 @@ export function CoachCard({ mentor, variant = "default", className }: CoachCardP
       <div className="mt-4 flex items-center gap-3">
         {mentor.rating && (
           <div className="flex items-center gap-1.5">
-            <Star size={14} weight="fill" className="text-[#F59E0B]" />
+            <Star size={14} weight="fill" className="text-[var(--primitive-yellow-500)]" />
             <span className="text-caption-strong text-foreground-default">{mentor.rating.toFixed(1)}</span>
           </div>
         )}

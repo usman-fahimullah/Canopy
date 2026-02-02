@@ -11,6 +11,7 @@ import {
   ArrowRight,
   ShieldCheck
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface StripeStatus {
   connected: boolean;
@@ -147,7 +148,7 @@ function PaymentSettingsContent() {
         )}
 
         {/* Status Card */}
-        <div className="bg-white border border-[var(--primitive-neutral-200)] rounded-2xl overflow-hidden mb-6">
+        <div className="bg-[var(--card-background)] border border-[var(--primitive-neutral-200)] rounded-2xl overflow-hidden mb-6">
           {/* Status Header */}
           <div className="p-6 border-b border-[var(--primitive-neutral-200)]">
             <div className="flex items-center justify-between">

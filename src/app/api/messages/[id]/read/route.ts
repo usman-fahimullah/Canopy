@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
 
 // PUT — mark messages as read up to this point in a conversation
 export async function PUT(
@@ -51,7 +52,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Mark read error:", error);
+    logger.error("Mark read error", { error: formatError(error), endpoint: "/api/messages/[id]/read" });
     return NextResponse.json(
       { error: "Failed to mark as read" },
       { status: 500 }

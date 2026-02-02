@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
 
 // GET — coach earnings: total, monthly breakdown, pending payouts
 export async function GET() {
@@ -42,6 +43,7 @@ export async function GET() {
         refundAmount: true,
       },
       orderBy: { paidAt: "desc" },
+      take: 200,
     });
 
     // Monthly breakdown (last 6 months)
@@ -86,7 +88,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Fetch earnings error:", error);
+    logger.error("Fetch earnings error", { error: formatError(error), endpoint: "/api/candid/coach/earnings" });
     return NextResponse.json({ error: "Failed to fetch earnings" }, { status: 500 });
   }
 }

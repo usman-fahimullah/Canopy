@@ -87,7 +87,7 @@ export default function OnboardingIntentPage() {
   return (
     <div className="flex min-h-screen flex-col bg-[var(--primitive-neutral-100)]">
       {/* ── Top bar ────────────────────────────────────────── */}
-      <header className="shrink-0 border-b border-[var(--primitive-neutral-200)] bg-white">
+      <header className="shrink-0 border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)]">
         <div className="flex items-center justify-between px-4 py-4 sm:px-12">
           <Link href="/" className="flex items-center py-[15px]">
             <svg
@@ -193,7 +193,7 @@ export default function OnboardingIntentPage() {
 
       {/* ── Main content ───────────────────────────────────── */}
       <main className="flex flex-1 flex-col items-center justify-center gap-12 px-4 py-12 sm:px-6">
-        <h1 className="text-center text-heading-lg font-medium text-black">
+        <h1 className="text-center text-heading-lg font-medium text-[var(--foreground-default)]">
           Which best describes you?
         </h1>
 

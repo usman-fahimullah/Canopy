@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
 
 // PUT — mark a single notification as read
 export async function PUT(
@@ -49,7 +50,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Mark notification read error:", error);
+    logger.error("Mark notification read error", { error: formatError(error), endpoint: "/api/notifications/[id]/read" });
     return NextResponse.json(
       { error: "Failed to mark notification as read" },
       { status: 500 }

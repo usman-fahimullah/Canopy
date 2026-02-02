@@ -55,7 +55,7 @@ export function ChatPanel({
   return (
     <div className="flex h-full flex-col">
       {/* Chat Header */}
-      <div className="border-b border-[var(--primitive-neutral-200)] bg-white px-6 py-[30px]">
+      <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-6 py-[30px]">
         <div className="flex items-center gap-3">
           {/* Mobile back button */}
           <button
@@ -114,7 +114,7 @@ export function ChatPanel({
       </div>
 
       {/* Message Composer */}
-      <div className="border-t border-[var(--primitive-neutral-200)] bg-white px-12 py-6">
+      <div className="border-t border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-12 py-6">
         <MessageComposer
           value={newMessage}
           onChange={setNewMessage}

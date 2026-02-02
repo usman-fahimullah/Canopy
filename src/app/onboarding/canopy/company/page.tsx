@@ -8,15 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCard, FormField, FormRow } from "@/components/ui/form-section";
 import { EMPLOYER_STEPS } from "@/lib/onboarding/types";
-import { cn } from "@/lib/utils";
-
-const companySizeOptions = [
-  { value: "1-10", label: "1-10" },
-  { value: "11-50", label: "11-50" },
-  { value: "51-200", label: "51-200" },
-  { value: "201-1000", label: "201-1,000" },
-  { value: "1000+", label: "1,000+" },
-];
 
 export default function EmployerCompanyPage() {
   const router = useRouter();
@@ -34,7 +25,7 @@ export default function EmployerCompanyPage() {
       footer={
         <StepNavigation
           onBack={() => router.push("/onboarding/profile")}
-          onContinue={() => router.push("/onboarding/canopy/your-role")}
+          onContinue={() => router.push("/onboarding/canopy/size-industry")}
           canContinue={canContinue}
         />
       }
@@ -81,26 +72,6 @@ export default function EmployerCompanyPage() {
               />
             </FormField>
           </FormRow>
-
-          <FormField label="Company size">
-            <div className="flex flex-wrap gap-2">
-              {companySizeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setEmployerData({ companySize: option.value })}
-                  className={cn(
-                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
-                    employerData.companySize === option.value
-                      ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
-                      : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
-                  )}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </FormField>
         </FormCard>
       </div>
     </OnboardingShell>

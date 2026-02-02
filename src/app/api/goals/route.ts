@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { CreateGoalSchema } from "@/lib/validators/api";
 
 // GET — list seeker's goals with milestones
 export async function GET() {
@@ -27,11 +29,12 @@ export async function GET() {
         milestones: { orderBy: { order: "asc" } },
       },
       orderBy: { createdAt: "desc" },
+      take: 50,
     });
 
     return NextResponse.json({ goals });
   } catch (error) {
-    console.error("Fetch goals error:", error);
+    logger.error("Fetch goals error", { error: formatError(error), endpoint: "/api/goals" });
     return NextResponse.json(
       { error: "Failed to fetch goals" },
       { status: 500 }
@@ -59,11 +62,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, description, icon, targetDate, milestones } = body;
-
-    if (!title?.trim()) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    const result = CreateGoalSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { title, description, icon, targetDate, milestones } = result.data;
 
     const goal = await prisma.goal.create({
       data: {
@@ -72,7 +78,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         icon: icon || null,
         targetDate: targetDate ? new Date(targetDate) : null,
-        milestones: milestones?.length > 0 ? {
+        milestones: milestones && milestones.length > 0 ? {
           create: milestones.map((m: { title: string }, i: number) => ({
             title: m.title,
             order: i,
@@ -84,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ goal }, { status: 201 });
   } catch (error) {
-    console.error("Create goal error:", error);
+    logger.error("Create goal error", { error: formatError(error), endpoint: "/api/goals" });
     return NextResponse.json(
       { error: "Failed to create goal" },
       { status: 500 }

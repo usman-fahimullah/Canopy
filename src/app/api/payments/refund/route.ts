@@ -3,6 +3,8 @@ import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { paymentLimiter } from "@/lib/rate-limit";
+import { logger, formatError } from "@/lib/logger";
+import { RefundSchema } from "@/lib/validators/api";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,14 +29,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { bookingId, reason } = body;
-
-    if (!bookingId) {
+    const result = RefundSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Missing bookingId" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { bookingId, reason } = result.data;
+
 
     // Get booking with session
     const booking = await prisma.booking.findUnique({
@@ -114,36 +117,36 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Update booking
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: {
-        status: refundPercent === 100 ? "REFUNDED" : "PARTIALLY_REFUNDED",
-        refundAmount,
-        refundReason,
-        refundedAt: new Date(),
-      },
-    });
+    // Wrap DB updates in transaction for consistency
+    await prisma.$transaction(async (tx) => {
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: {
+          status: refundPercent === 100 ? "REFUNDED" : "PARTIALLY_REFUNDED",
+          refundAmount,
+          refundReason,
+          refundedAt: new Date(),
+        },
+      });
 
-    // Cancel the session
-    await prisma.session.update({
-      where: { id: booking.sessionId },
-      data: {
-        status: "CANCELLED",
-        cancelledBy: isMentee ? "mentee" : "coach",
-        cancellationReason: refundReason,
-        cancelledAt: new Date(),
-      },
-    });
+      await tx.session.update({
+        where: { id: booking.sessionId },
+        data: {
+          status: "CANCELLED",
+          cancelledBy: isMentee ? "mentee" : "coach",
+          cancellationReason: refundReason,
+          cancelledAt: new Date(),
+        },
+      });
 
-    // Update coach stats
-    const coachPayoutRefund = Math.round(booking.coachPayout * (refundPercent / 100));
-    await prisma.coachProfile.update({
-      where: { id: booking.coachId },
-      data: {
-        totalEarnings: { decrement: coachPayoutRefund },
-        totalSessions: { decrement: 1 },
-      },
+      const coachPayoutRefund = Math.round(booking.coachPayout * (refundPercent / 100));
+      await tx.coachProfile.update({
+        where: { id: booking.coachId },
+        data: {
+          totalEarnings: { decrement: coachPayoutRefund },
+          totalSessions: { decrement: 1 },
+        },
+      });
     });
 
     return NextResponse.json({
@@ -154,7 +157,7 @@ export async function POST(request: NextRequest) {
       reason: refundReason,
     });
   } catch (error) {
-    console.error("Refund error:", error);
+    logger.error("Refund error", { error: formatError(error), endpoint: "/api/payments/refund" });
     return NextResponse.json(
       { error: "Failed to process refund" },
       { status: 500 }

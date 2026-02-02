@@ -35,7 +35,7 @@ export function CertificationCard({
   const { label, variant } = statusConfig[status];
 
   return (
-    <div className="flex items-start gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-5">
+    <div className="flex items-start gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-5">
       {/* Icon */}
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
         <Certificate size={20} weight="fill" className="text-[var(--primitive-green-700)]" />

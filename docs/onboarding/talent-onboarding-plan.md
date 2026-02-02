@@ -28,30 +28,17 @@ Talent onboarding prioritizes **speed to value**. Job seekers should see relevan
 │                              TALENT ONBOARDING                               │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-[Sign Up] → [Verify Email] → [Profile] → [Background] → [Skills] → [Preferences]
-                                │              │            │             │
-                                ▼              ▼            ▼             ▼
-                            Name/Photo    Career stage   Pathways +   Location +
-                            (optional)    + experience   Categories   work type
-                                                                          │
-                                                                          ▼
-                                                              ┌─────────────────┐
-                                                              │ "Finding jobs   │
-                                                              │  for you..."    │
-                                                              │  [Animation]    │
-                                                              └────────┬────────┘
-                                                                       │
-                                                                       ▼
-                                                              ┌─────────────────┐
-                                                              │ "127 roles      │
-                                                              │  match!"        │
-                                                              │ [View matches]  │
-                                                              └────────┬────────┘
-                                                                       │
-                                                                       ▼
-                                                                    [HOME]
-                                                              with job feed +
-                                                              profile checklist
+[Sign Up] → [Verify Email] → [Profile] → [Background] → [Skills] → [Preferences] → [HOME]
+                                │              │            │             │            │
+                                ▼              ▼            ▼             ▼            ▼
+                            Name *         Stage *      Pathways *    Location *   Job feed +
+                            + optional:    Experience * + Categories * Remote *    profile
+                            photo,         + optional:                Job types *  checklist
+                            pronouns,      role, goals                + optional:
+                            phone,                                    salary
+                            LinkedIn
+
+* = required field
 ```
 
 ---
@@ -99,24 +86,57 @@ finance-compliance | operations | science
 
 **Route:** `/onboarding/profile`
 
-| Element      | Type       | Required | Notes                                |
-| ------------ | ---------- | -------- | ------------------------------------ |
-| First name   | Text input | Yes      | Pre-filled if from OAuth             |
-| Last name    | Text input | Yes      | Pre-filled if from OAuth             |
-| LinkedIn URL | Text input | No       | "Optional, but helps us personalize" |
-| Bio          | Textarea   | No       | "A short intro about yourself"       |
+| Element       | Type         | Required | Notes                                |
+| ------------- | ------------ | -------- | ------------------------------------ |
+| First name    | Text input   | Yes      | Pre-filled if from OAuth             |
+| Last name     | Text input   | Yes      | Pre-filled if from OAuth             |
+| Profile photo | Image upload | No       | "Helps you stand out to employers"   |
+| Pronouns      | Text input   | No       | "How should we refer to you?"        |
+| Phone         | Text input   | No       | "For employer contact"               |
+| LinkedIn URL  | Text input   | No       | "Optional, but helps us personalize" |
+
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Tell us about yourself                                 │
+│                                                         │
+│  First name *                    Last name *            │
+│  [____________________]         [____________________]  │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  Add more details (optional)                            │
+│                                                         │
+│  ┌─────────┐                                            │
+│  │   [+]   │  Profile photo                             │
+│  │  Photo  │  Helps you stand out to employers          │
+│  └─────────┘                                            │
+│                                                         │
+│  Pronouns                        Phone                  │
+│  [____________________]         [____________________]  │
+│                                                         │
+│  LinkedIn URL                                           │
+│  [____________________]                                 │
+│                                                         │
+│                                        [Continue →]     │
+└─────────────────────────────────────────────────────────┘
+```
 
 **UI Notes:**
 
-- Photo upload NOT shown here (prompted later contextually)
-- Keep it minimal — 2-3 fields visible
-- "Continue" button always enabled (optional fields)
+- Clear visual separation between required and optional fields
+- "Add more details (optional)" header sets expectations
+- Photo shown but not blocking progress
+- Completionists can fill everything; speed-focused users skip optional
+- "Continue" button always enabled
 
 **Validation:**
 
 - First name: 1-50 characters
 - Last name: 1-50 characters
 - LinkedIn URL: Valid URL format if provided
+- Phone: Valid phone format if provided
 
 ---
 
@@ -124,11 +144,13 @@ finance-compliance | operations | science
 
 **Route:** `/onboarding/talent/background`
 
-| Element                  | Type                | Required | Notes                       |
-| ------------------------ | ------------------- | -------- | --------------------------- |
-| Career stage             | Single select chips | Yes      | Options below               |
-| Years of experience      | Single select       | Yes      | Ranges                      |
-| Current/most recent role | Text input          | No       | Free text with autocomplete |
+| Element                  | Type                | Required | Notes                                 |
+| ------------------------ | ------------------- | -------- | ------------------------------------- |
+| Career stage             | Single select chips | Yes      | Options below                         |
+| Years of experience      | Single select       | Yes      | Ranges                                |
+| Current/most recent role | Text input          | No       | Free text with autocomplete           |
+| Goals                    | Textarea            | No       | "What are you looking for?"           |
+| Work experience          | Repeatable form     | No       | Add multiple positions                |
 
 **Career Stage Options:**
 
@@ -150,11 +172,82 @@ finance-compliance | operations | science
 [ ] 15+ years
 ```
 
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Your background                                        │
+│  Help us understand where you are in your career        │
+│                                                         │
+│  What stage are you at? *                               │
+│                                                         │
+│  [Student / Recent grad]  [Early career (0-3 yrs)]      │
+│  [Mid-career (4-10 yrs)]  [Senior (10+ yrs)]            │
+│  [Career changer]                                       │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  Years of experience *                                  │
+│                                                         │
+│  [< 1 year]  [1-3 years]  [4-7 years]                   │
+│  [8-15 years]  [15+ years]                              │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  Build your profile (optional)                          │
+│                                                         │
+│  Current or most recent role                            │
+│  [____________________________________]                 │
+│                                                         │
+│  What are you looking for?                              │
+│  [Share your goals or what excites you about climate___]│
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  Work experience                                        │
+│  [+ Add work experience]                                │
+│                                                         │
+│                                        [Continue →]     │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Work Experience Form (expandable):**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Work experience                                        │
+│                                                         │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │  Job title                                      │    │
+│  │  [Product Manager_________________________]     │    │
+│  │                                                 │    │
+│  │  Company                                        │    │
+│  │  [Tesla_________________________________]      │    │
+│  │                                                 │    │
+│  │  Start date              End date              │    │
+│  │  [Jan 2020___]          [Present ☑]           │    │
+│  │                                                 │    │
+│  │  Description (optional)                         │    │
+│  │  [Led product strategy for..._______________]  │    │
+│  │                                                 │    │
+│  │  [Remove]                              [Save]   │    │
+│  └─────────────────────────────────────────────────┘    │
+│                                                         │
+│  [+ Add another position]                               │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
 **UI Notes:**
 
 - Chips should be large, tappable (mobile-first)
 - Single selection — selecting one deselects others
 - Show subtle helper text: "This helps us show you roles at the right level"
+- Goals field lets passionate users share their "why"
+- Work experience is collapsible — starts collapsed with "+ Add work experience" button
+- Users can add multiple positions
+- "Present" checkbox for current role
+- Building profile early helps with employer visibility
 
 ---
 
@@ -467,76 +560,6 @@ function CategorySelector({
 
 ---
 
-### Screen 5: Transition (Finding Jobs)
-
-**Route:** `/onboarding/talent/matching` (or modal overlay)
-
-**Duration:** 2-3 seconds (minimum 1.5s even if results load faster)
-
-**Visual:**
-
-```
-┌─────────────────────────────────────────┐
-│                                         │
-│         [Animated search icon]          │
-│                                         │
-│        Finding jobs for you...          │
-│                                         │
-│    ━━━━━━━━━━━━━━░░░░░░░░░░░░░░░░░░    │
-│                                         │
-│    "Searching 2,400+ climate roles"     │
-│                                         │
-└─────────────────────────────────────────┘
-```
-
-**Animation Details:**
-
-- Pulsing/rotating search or radar icon
-- Progress bar (indeterminate or timed)
-- Rotating helper text:
-  - "Searching 2,400+ climate roles"
-  - "Matching your skills..."
-  - "Finding the best opportunities..."
-
-**Technical:**
-
-- Fire API call to fetch matched jobs
-- Minimum display time ensures smooth UX
-- Handle error state gracefully
-
----
-
-### Screen 6: Results Reveal
-
-**Route:** `/onboarding/talent/results` (or part of transition)
-
-**Duration:** 2-3 seconds before auto-redirect
-
-**Visual:**
-
-```
-┌─────────────────────────────────────────┐
-│                                         │
-│              [Checkmark]                │
-│                                         │
-│          127 roles match!               │
-│                                         │
-│   Based on your skills and preferences  │
-│                                         │
-│         [View your matches]             │
-│                                         │
-└─────────────────────────────────────────┘
-```
-
-**Behavior:**
-
-- Animated number count-up (0 → 127)
-- Confetti or subtle celebration animation
-- Auto-redirect after 2-3 seconds OR on button click
-- Button pulses gently to draw attention
-
----
-
 ## Post-Onboarding: Home Experience
 
 ### Job Feed
@@ -600,29 +623,52 @@ function CategorySelector({
 import { PathwayType } from "@/components/ui/pathway-tag";
 import { JobCategoryType } from "@/components/ui/category-tag";
 
+interface WorkExperience {
+  id: string;
+  title: string;
+  company: string;
+  startDate: string; // ISO date
+  endDate?: string; // ISO date, null if current
+  isCurrent: boolean;
+  description?: string;
+}
+
 interface TalentOnboardingData {
-  // Screen 1: Profile
+  // Screen 1: Profile (required)
   firstName: string;
   lastName: string;
-  linkedInUrl?: string;
-  bio?: string;
 
-  // Screen 2: Background
+  // Screen 1: Profile (optional)
+  photoUrl?: string;
+  pronouns?: string;
+  phone?: string;
+  linkedInUrl?: string;
+
+  // Screen 2: Background (required)
   careerStage: "student" | "early" | "mid" | "senior" | "changer";
   yearsExperience: "<1" | "1-3" | "4-7" | "8-15" | "15+";
-  currentRole?: string;
 
-  // Screen 3: Skills (using design system types)
+  // Screen 2: Background (optional)
+  currentRole?: string;
+  goals?: string;
+  workExperience?: WorkExperience[]; // Optional work history
+
+  // Screen 3: Skills (required, using design system types)
   pathways: PathwayType[]; // Climate industries (max 5)
   categories: JobCategoryType[]; // Job functions (max 3)
 
-  // Screen 4: Preferences
+  // Screen 4: Preferences (required)
   locations: string[];
   remotePreference: "onsite" | "hybrid" | "remote-preferred" | "remote-only" | "open";
   jobTypes: ("full-time" | "part-time" | "contract" | "internship" | "freelance")[];
+
+  // Screen 4: Preferences (optional)
   salaryMin?: number;
   salaryMax?: number;
 }
+
+// Note: Ethnicity is NOT collected in onboarding
+// It lives in Profile Settings as voluntary self-identification
 ```
 
 ### Type Definitions Reference
@@ -699,14 +745,11 @@ src/app/onboarding/talent/
 │       ├── PathwaySelector.tsx   # Uses PathwayTag
 │       └── CategorySelector.tsx  # Uses CategoryTag
 ├── preferences/
-│   └── page.tsx           # Location + work type + salary
-├── matching/
-│   └── page.tsx           # Transition animation
+│   └── page.tsx           # Location + work type + salary → redirect to home
 └── components/
     ├── CareerStageSelector.tsx
     ├── LocationInput.tsx
-    ├── SalaryRangeSlider.tsx
-    └── MatchingAnimation.tsx
+    └── SalaryRangeSlider.tsx
 ```
 
 ### PathwaySelector Component

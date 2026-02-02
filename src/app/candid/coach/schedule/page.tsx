@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Clock, CalendarDots, FloppyDisk, Globe, Check } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 const DAYS = [
   "Monday",
@@ -76,7 +77,7 @@ export default function CoachSchedulePage() {
           setInitialSlots(new Set(slots));
         }
       } catch (error) {
-        console.error("Error fetching availability:", error);
+        logger.error("Error fetching availability", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -137,7 +138,7 @@ export default function CoachSchedulePage() {
       // Clear the saved indicator after 3 seconds
       setTimeout(() => setSaved(false), 3000);
     } catch (error) {
-      console.error("Error saving availability:", error);
+      logger.error("Error saving availability", { error: formatError(error) });
     } finally {
       setSaving(false);
     }
@@ -188,7 +189,7 @@ export default function CoachSchedulePage() {
         </div>
 
         {/* Weekly grid */}
-        <div className="overflow-x-auto rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white">
+        <div className="overflow-x-auto rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
           <table className="w-full border-collapse">
             <thead>
               <tr>

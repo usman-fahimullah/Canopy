@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -51,7 +52,7 @@ export async function GET() {
 
     return NextResponse.json(recentApplications);
   } catch (error) {
-    console.error("Error fetching recent applications:", error);
+    logger.error("Error fetching recent applications", { error: formatError(error), endpoint: "/api/jobs/recent-applications" });
     return NextResponse.json([], { status: 500 });
   }
 }

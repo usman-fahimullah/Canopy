@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 // GET - List active coaches for browse page
 export async function GET(request: NextRequest) {
@@ -82,6 +83,7 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy,
+      take: 100,
     });
 
     // Format for frontend
@@ -105,7 +107,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ coaches: formattedCoaches });
   } catch (error) {
-    console.error("Fetch coaches error:", error);
+    logger.error("Fetch coaches error", { error: formatError(error), endpoint: "/api/coaches" });
     return NextResponse.json({ error: "Failed to fetch coaches" }, { status: 500 });
   }
 }

@@ -15,10 +15,22 @@ export type EntryIntent = "talent" | "coach" | "employer";
 export type TalentOnboardingStep = "background" | "skills" | "preferences";
 
 /** Steps in the coach onboarding */
-export type CoachOnboardingStep = "about" | "expertise" | "services" | "availability";
+export type CoachOnboardingStep =
+  | "about"
+  | "expertise"
+  | "services"
+  | "availability"
+  | "payout"
+  | "preview";
 
 /** Steps in the employer onboarding */
-export type EmployerOnboardingStep = "company" | "your-role";
+export type EmployerOnboardingStep =
+  | "company"
+  | "size-industry"
+  | "your-role"
+  | "hiring-goals"
+  | "first-role"
+  | "invite-team";
 
 /** Union of all possible onboarding steps */
 export type OnboardingStep = TalentOnboardingStep | CoachOnboardingStep | EmployerOnboardingStep;
@@ -98,6 +110,18 @@ export const COACH_STEPS: StepConfig[] = [
     title: "Availability",
     subtitle: "When can clients book you?",
   },
+  {
+    id: "payout",
+    path: "payout",
+    title: "Get paid",
+    subtitle: "Set up your payout method",
+  },
+  {
+    id: "preview",
+    path: "preview",
+    title: "Preview & launch",
+    subtitle: "Review your profile and go live",
+  },
 ];
 
 export const EMPLOYER_STEPS: StepConfig[] = [
@@ -108,10 +132,34 @@ export const EMPLOYER_STEPS: StepConfig[] = [
     subtitle: "Tell us about your organization",
   },
   {
+    id: "size-industry",
+    path: "size-industry",
+    title: "Size & industry",
+    subtitle: "Help talent find your company",
+  },
+  {
     id: "your-role",
     path: "your-role",
     title: "Your role",
     subtitle: "What are you hiring for?",
+  },
+  {
+    id: "hiring-goals",
+    path: "hiring-goals",
+    title: "Hiring goals",
+    subtitle: "What brings you to Canopy?",
+  },
+  {
+    id: "first-role",
+    path: "first-role",
+    title: "Post your first role",
+    subtitle: "Get in front of climate talent right away",
+  },
+  {
+    id: "invite-team",
+    path: "invite-team",
+    title: "Invite your team",
+    subtitle: "Collaborate on hiring with your colleagues",
   },
 ];
 

@@ -19,6 +19,16 @@ export interface BaseProfileData {
   bio: string;
 }
 
+export interface WorkExperience {
+  id: string;
+  title: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  isCurrent: boolean;
+  description: string;
+}
+
 export interface TalentFormData {
   careerStage: string | null;
   yearsExperience: string | null;
@@ -30,17 +40,83 @@ export interface TalentFormData {
   locationPreference: string | null;
   salaryMin: string;
   salaryMax: string;
+  goals: string;
+  workExperience: WorkExperience[];
+  pathways: string[];
+  categories: string[];
+  remotePreference: string | null;
+}
+
+export interface CoachService {
+  id: string;
+  name: string;
+  duration: number; // minutes: 30, 45, 60, 90, 120
+  price: number; // in cents, 0 for free
+  description: string;
+}
+
+export interface CoachTimeSlot {
+  start: string; // "09:00"
+  end: string; // "17:00"
+}
+
+export interface CoachWeeklySchedule {
+  monday: CoachTimeSlot | null;
+  tuesday: CoachTimeSlot | null;
+  wednesday: CoachTimeSlot | null;
+  thursday: CoachTimeSlot | null;
+  friday: CoachTimeSlot | null;
+  saturday: CoachTimeSlot | null;
+  sunday: CoachTimeSlot | null;
 }
 
 export interface CoachFormData {
-  headline: string;
+  // About
+  photoUrl: string;
+  tagline: string;
   bio: string;
+  location: string;
+
+  // Expertise
+  coachingTypes: string[];
+  industryFocus: string[]; // PathwayType slugs
+  careerFocus: string[]; // JobCategoryType slugs
+  experienceLevel: string | null; // "new" | "developing" | "experienced" | "expert"
+  certifications: string[];
   yearsInClimate: string | null;
+
+  // Services
+  services: CoachService[];
+
+  // Availability
+  weeklySchedule: CoachWeeklySchedule;
+  timezone: string;
+  bufferMinutes: number;
+
+  // Payout
+  stripeConnected: boolean;
+
+  // Legacy fields kept for API compat
   sectors: string[];
   expertise: string[];
   sessionTypes: string[];
   sessionRate: number;
   availability: string | null;
+}
+
+export interface EmployerFirstRole {
+  title: string;
+  category: string | null;
+  location: string;
+  workType: "onsite" | "hybrid" | "remote" | null;
+  employmentType: string | null;
+}
+
+export type HiringGoal = "specific-role" | "multiple-roles" | "exploring";
+
+export interface TeamInviteEntry {
+  email: string;
+  role: "RECRUITER" | "MEMBER";
 }
 
 export interface EmployerFormData {
@@ -49,7 +125,11 @@ export interface EmployerFormData {
   companyWebsite: string;
   companyLocation: string;
   companySize: string | null;
+  industries: string[];
   userTitle: string;
+  hiringGoal: HiringGoal | null;
+  firstRole: EmployerFirstRole | null;
+  teamInvites: TeamInviteEntry[];
 }
 
 // ─── Initial values ───────────────────────────────────────────────
@@ -72,12 +152,67 @@ const INITIAL_TALENT: TalentFormData = {
   locationPreference: null,
   salaryMin: "",
   salaryMax: "",
+  goals: "",
+  workExperience: [],
+  pathways: [],
+  categories: [],
+  remotePreference: null,
+};
+
+const DEFAULT_SERVICES: CoachService[] = [
+  {
+    id: "default-discovery",
+    name: "Discovery Call",
+    duration: 30,
+    price: 0,
+    description: "Free intro call to discuss your goals and see if we're a good fit.",
+  },
+  {
+    id: "default-session",
+    name: "Coaching Session",
+    duration: 60,
+    price: 15000,
+    description: "One-on-one coaching session focused on your career development.",
+  },
+];
+
+const DEFAULT_SCHEDULE: CoachWeeklySchedule = {
+  monday: { start: "09:00", end: "17:00" },
+  tuesday: { start: "09:00", end: "17:00" },
+  wednesday: { start: "09:00", end: "17:00" },
+  thursday: { start: "09:00", end: "17:00" },
+  friday: { start: "09:00", end: "17:00" },
+  saturday: null,
+  sunday: null,
 };
 
 const INITIAL_COACH: CoachFormData = {
-  headline: "",
+  // About
+  photoUrl: "",
+  tagline: "",
   bio: "",
+  location: "",
+
+  // Expertise
+  coachingTypes: [],
+  industryFocus: [],
+  careerFocus: [],
+  experienceLevel: null,
+  certifications: [],
   yearsInClimate: null,
+
+  // Services
+  services: DEFAULT_SERVICES,
+
+  // Availability
+  weeklySchedule: DEFAULT_SCHEDULE,
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  bufferMinutes: 15,
+
+  // Payout
+  stripeConnected: false,
+
+  // Legacy
   sectors: [],
   expertise: [],
   sessionTypes: [],
@@ -91,7 +226,11 @@ const INITIAL_EMPLOYER: EmployerFormData = {
   companyWebsite: "",
   companyLocation: "",
   companySize: null,
+  industries: [],
   userTitle: "",
+  hiringGoal: null,
+  firstRole: null,
+  teamInvites: [],
 };
 
 // ─── Context shape ────────────────────────────────────────────────

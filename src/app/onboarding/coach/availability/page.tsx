@@ -1,79 +1,118 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
-import { useOnboardingForm } from "@/components/onboarding/form-context";
+import {
+  useOnboardingForm,
+  type CoachTimeSlot,
+  type CoachWeeklySchedule,
+} from "@/components/onboarding/form-context";
 import { FormCard, FormField } from "@/components/ui/form-section";
 import { COACH_STEPS } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
 
-const availabilityOptions = [
-  {
-    value: "1-2",
-    label: "1-2 hours/week",
-    description: "Light commitment — a few sessions per month",
-  },
-  {
-    value: "3-5",
-    label: "3-5 hours/week",
-    description: "Regular engagement — several sessions per week",
-  },
-  {
-    value: "5+",
-    label: "5+ hours/week",
-    description: "Full practice — coaching is a significant part of your work",
-  },
+type DayKey = keyof CoachWeeklySchedule;
+
+const DAYS: { key: DayKey; label: string; short: string }[] = [
+  { key: "monday", label: "Monday", short: "Mon" },
+  { key: "tuesday", label: "Tuesday", short: "Tue" },
+  { key: "wednesday", label: "Wednesday", short: "Wed" },
+  { key: "thursday", label: "Thursday", short: "Thu" },
+  { key: "friday", label: "Friday", short: "Fri" },
+  { key: "saturday", label: "Saturday", short: "Sat" },
+  { key: "sunday", label: "Sunday", short: "Sun" },
 ];
+
+const TIME_OPTIONS: string[] = [];
+for (let h = 6; h <= 22; h++) {
+  TIME_OPTIONS.push(`${h.toString().padStart(2, "0")}:00`);
+  if (h < 22) {
+    TIME_OPTIONS.push(`${h.toString().padStart(2, "0")}:30`);
+  }
+}
+
+function formatTime(time: string): string {
+  const [h, m] = time.split(":");
+  const hour = parseInt(h);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const display = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${display}:${m} ${ampm}`;
+}
+
+const BUFFER_OPTIONS = [
+  { value: 0, label: "No buffer" },
+  { value: 15, label: "15 minutes" },
+  { value: 30, label: "30 minutes" },
+  { value: 60, label: "1 hour" },
+];
+
+const COMMON_TIMEZONES = [
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "America/Anchorage",
+  "Pacific/Honolulu",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Asia/Dubai",
+  "Asia/Kolkata",
+  "Asia/Singapore",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+];
+
+function getTimezoneLabel(tz: string): string {
+  try {
+    const now = new Date();
+    const offset = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      timeZoneName: "shortOffset",
+    })
+      .formatToParts(now)
+      .find((p) => p.type === "timeZoneName")?.value;
+    const city = tz.split("/").pop()?.replace(/_/g, " ") ?? tz;
+    return `${city} (${offset ?? tz})`;
+  } catch {
+    return tz;
+  }
+}
 
 export default function CoachAvailabilityPage() {
   const router = useRouter();
-  const { coachData, setCoachData, baseProfile } = useOnboardingForm();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { coachData, setCoachData } = useOnboardingForm();
 
   const step = COACH_STEPS[3]; // availability
-  const canContinue = coachData.availability !== null;
+  const schedule = coachData.weeklySchedule;
 
-  async function handleContinue() {
-    if (!canContinue) return;
-    setLoading(true);
-    setError(null);
+  const hasAtLeastOneDay = DAYS.some((d) => schedule[d.key] !== null);
+  const canContinue = hasAtLeastOneDay;
 
-    try {
-      const res = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "complete-role",
-          shell: "coach",
-          firstName: baseProfile.firstName,
-          lastName: baseProfile.lastName,
-          linkedinUrl: baseProfile.linkedinUrl || undefined,
-          bio: coachData.bio || baseProfile.bio || undefined,
-          headline: coachData.headline,
-          sectors: coachData.sectors,
-          expertise: coachData.expertise,
-          sessionTypes: coachData.sessionTypes,
-          sessionRate: coachData.sessionRate,
-          yearsInClimate: coachData.yearsInClimate,
-          availability: coachData.availability,
-        }),
-      });
+  function toggleDay(day: DayKey) {
+    const current = schedule[day];
+    setCoachData({
+      weeklySchedule: {
+        ...schedule,
+        [day]: current ? null : { start: "09:00", end: "17:00" },
+      },
+    });
+  }
 
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Something went wrong");
-        return;
-      }
-
-      router.push("/onboarding/complete");
-    } catch {
-      setError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  function updateSlot(
+    day: DayKey,
+    field: keyof CoachTimeSlot,
+    value: string
+  ) {
+    const slot = schedule[day];
+    if (!slot) return;
+    setCoachData({
+      weeklySchedule: {
+        ...schedule,
+        [day]: { ...slot, [field]: value },
+      },
+    });
   }
 
   return (
@@ -85,49 +124,153 @@ export default function CoachAvailabilityPage() {
       footer={
         <StepNavigation
           onBack={() => router.push("/onboarding/coach/services")}
-          onContinue={handleContinue}
+          onContinue={() => router.push("/onboarding/coach/payout")}
           canContinue={canContinue}
-          loading={loading}
-          continueLabel="Submit application"
         />
       }
     >
       <div className="space-y-6">
+        {/* Weekly Schedule */}
         <FormCard>
-          <FormField label="How much time can you dedicate to coaching?" required>
+          <FormField
+            label="When are you available for sessions?"
+            required
+            helpText="Toggle days on/off and set your available hours"
+          >
             <div className="space-y-3">
-              {availabilityOptions.map((option) => (
+              {DAYS.map((day) => {
+                const slot = schedule[day.key];
+                const enabled = slot !== null;
+
+                return (
+                  <div
+                    key={day.key}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg border p-3 transition-all",
+                      enabled
+                        ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)]"
+                        : "border-[var(--border-muted)] bg-[var(--background-interactive-default)]"
+                    )}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleDay(day.key)}
+                      className={cn(
+                        "w-12 shrink-0 rounded-md py-1 text-center text-caption font-medium transition-all",
+                        enabled
+                          ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]"
+                          : "bg-[var(--background-muted)] text-[var(--foreground-subtle)]"
+                      )}
+                    >
+                      {day.short}
+                    </button>
+
+                    {enabled && slot ? (
+                      <div className="flex flex-1 items-center gap-2">
+                        <select
+                          value={slot.start}
+                          onChange={(e) =>
+                            updateSlot(day.key, "start", e.target.value)
+                          }
+                          className="rounded-md border border-[var(--border-muted)] bg-[var(--background-default)] px-2 py-1.5 text-caption text-[var(--foreground-default)]"
+                        >
+                          {TIME_OPTIONS.map((t) => (
+                            <option key={t} value={t}>
+                              {formatTime(t)}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-caption text-[var(--foreground-subtle)]">
+                          to
+                        </span>
+                        <select
+                          value={slot.end}
+                          onChange={(e) =>
+                            updateSlot(day.key, "end", e.target.value)
+                          }
+                          className="rounded-md border border-[var(--border-muted)] bg-[var(--background-default)] px-2 py-1.5 text-caption text-[var(--foreground-default)]"
+                        >
+                          {TIME_OPTIONS.map((t) => (
+                            <option key={t} value={t}>
+                              {formatTime(t)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      <span className="text-caption text-[var(--foreground-disabled)]">
+                        Off
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </FormField>
+        </FormCard>
+
+        {/* Timezone */}
+        <FormCard>
+          <FormField label="Timezone" helpText="Auto-detected from your browser">
+            <select
+              value={coachData.timezone}
+              onChange={(e) => setCoachData({ timezone: e.target.value })}
+              className="w-full rounded-lg border border-[var(--border-muted)] bg-[var(--background-default)] px-3 py-2.5 text-caption text-[var(--foreground-default)]"
+            >
+              {COMMON_TIMEZONES.map((tz) => (
+                <option key={tz} value={tz}>
+                  {getTimezoneLabel(tz)}
+                </option>
+              ))}
+              {!COMMON_TIMEZONES.includes(coachData.timezone) && (
+                <option value={coachData.timezone}>
+                  {getTimezoneLabel(coachData.timezone)}
+                </option>
+              )}
+            </select>
+          </FormField>
+        </FormCard>
+
+        {/* Buffer Time */}
+        <FormCard>
+          <FormField
+            label="Buffer time between sessions"
+            helpText="Give yourself a break between back-to-back sessions"
+          >
+            <div className="flex flex-wrap gap-2">
+              {BUFFER_OPTIONS.map((opt) => (
                 <button
-                  key={option.value}
+                  key={opt.value}
                   type="button"
-                  onClick={() => setCoachData({ availability: option.value })}
+                  onClick={() =>
+                    setCoachData({ bufferMinutes: opt.value })
+                  }
                   className={cn(
-                    "w-full rounded-xl border-2 p-4 text-left transition-all",
-                    coachData.availability === option.value
-                      ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)]"
-                      : "border-[var(--primitive-neutral-200)] bg-white hover:border-[var(--primitive-neutral-400)]"
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
+                    coachData.bufferMinutes === opt.value
+                      ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                      : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-[var(--foreground-muted)] hover:border-[var(--border-interactive-hover)]"
                   )}
                 >
-                  <p className="text-foreground-default text-body-sm font-medium">{option.label}</p>
-                  <p className="mt-0.5 text-caption text-foreground-muted">{option.description}</p>
+                  {opt.label}
                 </button>
               ))}
             </div>
           </FormField>
         </FormCard>
 
-        <div className="rounded-xl border border-[var(--primitive-yellow-300)] bg-[var(--primitive-yellow-100)] p-4">
-          <p className="text-foreground-default mb-1 text-caption font-medium">
-            What happens next?
+        {/* Calendar Sync Teaser */}
+        <div className="rounded-xl border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+          <p className="mb-1 text-caption font-medium text-[var(--foreground-default)]">
+            Sync your calendar
           </p>
-          <p className="text-caption text-foreground-muted">
-            Your coaching profile will be reviewed by our team. Once approved, you&apos;ll appear in
-            client search results and can start accepting bookings.
+          <p className="text-caption text-[var(--foreground-muted)]">
+            Avoid double-bookings by connecting your Google or Outlook
+            calendar. You can set this up from your dashboard after
+            onboarding.
           </p>
         </div>
       </div>
-
-      {error && <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>}
     </OnboardingShell>
   );
 }

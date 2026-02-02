@@ -15,6 +15,10 @@ interface StepNavigationProps {
   loading?: boolean;
   /** Custom label for Continue button */
   continueLabel?: string;
+  /** Called when user clicks Skip (hidden if not provided) */
+  onSkip?: () => void;
+  /** Custom label for Skip button */
+  skipLabel?: string;
   /** Additional className for the container */
   className?: string;
 }
@@ -25,12 +29,14 @@ export function StepNavigation({
   canContinue = true,
   loading = false,
   continueLabel = "Next Step",
+  onSkip,
+  skipLabel = "Skip for now",
   className,
 }: StepNavigationProps) {
   return (
     <footer
       className={cn(
-        "shrink-0 border-t border-[var(--primitive-neutral-200)] bg-white px-4 py-4 sm:px-12",
+        "shrink-0 border-t border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-4 py-4 sm:px-12",
         className
       )}
     >
@@ -44,6 +50,17 @@ export function StepNavigation({
             aria-label="Go back"
           >
             <ArrowLeft size={24} weight="bold" />
+          </Button>
+        )}
+
+        {onSkip && (
+          <Button
+            type="button"
+            variant="tertiary"
+            onClick={onSkip}
+            disabled={loading}
+          >
+            {skipLabel}
           </Button>
         )}
 

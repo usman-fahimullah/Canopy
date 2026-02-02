@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateGoalSchema, AddMilestoneSchema } from "@/lib/validators/api";
 
 // PATCH — update goal (title, progress, status)
 export async function PATCH(
@@ -34,7 +36,14 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { title, description, progress, status, icon, targetDate } = body;
+    const result = UpdateGoalSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
+    const { title, description, progress, status, icon, targetDate } = result.data;
 
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
@@ -58,7 +67,7 @@ export async function PATCH(
 
     return NextResponse.json({ goal: updated });
   } catch (error) {
-    console.error("Update goal error:", error);
+    logger.error("Update goal error", { error: formatError(error), endpoint: "/api/goals/[id]" });
     return NextResponse.json(
       { error: "Failed to update goal" },
       { status: 500 }
@@ -99,11 +108,14 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { title } = body;
-
-    if (!title?.trim()) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+    const milestoneResult = AddMilestoneSchema.safeParse(body);
+    if (!milestoneResult.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: milestoneResult.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { title } = milestoneResult.data;
 
     const milestone = await prisma.milestone.create({
       data: {
@@ -115,7 +127,7 @@ export async function POST(
 
     return NextResponse.json({ milestone }, { status: 201 });
   } catch (error) {
-    console.error("Add milestone error:", error);
+    logger.error("Add milestone error", { error: formatError(error), endpoint: "/api/goals/[id]" });
     return NextResponse.json(
       { error: "Failed to add milestone" },
       { status: 500 }

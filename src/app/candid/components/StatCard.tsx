@@ -31,7 +31,7 @@ export function StatCard({
       className={cn(
         "rounded-card p-5 transition-all",
         // White card = shadow, no border
-        variant === "default" && "bg-white shadow-card hover:shadow-card-hover",
+        variant === "default" && "bg-[var(--card-background)] shadow-card hover:shadow-card-hover",
         // Colored card (Blue 200) = no shadow, no border
         variant === "highlight" && "bg-[var(--primitive-blue-200)]",
         className

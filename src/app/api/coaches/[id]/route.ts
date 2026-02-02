@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 // GET - Get single coach profile
 export async function GET(
@@ -92,7 +93,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Fetch coach error:", error);
+    logger.error("Fetch coach error", { error: formatError(error), endpoint: "/api/coaches/[id]" });
     return NextResponse.json({ error: "Failed to fetch coach" }, { status: 500 });
   }
 }

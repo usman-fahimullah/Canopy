@@ -35,7 +35,7 @@ const FormCard = React.forwardRef<HTMLDivElement, FormCardProps>(
       ref={ref}
       className={cn(
         // Figma: white bg, 1px border #e5dfd8, 16px radius, 24px padding
-        "bg-white border border-[var(--primitive-neutral-200)] rounded-2xl p-6",
+        "bg-[var(--card-background)] border border-[var(--primitive-neutral-200)] rounded-2xl p-6",
         className
       )}
       {...props}
@@ -67,7 +67,7 @@ const FormSection = React.forwardRef<HTMLDivElement, FormSectionProps>(
       {...props}
     >
       {title && (
-        <h2 className="text-lg font-medium text-black py-2">
+        <h2 className="text-lg font-medium text-[var(--foreground-default)] py-2">
           {title}
         </h2>
       )}
@@ -106,7 +106,7 @@ const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
     >
       <div className="flex flex-col gap-1">
         {/* Figma: 18px font, black text, 24px line height */}
-        <label className="text-lg text-black leading-6">
+        <label className="text-lg text-[var(--foreground-default)] leading-6">
           {label}
           {required && "*"}
         </label>

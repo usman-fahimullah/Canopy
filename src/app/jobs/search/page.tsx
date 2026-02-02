@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MagnifyingGlass, MapPin, Heart, Briefcase } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /* ------------------------------------------------------------------ */
 /*  Types — based on the /api/jobs/matches response shape              */
@@ -85,7 +86,7 @@ export default function JobsPage() {
           setSavedIds(new Set(fetched.filter((j) => j.isSaved).map((j) => j.id)));
         }
       } catch (err) {
-        console.error("Error fetching job matches:", err);
+        logger.error("Error fetching job matches", { error: formatError(err) });
       } finally {
         setLoading(false);
       }
@@ -173,7 +174,7 @@ export default function JobsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search jobs by title, company, or location..."
-            className="focus:ring-[var(--primitive-green-500)]/20 w-full rounded-[16px] border border-[var(--primitive-neutral-300)] bg-white py-3 pl-12 pr-4 text-body text-[var(--foreground-default)] outline-none transition-colors placeholder:text-[var(--foreground-subtle)] focus:border-[var(--primitive-green-500)] focus:ring-2"
+            className="focus:ring-[var(--primitive-green-500)]/20 w-full rounded-[16px] border border-[var(--primitive-neutral-300)] bg-[var(--input-background)] py-3 pl-12 pr-4 text-body text-[var(--foreground-default)] outline-none transition-colors placeholder:text-[var(--foreground-subtle)] focus:border-[var(--primitive-green-500)] focus:ring-2"
           />
         </div>
 
@@ -204,7 +205,7 @@ export default function JobsPage() {
             {filteredJobs.map((job) => (
               <div
                 key={job.id}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-5 transition-shadow hover:shadow-card"
+                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card"
               >
                 {/* Icon */}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
@@ -270,7 +271,7 @@ export default function JobsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
             <MagnifyingGlass
               size={32}
               weight="light"

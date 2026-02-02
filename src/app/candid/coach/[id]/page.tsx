@@ -24,6 +24,7 @@ import {
   Spinner,
   Warning,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface Review {
   id: string;
@@ -68,7 +69,7 @@ function StarRating({ rating }: { rating: number }) {
           key={star}
           size={16}
           weight={star <= rating ? "fill" : "regular"}
-          className={star <= rating ? "text-[#F59E0B]" : "text-[var(--primitive-neutral-300)]"}
+          className={star <= rating ? "text-[var(--primitive-yellow-500)]" : "text-[var(--primitive-neutral-300)]"}
         />
       ))}
     </div>
@@ -77,7 +78,7 @@ function StarRating({ rating }: { rating: number }) {
 
 function ReviewCard({ review }: { review: Review }) {
   return (
-    <div className="rounded-xl bg-white p-5 shadow-card">
+    <div className="rounded-xl bg-[var(--card-background)] p-5 shadow-card">
       <div className="flex items-start justify-between mb-3">
         <div>
           <p className="font-medium text-foreground-default">{review.reviewerName}</p>
@@ -143,7 +144,7 @@ export default function CoachProfilePage() {
           }
         }
       } catch (err) {
-        console.error("Error fetching coach:", err);
+        logger.error("Error fetching coach", { error: formatError(err) });
         setError("Failed to load coach profile");
       } finally {
         setLoading(false);
@@ -204,7 +205,7 @@ export default function CoachProfilePage() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
           {/* Profile Header */}
-          <div className="rounded-xl bg-white p-6 shadow-card">
+          <div className="rounded-xl bg-[var(--card-background)] p-6 shadow-card">
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="relative flex-shrink-0">
                 <Avatar
@@ -241,7 +242,7 @@ export default function CoachProfilePage() {
                 <div className="flex flex-wrap items-center gap-4 mt-4 text-caption">
                   {coach.rating && coach.rating > 0 && (
                     <div className="flex items-center gap-1.5">
-                      <Star size={16} weight="fill" className="text-[#F59E0B]" />
+                      <Star size={16} weight="fill" className="text-[var(--primitive-yellow-500)]" />
                       <span className="font-semibold text-foreground-default">
                         {coach.rating.toFixed(1)}
                       </span>
@@ -291,7 +292,7 @@ export default function CoachProfilePage() {
 
           {/* Video Introduction */}
           {coach.videoLink && (
-            <div className="rounded-xl bg-white p-6 shadow-card">
+            <div className="rounded-xl bg-[var(--card-background)] p-6 shadow-card">
               <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">
                 Video Introduction
               </h2>
@@ -308,7 +309,7 @@ export default function CoachProfilePage() {
           )}
 
           {/* About */}
-          <div className="rounded-xl bg-white p-6 shadow-card">
+          <div className="rounded-xl bg-[var(--card-background)] p-6 shadow-card">
             <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">
               About {coach.firstName}
             </h2>
@@ -323,7 +324,7 @@ export default function CoachProfilePage() {
 
           {/* Expertise */}
           {coach.expertise && coach.expertise.length > 0 && (
-            <div className="rounded-xl bg-white p-6 shadow-card">
+            <div className="rounded-xl bg-[var(--card-background)] p-6 shadow-card">
               <h2 className="text-heading-sm font-semibold text-foreground-default mb-4">
                 Areas of Expertise
               </h2>
@@ -338,7 +339,7 @@ export default function CoachProfilePage() {
           )}
 
           {/* Reviews */}
-          <div className="rounded-xl bg-white p-6 shadow-card">
+          <div className="rounded-xl bg-[var(--card-background)] p-6 shadow-card">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-heading-sm font-semibold text-foreground-default">
                 Reviews
@@ -375,7 +376,7 @@ export default function CoachProfilePage() {
 
         {/* Sidebar - Booking Card */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 rounded-xl bg-white p-6 shadow-card">
+          <div className="sticky top-24 rounded-xl bg-[var(--card-background)] p-6 shadow-card">
             <div className="text-center mb-6">
               <div className="text-heading-md font-bold text-[var(--primitive-green-800)]">
                 {sessionRateFormatted}

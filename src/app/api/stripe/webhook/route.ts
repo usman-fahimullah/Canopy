@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 import { createSessionBookedNotifications } from "@/lib/notifications";
+import { logger, formatError } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err) {
-    console.error("Webhook signature verification failed:", err);
+    logger.error("Webhook signature verification failed", { error: formatError(err), endpoint: "/api/stripe/webhook" });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -56,12 +57,12 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        console.warn(`Unhandled event type: ${event.type}`);
+        logger.warn("Unhandled Stripe event type", { endpoint: "/api/stripe/webhook", eventType: event.type });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Webhook handler error:", error);
+    logger.error("Webhook handler error", { error: formatError(error), endpoint: "/api/stripe/webhook" });
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 }
@@ -70,7 +71,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const metadata = session.metadata;
 
   if (!metadata?.coachId || !metadata?.menteeId || !metadata?.sessionDate) {
-    console.error("Missing metadata in checkout session");
+    logger.error("Missing metadata in checkout session", { endpoint: "/api/stripe/webhook" });
     return;
   }
 
@@ -86,44 +87,44 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     where: { id: coachId },
   });
 
-  // Create the coaching session
-  const coachingSession = await prisma.session.create({
-    data: {
-      coachId,
-      menteeId,
-      scheduledAt: sessionDate,
-      duration: sessionDuration,
-      status: "SCHEDULED",
-      videoLink: coach?.videoLink,
-    },
-  });
+  // Wrap all DB writes in a transaction for consistency
+  const coachingSession = await prisma.$transaction(async (tx) => {
+    const createdSession = await tx.session.create({
+      data: {
+        coachId,
+        menteeId,
+        scheduledAt: sessionDate,
+        duration: sessionDuration,
+        status: "SCHEDULED",
+        videoLink: coach?.videoLink,
+      },
+    });
 
-  // Create the booking record
-  await prisma.booking.create({
-    data: {
-      sessionId: coachingSession.id,
-      menteeId,
-      coachId,
-      amount: session.amount_total || 0,
-      platformFee,
-      coachPayout,
-      stripeCheckoutSessionId: session.id,
-      stripePaymentIntentId: session.payment_intent as string,
-      status: "PAID",
-      paidAt: new Date(),
-    },
-  });
+    await tx.booking.create({
+      data: {
+        sessionId: createdSession.id,
+        menteeId,
+        coachId,
+        amount: session.amount_total || 0,
+        platformFee,
+        coachPayout,
+        stripeCheckoutSessionId: session.id,
+        stripePaymentIntentId: session.payment_intent as string,
+        status: "PAID",
+        paidAt: new Date(),
+      },
+    });
 
-  // Update coach stats
-  await prisma.coachProfile.update({
-    where: { id: coachId },
-    data: {
-      totalSessions: { increment: 1 },
-      totalEarnings: { increment: coachPayout },
-    },
-  });
+    await tx.coachProfile.update({
+      where: { id: coachId },
+      data: {
+        totalSessions: { increment: 1 },
+        totalEarnings: { increment: coachPayout },
+      },
+    });
 
-  // Session and booking created successfully
+    return createdSession;
+  });
 
   // Send booking notifications to both parties
   const fullSession = await prisma.session.findUnique({
@@ -143,7 +144,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       coach: fullSession.coach,
       mentee: fullSession.mentee,
     }).catch((err) => {
-      console.error("Failed to send booking notifications:", err);
+      logger.error("Failed to send booking notifications", { error: formatError(err) });
     });
   }
 }
@@ -171,19 +172,20 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   });
 
   if (booking) {
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { status: "FAILED" },
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: { status: "FAILED" },
+      });
 
-    // Also cancel the session
-    await prisma.session.update({
-      where: { id: booking.sessionId },
-      data: {
-        status: "CANCELLED",
-        cancellationReason: "Payment failed",
-        cancelledAt: new Date(),
-      },
+      await tx.session.update({
+        where: { id: booking.sessionId },
+        data: {
+          status: "CANCELLED",
+          cancellationReason: "Payment failed",
+          cancelledAt: new Date(),
+        },
+      });
     });
   }
 }
@@ -199,22 +201,23 @@ async function handleRefund(charge: Stripe.Charge) {
     const refundAmount = charge.amount_refunded;
     const isFullRefund = refundAmount >= booking.amount;
 
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: {
-        status: isFullRefund ? "REFUNDED" : "PARTIALLY_REFUNDED",
-        refundAmount,
-        refundedAt: new Date(),
-      },
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.booking.update({
+        where: { id: booking.id },
+        data: {
+          status: isFullRefund ? "REFUNDED" : "PARTIALLY_REFUNDED",
+          refundAmount,
+          refundedAt: new Date(),
+        },
+      });
 
-    // Update coach earnings
-    await prisma.coachProfile.update({
-      where: { id: booking.coachId },
-      data: {
-        totalEarnings: { decrement: booking.coachPayout },
-        totalSessions: { decrement: 1 },
-      },
+      await tx.coachProfile.update({
+        where: { id: booking.coachId },
+        data: {
+          totalEarnings: { decrement: booking.coachPayout },
+          totalSessions: { decrement: 1 },
+        },
+      });
     });
   }
 }

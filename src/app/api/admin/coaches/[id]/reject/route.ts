@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedAccount, isAdminAccount, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
+import { logger, formatError } from "@/lib/logger";
+import { createCoachStatusNotification } from "@/lib/notifications";
+
+const rejectBodySchema = z.object({
+  reason: z.string().max(2000).optional().default(""),
+}).optional().default({});
 
 export async function POST(
   request: NextRequest,
@@ -9,26 +16,20 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Check authentication
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const account = await getAuthenticatedAccount();
+    if (!account) return unauthorizedResponse();
+    if (!isAdminAccount(account)) return forbiddenResponse();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // TODO: Add proper admin role check
-
-    // Get optional rejection reason from body
+    // Parse and validate optional rejection reason
     let rejectionReason = "";
     try {
-      const body = await request.json();
-      rejectionReason = body.reason || "";
+      const rawBody = await request.json();
+      const parsed = rejectBodySchema.safeParse(rawBody);
+      if (parsed.success) {
+        rejectionReason = parsed.data.reason || "";
+      }
     } catch {
-      // No body provided, that's fine
+      // No body provided — rejection reason is optional
     }
 
     // Get the coach profile
@@ -58,7 +59,6 @@ export async function POST(
       where: { id },
       data: {
         status: "REJECTED",
-        // Store rejection reason in availability JSON field for now
         availability: JSON.stringify({
           ...JSON.parse(coach.availability || "{}"),
           rejectionReason,
@@ -67,8 +67,14 @@ export async function POST(
       },
     });
 
-    // TODO: Send rejection email to coach (optional, be kind)
-    // await sendRejectionEmail(coach.account.email, coach.firstName, rejectionReason);
+    await createCoachStatusNotification({
+      accountId: coach.account.id,
+      status: "REJECTED",
+      coachName: coach.firstName || coach.account.name || "Coach",
+      email: coach.account.email,
+    }).catch((err) => {
+      logger.error("Failed to send rejection notification", { error: formatError(err), endpoint: "/api/admin/coaches/[id]/reject" });
+    });
 
     return NextResponse.json({
       success: true,
@@ -76,7 +82,7 @@ export async function POST(
       message: "Coach rejected",
     });
   } catch (error) {
-    console.error("Reject coach error:", error);
+    logger.error("Reject coach error", { error: formatError(error), endpoint: "/api/admin/coaches/[id]/reject" });
     return NextResponse.json(
       { error: "Failed to reject coach" },
       { status: 500 }

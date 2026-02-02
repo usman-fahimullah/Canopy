@@ -63,6 +63,7 @@ import {
   SelectValue,
 } from "./dropdown";
 import { SegmentedController } from "./segmented-controller";
+import { logger, formatError } from "@/lib/logger";
 
 /* ============================================
    Scheduler Types
@@ -565,7 +566,7 @@ const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                     "border-2 focus:outline-none focus:ring-2 focus:ring-ring-color focus:ring-offset-1",
                     isSlotSelected
                       ? "bg-primary-600 text-white border-primary-600 shadow-md scale-[1.02]"
-                      : "border-border-muted bg-white dark:bg-neutral-900 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:scale-[1.02]"
+                      : "border-border-muted bg-[var(--background-interactive-default)] dark:bg-neutral-900 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:scale-[1.02]"
                   )}
                 >
                   {format(slot.start, "h:mm a")}
@@ -1225,7 +1226,7 @@ const BookingLink: React.FC<BookingLinkProps> = ({
       onCopy?.();
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy:", err);
+      logger.error("Failed to copy", { error: formatError(err) });
     }
   };
 
@@ -1265,7 +1266,7 @@ const BookingLink: React.FC<BookingLinkProps> = ({
             >
               <span
                 className={cn(
-                  "absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200",
+                  "absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-[var(--switch-thumb)] shadow-sm transition-transform duration-200",
                   isActive && "translate-x-5"
                 )}
               />

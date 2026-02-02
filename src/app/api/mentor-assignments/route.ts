@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { CreateMentorAssignmentSchema, UpdateMentorAssignmentSchema } from "@/lib/validators/api";
 
 // POST — request mentorship (creates MentorAssignment with status PENDING)
 export async function POST(request: NextRequest) {
@@ -27,14 +29,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { mentorProfileId, notes } = body;
-
-    if (!mentorProfileId) {
+    const result = CreateMentorAssignmentSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Mentor profile ID is required" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { mentorProfileId, notes } = result.data;
 
     // Verify mentor exists and is actually a mentor
     const mentor = await prisma.seekerProfile.findUnique({
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ assignment }, { status: 201 });
   } catch (error) {
-    console.error("Error creating mentor assignment:", error);
+    logger.error("Error creating mentor assignment", { error: formatError(error), endpoint: "/api/mentor-assignments" });
     return NextResponse.json(
       { error: "Failed to request mentorship" },
       { status: 500 }
@@ -125,22 +127,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { assignmentId, status, notes } = body;
-
-    if (!assignmentId || !status) {
+    const patchResult = UpdateMentorAssignmentSchema.safeParse(body);
+    if (!patchResult.success) {
       return NextResponse.json(
-        { error: "Assignment ID and status are required" },
-        { status: 400 }
+        { error: "Validation failed", details: patchResult.error.flatten() },
+        { status: 422 }
       );
     }
-
-    const validStatuses = ["ACTIVE", "PAUSED", "COMPLETED"];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: `Status must be one of: ${validStatuses.join(", ")}` },
-        { status: 400 }
-      );
-    }
+    const { assignmentId, status, notes } = patchResult.data;
 
     const assignment = await prisma.mentorAssignment.findUnique({
       where: { id: assignmentId },
@@ -192,7 +186,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ assignment: updated });
   } catch (error) {
-    console.error("Error updating mentor assignment:", error);
+    logger.error("Error updating mentor assignment", { error: formatError(error), endpoint: "/api/mentor-assignments" });
     return NextResponse.json(
       { error: "Failed to update mentorship" },
       { status: 500 }

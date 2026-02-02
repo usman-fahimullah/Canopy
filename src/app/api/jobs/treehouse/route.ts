@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -159,7 +160,7 @@ export async function GET() {
 
     return NextResponse.json({ pathways, courses, certifications });
   } catch (error) {
-    console.error("Error fetching treehouse data:", error);
+    logger.error("Error fetching treehouse data", { error: formatError(error), endpoint: "/api/jobs/treehouse" });
     return NextResponse.json({ pathways: [], courses: [], certifications: [] }, { status: 500 });
   }
 }

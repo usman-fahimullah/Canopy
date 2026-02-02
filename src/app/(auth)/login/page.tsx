@@ -10,7 +10,7 @@ import { EnvelopeSimple, Lock, GoogleLogo, LinkedinLogo } from "@phosphor-icons/
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)] animate-pulse h-96" />}>
+    <Suspense fallback={<div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)] animate-pulse h-96" />}>
       <LoginContent />
     </Suspense>
   );
@@ -76,7 +76,7 @@ function LoginContent() {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
+    <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
           Welcome back
@@ -116,7 +116,7 @@ function LoginContent() {
           <div className="w-full border-t border-[var(--primitive-neutral-200)]" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-white text-[var(--primitive-neutral-600)]">
+          <span className="px-4 bg-[var(--card-background)] text-[var(--primitive-neutral-600)]">
             or continue with email
           </span>
         </div>

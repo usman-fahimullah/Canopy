@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Badge } from "./badge";
 import { Checkbox } from "./checkbox";
 import { CaretDown, Check, X, MagnifyingGlass, CircleNotch, Warning } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /* ============================================
    Combobox Types
@@ -692,7 +693,7 @@ const AsyncCombobox = React.forwardRef<HTMLButtonElement, AsyncComboboxProps>(
             const results = await loadOptions(search);
             setOptions(results);
           } catch (err) {
-            console.error("Failed to load options:", err);
+            logger.error("Failed to load options", { error: formatError(err) });
             setError(true);
             setOptions([]);
           } finally {

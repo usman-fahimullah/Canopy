@@ -216,7 +216,7 @@ function CompanyProfileSection({
           </div>
         </div>
 
-        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8">
+        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
           <div className="max-w-xl space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="company-name">Company name</Label>
@@ -284,7 +284,7 @@ function CompanyProfileSection({
         </Button>
       </div>
 
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8">
+      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
         <dl className="max-w-xl space-y-5">
           <div>
             <dt className="mb-1 text-caption font-medium text-foreground-muted">Company name</dt>
@@ -352,7 +352,7 @@ function TeamPermissionsSection() {
         </SimpleTooltip>
       </div>
 
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-6">
+      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
         <p className="mb-4 text-caption text-foreground-muted">
           {MOCK_TEAM.length} member{MOCK_TEAM.length !== 1 ? "s" : ""}
         </p>
@@ -407,7 +407,7 @@ function NotificationsSection({
     <div className="space-y-6">
       <h2 className="text-foreground-default text-heading-sm font-medium">Notifications</h2>
 
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8">
+      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
         <div className="max-w-xl space-y-6">
           <SwitchWithLabel
             label="New applications"
@@ -454,7 +454,7 @@ function PrivacyAccountSection({ onSignOut }: { onSignOut: () => void }) {
       <h2 className="text-foreground-default text-heading-sm font-medium">Privacy & Account</h2>
 
       {/* Export data */}
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8">
+      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
         <h3 className="text-foreground-default mb-1 text-body font-medium">Export company data</h3>
         <p className="mb-4 text-caption text-foreground-muted">
           Download a copy of all your organization data including jobs, candidates, and team
@@ -471,7 +471,7 @@ function PrivacyAccountSection({ onSignOut }: { onSignOut: () => void }) {
       </div>
 
       {/* Sign out */}
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8">
+      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
         <h3 className="text-foreground-default mb-1 text-body font-medium">Sign out</h3>
         <p className="mb-4 text-caption text-foreground-muted">
           Sign out of your Canopy employer account on this device.

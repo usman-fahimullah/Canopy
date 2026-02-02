@@ -159,7 +159,7 @@ function SignupForm() {
   // Success state
   if (success) {
     return (
-      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-8 shadow-sm">
+      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
             <EnvelopeSimple className="h-8 w-8 text-[var(--primitive-green-600)]" weight="bold" />
@@ -193,7 +193,7 @@ function SignupForm() {
   // Account type selection
   if (step === "type") {
     return (
-      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-8 shadow-sm">
+      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">Get started</h1>
           <p className="text-[var(--primitive-neutral-600)]">What brings you here?</p>
@@ -259,7 +259,7 @@ function SignupForm() {
         : "Create account";
 
   return (
-    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-8 shadow-sm">
+    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
       <div className="mb-8 text-center">
         <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">
           Create your account
@@ -297,7 +297,7 @@ function SignupForm() {
           <div className="w-full border-t border-[var(--primitive-neutral-200)]" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-white px-4 text-[var(--primitive-neutral-600)]">
+          <span className="bg-[var(--card-background)] px-4 text-[var(--primitive-neutral-600)]">
             or continue with email
           </span>
         </div>

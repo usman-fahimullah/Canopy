@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { CreateExperienceSchema } from "@/lib/validators/api";
 
 // GET — list experiences for current user
 export async function GET() {
@@ -24,11 +26,12 @@ export async function GET() {
     const experiences = await prisma.workExperience.findMany({
       where: { seekerId: account.seekerProfile.id },
       orderBy: { startDate: "desc" },
+      take: 100,
     });
 
     return NextResponse.json({ experiences });
   } catch (error) {
-    console.error("Fetch experiences error:", error);
+    logger.error("Fetch experiences error", { error: formatError(error), endpoint: "/api/experience" });
     return NextResponse.json(
       { error: "Failed to fetch experiences" },
       { status: 500 }
@@ -56,6 +59,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const result = CreateExperienceSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
     const {
       companyName,
       jobTitle,
@@ -66,29 +76,15 @@ export async function POST(request: NextRequest) {
       isCurrent,
       description,
       skills,
-    } = body;
-
-    // Validation
-    if (!companyName?.trim()) {
-      return NextResponse.json({ error: "Company name is required" }, { status: 400 });
-    }
-    if (!jobTitle?.trim()) {
-      return NextResponse.json({ error: "Job title is required" }, { status: 400 });
-    }
-    if (!startDate) {
-      return NextResponse.json({ error: "Start date is required" }, { status: 400 });
-    }
-    if (!isCurrent && !endDate) {
-      return NextResponse.json({ error: "End date is required when not current" }, { status: 400 });
-    }
+    } = result.data;
 
     const experience = await prisma.workExperience.create({
       data: {
         seekerId: account.seekerProfile.id,
         companyName: companyName.trim(),
         jobTitle: jobTitle.trim(),
-        employmentType,
-        workType,
+        employmentType: (employmentType || "FULL_TIME") as "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP",
+        workType: (workType || "ONSITE") as "ONSITE" | "REMOTE" | "HYBRID",
         startDate: new Date(startDate),
         endDate: endDate ? new Date(endDate) : null,
         isCurrent: !!isCurrent,
@@ -99,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ experience }, { status: 201 });
   } catch (error) {
-    console.error("Create experience error:", error);
+    logger.error("Create experience error", { error: formatError(error), endpoint: "/api/experience" });
     return NextResponse.json(
       { error: "Failed to create experience" },
       { status: 500 }

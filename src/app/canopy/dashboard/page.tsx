@@ -17,6 +17,7 @@ import {
   MapPin,
   Plus,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface Job {
   id: string;
@@ -145,7 +146,7 @@ export default function EmployerDashboardPage() {
           pipelineStats,
         });
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        logger.error("Error fetching dashboard data", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -239,7 +240,7 @@ export default function EmployerDashboardPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-4 py-5 transition-shadow hover:shadow-card"
+              className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-5 transition-shadow hover:shadow-card"
             >
               <div className="flex items-center justify-between">
                 <p className="text-caption text-foreground-muted">{stat.label}</p>
@@ -275,7 +276,7 @@ export default function EmployerDashboardPage() {
               <Link
                 key={job.id}
                 href={`/canopy/roles/${job.id}`}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-4 transition-shadow hover:shadow-card"
+                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-4 transition-shadow hover:shadow-card"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
                   <BriefcaseMetal
@@ -305,7 +306,7 @@ export default function EmployerDashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
             <p className="text-body text-foreground-muted">
               No roles posted yet. Create your first job listing to start receiving applications.
             </p>
@@ -336,7 +337,7 @@ export default function EmployerDashboardPage() {
             {data.recentApplications.map((app) => (
               <div
                 key={app.id}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-4"
+                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-4"
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-foreground-default truncate text-body font-medium">
@@ -355,7 +356,7 @@ export default function EmployerDashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
             <p className="text-body text-foreground-muted">
               No applications yet. Post a role to start receiving candidates.
             </p>
@@ -369,7 +370,7 @@ export default function EmployerDashboardPage() {
           <h2 className="text-foreground-default mb-4 text-heading-sm font-medium">
             Hiring Pipeline
           </h2>
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-6">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
             <div className="flex items-end gap-1">
               {PIPELINE_STAGES.map((stage) => {
                 const count = data.pipelineStats[stage] || 0;

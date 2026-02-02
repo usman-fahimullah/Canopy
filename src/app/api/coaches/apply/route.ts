@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { standardLimiter } from "@/lib/rate-limit";
+import { getAuthenticatedAccount, isAdminAccount, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
+import { logger, formatError } from "@/lib/logger";
+import { CoachApplySchema } from "@/lib/validators/api";
+
+const VALID_COACH_STATUSES = ["PENDING", "APPROVED", "REJECTED", "ACTIVE", "PAUSED"] as const;
+type CoachStatus = (typeof VALID_COACH_STATUSES)[number];
+
+function isValidCoachStatus(value: string): value is CoachStatus {
+  return (VALID_COACH_STATUSES as readonly string[]).includes(value);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +26,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const result = CoachApplySchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
     const {
       firstName,
       lastName,
@@ -29,15 +46,8 @@ export async function POST(request: NextRequest) {
       sessionRate,
       availability,
       motivation,
-    } = body;
+    } = result.data;
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !linkedinUrl || !headline || !bio || !expertise?.length || !sectors?.length) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
 
     // Check if user is already authenticated
     const supabase = await createClient();
@@ -128,7 +138,7 @@ export async function POST(request: NextRequest) {
       message: "Application submitted successfully",
     });
   } catch (error) {
-    console.error("Coach application error:", error);
+    logger.error("Coach application error", { error: formatError(error), endpoint: "/api/coaches/apply" });
     return NextResponse.json(
       { error: "Failed to submit application" },
       { status: 500 }
@@ -139,25 +149,19 @@ export async function POST(request: NextRequest) {
 // GET - List coach applications (for admin)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // TODO: Add proper admin check
-    // For now, just return applications
+    const account = await getAuthenticatedAccount();
+    if (!account) return unauthorizedResponse();
+    if (!isAdminAccount(account)) return forbiddenResponse();
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status") || "PENDING";
+    const statusParam = searchParams.get("status") || "PENDING";
+
+    // Validate status against the CoachStatus enum
+    const status: CoachStatus = isValidCoachStatus(statusParam) ? statusParam : "PENDING";
 
     const coaches = await prisma.coachProfile.findMany({
       where: {
-        status: status as any,
+        status,
       },
       include: {
         account: {
@@ -170,11 +174,12 @@ export async function GET(request: NextRequest) {
       orderBy: {
         applicationDate: "desc",
       },
+      take: 100,
     });
 
     return NextResponse.json({ coaches });
   } catch (error) {
-    console.error("Fetch applications error:", error);
+    logger.error("Fetch applications error", { error: formatError(error), endpoint: "/api/coaches/apply" });
     return NextResponse.json(
       { error: "Failed to fetch applications" },
       { status: 500 }

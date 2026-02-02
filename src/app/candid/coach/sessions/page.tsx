@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { CalendarDots, VideoCamera, Clock } from "@phosphor-icons/react";
 import { format, isToday, isPast } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 type FilterTab = "upcoming" | "past" | "cancelled";
 
@@ -81,7 +82,7 @@ export default function CoachSessionsPage() {
         const data = await res.json();
         setSessions(data.sessions || []);
       } catch (error) {
-        console.error("Error fetching sessions:", error);
+        logger.error("Error fetching sessions", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -184,7 +185,7 @@ export default function CoachSessionsPage() {
                       ? "border-[var(--primitive-green-300)] bg-[var(--primitive-green-800)]"
                       : activeTab === "upcoming"
                         ? "border-[var(--primitive-blue-200)] bg-[var(--primitive-blue-100)]"
-                        : "border-[var(--primitive-neutral-200)] bg-white"
+                        : "border-[var(--primitive-neutral-200)] bg-[var(--card-background)]"
                   }`}
                 >
                   <Avatar
@@ -253,7 +254,7 @@ export default function CoachSessionsPage() {
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-8 py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-8 py-16 text-center">
             <div className="mb-4 rounded-xl bg-[var(--primitive-yellow-100)] p-3">
               <CalendarDots
                 size={28}

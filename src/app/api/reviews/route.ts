@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
+import { CreateReviewSchema } from "@/lib/validators/api";
 
 // POST - Create a review
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 review creations per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `reviews:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -13,14 +26,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { sessionId, rating, comment } = body;
-
-    if (!sessionId || !rating || rating < 1 || rating > 5) {
+    const result = CreateReviewSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Invalid rating (must be 1-5)" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { sessionId, rating, comment } = result.data;
 
     // Get the session
     const session = await prisma.session.findUnique({
@@ -52,36 +65,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create review
-    const review = await prisma.review.create({
-      data: {
-        sessionId,
-        menteeId: session.menteeId,
-        coachId: session.coachId,
-        rating,
-        comment,
-      },
-    });
+    // Create review and recalculate coach rating in a transaction
+    const review = await prisma.$transaction(async (tx) => {
+      const review = await tx.review.create({
+        data: {
+          sessionId,
+          menteeId: session.menteeId,
+          coachId: session.coachId,
+          rating,
+          comment,
+        },
+      });
 
-    // Update coach's average rating
-    const allReviews = await prisma.review.findMany({
-      where: { coachId: session.coachId, isVisible: true },
-      select: { rating: true },
-    });
+      // Update coach's average rating
+      const allReviews = await tx.review.findMany({
+        where: { coachId: session.coachId, isVisible: true },
+        select: { rating: true },
+      });
 
-    const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+      const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
 
-    await prisma.coachProfile.update({
-      where: { id: session.coachId },
-      data: {
-        rating: avgRating,
-        reviewCount: allReviews.length,
-      },
+      await tx.coachProfile.update({
+        where: { id: session.coachId },
+        data: {
+          rating: avgRating,
+          reviewCount: allReviews.length,
+        },
+      });
+
+      return review;
     });
 
     return NextResponse.json({ success: true, review });
   } catch (error) {
-    console.error("Create review error:", error);
+    logger.error("Create review error", { error: formatError(error), endpoint: "/api/reviews" });
     return NextResponse.json({ error: "Failed to create review" }, { status: 500 });
   }
 }
@@ -106,6 +123,7 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
     // Format reviews for display (first name + last initial)
@@ -128,7 +146,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ reviews: formattedReviews });
   } catch (error) {
-    console.error("Fetch reviews error:", error);
+    logger.error("Fetch reviews error", { error: formatError(error), endpoint: "/api/reviews" });
     return NextResponse.json({ error: "Failed to fetch reviews" }, { status: 500 });
   }
 }

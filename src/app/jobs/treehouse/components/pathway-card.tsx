@@ -12,7 +12,7 @@ interface PathwayCardProps {
 
 export function PathwayCard({ title, description, courseCount, progress, icon }: PathwayCardProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-6 transition-shadow hover:shadow-card">
+    <div className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 transition-shadow hover:shadow-card">
       {/* Icon */}
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
         <span className="text-xl" role="img" aria-hidden="true">

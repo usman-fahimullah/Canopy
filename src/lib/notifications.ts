@@ -3,6 +3,7 @@
 
 import { prisma } from "@/lib/db";
 import { NotificationType } from "@prisma/client";
+import { logger, formatError } from "@/lib/logger";
 import {
   sendEmail,
   sessionBookingConfirmation,
@@ -46,7 +47,7 @@ export async function createNotification(params: CreateNotificationParams) {
   // Send email if requested and payload provided
   if (sendEmailNotification && emailPayload) {
     await sendEmail(emailPayload).catch((err) => {
-      console.error("[Notification] Email send failed:", err);
+      logger.error("Notification email send failed", { error: formatError(err), endpoint: "lib/notifications" });
     });
   }
 

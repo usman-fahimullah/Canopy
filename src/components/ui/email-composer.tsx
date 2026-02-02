@@ -252,7 +252,7 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({
       )}
     >
       {/* File icon or thumbnail */}
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-muted bg-white dark:bg-neutral-900">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-muted bg-[var(--card-background)] dark:bg-neutral-900">
         {isImage && attachment.url ? (
           <Image
             src={attachment.url}
@@ -379,7 +379,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
             className={cn(
               "rounded-md p-1.5 transition-all duration-150",
               viewMode === "grid"
-                ? "bg-white shadow-sm dark:bg-neutral-700"
+                ? "bg-[var(--background-interactive-default)] shadow-sm dark:bg-neutral-700"
                 : "hover:text-foreground-default text-foreground-muted"
             )}
           >
@@ -390,7 +390,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
             className={cn(
               "rounded-md p-1.5 transition-all duration-150",
               viewMode === "list"
-                ? "bg-white shadow-sm dark:bg-neutral-700"
+                ? "bg-[var(--background-interactive-default)] shadow-sm dark:bg-neutral-700"
                 : "hover:text-foreground-default text-foreground-muted"
             )}
           >

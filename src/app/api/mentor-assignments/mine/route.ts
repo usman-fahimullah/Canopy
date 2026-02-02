@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
 
 // GET — fetch current user's mentor assignments (as mentor or mentee)
 export async function GET(request: NextRequest) {
@@ -44,6 +45,7 @@ export async function GET(request: NextRequest) {
           },
         },
         orderBy: { startedAt: "desc" },
+        take: 50,
       });
 
       const result = assignments.map((a) => ({
@@ -75,6 +77,7 @@ export async function GET(request: NextRequest) {
           },
         },
         orderBy: { startedAt: "desc" },
+        take: 50,
       });
 
       const result = assignments.map((a) => ({
@@ -96,7 +99,7 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error("Error fetching mentor assignments:", error);
+    logger.error("Error fetching mentor assignments", { error: formatError(error), endpoint: "/api/mentor-assignments/mine" });
     return NextResponse.json(
       { error: "Failed to fetch assignments" },
       { status: 500 }

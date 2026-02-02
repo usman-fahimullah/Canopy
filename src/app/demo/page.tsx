@@ -119,9 +119,9 @@ const colorMap = {
 
 export default function DemoIndexPage() {
   return (
-    <div className="min-h-screen bg-[var(--primitive-neutral-100)] dark:bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[var(--primitive-neutral-100)] dark:bg-[var(--primitive-neutral-900)]">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-[var(--primitive-neutral-200)] dark:border-[var(--primitive-neutral-700)] bg-[var(--primitive-neutral-100)]/95 dark:bg-[#0A0A0A]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-[var(--primitive-neutral-200)] dark:border-[var(--primitive-neutral-700)] bg-[var(--primitive-neutral-100)]/95 dark:bg-[var(--primitive-neutral-900)]/95 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link
             href="/"
@@ -161,7 +161,7 @@ export default function DemoIndexPage() {
               <Link
                 key={demo.href}
                 href={demo.href}
-                className={`group p-6 rounded-xl border border-[var(--primitive-neutral-200)] dark:border-[var(--primitive-neutral-700)] bg-white dark:bg-[#1A1A1A] ${colors.hover} hover:shadow-lg transition-all duration-200`}
+                className={`group p-6 rounded-xl border border-[var(--primitive-neutral-200)] dark:border-[var(--primitive-neutral-700)] bg-white dark:bg-[var(--primitive-neutral-800)] ${colors.hover} hover:shadow-lg transition-all duration-200`}
               >
                 <div className="flex items-start gap-4 mb-4">
                   <div

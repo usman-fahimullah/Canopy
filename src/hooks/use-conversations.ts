@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { logger, formatError } from "@/lib/logger";
 
 export interface ConversationListItem {
   id: string;
@@ -37,7 +38,7 @@ export function useConversations() {
       setConversations(data.conversations || []);
       setError(null);
     } catch (err) {
-      console.error("useConversations error:", err);
+      logger.error("useConversations fetch failed", { error: formatError(err), endpoint: "hooks/use-conversations" });
       setError("Failed to load conversations");
     } finally {
       setLoading(false);
@@ -90,7 +91,7 @@ export function useConversations() {
         await fetchConversations();
         return data.conversation;
       } catch (err) {
-        console.error("createConversation error:", err);
+        logger.error("createConversation failed", { error: formatError(err), endpoint: "hooks/use-conversations" });
         throw err;
       }
     },

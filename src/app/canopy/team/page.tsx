@@ -133,7 +133,7 @@ export default function TeamPage() {
           {MOCK_TEAM.map((member) => (
             <div
               key={member.id}
-              className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-5 sm:flex-row sm:items-center"
+              className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-5 sm:flex-row sm:items-center"
             >
               {/* Avatar */}
               <Avatar name={member.name} color={member.avatarColor} size="default" />

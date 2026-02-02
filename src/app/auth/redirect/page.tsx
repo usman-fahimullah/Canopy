@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 import {
   getOnboardingRedirect,
   getDashboardPath,
@@ -57,7 +58,7 @@ export default async function AuthRedirectPage() {
           },
         });
       } catch (error) {
-        console.error("Failed to create account:", error);
+        logger.error("Failed to create account", { error: formatError(error) });
         // Still redirect to onboarding — the /api/onboarding fallback will retry
       }
       redirect("/onboarding");
@@ -76,7 +77,7 @@ export default async function AuthRedirectPage() {
     const primaryRole = account.primaryRole as Shell | null;
     redirect(getDashboardPath(primaryRole));
   } catch (error) {
-    console.error("Auth redirect error:", error);
+    logger.error("Auth redirect error", { error: formatError(error) });
     // Fallback: send to onboarding rather than crashing
     redirect("/onboarding");
   }

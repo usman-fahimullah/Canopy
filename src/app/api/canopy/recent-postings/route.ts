@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -54,7 +55,7 @@ export async function GET() {
 
     return NextResponse.json(recentPostings);
   } catch (error) {
-    console.error("Error fetching recent postings:", error);
+    logger.error("Error fetching recent postings", { error: formatError(error), endpoint: "/api/canopy/recent-postings" });
     return NextResponse.json([], { status: 500 });
   }
 }

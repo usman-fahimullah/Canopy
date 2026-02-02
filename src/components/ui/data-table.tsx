@@ -1885,11 +1885,13 @@ function DataTable<T extends Record<string, unknown>>({
 
     const groups = new Map<string, T[]>();
     sortedData.forEach(row => {
-      const groupValue = String(row[column.accessorKey!] ?? "");
+      const key = column.accessorKey;
+      const groupValue = key ? String(row[key] ?? "") : "";
       if (!groups.has(groupValue)) {
         groups.set(groupValue, []);
       }
-      groups.get(groupValue)!.push(row);
+      const group = groups.get(groupValue);
+      if (group) group.push(row);
     });
 
     return Array.from(groups.entries()).map(([value, rows]) => ({

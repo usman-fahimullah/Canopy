@@ -48,7 +48,7 @@ export default function JobFormDemoPage() {
     <div className="min-h-screen bg-[var(--primitive-neutral-100)] py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">
+          <h1 className="text-3xl font-bold text-[var(--foreground-default)] mb-2">
             Job Posting Form Demo
           </h1>
           <p className="text-[var(--primitive-neutral-600)]">
@@ -99,7 +99,7 @@ export default function JobFormDemoPage() {
 
         {/* Debug output */}
         <details className="bg-white rounded-2xl border border-[var(--primitive-neutral-200)] p-6">
-          <summary className="cursor-pointer text-lg font-medium text-black">
+          <summary className="cursor-pointer text-lg font-medium text-[var(--foreground-default)]">
             Form State (Debug)
           </summary>
           <pre className="mt-4 text-sm text-[var(--primitive-neutral-600)] overflow-auto">

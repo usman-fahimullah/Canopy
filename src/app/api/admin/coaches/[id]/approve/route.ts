@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedAccount, isAdminAccount, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
+import { logger, formatError } from "@/lib/logger";
+import { createCoachStatusNotification } from "@/lib/notifications";
 
 export async function POST(
   request: NextRequest,
@@ -9,19 +11,9 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Check authentication
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // TODO: Add proper admin role check
-    // For now, allow any authenticated user
+    const account = await getAuthenticatedAccount();
+    if (!account) return unauthorizedResponse();
+    if (!isAdminAccount(account)) return forbiddenResponse();
 
     // Get the coach profile
     const coach = await prisma.coachProfile.findUnique({
@@ -54,8 +46,14 @@ export async function POST(
       },
     });
 
-    // TODO: Send approval email to coach
-    // await sendApprovalEmail(coach.account.email, coach.firstName);
+    await createCoachStatusNotification({
+      accountId: coach.account.id,
+      status: "APPROVED",
+      coachName: coach.firstName || coach.account.name || "Coach",
+      email: coach.account.email,
+    }).catch((err) => {
+      logger.error("Failed to send approval notification", { error: formatError(err), endpoint: "/api/admin/coaches/[id]/approve" });
+    });
 
     return NextResponse.json({
       success: true,
@@ -63,7 +61,7 @@ export async function POST(
       message: "Coach approved successfully",
     });
   } catch (error) {
-    console.error("Approve coach error:", error);
+    logger.error("Approve coach error", { error: formatError(error), endpoint: "/api/admin/coaches/[id]/approve" });
     return NextResponse.json(
       { error: "Failed to approve coach" },
       { status: 500 }

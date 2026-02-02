@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { logger, formatError } from "@/lib/logger";
 
 export interface MessageItem {
   id: string;
@@ -71,7 +72,7 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
         setNextCursor(data.nextCursor);
         setError(null);
       } catch (err) {
-        console.error("useMessages error:", err);
+        logger.error("useMessages fetch failed", { error: formatError(err), endpoint: "hooks/use-messages" });
         setError("Failed to load messages");
       } finally {
         setLoading(false);
@@ -151,7 +152,7 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
 
         return data.message;
       } catch (err) {
-        console.error("sendMessage error:", err);
+        logger.error("sendMessage failed", { error: formatError(err), endpoint: "hooks/use-messages" });
         setError("Failed to send message");
         return null;
       } finally {
@@ -174,7 +175,7 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
         method: "PUT",
       });
     } catch (err) {
-      console.error("markAsRead error:", err);
+      logger.error("markAsRead failed", { error: formatError(err), endpoint: "hooks/use-messages" });
     }
   }, [conversationId]);
 

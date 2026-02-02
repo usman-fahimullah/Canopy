@@ -212,7 +212,7 @@ function SortableQuestionItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-white p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]"
+      className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]"
     >
       <div className="flex items-center gap-4">
         {/* Drag Handle */}
@@ -694,7 +694,7 @@ export default function RoleEditPage() {
   return (
     <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
       {/* Top Navigation Bar */}
-      <header className="border-b border-[var(--primitive-neutral-100)] bg-white">
+      <header className="border-b border-[var(--primitive-neutral-100)] bg-[var(--background-default)]">
         <div className="flex items-center justify-between">
           {/* Left: Logo */}
           <div className="flex h-full items-center px-12 py-4">
@@ -743,7 +743,7 @@ export default function RoleEditPage() {
           {/* Right: Organization selector */}
           <div className="flex h-full items-center px-8 py-4">
             <div className="flex items-center gap-2 rounded-2xl p-2">
-              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-[var(--primitive-neutral-200)] bg-[#1963b0]">
+              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--primitive-blue-600)]">
                 <span className="text-caption-sm font-bold text-white">SA</span>
               </div>
               <span className="text-caption text-foreground">Seattle Aquarium</span>
@@ -755,7 +755,7 @@ export default function RoleEditPage() {
       {/* Page Content with left border and rounded corners */}
       <div className="rounded-bl-3xl rounded-tl-3xl border-l border-[var(--primitive-neutral-200)]">
         {/* Page Header */}
-        <div className="border-b border-[var(--primitive-neutral-200)] bg-white px-12 py-6">
+        <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-12 py-6">
           <div className="relative flex items-center justify-between">
             {/* Left: Icon + Title + Badge - with truncation */}
             <div className="flex min-w-0 max-w-[280px] items-center gap-3">
@@ -819,7 +819,7 @@ export default function RoleEditPage() {
           {activeTab === "apply-form" && (
             <div className="flex flex-col gap-4">
               {/* Apply Form Header Card */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
                 {/* Title Section */}
                 <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                   <h2 className="text-heading-sm text-foreground">Apply Form</h2>
@@ -846,7 +846,7 @@ export default function RoleEditPage() {
                           variant="primary"
                           size="sm"
                           onClick={() => {
-                            /* TODO: Implement save changes */
+                            /* Feature: Save changes functionality — requires API endpoint implementation */
                           }}
                         >
                           Save Changes
@@ -897,7 +897,7 @@ export default function RoleEditPage() {
               </div>
 
               {/* Personal Info Card */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
                 {/* Header */}
                 <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                   <h2 className="text-body-strong text-foreground">Personal Info</h2>
@@ -962,7 +962,7 @@ export default function RoleEditPage() {
               </div>
 
               {/* Questions Section Card */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
                 {/* Header with Toggle */}
                 <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
                   <Switch checked={questionsEnabled} onCheckedChange={setQuestionsEnabled} />
@@ -1556,7 +1556,7 @@ export default function RoleEditPage() {
                           className={`flex h-[89px] w-[85%] items-start rounded-lg p-3 ${
                             tempTextQuestion.answerType === "long"
                               ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                              : "border border-[var(--primitive-neutral-200)] bg-white"
+                              : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
                           }`}
                         >
                           <span
@@ -1592,7 +1592,7 @@ export default function RoleEditPage() {
                           className={`w-[85%] rounded-lg p-4 ${
                             tempTextQuestion.answerType === "short"
                               ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                              : "border border-[var(--primitive-neutral-200)] bg-white"
+                              : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
                           }`}
                         >
                           <span
@@ -1703,13 +1703,13 @@ export default function RoleEditPage() {
                   <label className="text-body text-foreground">Answer Preview</label>
                   <div className="rounded-2xl bg-[var(--primitive-neutral-100)] p-6">
                     <div className="flex gap-4">
-                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-white px-6 py-3">
+                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--primitive-blue-500)]">
                           <div className="h-2.5 w-2.5 rounded-full bg-[var(--primitive-blue-500)]" />
                         </div>
                         <span className="text-body-sm text-foreground">Yes</span>
                       </div>
-                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-white px-6 py-3">
+                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
                         <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
                         <span className="text-body-sm text-foreground">No</span>
                       </div>
@@ -1832,7 +1832,7 @@ export default function RoleEditPage() {
                             className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
                               !tempMultipleChoice.allowMultiple
                                 ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                                : "border border-[var(--primitive-neutral-200)] bg-white"
+                                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
                             }`}
                           >
                             <div
@@ -1848,7 +1848,7 @@ export default function RoleEditPage() {
                             </div>
                             <span className="text-caption">Option A</span>
                           </div>
-                          <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-200)] bg-white px-3 py-2">
+                          <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)] px-3 py-2">
                             <div className="h-4 w-4 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
                             <span className="text-caption text-foreground-subtle">Option B</span>
                           </div>
@@ -1877,7 +1877,7 @@ export default function RoleEditPage() {
                             className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
                               tempMultipleChoice.allowMultiple
                                 ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                                : "border border-[var(--primitive-neutral-200)] bg-white"
+                                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
                             }`}
                           >
                             <div
@@ -1897,7 +1897,7 @@ export default function RoleEditPage() {
                             className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
                               tempMultipleChoice.allowMultiple
                                 ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                                : "border border-[var(--primitive-neutral-200)] bg-white"
+                                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
                             }`}
                           >
                             <div
@@ -2180,7 +2180,7 @@ export default function RoleEditPage() {
           {activeTab === "candidates" && (
             <div className="space-y-4">
               {/* Header Card */}
-              <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-white p-6">
+              <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <h2 className="mb-1 text-heading-sm text-foreground">Applications</h2>
@@ -2220,7 +2220,7 @@ export default function RoleEditPage() {
               </div>
 
               {/* Applications List */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
                 {/* Table Header */}
                 <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-6 py-3">
                   <div className="grid grid-cols-12 gap-4 text-caption font-semibold text-foreground-muted">
@@ -2670,7 +2670,7 @@ export default function RoleEditPage() {
               {/* Right Column - Sidebar */}
               <div className="sticky top-6 flex w-[480px] flex-col gap-4 self-start">
                 {/* Role Settings Card - Figma 188:6269 */}
-                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
                   {/* Header */}
                   <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-200)] p-6">
                     <SlidersHorizontal

@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Star, CalendarBlank, BriefcaseMetal } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /* -------------------------------------------------------------------
    Types
@@ -107,7 +108,7 @@ export default function CandidatesPage() {
           setApplications(data.applications || []);
         }
       } catch (error) {
-        console.error("Error fetching applications:", error);
+        logger.error("Error fetching applications", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -171,7 +172,7 @@ export default function CandidatesPage() {
 
         {/* Empty State */}
         {!loading && filteredApplications.length === 0 && (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-12 text-center">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primitive-blue-100)]">
               <Users size={28} weight="fill" className="text-[var(--primitive-blue-600)]" />
             </div>
@@ -197,7 +198,7 @@ export default function CandidatesPage() {
               return (
                 <div
                   key={app.id}
-                  className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-5 transition-shadow hover:shadow-card sm:flex-row sm:items-center sm:gap-4"
+                  className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card sm:flex-row sm:items-center sm:gap-4"
                 >
                   {/* Avatar Initials */}
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primitive-blue-200)] text-caption font-bold text-[var(--primitive-blue-700)]">

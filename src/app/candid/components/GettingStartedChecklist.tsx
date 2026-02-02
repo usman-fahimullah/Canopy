@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProgressMeterLinear } from "@/components/ui/progress-meter";
 import { CheckCircle, Circle, Rocket, CaretRight, X } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface ChecklistItem {
   id: string;
@@ -110,7 +111,7 @@ export function GettingStartedChecklist({
           return;
         }
       } catch (error) {
-        console.error("Error fetching checklist from API:", error);
+        logger.error("Error fetching checklist from API", { error: formatError(error) });
       }
 
       // Fallback to localStorage if API fails

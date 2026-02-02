@@ -320,6 +320,80 @@ It only takes a minute and makes a big difference!
   };
 }
 
+// Team invite email (Canopy)
+interface TeamInviteData {
+  recipientEmail: string;
+  inviterName: string;
+  companyName: string;
+  role: string;
+  acceptUrl: string;
+}
+
+export function teamInviteEmail(data: TeamInviteData) {
+  const roleName = data.role === "RECRUITER" ? "Recruiter" : "Hiring Team";
+
+  return {
+    to: data.recipientEmail,
+    subject: `${data.inviterName} invited you to join ${data.companyName} on Canopy`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #0A3D2C; padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0;">You're Invited!</h1>
+        </div>
+
+        <div style="padding: 32px; background-color: #ffffff;">
+          <p>Hi there,</p>
+
+          <p><strong>${data.inviterName}</strong> has invited you to join <strong>${data.companyName}</strong> on Canopy as a <strong>${roleName}</strong>.</p>
+
+          <div style="background-color: #F3F7F6; border-radius: 8px; padding: 24px; margin: 24px 0;">
+            <h3 style="margin: 0 0 16px 0; color: #0A3D2C;">What you'll be able to do</h3>
+            ${data.role === "RECRUITER" ? `
+            <ul style="margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 8px;">Post and manage job roles</li>
+              <li style="margin-bottom: 8px;">Review and manage candidates</li>
+              <li style="margin-bottom: 8px;">View hiring analytics</li>
+            </ul>
+            ` : `
+            <ul style="margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 8px;">View candidates for your assigned roles</li>
+              <li style="margin-bottom: 8px;">Leave feedback and evaluations</li>
+            </ul>
+            `}
+          </div>
+
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${data.acceptUrl}" style="background-color: #0A3D2C; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              Accept Invitation
+            </a>
+          </div>
+
+          <p style="color: #888; font-size: 14px;">
+            This invitation expires in 7 days. If you didn't expect this, you can safely ignore this email.
+          </p>
+        </div>
+
+        <div style="background-color: #F3F7F6; padding: 24px; text-align: center;">
+          <p style="margin: 0; color: #666; font-size: 14px;">
+            &copy; ${new Date().getFullYear()} Canopy by Green Jobs Board. Climate hiring, simplified.
+          </p>
+        </div>
+      </div>
+    `,
+    text: `
+You're invited to join ${data.companyName} on Canopy!
+
+${data.inviterName} has invited you to join ${data.companyName} as a ${roleName}.
+
+Accept your invitation: ${data.acceptUrl}
+
+This invitation expires in 7 days.
+
+&copy; ${new Date().getFullYear()} Canopy by Green Jobs Board. Climate hiring, simplified.
+    `.trim(),
+  };
+}
+
 // New booking notification for coach
 interface NewBookingNotificationData extends BaseEmailData {
   menteeName: string;

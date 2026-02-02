@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { logger, formatError } from "@/lib/logger";
 
 export interface NotificationItem {
   id: string;
@@ -27,7 +28,7 @@ export function useNotifications() {
       setUnreadCount(data.unreadCount || 0);
       setError(null);
     } catch (err) {
-      console.error("useNotifications error:", err);
+      logger.error("useNotifications fetch failed", { error: formatError(err), endpoint: "hooks/use-notifications" });
       setError("Failed to load notifications");
     } finally {
       setLoading(false);
@@ -54,7 +55,7 @@ export function useNotifications() {
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (err) {
-      console.error("markAsRead error:", err);
+      logger.error("markAsRead failed", { error: formatError(err), endpoint: "hooks/use-notifications" });
     }
   }, []);
 
@@ -66,7 +67,7 @@ export function useNotifications() {
       );
       setUnreadCount(0);
     } catch (err) {
-      console.error("markAllAsRead error:", err);
+      logger.error("markAllAsRead failed", { error: formatError(err), endpoint: "hooks/use-notifications" });
     }
   }, []);
 

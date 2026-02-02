@@ -321,7 +321,7 @@ export default function ApplyPage() {
     return (
       <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
         <div className="mx-auto max-w-2xl px-4 py-16">
-          <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-white p-12 text-center">
+          <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-12 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
               <CheckCircle weight="fill" className="h-10 w-10 text-[var(--primitive-green-600)]" />
             </div>
@@ -396,7 +396,7 @@ export default function ApplyPage() {
   return (
     <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-[var(--primitive-neutral-300)] bg-white">
+      <header className="sticky top-0 z-10 border-b border-[var(--primitive-neutral-300)] bg-[var(--background-default)]">
         <div className="mx-auto max-w-4xl px-4 py-6">
           <div className="mb-4 flex items-start justify-between">
             <div>
@@ -501,7 +501,7 @@ export default function ApplyPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Info Section */}
-          <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+          <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
             <div className="border-b border-[var(--primitive-neutral-200)] p-6">
               <h2 className="mb-1 text-body-strong text-foreground">Personal Info</h2>
               <p className="text-caption text-foreground-muted">Tell us about yourself</p>
@@ -629,7 +629,7 @@ export default function ApplyPage() {
           </section>
 
           {/* Career Details Section */}
-          <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+          <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
             <div className="border-b border-[var(--primitive-neutral-200)] p-6">
               <h2 className="mb-1 text-body-strong text-foreground">Career Details</h2>
               <p className="text-caption text-foreground-muted">
@@ -757,7 +757,7 @@ export default function ApplyPage() {
           {(MOCK_JOB_DATA.requiredFiles.resume ||
             MOCK_JOB_DATA.requiredFiles.coverLetter ||
             MOCK_JOB_DATA.requiredFiles.portfolio) && (
-            <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+            <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
               <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                 <h2 className="mb-1 text-body-strong text-foreground">Required Files</h2>
                 <p className="text-caption text-foreground-muted">Upload the following documents</p>
@@ -883,7 +883,7 @@ export default function ApplyPage() {
 
           {/* Additional Questions Section */}
           {MOCK_JOB_DATA.questions.length > 0 && (
-            <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-white">
+            <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
               <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                 <h2 className="mb-1 text-body-strong text-foreground">Additional Questions</h2>
                 <p className="text-caption text-foreground-muted">Help us get to know you better</p>
@@ -1021,7 +1021,7 @@ export default function ApplyPage() {
           )}
 
           {/* Submit Section */}
-          <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-white p-6">
+          <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-6">
             <div className="mb-6 flex items-start gap-3">
               <Checkbox id="consent" required />
               <Label htmlFor="consent" className="text-caption font-normal leading-relaxed">

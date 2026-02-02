@@ -146,7 +146,7 @@ export function MentorDetailPanel({
 
           {/* About Section */}
           {mentor.bio && (
-            <section className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white overflow-hidden mb-6">
+            <section className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] overflow-hidden mb-6">
               <div className="flex items-center gap-2.5 px-6 pt-6 pb-3">
                 <div className="rounded-lg bg-[var(--primitive-purple-200)] p-2">
                   <TextAlignLeft size={18} className="text-[var(--primitive-purple-600)]" />
@@ -167,7 +167,7 @@ export function MentorDetailPanel({
 
           {/* Green Skills — always visible per Figma */}
           {(mentor.greenSkills.length > 0 || mentor.skills.length > 0) && (
-            <section className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white overflow-hidden mb-6">
+            <section className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] overflow-hidden mb-6">
               <div className="flex items-center gap-2.5 px-6 pt-4 pb-2">
                 <div className="rounded-lg bg-[var(--primitive-green-200)] p-2">
                   <Tree size={18} className="text-[var(--primitive-green-700)]" />
@@ -195,7 +195,7 @@ export function MentorDetailPanel({
       </div>
 
       {/* Sticky CTA */}
-      <div className="shrink-0 border-t border-border-muted bg-white">
+      <div className="shrink-0 border-t border-border-muted bg-[var(--card-background)]">
         <div className="px-12 py-6">
           <Button
             variant="primary"

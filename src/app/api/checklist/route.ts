@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateChecklistSchema } from "@/lib/validators/api";
 
 // Default checklist items with their IDs
 const DEFAULT_CHECKLIST_ITEMS = [
@@ -86,7 +88,7 @@ export async function GET() {
       progress: progressPercentage,
     });
   } catch (error) {
-    console.error("Fetch checklist error:", error);
+    logger.error("Fetch checklist error", { error: formatError(error), endpoint: "/api/checklist" });
     return NextResponse.json(
       { error: "Failed to fetch checklist" },
       { status: 500 }
@@ -105,11 +107,15 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { itemId, completed } = body;
-
-    if (!itemId) {
-      return NextResponse.json({ error: "Item ID required" }, { status: 400 });
+    const result = UpdateChecklistSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { itemId, completed } = result.data;
+
 
     // For now, we'll store manual completions in localStorage on the client
     // In a future iteration, we could add a ChecklistCompletion model to the schema
@@ -121,7 +127,7 @@ export async function PATCH(request: NextRequest) {
       completed,
     });
   } catch (error) {
-    console.error("Update checklist error:", error);
+    logger.error("Update checklist error", { error: formatError(error), endpoint: "/api/checklist" });
     return NextResponse.json(
       { error: "Failed to update checklist" },
       { status: 500 }

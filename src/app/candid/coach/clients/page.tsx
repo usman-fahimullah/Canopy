@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Avatar } from "@/components/ui/avatar";
 import { Users, MagnifyingGlass, CalendarDots } from "@phosphor-icons/react";
 import { format } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 interface Session {
   id: string;
@@ -106,7 +107,7 @@ export default function CoachClientsPage() {
 
         setClients(clientList);
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -146,7 +147,7 @@ export default function CoachClientsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search clients..."
-            className="focus:ring-[var(--primitive-green-500)]/20 w-full rounded-[12px] border border-[var(--primitive-neutral-200)] bg-white py-3 pl-10 pr-4 text-body text-[var(--primitive-neutral-800)] outline-none transition-colors placeholder:text-[var(--primitive-neutral-500)] focus:border-[var(--primitive-green-500)] focus:ring-2"
+            className="focus:ring-[var(--primitive-green-500)]/20 w-full rounded-[12px] border border-[var(--primitive-neutral-200)] bg-[var(--input-background)] py-3 pl-10 pr-4 text-body text-[var(--primitive-neutral-800)] outline-none transition-colors placeholder:text-[var(--primitive-neutral-500)] focus:border-[var(--primitive-green-500)] focus:ring-2"
           />
         </div>
 
@@ -156,7 +157,7 @@ export default function CoachClientsPage() {
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-5 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+                className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-5 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
               >
                 <div className="flex items-center gap-3">
                   <Avatar
@@ -196,7 +197,7 @@ export default function CoachClientsPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-8 py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-8 py-16 text-center">
             <div className="mb-4 rounded-xl bg-[var(--primitive-yellow-100)] p-3">
               <Users size={28} weight="bold" className="text-[var(--primitive-yellow-600)]" />
             </div>

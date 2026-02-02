@@ -3,6 +3,8 @@ import { stripe, calculateFees } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { paymentLimiter } from "@/lib/rate-limit";
+import { logger, formatError } from "@/lib/logger";
+import { CheckoutSchema } from "@/lib/validators/api";
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,14 +29,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { coachId, sessionDate, sessionDuration = 60 } = body;
-
-    if (!coachId || !sessionDate) {
+    const result = CheckoutSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Missing required fields: coachId, sessionDate" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { coachId, sessionDate, sessionDuration } = result.data;
+
 
     // Get coach profile
     const coach = await prisma.coachProfile.findUnique({
@@ -127,7 +130,7 @@ export async function POST(request: NextRequest) {
       url: session.url,
     });
   } catch (error) {
-    console.error("Checkout session error:", error);
+    logger.error("Checkout session error", { error: formatError(error), endpoint: "/api/payments/checkout" });
     return NextResponse.json(
       { error: "Failed to create checkout session" },
       { status: 500 }

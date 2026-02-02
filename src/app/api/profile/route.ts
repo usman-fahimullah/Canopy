@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateProfileSchema } from "@/lib/validators/api";
 
 // GET — current user's account + seekerProfile + coachProfile
 export async function GET() {
@@ -26,7 +28,7 @@ export async function GET() {
 
     return NextResponse.json({ account });
   } catch (error) {
-    console.error("Fetch profile error:", error);
+    logger.error("Fetch profile error", { error: formatError(error), endpoint: "/api/profile" });
     return NextResponse.json(
       { error: "Failed to fetch profile" },
       { status: 500 }
@@ -54,6 +56,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
+    const result = UpdateProfileSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
     const {
       name, avatar, phone, location, timezone, bio,
       pronouns, ethnicity, linkedinUrl,
@@ -61,7 +70,7 @@ export async function PATCH(request: NextRequest) {
       headline, skills, greenSkills, certifications,
       yearsExperience, targetSectors, resumeUrl, portfolioUrl,
       summary, isMentor, mentorBio, mentorTopics,
-    } = body;
+    } = result.data;
 
     // Update account
     const accountUpdate: Record<string, unknown> = {};
@@ -114,7 +123,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ account: updated });
   } catch (error) {
-    console.error("Update profile error:", error);
+    logger.error("Update profile error", { error: formatError(error), endpoint: "/api/profile" });
     return NextResponse.json(
       { error: "Failed to update profile" },
       { status: 500 }

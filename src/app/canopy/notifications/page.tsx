@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Bell, Check, BriefcaseMetal, ChatCircleDots, Users, Warning } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface Notification {
   id: string;
@@ -57,7 +58,10 @@ export default function EmployerNotificationsPage() {
     fetch("/api/notifications")
       .then((res) => (res.ok ? res.json() : { notifications: [] }))
       .then((data) => setNotifications(data.notifications || []))
-      .catch(() => setNotifications([]))
+      .catch((err) => {
+        logger.error("Failed to fetch notifications", { error: formatError(err) });
+        setNotifications([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -67,7 +71,9 @@ export default function EmployerNotificationsPage() {
 
   const markRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch(() => {});
+    fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch((err) => {
+      logger.error("Failed to mark notification as read", { error: formatError(err), notificationId: id });
+    });
   };
 
   if (loading) {
@@ -97,7 +103,7 @@ export default function EmployerNotificationsPage() {
 
       <div className="px-8 py-6 lg:px-12">
         {notifications.length === 0 ? (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-12 text-center">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-neutral-100)]">
               <Bell size={28} className="text-foreground-muted" />
             </div>
@@ -120,7 +126,7 @@ export default function EmployerNotificationsPage() {
                       <button
                         key={notif.id}
                         onClick={() => markRead(notif.id)}
-                        className={`flex w-full items-start gap-4 rounded-[16px] border bg-white px-6 py-4 text-left transition-colors ${
+                        className={`flex w-full items-start gap-4 rounded-[16px] border bg-[var(--card-background)] px-6 py-4 text-left transition-colors ${
                           notif.read
                             ? "border-[var(--primitive-neutral-200)]"
                             : "bg-[var(--primitive-blue-100)]/30 border-[var(--primitive-blue-200)]"

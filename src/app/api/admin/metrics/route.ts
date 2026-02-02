@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedAccount, isAdminAccount, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
+import { logger, formatError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // TODO: Add proper admin role check
+    const account = await getAuthenticatedAccount();
+    if (!account) return unauthorizedResponse();
+    if (!isAdminAccount(account)) return forbiddenResponse();
 
     // Get metrics in parallel
     const [
@@ -44,12 +36,14 @@ export async function GET(request: NextRequest) {
       prisma.booking.findMany({
         where: { status: "PAID" },
         select: { platformFee: true },
+        take: 1000,
       }),
 
       // Get reviews for average rating
       prisma.review.findMany({
         where: { isVisible: true },
         select: { rating: true },
+        take: 1000,
       }),
     ]);
 
@@ -83,11 +77,13 @@ export async function GET(request: NextRequest) {
           where: { scheduledAt: { gte: sixMonthsAgo } },
           select: { scheduledAt: true, status: true },
           orderBy: { scheduledAt: "asc" },
+          take: 1000,
         }),
         prisma.booking.findMany({
           where: { createdAt: { gte: sixMonthsAgo }, status: "PAID" },
           select: { createdAt: true, amount: true, platformFee: true },
           orderBy: { createdAt: "asc" },
+          take: 1000,
         }),
         prisma.seekerProfile.count(),
         prisma.seekerProfile.count({ where: { isMentor: true } }),
@@ -149,7 +145,7 @@ export async function GET(request: NextRequest) {
       ...analytics,
     });
   } catch (error) {
-    console.error("Fetch metrics error:", error);
+    logger.error("Fetch metrics error", { error: formatError(error), endpoint: "/api/admin/metrics" });
     return NextResponse.json(
       { error: "Failed to fetch metrics" },
       { status: 500 }

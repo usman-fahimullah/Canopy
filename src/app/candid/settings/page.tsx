@@ -24,6 +24,7 @@ import {
   Check,
   X,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 type SettingsTab = "profile" | "notifications" | "privacy" | "billing";
 

@@ -1,43 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { SubmitApplicationSchema } from "@/lib/validators/api";
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await request.formData();
 
-    // Extract form fields
-    const application = {
-      jobId: formData.get("jobId"),
-      name: formData.get("name"),
-      email: formData.get("email"),
-      dateOfBirth: formData.get("dateOfBirth"),
-      pronouns: formData.get("pronouns"),
-      location: formData.get("location"),
-      currentRole: formData.get("currentRole"),
-      currentCompany: formData.get("currentCompany"),
-      yearsExperience: formData.get("yearsExperience"),
-      linkedIn: formData.get("linkedIn"),
-      portfolio: formData.get("portfolio"),
-      questionAnswers: JSON.parse((formData.get("questionAnswers") as string) || "{}"),
-      submittedAt: new Date().toISOString(),
+    // Safely parse questionAnswers JSON
+    let questionAnswers: Record<string, string> = {};
+    try {
+      const rawAnswers = formData.get("questionAnswers") as string;
+      if (rawAnswers) {
+        questionAnswers = JSON.parse(rawAnswers);
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid question answers format" },
+        { status: 400 }
+      );
+    }
+
+    // Extract form data into object for validation
+    const applicationData = {
+      jobId: (formData.get("jobId") as string) || "",
+      name: (formData.get("name") as string) || "",
+      email: (formData.get("email") as string) || "",
+      dateOfBirth: (formData.get("dateOfBirth") as string) || undefined,
+      pronouns: (formData.get("pronouns") as string) || undefined,
+      location: (formData.get("location") as string) || undefined,
+      currentRole: (formData.get("currentRole") as string) || undefined,
+      currentCompany: (formData.get("currentCompany") as string) || undefined,
+      yearsExperience: (formData.get("yearsExperience") as string) || undefined,
+      linkedIn: (formData.get("linkedIn") as string) || undefined,
+      portfolio: (formData.get("portfolio") as string) || undefined,
+      questionAnswers,
     };
 
-    // Extract files
+    const result = SubmitApplicationSchema.safeParse(applicationData);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
+
+    // Extract files (for future storage integration)
     const resumeFile = formData.get("resume") as File | null;
     const coverLetterFile = formData.get("coverLetter") as File | null;
-    const portfolioFile = formData.get("portfolio") as File | null;
+    const portfolioFile = formData.get("portfolioFile") as File | null;
 
-    // In a real app, you would:
-    // 1. Validate the data
-    // 2. Upload files to storage (S3, etc.)
-    // 3. Save to database
-    // 4. Send confirmation email
-    // 5. Notify recruiter
-
-    // TODO: Log application receipt to proper logging service
-    // Application received with files: resume, coverLetter, portfolio
-
-    // Simulate processing delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // TODO: Upload files to storage, save to database, send confirmation email, notify recruiter
+    void resumeFile;
+    void coverLetterFile;
+    void portfolioFile;
 
     return NextResponse.json(
       {
@@ -48,7 +72,10 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error submitting application:", error);
+    logger.error("Error submitting application", {
+      error: formatError(error),
+      endpoint: "/api/applications",
+    });
     return NextResponse.json(
       {
         success: false,
@@ -62,6 +89,12 @@ export async function POST(request: NextRequest) {
 // GET endpoint to retrieve applications for a job
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const jobId = searchParams.get("jobId");
 
@@ -125,7 +158,7 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error fetching applications:", error);
+    logger.error("Error fetching applications", { error: formatError(error), endpoint: "/api/applications" });
     return NextResponse.json(
       {
         success: false,

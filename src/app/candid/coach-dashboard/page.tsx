@@ -19,6 +19,7 @@ import {
   Gear,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow, isSameDay } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 interface Session {
   id: string;
@@ -126,7 +127,7 @@ export default function CoachDashboardPage() {
           },
         });
       } catch (error) {
-        console.error("Error fetching coach dashboard data:", error);
+        logger.error("Error fetching coach dashboard data", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -204,7 +205,7 @@ export default function CoachDashboardPage() {
 
       {/* Stats Grid */}
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="rounded-card bg-white p-5 shadow-card">
+        <div className="rounded-card bg-[var(--card-background)] p-5 shadow-card">
           <div className="mb-2 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
               <CalendarBlank size={20} className="text-[var(--primitive-green-700)]" />
@@ -216,7 +217,7 @@ export default function CoachDashboardPage() {
           <p className="text-caption text-foreground-muted">Total Sessions</p>
         </div>
 
-        <div className="rounded-card bg-white p-5 shadow-card">
+        <div className="rounded-card bg-[var(--card-background)] p-5 shadow-card">
           <div className="mb-2 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-yellow-100)]">
               <Star size={20} className="text-[var(--primitive-yellow-600)]" />
@@ -230,7 +231,7 @@ export default function CoachDashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-card bg-white p-5 shadow-card">
+        <div className="rounded-card bg-[var(--card-background)] p-5 shadow-card">
           <div className="mb-2 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
               <TrendUp size={20} className="text-[var(--primitive-blue-600)]" />
@@ -242,7 +243,7 @@ export default function CoachDashboardPage() {
           <p className="text-caption text-foreground-muted">Sessions This Month</p>
         </div>
 
-        <div className="rounded-card bg-white p-5 shadow-card">
+        <div className="rounded-card bg-[var(--card-background)] p-5 shadow-card">
           <div className="mb-2 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
               <CurrencyDollar size={20} className="text-[var(--primitive-green-700)]" />
@@ -307,7 +308,7 @@ export default function CoachDashboardPage() {
                           <div
                             key={session.id}
                             className={cn(
-                              "rounded-card bg-white p-5 shadow-card",
+                              "rounded-card bg-[var(--card-background)] p-5 shadow-card",
                               isGroupToday && "ring-2 ring-[var(--primitive-green-200)]"
                             )}
                           >
@@ -351,7 +352,7 @@ export default function CoachDashboardPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-card bg-white p-8 text-center shadow-card">
+            <div className="rounded-card bg-[var(--card-background)] p-8 text-center shadow-card">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
                 <CalendarBlank size={32} className="text-[var(--primitive-green-700)]" />
               </div>
@@ -369,7 +370,7 @@ export default function CoachDashboardPage() {
         <div className="space-y-6">
           {/* Profile Status */}
           {data.profile && (
-            <div className="rounded-card bg-white p-5 shadow-card">
+            <div className="rounded-card bg-[var(--card-background)] p-5 shadow-card">
               <h3 className="text-foreground-default mb-4 text-body-strong font-semibold">
                 Profile Status
               </h3>
@@ -400,7 +401,7 @@ export default function CoachDashboardPage() {
           )}
 
           {/* Quick Actions */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-[var(--card-background)] p-5 shadow-card">
             <h3 className="text-foreground-default mb-4 text-body-strong font-semibold">
               Quick Actions
             </h3>
@@ -429,7 +430,7 @@ export default function CoachDashboardPage() {
           </div>
 
           {/* Recent Reviews Preview */}
-          <div className="rounded-card bg-white p-5 shadow-card">
+          <div className="rounded-card bg-[var(--card-background)] p-5 shadow-card">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-foreground-default text-body-strong font-semibold">
                 Recent Reviews
@@ -456,7 +457,7 @@ export default function CoachDashboardPage() {
                           weight={star <= review.rating ? "fill" : "regular"}
                           className={
                             star <= review.rating
-                              ? "text-[#F59E0B]"
+                              ? "text-[var(--primitive-yellow-500)]"
                               : "text-[var(--primitive-neutral-300)]"
                           }
                         />

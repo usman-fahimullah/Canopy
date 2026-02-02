@@ -19,7 +19,7 @@ const difficultyVariant = {
 
 export function CourseCard({ title, provider, duration, difficulty, progress }: CourseCardProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-5 transition-shadow hover:shadow-card">
+    <div className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-5 transition-shadow hover:shadow-card">
       {/* Difficulty badge */}
       <div>
         <Badge variant={difficultyVariant[difficulty]} size="sm">

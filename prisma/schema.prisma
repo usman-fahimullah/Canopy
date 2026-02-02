@@ -52,6 +52,9 @@ model Account {
   // Notifications
   notifications Notification[]
 
+  // Team invites sent by this account
+  invitesSent TeamInvite[] @relation("InvitedByAccount")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -70,6 +73,9 @@ model Organization {
   description    String?  @db.Text  // Company description
   website        String?            // Company website URL
   location       String?            // Company headquarters location
+  size           String?            // "1-10" | "11-50" | "51-200" | "201-1000" | "1000+"
+  industries     String[]           // PathwayType slugs: ["energy", "agriculture"]
+  hiringGoal     String?            // "specific-role" | "multiple-roles" | "exploring"
 
   // Brand kit for career pages
   primaryColor   String   @default("#0F766E")
@@ -97,6 +103,9 @@ model Organization {
 
   // Sponsor collections (NEW for Job Seeker Portal)
   sponsoredCollections Collection[]
+
+  // Team invites
+  teamInvites    TeamInvite[]
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -136,6 +145,42 @@ enum OrgMemberRole {
   RECRUITER
   MEMBER
   VIEWER
+}
+
+// =================================================================
+// TEAM INVITE — Pending invitations to join an organization.
+// Created during employer onboarding or from the team settings page.
+// =================================================================
+
+model TeamInvite {
+  id              String         @id @default(cuid())
+
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  invitedById     String
+  invitedBy       Account        @relation("InvitedByAccount", fields: [invitedById], references: [id])
+
+  email           String
+  role            OrgMemberRole  @default(RECRUITER)
+  assignedJobIds  String[]
+  token           String         @unique
+  expiresAt       DateTime
+  status          InviteStatus   @default(PENDING)
+  acceptedAt      DateTime?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
 }
 
 // =================================================================

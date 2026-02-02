@@ -19,7 +19,7 @@ export function MentorListItem({
       onClick={onClick}
       aria-pressed={isSelected}
       className={`w-full border-b border-[var(--primitive-neutral-200)] px-6 py-4 text-left transition-all duration-150 ${
-        isSelected ? "bg-background-brand-subtle" : "bg-white hover:bg-background-subtle"
+        isSelected ? "bg-background-brand-subtle" : "bg-[var(--card-background)] hover:bg-background-subtle"
       }`}
     >
       <div className="flex items-start gap-3">

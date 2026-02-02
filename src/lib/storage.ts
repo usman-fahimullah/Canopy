@@ -2,6 +2,7 @@
 // Uses Supabase Storage for file uploads
 
 import { createClient } from "@/lib/supabase/client";
+import { logger, formatError } from "@/lib/logger";
 
 const BUCKETS = {
   avatars: "avatars",
@@ -30,7 +31,7 @@ export async function uploadFile(
     });
 
   if (error) {
-    console.error("[Storage] Upload failed:", error);
+    logger.error("Storage upload failed", { error: formatError(error), endpoint: "lib/storage" });
     return { url: "", error: error.message };
   }
 
@@ -93,7 +94,7 @@ export async function deleteFile(
     .remove([path]);
 
   if (error) {
-    console.error("[Storage] Delete failed:", error);
+    logger.error("Storage delete failed", { error: formatError(error), endpoint: "lib/storage" });
     return { success: false, error: error.message };
   }
 

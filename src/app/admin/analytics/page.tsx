@@ -13,6 +13,7 @@ import {
   XCircle,
   WarningCircle,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface AnalyticsData {
   pendingApplications: number;
@@ -46,7 +47,7 @@ function StatCard({
   subtitle?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-5">
+    <div className="bg-[var(--card-background)] rounded-xl border border-[var(--primitive-neutral-200)] p-5">
       <div className="flex items-center gap-3 mb-2">
         <div
           className={`w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--primitive-${color}-100)]`}
@@ -110,7 +111,7 @@ export default function AdminAnalyticsPage() {
           setData(json);
         }
       } catch (err) {
-        console.error("Failed to fetch analytics:", err);
+        logger.error("Failed to fetch analytics", { error: formatError(err) });
       } finally {
         setLoading(false);
       }
@@ -248,7 +249,7 @@ export default function AdminAnalyticsPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Sessions by Month */}
-        <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-6">
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--primitive-neutral-200)] p-6">
           <BarChart
             data={sessionMonthData}
             maxValue={maxSessions}
@@ -257,7 +258,7 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Revenue by Month */}
-        <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-6">
+        <div className="bg-[var(--card-background)] rounded-xl border border-[var(--primitive-neutral-200)] p-6">
           <BarChart
             data={revenueMonthData}
             maxValue={maxRevenue}
@@ -267,7 +268,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* Rating Distribution */}
-      <div className="bg-white rounded-xl border border-[var(--primitive-neutral-200)] p-6">
+      <div className="bg-[var(--card-background)] rounded-xl border border-[var(--primitive-neutral-200)] p-6">
         <BarChart
           data={ratingData.reverse()}
           maxValue={maxRating}

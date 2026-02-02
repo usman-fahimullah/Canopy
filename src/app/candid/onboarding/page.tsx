@@ -47,6 +47,7 @@ import {
   Handshake,
   CaretDown as ChevronDown,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 type Step =
   | "welcome"
@@ -258,7 +259,7 @@ export default function OnboardingPage() {
         }),
       });
     } catch (err) {
-      console.error("Onboarding submit error:", err);
+      logger.error("Onboarding submit error", { error: formatError(err) });
     } finally {
       setSubmitting(false);
     }
@@ -407,7 +408,7 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-[var(--background-subtle)]">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-white/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-[var(--background-default)]/95 backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
           <Link
             href="/candid"
@@ -535,7 +536,7 @@ export default function OnboardingPage() {
                         "relative w-full rounded-card p-5 text-left transition-all duration-200",
                         isSelected
                           ? "bg-[var(--primitive-blue-200)]"
-                          : "bg-white shadow-card hover:shadow-card-hover"
+                          : "bg-[var(--background-interactive-default)] shadow-card hover:shadow-card-hover"
                       )}
                     >
                       {option.highlight && (
@@ -708,7 +709,7 @@ export default function OnboardingPage() {
                       <select
                         value={yearsExperience || ""}
                         onChange={(e) => setYearsExperience(e.target.value || null)}
-                        className="text-foreground-default focus:ring-[var(--primitive-green-600)]/20 w-full appearance-none rounded-lg border border-[var(--border-default)] bg-white px-4 py-2.5 transition-colors hover:border-[var(--border-muted)] focus:border-[var(--primitive-green-600)] focus:outline-none focus:ring-2"
+                        className="text-foreground-default focus:ring-[var(--primitive-green-600)]/20 w-full appearance-none rounded-lg border border-[var(--border-default)] bg-[var(--background-interactive-default)] px-4 py-2.5 transition-colors hover:border-[var(--border-muted)] focus:border-[var(--primitive-green-600)] focus:outline-none focus:ring-2"
                       >
                         <option value="">Select experience level...</option>
                         {yearsOfExperienceOptions.map((option) => (
@@ -757,7 +758,7 @@ export default function OnboardingPage() {
                             "rounded-card p-4 text-left transition-all duration-200",
                             isSelected
                               ? "border-2 border-[var(--primitive-green-800)] bg-[var(--primitive-blue-200)]"
-                              : "border border-[var(--border-default)] bg-white shadow-card hover:shadow-card-hover"
+                              : "border border-[var(--border-default)] bg-[var(--background-interactive-default)] shadow-card hover:shadow-card-hover"
                           )}
                         >
                           <h4
@@ -832,7 +833,7 @@ export default function OnboardingPage() {
                               "rounded-full border px-3 py-1.5 text-caption transition-all",
                               isAdded
                                 ? "bg-[var(--primitive-green-800)]/5 cursor-default border-[var(--primitive-green-800)] text-[var(--primitive-green-800)]"
-                                : "border-[var(--border-default)] bg-white hover:border-[var(--primitive-green-800)] hover:bg-[var(--primitive-blue-200)]"
+                                : "border-[var(--border-default)] bg-[var(--background-interactive-default)] hover:border-[var(--primitive-green-800)] hover:bg-[var(--primitive-blue-200)]"
                             )}
                           >
                             {suggestion}
@@ -909,7 +910,7 @@ export default function OnboardingPage() {
                             "flex items-center gap-3 rounded-card p-4 text-left transition-all duration-200",
                             isSelected
                               ? "bg-[var(--primitive-blue-200)]"
-                              : "bg-white shadow-card hover:shadow-card-hover"
+                              : "bg-[var(--background-interactive-default)] shadow-card hover:shadow-card-hover"
                           )}
                         >
                           <div
@@ -961,7 +962,7 @@ export default function OnboardingPage() {
                             "flex w-full items-center justify-between rounded-card p-4 text-left transition-all duration-200",
                             isSelected
                               ? "bg-[var(--primitive-blue-200)]"
-                              : "bg-white shadow-card hover:shadow-card-hover"
+                              : "bg-[var(--background-interactive-default)] shadow-card hover:shadow-card-hover"
                           )}
                         >
                           <span
@@ -1006,7 +1007,7 @@ export default function OnboardingPage() {
                             "flex w-full items-center justify-between rounded-card p-4 text-left transition-all duration-200",
                             isSelected
                               ? "bg-[var(--primitive-blue-200)]"
-                              : "bg-white shadow-card hover:shadow-card-hover"
+                              : "bg-[var(--background-interactive-default)] shadow-card hover:shadow-card-hover"
                           )}
                         >
                           <span
@@ -1134,7 +1135,7 @@ export default function OnboardingPage() {
                           "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-caption transition-all",
                           isAdded
                             ? "bg-[var(--primitive-green-800)]/5 cursor-default border-[var(--primitive-green-800)] text-[var(--primitive-green-800)]"
-                            : "border-[var(--border-default)] bg-white hover:border-[var(--primitive-green-800)] hover:bg-[var(--primitive-blue-200)]"
+                            : "border-[var(--border-default)] bg-[var(--background-interactive-default)] hover:border-[var(--primitive-green-800)] hover:bg-[var(--primitive-blue-200)]"
                         )}
                       >
                         <Icon size={14} weight={isAdded ? "fill" : "regular"} />
@@ -1211,7 +1212,7 @@ export default function OnboardingPage() {
                         "flex items-center gap-3 rounded-card p-4 text-left transition-all duration-200",
                         isSelected
                           ? "bg-[var(--primitive-blue-200)]"
-                          : "bg-white shadow-card hover:shadow-card-hover",
+                          : "bg-[var(--background-interactive-default)] shadow-card hover:shadow-card-hover",
                         isDisabled && "cursor-not-allowed opacity-50"
                       )}
                     >
@@ -1279,7 +1280,7 @@ export default function OnboardingPage() {
                         "flex w-full items-center justify-between rounded-card p-5 text-left transition-all duration-200",
                         isSelected
                           ? "bg-[var(--primitive-blue-200)]"
-                          : "bg-white shadow-card hover:shadow-card-hover"
+                          : "bg-[var(--background-interactive-default)] shadow-card hover:shadow-card-hover"
                       )}
                     >
                       <div className="flex items-center gap-4">
@@ -1492,7 +1493,7 @@ export default function OnboardingPage() {
               </p>
 
               {/* Summary Card */}
-              <div className="animate-in fade-in slide-in-from-bottom-4 mt-8 rounded-card bg-white text-left shadow-card delay-300 duration-500">
+              <div className="animate-in fade-in slide-in-from-bottom-4 mt-8 rounded-card bg-[var(--card-background)] text-left shadow-card delay-300 duration-500">
                 <div className="p-6">
                   <div className="mb-4 flex items-center gap-4">
                     <Avatar size="lg" name={`${firstName} ${lastName}`} color="green" />

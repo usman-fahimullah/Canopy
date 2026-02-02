@@ -111,7 +111,7 @@ export function MessageBubbles({
                     radiusClass,
                     group.isOwn
                       ? "bg-[var(--primitive-blue-200)] text-[var(--primitive-blue-800)]"
-                      : "bg-[var(--primitive-neutral-200)] text-black",
+                      : "bg-[var(--primitive-neutral-200)] text-[var(--foreground-default)]",
                     !isSingle && isFirst && !group.isOwn && "w-full",
                     !isSingle && !isFirst && !isLast && !group.isOwn && "w-full"
                   )}

@@ -689,7 +689,7 @@ function PresetsSidebar({
                 )}
               >
                 {isSelected && (
-                  <span className="w-2 h-2 rounded-full bg-white" />
+                  <span className="w-2 h-2 rounded-full bg-[var(--foreground-on-emphasis)]" />
                 )}
               </span>
               <span className={cn(isSelected && "font-medium")}>{preset.label}</span>
@@ -719,7 +719,7 @@ function PresetsSidebar({
               )}
             >
               {isCustomSelected && (
-                <span className="w-2 h-2 rounded-full bg-white" />
+                <span className="w-2 h-2 rounded-full bg-[var(--foreground-on-emphasis)]" />
               )}
             </span>
             <span className={cn(isCustomSelected && "font-medium")}>Custom</span>
@@ -772,7 +772,7 @@ const DatePickerEnhanced = React.forwardRef<
       setOpen(false);
     };
 
-    const handleClear = (e: React.MouseEvent) => {
+    const handleClear = (e: React.MouseEvent | React.KeyboardEvent) => {
       e.stopPropagation();
       onChange?.(undefined);
       setSelectedPreset(undefined);
@@ -859,7 +859,7 @@ const DatePickerEnhanced = React.forwardRef<
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    handleClear(e as unknown as React.MouseEvent);
+                    handleClear(e);
                   }
                 }}
                 className={cn(
@@ -1013,7 +1013,7 @@ const DateRangePickerEnhanced = React.forwardRef<
       }
     };
 
-    const handleClear = (e: React.MouseEvent) => {
+    const handleClear = (e: React.MouseEvent | React.KeyboardEvent) => {
       e.stopPropagation();
       onChange?.(undefined);
       setSelectedPreset(undefined);
@@ -1107,7 +1107,7 @@ const DateRangePickerEnhanced = React.forwardRef<
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    handleClear(e as unknown as React.MouseEvent);
+                    handleClear(e);
                   }
                 }}
                 className={cn(

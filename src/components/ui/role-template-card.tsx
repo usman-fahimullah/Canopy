@@ -62,7 +62,7 @@ const RoleTemplateCard = React.forwardRef<HTMLDivElement, RoleTemplateCardProps>
                   {/* Middle card */}
                   <div className="absolute -left-1 -top-1 w-24 h-32 rounded-lg bg-white/80 border border-primary-200 transform -rotate-3" />
                   {/* Front card */}
-                  <div className="relative w-24 h-32 rounded-lg bg-white border border-primary-300 shadow-sm">
+                  <div className="relative w-24 h-32 rounded-lg bg-[var(--card-background)] border border-primary-300 shadow-sm">
                     {/* Card content lines */}
                     <div className="p-3 space-y-2">
                       <div className="flex items-center gap-1.5">

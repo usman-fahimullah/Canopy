@@ -14,6 +14,7 @@ import {
   Funnel,
   X,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface AdminSession {
   id: string;
@@ -79,7 +80,7 @@ export default function AdminSessionsPage() {
         setTotal(data.total || 0);
       }
     } catch (err) {
-      console.error("Failed to fetch sessions:", err);
+      logger.error("Failed to fetch sessions", { error: formatError(err) });
     } finally {
       setLoading(false);
     }
@@ -126,7 +127,7 @@ export default function AdminSessionsPage() {
 
       {/* Filters */}
       {showFilters && (
-        <div className="mb-6 rounded-xl border border-[var(--primitive-neutral-200)] bg-white p-4">
+        <div className="mb-6 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-sm font-medium text-[var(--primitive-green-800)]">
               Filter by Status
@@ -175,7 +176,7 @@ export default function AdminSessionsPage() {
           <p className="mt-1 text-sm">Try adjusting your filters.</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-[var(--primitive-neutral-200)] bg-white">
+        <div className="overflow-hidden rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

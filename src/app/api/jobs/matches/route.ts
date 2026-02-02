@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 // GET - Get matched jobs for the current seeker based on their profile
 export async function GET(request: NextRequest) {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "10"), 100);
 
     // Get the user's account and seeker profile
     const account = await prisma.account.findUnique({
@@ -163,7 +164,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ jobs: formattedJobs });
   } catch (error) {
-    console.error("Fetch job matches error:", error);
+    logger.error("Fetch job matches error", { error: formatError(error), endpoint: "/api/jobs/matches" });
     return NextResponse.json(
       { error: "Failed to fetch job matches" },
       { status: 500 }

@@ -30,7 +30,7 @@ export function MentorFilterPills({
               "rounded-full px-4 py-1.5 text-caption font-medium transition-colors duration-150",
               isActive
                 ? "bg-[var(--primitive-green-100)] text-[var(--primitive-green-700)]"
-                : "bg-white border border-[var(--primitive-neutral-300)] text-[var(--primitive-neutral-600)] hover:bg-[var(--primitive-neutral-100)]"
+                : "bg-[var(--background-default)] border border-[var(--primitive-neutral-300)] text-[var(--primitive-neutral-600)] hover:bg-[var(--primitive-neutral-100)]"
             )}
           >
             {filter.label}

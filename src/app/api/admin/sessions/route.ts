@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedAccount, isAdminAccount, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
+import { logger, formatError } from "@/lib/logger";
 
 // GET — list all sessions with filters (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const account = await getAuthenticatedAccount();
+    if (!account) return unauthorizedResponse();
+    if (!isAdminAccount(account)) return forbiddenResponse();
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status") || "";
@@ -20,7 +16,7 @@ export async function GET(request: NextRequest) {
     const from = searchParams.get("from") || "";
     const to = searchParams.get("to") || "";
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20", 10), 100);
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = {};
@@ -106,7 +102,7 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("Admin sessions error:", error);
+    logger.error("Admin sessions error", { error: formatError(error), endpoint: "/api/admin/sessions" });
     return NextResponse.json(
       { error: "Failed to fetch sessions" },
       { status: 500 }

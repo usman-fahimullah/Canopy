@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 
 export async function GET() {
   try {
@@ -51,7 +52,7 @@ export async function GET() {
 
     return NextResponse.json(recentConversations);
   } catch (error) {
-    console.error("Error fetching recent conversations:", error);
+    logger.error("Error fetching recent conversations", { error: formatError(error), endpoint: "/api/candid/coach/recent-conversations" });
     return NextResponse.json([], { status: 500 });
   }
 }

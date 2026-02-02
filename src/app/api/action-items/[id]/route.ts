@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateActionItemSchema } from "@/lib/validators/api";
 
 // PATCH — update action item status/description
 export async function PATCH(
@@ -42,7 +44,14 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { description, status, dueDate } = body;
+    const result = UpdateActionItemSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
+    const { description, status, dueDate } = result.data;
 
     const updateData: Record<string, unknown> = {};
 
@@ -70,7 +79,7 @@ export async function PATCH(
 
     return NextResponse.json({ actionItem: updated });
   } catch (error) {
-    console.error("Update action item error:", error);
+    logger.error("Update action item error", { error: formatError(error), endpoint: "/api/action-items/[id]" });
     return NextResponse.json(
       { error: "Failed to update action item" },
       { status: 500 }
@@ -119,7 +128,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete action item error:", error);
+    logger.error("Delete action item error", { error: formatError(error), endpoint: "/api/action-items/[id]" });
     return NextResponse.json(
       { error: "Failed to delete action item" },
       { status: 500 }

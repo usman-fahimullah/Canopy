@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { AdminReviewActionSchema } from "@/lib/validators/api";
 
 // GET — list reviews for admin (with optional flagged filter)
 export async function GET(request: NextRequest) {
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const flagged = searchParams.get("flagged");
-    const limit = parseInt(searchParams.get("limit") || "50");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
     const where: Record<string, unknown> = {};
     if (flagged === "true") {
@@ -60,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ reviews });
   } catch (error) {
-    console.error("Admin fetch reviews error:", error);
+    logger.error("Admin fetch reviews error", { error: formatError(error), endpoint: "/api/admin/reviews" });
     return NextResponse.json(
       { error: "Failed to fetch reviews" },
       { status: 500 }
@@ -98,11 +100,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { reviewId, action } = body;
-
-    if (!reviewId || !action) {
-      return NextResponse.json({ error: "reviewId and action required" }, { status: 400 });
+    const result = AdminReviewActionSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { reviewId, action } = result.data;
 
     const updateData: Record<string, unknown> = {};
 
@@ -117,38 +122,41 @@ export async function PATCH(request: NextRequest) {
         updateData.isFlagged = false;
         updateData.flagReason = null;
         break;
-      default:
-        return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
-    const updated = await prisma.review.update({
-      where: { id: reviewId },
-      data: updateData,
+    // Wrap review update and rating recalculation in a transaction
+    const updated = await prisma.$transaction(async (tx) => {
+      const updated = await tx.review.update({
+        where: { id: reviewId },
+        data: updateData,
+      });
+
+      // If hiding/unhiding a review, recalculate coach rating
+      if (action === "hide" || action === "unhide") {
+        const visibleReviews = await tx.review.findMany({
+          where: { coachId: updated.coachId, isVisible: true },
+          select: { rating: true },
+        });
+
+        const avgRating = visibleReviews.length > 0
+          ? visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length
+          : 0;
+
+        await tx.coachProfile.update({
+          where: { id: updated.coachId },
+          data: {
+            rating: avgRating,
+            reviewCount: visibleReviews.length,
+          },
+        });
+      }
+
+      return updated;
     });
-
-    // If hiding a review, recalculate coach rating
-    if (action === "hide" || action === "unhide") {
-      const visibleReviews = await prisma.review.findMany({
-        where: { coachId: updated.coachId, isVisible: true },
-        select: { rating: true },
-      });
-
-      const avgRating = visibleReviews.length > 0
-        ? visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length
-        : 0;
-
-      await prisma.coachProfile.update({
-        where: { id: updated.coachId },
-        data: {
-          rating: avgRating,
-          reviewCount: visibleReviews.length,
-        },
-      });
-    }
 
     return NextResponse.json({ success: true, review: updated });
   } catch (error) {
-    console.error("Admin update review error:", error);
+    logger.error("Admin update review error", { error: formatError(error), endpoint: "/api/admin/reviews" });
     return NextResponse.json(
       { error: "Failed to update review" },
       { status: 500 }

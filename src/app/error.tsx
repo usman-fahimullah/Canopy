@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { WarningCircle } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 export default function RootError({
   error,
@@ -13,7 +14,7 @@ export default function RootError({
 }) {
   useEffect(() => {
     if (process.env.NODE_ENV === "development") {
-      console.error("Root error:", error);
+      logger.error("Root error", { error: formatError(error) });
     }
   }, [error]);
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { RespondToReviewSchema } from "@/lib/validators/api";
 
 // POST — coach writes response to a review
 export async function POST(
@@ -42,11 +44,14 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { response } = body;
-
-    if (!response?.trim()) {
-      return NextResponse.json({ error: "Response is required" }, { status: 400 });
+    const result = RespondToReviewSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { response } = result.data;
 
     const updated = await prisma.review.update({
       where: { id: reviewId },
@@ -55,7 +60,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, review: updated });
   } catch (error) {
-    console.error("Review respond error:", error);
+    logger.error("Review respond error", { error: formatError(error), endpoint: "/api/reviews/[id]/respond" });
     return NextResponse.json(
       { error: "Failed to respond to review" },
       { status: 500 }

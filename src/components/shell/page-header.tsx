@@ -19,7 +19,7 @@ export function PageHeader({ title, actions, className }: PageHeaderProps) {
   return (
     <div
       className={cn(
-        "flex h-[108px] items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-white px-8 lg:px-12",
+        "flex h-[108px] items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-8 lg:px-12",
         className
       )}
     >

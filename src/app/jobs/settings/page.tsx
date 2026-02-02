@@ -26,6 +26,7 @@ import {
   Eye,
   MagnifyingGlass,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 type SettingsSection = "profile" | "notifications" | "privacy";
 
@@ -131,10 +132,10 @@ export default function TalentSettingsPage() {
           setFormBio(profileData.bio || "");
           setFormLocation(profileData.location || "");
         } else {
-          console.error("Failed to fetch profile:", res.status);
+          logger.error("Failed to fetch profile", { error: formatError(res.status) });
         }
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        logger.error("Error fetching profile", { error: formatError(err) });
       } finally {
         setLoading(false);
       }
@@ -186,10 +187,10 @@ export default function TalentSettingsPage() {
         setFormLocation(updated.location || "");
         setIsEditing(false);
       } else {
-        console.error("Failed to save profile:", res.status);
+        logger.error("Failed to save profile", { error: formatError(res.status) });
       }
     } catch (err) {
-      console.error("Error saving profile:", err);
+      logger.error("Error saving profile", { error: formatError(err) });
     } finally {
       setSaving(false);
     }
@@ -210,7 +211,7 @@ export default function TalentSettingsPage() {
       await supabase.auth.signOut();
       router.push("/login");
     } catch (err) {
-      console.error("Error signing out:", err);
+      logger.error("Error signing out", { error: formatError(err) });
     }
   };
 
@@ -321,7 +322,7 @@ export default function TalentSettingsPage() {
                 )}
               </div>
 
-              <div className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white">
+              <div className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
                 {/* Avatar & name header */}
                 <div className="flex items-center gap-4 border-b border-[var(--primitive-neutral-200)] px-6 py-6">
                   <Avatar
@@ -425,7 +426,7 @@ export default function TalentSettingsPage() {
                 </p>
               </div>
 
-              <div className="divide-y divide-[var(--primitive-neutral-200)] rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white">
+              <div className="divide-y divide-[var(--primitive-neutral-200)] rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
                 <div className="px-6 py-4">
                   <SwitchWithLabel
                     label="Job alerts"
@@ -472,7 +473,7 @@ export default function TalentSettingsPage() {
                 </p>
               </div>
 
-              <div className="divide-y divide-[var(--primitive-neutral-200)] rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white">
+              <div className="divide-y divide-[var(--primitive-neutral-200)] rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
                 {/* Profile visibility */}
                 <div className="px-6 py-4">
                   <div className="flex items-start gap-3">

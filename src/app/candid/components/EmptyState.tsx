@@ -134,7 +134,7 @@ export function EmptyState({
     <div
       className={cn(
         // White card = shadow, no border
-        "flex flex-col items-center justify-center rounded-card bg-white shadow-card p-8 sm:p-12 text-center",
+        "flex flex-col items-center justify-center rounded-card bg-[var(--card-background)] shadow-card p-8 sm:p-12 text-center",
         className
       )}
     >

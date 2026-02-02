@@ -1,0 +1,294 @@
+/**
+ * Zod validation schemas for API routes.
+ *
+ * Each schema matches the exact field names used in the corresponding route handler.
+ * Use `schema.safeParse(body)` at the top of each write handler, return 422 on failure.
+ */
+
+import { z } from "zod";
+
+// --- Reviews ---
+
+export const CreateReviewSchema = z.object({
+  sessionId: z.string().min(1, "Session ID is required"),
+  rating: z
+    .number()
+    .int("Rating must be an integer")
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating must be at most 5"),
+  comment: z.string().max(2000, "Comment must be 2000 characters or fewer").optional(),
+});
+
+export const RespondToReviewSchema = z.object({
+  response: z
+    .string()
+    .min(1, "Response is required")
+    .transform((v) => v.trim()),
+});
+
+export const FlagReviewSchema = z.object({
+  reason: z
+    .string()
+    .min(1, "Flag reason is required")
+    .transform((v) => v.trim()),
+});
+
+export const AdminReviewActionSchema = z.object({
+  reviewId: z.string().min(1, "Review ID is required"),
+  action: z.enum(["hide", "unhide", "unflag"], {
+    message: "Action must be hide, unhide, or unflag",
+  }),
+});
+
+// --- Goals ---
+
+export const CreateGoalSchema = z.object({
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .transform((v) => v.trim()),
+  description: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  targetDate: z.string().nullable().optional(),
+  milestones: z
+    .array(z.object({ title: z.string().min(1) }))
+    .max(20, "Maximum 20 milestones allowed")
+    .optional(),
+});
+
+export const UpdateGoalSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().nullable().optional(),
+  progress: z.number().min(0).max(100).optional(),
+  status: z.string().optional(),
+  icon: z.string().nullable().optional(),
+  targetDate: z.string().nullable().optional(),
+});
+
+export const AddMilestoneSchema = z.object({
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .transform((v) => v.trim()),
+});
+
+// --- Experience ---
+
+export const CreateExperienceSchema = z.object({
+  companyName: z
+    .string()
+    .min(1, "Company name is required")
+    .transform((v) => v.trim()),
+  jobTitle: z
+    .string()
+    .min(1, "Job title is required")
+    .transform((v) => v.trim()),
+  employmentType: z.string().optional(),
+  workType: z.string().optional(),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().nullable().optional(),
+  isCurrent: z.boolean().optional().default(false),
+  description: z.string().nullable().optional(),
+  skills: z.array(z.string()).optional().default([]),
+});
+
+export const UpdateExperienceSchema = z.object({
+  companyName: z.string().min(1).optional(),
+  jobTitle: z.string().min(1).optional(),
+  employmentType: z.string().optional(),
+  workType: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().nullable().optional(),
+  isCurrent: z.boolean().optional(),
+  description: z.string().nullable().optional(),
+  skills: z.array(z.string()).optional(),
+});
+
+// --- Conversations and Messages ---
+
+export const CreateConversationSchema = z.object({
+  recipientAccountId: z.string().min(1, "Recipient account ID is required"),
+  initialMessage: z.string().optional(),
+});
+
+export const SendMessageSchema = z
+  .object({
+    content: z.string().optional(),
+    attachmentUrls: z.array(z.string().url()).optional(),
+  })
+  .refine(
+    (data) =>
+      (data.content?.trim()?.length ?? 0) > 0 ||
+      (data.attachmentUrls?.length ?? 0) > 0,
+    { message: "Message content or attachments required" }
+  );
+
+// --- Sessions ---
+
+export const UpdateSessionSchema = z.object({
+  sessionId: z.string().min(1, "Session ID is required"),
+  status: z.string().optional(),
+  coachNotes: z.string().optional(),
+});
+
+export const CancelSessionSchema = z.object({
+  reason: z.string().max(500, "Reason must be 500 characters or fewer").optional().default("No reason provided"),
+});
+
+export const RescheduleSessionSchema = z.object({
+  newDate: z.string().min(1, "New date is required (ISO format)"),
+});
+
+// --- Action Items ---
+
+export const CreateActionItemSchema = z.object({
+  description: z.string().min(1, "Description is required"),
+  dueDate: z.string().nullable().optional(),
+});
+
+export const UpdateActionItemSchema = z.object({
+  description: z.string().optional(),
+  status: z.string().optional(),
+  dueDate: z.string().nullable().optional(),
+});
+
+// --- Mentor Assignments ---
+
+export const CreateMentorAssignmentSchema = z.object({
+  mentorProfileId: z.string().min(1, "Mentor profile ID is required"),
+  notes: z.string().nullable().optional(),
+});
+
+export const UpdateMentorAssignmentSchema = z.object({
+  assignmentId: z.string().min(1, "Assignment ID is required"),
+  status: z.enum(["ACTIVE", "PAUSED", "COMPLETED"], {
+    message: "Status must be ACTIVE, PAUSED, or COMPLETED",
+  }),
+  notes: z.string().nullable().optional(),
+});
+
+export const RateMentorSchema = z.object({
+  rating: z
+    .number()
+    .int("Rating must be an integer")
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating must be at most 5"),
+  comment: z.string().nullable().optional(),
+});
+
+// --- Profile ---
+
+export const UpdateProfileSchema = z.object({
+  // Account fields
+  name: z.string().max(100, "Name must be 100 characters or fewer").optional(),
+  avatar: z.string().url("Avatar must be a valid URL").nullable().optional(),
+  phone: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  timezone: z.string().nullable().optional(),
+  bio: z.string().nullable().optional(),
+  pronouns: z.string().nullable().optional(),
+  ethnicity: z.string().nullable().optional(),
+  linkedinUrl: z.string().nullable().optional(),
+  // Seeker profile fields
+  headline: z.string().nullable().optional(),
+  skills: z.array(z.string()).optional(),
+  greenSkills: z.array(z.string()).optional(),
+  certifications: z.array(z.string()).optional(),
+  yearsExperience: z.number().nullable().optional(),
+  targetSectors: z.array(z.string()).optional(),
+  resumeUrl: z.string().nullable().optional(),
+  portfolioUrl: z.string().nullable().optional(),
+  summary: z.string().nullable().optional(),
+  isMentor: z.boolean().optional(),
+  mentorBio: z.string().nullable().optional(),
+  mentorTopics: z.array(z.string()).optional(),
+});
+
+export const UpdateCoachProfileSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  photoUrl: z.string().nullable().optional(),
+  bio: z.string().nullable().optional(),
+  headline: z.string().nullable().optional(),
+  expertise: z.array(z.string()).optional(),
+  sectors: z.array(z.string()).optional(),
+  sessionTypes: z.array(z.string()).optional(),
+  yearsInClimate: z.number().nullable().optional(),
+  sessionRate: z.number().nullable().optional(),
+  sessionDuration: z.number().nullable().optional(),
+  hourlyRate: z.number().nullable().optional(),
+  monthlyRate: z.number().nullable().optional(),
+  videoLink: z.string().nullable().optional(),
+});
+
+// --- Payments ---
+
+export const CheckoutSchema = z.object({
+  coachId: z.string().min(1, "Coach ID is required"),
+  sessionDate: z.string().datetime({ message: "Session date must be a valid ISO datetime" }),
+  sessionDuration: z.number().int().min(15, "Duration must be at least 15 minutes").max(180, "Duration must be at most 180 minutes"),
+});
+
+export const RefundSchema = z.object({
+  bookingId: z.string().min(1, "Booking ID is required"),
+  reason: z.string().optional(),
+});
+
+// --- Availability ---
+
+export const UpdateAvailabilitySchema = z.object({
+  availability: z.unknown().optional(),
+  sessionDuration: z.number().optional(),
+  bufferTime: z.number().optional(),
+  maxSessionsPerWeek: z.number().optional(),
+  videoLink: z.string().nullable().optional(),
+});
+
+// --- Coach Application ---
+
+export const CoachApplySchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Valid email is required"),
+  linkedinUrl: z.string().min(1, "LinkedIn URL is required"),
+  headline: z.string().min(1, "Headline is required"),
+  bio: z.string().min(1, "Bio is required"),
+  yearsInClimate: z.number().optional(),
+  expertise: z
+    .array(z.string())
+    .min(1, "At least one area of expertise is required"),
+  sectors: z.array(z.string()).min(1, "At least one sector is required"),
+  sessionRate: z.number().optional(),
+  availability: z.string().optional(),
+  motivation: z.string().optional(),
+});
+
+// --- Saved Jobs ---
+
+export const UpdateSavedJobNotesSchema = z.object({
+  notes: z.string().max(2000, "Notes must be 2000 characters or fewer").optional(),
+});
+
+// --- Applications ---
+
+export const SubmitApplicationSchema = z.object({
+  jobId: z.string().min(1),
+  name: z.string().min(1).max(200),
+  email: z.string().email(),
+  dateOfBirth: z.string().max(50).optional(),
+  pronouns: z.string().max(50).optional(),
+  location: z.string().max(200).optional(),
+  currentRole: z.string().max(200).optional(),
+  currentCompany: z.string().max(200).optional(),
+  yearsExperience: z.string().max(50).optional(),
+  linkedIn: z.string().url().max(500).optional().or(z.literal("")),
+  portfolio: z.string().url().max(500).optional().or(z.literal("")),
+  questionAnswers: z.record(z.string(), z.string().max(5000)).optional(),
+});
+
+// --- Checklist ---
+
+export const UpdateChecklistSchema = z.object({
+  itemId: z.string().min(1, "Item ID is required"),
+  completed: z.boolean().optional(),
+});

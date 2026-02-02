@@ -44,18 +44,21 @@ export function OnboardingShell({
   const contextLabel = shell ? SHELL_CONTEXT_LABELS[shell] : "Account setup";
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-[var(--background-default)]">
       {/* ── Top bar ────────────────────────────────────────────── */}
-      <header className="shrink-0 border-b border-[var(--primitive-neutral-200)] bg-white">
+      <header className="shrink-0 border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)]">
         <div className="flex items-center justify-between">
           {/* Left: Change account type chip + context label */}
           <div className="flex flex-1 items-center gap-3 px-4 sm:px-12">
-            <Button variant="tertiary" asChild>
-              <Link href="/onboarding">
-                <ArrowLeft size={20} weight="bold" />
+            <Link href="/onboarding">
+              <Button
+                variant="tertiary"
+                className="gap-2"
+                leftIcon={<ArrowLeft size={20} weight="bold" />}
+              >
                 Change account type
-              </Link>
-            </Button>
+              </Button>
+            </Link>
             <span className="hidden text-sm leading-4 text-[var(--primitive-green-800)] sm:inline">
               {contextLabel}
             </span>
@@ -153,7 +156,7 @@ export function OnboardingShell({
       {/* ── Two-panel content area ────────────────────────────── */}
       <main className="flex flex-1">
         {/* Left panel — white background, form content */}
-        <div className="flex flex-1 flex-col bg-white">
+        <div className="flex flex-1 flex-col bg-[var(--background-default)]">
           <div className="flex flex-1 flex-col px-6 py-8 sm:px-12 sm:py-12 lg:px-[72px]">
             {/* Step indicator */}
             {hasProgress && (

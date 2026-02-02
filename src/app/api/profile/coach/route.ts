@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateCoachProfileSchema } from "@/lib/validators/api";
 
 // PATCH — update coach-specific fields
 export async function PATCH(request: NextRequest) {
@@ -22,12 +24,19 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
+    const result = UpdateCoachProfileSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
     const {
       firstName, lastName, photoUrl, bio, headline,
       expertise, sectors, sessionTypes,
       yearsInClimate, sessionRate, sessionDuration,
       hourlyRate, monthlyRate, videoLink,
-    } = body;
+    } = result.data;
 
     const updateData: Record<string, unknown> = {};
     if (firstName !== undefined) updateData.firstName = firstName;
@@ -52,7 +61,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, coach: updated });
   } catch (error) {
-    console.error("Update coach profile error:", error);
+    logger.error("Update coach profile error", { error: formatError(error), endpoint: "/api/profile/coach" });
     return NextResponse.json(
       { error: "Failed to update coach profile" },
       { status: 500 }

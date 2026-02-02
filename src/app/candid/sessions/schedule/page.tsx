@@ -50,6 +50,7 @@ import {
   isBefore,
   startOfDay,
 } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 type Step = "mentor" | "datetime" | "details" | "confirm";
 
@@ -148,7 +149,7 @@ const timeSlots = generateTimeSlots();
 export default function ScheduleSessionPage() {
   return (
     <Suspense
-      fallback={<div className="min-h-screen bg-gradient-to-b from-[#FAF9F7] to-[#E5F1FF]/30" />}
+      fallback={<div className="min-h-screen bg-gradient-to-b from-[var(--primitive-neutral-100)] to-[var(--primitive-blue-100)]/30" />}
     >
       <ScheduleSessionContent />
     </Suspense>
@@ -189,7 +190,7 @@ function ScheduleSessionContent() {
           }
         }
       } catch (error) {
-        console.error("Error fetching coaches:", error);
+        logger.error("Error fetching coaches", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -269,9 +270,9 @@ function ScheduleSessionContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FAF9F7] to-[#E5F1FF]/30">
+    <div className="min-h-screen bg-gradient-to-b from-[var(--primitive-neutral-100)] to-[var(--primitive-blue-100)]/30">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-white/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-[var(--border-default)] bg-[var(--background-default)]/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
           <Link
             href="/candid/sessions"
@@ -291,7 +292,7 @@ function ScheduleSessionContent() {
                     i < currentStepIndex
                       ? "bg-[var(--primitive-green-500)] text-white"
                       : i === currentStepIndex
-                        ? "bg-[#072924] text-white"
+                        ? "bg-[var(--primitive-green-800)] text-white"
                         : "bg-[var(--background-subtle)] text-foreground-muted"
                   )}
                 >
@@ -321,7 +322,7 @@ function ScheduleSessionContent() {
       {/* Progress Bar */}
       <div className="h-1 bg-[var(--background-subtle)]">
         <div
-          className="h-full bg-gradient-to-r from-[#072924] to-[#099C73] transition-all duration-500 ease-out"
+          className="h-full bg-gradient-to-r from-[var(--primitive-green-800)] to-[var(--primitive-green-600)] transition-all duration-500 ease-out"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
@@ -359,8 +360,8 @@ function ScheduleSessionContent() {
                     className={cn(
                       "flex items-start gap-4 rounded-xl border-2 p-4 text-left transition-all duration-200",
                       isSelected
-                        ? "border-[#072924] bg-[var(--candid-background-subtle)] shadow-md"
-                        : "border-[var(--border-default)] bg-white hover:border-[var(--candid-border-accent)] hover:shadow-sm"
+                        ? "border-[var(--primitive-green-800)] bg-[var(--candid-background-subtle)] shadow-md"
+                        : "border-[var(--border-default)] bg-[var(--background-interactive-default)] hover:border-[var(--candid-border-accent)] hover:shadow-sm"
                     )}
                   >
                     <Avatar
@@ -403,7 +404,7 @@ function ScheduleSessionContent() {
                       className={cn(
                         "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all",
                         isSelected
-                          ? "border-[#072924] bg-[#072924]"
+                          ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)]"
                           : "border-[var(--border-default)]"
                       )}
                     >
@@ -465,11 +466,11 @@ function ScheduleSessionContent() {
                           className={cn(
                             "flex flex-col items-center gap-1 rounded-xl p-3 transition-all",
                             isSelected
-                              ? "bg-[#072924] text-white"
+                              ? "bg-[var(--primitive-green-800)] text-white"
                               : isPast || !hasAvailable
                                 ? "cursor-not-allowed opacity-40"
                                 : isToday(day)
-                                  ? "bg-[var(--candid-background-subtle)] text-[#072924] hover:bg-[var(--candid-background-accent)]"
+                                  ? "bg-[var(--candid-background-subtle)] text-[var(--primitive-green-800)] hover:bg-[var(--candid-background-accent)]"
                                   : "hover:bg-[var(--background-subtle)]"
                           )}
                         >
@@ -488,7 +489,7 @@ function ScheduleSessionContent() {
                             <div
                               className={cn(
                                 "h-1.5 w-1.5 rounded-full",
-                                isSelected ? "bg-white" : "bg-[var(--primitive-green-500)]"
+                                isSelected ? "bg-[var(--card-background)]" : "bg-[var(--primitive-green-500)]"
                               )}
                             />
                           )}
@@ -524,7 +525,7 @@ function ScheduleSessionContent() {
                             className={cn(
                               "rounded-lg border px-3 py-2.5 text-body-sm font-medium transition-all",
                               isSelected
-                                ? "border-[#072924] bg-[#072924] text-white"
+                                ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)] text-white"
                                 : "border-[var(--border-default)] hover:border-[var(--candid-border-accent)] hover:bg-[var(--background-subtle)]"
                             )}
                           >
@@ -549,7 +550,7 @@ function ScheduleSessionContent() {
             {selectedDate && selectedTime && (
               <div className="mt-6 rounded-xl border border-[var(--candid-border-accent)] bg-[var(--candid-background-subtle)] p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#072924] text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--primitive-green-800)] text-white">
                     <Calendar size={20} />
                   </div>
                   <div>
@@ -595,15 +596,15 @@ function ScheduleSessionContent() {
                         className={cn(
                           "flex w-full items-start gap-4 rounded-xl border-2 p-4 text-left transition-all duration-200",
                           isSelected
-                            ? "border-[#072924] bg-[var(--candid-background-subtle)]"
-                            : "border-[var(--border-default)] bg-white hover:border-[var(--candid-border-accent)]"
+                            ? "border-[var(--primitive-green-800)] bg-[var(--candid-background-subtle)]"
+                            : "border-[var(--border-default)] bg-[var(--background-interactive-default)] hover:border-[var(--candid-border-accent)]"
                         )}
                       >
                         <div
                           className={cn(
                             "flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
                             isSelected
-                              ? "bg-[#072924] text-white"
+                              ? "bg-[var(--primitive-green-800)] text-white"
                               : "bg-[var(--background-subtle)] text-foreground-muted"
                           )}
                         >
@@ -623,7 +624,7 @@ function ScheduleSessionContent() {
                           className={cn(
                             "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all",
                             isSelected
-                              ? "border-[#072924] bg-[#072924]"
+                              ? "border-[var(--primitive-green-800)] bg-[var(--primitive-green-800)]"
                               : "border-[var(--border-default)]"
                           )}
                         >
@@ -721,8 +722,8 @@ function ScheduleSessionContent() {
           selectedSessionType && (
             <div className="mx-auto max-w-2xl">
               <div className="mb-8 text-center">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#E5F1FF] to-[#99C9FF]">
-                  <Sparkle size={40} weight="fill" className="text-[#072924]" />
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[var(--primitive-blue-100)] to-[var(--primitive-blue-300)]">
+                  <Sparkle size={40} weight="fill" className="text-[var(--primitive-green-800)]" />
                 </div>
                 <h1 className="text-foreground-default text-display font-semibold">
                   Confirm Your Session
@@ -757,7 +758,7 @@ function ScheduleSessionContent() {
                   <div className="space-y-4 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
-                        <Calendar size={20} className="text-[#072924]" />
+                        <Calendar size={20} className="text-[var(--primitive-green-800)]" />
                       </div>
                       <div>
                         <p className="text-foreground-default font-medium">
@@ -771,7 +772,7 @@ function ScheduleSessionContent() {
 
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
-                        <selectedSessionType.icon size={20} className="text-[#072924]" />
+                        <selectedSessionType.icon size={20} className="text-[var(--primitive-green-800)]" />
                       </div>
                       <div>
                         <p className="text-foreground-default font-medium">
@@ -786,7 +787,7 @@ function ScheduleSessionContent() {
                     {notes && (
                       <div className="flex items-start gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--candid-background-subtle)]">
-                          <FileText size={20} className="text-[#072924]" />
+                          <FileText size={20} className="text-[var(--primitive-green-800)]" />
                         </div>
                         <div>
                           <p className="text-foreground-default font-medium">Session Notes</p>
@@ -833,7 +834,7 @@ function ScheduleSessionContent() {
               {/* Info Box */}
               <div className="mb-6 rounded-xl border border-[var(--candid-border-accent)] bg-[var(--candid-background-subtle)] p-4">
                 <div className="flex items-start gap-3">
-                  <VideoCamera size={20} className="mt-0.5 flex-shrink-0 text-[#072924]" />
+                  <VideoCamera size={20} className="mt-0.5 flex-shrink-0 text-[var(--primitive-green-800)]" />
                   <div>
                     <p className="text-foreground-default font-medium">
                       You&apos;ll receive a calendar invite with the meeting link

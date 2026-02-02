@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAvailableSlots } from "@/lib/availability";
+import { logger, formatError } from "@/lib/logger";
 
 // GET — get computed available slots for a coach
 export async function GET(
@@ -43,7 +44,7 @@ export async function GET(
 
     return NextResponse.json({ slots });
   } catch (error) {
-    console.error("Fetch available slots error:", error);
+    logger.error("Fetch available slots error", { error: formatError(error), endpoint: "/api/availability/slots" });
     return NextResponse.json(
       { error: "Failed to fetch available slots" },
       { status: 500 }

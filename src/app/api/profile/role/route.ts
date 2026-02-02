@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
 import type { Shell, EntryIntent, OnboardingProgress } from "@/lib/onboarding/types";
 
 export type CandidRole = "seeker" | "mentor" | "coach" | "admin";
@@ -139,7 +140,7 @@ export async function GET() {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Fetch role error:", error);
+    logger.error("Fetch role error", { error: formatError(error), endpoint: "/api/profile/role" });
     return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 });
   }
 }

@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User, PencilSimple, MapPin, CurrencyDollar, Briefcase, Leaf } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /* ------------------------------------------------------------------ */
 /*  Types — based on /api/profile response shape                       */
@@ -61,7 +62,7 @@ export default function ProfilePage() {
           setAccount(data.account ?? null);
         }
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        logger.error("Error fetching profile", { error: formatError(err) });
       } finally {
         setLoading(false);
       }
@@ -113,7 +114,7 @@ export default function ProfilePage() {
 
       <div className="space-y-6 px-8 py-6 lg:px-12">
         {/* ---- Profile Header Card -------------------------------- */}
-        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-8">
+        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-8">
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             {/* Avatar / Initials */}
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[var(--primitive-green-200)] text-heading-md font-bold text-[var(--primitive-green-800)]">
@@ -137,7 +138,7 @@ export default function ProfilePage() {
         </div>
 
         {/* ---- About Section -------------------------------------- */}
-        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-6">
+        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-body font-bold text-[var(--foreground-default)]">About</h3>
             <Button variant="ghost" size="icon-sm" aria-label="Edit about section">
@@ -148,7 +149,7 @@ export default function ProfilePage() {
         </div>
 
         {/* ---- Skills Section ------------------------------------- */}
-        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-6">
+        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-body font-bold text-[var(--foreground-default)]">Skills</h3>
             <Button variant="ghost" size="icon-sm" aria-label="Edit skills">
@@ -206,7 +207,7 @@ export default function ProfilePage() {
         </div>
 
         {/* ---- Preferences Section -------------------------------- */}
-        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-6">
+        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-body font-bold text-[var(--foreground-default)]">Preferences</h3>
             <Button variant="ghost" size="icon-sm" aria-label="Edit preferences">
@@ -266,7 +267,7 @@ export default function ProfilePage() {
 
         {/* ---- Experience Summary --------------------------------- */}
         {seeker?.yearsExperience != null && (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-6">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-6">
             <h3 className="mb-2 text-body font-bold text-[var(--foreground-default)]">
               Experience
             </h3>

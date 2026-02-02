@@ -120,7 +120,7 @@ export default function AnalyticsPage() {
             {STAT_CARDS.map((stat) => (
               <div
                 key={stat.label}
-                className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-5 py-5"
+                className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-5 py-5"
               >
                 <div className="flex items-center justify-between">
                   <p className="text-caption font-medium text-foreground-muted">{stat.label}</p>
@@ -146,7 +146,7 @@ export default function AnalyticsPage() {
           <h2 className="text-foreground-default mb-4 text-heading-sm font-medium">
             Pipeline Funnel
           </h2>
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-6">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
             <div className="space-y-4">
               {PIPELINE_FUNNEL.map((stage, idx) => {
                 const widthPercent = Math.max((stage.count / maxFunnel) * 100, 8);
@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
           <h2 className="text-foreground-default mb-4 text-heading-sm font-medium">
             Source Breakdown
           </h2>
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-6">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
             <div className="space-y-4">
               {SOURCE_BREAKDOWN.map((source) => (
                 <div key={source.name} className="space-y-1.5">

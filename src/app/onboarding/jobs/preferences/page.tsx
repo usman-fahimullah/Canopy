@@ -17,6 +17,14 @@ const roleTypeOptions = [
   { value: "internship", label: "Internship" },
 ];
 
+const remotePreferenceOptions = [
+  { value: "onsite-only", label: "On-site only" },
+  { value: "hybrid-preferred", label: "Hybrid preferred" },
+  { value: "remote-preferred", label: "Remote preferred" },
+  { value: "remote-only", label: "Remote only" },
+  { value: "open-to-all", label: "Open to all" },
+];
+
 const timelineOptions = [
   { value: "actively-looking", label: "Actively looking" },
   { value: "3-months", label: "Within 3 months" },
@@ -41,7 +49,8 @@ export default function TalentPreferencesPage() {
   const canContinue =
     talentData.roleTypes.length > 0 &&
     talentData.transitionTimeline !== null &&
-    talentData.locationPreference !== null;
+    talentData.locationPreference !== null &&
+    talentData.remotePreference !== null;
 
   function toggleRoleType(value: string) {
     const current = talentData.roleTypes;
@@ -73,14 +82,28 @@ export default function TalentPreferencesPage() {
           jobTitle: talentData.jobTitle || undefined,
           skills: talentData.skills,
           sectors: talentData.sectors,
+          pathways: talentData.pathways,
+          categories: talentData.categories,
+          goals: talentData.goals || undefined,
+          workExperience:
+            talentData.workExperience.length > 0
+              ? talentData.workExperience
+                  .filter((exp) => exp.title && exp.company)
+                  .map(({ id: _id, ...rest }) => rest)
+              : undefined,
           roleTypes: talentData.roleTypes,
           transitionTimeline: talentData.transitionTimeline,
           locationPreference: talentData.locationPreference,
+          remotePreference: talentData.remotePreference,
           salaryRange:
             talentData.salaryMin || talentData.salaryMax
               ? {
-                  min: talentData.salaryMin ? parseInt(talentData.salaryMin) : null,
-                  max: talentData.salaryMax ? parseInt(talentData.salaryMax) : null,
+                  min: talentData.salaryMin
+                    ? parseInt(talentData.salaryMin, 10)
+                    : null,
+                  max: talentData.salaryMax
+                    ? parseInt(talentData.salaryMax, 10)
+                    : null,
                 }
               : undefined,
         }),
@@ -112,14 +135,17 @@ export default function TalentPreferencesPage() {
           onContinue={handleContinue}
           canContinue={canContinue}
           loading={loading}
-          continueLabel="Finish setup"
+          continueLabel="Find my matches"
         />
       }
     >
       <div className="space-y-6">
         {/* Role types */}
         <FormCard>
-          <FormField label="What type of roles are you interested in?" required>
+          <FormField
+            label="What type of roles are you interested in?"
+            required
+          >
             <div className="flex flex-wrap gap-2">
               {roleTypeOptions.map((option) => (
                 <button
@@ -127,10 +153,35 @@ export default function TalentPreferencesPage() {
                   type="button"
                   onClick={() => toggleRoleType(option.value)}
                   className={cn(
-                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2",
                     talentData.roleTypes.includes(option.value)
-                      ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
-                      : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
+                      ? "border-[var(--candid-foreground-brand)] bg-[var(--background-brand-subtle)] text-[var(--candid-foreground-brand)]"
+                      : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-foreground-muted hover:border-[var(--border-interactive-hover)]"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </FormField>
+        </FormCard>
+
+        {/* Remote preference */}
+        <FormCard>
+          <FormField label="Remote preference" required>
+            <div className="flex flex-wrap gap-2">
+              {remotePreferenceOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    setTalentData({ remotePreference: option.value })
+                  }
+                  className={cn(
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2",
+                    talentData.remotePreference === option.value
+                      ? "border-[var(--candid-foreground-brand)] bg-[var(--background-brand-subtle)] text-[var(--candid-foreground-brand)]"
+                      : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-foreground-muted hover:border-[var(--border-interactive-hover)]"
                   )}
                 >
                   {option.label}
@@ -148,12 +199,14 @@ export default function TalentPreferencesPage() {
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setTalentData({ transitionTimeline: option.value })}
+                  onClick={() =>
+                    setTalentData({ transitionTimeline: option.value })
+                  }
                   className={cn(
-                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2",
                     talentData.transitionTimeline === option.value
-                      ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
-                      : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
+                      ? "border-[var(--candid-foreground-brand)] bg-[var(--background-brand-subtle)] text-[var(--candid-foreground-brand)]"
+                      : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-foreground-muted hover:border-[var(--border-interactive-hover)]"
                   )}
                 >
                   {option.label}
@@ -171,12 +224,14 @@ export default function TalentPreferencesPage() {
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setTalentData({ locationPreference: option.value })}
+                  onClick={() =>
+                    setTalentData({ locationPreference: option.value })
+                  }
                   className={cn(
-                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
+                    "rounded-lg border px-4 py-2 text-caption font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2",
                     talentData.locationPreference === option.value
-                      ? "border-[var(--candid-foreground-brand)] bg-[var(--primitive-green-100)] text-[var(--candid-foreground-brand)]"
-                      : "border-[var(--primitive-neutral-200)] bg-white text-foreground-muted hover:border-[var(--primitive-neutral-400)]"
+                      ? "border-[var(--candid-foreground-brand)] bg-[var(--background-brand-subtle)] text-[var(--candid-foreground-brand)]"
+                      : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-foreground-muted hover:border-[var(--border-interactive-hover)]"
                   )}
                 >
                   {option.label}
@@ -188,13 +243,18 @@ export default function TalentPreferencesPage() {
 
         {/* Salary range */}
         <FormCard>
-          <FormField label="Salary expectations" helpText="Optional — helps us match better">
+          <FormField
+            label="Salary expectations"
+            helpText="Optional — helps us match better"
+          >
             <FormRow>
               <div>
                 <Input
                   placeholder="Min (e.g. 60000)"
                   value={talentData.salaryMin}
-                  onChange={(e) => setTalentData({ salaryMin: e.target.value })}
+                  onChange={(e) =>
+                    setTalentData({ salaryMin: e.target.value })
+                  }
                   type="number"
                 />
               </div>
@@ -202,7 +262,9 @@ export default function TalentPreferencesPage() {
                 <Input
                   placeholder="Max (e.g. 90000)"
                   value={talentData.salaryMax}
-                  onChange={(e) => setTalentData({ salaryMax: e.target.value })}
+                  onChange={(e) =>
+                    setTalentData({ salaryMax: e.target.value })
+                  }
                   type="number"
                 />
               </div>
@@ -211,7 +273,11 @@ export default function TalentPreferencesPage() {
         </FormCard>
       </div>
 
-      {error && <p className="mt-4 text-caption text-[var(--primitive-red-600)]">{error}</p>}
+      {error && (
+        <p className="mt-4 text-caption text-[var(--foreground-error)]">
+          {error}
+        </p>
+      )}
     </OnboardingShell>
   );
 }

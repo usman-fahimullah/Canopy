@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
+import { CreateConversationSchema } from "@/lib/validators/api";
 
 // GET — list conversations for current user with last message, unread count, other participant
 export async function GET(request: NextRequest) {
@@ -63,6 +66,7 @@ export async function GET(request: NextRequest) {
       orderBy: {
         conversation: { lastMessageAt: "desc" },
       },
+      take: 100,
     });
 
     // Build response with unread counts and other user info
@@ -109,7 +113,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ conversations });
   } catch (error) {
-    console.error("Fetch conversations error:", error);
+    logger.error("Fetch conversations error", { error: formatError(error), endpoint: "/api/conversations" });
     return NextResponse.json(
       { error: "Failed to fetch conversations" },
       { status: 500 }
@@ -121,6 +125,16 @@ export async function GET(request: NextRequest) {
 // Body: { recipientAccountId: string, initialMessage?: string }
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 conversation creations per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `conversations:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -137,14 +151,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { recipientAccountId, initialMessage } = body;
-
-    if (!recipientAccountId) {
+    const result = CreateConversationSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "recipientAccountId is required" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { recipientAccountId, initialMessage } = result.data;
 
     if (recipientAccountId === account.id) {
       return NextResponse.json(
@@ -178,17 +192,19 @@ export async function POST(request: NextRequest) {
     if (existing) {
       // If initial message provided, add it to existing conversation
       if (initialMessage?.trim()) {
-        const message = await prisma.message.create({
-          data: {
-            conversationId: existing.id,
-            senderId: account.id,
-            content: initialMessage.trim(),
-          },
-        });
+        await prisma.$transaction(async (tx) => {
+          const message = await tx.message.create({
+            data: {
+              conversationId: existing.id,
+              senderId: account.id,
+              content: initialMessage.trim(),
+            },
+          });
 
-        await prisma.conversation.update({
-          where: { id: existing.id },
-          data: { lastMessageAt: message.createdAt },
+          await tx.conversation.update({
+            where: { id: existing.id },
+            data: { lastMessageAt: message.createdAt },
+          });
         });
       }
 
@@ -229,7 +245,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ conversation, created: true }, { status: 201 });
   } catch (error) {
-    console.error("Create conversation error:", error);
+    logger.error("Create conversation error", { error: formatError(error), endpoint: "/api/conversations" });
     return NextResponse.json(
       { error: "Failed to create conversation" },
       { status: 500 }

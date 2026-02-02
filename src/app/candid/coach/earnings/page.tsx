@@ -15,6 +15,7 @@ import {
   Warning,
 } from "@phosphor-icons/react";
 import { format, parse } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 interface MonthlyBreakdown {
   month: string;
@@ -63,7 +64,7 @@ export default function CoachEarningsPage() {
           setSessionsCompleted(completed.length);
         }
       } catch (error) {
-        console.error("Error fetching earnings:", error);
+        logger.error("Error fetching earnings", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -118,7 +119,7 @@ export default function CoachEarningsPage() {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-4 py-5"
+                  className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-5"
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-caption text-[var(--primitive-neutral-600)]">{stat.label}</p>
@@ -143,7 +144,7 @@ export default function CoachEarningsPage() {
                 <h2 className="mb-4 text-heading-sm font-medium text-[var(--primitive-neutral-800)]">
                   Monthly Breakdown
                 </h2>
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white">
+                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
                   {earnings.monthlyBreakdown.map((month, index) => {
                     // Parse "YYYY-MM" format
                     const monthDate = parse(`${month.month}-01`, "yyyy-MM-dd", new Date());
@@ -214,7 +215,7 @@ export default function CoachEarningsPage() {
           </div>
         ) : (
           /* Empty state */
-          <div className="flex flex-col items-center justify-center rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-8 py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-8 py-16 text-center">
             <div className="mb-4 rounded-xl bg-[var(--primitive-yellow-100)] p-3">
               <CurrencyDollar
                 size={28}

@@ -27,6 +27,7 @@ import {
   Trash,
 } from "@phosphor-icons/react";
 import { ExperienceModal, type Experience } from "../components/ExperienceModal";
+import { logger, formatError } from "@/lib/logger";
 
 interface UserProfile {
   id: string;
@@ -42,6 +43,15 @@ interface UserProfile {
   matchedCoachId: string | null;
 }
 
+interface MatchedCoach {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatar: string | null;
+  currentRole?: string;
+  currentCompany?: string;
+}
+
 interface Session {
   id: string;
   status: string;
@@ -50,7 +60,7 @@ interface Session {
 export default function MyProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [matchedCoach, setMatchedCoach] = useState<any>(null);
+  const [matchedCoach, setMatchedCoach] = useState<MatchedCoach | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Experience modal state
@@ -84,7 +94,7 @@ export default function MyProfilePage() {
         setExperiences(data.experiences || []);
       }
     } catch (error) {
-      console.error("Failed to fetch experiences:", error);
+      logger.error("Failed to fetch experiences", { error: formatError(error) });
     } finally {
       setExperiencesLoading(false);
     }
@@ -437,7 +447,7 @@ export default function MyProfilePage() {
             <div className="flex items-center gap-4">
               <Avatar
                 size="lg"
-                src={matchedCoach.avatar}
+                src={matchedCoach.avatar ?? undefined}
                 name={`${matchedCoach.firstName} ${matchedCoach.lastName}`}
                 color="green"
               />
@@ -446,10 +456,10 @@ export default function MyProfilePage() {
                   {matchedCoach.firstName} {matchedCoach.lastName}
                 </h3>
                 <p className="text-caption text-foreground-muted">
-                  {(matchedCoach as any).currentRole}
+                  {matchedCoach.currentRole}
                 </p>
                 <p className="text-caption text-foreground-muted">
-                  {(matchedCoach as any).currentCompany}
+                  {matchedCoach.currentCompany}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -666,7 +676,7 @@ export default function MyProfilePage() {
                   }
                   setSummaryModalOpen(false);
                 } catch (error) {
-                  console.error("Failed to update summary:", error);
+                  logger.error("Failed to update summary", { error: formatError(error) });
                 } finally {
                   setSummaryLoading(false);
                 }
@@ -728,7 +738,7 @@ export default function MyProfilePage() {
                   }
                   setSkillsModalOpen(false);
                 } catch (error) {
-                  console.error("Failed to update skills:", error);
+                  logger.error("Failed to update skills", { error: formatError(error) });
                 } finally {
                   setSkillsLoading(false);
                 }
@@ -785,7 +795,7 @@ export default function MyProfilePage() {
                   }
                   setGoalsModalOpen(false);
                 } catch (error) {
-                  console.error("Failed to update goals:", error);
+                  logger.error("Failed to update goals", { error: formatError(error) });
                 } finally {
                   setGoalsLoading(false);
                 }

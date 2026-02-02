@@ -8,6 +8,7 @@ import { BookOpen } from "@phosphor-icons/react";
 import { PathwayCard } from "./components/pathway-card";
 import { CourseCard } from "./components/course-card";
 import { CertificationCard } from "./components/certification-card";
+import { logger, formatError } from "@/lib/logger";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -71,7 +72,7 @@ export default function TreehousePage() {
           });
         }
       } catch (error) {
-        console.error("Error fetching treehouse data:", error);
+        logger.error("Error fetching treehouse data", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -169,7 +170,7 @@ export default function TreehousePage() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-12 text-center">
+                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
                   <BookOpen
                     size={40}
                     weight="light"
@@ -203,7 +204,7 @@ export default function TreehousePage() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-12 text-center">
+                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
                   <BookOpen
                     size={40}
                     weight="light"

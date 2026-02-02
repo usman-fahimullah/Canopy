@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Table, CalendarBlank, Briefcase } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -93,7 +94,7 @@ export default function ApplicationsPage() {
           setApplications([]);
         }
       } catch (err) {
-        console.error("Error fetching applications:", err);
+        logger.error("Error fetching applications", { error: formatError(err) });
         setApplications([]);
       } finally {
         setLoading(false);
@@ -156,7 +157,7 @@ export default function ApplicationsPage() {
             {filteredApplications.map((app) => (
               <div
                 key={app.id}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-5 transition-shadow hover:shadow-card"
+                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card"
               >
                 {/* Icon */}
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
@@ -191,7 +192,7 @@ export default function ApplicationsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
             <Table
               size={32}
               weight="light"

@@ -25,6 +25,7 @@ import {
   ArrowClockwise,
 } from "@phosphor-icons/react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 type ViewMode = "list" | "calendar";
 type FilterStatus = "all" | "SCHEDULED" | "COMPLETED" | "CANCELLED";
@@ -137,7 +138,7 @@ export default function SessionsPage() {
       const data = await response.json();
       setSessions(data.sessions || []);
     } catch (err) {
-      console.error("Error fetching sessions:", err);
+      logger.error("Error fetching sessions", { error: formatError(err) });
       setError("Failed to load sessions");
     } finally {
       setLoading(false);

@@ -3,6 +3,9 @@ import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { isSlotAvailable } from "@/lib/availability";
 import { createNotification } from "@/lib/notifications";
+import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
+import { RescheduleSessionSchema } from "@/lib/validators/api";
 
 // POST — reschedule a session
 // Body: { newDate: string (ISO), newTime: string (HH:MM) }
@@ -11,6 +14,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Rate limit: 5 reschedules per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(5, `reschedule:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id: sessionId } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -58,14 +71,14 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { newDate } = body;
-
-    if (!newDate) {
+    const result = RescheduleSessionSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "newDate is required (ISO format)" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { newDate } = result.data;
 
     const newDateTime = new Date(newDate);
     if (isNaN(newDateTime.getTime())) {
@@ -110,12 +123,12 @@ export async function POST(
         url: `/candid/sessions/${session.id}`,
       },
     }).catch((err) => {
-      console.error("Failed to send reschedule notification:", err);
+      logger.error("Failed to send reschedule notification", { error: formatError(err), endpoint: "/api/sessions/[id]/reschedule" });
     });
 
     return NextResponse.json({ success: true, session: updated });
   } catch (error) {
-    console.error("Reschedule session error:", error);
+    logger.error("Reschedule session error", { error: formatError(error), endpoint: "/api/sessions/[id]/reschedule" });
     return NextResponse.json(
       { error: "Failed to reschedule session" },
       { status: 500 }

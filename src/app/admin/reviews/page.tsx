@@ -6,6 +6,7 @@ import { Chip } from "@/components/ui/chip";
 import { Avatar } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { Star, Flag, Eye, EyeSlash, ChatCircle, Warning } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface AdminReview {
   id: string;
@@ -47,7 +48,7 @@ export default function AdminReviewsPage() {
         setReviews(data.reviews || []);
       }
     } catch (err) {
-      console.error("Failed to fetch reviews:", err);
+      logger.error("Failed to fetch reviews", { error: formatError(err) });
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,7 @@ export default function AdminReviewsPage() {
         fetchReviews();
       }
     } catch (err) {
-      console.error("Failed to update review:", err);
+      logger.error("Failed to update review", { error: formatError(err) });
     } finally {
       setUpdating(null);
     }
@@ -125,7 +126,7 @@ export default function AdminReviewsPage() {
           {reviews.map((review) => (
             <div
               key={review.id}
-              className={`rounded-xl border bg-white p-5 ${
+              className={`rounded-xl border bg-[var(--card-background)] p-5 ${
                 review.isFlagged
                   ? "border-[var(--primitive-red-300)]"
                   : !review.isVisible
@@ -186,7 +187,7 @@ export default function AdminReviewsPage() {
                         weight={s <= review.rating ? "fill" : "regular"}
                         className={
                           s <= review.rating
-                            ? "text-[#F59E0B]"
+                            ? "text-[var(--primitive-yellow-500)]"
                             : "text-[var(--primitive-neutral-300)]"
                         }
                       />

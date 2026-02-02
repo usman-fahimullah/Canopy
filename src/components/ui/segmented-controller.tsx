@@ -180,7 +180,7 @@ const SegmentedController = React.forwardRef<
         {/* Sliding pill indicator */}
         <div
           // Figma: white bg, rounded-xl (12px), shadow 1px 3px 16px rgba(31,29,28,0.08)
-          className="absolute top-1 bottom-1 rounded-xl bg-white transition-[left] duration-200 ease-out shadow-[1px_3px_16px_0px_rgba(31,29,28,0.08)]"
+          className="absolute top-1 bottom-1 rounded-xl bg-[var(--background-default)] transition-[left] duration-200 ease-out shadow-[1px_3px_16px_0px_rgba(31,29,28,0.08)]"
           style={{
             left: `calc(${selectedIndex * tabWidthPercent}% + 4px)`,
             width: `calc(${tabWidthPercent}% - 8px)`,

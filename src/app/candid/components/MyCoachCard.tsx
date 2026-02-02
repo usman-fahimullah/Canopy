@@ -15,6 +15,7 @@ import {
   Users,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 interface MyCoach {
   id: string;
@@ -56,7 +57,7 @@ export function MyCoachCard({ className }: MyCoachCardProps) {
           setCoach(data.coach);
         }
       } catch (error) {
-        console.error("Failed to fetch assigned coach:", error);
+        logger.error("Failed to fetch assigned coach", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -67,7 +68,7 @@ export function MyCoachCard({ className }: MyCoachCardProps) {
 
   if (loading) {
     return (
-      <div className={cn("animate-pulse rounded-card bg-white p-6", className)}>
+      <div className={cn("animate-pulse rounded-card bg-[var(--card-background)] p-6", className)}>
         <div className="flex items-center gap-4">
           <div className="h-16 w-16 rounded-full bg-[var(--primitive-neutral-200)]" />
           <div className="flex-1 space-y-2">
@@ -84,7 +85,7 @@ export function MyCoachCard({ className }: MyCoachCardProps) {
     return (
       <div
         className={cn(
-          "rounded-card bg-white p-6 shadow-card",
+          "rounded-card bg-[var(--card-background)] p-6 shadow-card",
           className
         )}
       >
@@ -164,7 +165,7 @@ export function MyCoachCard({ className }: MyCoachCardProps) {
       <div className="mt-4 flex items-center gap-4 text-caption">
         {coach.rating && coach.rating > 0 && (
           <span className="flex items-center gap-1">
-            <Star size={14} weight="fill" className="text-[#FFD700]" />
+            <Star size={14} weight="fill" className="text-[var(--primitive-yellow-400)]" />
             <span className="font-medium text-[var(--primitive-blue-100)]">
               {coach.rating.toFixed(1)}
             </span>

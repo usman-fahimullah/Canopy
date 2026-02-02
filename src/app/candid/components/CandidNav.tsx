@@ -221,7 +221,7 @@ export function CandidNav() {
       {/* Mobile Menu Sheet */}
       <div
         className={cn(
-          "fixed top-0 right-0 z-50 h-full w-[280px] bg-white shadow-xl md:hidden transition-transform duration-300 ease-out",
+          "fixed top-0 right-0 z-50 h-full w-[280px] bg-[var(--background-default)] shadow-xl md:hidden transition-transform duration-300 ease-out",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >

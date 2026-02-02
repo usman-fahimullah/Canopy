@@ -18,6 +18,7 @@ import {
   CaretDown,
   MagnifyingGlass,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 export default function AdminCoachesPage() {
   return (
@@ -87,7 +88,7 @@ function AdminCoachesContent() {
         setCoaches(data.coaches || []);
       }
     } catch (error) {
-      console.error("Failed to fetch coaches:", error);
+      logger.error("Failed to fetch coaches", { error: formatError(error) });
     } finally {
       setLoading(false);
     }
@@ -106,7 +107,7 @@ function AdminCoachesContent() {
         setSelectedCoach(null);
       }
     } catch (error) {
-      console.error(`Failed to ${action} coach:`, error);
+      logger.error(`Failed to ${action} coach`, { error: formatError(error) });
     } finally {
       setActionLoading(false);
     }
@@ -142,7 +143,7 @@ function AdminCoachesContent() {
             className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               selectedStatus === tab.value
                 ? "bg-[var(--primitive-green-600)] text-white"
-                : "border border-[var(--primitive-neutral-200)] bg-white text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-50)]"
+                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-50)]"
             }`}
           >
             {tab.label}
@@ -171,12 +172,12 @@ function AdminCoachesContent() {
         {/* Coach List */}
         <div className="flex-1">
           {loading ? (
-            <div className="rounded-xl border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+            <div className="rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
               <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-[var(--primitive-green-600)] border-t-transparent" />
               <p className="mt-4 text-[var(--primitive-neutral-600)]">Loading coaches...</p>
             </div>
           ) : filteredCoaches.length === 0 ? (
-            <div className="rounded-xl border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+            <div className="rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
               <User size={48} className="mx-auto mb-4 text-[var(--primitive-neutral-400)]" />
               <p className="text-[var(--primitive-neutral-600)]">
                 No {selectedStatus.toLowerCase()} coaches found
@@ -188,7 +189,7 @@ function AdminCoachesContent() {
                 <button
                   key={coach.id}
                   onClick={() => setSelectedCoach(coach)}
-                  className={`w-full rounded-xl border bg-white p-4 text-left transition-all ${
+                  className={`w-full rounded-xl border bg-[var(--card-background)] p-4 text-left transition-all ${
                     selectedCoach?.id === coach.id
                       ? "border-[var(--primitive-green-600)] ring-2 ring-[var(--primitive-green-100)]"
                       : "border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-neutral-300)]"
@@ -235,7 +236,7 @@ function AdminCoachesContent() {
         {/* Coach Detail Panel */}
         {selectedCoach && (
           <div className="w-96 shrink-0">
-            <div className="sticky top-24 rounded-xl border border-[var(--primitive-neutral-200)] bg-white">
+            <div className="sticky top-24 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
               {/* Header */}
               <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                 <div className="mb-4 flex items-center gap-4">

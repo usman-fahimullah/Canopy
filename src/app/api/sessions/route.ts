@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { createReviewRequestNotification } from "@/lib/notifications";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateSessionSchema } from "@/lib/validators/api";
 
 // GET - List sessions for current user
 export async function GET(request: NextRequest) {
@@ -38,7 +40,7 @@ export async function GET(request: NextRequest) {
       sessions = await prisma.session.findMany({
         where: {
           coachId: account.coachProfile.id,
-          ...(status ? { status: status as any } : {}),
+          ...(status ? { status: status as "SCHEDULED" | "COMPLETED" | "CANCELLED" | "NO_SHOW" } : {}),
         },
         include: {
           mentee: {
@@ -48,12 +50,13 @@ export async function GET(request: NextRequest) {
           review: true,
         },
         orderBy: { scheduledAt: "desc" },
+        take: 100,
       });
     } else if (account.seekerProfile) {
       sessions = await prisma.session.findMany({
         where: {
           menteeId: account.seekerProfile.id,
-          ...(status ? { status: status as any } : {}),
+          ...(status ? { status: status as "SCHEDULED" | "COMPLETED" | "CANCELLED" | "NO_SHOW" } : {}),
         },
         include: {
           coach: {
@@ -63,6 +66,7 @@ export async function GET(request: NextRequest) {
           review: true,
         },
         orderBy: { scheduledAt: "desc" },
+        take: 100,
       });
     } else {
       return NextResponse.json({ sessions: [] });
@@ -70,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ sessions });
   } catch (error) {
-    console.error("Fetch sessions error:", error);
+    logger.error("Fetch sessions error", { error: formatError(error), endpoint: "/api/sessions" });
     return NextResponse.json({ error: "Failed to fetch sessions" }, { status: 500 });
   }
 }
@@ -88,11 +92,14 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { sessionId, status, coachNotes } = body;
-
-    if (!sessionId) {
-      return NextResponse.json({ error: "sessionId required" }, { status: 400 });
+    const result = UpdateSessionSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { sessionId, status, coachNotes } = result.data;
 
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
@@ -138,13 +145,13 @@ export async function PATCH(request: NextRequest) {
         coach: session.coach,
         mentee: session.mentee,
       }).catch((err) => {
-        console.error("Failed to send review request notification:", err);
+        logger.error("Failed to send review request notification", { error: formatError(err) });
       });
     }
 
     return NextResponse.json({ success: true, session: updatedSession });
   } catch (error) {
-    console.error("Update session error:", error);
+    logger.error("Update session error", { error: formatError(error), endpoint: "/api/sessions" });
     return NextResponse.json({ error: "Failed to update session" }, { status: 500 });
   }
 }

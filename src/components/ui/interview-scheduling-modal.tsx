@@ -72,6 +72,7 @@ import {
   CalendarDot,
   DotsSixVertical,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /* ============================================
    Types
@@ -760,7 +761,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
     >
-      <div className={cn("flex h-full min-h-0 flex-col bg-white", className)}>
+      <div className={cn("flex h-full min-h-0 flex-col bg-[var(--card-background)]", className)}>
         {/* Calendar Header */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--primitive-neutral-200)] px-4 py-3">
           <div className="flex items-center gap-1">
@@ -801,7 +802,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                 className={cn(
                   "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
                   weekView === "5-day"
-                    ? "bg-white text-[var(--foreground-default)] shadow-sm"
+                    ? "bg-[var(--background-interactive-default)] text-[var(--foreground-default)] shadow-sm"
                     : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
                 )}
               >
@@ -813,7 +814,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                 className={cn(
                   "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
                   weekView === "7-day"
-                    ? "bg-white text-[var(--foreground-default)] shadow-sm"
+                    ? "bg-[var(--background-interactive-default)] text-[var(--foreground-default)] shadow-sm"
                     : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
                 )}
               >
@@ -911,7 +912,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                     )}
                   >
                     {/* Day header */}
-                    <div className="sticky top-0 z-10 flex h-12 flex-col items-center justify-center border-b border-[var(--primitive-neutral-200)] bg-white">
+                    <div className="sticky top-0 z-10 flex h-12 flex-col items-center justify-center border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
                       <span className="text-[10px] uppercase tracking-wider text-[var(--foreground-muted)]">
                         {format(day, "EEE")}
                       </span>
@@ -1008,15 +1009,16 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                                       ? "opacity-85 hover:opacity-100"
                                       : "opacity-95 hover:opacity-100"
                                   )}
-                                  style={{
-                                    top,
-                                    height,
-                                    backgroundColor: color.bg,
-                                    borderLeft: `4px solid ${color.border}`,
-                                    backgroundImage: showPattern ? TENTATIVE_PATTERN : undefined,
-                                    // @ts-expect-error CSS custom property for hover ring color
-                                    "--tw-ring-color": color.border,
-                                  }}
+                                  style={
+                                    {
+                                      top,
+                                      height,
+                                      backgroundColor: color.bg,
+                                      borderLeft: `4px solid ${color.border}`,
+                                      backgroundImage: showPattern ? TENTATIVE_PATTERN : undefined,
+                                      "--tw-ring-color": color.border,
+                                    } as unknown as React.CSSProperties
+                                  }
                                 >
                                   <div className="flex h-full flex-col overflow-hidden px-2 py-1">
                                     {/* Row 1: Attendee color dot + Title */}
@@ -1370,7 +1372,7 @@ const AddAttendeePopover: React.FC<AddAttendeePopoverProps> = ({
           className={cn(
             "absolute left-0 top-full z-50 mt-1",
             "max-h-80 w-72",
-            "border border-[var(--primitive-neutral-300)] bg-white",
+            "border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]",
             "overflow-hidden rounded-lg shadow-lg"
           )}
         >
@@ -1480,7 +1482,7 @@ const SuggestTimesButton: React.FC<SuggestTimesButtonProps> = ({
       const suggestedSlots = await onSuggest();
       onSuggestComplete?.(suggestedSlots);
     } catch (error) {
-      console.error("Failed to get suggestions:", error);
+      logger.error("Failed to get suggestions", { error: formatError(error) });
     } finally {
       setIsLoading(false);
     }
@@ -1745,7 +1747,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
               className={cn(
                 "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
                 weekView === "5-day"
-                  ? "bg-white text-[var(--foreground-default)] shadow-sm"
+                  ? "bg-[var(--background-interactive-default)] text-[var(--foreground-default)] shadow-sm"
                   : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
               )}
             >
@@ -1757,7 +1759,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
               className={cn(
                 "rounded-md px-2 py-1 text-[11px] font-medium transition-all",
                 weekView === "7-day"
-                  ? "bg-white text-[var(--foreground-default)] shadow-sm"
+                  ? "bg-[var(--background-interactive-default)] text-[var(--foreground-default)] shadow-sm"
                   : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
               )}
             >
@@ -1960,7 +1962,7 @@ const YourCalendarView: React.FC<YourCalendarViewProps> = ({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 border-t border-[var(--primitive-neutral-200)] bg-white px-4 py-2 text-[11px] text-[var(--foreground-muted)]">
+      <div className="flex items-center gap-4 border-t border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-2 text-[11px] text-[var(--foreground-muted)]">
         <div className="flex items-center gap-1.5">
           <div className="h-3 w-3 rounded border-l-2 border-[var(--primitive-neutral-700)] bg-[var(--primitive-neutral-600)]" />
           <span>My events</span>
@@ -2113,12 +2115,12 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
       {/* Modal - Full screen with margins */}
       <div
         className={cn(
-          "relative m-4 flex max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-2xl bg-white shadow-2xl",
+          "relative m-4 flex max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-2xl bg-[var(--background-default)] shadow-2xl",
           className
         )}
       >
         {/* Left Panel - Form */}
-        <div className="flex h-full w-[340px] flex-shrink-0 flex-col border-r border-[var(--primitive-neutral-200)] bg-white">
+        <div className="flex h-full w-[340px] flex-shrink-0 flex-col border-r border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
           {/* Header - X button on left */}
           <div className="flex flex-shrink-0 items-center gap-3 border-b border-[var(--primitive-neutral-200)] px-4 py-3">
             <button
@@ -2297,7 +2299,7 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
                               handleSuggestedSlots(slots);
                             }
                           })
-                          .catch(console.error);
+                          .catch((err) => logger.error("Async operation failed", { error: formatError(err) }));
                       }}
                       disabled={attendees.length < 2}
                       className={cn(
@@ -2391,7 +2393,7 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
         {/* Right Panel - Calendar with Tabs */}
         <div className="flex h-full flex-1 flex-col overflow-hidden bg-[var(--primitive-neutral-100)]">
           {/* Tab Header - Fixed at top */}
-          <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-white px-4 py-2">
+          <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-2">
             {/* Tab Switcher */}
             <SegmentedController
               options={[

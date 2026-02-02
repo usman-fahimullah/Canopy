@@ -19,7 +19,7 @@ function ShellLayoutInner({ shell, children }: { shell: Shell; children: ReactNo
   const config = shellNavConfigs[shell];
 
   return (
-    <div className="min-h-screen bg-[#FAF9F7]">
+    <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
       {/* Desktop sidebar */}
       <ShellSidebar config={config} />
 

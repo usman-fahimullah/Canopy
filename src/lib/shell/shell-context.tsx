@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import type { Shell } from "@/lib/onboarding/types";
 import { SHELL_CONFIGS } from "@/lib/onboarding/types";
 import type { ShellUser, EmployerOrgRole } from "./types";
+import { logger, formatError } from "@/lib/logger";
 
 interface ShellContextValue {
   currentShell: Shell;
@@ -66,7 +67,7 @@ export function ShellProvider({ shell, children }: ShellProviderProps) {
 
         setUser(shellUser);
       } catch (err) {
-        console.error("ShellProvider fetch error:", err);
+        logger.error("ShellProvider fetch failed", { error: formatError(err), endpoint: "lib/shell/shell-context" });
       } finally {
         if (!cancelled) setLoading(false);
       }

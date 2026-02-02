@@ -40,10 +40,10 @@ function NeutralSelectionEditor() {
           "[&_.ProseMirror]:text-lg [&_.ProseMirror]:leading-6 [&_.ProseMirror]:text-foreground",
           "[&_.ProseMirror]:focus:outline-none",
           // Neutral selection color
-          "[&_.ProseMirror]::selection:bg-[#e5dfd8]",
-          "[&_.ProseMirror]:selection:bg-[#e5dfd8]",
-          "[&_.ProseMirror_*::selection]:bg-[#e5dfd8]",
-          "[&_.ProseMirror_*]:selection:bg-[#e5dfd8]"
+          "[&_.ProseMirror]::selection:bg-[var(--primitive-neutral-300)]",
+          "[&_.ProseMirror]:selection:bg-[var(--primitive-neutral-300)]",
+          "[&_.ProseMirror_*::selection]:bg-[var(--primitive-neutral-300)]",
+          "[&_.ProseMirror_*]:selection:bg-[var(--primitive-neutral-300)]"
         )}
       />
       <style jsx global>{`
@@ -105,7 +105,7 @@ export default function SelectionComparisonPage() {
     <div className="min-h-screen bg-[var(--primitive-neutral-100)] px-4 py-8">
       <div className="mx-auto max-w-4xl space-y-8">
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-black">Text Selection Color Comparison</h1>
+          <h1 className="mb-2 text-3xl font-bold text-[var(--foreground-default)]">Text Selection Color Comparison</h1>
           <p className="text-[var(--primitive-neutral-600)]">
             Click and drag to select text in each editor to compare selection highlight colors.
           </p>
@@ -115,9 +115,9 @@ export default function SelectionComparisonPage() {
         <div className="grid grid-cols-2 gap-6">
           <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
             <div className="mb-4 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl border border-[var(--primitive-neutral-300)] bg-[#e5dfd8]" />
+              <div className="h-12 w-12 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-300)]" />
               <div>
-                <h3 className="font-medium text-black">Option 1: Neutral Warm</h3>
+                <h3 className="font-medium text-[var(--foreground-default)]">Option 1: Neutral Warm</h3>
                 <p className="text-sm text-[var(--primitive-neutral-600)]">#e5dfd8 (neutral-300)</p>
               </div>
             </div>
@@ -131,9 +131,9 @@ export default function SelectionComparisonPage() {
 
           <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
             <div className="mb-4 flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl border border-blue-300 bg-[#BFDBFE]" />
+              <div className="h-12 w-12 rounded-xl border border-blue-300 bg-[var(--primitive-blue-200)]" />
               <div>
-                <h3 className="font-medium text-black">Option 3: Light Blue</h3>
+                <h3 className="font-medium text-[var(--foreground-default)]">Option 3: Light Blue</h3>
                 <p className="text-sm text-[var(--primitive-neutral-600)]">#BFDBFE (blue-200)</p>
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function SelectionComparisonPage() {
         {/* Editor Demos */}
         <div className="space-y-6">
           <div>
-            <h2 className="mb-3 text-xl font-medium text-black">
+            <h2 className="mb-3 text-xl font-medium text-[var(--foreground-default)]">
               Option 1: Neutral Warm Selection
             </h2>
             <div className="neutral-selection">
@@ -158,7 +158,7 @@ export default function SelectionComparisonPage() {
           </div>
 
           <div>
-            <h2 className="mb-3 text-xl font-medium text-black">Option 3: Light Blue Selection</h2>
+            <h2 className="mb-3 text-xl font-medium text-[var(--foreground-default)]">Option 3: Light Blue Selection</h2>
             <div className="blue-selection">
               <BlueSelectionEditor />
             </div>
@@ -167,7 +167,7 @@ export default function SelectionComparisonPage() {
 
         {/* Recommendation */}
         <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-white p-6">
-          <h2 className="mb-4 text-xl font-medium text-black">My Recommendation</h2>
+          <h2 className="mb-4 text-xl font-medium text-[var(--foreground-default)]">My Recommendation</h2>
           <div className="prose prose-sm max-w-none text-[var(--primitive-neutral-700)]">
             <p>
               For <strong>text selection</strong> specifically, I&apos;d lean towards{" "}

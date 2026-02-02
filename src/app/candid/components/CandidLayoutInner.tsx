@@ -9,7 +9,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const { collapsed } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-[#FAF9F7]">
+    <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
       <CandidSidebar />
 
       <div className="lg:hidden">

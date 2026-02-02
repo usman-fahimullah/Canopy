@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { RateMentorSchema } from "@/lib/validators/api";
 
 // POST — rate a mentor for a specific assignment
 export async function POST(
@@ -51,56 +53,63 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { rating, comment } = body;
-
-    if (!rating || rating < 1 || rating > 5) {
+    const result = RateMentorSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Rating must be between 1 and 5" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { rating, comment } = result.data;
 
-    // Create or update the review
-    const review = await prisma.mentorReview.upsert({
-      where: {
-        assignmentId_menteeId: {
-          assignmentId,
-          menteeId: account.seekerProfile.id,
+
+    // Capture for use inside transaction closure (TypeScript narrowing doesn't carry into async callbacks)
+    const seekerProfileId = account.seekerProfile.id;
+
+    // Create or update the review and recalculate rating in a transaction
+    const review = await prisma.$transaction(async (tx) => {
+      const rev = await tx.mentorReview.upsert({
+        where: {
+          assignmentId_menteeId: {
+            assignmentId,
+            menteeId: seekerProfileId,
+          },
         },
-      },
-      create: {
-        assignmentId,
-        menteeId: account.seekerProfile.id,
-        mentorId: assignment.mentorId,
-        rating,
-        comment: comment || null,
-      },
-      update: {
-        rating,
-        comment: comment || null,
-      },
-    });
+        create: {
+          assignmentId,
+          menteeId: seekerProfileId,
+          mentorId: assignment.mentorId,
+          rating,
+          comment: comment || null,
+        },
+        update: {
+          rating,
+          comment: comment || null,
+        },
+      });
 
-    // Recalculate mentor's average rating
-    const allReviews = await prisma.mentorReview.findMany({
-      where: { mentorId: assignment.mentorId },
-      select: { rating: true },
-    });
+      const allReviews = await tx.mentorReview.findMany({
+        where: { mentorId: assignment.mentorId },
+        select: { rating: true },
+      });
 
-    const avgRating =
-      allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+      const avgRating =
+        allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
 
-    await prisma.seekerProfile.update({
-      where: { id: assignment.mentorId },
-      data: {
-        mentorRating: Math.round(avgRating * 10) / 10,
-        mentorReviewCount: allReviews.length,
-      },
+      await tx.seekerProfile.update({
+        where: { id: assignment.mentorId },
+        data: {
+          mentorRating: Math.round(avgRating * 10) / 10,
+          mentorReviewCount: allReviews.length,
+        },
+      });
+
+      return rev;
     });
 
     return NextResponse.json({ review }, { status: 201 });
   } catch (error) {
-    console.error("Error rating mentor:", error);
+    logger.error("Error rating mentor", { error: formatError(error), endpoint: "/api/mentor-assignments/rate" });
     return NextResponse.json(
       { error: "Failed to submit rating" },
       { status: 500 }

@@ -19,6 +19,7 @@ import {
   ChatCircle,
 } from "@phosphor-icons/react";
 import { formatDistanceToNow } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 function formatTimestamp(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
@@ -146,7 +147,7 @@ function MessagesContent() {
       {/* ─── Panel 1: Conversation List ─── */}
       <div
         className={cn(
-          "flex h-full w-full flex-col border-r border-[var(--primitive-neutral-200)] bg-white lg:w-[480px] shrink-0",
+          "flex h-full w-full flex-col border-r border-[var(--primitive-neutral-200)] bg-[var(--background-default)] lg:w-[480px] shrink-0",
           mobileShowChat && activeThreadId ? "hidden lg:flex" : "flex"
         )}
       >
@@ -158,7 +159,7 @@ function MessagesContent() {
               className={cn(
                 "flex-1 rounded-xl py-3 px-2 text-sm text-center transition-all",
                 activeTab === "messages"
-                  ? "bg-white font-bold text-[var(--primitive-green-800)] shadow-[1px_2px_16px_0px_rgba(31,29,28,0.08)]"
+                  ? "bg-[var(--background-interactive-default)] font-bold text-[var(--primitive-green-800)] shadow-[1px_2px_16px_0px_rgba(31,29,28,0.08)]"
                   : "font-normal text-[var(--primitive-neutral-700)]"
               )}
             >
@@ -169,7 +170,7 @@ function MessagesContent() {
               className={cn(
                 "flex-1 rounded-xl py-3 px-2 text-sm text-center transition-all cursor-pointer",
                 activeTab === "requests"
-                  ? "bg-white font-bold text-[var(--primitive-green-800)] shadow-[1px_2px_16px_0px_rgba(31,29,28,0.08)]"
+                  ? "bg-[var(--background-interactive-default)] font-bold text-[var(--primitive-green-800)] shadow-[1px_2px_16px_0px_rgba(31,29,28,0.08)]"
                   : "font-normal text-[var(--primitive-neutral-700)]"
               )}
             >
@@ -210,7 +211,7 @@ function MessagesContent() {
                     "flex items-start gap-3 border-b border-[var(--primitive-neutral-200)] px-6 py-4 transition-colors",
                     isActive
                       ? "bg-[var(--primitive-neutral-100)]"
-                      : "bg-white hover:bg-[var(--primitive-neutral-100)]/50"
+                      : "bg-[var(--background-interactive-default)] hover:bg-[var(--primitive-neutral-100)]/50"
                   )}
                 >
                   {/* Avatar */}
@@ -242,7 +243,7 @@ function MessagesContent() {
                       className={cn(
                         "mt-1 text-lg leading-6 line-clamp-2",
                         isActive
-                          ? "text-black"
+                          ? "text-[var(--foreground-default)]"
                           : "text-[var(--primitive-neutral-500)]"
                       )}
                     >
@@ -294,7 +295,7 @@ function MessagesContent() {
         {activeThreadId && otherUser ? (
           <>
             {/* Chat Header */}
-            <div className="border-b border-[var(--primitive-neutral-200)] bg-white px-6 py-[30px]">
+            <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-6 py-[30px]">
               <div className="flex items-center gap-3">
                 {/* Mobile back button */}
                 <button
@@ -348,7 +349,7 @@ function MessagesContent() {
             </div>
 
             {/* Message Composer */}
-            <div className="border-t border-[var(--primitive-neutral-200)] bg-white px-12 py-6">
+            <div className="border-t border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-12 py-6">
               <div className="flex flex-col gap-4 rounded-2xl bg-[var(--primitive-neutral-100)] p-6">
                 {/* Input */}
                 <textarea
@@ -543,7 +544,7 @@ function MessageBubbles({
                     radiusClass,
                     group.isOwn
                       ? "bg-[var(--primitive-blue-200)] text-[var(--primitive-blue-800)]"
-                      : "bg-[var(--primitive-neutral-200)] text-black",
+                      : "bg-[var(--primitive-neutral-200)] text-[var(--foreground-default)]",
                     !isSingle && isFirst && !group.isOwn && "w-full",
                     !isSingle && !isFirst && !isLast && !group.isOwn && "w-full"
                   )}

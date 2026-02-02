@@ -118,7 +118,7 @@ export function MessagesLayout({
       {/* Panel 1: Conversation List */}
       <div
         className={cn(
-          "flex h-full w-full flex-col border-r border-[var(--primitive-neutral-200)] bg-white lg:w-[480px] shrink-0",
+          "flex h-full w-full flex-col border-r border-[var(--primitive-neutral-200)] bg-[var(--background-default)] lg:w-[480px] shrink-0",
           mobileShowChat && activeThreadId ? "hidden lg:flex" : "flex"
         )}
       >

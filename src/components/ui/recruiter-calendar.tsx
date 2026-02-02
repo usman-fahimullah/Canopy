@@ -459,7 +459,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
     .slice(0, 3);
 
   return (
-    <div className={cn("w-64 flex flex-col bg-white border-r border-[var(--primitive-neutral-200)]", className)}>
+    <div className={cn("w-64 flex flex-col bg-[var(--card-background)] border-r border-[var(--primitive-neutral-200)]", className)}>
       {/* Create Button */}
       <div className="p-4">
         <Button
@@ -700,7 +700,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
   return (
     <div className={cn(
-      "flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-200)] bg-white",
+      "flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]",
       className
     )}>
       {/* Left: Navigation */}
@@ -764,7 +764,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               className={cn(
                 "px-3 py-1.5 text-sm font-medium rounded-md transition-all",
                 view === opt.value
-                  ? "bg-white text-[var(--foreground-default)] shadow-sm"
+                  ? "bg-[var(--background-interactive-default)] text-[var(--foreground-default)] shadow-sm"
                   : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
               )}
             >
@@ -934,7 +934,7 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
   return (
     <div className={cn("flex flex-col h-full", className)}>
       {/* Day headers */}
-      <div className="flex-shrink-0 flex border-b border-[var(--primitive-neutral-200)] bg-white">
+      <div className="flex-shrink-0 flex border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
         <div className="w-16 flex-shrink-0 border-r border-[var(--primitive-neutral-200)]" />
         {days.map((day) => {
           const isTodayDate = isToday(day);
@@ -1086,7 +1086,7 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
   return (
     <div className={cn("flex flex-col h-full", className)}>
       {/* Day headers */}
-      <div className="flex-shrink-0 grid grid-cols-7 border-b border-[var(--primitive-neutral-200)] bg-white">
+      <div className="flex-shrink-0 grid grid-cols-7 border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <div
             key={day}
@@ -1321,7 +1321,7 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
         />
 
         {/* Calendar Grid */}
-        <div className="flex-1 overflow-hidden bg-white">
+        <div className="flex-1 overflow-hidden bg-[var(--card-background)]">
           {view === "day" && (
             <CalendarDayGrid
               date={selectedDate}
@@ -1359,7 +1359,7 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
             className="absolute inset-0 bg-black/40"
             onClick={() => setShowShortcuts(false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+          <div className="relative bg-[var(--background-default)] rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
               <button

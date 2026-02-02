@@ -9,6 +9,7 @@ import { MentorFilterPills } from "../components/mentor-filter-pills";
 import { MentorListItem } from "../components/mentor-list-item";
 import { MentorDetailPanel } from "../components/mentor-detail-panel";
 import type { Mentor, MentorFilterType } from "../components/types";
+import { logger, formatError } from "@/lib/logger";
 
 /* ------------------------------------------------------------------ */
 /*  Inner content (needs useSearchParams inside Suspense)              */
@@ -43,7 +44,7 @@ function ConnectContent() {
           setMentors([]);
         }
       } catch (err) {
-        console.error("Error fetching mentors:", err);
+        logger.error("Error fetching mentors", { error: formatError(err) });
         setMentors([]);
       } finally {
         setLoading(false);

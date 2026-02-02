@@ -142,7 +142,7 @@ export default function CoachApplicationPage() {
           </ul>
         </div>
 
-        <div className="bg-white border border-[var(--primitive-neutral-200)] rounded-xl p-6 mb-8">
+        <div className="bg-[var(--card-background)] border border-[var(--primitive-neutral-200)] rounded-xl p-6 mb-8">
           <h2 className="font-semibold text-[var(--primitive-green-800)] mb-4">
             Requirements:
           </h2>
@@ -485,7 +485,7 @@ function ApplicationLayout({ children }: { children: React.ReactNode }) {
         </Link>
       </header>
       <main className="max-w-xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
+        <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
           {children}
         </div>
       </main>

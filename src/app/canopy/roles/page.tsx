@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Plus, BriefcaseMetal, MapPin, Users, CalendarBlank } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /* -------------------------------------------------------------------
    Types
@@ -75,7 +76,7 @@ export default function RolesPage() {
           setJobs(data.jobs || []);
         }
       } catch (error) {
-        console.error("Error fetching jobs:", error);
+        logger.error("Error fetching jobs", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -109,7 +110,7 @@ export default function RolesPage() {
 
         {/* Empty State */}
         {!loading && jobs.length === 0 && (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-12 text-center">
+          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primitive-blue-100)]">
               <BriefcaseMetal
                 size={28}
@@ -156,7 +157,7 @@ export default function RolesPage() {
                 <Link
                   key={job.id}
                   href={`/canopy/roles/${job.id}`}
-                  className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-6 py-5 transition-shadow hover:shadow-card lg:grid lg:grid-cols-12 lg:items-center lg:gap-4 lg:py-4"
+                  className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card lg:grid lg:grid-cols-12 lg:items-center lg:gap-4 lg:py-4"
                 >
                   {/* Title */}
                   <div className="col-span-4 flex min-w-0 items-center gap-3">

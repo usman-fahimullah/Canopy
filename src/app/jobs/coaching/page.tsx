@@ -10,6 +10,7 @@ import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/co
 import { SearchInput } from "@/components/ui/search-input";
 import { SessionCard } from "./components/session-card";
 import { CoachBrowseCard } from "./components/coach-browse-card";
+import { logger, formatError } from "@/lib/logger";
 
 interface CoachInfo {
   id: string;
@@ -64,7 +65,7 @@ export default function CoachingPage() {
         setSessions(sessionsData.sessions || []);
         setCoaches(coachesData.coaches || []);
       } catch (error) {
-        console.error("Error fetching coaching data:", error);
+        logger.error("Error fetching coaching data", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -167,7 +168,7 @@ export default function CoachingPage() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-12 text-center">
+                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
                   <MagnifyingGlass
                     size={48}
                     weight="light"
@@ -191,7 +192,7 @@ export default function CoachingPage() {
 
 function EmptySessionsState() {
   return (
-    <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-12 text-center">
+    <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
       <GraduationCap
         size={48}
         weight="light"

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { CreateActionItemSchema } from "@/lib/validators/api";
 
 // GET — list action items for a session
 export async function GET(
@@ -45,11 +47,12 @@ export async function GET(
     const actionItems = await prisma.actionItem.findMany({
       where: { sessionId },
       orderBy: { createdAt: "asc" },
+      take: 100,
     });
 
     return NextResponse.json({ actionItems });
   } catch (error) {
-    console.error("Fetch action items error:", error);
+    logger.error("Fetch action items error", { error: formatError(error), endpoint: "/api/sessions/[id]/action-items" });
     return NextResponse.json(
       { error: "Failed to fetch action items" },
       { status: 500 }
@@ -94,11 +97,14 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { description, dueDate } = body;
-
-    if (!description) {
-      return NextResponse.json({ error: "Description is required" }, { status: 400 });
+    const result = CreateActionItemSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
     }
+    const { description, dueDate } = result.data;
 
     const actionItem = await prisma.actionItem.create({
       data: {
@@ -112,7 +118,7 @@ export async function POST(
 
     return NextResponse.json({ actionItem }, { status: 201 });
   } catch (error) {
-    console.error("Create action item error:", error);
+    logger.error("Create action item error", { error: formatError(error), endpoint: "/api/sessions/[id]/action-items" });
     return NextResponse.json(
       { error: "Failed to create action item" },
       { status: 500 }

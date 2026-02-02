@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { createNewMessageNotification } from "@/lib/notifications";
+import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
+import { SendMessageSchema } from "@/lib/validators/api";
 
 // GET — paginated messages for a conversation
 export async function GET(
@@ -90,7 +93,7 @@ export async function GET(
       hasMore,
     });
   } catch (error) {
-    console.error("Fetch messages error:", error);
+    logger.error("Fetch messages error", { error: formatError(error), endpoint: "/api/conversations/[id]/messages" });
     return NextResponse.json(
       { error: "Failed to fetch messages" },
       { status: 500 }
@@ -105,6 +108,16 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Rate limit: 30 messages per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(30, `messages:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { id: conversationId } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -136,57 +149,62 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { content, attachmentUrls } = body;
-
-    if (!content?.trim() && (!attachmentUrls || attachmentUrls.length === 0)) {
+    const result = SendMessageSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: "Message content or attachments required" },
-        { status: 400 }
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
       );
     }
+    const { content, attachmentUrls } = result.data;
 
-    // Create message
-    const message = await prisma.message.create({
-      data: {
-        conversationId,
-        senderId: account.id,
-        content: content?.trim() || "",
-        attachmentUrls: attachmentUrls || [],
-      },
-      select: {
-        id: true,
-        content: true,
-        senderId: true,
-        attachmentUrls: true,
-        createdAt: true,
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
+
+    // Create message, update conversation, and update sender's lastReadAt in a transaction
+    const message = await prisma.$transaction(async (tx) => {
+      const message = await tx.message.create({
+        data: {
+          conversationId,
+          senderId: account.id,
+          content: content?.trim() || "",
+          attachmentUrls: attachmentUrls || [],
+        },
+        select: {
+          id: true,
+          content: true,
+          senderId: true,
+          attachmentUrls: true,
+          createdAt: true,
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Update conversation lastMessageAt
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { lastMessageAt: message.createdAt },
-    });
+      // Update conversation lastMessageAt
+      await tx.conversation.update({
+        where: { id: conversationId },
+        data: { lastMessageAt: message.createdAt },
+      });
 
-    // Update sender's lastReadAt (they've read their own message)
-    await prisma.conversationParticipant.update({
-      where: {
-        conversationId_accountId: {
-          conversationId,
-          accountId: account.id,
+      // Update sender's lastReadAt (they've read their own message)
+      await tx.conversationParticipant.update({
+        where: {
+          conversationId_accountId: {
+            conversationId,
+            accountId: account.id,
+          },
         },
-      },
-      data: { lastReadAt: message.createdAt },
+        data: { lastReadAt: message.createdAt },
+      });
+
+      return message;
     });
 
-    // Notify other participants
+    // Notify other participants (kept outside transaction - external side effect)
     const otherParticipants = await prisma.conversationParticipant.findMany({
       where: {
         conversationId,
@@ -202,13 +220,13 @@ export async function POST(
         messagePreview: content?.trim() || "[Attachment]",
         conversationId,
       }).catch((err) => {
-        console.error("Failed to create message notification:", err);
+        logger.error("Failed to create message notification", { error: formatError(err), endpoint: "/api/conversations/[id]/messages" });
       });
     }
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
-    console.error("Send message error:", error);
+    logger.error("Send message error", { error: formatError(error), endpoint: "/api/conversations/[id]/messages" });
     return NextResponse.json(
       { error: "Failed to send message" },
       { status: 500 }

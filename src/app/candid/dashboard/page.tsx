@@ -16,6 +16,7 @@ import {
   ArrowCircleRight,
 } from "@phosphor-icons/react";
 import { format, isToday, isTomorrow, isSameDay } from "date-fns";
+import { logger, formatError } from "@/lib/logger";
 
 interface Session {
   id: string;
@@ -120,7 +121,7 @@ export default function DashboardPage() {
           milestones: { current: completedMilestones, total: Math.max(allMilestones.length, 1) },
         });
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        logger.error("Error fetching dashboard data", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
@@ -218,7 +219,7 @@ export default function DashboardPage() {
       {/* Main Content */}
       <div className="min-w-0 flex-1">
         {/* Page Header — 108px white bar */}
-        <div className="flex h-[108px] items-center border-b border-[var(--primitive-neutral-200)] bg-white px-8 lg:px-12">
+        <div className="flex h-[108px] items-center border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-8 lg:px-12">
           <h1 className="text-heading-md font-medium text-[var(--primitive-green-800)]">Home</h1>
         </div>
 
@@ -290,7 +291,7 @@ export default function DashboardPage() {
             ].map((item) => (
               <div
                 key={item.goal}
-                className="flex flex-col items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white px-4 py-6"
+                className="flex flex-col items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-6"
               >
                 <ProgressMeterCircular
                   goal={item.goal}
@@ -326,7 +327,7 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={session.id}
-                    className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white"
+                    className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]"
                   >
                     {/* Session header */}
                     <div className="flex items-center gap-3 px-6 pb-2 pt-4">
@@ -363,7 +364,7 @@ export default function DashboardPage() {
 
                     {/* Action item — placeholder */}
                     <div className="flex items-center gap-3 border-t border-[var(--primitive-neutral-200)] px-6 py-6">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--primitive-neutral-300)] bg-white"></div>
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)]"></div>
                       <span className="text-foreground-default text-body font-medium">
                         Send meeting notes to{" "}
                         <span className="text-[var(--primitive-blue-500)]">
@@ -376,7 +377,7 @@ export default function DashboardPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-white p-8 text-center">
+            <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
               <p className="text-body text-foreground-muted">No action items for today</p>
             </div>
           )}
@@ -392,7 +393,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Right Sidebar - Schedule (Large Desktop only) */}
-      <aside className="hidden w-[375px] flex-shrink-0 border-l border-[var(--candid-schedule-border)] bg-white xl:block">
+      <aside className="hidden w-[375px] flex-shrink-0 border-l border-[var(--candid-schedule-border)] bg-[var(--background-default)] xl:block">
         <div className="sticky top-0 h-screen overflow-y-auto">
           {/* Schedule Header */}
           <div className="flex h-[108px] items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6">

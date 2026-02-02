@@ -2,6 +2,7 @@
 // Uses Resend as the email provider
 
 import { Resend } from "resend";
+import { logger, formatError } from "@/lib/logger";
 
 export interface EmailPayload {
   to: string;
@@ -41,10 +42,8 @@ export async function sendEmail(
 
   // Dev mode fallback when Resend is not configured
   if (!client) {
-    console.warn("[Email] Resend not configured. Would send:", {
-      to: emailPayload.to,
-      subject: emailPayload.subject,
-      from: emailPayload.from,
+    logger.warn("Resend not configured, email not sent", {
+      endpoint: "lib/email",
     });
     return { success: true };
   }
@@ -60,14 +59,14 @@ export async function sendEmail(
     });
 
     if (error) {
-      console.error("[Email] Failed to send:", error);
+      logger.error("Email failed to send", { error: formatError(error), endpoint: "lib/email" });
       return { success: false, error: error.message };
     }
 
     // Email sent successfully
     return { success: true };
   } catch (error) {
-    console.error("[Email] Error:", error);
+    logger.error("Email error", { error: formatError(error), endpoint: "lib/email" });
     return { success: false, error: "Failed to send email" };
   }
 }

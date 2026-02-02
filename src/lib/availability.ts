@@ -2,6 +2,7 @@
 // Calculates available booking slots from coach availability and existing sessions
 
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 export interface TimeSlot {
   start: string; // "09:00"
@@ -36,7 +37,7 @@ export function parseAvailability(json: string | null): WeeklyAvailability | nul
   try {
     return JSON.parse(json) as WeeklyAvailability;
   } catch {
-    console.error("[Availability] Failed to parse availability JSON");
+    logger.error("Failed to parse availability JSON", { endpoint: "lib/availability" });
     return null;
   }
 }
@@ -112,6 +113,7 @@ export async function getAvailableSlots(
       scheduledAt: true,
       duration: true,
     },
+    take: 200,
   });
 
   // Build a set of occupied time ranges (in minutes from midnight for each date)
@@ -126,7 +128,8 @@ export async function getAvailableSlots(
     if (!occupiedSlots.has(dateKey)) {
       occupiedSlots.set(dateKey, []);
     }
-    occupiedSlots.get(dateKey)!.push({ start: startMin, end: endMin });
+    const slots = occupiedSlots.get(dateKey);
+    if (slots) slots.push({ start: startMin, end: endMin });
   }
 
   // Generate available slots day by day

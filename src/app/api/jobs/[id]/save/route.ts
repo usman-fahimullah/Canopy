@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateSavedJobNotesSchema } from "@/lib/validators/api";
 
 // POST - Save a job
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -52,9 +54,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     let notes: string | undefined;
     try {
       const body = await request.json();
-      notes = body.notes;
+      const result = UpdateSavedJobNotesSchema.safeParse(body);
+      if (!result.success) {
+        return NextResponse.json(
+          { error: "Validation failed", details: result.error.flatten() },
+          { status: 422 }
+        );
+      }
+      notes = result.data.notes;
     } catch {
-      // No body provided, that's fine
+      // Body is optional for this endpoint — continue without notes
     }
 
     // Create saved job
@@ -85,7 +94,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
     });
   } catch (error) {
-    console.error("Save job error:", error);
+    logger.error("Save job error", { error: formatError(error), endpoint: "/api/jobs/[id]/save" });
     return NextResponse.json({ error: "Failed to save job" }, { status: 500 });
   }
 }
@@ -133,7 +142,7 @@ export async function DELETE(
     if (prismaError.code === "P2025") {
       return NextResponse.json({ error: "Job not in saved list" }, { status: 404 });
     }
-    console.error("Unsave job error:", error);
+    logger.error("Unsave job error", { error: formatError(error), endpoint: "/api/jobs/[id]/save" });
     return NextResponse.json({ error: "Failed to unsave job" }, { status: 500 });
   }
 }
@@ -152,7 +161,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const body = await request.json();
-    const { notes } = body;
+    const result = UpdateSavedJobNotesSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
+    const { notes } = result.data;
 
     // Get the user's seeker profile
     const account = await prisma.account.findUnique({
@@ -184,7 +200,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (prismaError.code === "P2025") {
       return NextResponse.json({ error: "Job not in saved list" }, { status: 404 });
     }
-    console.error("Update saved job notes error:", error);
+    logger.error("Update saved job notes error", { error: formatError(error), endpoint: "/api/jobs/[id]/save" });
     return NextResponse.json({ error: "Failed to update notes" }, { status: 500 });
   }
 }

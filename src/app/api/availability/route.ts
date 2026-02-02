@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
+import { UpdateAvailabilitySchema } from "@/lib/validators/api";
 
 // GET — get current coach's availability settings
 export async function GET() {
@@ -31,7 +33,7 @@ export async function GET() {
       videoLink: coach.videoLink,
     });
   } catch (error) {
-    console.error("Fetch availability error:", error);
+    logger.error("Fetch availability error", { error: formatError(error), endpoint: "/api/availability" });
     return NextResponse.json({ error: "Failed to fetch availability" }, { status: 500 });
   }
 }
@@ -56,7 +58,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { availability, sessionDuration, bufferTime, maxSessionsPerWeek, videoLink } = body;
+    const result = UpdateAvailabilitySchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
+    const { availability, sessionDuration, bufferTime, maxSessionsPerWeek, videoLink } = result.data;
 
     const updateData: Record<string, unknown> = {};
 
@@ -90,7 +99,7 @@ export async function PUT(request: NextRequest) {
       videoLink: updated.videoLink,
     });
   } catch (error) {
-    console.error("Update availability error:", error);
+    logger.error("Update availability error", { error: formatError(error), endpoint: "/api/availability" });
     return NextResponse.json({ error: "Failed to update availability" }, { status: 500 });
   }
 }

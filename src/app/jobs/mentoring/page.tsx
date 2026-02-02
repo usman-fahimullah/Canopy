@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/components/ui/tabs";
 import type { MyMentorData } from "./components/types";
+import { logger, formatError } from "@/lib/logger";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -62,7 +63,7 @@ export default function MentoringPage() {
           setAssignments([]);
         }
       } catch (err) {
-        console.error("Error fetching mentor assignments:", err);
+        logger.error("Error fetching mentor assignments", { error: formatError(err) });
         setAssignments([]);
       } finally {
         setLoading(false);

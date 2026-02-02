@@ -23,6 +23,7 @@ import type {
   MentorshipTabType,
   MentorFilterType,
 } from "./components/types";
+import { logger, formatError } from "@/lib/logger";
 
 export default function MentorsBrowsePage() {
   return (
@@ -127,7 +128,7 @@ function MentorsContent() {
   return (
     <div className="h-[calc(100vh-5rem)] lg:h-screen flex flex-col">
       {/* Page Header */}
-      <div className="px-6 pt-5 pb-4 border-b border-[var(--primitive-neutral-200)] bg-white shrink-0">
+      <div className="px-6 pt-5 pb-4 border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] shrink-0">
         <div className="flex items-center gap-6">
           <h1 className="text-heading-sm font-bold text-foreground-default shrink-0">
             Mentorship
@@ -142,12 +143,12 @@ function MentorsContent() {
           <div className="h-full flex">
             {/* Left Panel - Mentor List */}
             <div
-              className={`w-full lg:w-[480px] flex-shrink-0 bg-white border-r border-[var(--primitive-neutral-200)] flex flex-col ${
+              className={`w-full lg:w-[480px] flex-shrink-0 bg-[var(--background-default)] border-r border-[var(--primitive-neutral-200)] flex flex-col ${
                 selectedMentorId ? "hidden lg:flex" : "flex"
               }`}
             >
               {/* Search & Filters */}
-              <div className="px-6 py-4 border-b border-[var(--primitive-neutral-200)] bg-white space-y-3">
+              <div className="px-6 py-4 border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] space-y-3">
                 <SearchInput
                   placeholder="Search mentors"
                   value={searchQuery}

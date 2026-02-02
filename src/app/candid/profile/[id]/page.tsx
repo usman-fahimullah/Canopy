@@ -19,6 +19,7 @@ import {
   LinkedinLogo,
   Spinner,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 interface Coach {
   id: string;
@@ -60,7 +61,7 @@ export default function ProfilePage() {
           setNotFound(true);
         }
       } catch (error) {
-        console.error("Error fetching coach:", error);
+        logger.error("Error fetching coach", { error: formatError(error) });
         setNotFound(true);
       } finally {
         setLoading(false);
@@ -81,7 +82,7 @@ export default function ProfilePage() {
   if (notFound || !coach) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8 pb-24 sm:px-6 md:pb-8 lg:px-8">
-        <div className="rounded-card bg-white p-12 text-center shadow-card">
+        <div className="rounded-card bg-[var(--card-background)] p-12 text-center shadow-card">
           <h2 className="text-foreground-default text-heading-sm font-semibold">
             Profile not found
           </h2>
@@ -104,7 +105,7 @@ export default function ProfilePage() {
       </Button>
 
       {/* Profile Card - White card with shadow */}
-      <div className="overflow-hidden rounded-card bg-white shadow-card">
+      <div className="overflow-hidden rounded-card bg-[var(--card-background)] shadow-card">
         {/* Header with solid Green 800 background */}
         <div className="relative h-32 bg-[var(--primitive-green-800)]">
           {coach.isFeatured && (
@@ -146,7 +147,7 @@ export default function ProfilePage() {
             <div className="mt-3 flex flex-wrap items-center gap-4">
               {coach.rating && (
                 <div className="flex items-center gap-1.5">
-                  <Star size={16} weight="fill" className="text-[#F59E0B]" />
+                  <Star size={16} weight="fill" className="text-[var(--primitive-yellow-500)]" />
                   <span className="text-body font-medium">{coach.rating.toFixed(1)}</span>
                   <span className="text-caption text-foreground-muted">
                     ({coach.reviewCount} reviews)
@@ -168,7 +169,7 @@ export default function ProfilePage() {
                   href={coach.linkedIn}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-lg p-2 text-foreground-muted hover:bg-[var(--background-subtle)] hover:text-[#0077b5]"
+                  className="rounded-lg p-2 text-foreground-muted hover:bg-[var(--background-subtle)] hover:text-[var(--primitive-blue-600)]"
                 >
                   <LinkedinLogo size={20} weight="fill" />
                 </a>
@@ -234,7 +235,7 @@ export default function ProfilePage() {
               <h2 className="mb-4 text-caption font-semibold uppercase tracking-wide text-foreground-muted">
                 Session Rate
               </h2>
-              <div className="rounded-lg bg-white p-4 shadow-card">
+              <div className="rounded-lg bg-[var(--card-background)] p-4 shadow-card">
                 <p className="text-caption text-foreground-muted">
                   Per Session ({coach.sessionDuration} min)
                 </p>

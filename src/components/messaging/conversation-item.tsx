@@ -32,7 +32,7 @@ export function ConversationItem({
         "flex w-full items-start gap-3 border-b border-[var(--primitive-neutral-200)] px-6 py-4 text-left transition-colors",
         isActive
           ? "bg-[var(--primitive-neutral-100)]"
-          : "bg-white hover:bg-[var(--primitive-neutral-100)]/50"
+          : "bg-[var(--background-interactive-default)] hover:bg-[var(--primitive-neutral-100)]/50"
       )}
     >
       {/* Avatar */}
@@ -64,7 +64,7 @@ export function ConversationItem({
           className={cn(
             "mt-1 text-lg leading-6 line-clamp-2",
             isActive
-              ? "text-black"
+              ? "text-[var(--foreground-default)]"
               : "text-[var(--primitive-neutral-500)]"
           )}
         >

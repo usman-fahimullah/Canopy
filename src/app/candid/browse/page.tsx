@@ -30,6 +30,7 @@ import {
   GraduationCap,
   Funnel,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 type MentorType = "all" | "coach" | "mentor";
 type ViewMode = "grid" | "list";
@@ -136,7 +137,7 @@ function MentorListItem({ mentor }: { mentor: CandidCoach | CandidMentor }) {
         <div className="mt-1.5 flex items-center gap-3 text-caption">
           {mentor.rating && mentor.rating > 0 && (
             <span className="flex items-center gap-1">
-              <Star size={12} weight="fill" className="text-[#F59E0B]" />
+              <Star size={12} weight="fill" className="text-[var(--primitive-yellow-500)]" />
               <span className="text-foreground-default font-semibold">
                 {mentor.rating.toFixed(1)}
               </span>
@@ -193,7 +194,7 @@ export default function BrowsePage() {
         const transformedCoaches = (data.coaches || []).map(transformCoach);
         setCoaches(transformedCoaches);
       } catch (err) {
-        console.error("Error fetching coaches:", err);
+        logger.error("Error fetching coaches", { error: formatError(err) });
         setError("Failed to load coaches. Please try again.");
       } finally {
         setLoading(false);
@@ -249,7 +250,7 @@ export default function BrowsePage() {
             {coaches.length} coaches
           </span>
           <span className="flex items-center gap-1.5">
-            <Star size={16} weight="fill" className="text-[#F59E0B]" />
+            <Star size={16} weight="fill" className="text-[var(--primitive-yellow-500)]" />
             {coaches.length > 0
               ? (coaches.reduce((acc, c) => acc + (c.rating || 0), 0) / coaches.length).toFixed(1)
               : "0.0"}{" "}
@@ -337,7 +338,7 @@ export default function BrowsePage() {
 
       {/* Sector Filters - white card with shadow */}
       {showFilters && (
-        <div className="mb-6 rounded-card bg-white p-4 shadow-card">
+        <div className="mb-6 rounded-card bg-[var(--card-background)] p-4 shadow-card">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-foreground-default text-body-strong font-medium">Sectors</span>
             {selectedSectors.length > 0 && (

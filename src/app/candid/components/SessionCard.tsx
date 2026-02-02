@@ -53,7 +53,7 @@ export function SessionCard({ session, userRole, className }: SessionCardProps) 
     <Link
       href={`/candid/sessions/${session.id}`}
       className={cn(
-        "group flex items-center gap-4 rounded-card bg-white p-4 shadow-card transition-all hover:shadow-card-hover",
+        "group flex items-center gap-4 rounded-card bg-[var(--card-background)] p-4 shadow-card transition-all hover:shadow-card-hover",
         className
       )}
     >

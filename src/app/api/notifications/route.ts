@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger, formatError } from "@/lib/logger";
 
 // GET — list notifications for current user
 export async function GET(request: NextRequest) {
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ notifications, unreadCount });
   } catch (error) {
-    console.error("Fetch notifications error:", error);
+    logger.error("Fetch notifications error", { error: formatError(error), endpoint: "/api/notifications" });
     return NextResponse.json(
       { error: "Failed to fetch notifications" },
       { status: 500 }
@@ -79,7 +80,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Mark all read error:", error);
+    logger.error("Mark all read error", { error: formatError(error), endpoint: "/api/notifications" });
     return NextResponse.json(
       { error: "Failed to mark notifications as read" },
       { status: 500 }
