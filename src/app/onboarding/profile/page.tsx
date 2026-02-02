@@ -8,6 +8,7 @@ import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCard, FormField, FormRow } from "@/components/ui/form-section";
+import { SHELL_ONBOARDING_SLUGS, STEPS_BY_SHELL } from "@/lib/onboarding/types";
 
 const PROFILE_STEP = {
   id: "profile",
@@ -18,7 +19,7 @@ const PROFILE_STEP = {
 
 export default function OnboardingProfilePage() {
   const router = useRouter();
-  const { baseProfile, setBaseProfile } = useOnboardingForm();
+  const { baseProfile, setBaseProfile, selectedShell } = useOnboardingForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +50,17 @@ export default function OnboardingProfilePage() {
         return;
       }
 
-      // The auth/redirect page will determine the next step based on onboarding progress
+      // Route directly to the first step of the selected shell's onboarding
+      if (selectedShell) {
+        const slug = SHELL_ONBOARDING_SLUGS[selectedShell];
+        const firstStep = STEPS_BY_SHELL[selectedShell][0];
+        if (slug && firstStep) {
+          router.push(`/onboarding/${slug}/${firstStep.path}`);
+          return;
+        }
+      }
+
+      // Fallback: use auth/redirect resolver if shell is unknown
       router.push("/auth/redirect");
     } catch {
       setError("Network error. Please try again.");

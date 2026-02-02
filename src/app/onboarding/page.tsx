@@ -6,6 +6,7 @@ import Link from "next/link";
 import { GraduationCap, Buildings } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
 import { Button, Card } from "@/components/ui";
+import { useOnboardingForm } from "@/components/onboarding/form-context";
 import type { Shell } from "@/lib/onboarding/types";
 
 const roleCards: {
@@ -48,6 +49,7 @@ const roleCards: {
 
 export default function OnboardingIntentPage() {
   const router = useRouter();
+  const { setSelectedShell } = useOnboardingForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,6 +78,8 @@ export default function OnboardingIntentPage() {
         return;
       }
 
+      // Store selected shell in form context so the profile page can route correctly
+      setSelectedShell(shell);
       router.push("/onboarding/profile");
     } catch {
       setError("Network error. Please try again.");

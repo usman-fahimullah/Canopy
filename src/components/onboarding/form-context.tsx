@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import type { Shell } from "@/lib/onboarding/types";
 
 // ─── Form data types per shell ────────────────────────────────────
@@ -236,6 +229,10 @@ const INITIAL_EMPLOYER: EmployerFormData = {
 // ─── Context shape ────────────────────────────────────────────────
 
 interface OnboardingFormContextValue {
+  /** Which shell the user selected at role selection (persisted to localStorage) */
+  selectedShell: Shell | null;
+  setSelectedShell: (shell: Shell) => void;
+
   baseProfile: BaseProfileData;
   setBaseProfile: (data: Partial<BaseProfileData>) => void;
 
@@ -253,6 +250,8 @@ interface OnboardingFormContextValue {
 }
 
 const OnboardingFormContext = createContext<OnboardingFormContextValue>({
+  selectedShell: null,
+  setSelectedShell: () => {},
   baseProfile: INITIAL_BASE,
   setBaseProfile: () => {},
   talentData: INITIAL_TALENT,
@@ -269,6 +268,7 @@ const OnboardingFormContext = createContext<OnboardingFormContextValue>({
 const STORAGE_KEY = "onboarding-form-data";
 
 interface StoredFormData {
+  selectedShell: Shell | null;
   baseProfile: BaseProfileData;
   talent: TalentFormData;
   coach: CoachFormData;
@@ -311,6 +311,7 @@ interface OnboardingFormProviderProps {
 }
 
 export function OnboardingFormProvider({ children }: OnboardingFormProviderProps) {
+  const [selectedShell, setSelectedShellState] = useState<Shell | null>(null);
   const [baseProfile, setBaseProfileState] = useState<BaseProfileData>(INITIAL_BASE);
   const [talentData, setTalentDataState] = useState<TalentFormData>(INITIAL_TALENT);
   const [coachData, setCoachDataState] = useState<CoachFormData>(INITIAL_COACH);
@@ -321,6 +322,7 @@ export function OnboardingFormProvider({ children }: OnboardingFormProviderProps
   useEffect(() => {
     const stored = loadFromStorage();
     if (stored) {
+      setSelectedShellState(stored.selectedShell ?? null);
       setBaseProfileState(stored.baseProfile);
       setTalentDataState(stored.talent);
       setCoachDataState(stored.coach);
@@ -333,12 +335,17 @@ export function OnboardingFormProvider({ children }: OnboardingFormProviderProps
   useEffect(() => {
     if (!hydrated) return;
     saveToStorage({
+      selectedShell,
       baseProfile,
       talent: talentData,
       coach: coachData,
       employer: employerData,
     });
-  }, [hydrated, baseProfile, talentData, coachData, employerData]);
+  }, [hydrated, selectedShell, baseProfile, talentData, coachData, employerData]);
+
+  const setSelectedShell = useCallback((shell: Shell) => {
+    setSelectedShellState(shell);
+  }, []);
 
   const setBaseProfile = useCallback((data: Partial<BaseProfileData>) => {
     setBaseProfileState((prev) => ({ ...prev, ...data }));
@@ -357,6 +364,7 @@ export function OnboardingFormProvider({ children }: OnboardingFormProviderProps
   }, []);
 
   const clearAll = useCallback(() => {
+    setSelectedShellState(null);
     setBaseProfileState(INITIAL_BASE);
     setTalentDataState(INITIAL_TALENT);
     setCoachDataState(INITIAL_COACH);
@@ -367,6 +375,8 @@ export function OnboardingFormProvider({ children }: OnboardingFormProviderProps
   return (
     <OnboardingFormContext.Provider
       value={{
+        selectedShell,
+        setSelectedShell,
         baseProfile,
         setBaseProfile,
         talentData,

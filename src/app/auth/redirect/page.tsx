@@ -73,8 +73,13 @@ export default async function AuthRedirectPage() {
       redirect(onboardingRedirect);
     }
 
-    // All onboarding complete — go to primary shell's dashboard
+    // If profile is done but no role has been activated, send to role selection
     const primaryRole = account.primaryRole as Shell | null;
+    if (!primaryRole && progress?.baseProfileComplete) {
+      redirect("/onboarding");
+    }
+
+    // All onboarding complete — go to primary shell's dashboard
     redirect(getDashboardPath(primaryRole));
   } catch (error) {
     logger.error("Auth redirect error", { error: formatError(error) });
