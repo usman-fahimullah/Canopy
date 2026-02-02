@@ -3,11 +3,10 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Input, InputMessage } from "@/components/ui/input";
 import { SegmentedController } from "@/components/ui/segmented-controller";
 import { createClient } from "@/lib/supabase/client";
-import { GoogleLogo, LinkedinLogo } from "@phosphor-icons/react";
+import { GoogleIcon, LinkedInIcon } from "@/components/brand/oauth-icons";
 
 /**
  * Log In page — mirrors the Sign Up design with SegmentedController toggle.
@@ -86,7 +85,7 @@ function LoginContent() {
   return (
     <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-[var(--shadow-card)]">
       <div className="flex flex-col items-center gap-6">
-        {/* Segmented Controller: Sign Up / Log In */}
+        {/* Segmented Controller: Sign Up / Log In — Figma: each tab 167.5px */}
         <SegmentedController
           options={[
             { value: "signup", label: "Sign Up" },
@@ -96,6 +95,7 @@ function LoginContent() {
           onValueChange={(val) => {
             if (val === "signup") router.push("/signup");
           }}
+          className="w-[343px]"
           aria-label="Authentication mode"
         />
 
@@ -106,27 +106,28 @@ function LoginContent() {
 
         {/* Form */}
         <div className="flex w-full flex-col gap-6">
-          {/* OAuth Buttons */}
+          {/* OAuth Buttons — Figma: rounded-[16px], p-16, gap-8, full width */}
           <div className="flex flex-col gap-3">
-            {/* Google */}
+            {/* Google — Figma: black bg, white text, multicolor G icon */}
             <button
               type="button"
               onClick={() => handleOAuthLogin("google")}
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--primitive-neutral-900)] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--primitive-neutral-900)] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
             >
-              <GoogleLogo size={24} weight="bold" />
+              <GoogleIcon size={24} />
               Sign in with Google
             </button>
 
-            {/* LinkedIn */}
+            {/* LinkedIn — Figma: #0a66c2 bg, white text, white "in" icon
+                One-off hex: LinkedIn brand color, no design system token */}
             <button
               type="button"
               onClick={() => handleOAuthLogin("linkedin_oidc")}
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0a66c2] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[#0a66c2] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
             >
-              <LinkedinLogo size={24} weight="fill" />
+              <LinkedInIcon size={24} />
               Sign in with LinkedIn
             </button>
           </div>
@@ -187,9 +188,21 @@ function LoginContent() {
 
             {error && <InputMessage status="error">{error}</InputMessage>}
 
-            <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
-              Log In
-            </Button>
+            {/* Log In Button — Figma: g800 bg, b100 text, rounded-16, p-16, full width */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--button-primary-background)] p-4 text-body font-bold text-[var(--button-primary-foreground)] transition-all hover:bg-[var(--button-primary-background-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:bg-[var(--button-primary-background-active)] disabled:pointer-events-none disabled:opacity-50"
+            >
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Logging in…
+                </span>
+              ) : (
+                "Log In"
+              )}
+            </button>
           </form>
         </div>
       </div>
