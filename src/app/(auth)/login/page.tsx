@@ -5,12 +5,20 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input, InputMessage } from "@/components/ui/input";
+import { SegmentedController } from "@/components/ui/segmented-controller";
 import { createClient } from "@/lib/supabase/client";
-import { EnvelopeSimple, Lock, GoogleLogo, LinkedinLogo } from "@phosphor-icons/react";
+import { GoogleLogo, LinkedinLogo } from "@phosphor-icons/react";
 
+/**
+ * Log In page — mirrors the Sign Up design with SegmentedController toggle.
+ */
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)] animate-pulse h-96" />}>
+    <Suspense
+      fallback={
+        <div className="h-96 animate-pulse rounded-3xl bg-[var(--card-background)] shadow-[var(--shadow-card)]" />
+      }
+    >
       <LoginContent />
     </Suspense>
   );
@@ -19,7 +27,7 @@ export default function LoginPage() {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/candid/dashboard";
+  const redirect = searchParams.get("redirect") || "/auth/redirect";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +53,7 @@ function LoginContent() {
 
       router.push(redirect);
       router.refresh();
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -69,127 +77,122 @@ function LoginContent() {
         setError(error.message);
         setLoading(false);
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
-          Welcome back
+    <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-[var(--shadow-card)]">
+      <div className="flex flex-col items-center gap-6">
+        {/* Segmented Controller: Sign Up / Log In */}
+        <SegmentedController
+          options={[
+            { value: "signup", label: "Sign Up" },
+            { value: "login", label: "Log In" },
+          ]}
+          value="login"
+          onValueChange={(val) => {
+            if (val === "signup") router.push("/signup");
+          }}
+          aria-label="Authentication mode"
+        />
+
+        {/* Heading */}
+        <h1 className="text-center text-heading-sm font-medium text-[var(--primitive-neutral-800)]">
+          Log in to Green Jobs Board
         </h1>
-        <p className="text-[var(--primitive-neutral-600)]">
-          Sign in to continue your climate career journey
-        </p>
-      </div>
 
-      {/* OAuth Buttons */}
-      <div className="space-y-3 mb-6">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleOAuthLogin("google")}
-          disabled={loading}
-          leftIcon={<GoogleLogo weight="bold" className="w-5 h-5" />}
-        >
-          Continue with Google
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleOAuthLogin("linkedin_oidc")}
-          disabled={loading}
-          leftIcon={<LinkedinLogo weight="bold" className="w-5 h-5" />}
-        >
-          Continue with LinkedIn
-        </Button>
-      </div>
-
-      {/* Divider */}
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[var(--primitive-neutral-200)]" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-[var(--card-background)] text-[var(--primitive-neutral-600)]">
-            or continue with email
-          </span>
-        </div>
-      </div>
-
-      {/* Email/Password Form */}
-      <form onSubmit={handleEmailLogin} className="space-y-4">
-        <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium text-[var(--primitive-green-800)]">
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            leftAddon={<EnvelopeSimple weight="bold" />}
-            required
-            autoComplete="email"
-            error={!!error}
-          />
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-medium text-[var(--primitive-green-800)]">
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-sm text-[var(--primitive-green-600)] hover:text-[var(--primitive-green-700)] font-medium"
+        {/* Form */}
+        <div className="flex w-full flex-col gap-6">
+          {/* OAuth Buttons */}
+          <div className="flex flex-col gap-3">
+            {/* Google */}
+            <button
+              type="button"
+              onClick={() => handleOAuthLogin("google")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--primitive-neutral-900)] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
             >
-              Forgot password?
-            </Link>
+              <GoogleLogo size={24} weight="bold" />
+              Sign in with Google
+            </button>
+
+            {/* LinkedIn */}
+            <button
+              type="button"
+              onClick={() => handleOAuthLogin("linkedin_oidc")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0a66c2] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+            >
+              <LinkedinLogo size={24} weight="fill" />
+              Sign in with LinkedIn
+            </button>
           </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            leftAddon={<Lock weight="bold" />}
-            required
-            autoComplete="current-password"
-            error={!!error}
-          />
+
+          {/* Or Divider */}
+          <div className="flex items-center gap-2.5">
+            <div className="h-px flex-1 bg-[var(--border-muted)]" />
+            <span className="text-caption font-bold text-[var(--foreground-subtle)]">Or</span>
+            <div className="h-px flex-1 bg-[var(--border-muted)]" />
+          </div>
+
+          {/* Email/Password Form */}
+          <form onSubmit={handleEmailLogin} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="email"
+                className="text-caption font-medium text-[var(--primitive-neutral-900)]"
+              >
+                Email Address
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="password"
+                  className="text-caption font-medium text-[var(--primitive-neutral-900)]"
+                >
+                  Password
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-caption-sm font-medium text-[var(--foreground-brand)] hover:text-[var(--foreground-brand-emphasis)]"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+
+            {error && <InputMessage status="error">{error}</InputMessage>}
+
+            <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
+              Log In
+            </Button>
+          </form>
         </div>
-
-        {error && (
-          <InputMessage status="error">{error}</InputMessage>
-        )}
-
-        <Button
-          type="submit"
-          className="w-full"
-          loading={loading}
-          disabled={loading}
-        >
-          Sign in
-        </Button>
-      </form>
-
-      {/* Sign up link */}
-      <p className="mt-6 text-center text-sm text-[var(--primitive-neutral-600)]">
-        Don&apos;t have an account?{" "}
-        <Link
-          href="/signup"
-          className="text-[var(--primitive-green-600)] hover:text-[var(--primitive-green-700)] font-medium"
-        >
-          Sign up
-        </Link>
-      </p>
+      </div>
     </div>
   );
 }

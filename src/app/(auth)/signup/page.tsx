@@ -5,50 +5,24 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input, InputMessage } from "@/components/ui/input";
+import { SegmentedController } from "@/components/ui/segmented-controller";
 import { createClient } from "@/lib/supabase/client";
+import { EnvelopeSimple, GoogleLogo, LinkedinLogo, ArrowLeft } from "@phosphor-icons/react";
+import { OtpInput } from "./components/otp-input";
 import {
-  EnvelopeSimple,
-  Lock,
-  User,
-  GoogleLogo,
-  LinkedinLogo,
-  MagnifyingGlass,
-  GraduationCap,
-  Buildings,
-} from "@phosphor-icons/react";
+  isValidOtpFormat,
+  canResendOtp,
+  getResendCooldownRemaining,
+  getOtpErrorMessage,
+  formatCooldownTime,
+} from "@/lib/auth/otp-utils";
 
-type AccountType = "talent" | "coach" | "employer";
-
-const typeOptions: {
-  value: AccountType;
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  iconBg: string;
-}[] = [
-  {
-    value: "talent",
-    title: "I'm looking for a climate job",
-    description: "Search jobs, get matched with opportunities, and connect with career coaches",
-    icon: MagnifyingGlass,
-    iconBg: "var(--primitive-green-100)",
-  },
-  {
-    value: "coach",
-    title: "I want to coach others",
-    description: "Share your expertise and help career changers transition into climate work",
-    icon: GraduationCap,
-    iconBg: "var(--primitive-yellow-100)",
-  },
-  {
-    value: "employer",
-    title: "I'm hiring climate talent",
-    description: "Post roles, manage candidates, and build your team with AI-powered sourcing",
-    icon: Buildings,
-    iconBg: "var(--primitive-blue-100)",
-  },
-];
-
+/**
+ * Sign Up page — Figma: node 714:9370
+ *
+ * Flow: Sign Up (name + email + OAuth) → OTP Verify → /auth/redirect → /onboarding
+ * No account type selection here — role selection happens on /onboarding after auth.
+ */
 export default function SignupPage() {
   return (
     <Suspense>
@@ -61,41 +35,52 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [step, setStep] = useState<"type" | "details">("type");
-  const [accountType, setAccountType] = useState<AccountType | null>(null);
-  const [name, setName] = useState("");
+  // Form state
+  const [step, setStep] = useState<"signup" | "verify">("signup");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
-  // Pre-select account type from URL param (e.g., /signup?intent=talent)
+  // OTP verification state
+  const [otpCode, setOtpCode] = useState("");
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [resendCount, setResendCount] = useState(0);
+  const [lastResendTime, setLastResendTime] = useState<number | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  // Intent from URL (preserved for after auth)
+  const intent = searchParams.get("intent");
+
+  // Countdown timer for resend cooldown
   useEffect(() => {
-    const intent = searchParams.get("intent");
-    if (intent && ["talent", "coach", "employer"].includes(intent)) {
-      setAccountType(intent as AccountType);
-      setStep("details");
-    }
-  }, [searchParams]);
+    if (!lastResendTime) return;
 
-  const handleTypeSelect = (type: AccountType) => {
-    setAccountType(type);
-    setStep("details");
-  };
+    const timer = setInterval(() => {
+      const remaining = getResendCooldownRemaining(lastResendTime);
+      setResendCooldown(remaining);
+
+      if (remaining === 0) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lastResendTime]);
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    if (!firstName.trim()) {
+      setError("First name is required");
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+    if (!email.trim()) {
+      setError("Email is required");
       return;
     }
 
@@ -103,15 +88,18 @@ function SignupForm() {
 
     try {
       const supabase = createClient();
+
+      // Passwordless sign-up: Supabase sends an OTP to the email
       const { error } = await supabase.auth.signUp({
         email,
-        password,
+        password: crypto.randomUUID() + "Aa1!", // Generate a strong random password (required by Supabase)
         options: {
           data: {
-            name,
-            account_type: accountType,
+            first_name: firstName,
+            last_name: lastName,
+            name: `${firstName} ${lastName}`.trim(),
+            ...(intent ? { account_type: intent } : {}),
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?redirect=/auth/redirect`,
         },
       });
 
@@ -120,7 +108,10 @@ function SignupForm() {
         return;
       }
 
-      setSuccess(true);
+      // Move to OTP verification step
+      setStep("verify");
+      setLastResendTime(Date.now());
+      setResendCooldown(60);
     } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
@@ -128,21 +119,89 @@ function SignupForm() {
     }
   };
 
-  const handleOAuthSignup = async (provider: "google" | "linkedin_oidc") => {
-    if (!accountType) {
-      setError("Please select an account type first");
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setVerifyError(null);
+
+    if (!isValidOtpFormat(otpCode)) {
+      setVerifyError("Please enter all 6 digits");
       return;
     }
 
+    setVerifyLoading(true);
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: "signup",
+      });
+
+      if (error) {
+        setVerifyError(getOtpErrorMessage(error.message));
+        return;
+      }
+
+      // Success! Redirect to auth resolver
+      router.push("/auth/redirect");
+      router.refresh();
+    } catch {
+      setVerifyError("Verification failed. Please try again.");
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!canResendOtp(lastResendTime, resendCount)) {
+      return;
+    }
+
+    setVerifyError(null);
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+      });
+
+      if (error) {
+        setVerifyError(getOtpErrorMessage(error.message));
+        return;
+      }
+
+      setResendCount((prev) => prev + 1);
+      setLastResendTime(Date.now());
+      setResendCooldown(60);
+      setOtpCode("");
+    } catch {
+      setVerifyError("Failed to resend code. Please try again.");
+    }
+  };
+
+  const handleBackFromVerify = () => {
+    setStep("signup");
+    setOtpCode("");
+    setVerifyError(null);
+  };
+
+  const handleOAuthSignup = async (provider: "google" | "linkedin_oidc") => {
     setError(null);
     setLoading(true);
 
     try {
       const supabase = createClient();
+      const redirectParams = new URLSearchParams({
+        redirect: "/auth/redirect",
+        ...(intent ? { type: intent } : {}),
+      });
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirect=/auth/redirect&type=${accountType}`,
+          redirectTo: `${window.location.origin}/auth/callback?${redirectParams.toString()}`,
         },
       });
 
@@ -156,251 +215,228 @@ function SignupForm() {
     }
   };
 
-  // Success state
-  if (success) {
+  // ─── OTP Verification Step ───
+  if (step === "verify") {
+    const canResend = canResendOtp(lastResendTime, resendCount);
+    const maxResendsReached = resendCount >= 5;
+
     return (
-      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
-        <div className="text-center">
+      <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-[var(--shadow-card)]">
+        <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
             <EnvelopeSimple className="h-8 w-8 text-[var(--primitive-green-600)]" weight="bold" />
           </div>
-          <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">
+          <h1 className="mb-2 text-heading-sm font-medium text-[var(--primitive-neutral-800)]">
             Check your email
           </h1>
-          <p className="mb-6 text-[var(--primitive-neutral-600)]">
-            We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to
-            activate your account.
+          <p className="text-body-sm text-[var(--foreground-muted)]">
+            We sent a 6-digit code to <strong>{email}</strong>
           </p>
+        </div>
+
+        <form onSubmit={handleVerifyOtp} className="space-y-6">
+          <OtpInput
+            value={otpCode}
+            onChange={setOtpCode}
+            disabled={verifyLoading}
+            error={!!verifyError}
+          />
+
+          {verifyError && (
+            <InputMessage status="error" className="text-center">
+              {verifyError}
+            </InputMessage>
+          )}
+
           <Button
-            variant="secondary"
-            onClick={() => {
-              setSuccess(false);
-              setStep("type");
-              setAccountType(null);
-              setEmail("");
-              setPassword("");
-              setConfirmPassword("");
-              setName("");
-            }}
+            type="submit"
+            className="w-full"
+            size="lg"
+            loading={verifyLoading}
+            disabled={verifyLoading || otpCode.length < 6}
           >
-            Back to sign up
+            Verify email
+          </Button>
+        </form>
+
+        {/* Resend code */}
+        <div className="mt-6 text-center">
+          {maxResendsReached ? (
+            <p className="text-caption text-[var(--foreground-muted)]">
+              Too many resend attempts. Please try again later.
+            </p>
+          ) : (
+            <p className="text-caption text-[var(--foreground-muted)]">
+              Didn&apos;t receive the code?{" "}
+              {canResend ? (
+                <button
+                  type="button"
+                  onClick={handleResendCode}
+                  className="font-medium text-[var(--foreground-brand)] hover:text-[var(--foreground-brand-emphasis)]"
+                >
+                  Resend
+                </button>
+              ) : (
+                <span className="text-[var(--foreground-subtle)]">
+                  Resend in {formatCooldownTime(resendCooldown)}
+                </span>
+              )}
+            </p>
+          )}
+        </div>
+
+        {/* Back button */}
+        <div className="mt-4">
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full"
+            onClick={handleBackFromVerify}
+            leftIcon={<ArrowLeft weight="bold" />}
+          >
+            Back
           </Button>
         </div>
       </div>
     );
   }
 
-  // Account type selection
-  if (step === "type") {
-    return (
-      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">Get started</h1>
-          <p className="text-[var(--primitive-neutral-600)]">What brings you here?</p>
-        </div>
+  // ─── Sign Up Form (Figma: 714:9370) ───
+  return (
+    <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-[var(--shadow-card)]">
+      <div className="flex flex-col items-center gap-6">
+        {/* Segmented Controller: Sign Up / Log In */}
+        <SegmentedController
+          options={[
+            { value: "signup", label: "Sign Up" },
+            { value: "login", label: "Log In" },
+          ]}
+          value="signup"
+          onValueChange={(val) => {
+            if (val === "login") router.push("/login");
+          }}
+          aria-label="Authentication mode"
+        />
 
-        <div className="space-y-3">
-          {typeOptions.map((option) => {
-            const Icon = option.icon;
-            return (
-              <button
-                key={option.value}
-                onClick={() => handleTypeSelect(option.value)}
-                className="group w-full rounded-xl border-2 border-[var(--primitive-neutral-200)] p-5 text-left transition-all hover:border-[var(--primitive-green-600)] hover:bg-[var(--primitive-green-100)]"
+        {/* Heading */}
+        <h1 className="text-center text-heading-sm font-medium text-[var(--primitive-neutral-800)]">
+          Sign up to Green Jobs Board
+        </h1>
+
+        {/* Form */}
+        <div className="flex w-full flex-col gap-6">
+          {/* OAuth Buttons */}
+          <div className="flex flex-col gap-3">
+            {/* Google — Figma: black background, white text, rounded-2xl, p-4 */}
+            <button
+              type="button"
+              onClick={() => handleOAuthSignup("google")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--primitive-neutral-900)] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+            >
+              <GoogleLogo size={24} weight="bold" />
+              Sign in with Google
+            </button>
+
+            {/* LinkedIn — Figma: #0a66c2 background, white text, rounded-2xl, p-4 */}
+            <button
+              type="button"
+              onClick={() => handleOAuthSignup("linkedin_oidc")}
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0a66c2] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+            >
+              <LinkedinLogo size={24} weight="fill" />
+              Sign in with LinkedIn
+            </button>
+          </div>
+
+          {/* Or Divider — Figma: neutral-300 line, "Or" in neutral-500, bold caption */}
+          <div className="flex items-center gap-2.5">
+            <div className="h-px flex-1 bg-[var(--border-muted)]" />
+            <span className="text-caption font-bold text-[var(--foreground-subtle)]">Or</span>
+            <div className="h-px flex-1 bg-[var(--border-muted)]" />
+          </div>
+
+          {/* Email Form Fields */}
+          <form onSubmit={handleEmailSignup} className="flex flex-col gap-4">
+            {/* First Name + Last Name row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="firstName"
+                  className="text-caption font-medium text-[var(--primitive-neutral-900)]"
+                >
+                  First Name
+                </label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  placeholder="Usman"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  autoComplete="given-name"
+                  autoFocus
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="lastName"
+                  className="text-caption font-medium text-[var(--primitive-neutral-900)]"
+                >
+                  Last Name
+                </label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  placeholder="i.e. Appleseed"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  autoComplete="family-name"
+                />
+              </div>
+            </div>
+
+            {/* Email Address */}
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="email"
+                className="text-caption font-medium text-[var(--primitive-neutral-900)]"
               >
-                <div className="flex items-start gap-4">
-                  <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: option.iconBg }}
-                  >
-                    <Icon className="text-foreground-default h-5 w-5" weight="bold" />
-                  </div>
-                  <div>
-                    <h3 className="mb-0.5 font-semibold text-[var(--primitive-green-800)]">
-                      {option.title}
-                    </h3>
-                    <p className="text-sm text-[var(--primitive-neutral-600)]">
-                      {option.description}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+                Email Address
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
+
+            {error && <InputMessage status="error">{error}</InputMessage>}
+
+            {/* Sign Up Button — Figma: primary, full width, large */}
+            <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
+              Sign Up
+            </Button>
+          </form>
         </div>
 
-        {/* Sign in link */}
-        <p className="mt-6 text-center text-sm text-[var(--primitive-neutral-600)]">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-[var(--primitive-green-600)] hover:text-[var(--primitive-green-700)]"
-          >
-            Sign in
+        {/* Terms */}
+        <p className="text-center text-caption-sm text-[var(--foreground-muted)]">
+          By creating an account, you agree to our{" "}
+          <Link href="/terms" className="underline hover:text-[var(--foreground-brand)]">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline hover:text-[var(--foreground-brand)]">
+            Privacy Policy
           </Link>
         </p>
       </div>
-    );
-  }
-
-  // Details form
-  const typeLabel =
-    accountType === "talent"
-      ? "Start your climate career journey"
-      : accountType === "coach"
-        ? "Apply to become a coach"
-        : "Start hiring climate talent";
-
-  const buttonLabel =
-    accountType === "talent"
-      ? "Create account"
-      : accountType === "coach"
-        ? "Apply to coach"
-        : "Create account";
-
-  return (
-    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">
-          Create your account
-        </h1>
-        <p className="text-[var(--primitive-neutral-600)]">{typeLabel}</p>
-      </div>
-
-      {/* OAuth Buttons */}
-      <div className="mb-6 space-y-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleOAuthSignup("google")}
-          disabled={loading}
-          leftIcon={<GoogleLogo weight="bold" className="h-5 w-5" />}
-        >
-          Continue with Google
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => handleOAuthSignup("linkedin_oidc")}
-          disabled={loading}
-          leftIcon={<LinkedinLogo weight="bold" className="h-5 w-5" />}
-        >
-          Continue with LinkedIn
-        </Button>
-      </div>
-
-      {/* Divider */}
-      <div className="relative mb-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[var(--primitive-neutral-200)]" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="bg-[var(--card-background)] px-4 text-[var(--primitive-neutral-600)]">
-            or continue with email
-          </span>
-        </div>
-      </div>
-
-      {/* Email/Password Form */}
-      <form onSubmit={handleEmailSignup} className="space-y-4">
-        <div className="space-y-1">
-          <label htmlFor="name" className="text-sm font-medium text-[var(--primitive-green-800)]">
-            Full name
-          </label>
-          <Input
-            id="name"
-            type="text"
-            placeholder="Your name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            leftAddon={<User weight="bold" />}
-            required
-            autoComplete="name"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="email" className="text-sm font-medium text-[var(--primitive-green-800)]">
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            leftAddon={<EnvelopeSimple weight="bold" />}
-            required
-            autoComplete="email"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label
-            htmlFor="password"
-            className="text-sm font-medium text-[var(--primitive-green-800)]"
-          >
-            Password
-          </label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="At least 8 characters"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            leftAddon={<Lock weight="bold" />}
-            required
-            autoComplete="new-password"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label
-            htmlFor="confirmPassword"
-            className="text-sm font-medium text-[var(--primitive-green-800)]"
-          >
-            Confirm password
-          </label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            leftAddon={<Lock weight="bold" />}
-            required
-            autoComplete="new-password"
-            error={confirmPassword.length > 0 && password !== confirmPassword}
-          />
-        </div>
-
-        {error && <InputMessage status="error">{error}</InputMessage>}
-
-        <Button type="submit" className="w-full" loading={loading} disabled={loading}>
-          {buttonLabel}
-        </Button>
-      </form>
-
-      {/* Back button */}
-      <div className="mt-4">
-        <Button type="button" variant="ghost" className="w-full" onClick={() => setStep("type")}>
-          Back
-        </Button>
-      </div>
-
-      {/* Terms */}
-      <p className="mt-6 text-center text-xs text-[var(--primitive-neutral-600)]">
-        By creating an account, you agree to our{" "}
-        <Link href="/terms" className="underline hover:text-[var(--primitive-green-600)]">
-          Terms of Service
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className="underline hover:text-[var(--primitive-green-600)]">
-          Privacy Policy
-        </Link>
-      </p>
     </div>
   );
 }
