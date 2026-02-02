@@ -33,6 +33,8 @@ export default async function AuthRedirectPage() {
     redirect("/login");
   }
 
+  let destination = "/onboarding"; // Default fallback
+
   try {
     const account = await prisma.account.findUnique({
       where: { supabaseId: user.id },
@@ -57,33 +59,35 @@ export default async function AuthRedirectPage() {
             name: metadata.name || metadata.full_name || null,
           },
         });
-      } catch (error) {
-        logger.error("Failed to create account", { error: formatError(error) });
+      } catch (dbError) {
+        logger.error("Failed to create account", { error: formatError(dbError) });
         // Still redirect to onboarding — the /api/onboarding fallback will retry
       }
-      redirect("/onboarding");
+    } else {
+      const progress = account.onboardingProgress as OnboardingProgress | null;
+      const entryIntent = account.entryIntent as EntryIntent | null;
+
+      // Check if there's incomplete onboarding to finish
+      const onboardingRedirect = getOnboardingRedirect(progress, entryIntent);
+      if (onboardingRedirect) {
+        destination = onboardingRedirect;
+      } else {
+        // If profile is done but no role has been activated, send to role selection
+        const primaryRole = account.primaryRole as Shell | null;
+        if (!primaryRole && progress?.baseProfileComplete) {
+          destination = "/onboarding";
+        } else {
+          // All onboarding complete — go to primary shell's dashboard
+          destination = getDashboardPath(primaryRole);
+        }
+      }
     }
-
-    const progress = account.onboardingProgress as OnboardingProgress | null;
-    const entryIntent = account.entryIntent as EntryIntent | null;
-
-    // Check if there's incomplete onboarding to finish
-    const onboardingRedirect = getOnboardingRedirect(progress, entryIntent);
-    if (onboardingRedirect) {
-      redirect(onboardingRedirect);
-    }
-
-    // If profile is done but no role has been activated, send to role selection
-    const primaryRole = account.primaryRole as Shell | null;
-    if (!primaryRole && progress?.baseProfileComplete) {
-      redirect("/onboarding");
-    }
-
-    // All onboarding complete — go to primary shell's dashboard
-    redirect(getDashboardPath(primaryRole));
   } catch (error) {
     logger.error("Auth redirect error", { error: formatError(error) });
     // Fallback: send to onboarding rather than crashing
-    redirect("/onboarding");
   }
+
+  // redirect() is called OUTSIDE try/catch since it works by throwing
+  // a special NEXT_REDIRECT error that must not be caught
+  redirect(destination);
 }
