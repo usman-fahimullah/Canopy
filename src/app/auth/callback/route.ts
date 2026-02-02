@@ -17,17 +17,22 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/reset-password`);
       }
 
+      // Build the redirect URL, forwarding the intent (type) if present.
+      // For OAuth signups with ?intent=employer, the signup page passes
+      // type=employer through the callback URL. We forward it to /auth/redirect
+      // so the account creation logic can pick it up.
+      let redirectUrl = redirect;
+      if (type && type !== "recovery") {
+        const separator = redirect.includes("?") ? "&" : "?";
+        redirectUrl = `${redirect}${separator}intent=${encodeURIComponent(type)}`;
+      }
+
       // Regular OAuth login - redirect to dashboard or specified page
       const forwardedHost = request.headers.get("x-forwarded-host");
       const isLocalEnv = process.env.NODE_ENV === "development";
+      const host = isLocalEnv ? origin : forwardedHost ? `https://${forwardedHost}` : origin;
 
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${redirect}`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${redirect}`);
-      } else {
-        return NextResponse.redirect(`${origin}${redirect}`);
-      }
+      return NextResponse.redirect(`${host}${redirectUrl}`);
     }
   }
 

@@ -68,17 +68,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // ── 2. Redirect authenticated users away from auth pages ──────
-  const isAuthPath = AUTH_PATHS.some((path) => pathname === path);
-
-  if (isAuthPath && user) {
-    // Instead of hardcoding /candid/dashboard, route to shell resolver
-    // The /api/auth/redirect endpoint will determine the correct destination
-    // For now, use a lightweight cookie/header check, or redirect to a resolver page
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/redirect";
-    return NextResponse.redirect(url);
-  }
+  // ── 2. Auth pages for authenticated users ─────────────────────
+  // We no longer redirect authenticated users away from /login and /signup in
+  // middleware. Reason: after OTP verification or OAuth callback, the user has a
+  // Supabase session but hasn't been routed to onboarding yet. Middleware redirect
+  // would intercept SegmentedController navigation between /signup ↔ /login and
+  // cause the tab toggle to break.
+  //
+  // Instead, the auth pages' form-submit handlers route to /auth/redirect on
+  // success, which decides the correct destination (onboarding or dashboard).
+  // Users who are fully onboarded and visit /login directly are harmless —
+  // the login form will just log them in again or they can navigate away.
 
   // ── 3. Shell role authorization ───────────────────────────────
   // Cross-shell authorization (talent/coach/employer) is enforced

@@ -34,17 +34,33 @@ export default function OnboardingCompletePage() {
   const [shell, setShell] = useState<Shell | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch the user's primary shell to show the right message
+  // Fetch the user's primary shell to show the correct message and dashboard link.
+  // Priority: primaryShell (set during onboarding) > entryIntent > completed role > talent
   useEffect(() => {
     async function fetchRole() {
       try {
         const res = await fetch("/api/profile/role");
         if (res.ok) {
           const data = await res.json();
-          setShell(data.primaryShell || data.entryIntent || "talent");
+          let resolved: Shell | null = data.primaryShell || data.entryIntent || null;
+
+          // Fallback: find the most recently completed role from progress
+          if (!resolved && data.onboardingProgress?.roles) {
+            const roles = data.onboardingProgress.roles as Record<
+              string,
+              { complete?: boolean } | null
+            >;
+            for (const s of ["employer", "talent", "coach"] as Shell[]) {
+              if (roles[s]?.complete) {
+                resolved = s;
+                break;
+              }
+            }
+          }
+
+          setShell(resolved || "talent");
         }
       } catch {
-        // Fallback to talent
         setShell("talent");
       } finally {
         setLoading(false);
@@ -71,29 +87,21 @@ export default function OnboardingCompletePage() {
 
   return (
     <OnboardingShell shell={shell}>
-      <div className="max-w-lg mx-auto text-center py-8">
+      <div className="mx-auto max-w-lg py-8 text-center">
         {/* Success icon */}
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--primitive-green-100)] mb-6">
-          <CheckCircle
-            size={40}
-            weight="fill"
-            className="text-[var(--candid-foreground-brand)]"
-          />
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
+          <CheckCircle size={40} weight="fill" className="text-[var(--candid-foreground-brand)]" />
         </div>
 
-        <h1 className="text-heading-sm font-bold text-foreground-default mb-3">
+        <h1 className="text-foreground-default mb-3 text-heading-sm font-bold">
           {message.heading}
         </h1>
-        <p className="text-body-sm text-foreground-muted mb-8">
-          {message.description}
-        </p>
+        <p className="mb-8 text-body-sm text-foreground-muted">{message.description}</p>
 
         {/* CTA buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild>
-            <Link href={config.dashboardPath}>
-              Go to your dashboard
-            </Link>
+            <Link href={config.dashboardPath}>Go to your dashboard</Link>
           </Button>
         </div>
       </div>

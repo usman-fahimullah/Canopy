@@ -17,8 +17,16 @@ import {
  * - Incomplete onboarding → /onboarding/[shell]/[step]
  * - Complete onboarding → primary shell's dashboard
  * - No account → /onboarding (fresh start)
+ *
+ * Accepts ?intent=<shell> query param forwarded from OAuth callback.
  */
-export default async function AuthRedirectPage() {
+export default async function AuthRedirectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ intent?: string }>;
+}) {
+  const params = await searchParams;
+  const oauthIntent = params.intent as EntryIntent | undefined;
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,7 +56,17 @@ export default async function AuthRedirectPage() {
     if (!account) {
       // Account doesn't exist yet — create it from Supabase auth metadata.
       // Use upsert to handle race conditions (concurrent requests both see null).
+      //
+      // The `account_type` metadata is set during signup (email or OAuth) when
+      // the user had an intent param (e.g. /signup?intent=employer).
+      // Resolve intent from two sources:
+      // 1. Supabase metadata `account_type` — set during email signup
+      // 2. OAuth callback `?intent=` query param — forwarded through callback route
       const metadata = user.user_metadata || {};
+      const signupIntent = (metadata.account_type || oauthIntent) as EntryIntent | undefined;
+      const validIntents: EntryIntent[] = ["talent", "coach", "employer"];
+      const entryIntent = signupIntent && validIntents.includes(signupIntent) ? signupIntent : null;
+
       try {
         await prisma.account.upsert({
           where: { supabaseId: user.id },
@@ -57,8 +75,15 @@ export default async function AuthRedirectPage() {
             supabaseId: user.id,
             email: user.email,
             name: metadata.name || metadata.full_name || null,
+            // Carry forward the signup intent so the redirect logic knows which
+            // onboarding to send the user to (instead of defaulting to role selection)
+            ...(entryIntent ? { entryIntent } : {}),
           },
         });
+
+        // If we just created an account with an intent, route to onboarding
+        // (the role selection page will be skipped since set-intent hasn't been
+        // called yet — we need to go through that flow)
       } catch (dbError) {
         logger.error("Failed to create account", { error: formatError(dbError) });
         // Still redirect to onboarding — the /api/onboarding fallback will retry
