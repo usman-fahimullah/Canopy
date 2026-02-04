@@ -969,6 +969,31 @@
     /* Tentative event modifier */
     --calendar-event-tentative-opacity: 0.5;
 
+    /* Calendar slot tokens — proposed interview slots */
+    --calendar-slot-proposed-background: var(--primitive-blue-400);
+    --calendar-slot-proposed-background-hover: var(--primitive-blue-500);
+    --calendar-slot-proposed-border: var(--primitive-blue-500);
+    --calendar-slot-proposed-foreground: var(--primitive-neutral-0);
+
+    /* Calendar slot tokens — hover preview */
+    --calendar-slot-preview-background: var(--primitive-blue-100);
+    --calendar-slot-preview-border: var(--primitive-blue-400);
+    --calendar-slot-preview-foreground: var(--primitive-blue-700);
+
+    /* Calendar event tokens — existing calendar events */
+    --calendar-event-background: var(--primitive-neutral-600);
+    --calendar-event-border: var(--primitive-neutral-700);
+    --calendar-event-foreground: var(--primitive-neutral-0);
+    --calendar-event-foreground-muted: rgba(255, 255, 255, 0.8);
+
+    /* Calendar event type tokens */
+    --calendar-event-video-background: var(--badge-info-background);
+    --calendar-event-video-border: var(--badge-info-border);
+    --calendar-event-phone-background: var(--badge-success-background);
+    --calendar-event-phone-border: var(--badge-success-border);
+    --calendar-event-onsite-background: var(--badge-accent-background);
+    --calendar-event-onsite-border: var(--badge-accent-border);
+
     /* --- SLIDER --- */
     --slider-track-background: var(--primitive-neutral-300);
     --slider-track-background-active: var(--primitive-green-200);
@@ -2184,6 +2209,31 @@
     --calendar-time-label: var(--primitive-neutral-600);
     --calendar-today-highlight: var(--primitive-blue-200);
     --calendar-weekend-background: var(--primitive-neutral-100);
+
+    /* Calendar slot tokens — proposed interview slots (Dark mode) */
+    --calendar-slot-proposed-background: var(--primitive-blue-500);
+    --calendar-slot-proposed-background-hover: var(--primitive-blue-600);
+    --calendar-slot-proposed-border: var(--primitive-blue-600);
+    --calendar-slot-proposed-foreground: var(--primitive-neutral-0);
+
+    /* Calendar slot tokens — hover preview (Dark mode) */
+    --calendar-slot-preview-background: var(--primitive-blue-200);
+    --calendar-slot-preview-border: var(--primitive-blue-500);
+    --calendar-slot-preview-foreground: var(--primitive-blue-600);
+
+    /* Calendar event tokens — existing calendar events (Dark mode) */
+    --calendar-event-background: var(--primitive-neutral-500);
+    --calendar-event-border: var(--primitive-neutral-600);
+    --calendar-event-foreground: var(--primitive-neutral-0);
+    --calendar-event-foreground-muted: rgba(255, 255, 255, 0.7);
+
+    /* Calendar event type tokens (Dark mode) */
+    --calendar-event-video-background: var(--badge-info-background);
+    --calendar-event-video-border: var(--badge-info-border);
+    --calendar-event-phone-background: var(--badge-success-background);
+    --calendar-event-phone-border: var(--badge-success-border);
+    --calendar-event-onsite-background: var(--badge-accent-background);
+    --calendar-event-onsite-border: var(--badge-accent-border);
 
     /* Progress */
     --progress-background: var(--primitive-neutral-300);

@@ -629,17 +629,23 @@ export {
   type MentionTextareaProps,
 } from "./mention-input";
 
-// Scheduler / Calendar
+// Scheduler / Calendar — extracted components
+export { TimezoneSelector, type TimezoneSelectorProps } from "./timezone-selector";
+export { EventCard, type EventCardProps } from "./event-card";
+export { TimeSlotPicker, type TimeSlotPickerProps } from "./time-slot-picker";
+export { UpcomingInterviews, type UpcomingInterviewsProps } from "./upcoming-interviews";
+export { BookingLink, type BookingLinkProps } from "./booking-link";
+
+// Scheduler / Calendar — remaining in scheduler.tsx
 export {
   Scheduler,
   WeekView,
   DayView,
   MonthView,
-  EventCard,
   InterviewScheduler,
-  UpcomingInterviews,
   getEventPosition,
   getInterviewIcon,
+  defaultEventColors,
   type SchedulerEvent,
   type SchedulerProps,
   type InterviewType,
@@ -926,17 +932,30 @@ export {
 // Company Card
 export { CompanyCard, companyCardVariants, type CompanyCardProps } from "./company-card";
 
-// Interview Scheduling Modal
+// Interview Scheduling — Extracted Components
+export { AttendeeChip, type AttendeeChipProps } from "./attendee-chip";
+export { TimeSlotChip, type TimeSlotChipProps } from "./time-slot-chip";
+export { InternalNotesSection, type InternalNotesSectionProps } from "./internal-notes-section";
+export { AddAttendeePopover, type AddAttendeePopoverProps } from "./add-attendee-popover";
+export { SuggestTimesButton, type SuggestTimesButtonProps } from "./suggest-times-button";
+export { CalendarOverlayToggle, type CalendarOverlayToggleProps } from "./calendar-overlay-toggle";
+export { CandidatePreviewCard, type CandidatePreviewCardProps } from "./candidate-preview-card";
+
+// Availability Calendar (extracted from interview-scheduling-modal)
+export {
+  AvailabilityCalendar,
+  DraggableSlot,
+  type AvailabilityCalendarProps,
+  type DraggableSlotProps,
+  type WeekViewType,
+} from "./availability-calendar";
+
+// Your Calendar View (extracted from interview-scheduling-modal)
+export { YourCalendarView, type YourCalendarViewProps } from "./your-calendar-view";
+
+// Interview Scheduling Modal (orchestrator)
 export {
   InterviewSchedulingModal,
-  AttendeeChip,
-  TimeSlotChip,
-  AvailabilityCalendar,
-  InternalNotesSection,
-  AddAttendeePopover,
-  SuggestTimesButton,
-  CalendarOverlayToggle,
-  YourCalendarView,
   type Attendee,
   type AttendeeAvailability,
   type TimeSlot,
