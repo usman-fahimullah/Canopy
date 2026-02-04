@@ -239,15 +239,13 @@ const BenefitsSelector = React.forwardRef<HTMLDivElement, BenefitsSelectorProps>
                   ))}
                 </div>
               </ModalBody>
-              <ModalFooter>
-                <div className="flex w-full items-center justify-between">
-                  <span className="text-caption text-[var(--foreground-muted)]">
-                    {selectedBenefits.length} benefits selected
-                  </span>
-                  <Button variant="primary" onClick={() => setCustomizeOpen(false)}>
-                    Done
-                  </Button>
-                </div>
+              <ModalFooter className="justify-between">
+                <span className="text-caption text-[var(--foreground-muted)]">
+                  {selectedBenefits.length} benefits selected
+                </span>
+                <Button variant="primary" onClick={() => setCustomizeOpen(false)}>
+                  Done
+                </Button>
               </ModalFooter>
             </ModalContent>
           </Modal>

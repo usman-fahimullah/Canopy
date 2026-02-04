@@ -42,14 +42,6 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -1071,33 +1063,19 @@ export default function RoleEditPage() {
           {/* ============================================
               PERSONAL DETAILS MODAL - Figma Design 523:6134
               ============================================ */}
-          <Dialog open={personalDetailsModalOpen} onOpenChange={setPersonalDetailsModalOpen}>
-            <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0" hideCloseButton>
-              {/* Header - Figma: border-b, px-32 py-16 */}
-              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
-                <div className="shrink-0 rounded-lg bg-[var(--primitive-blue-200)] p-1">
-                  <User weight="regular" className="h-6 w-6 text-foreground" />
-                </div>
-                <DialogTitle className="flex-1 text-body text-foreground">
-                  Personal Details
-                </DialogTitle>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="icon"
-                  onClick={() => setPersonalDetailsModalOpen(false)}
-                  className="rounded-2xl"
-                  aria-label="Close"
-                >
-                  <X weight="regular" className="h-6 w-6" />
-                </Button>
-              </div>
+          <Modal open={personalDetailsModalOpen} onOpenChange={setPersonalDetailsModalOpen}>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={<User weight="regular" className="h-6 w-6 text-foreground" />}
+                iconBg="bg-[var(--primitive-blue-200)]"
+              >
+                <ModalTitle>Personal Details</ModalTitle>
+              </ModalHeader>
 
-              {/* Body - Figma: px-32 py-16 */}
-              <div className="flex flex-col gap-3 px-8 py-4">
-                <DialogDescription className="text-body text-foreground">
+              <ModalBody>
+                <ModalDescription className="text-body text-foreground">
                   Select what should be included or required in the apply form.
-                </DialogDescription>
+                </ModalDescription>
 
                 {/* Table - Figma: border rounded-16 */}
                 <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
@@ -1233,10 +1211,9 @@ export default function RoleEditPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </ModalBody>
 
-              {/* Footer - Figma: border-t, px-32 py-16, buttons right-aligned */}
-              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+              <ModalFooter>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -1247,40 +1224,26 @@ export default function RoleEditPage() {
                 <Button type="button" variant="primary" onClick={handleSavePersonalDetails}>
                   Apply Changes
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
 
           {/* ============================================
               CAREER DETAILS MODAL
               ============================================ */}
-          <Dialog open={careerDetailsModalOpen} onOpenChange={setCareerDetailsModalOpen}>
-            <DialogContent className="max-w-2xl gap-0 overflow-hidden p-0" hideCloseButton>
-              {/* Header - Matching Personal Details design */}
-              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
-                <div className="shrink-0 rounded-lg bg-[var(--primitive-green-200)] p-1">
-                  <Briefcase weight="regular" className="h-6 w-6 text-foreground" />
-                </div>
-                <DialogTitle className="flex-1 text-body text-foreground">
-                  Career Details
-                </DialogTitle>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="icon"
-                  onClick={() => setCareerDetailsModalOpen(false)}
-                  className="rounded-2xl"
-                  aria-label="Close"
-                >
-                  <X weight="regular" className="h-6 w-6" />
-                </Button>
-              </div>
+          <Modal open={careerDetailsModalOpen} onOpenChange={setCareerDetailsModalOpen}>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={<Briefcase weight="regular" className="h-6 w-6 text-foreground" />}
+                iconBg="bg-[var(--primitive-green-200)]"
+              >
+                <ModalTitle>Career Details</ModalTitle>
+              </ModalHeader>
 
-              {/* Body with table */}
-              <div className="flex flex-col gap-3 px-8 py-4">
-                <DialogDescription className="text-body-sm text-foreground-muted">
+              <ModalBody>
+                <ModalDescription className="text-body-sm text-foreground-muted">
                   Select what should be included or required in the apply form.
-                </DialogDescription>
+                </ModalDescription>
 
                 {/* Table Container */}
                 <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
@@ -1469,10 +1432,9 @@ export default function RoleEditPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </ModalBody>
 
-              {/* Footer */}
-              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+              <ModalFooter>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -1483,38 +1445,28 @@ export default function RoleEditPage() {
                 <Button type="button" variant="primary" onClick={handleSaveCareerDetails}>
                   Apply Changes
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
 
           {/* ============================================
               TEXT QUESTION MODAL
               ============================================ */}
-          <Dialog open={textQuestionModalOpen} onOpenChange={setTextQuestionModalOpen}>
-            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
-              {/* Header - Figma: border-b, px-32 py-16 */}
-              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
-                <div className="shrink-0 rounded-lg bg-[var(--primitive-blue-200)] p-1">
+          <Modal open={textQuestionModalOpen} onOpenChange={setTextQuestionModalOpen}>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={
                   <TextAlignLeft
                     weight="regular"
                     className="h-6 w-6 text-[var(--primitive-blue-700)]"
                   />
-                </div>
-                <DialogTitle className="flex-1 text-body text-foreground">Text</DialogTitle>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="icon"
-                  onClick={handleDiscardTextQuestion}
-                  className="rounded-2xl"
-                  aria-label="Close"
-                >
-                  <X weight="regular" className="h-5 w-5" />
-                </Button>
-              </div>
+                }
+                iconBg="bg-[var(--primitive-blue-200)]"
+              >
+                <ModalTitle>Text</ModalTitle>
+              </ModalHeader>
 
-              {/* Body - Figma: px-32 py-16, gap-24 */}
-              <div className="flex flex-col gap-6 px-8 py-4">
+              <ModalBody className="gap-6">
                 {/* Question Title Field */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Question title</label>
@@ -1641,10 +1593,9 @@ export default function RoleEditPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </ModalBody>
 
-              {/* Footer - Figma: border-t, px-32 py-16 */}
-              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+              <ModalFooter>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -1656,35 +1607,25 @@ export default function RoleEditPage() {
                 <Button type="button" variant="primary" size="lg" onClick={handleSaveTextQuestion}>
                   Apply Changes
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
 
           {/* ============================================
               YES/NO QUESTION MODAL
               ============================================ */}
-          <Dialog open={yesNoQuestionModalOpen} onOpenChange={setYesNoQuestionModalOpen}>
-            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
-              {/* Header */}
-              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
-                <div className="shrink-0 rounded-lg bg-[var(--primitive-red-100)] p-1">
+          <Modal open={yesNoQuestionModalOpen} onOpenChange={setYesNoQuestionModalOpen}>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={
                   <Circle weight="regular" className="h-6 w-6 text-[var(--primitive-red-500)]" />
-                </div>
-                <DialogTitle className="flex-1 text-body text-foreground">Yes/No</DialogTitle>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="icon"
-                  onClick={handleDiscardYesNoQuestion}
-                  className="rounded-2xl"
-                  aria-label="Close"
-                >
-                  <X weight="regular" className="h-5 w-5" />
-                </Button>
-              </div>
+                }
+                iconBg="bg-[var(--primitive-red-100)]"
+              >
+                <ModalTitle>Yes/No</ModalTitle>
+              </ModalHeader>
 
-              {/* Body */}
-              <div className="flex flex-col gap-6 px-8 py-4">
+              <ModalBody className="gap-6">
                 {/* Question Title Field */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Question title</label>
@@ -1741,10 +1682,9 @@ export default function RoleEditPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </ModalBody>
 
-              {/* Footer */}
-              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+              <ModalFooter>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -1756,40 +1696,28 @@ export default function RoleEditPage() {
                 <Button type="button" variant="primary" size="lg" onClick={handleSaveYesNoQuestion}>
                   Apply Changes
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
 
           {/* ============================================
               MULTIPLE CHOICE QUESTION MODAL
               ============================================ */}
-          <Dialog open={multipleChoiceModalOpen} onOpenChange={setMultipleChoiceModalOpen}>
-            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
-              {/* Header */}
-              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
-                <div className="shrink-0 rounded-lg bg-[var(--primitive-yellow-100)] p-1">
+          <Modal open={multipleChoiceModalOpen} onOpenChange={setMultipleChoiceModalOpen}>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={
                   <CheckSquare
                     weight="regular"
                     className="h-6 w-6 text-[var(--primitive-yellow-600)]"
                   />
-                </div>
-                <DialogTitle className="flex-1 text-body text-foreground">
-                  Multiple Choice
-                </DialogTitle>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="icon"
-                  onClick={handleDiscardMultipleChoice}
-                  className="rounded-2xl"
-                  aria-label="Close"
-                >
-                  <X weight="regular" className="h-5 w-5" />
-                </Button>
-              </div>
+                }
+                iconBg="bg-[var(--primitive-yellow-100)]"
+              >
+                <ModalTitle>Multiple Choice</ModalTitle>
+              </ModalHeader>
 
-              {/* Body */}
-              <div className="flex flex-col gap-6 px-8 py-4">
+              <ModalBody className="gap-6">
                 {/* Question Title Field */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Question title</label>
@@ -1996,10 +1924,9 @@ export default function RoleEditPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </ModalBody>
 
-              {/* Footer */}
-              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+              <ModalFooter>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -2016,35 +1943,25 @@ export default function RoleEditPage() {
                 >
                   Apply Changes
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
 
           {/* ============================================
               FILE UPLOAD QUESTION MODAL
               ============================================ */}
-          <Dialog open={fileUploadModalOpen} onOpenChange={setFileUploadModalOpen}>
-            <DialogContent className="max-w-[720px] gap-0 overflow-hidden p-0" hideCloseButton>
-              {/* Header */}
-              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-300)] px-8 py-4">
-                <div className="shrink-0 rounded-lg bg-[var(--primitive-blue-200)] p-1">
+          <Modal open={fileUploadModalOpen} onOpenChange={setFileUploadModalOpen}>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={
                   <Upload weight="regular" className="h-6 w-6 text-[var(--primitive-blue-700)]" />
-                </div>
-                <DialogTitle className="flex-1 text-body text-foreground">File Upload</DialogTitle>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="icon"
-                  onClick={handleDiscardFileUpload}
-                  className="rounded-2xl"
-                  aria-label="Close"
-                >
-                  <X weight="regular" className="h-5 w-5" />
-                </Button>
-              </div>
+                }
+                iconBg="bg-[var(--primitive-blue-200)]"
+              >
+                <ModalTitle>File Upload</ModalTitle>
+              </ModalHeader>
 
-              {/* Body */}
-              <div className="flex flex-col gap-6 px-8 py-4">
+              <ModalBody className="gap-6">
                 {/* Question Title Field */}
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Question title</label>
@@ -2155,10 +2072,9 @@ export default function RoleEditPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </ModalBody>
 
-              {/* Footer */}
-              <div className="flex items-center justify-end gap-3 border-t border-[var(--primitive-neutral-300)] px-8 py-4">
+              <ModalFooter>
                 <Button
                   type="button"
                   variant="tertiary"
@@ -2170,9 +2086,9 @@ export default function RoleEditPage() {
                 <Button type="button" variant="primary" size="lg" onClick={handleSaveFileUpload}>
                   Apply Changes
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
 
           {/* ============================================
               CANDIDATES TAB

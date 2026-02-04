@@ -149,6 +149,7 @@ export {
   ModalDescription,
   ModalBody,
   ModalContentBox,
+  ModalIconBadge,
 } from "./modal";
 export {
   Tooltip,

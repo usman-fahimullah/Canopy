@@ -12,6 +12,7 @@ import {
   ModalContentBox,
   ModalFooter,
   ModalClose,
+  ModalIconBadge,
   Button,
   Input,
   Label,
@@ -46,6 +47,11 @@ import {
   Phone,
   CalendarBlank,
   X,
+  TextAlignLeft,
+  CheckSquare,
+  Upload,
+  Circle,
+  PencilSimple,
 } from "@phosphor-icons/react";
 
 // ============================================
@@ -87,9 +93,10 @@ const modalProps = [
 const modalContentProps = [
   {
     name: "size",
-    type: '"default" | "lg" | "xl" | "full"',
+    type: '"default" | "md" | "lg" | "xl" | "full"',
     default: '"default"',
-    description: "Modal size variant (640px, 800px, 1024px, or full viewport)",
+    description:
+      "Modal size variant (default: 640px, md: 720px, lg: 800px, xl: 1024px, full: viewport)",
   },
   {
     name: "hideCloseButton",
@@ -107,6 +114,25 @@ const modalContentProps = [
 
 const modalHeaderProps = [
   {
+    name: "icon",
+    type: "ReactNode",
+    default: "undefined",
+    description: "Icon element rendered inside a ModalIconBadge in the header row",
+  },
+  {
+    name: "iconBg",
+    type: "string",
+    default: "undefined",
+    description: 'Background class for the icon badge, e.g. "bg-[var(--primitive-blue-200)]"',
+  },
+  {
+    name: "variant",
+    type: '"default" | "feature"',
+    default: '"default"',
+    description:
+      "Header layout variant. Default: icon + title + close in a row with border-b. Feature: close button above title (legacy style for feature moments)",
+  },
+  {
     name: "hideCloseButton",
     type: "boolean",
     default: "false",
@@ -119,6 +145,22 @@ const modalHeaderProps = [
   },
 ];
 
+const modalTitleProps = [
+  {
+    name: "variant",
+    type: '"default" | "large"',
+    default: '"default"',
+    description:
+      "Title size variant. Default: text-body font-medium. Large: text-heading-md font-medium (for feature moments)",
+  },
+  {
+    name: "children",
+    type: "ReactNode",
+    required: true,
+    description: "Title text content",
+  },
+];
+
 const subComponentProps = [
   {
     name: "ModalTrigger",
@@ -126,15 +168,23 @@ const subComponentProps = [
   },
   {
     name: "ModalContent",
-    description: "Container for modal content. Includes overlay and portal.",
+    description:
+      "Container for modal content. Includes overlay and portal. Supports size variants.",
   },
   {
     name: "ModalHeader",
-    description: "Header section with close button and title area.",
+    description:
+      "Header section. Default: icon + title + close button in a row with border-b. Feature variant: close button above title.",
+  },
+  {
+    name: "ModalIconBadge",
+    description:
+      "Colored icon badge for the modal header. Renders a rounded container for an icon with a background color.",
   },
   {
     name: "ModalTitle",
-    description: "Title text, rendered as heading-md (36px).",
+    description:
+      "Title text. Default: text-body font-medium. Large variant: text-heading-md for feature moments.",
   },
   {
     name: "ModalDescription",
@@ -142,15 +192,15 @@ const subComponentProps = [
   },
   {
     name: "ModalBody",
-    description: "Main content area with proper padding.",
+    description: "Main content area with px-8 py-4 padding.",
   },
   {
     name: "ModalContentBox",
-    description: "Styled content section with subtle background.",
+    description: "Centered content container with subtle background. Used for feature moments.",
   },
   {
     name: "ModalFooter",
-    description: "Footer area with right-aligned buttons.",
+    description: "Footer area with border-t and right-aligned buttons (px-8 py-4).",
   },
   {
     name: "ModalClose",
@@ -171,9 +221,11 @@ export default function ModalPage() {
           Modal
         </h1>
         <p className="mb-4 max-w-2xl text-body text-foreground-muted">
-          Modals are larger overlay panels for complex content like forms, previews, or multi-step
-          workflows. They block interaction with the page until dismissed, making them suitable for
-          focused tasks.
+          Modals are overlay panels for focused tasks like configuration, forms, and multi-step
+          workflows. They block interaction with the page until dismissed. The default layout
+          features a structured header with an icon badge, title, and close button in a row,
+          separated by borders. A &quot;feature&quot; variant is available for special moments like
+          onboarding or success confirmations.
         </p>
 
         {/* Category Tags */}
@@ -226,32 +278,51 @@ export default function ModalPage() {
               description: "Semi-transparent backdrop that blocks page interaction",
             },
             { name: "Container", description: "Main modal panel with rounded corners and shadow" },
-            { name: "Header", description: "Contains close button and title" },
-            { name: "Close Button", description: "Button to dismiss the modal" },
-            { name: "Title", description: "Modal heading text" },
-            { name: "Body", description: "Main content area" },
-            { name: "Content Box (optional)", description: "Styled section for grouped content" },
-            { name: "Footer", description: "Action buttons area" },
+            {
+              name: "Header (border-b)",
+              description:
+                "Default: icon badge + title + close button in a flex row. Feature: close button above title",
+            },
+            {
+              name: "Icon Badge (optional)",
+              description: "Colored icon container in the header (default variant only)",
+            },
+            { name: "Title", description: "Modal heading text (body weight by default)" },
+            { name: "Close Button", description: "Tertiary button to dismiss the modal" },
+            { name: "Body", description: "Main content area (px-8 py-4)" },
+            {
+              name: "Content Box (optional)",
+              description: "Centered content with subtle background (feature variant)",
+            },
+            { name: "Footer (border-t)", description: "Right-aligned action buttons (px-8 py-4)" },
           ]}
         />
         <div className="mt-6 rounded-lg bg-background-subtle p-4">
-          <p className="mb-4 text-caption text-foreground-muted">Structure overview:</p>
-          <div className="max-w-sm rounded-xl border bg-surface p-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-muted">
-                  <X size={16} className="text-foreground-muted" />
+          <p className="mb-4 text-caption text-foreground-muted">
+            Default layout (standard pattern):
+          </p>
+          <div className="max-w-sm rounded-xl border bg-surface">
+            <div className="space-y-0">
+              {/* Header row */}
+              <div className="flex items-center gap-3 border-b px-4 py-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-blue-200)]">
+                  <User size={16} className="text-foreground" />
                 </div>
-                <span className="text-caption-sm text-foreground-muted">Close</span>
+                <div className="h-4 flex-1 rounded bg-background-muted" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background-muted">
+                  <X size={14} className="text-foreground-muted" />
+                </div>
               </div>
-              <div className="h-6 w-2/3 rounded bg-background-muted" />
-              <div className="space-y-2 rounded-lg bg-background-subtle p-4">
+              {/* Body */}
+              <div className="space-y-2 px-4 py-3">
                 <div className="h-3 w-full rounded bg-background-muted" />
                 <div className="h-3 w-4/5 rounded bg-background-muted" />
+                <div className="h-3 w-3/5 rounded bg-background-muted" />
               </div>
-              <div className="flex justify-end gap-2 border-t pt-2">
+              {/* Footer */}
+              <div className="flex justify-end gap-2 border-t px-4 py-3">
                 <div className="h-8 w-16 rounded bg-background-muted" />
-                <div className="h-8 w-16 rounded bg-[var(--background-brand)]" />
+                <div className="h-8 w-20 rounded bg-[var(--background-brand)]" />
               </div>
             </div>
           </div>
@@ -264,7 +335,7 @@ export default function ModalPage() {
       <ComponentCard
         id="basic-usage"
         title="Basic Usage"
-        description="The simplest way to use a modal"
+        description="The standard modal pattern with icon header, bordered sections, and action footer"
       >
         <CodePreview
           code={`import {
@@ -277,21 +348,25 @@ export default function ModalPage() {
   ModalFooter,
   Button,
 } from "@/components/ui";
+import { User } from "@phosphor-icons/react";
 
 <Modal>
   <ModalTrigger asChild>
     <Button>Open Modal</Button>
   </ModalTrigger>
-  <ModalContent>
-    <ModalHeader>
+  <ModalContent size="md">
+    <ModalHeader
+      icon={<User weight="regular" className="h-6 w-6 text-foreground" />}
+      iconBg="bg-[var(--primitive-blue-200)]"
+    >
       <ModalTitle>Modal Title</ModalTitle>
     </ModalHeader>
     <ModalBody>
       <p>Modal content goes here...</p>
     </ModalBody>
     <ModalFooter>
-      <Button variant="secondary">Cancel</Button>
-      <Button>Save</Button>
+      <Button variant="tertiary">Cancel</Button>
+      <Button variant="primary">Save</Button>
     </ModalFooter>
   </ModalContent>
 </Modal>`}
@@ -300,21 +375,24 @@ export default function ModalPage() {
             <ModalTrigger asChild>
               <Button>Open Modal</Button>
             </ModalTrigger>
-            <ModalContent>
-              <ModalHeader>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={<User weight="regular" className="h-6 w-6 text-foreground" />}
+                iconBg="bg-[var(--primitive-blue-200)]"
+              >
                 <ModalTitle>Modal Title</ModalTitle>
               </ModalHeader>
               <ModalBody>
                 <p className="text-body text-foreground-muted">
-                  This is the modal body content. It can contain any content including forms,
-                  previews, or complex layouts.
+                  This is the default modal layout. The header shows an icon badge, title, and close
+                  button in a row, separated from the body and footer by borders.
                 </p>
               </ModalBody>
               <ModalFooter>
                 <ModalClose asChild>
-                  <Button variant="secondary">Cancel</Button>
+                  <Button variant="tertiary">Cancel</Button>
                 </ModalClose>
-                <Button>Save</Button>
+                <Button variant="primary">Save</Button>
               </ModalFooter>
             </ModalContent>
           </Modal>
@@ -327,6 +405,7 @@ export default function ModalPage() {
       <ComponentCard id="sizes" title="Sizes" description="Available modal size variants">
         <CodePreview
           code={`<ModalContent size="default">  {/* 640px */}
+<ModalContent size="md">       {/* 720px - configuration modals */}
 <ModalContent size="lg">       {/* 800px */}
 <ModalContent size="xl">       {/* 1024px */}
 <ModalContent size="full">     {/* Full viewport */}`}
@@ -339,18 +418,47 @@ export default function ModalPage() {
                 </Button>
               </ModalTrigger>
               <ModalContent size="default">
-                <ModalHeader>
+                <ModalHeader
+                  icon={<Info weight="regular" className="h-6 w-6 text-foreground" />}
+                  iconBg="bg-[var(--primitive-blue-200)]"
+                >
                   <ModalTitle>Default Size</ModalTitle>
                 </ModalHeader>
                 <ModalBody>
                   <p className="text-body text-foreground-muted">
-                    This is the default modal size at 640px width. Suitable for most forms and
-                    simple content.
+                    Default modal at 640px width. Suitable for simple forms and content.
                   </p>
                 </ModalBody>
                 <ModalFooter>
                   <ModalClose asChild>
-                    <Button variant="secondary">Close</Button>
+                    <Button variant="tertiary">Close</Button>
+                  </ModalClose>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+
+            <Modal>
+              <ModalTrigger asChild>
+                <Button variant="secondary" size="sm">
+                  Medium (720px)
+                </Button>
+              </ModalTrigger>
+              <ModalContent size="md">
+                <ModalHeader
+                  icon={<PencilSimple weight="regular" className="h-6 w-6 text-foreground" />}
+                  iconBg="bg-[var(--primitive-green-200)]"
+                >
+                  <ModalTitle>Medium Size</ModalTitle>
+                </ModalHeader>
+                <ModalBody>
+                  <p className="text-body text-foreground-muted">
+                    Medium modal at 720px width. The standard size for configuration and settings
+                    modals.
+                  </p>
+                </ModalBody>
+                <ModalFooter>
+                  <ModalClose asChild>
+                    <Button variant="tertiary">Close</Button>
                   </ModalClose>
                 </ModalFooter>
               </ModalContent>
@@ -363,18 +471,21 @@ export default function ModalPage() {
                 </Button>
               </ModalTrigger>
               <ModalContent size="lg">
-                <ModalHeader>
+                <ModalHeader
+                  icon={<Briefcase weight="regular" className="h-6 w-6 text-foreground" />}
+                  iconBg="bg-[var(--primitive-green-200)]"
+                >
                   <ModalTitle>Large Size</ModalTitle>
                 </ModalHeader>
                 <ModalBody>
                   <p className="text-body text-foreground-muted">
-                    Large modal at 800px width. Good for more complex forms with multiple columns or
+                    Large modal at 800px width. Good for complex forms with multiple columns or
                     larger content areas.
                   </p>
                 </ModalBody>
                 <ModalFooter>
                   <ModalClose asChild>
-                    <Button variant="secondary">Close</Button>
+                    <Button variant="tertiary">Close</Button>
                   </ModalClose>
                 </ModalFooter>
               </ModalContent>
@@ -398,7 +509,7 @@ export default function ModalPage() {
                 </ModalBody>
                 <ModalFooter>
                   <ModalClose asChild>
-                    <Button variant="secondary">Close</Button>
+                    <Button variant="tertiary">Close</Button>
                   </ModalClose>
                 </ModalFooter>
               </ModalContent>
@@ -422,7 +533,7 @@ export default function ModalPage() {
                 </ModalBody>
                 <ModalFooter>
                   <ModalClose asChild>
-                    <Button variant="secondary">Close</Button>
+                    <Button variant="tertiary">Close</Button>
                   </ModalClose>
                 </ModalFooter>
               </ModalContent>
@@ -434,32 +545,136 @@ export default function ModalPage() {
       {/* ============================================
           SECTION 5: WITH DESCRIPTION
           ============================================ */}
+      {/* ============================================
+          SECTION 5: WITH ICON BADGE
+          ============================================ */}
+      <ComponentCard
+        id="with-icon"
+        title="With Icon Badge"
+        description="Headers with colored icon badges for context"
+      >
+        <CodePreview
+          code={`<ModalHeader
+  icon={<User weight="regular" className="h-6 w-6 text-foreground" />}
+  iconBg="bg-[var(--primitive-blue-200)]"
+>
+  <ModalTitle>Personal Details</ModalTitle>
+</ModalHeader>
+
+{/* Different icon colors for different contexts */}
+<ModalHeader
+  icon={<Briefcase weight="regular" className="h-6 w-6 text-foreground" />}
+  iconBg="bg-[var(--primitive-green-200)]"
+>
+  <ModalTitle>Career Details</ModalTitle>
+</ModalHeader>`}
+        >
+          <div className="flex flex-wrap gap-3">
+            {[
+              {
+                icon: <User weight="regular" className="h-6 w-6 text-foreground" />,
+                bg: "bg-[var(--primitive-blue-200)]",
+                title: "Personal Details",
+                label: "Blue",
+              },
+              {
+                icon: <Briefcase weight="regular" className="h-6 w-6 text-foreground" />,
+                bg: "bg-[var(--primitive-green-200)]",
+                title: "Career Details",
+                label: "Green",
+              },
+              {
+                icon: <TextAlignLeft weight="regular" className="h-6 w-6 text-foreground" />,
+                bg: "bg-[var(--primitive-blue-200)]",
+                title: "Text Question",
+                label: "Blue",
+              },
+              {
+                icon: <Circle weight="regular" className="h-6 w-6 text-foreground" />,
+                bg: "bg-[var(--primitive-red-100)]",
+                title: "Yes/No Question",
+                label: "Red",
+              },
+              {
+                icon: <CheckSquare weight="regular" className="h-6 w-6 text-foreground" />,
+                bg: "bg-[var(--primitive-yellow-100)]",
+                title: "Multiple Choice",
+                label: "Yellow",
+              },
+              {
+                icon: <Upload weight="regular" className="h-6 w-6 text-foreground" />,
+                bg: "bg-[var(--primitive-blue-200)]",
+                title: "File Upload",
+                label: "Blue",
+              },
+            ].map((item) => (
+              <Modal key={item.title}>
+                <ModalTrigger asChild>
+                  <Button variant="secondary" size="sm">
+                    {item.title}
+                  </Button>
+                </ModalTrigger>
+                <ModalContent size="md">
+                  <ModalHeader icon={item.icon} iconBg={item.bg}>
+                    <ModalTitle>{item.title}</ModalTitle>
+                  </ModalHeader>
+                  <ModalBody>
+                    <p className="text-body text-foreground-muted">
+                      This modal uses a {item.label.toLowerCase()} icon badge to provide visual
+                      context for the {item.title.toLowerCase()} configuration.
+                    </p>
+                  </ModalBody>
+                  <ModalFooter>
+                    <ModalClose asChild>
+                      <Button variant="tertiary">Discard</Button>
+                    </ModalClose>
+                    <Button variant="primary">Apply Changes</Button>
+                  </ModalFooter>
+                </ModalContent>
+              </Modal>
+            ))}
+          </div>
+        </CodePreview>
+      </ComponentCard>
+
+      {/* ============================================
+          SECTION 6: WITH DESCRIPTION
+          ============================================ */}
       <ComponentCard
         id="with-description"
         title="With Description"
-        description="Modal with title and description text"
+        description="Modal with title and description text in the body"
       >
         <CodePreview
-          code={`<ModalHeader>
+          code={`<ModalHeader
+  icon={<CalendarBlank weight="regular" className="h-6 w-6 text-foreground" />}
+  iconBg="bg-[var(--primitive-blue-200)]"
+>
   <ModalTitle>Schedule Interview</ModalTitle>
+</ModalHeader>
+<ModalBody>
   <ModalDescription>
     Select a time slot for the candidate interview.
   </ModalDescription>
-</ModalHeader>`}
+  {/* form content */}
+</ModalBody>`}
         >
           <Modal>
             <ModalTrigger asChild>
               <Button>Schedule Interview</Button>
             </ModalTrigger>
-            <ModalContent>
-              <ModalHeader>
+            <ModalContent size="md">
+              <ModalHeader
+                icon={<CalendarBlank weight="regular" className="h-6 w-6 text-foreground" />}
+                iconBg="bg-[var(--primitive-blue-200)]"
+              >
                 <ModalTitle>Schedule Interview</ModalTitle>
+              </ModalHeader>
+              <ModalBody>
                 <ModalDescription>
                   Select a time slot and interview type for the candidate.
                 </ModalDescription>
-              </ModalHeader>
-              <ModalBody>
-                <div className="space-y-4">
+                <div className="w-full space-y-4">
                   <div className="space-y-2">
                     <Label>Interview Type</Label>
                     <Select>
@@ -482,9 +697,9 @@ export default function ModalPage() {
               </ModalBody>
               <ModalFooter>
                 <ModalClose asChild>
-                  <Button variant="secondary">Cancel</Button>
+                  <Button variant="tertiary">Cancel</Button>
                 </ModalClose>
-                <Button>Schedule</Button>
+                <Button variant="primary">Schedule</Button>
               </ModalFooter>
             </ModalContent>
           </Modal>
@@ -492,12 +707,70 @@ export default function ModalPage() {
       </ComponentCard>
 
       {/* ============================================
-          SECTION 6: CONTENT BOX
+          SECTION 7: FEATURE VARIANT
+          ============================================ */}
+      <ComponentCard
+        id="feature-variant"
+        title="Feature Variant"
+        description="Alternative layout for feature moments, onboarding, and confirmations"
+      >
+        <CodePreview
+          code={`{/* Feature variant: close button above title, large heading */}
+<ModalHeader variant="feature">
+  <ModalTitle variant="large">Welcome to Canopy</ModalTitle>
+  <ModalDescription>
+    Let's set up your hiring workspace.
+  </ModalDescription>
+</ModalHeader>
+<ModalBody>
+  <ModalContentBox>
+    {/* Centered content for feature moments */}
+  </ModalContentBox>
+</ModalBody>`}
+        >
+          <Modal>
+            <ModalTrigger asChild>
+              <Button variant="secondary">View Feature Variant</Button>
+            </ModalTrigger>
+            <ModalContent>
+              <ModalHeader variant="feature">
+                <ModalTitle variant="large">Welcome to Canopy</ModalTitle>
+                <ModalDescription>
+                  Let&apos;s set up your hiring workspace for climate recruitment.
+                </ModalDescription>
+              </ModalHeader>
+              <ModalBody>
+                <ModalContentBox>
+                  <CheckCircle
+                    size={48}
+                    weight="fill"
+                    className="text-[var(--foreground-success)]"
+                  />
+                  <h3 className="text-heading-sm text-foreground">Ready to Hire</h3>
+                  <p className="text-body text-foreground-muted">
+                    Your workspace is configured. Start posting jobs and attracting top climate
+                    talent.
+                  </p>
+                </ModalContentBox>
+              </ModalBody>
+              <ModalFooter>
+                <ModalClose asChild>
+                  <Button variant="tertiary">Skip for Now</Button>
+                </ModalClose>
+                <Button variant="primary">Get Started</Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        </CodePreview>
+      </ComponentCard>
+
+      {/* ============================================
+          SECTION 8: CONTENT BOX
           ============================================ */}
       <ComponentCard
         id="content-box"
         title="Content Box"
-        description="Use ModalContentBox for styled content sections"
+        description="Use ModalContentBox for styled content sections (typically with feature variant)"
       >
         <CodePreview
           code={`<ModalBody>
@@ -514,8 +787,8 @@ export default function ModalPage() {
               <Button variant="secondary">View Content Box</Button>
             </ModalTrigger>
             <ModalContent>
-              <ModalHeader>
-                <ModalTitle>Content Box Example</ModalTitle>
+              <ModalHeader variant="feature">
+                <ModalTitle variant="large">Job Published</ModalTitle>
               </ModalHeader>
               <ModalBody>
                 <ModalContentBox>
@@ -622,6 +895,10 @@ export default function ModalPage() {
         <PropsTable props={modalHeaderProps} />
       </ComponentCard>
 
+      <ComponentCard id="props-title" title="ModalTitle Props">
+        <PropsTable props={modalTitleProps} />
+      </ComponentCard>
+
       <ComponentCard id="sub-components" title="Sub-Components">
         <div className="space-y-3">
           {subComponentProps.map((comp) => (
@@ -643,16 +920,16 @@ export default function ModalPage() {
           ============================================ */}
       <UsageGuide
         dos={[
-          "Use for complex forms or multi-step workflows",
-          "Choose the appropriate size for your content",
-          "Use ModalContentBox to organize sections visually",
-          "Provide clear primary and secondary actions in footer",
-          "Use ModalDescription for context when needed",
+          "Use the default variant with icon badge for configuration and form modals",
+          "Use the feature variant for onboarding, success confirmations, and special moments",
+          "Use size='md' (720px) for standard configuration modals",
+          "Provide Discard/Apply or Cancel/Save actions in the footer",
+          "Choose icon badge colors that match the content context",
         ]}
         donts={[
           "Don't use for simple confirmations (use Dialog)",
-          "Don't overcrowd with too much content",
-          "Don't use full-screen modals unless necessary",
+          "Don't mix default and feature variants in the same flow",
+          "Don't use the feature variant for routine configuration",
           "Don't hide critical actions below the fold",
           "Don't nest modals within modals",
         ]}
@@ -699,22 +976,96 @@ export default function ModalPage() {
           SECTION 12: REAL-WORLD EXAMPLES
           ============================================ */}
       <RealWorldExample
-        title="Create Job Posting"
-        description="Form modal for creating a new job posting"
+        title="Apply Form Configuration"
+        description="Configuration modal for customizing apply form fields (standard pattern)"
       >
         <Modal>
           <ModalTrigger asChild>
-            <Button>Create Job Posting</Button>
+            <Button>Configure Personal Details</Button>
+          </ModalTrigger>
+          <ModalContent size="md">
+            <ModalHeader
+              icon={<User weight="regular" className="h-6 w-6 text-foreground" />}
+              iconBg="bg-[var(--primitive-blue-200)]"
+            >
+              <ModalTitle>Personal Details</ModalTitle>
+            </ModalHeader>
+            <ModalBody>
+              <ModalDescription>
+                Configure which personal detail fields candidates must fill out.
+              </ModalDescription>
+              <div className="w-full overflow-hidden rounded-lg border border-[var(--border-muted)]">
+                <table className="w-full text-body-sm">
+                  <thead>
+                    <tr className="border-b bg-background-subtle">
+                      <th className="px-4 py-2 text-left font-medium text-foreground-muted">
+                        Field
+                      </th>
+                      <th className="px-4 py-2 text-left font-medium text-foreground-muted">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { field: "Full Name", status: "Required" },
+                      { field: "Email Address", status: "Required" },
+                      { field: "Phone Number", status: "Optional" },
+                      { field: "Location", status: "Optional" },
+                      { field: "LinkedIn URL", status: "Hidden" },
+                    ].map((row) => (
+                      <tr key={row.field} className="border-b last:border-0">
+                        <td className="px-4 py-2 text-foreground">{row.field}</td>
+                        <td className="px-4 py-2">
+                          <Badge
+                            variant={
+                              row.status === "Required"
+                                ? "success"
+                                : row.status === "Optional"
+                                  ? "neutral"
+                                  : "secondary"
+                            }
+                            size="sm"
+                          >
+                            {row.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <ModalClose asChild>
+                <Button variant="tertiary">Discard</Button>
+              </ModalClose>
+              <Button variant="primary">Apply Changes</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </RealWorldExample>
+
+      <RealWorldExample
+        title="Job Posting Form"
+        description="Form modal with icon header for creating content"
+      >
+        <Modal>
+          <ModalTrigger asChild>
+            <Button variant="secondary">Create Job Posting</Button>
           </ModalTrigger>
           <ModalContent size="lg">
-            <ModalHeader>
+            <ModalHeader
+              icon={<Briefcase weight="regular" className="h-6 w-6 text-foreground" />}
+              iconBg="bg-[var(--primitive-green-200)]"
+            >
               <ModalTitle>Create Job Posting</ModalTitle>
+            </ModalHeader>
+            <ModalBody>
               <ModalDescription>
                 Fill in the details for your new climate job posting.
               </ModalDescription>
-            </ModalHeader>
-            <ModalBody>
-              <div className="space-y-4">
+              <div className="w-full space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="job-title" required>
                     Job Title
@@ -755,106 +1106,25 @@ export default function ModalPage() {
             </ModalBody>
             <ModalFooter>
               <ModalClose asChild>
-                <Button variant="secondary">Save as Draft</Button>
+                <Button variant="tertiary">Save as Draft</Button>
               </ModalClose>
-              <Button>Publish Job</Button>
+              <Button variant="primary">Publish Job</Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
       </RealWorldExample>
 
       <RealWorldExample
-        title="Candidate Profile View"
-        description="Modal displaying candidate details with content boxes"
-      >
-        <Modal>
-          <ModalTrigger asChild>
-            <Button variant="secondary">View Candidate</Button>
-          </ModalTrigger>
-          <ModalContent size="lg">
-            <ModalHeader>
-              <div className="flex items-center gap-3">
-                <Avatar name="Sarah Johnson" />
-                <div>
-                  <ModalTitle>Sarah Johnson</ModalTitle>
-                  <div className="mt-1 flex items-center gap-2">
-                    <Badge variant="feature" size="sm">
-                      Interview
-                    </Badge>
-                    <span className="text-caption text-foreground-muted">Match Score: 92%</span>
-                  </div>
-                </div>
-              </div>
-            </ModalHeader>
-            <ModalBody>
-              <div className="w-full space-y-4">
-                <ModalContentBox>
-                  <div className="grid w-full gap-3 text-left text-sm">
-                    <div className="flex items-center gap-2">
-                      <EnvelopeSimple size={16} className="text-foreground-muted" />
-                      <span>sarah.johnson@email.com</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone size={16} className="text-foreground-muted" />
-                      <span>(555) 123-4567</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-foreground-muted" />
-                      <span>San Francisco, CA</span>
-                    </div>
-                  </div>
-                </ModalContentBox>
-                <div className="rounded-lg bg-background-subtle p-4">
-                  <h4 className="mb-2 text-body-strong text-foreground">Experience</h4>
-                  <p className="text-body-sm text-foreground-muted">
-                    5+ years in solar energy systems. Previously at SunPower and Tesla Energy.
-                    Specialized in commercial installations and NABCEP certified.
-                  </p>
-                </div>
-                <div className="rounded-lg bg-background-subtle p-4">
-                  <h4 className="mb-2 text-body-strong text-foreground">Skills</h4>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" size="sm">
-                      Solar PV
-                    </Badge>
-                    <Badge variant="secondary" size="sm">
-                      AutoCAD
-                    </Badge>
-                    <Badge variant="secondary" size="sm">
-                      Project Management
-                    </Badge>
-                    <Badge
-                      variant="success"
-                      size="sm"
-                      icon={<CheckCircle size={12} weight="bold" />}
-                    >
-                      NABCEP Certified
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <ModalClose asChild>
-                <Button variant="destructive">Reject</Button>
-              </ModalClose>
-              <Button leftIcon={<CalendarBlank size={16} />}>Schedule Interview</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </RealWorldExample>
-
-      <RealWorldExample
-        title="Confirmation with Content Box"
-        description="Success confirmation using ModalContentBox"
+        title="Feature Moment Confirmation"
+        description="Success confirmation using feature variant with ModalContentBox"
       >
         <Modal>
           <ModalTrigger asChild>
             <Button variant="tertiary">View Confirmation</Button>
           </ModalTrigger>
           <ModalContent>
-            <ModalHeader hideCloseButton>
-              <ModalTitle>Job Published</ModalTitle>
+            <ModalHeader variant="feature" hideCloseButton>
+              <ModalTitle variant="large">Job Published</ModalTitle>
             </ModalHeader>
             <ModalBody>
               <ModalContentBox>
@@ -868,10 +1138,10 @@ export default function ModalPage() {
             </ModalBody>
             <ModalFooter>
               <ModalClose asChild>
-                <Button variant="secondary">View Job</Button>
+                <Button variant="tertiary">View Job</Button>
               </ModalClose>
               <ModalClose asChild>
-                <Button>Done</Button>
+                <Button variant="primary">Done</Button>
               </ModalClose>
             </ModalFooter>
           </ModalContent>
