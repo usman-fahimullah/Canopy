@@ -27,6 +27,8 @@ interface OnboardingShellProps {
   currentStepIndex?: number;
   /** Total steps for the current shell */
   totalSteps?: number;
+  /** First name for subtitle interpolation (replaces {firstName} in subtitle template) */
+  firstName?: string;
 }
 
 export function OnboardingShell({
@@ -37,6 +39,7 @@ export function OnboardingShell({
   step,
   currentStepIndex,
   totalSteps,
+  firstName,
 }: OnboardingShellProps) {
   const hasProgress = currentStepIndex !== undefined && totalSteps !== undefined && totalSteps > 0;
   const progressPercent = hasProgress ? ((currentStepIndex + 1) / totalSteps) * 100 : 0;
@@ -175,7 +178,7 @@ export function OnboardingShell({
                   {step.title}
                 </h1>
                 <p className="mt-2 text-body leading-6 text-[var(--primitive-neutral-700)]">
-                  {step.subtitle}
+                  {step.subtitle.replace(/\{firstName\}/g, firstName || "there")}
                 </p>
               </div>
             )}

@@ -11,7 +11,6 @@ import {
   UsersFour,
   ChartDonut,
   GraduationCap,
-  ChatTeardropDots,
   Handshake,
 } from "@phosphor-icons/react";
 import { TreehouseIcon } from "@/components/Icons/treehouse-icon";
@@ -82,17 +81,10 @@ export const talentNavConfig: ShellNavConfig = {
       progressiveFeature: "coaching",
       items: [
         {
-          id: "coaching-sessions",
+          id: "coaching",
           href: "/jobs/coaching",
           label: "Coaching",
           icon: GraduationCap,
-          iconWeight: "fill",
-        },
-        {
-          id: "coach-messages",
-          href: "/jobs/coaching/messages",
-          label: "Coach Messages",
-          icon: ChatTeardropDots,
           iconWeight: "fill",
         },
       ],
@@ -104,18 +96,11 @@ export const talentNavConfig: ShellNavConfig = {
       progressiveFeature: "mentoring",
       items: [
         {
-          id: "mentoring-sessions",
+          id: "mentoring",
           href: "/jobs/mentoring",
           label: "Mentoring",
           icon: Handshake,
           iconWeight: "fill",
-        },
-        {
-          id: "mentor-connect",
-          href: "/jobs/mentoring/connect",
-          label: "Find Mentors",
-          icon: Users,
-          iconWeight: "bold",
         },
       ],
     },

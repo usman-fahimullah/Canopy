@@ -14,13 +14,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "./dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./dropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./dropdown";
 import {
   format,
   addDays,
@@ -74,52 +68,21 @@ import {
   Star,
 } from "@phosphor-icons/react";
 
-/* ============================================
-   Types
-   ============================================ */
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  start: Date | string;
-  end: Date | string;
-  type?: "interview" | "meeting" | "block" | "interview-video" | "interview-phone" | "interview-onsite";
-  status?: "confirmed" | "tentative" | "cancelled";
-  candidateId?: string;
-  candidateName?: string;
-  candidateAvatar?: string;
-  jobId?: string;
-  jobTitle?: string;
-  interviewers?: { id: string; name: string; avatar?: string; role?: string }[];
-  location?: string;
-  meetingLink?: string;
-  notes?: string;
-  color?: string;
-  isAllDay?: boolean;
-}
+import {
+  type CalendarEvent,
+  type CalendarFilter,
+  type CalendarConfig,
+  type RecruiterCalendarViewProps,
+  VIEW_OPTIONS,
+  KEYBOARD_SHORTCUTS,
+  getUserTimezone,
+  getTimezoneAbbr,
+  getEventPosition as getEventPositionShared,
+} from "@/lib/scheduling";
 
-export interface CalendarFilter {
-  id: string;
-  label: string;
-  color: string;
-  enabled: boolean;
-}
-
-export interface CalendarConfig {
-  id: string;
-  name: string;
-  email: string;
-  color: string;
-  visible: boolean;
-}
-
-/* ============================================
-   Constants
-   ============================================ */
-const VIEW_OPTIONS = [
-  { value: "day", label: "Day", shortcut: "D" },
-  { value: "week", label: "Week", shortcut: "W" },
-  { value: "month", label: "Month", shortcut: "M" },
-];
+// Re-export types and values for consumers importing from this file
+export type { CalendarEvent, CalendarFilter, CalendarConfig, RecruiterCalendarViewProps };
+export { KEYBOARD_SHORTCUTS, getUserTimezone, getTimezoneAbbr };
 
 const DEFAULT_FILTERS: CalendarFilter[] = [
   { id: "interviews", label: "Interviews", color: "var(--primitive-green-500)", enabled: true },
@@ -127,44 +90,10 @@ const DEFAULT_FILTERS: CalendarFilter[] = [
   { id: "blocks", label: "Focus Time", color: "var(--primitive-neutral-400)", enabled: true },
 ];
 
-const KEYBOARD_SHORTCUTS = [
-  { keys: ["T"], action: "Go to today" },
-  { keys: ["J"], action: "Previous period" },
-  { keys: ["K"], action: "Next period" },
-  { keys: ["D"], action: "Day view" },
-  { keys: ["W"], action: "Week view" },
-  { keys: ["M"], action: "Month view" },
-  { keys: ["N"], action: "New event" },
-  { keys: ["⌘", "K"], action: "Quick search" },
-  { keys: ["?"], action: "Keyboard shortcuts" },
-];
-
-/* ============================================
-   Helper Functions
-   ============================================ */
-const getEventPosition = (
-  event: CalendarEvent,
-  startHour: number,
-  endHour: number
-): { top: string; height: string } => {
-  const start = typeof event.start === "string" ? parseISO(event.start) : event.start;
-  const end = typeof event.end === "string" ? parseISO(event.end) : event.end;
-
-  const dayStartMinutes = startHour * 60;
-  const dayEndMinutes = endHour * 60;
-  const totalMinutes = dayEndMinutes - dayStartMinutes;
-
-  const eventStartMinutes = start.getHours() * 60 + start.getMinutes();
-  const eventEndMinutes = end.getHours() * 60 + end.getMinutes();
-
-  const topPercent = ((eventStartMinutes - dayStartMinutes) / totalMinutes) * 100;
-  const heightPercent = ((eventEndMinutes - eventStartMinutes) / totalMinutes) * 100;
-
-  return {
-    top: `${Math.max(0, topPercent)}%`,
-    height: `${Math.min(100 - topPercent, Math.max(2, heightPercent))}%`,
-  };
-};
+// Local wrapper — shared getEventPosition uses a generic { start, end } signature;
+// this component passes CalendarEvent objects directly
+const getEventPosition = (event: CalendarEvent, startHour: number, endHour: number) =>
+  getEventPositionShared(event, startHour, endHour);
 
 const getEventTypeIcon = (type?: CalendarEvent["type"]) => {
   switch (type) {
@@ -203,29 +132,6 @@ const getEventColorClass = (event: CalendarEvent): string => {
   }
 };
 
-const getUserTimezone = (): string => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch {
-    return "America/New_York";
-  }
-};
-
-const getTimezoneAbbr = (timezone: string): string => {
-  try {
-    const date = new Date();
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: timezone,
-      timeZoneName: "short",
-    });
-    const parts = formatter.formatToParts(date);
-    const tzPart = parts.find((p) => p.type === "timeZoneName");
-    return tzPart?.value || timezone;
-  } catch {
-    return timezone;
-  }
-};
-
 /* ============================================
    MiniCalendar Component
    ============================================ */
@@ -260,10 +166,10 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
   return (
     <div className={cn("w-full", className)}>
       {/* Month Navigation */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <button
           onClick={() => setViewMonth(subMonths(viewMonth, 1))}
-          className="p-1 rounded hover:bg-[var(--primitive-neutral-200)] text-[var(--foreground-muted)] transition-colors"
+          className="rounded p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
         >
           <CaretLeft size={14} weight="bold" />
         </button>
@@ -272,18 +178,18 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
         </span>
         <button
           onClick={() => setViewMonth(addMonths(viewMonth, 1))}
-          className="p-1 rounded hover:bg-[var(--primitive-neutral-200)] text-[var(--foreground-muted)] transition-colors"
+          className="rounded p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
         >
           <CaretRight size={14} weight="bold" />
         </button>
       </div>
 
       {/* Day Headers */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="mb-1 grid grid-cols-7">
         {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
           <div
             key={i}
-            className="text-center text-[10px] font-medium text-[var(--foreground-muted)] py-1"
+            className="py-1 text-center text-[10px] font-medium text-[var(--foreground-muted)]"
           >
             {day}
           </div>
@@ -303,9 +209,10 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
               key={day.toISOString()}
               onClick={() => onDateSelect(day)}
               className={cn(
-                "relative h-7 w-7 flex items-center justify-center rounded text-xs transition-all",
+                "relative flex h-7 w-7 items-center justify-center rounded text-xs transition-all",
                 "hover:bg-[var(--primitive-neutral-200)]",
-                isSelected && "bg-[var(--primitive-green-600)] text-white hover:bg-[var(--primitive-green-700)]",
+                isSelected &&
+                  "bg-[var(--primitive-green-600)] text-white hover:bg-[var(--primitive-green-700)]",
                 !isSelected && isTodayDate && "font-bold text-[var(--primitive-green-700)]",
                 !isCurrentMonth && "text-[var(--foreground-muted)]/50",
                 isCurrentMonth && !isSelected && !isTodayDate && "text-[var(--foreground-default)]"
@@ -314,7 +221,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
               {format(day, "d")}
               {/* Event indicator dot */}
               {hasEvents && !isSelected && (
-                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--primitive-green-500)]" />
+                <span className="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[var(--primitive-green-500)]" />
               )}
             </button>
           );
@@ -355,15 +262,19 @@ const CalendarEventCard: React.FC<CalendarEventCardProps> = ({
         e.preventDefault();
         onContextMenu?.(event, e);
       }}
-      style={event.color ? {
-        backgroundColor: `${event.color}20`,
-        borderColor: event.color,
-        color: event.color
-      } : undefined}
+      style={
+        event.color
+          ? {
+              backgroundColor: `${event.color}20`,
+              borderColor: event.color,
+              color: event.color,
+            }
+          : undefined
+      }
       className={cn(
-        "rounded-md border-l-[3px] px-2 py-1 cursor-pointer overflow-hidden",
+        "cursor-pointer overflow-hidden rounded-md border-l-[3px] px-2 py-1",
         "transition-all duration-100",
-        "hover:shadow-md hover:-translate-y-[1px] active:translate-y-0 active:shadow-sm",
+        "hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 active:shadow-sm",
         getEventColorClass(event),
         className
       )}
@@ -371,41 +282,38 @@ const CalendarEventCard: React.FC<CalendarEventCardProps> = ({
       <div className="flex items-start gap-1.5">
         {/* Icon */}
         {!isMinimal && (
-          <span className="flex-shrink-0 mt-0.5 opacity-70">
-            {getEventTypeIcon(event.type)}
-          </span>
+          <span className="mt-0.5 flex-shrink-0 opacity-70">{getEventTypeIcon(event.type)}</span>
         )}
 
         {/* Content */}
         <div className="min-w-0 flex-1">
-          <p className={cn(
-            "font-medium truncate",
-            isMinimal ? "text-[10px]" : isCompact ? "text-xs" : "text-sm"
-          )}>
+          <p
+            className={cn(
+              "truncate font-medium",
+              isMinimal ? "text-[10px]" : isCompact ? "text-xs" : "text-sm"
+            )}
+          >
             {event.title}
           </p>
 
           {!isMinimal && (
-            <p className={cn(
-              "opacity-70",
-              isCompact ? "text-[10px]" : "text-xs"
-            )}>
+            <p className={cn("opacity-70", isCompact ? "text-[10px]" : "text-xs")}>
               {format(start, "h:mm")} - {format(end, "h:mm a")}
             </p>
           )}
 
           {/* Candidate info for interviews */}
           {!isCompact && !isMinimal && event.candidateName && (
-            <div className="flex items-center gap-1 mt-1">
+            <div className="mt-1 flex items-center gap-1">
               <Avatar
                 src={event.candidateAvatar}
                 name={event.candidateName}
                 size="xs"
-                className="w-4 h-4"
+                className="h-4 w-4"
               />
-              <span className="text-[10px] truncate">{event.candidateName}</span>
+              <span className="truncate text-[10px]">{event.candidateName}</span>
               {event.jobTitle && (
-                <span className="text-[10px] opacity-70 truncate">· {event.jobTitle}</span>
+                <span className="truncate text-[10px] opacity-70">· {event.jobTitle}</span>
               )}
             </div>
           )}
@@ -413,7 +321,7 @@ const CalendarEventCard: React.FC<CalendarEventCardProps> = ({
 
         {/* Status indicator */}
         {event.status === "tentative" && (
-          <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--primitive-yellow-500)]" />
+          <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--primitive-yellow-500)]" />
         )}
       </div>
     </div>
@@ -459,13 +367,15 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
     .slice(0, 3);
 
   return (
-    <div className={cn("w-64 flex flex-col bg-[var(--card-background)] border-r border-[var(--primitive-neutral-200)]", className)}>
+    <div
+      className={cn(
+        "flex w-64 flex-col border-r border-[var(--primitive-neutral-200)] bg-[var(--card-background)]",
+        className
+      )}
+    >
       {/* Create Button */}
       <div className="p-4">
-        <Button
-          onClick={onCreateEvent}
-          className="w-full gap-2"
-        >
+        <Button onClick={onCreateEvent} className="w-full gap-2">
           <Plus size={16} weight="bold" />
           <span>New Event</span>
         </Button>
@@ -473,11 +383,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
 
       {/* Mini Calendar */}
       <div className="px-4 pb-4">
-        <MiniCalendar
-          selectedDate={selectedDate}
-          onDateSelect={onDateSelect}
-          events={events}
-        />
+        <MiniCalendar selectedDate={selectedDate} onDateSelect={onDateSelect} events={events} />
       </div>
 
       {/* Divider */}
@@ -486,21 +392,15 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
       {/* Today's Schedule */}
       <div className="flex-1 overflow-auto">
         <div className="p-4">
-          <h3 className="text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider mb-3">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">
             {isToday(selectedDate) ? "Today's Schedule" : format(selectedDate, "MMM d")}
           </h3>
           {todayEvents.length === 0 ? (
-            <p className="text-sm text-[var(--foreground-muted)] italic">
-              No events scheduled
-            </p>
+            <p className="text-sm italic text-[var(--foreground-muted)]">No events scheduled</p>
           ) : (
             <div className="space-y-2">
               {todayEvents.slice(0, 5).map((event) => (
-                <CalendarEventCard
-                  key={event.id}
-                  event={event}
-                  variant="compact"
-                />
+                <CalendarEventCard key={event.id} event={event} variant="compact" />
               ))}
               {todayEvents.length > 5 && (
                 <p className="text-xs text-[var(--foreground-muted)]">
@@ -514,7 +414,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
         {/* Upcoming Interviews */}
         {upcomingInterviews.length > 0 && (
           <div className="px-4 pb-4">
-            <h3 className="text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider mb-3">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">
               Upcoming Interviews
             </h3>
             <div className="space-y-2">
@@ -523,17 +423,17 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                 return (
                   <div
                     key={event.id}
-                    className="p-2 rounded-lg bg-[var(--primitive-green-50)] border border-[var(--primitive-green-200)]"
+                    className="rounded-lg border border-[var(--primitive-green-200)] bg-[var(--primitive-green-50)] p-2"
                   >
                     <div className="flex items-center gap-2">
                       <Avatar
                         src={event.candidateAvatar}
                         name={event.candidateName || ""}
                         size="xs"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{event.candidateName}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium">{event.candidateName}</p>
                         <p className="text-[10px] text-[var(--foreground-muted)]">
                           {format(start, "EEE, MMM d 'at' h:mm a")}
                         </p>
@@ -549,14 +449,14 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
         {/* Calendars */}
         {calendars.length > 0 && (
           <div className="px-4 pb-4">
-            <h3 className="text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider mb-3">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">
               My Calendars
             </h3>
             <div className="space-y-1">
               {calendars.map((cal) => (
                 <label
                   key={cal.id}
-                  className="flex items-center gap-2 p-1.5 rounded hover:bg-[var(--primitive-neutral-100)] cursor-pointer transition-colors"
+                  className="flex cursor-pointer items-center gap-2 rounded p-1.5 transition-colors hover:bg-[var(--primitive-neutral-100)]"
                 >
                   <input
                     type="checkbox"
@@ -566,10 +466,8 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                   />
                   <span
                     className={cn(
-                      "w-3 h-3 rounded border-2 flex items-center justify-center transition-colors",
-                      cal.visible
-                        ? "border-transparent"
-                        : "border-[var(--primitive-neutral-400)]"
+                      "flex h-3 w-3 items-center justify-center rounded border-2 transition-colors",
+                      cal.visible ? "border-transparent" : "border-[var(--primitive-neutral-400)]"
                     )}
                     style={{
                       backgroundColor: cal.visible ? cal.color : "transparent",
@@ -577,7 +475,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                   >
                     {cal.visible && <Check size={8} weight="bold" className="text-white" />}
                   </span>
-                  <span className="text-sm text-[var(--foreground-default)] truncate">
+                  <span className="truncate text-sm text-[var(--foreground-default)]">
                     {cal.name}
                   </span>
                 </label>
@@ -588,14 +486,14 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
 
         {/* Filters */}
         <div className="px-4 pb-4">
-          <h3 className="text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wider mb-3">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--foreground-muted)]">
             Event Types
           </h3>
           <div className="space-y-1">
             {filters.map((filter) => (
               <label
                 key={filter.id}
-                className="flex items-center gap-2 p-1.5 rounded hover:bg-[var(--primitive-neutral-100)] cursor-pointer transition-colors"
+                className="flex cursor-pointer items-center gap-2 rounded p-1.5 transition-colors hover:bg-[var(--primitive-neutral-100)]"
               >
                 <input
                   type="checkbox"
@@ -605,10 +503,8 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                 />
                 <span
                   className={cn(
-                    "w-3 h-3 rounded border-2 flex items-center justify-center transition-colors",
-                    filter.enabled
-                      ? "border-transparent"
-                      : "border-[var(--primitive-neutral-400)]"
+                    "flex h-3 w-3 items-center justify-center rounded border-2 transition-colors",
+                    filter.enabled ? "border-transparent" : "border-[var(--primitive-neutral-400)]"
                   )}
                   style={{
                     backgroundColor: filter.enabled ? filter.color : "transparent",
@@ -616,9 +512,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                 >
                   {filter.enabled && <Check size={8} weight="bold" className="text-white" />}
                 </span>
-                <span className="text-sm text-[var(--foreground-default)]">
-                  {filter.label}
-                </span>
+                <span className="text-sm text-[var(--foreground-default)]">{filter.label}</span>
               </label>
             ))}
           </div>
@@ -626,11 +520,13 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
       </div>
 
       {/* Keyboard Shortcuts Footer */}
-      <div className="p-3 border-t border-[var(--primitive-neutral-200)]">
-        <button className="flex items-center gap-2 text-xs text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors">
+      <div className="border-t border-[var(--primitive-neutral-200)] p-3">
+        <button className="flex items-center gap-2 text-xs text-[var(--foreground-muted)] transition-colors hover:text-[var(--foreground-default)]">
           <Keyboard size={14} />
           <span>Keyboard shortcuts</span>
-          <span className="ml-auto text-[10px] bg-[var(--primitive-neutral-200)] px-1.5 py-0.5 rounded">?</span>
+          <span className="ml-auto rounded bg-[var(--primitive-neutral-200)] px-1.5 py-0.5 text-[10px]">
+            ?
+          </span>
         </button>
       </div>
     </div>
@@ -699,23 +595,25 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   };
 
   return (
-    <div className={cn(
-      "flex items-center justify-between px-4 py-3 border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]",
-      className
-    )}>
+    <div
+      className={cn(
+        "flex items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-3",
+        className
+      )}
+    >
       {/* Left: Navigation */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1">
           <button
             onClick={() => navigatePeriod("prev")}
-            className="p-1.5 rounded hover:bg-[var(--primitive-neutral-200)] text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
             aria-label="Previous"
           >
             <CaretLeft size={16} weight="bold" />
           </button>
           <button
             onClick={() => navigatePeriod("next")}
-            className="p-1.5 rounded hover:bg-[var(--primitive-neutral-200)] text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
             aria-label="Next"
           >
             <CaretRight size={16} weight="bold" />
@@ -749,20 +647,20 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         {/* Search */}
         <button
           onClick={onSearch}
-          className="p-2 rounded hover:bg-[var(--primitive-neutral-200)] text-[var(--foreground-muted)] hover:text-[var(--foreground-default)] transition-colors"
+          className="rounded p-2 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
           aria-label="Search"
         >
           <MagnifyingGlass size={18} />
         </button>
 
         {/* View Switcher */}
-        <div className="flex items-center bg-[var(--primitive-neutral-100)] rounded-lg p-0.5">
+        <div className="flex items-center rounded-lg bg-[var(--primitive-neutral-100)] p-0.5">
           {VIEW_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => onViewChange(opt.value as "day" | "week" | "month")}
               className={cn(
-                "px-3 py-1.5 text-sm font-medium rounded-md transition-all",
+                "rounded-md px-3 py-1.5 text-sm font-medium transition-all",
                 view === opt.value
                   ? "bg-[var(--background-interactive-default)] text-[var(--foreground-default)] shadow-sm"
                   : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
@@ -811,18 +709,18 @@ const CalendarDayGrid: React.FC<CalendarDayGridProps> = ({
   };
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn("flex h-full flex-col", className)}>
       {/* All-day events */}
-      <div className="flex-shrink-0 px-2 py-1 border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)]">
+      <div className="flex-shrink-0 border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-50)] px-2 py-1">
         <span className="text-xs text-[var(--foreground-muted)]">All day</span>
       </div>
 
       {/* Time grid */}
-      <div className="flex-1 flex overflow-auto">
+      <div className="flex flex-1 overflow-auto">
         {/* Time labels */}
         <div className="w-16 flex-shrink-0 border-r border-[var(--primitive-neutral-200)]">
           {Array.from({ length: endHour - startHour }).map((_, i) => (
-            <div key={i} className="h-16 relative">
+            <div key={i} className="relative h-16">
               <span className="absolute -top-2 right-2 text-[11px] text-[var(--foreground-muted)]">
                 {format(setHours(new Date(), startHour + i), "h a")}
               </span>
@@ -831,7 +729,7 @@ const CalendarDayGrid: React.FC<CalendarDayGridProps> = ({
         </div>
 
         {/* Day column */}
-        <div className="flex-1 relative">
+        <div className="relative flex-1">
           {/* Hour slots */}
           {Array.from({ length: endHour - startHour }).map((_, i) => (
             <button
@@ -839,7 +737,7 @@ const CalendarDayGrid: React.FC<CalendarDayGridProps> = ({
               type="button"
               className={cn(
                 "h-16 w-full border-b border-[var(--primitive-neutral-200)]",
-                "hover:bg-[var(--primitive-green-50)] transition-colors"
+                "transition-colors hover:bg-[var(--primitive-green-50)]"
               )}
               onClick={() => handleSlotClick(startHour + i)}
             >
@@ -849,20 +747,16 @@ const CalendarDayGrid: React.FC<CalendarDayGridProps> = ({
           ))}
 
           {/* Events */}
-          <div className="absolute inset-x-2 top-0 bottom-0 pointer-events-none">
+          <div className="pointer-events-none absolute inset-x-2 bottom-0 top-0">
             {dayEvents.map((event) => {
               const position = getEventPosition(event, startHour, endHour);
               return (
                 <div
                   key={event.id}
-                  className="absolute left-0 right-0 pointer-events-auto"
+                  className="pointer-events-auto absolute left-0 right-0"
                   style={{ top: position.top, height: position.height }}
                 >
-                  <CalendarEventCard
-                    event={event}
-                    onClick={onEventClick}
-                    className="h-full"
-                  />
+                  <CalendarEventCard event={event} onClick={onEventClick} className="h-full" />
                 </div>
               );
             })}
@@ -871,7 +765,7 @@ const CalendarDayGrid: React.FC<CalendarDayGridProps> = ({
           {/* Current time indicator */}
           {isToday(date) && (
             <div
-              className="absolute left-0 right-0 z-10 pointer-events-none"
+              className="pointer-events-none absolute left-0 right-0 z-10"
               style={{
                 top: getEventPosition(
                   { id: "now", title: "", start: new Date(), end: new Date() },
@@ -881,8 +775,8 @@ const CalendarDayGrid: React.FC<CalendarDayGridProps> = ({
               }}
             >
               <div className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-[var(--primitive-red-500)]" />
-                <div className="flex-1 h-0.5 bg-[var(--primitive-red-500)]" />
+                <div className="h-2 w-2 rounded-full bg-[var(--primitive-red-500)]" />
+                <div className="h-0.5 flex-1 bg-[var(--primitive-red-500)]" />
               </div>
             </div>
           )}
@@ -932,9 +826,9 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
   };
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn("flex h-full flex-col", className)}>
       {/* Day headers */}
-      <div className="flex-shrink-0 flex border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
+      <div className="flex flex-shrink-0 border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
         <div className="w-16 flex-shrink-0 border-r border-[var(--primitive-neutral-200)]" />
         {days.map((day) => {
           const isTodayDate = isToday(day);
@@ -942,18 +836,16 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
             <div
               key={day.toISOString()}
               className={cn(
-                "flex-1 py-2 text-center border-r border-[var(--primitive-neutral-200)] last:border-r-0",
+                "flex-1 border-r border-[var(--primitive-neutral-200)] py-2 text-center last:border-r-0",
                 isTodayDate && "bg-[var(--primitive-green-50)]"
               )}
             >
-              <p className="text-xs text-[var(--foreground-muted)]">
-                {format(day, "EEE")}
-              </p>
+              <p className="text-xs text-[var(--foreground-muted)]">{format(day, "EEE")}</p>
               <p
                 className={cn(
-                  "text-lg font-semibold mt-0.5",
+                  "mt-0.5 text-lg font-semibold",
                   isTodayDate
-                    ? "w-8 h-8 mx-auto flex items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
+                    ? "mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
                     : "text-[var(--foreground-default)]"
                 )}
               >
@@ -965,11 +857,11 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
       </div>
 
       {/* Time grid */}
-      <div className="flex-1 flex overflow-auto">
+      <div className="flex flex-1 overflow-auto">
         {/* Time labels */}
         <div className="w-16 flex-shrink-0 border-r border-[var(--primitive-neutral-200)]">
           {Array.from({ length: endHour - startHour }).map((_, i) => (
-            <div key={i} className="h-12 relative">
+            <div key={i} className="relative h-12">
               <span className="absolute -top-2 right-2 text-[11px] text-[var(--foreground-muted)]">
                 {format(setHours(new Date(), startHour + i), "h a")}
               </span>
@@ -978,7 +870,7 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
         </div>
 
         {/* Day columns */}
-        <div className="flex-1 flex">
+        <div className="flex flex-1">
           {days.map((day) => {
             const dayEvents = getEventsForDay(day);
             const isTodayDate = isToday(day);
@@ -987,7 +879,7 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
               <div
                 key={day.toISOString()}
                 className={cn(
-                  "flex-1 relative border-r border-[var(--primitive-neutral-200)] last:border-r-0",
+                  "relative flex-1 border-r border-[var(--primitive-neutral-200)] last:border-r-0",
                   isTodayDate && "bg-[var(--primitive-green-50)]/30"
                 )}
               >
@@ -1005,13 +897,13 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
                 ))}
 
                 {/* Events */}
-                <div className="absolute inset-x-0.5 top-0 bottom-0 pointer-events-none">
+                <div className="pointer-events-none absolute inset-x-0.5 bottom-0 top-0">
                   {dayEvents.map((event) => {
                     const position = getEventPosition(event, startHour, endHour);
                     return (
                       <div
                         key={event.id}
-                        className="absolute left-0 right-0 pointer-events-auto px-0.5"
+                        className="pointer-events-auto absolute left-0 right-0 px-0.5"
                         style={{ top: position.top, height: position.height }}
                       >
                         <CalendarEventCard
@@ -1028,7 +920,7 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
                 {/* Current time indicator */}
                 {isTodayDate && (
                   <div
-                    className="absolute left-0 right-0 z-10 pointer-events-none"
+                    className="pointer-events-none absolute left-0 right-0 z-10"
                     style={{
                       top: getEventPosition(
                         { id: "now", title: "", start: new Date(), end: new Date() },
@@ -1038,8 +930,8 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
                     }}
                   >
                     <div className="flex items-center">
-                      <div className="w-2 h-2 rounded-full bg-[var(--primitive-red-500)]" />
-                      <div className="flex-1 h-0.5 bg-[var(--primitive-red-500)]" />
+                      <div className="h-2 w-2 rounded-full bg-[var(--primitive-red-500)]" />
+                      <div className="h-0.5 flex-1 bg-[var(--primitive-red-500)]" />
                     </div>
                   </div>
                 )}
@@ -1084,9 +976,9 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
   };
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn("flex h-full flex-col", className)}>
       {/* Day headers */}
-      <div className="flex-shrink-0 grid grid-cols-7 border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
+      <div className="grid flex-shrink-0 grid-cols-7 border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <div
             key={day}
@@ -1098,7 +990,7 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
       </div>
 
       {/* Days grid */}
-      <div className="flex-1 grid grid-cols-7 auto-rows-fr overflow-hidden">
+      <div className="grid flex-1 auto-rows-fr grid-cols-7 overflow-hidden">
         {days.map((day) => {
           const dayEvents = getEventsForDay(day);
           const isTodayDate = isToday(day);
@@ -1109,18 +1001,18 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
               key={day.toISOString()}
               onClick={() => onDayClick?.(day)}
               className={cn(
-                "min-h-24 p-1 border-b border-r border-[var(--primitive-neutral-200)]",
-                "hover:bg-[var(--primitive-neutral-50)] cursor-pointer transition-colors",
+                "min-h-24 border-b border-r border-[var(--primitive-neutral-200)] p-1",
+                "cursor-pointer transition-colors hover:bg-[var(--primitive-neutral-50)]",
                 !isCurrentMonth && "bg-[var(--primitive-neutral-50)] opacity-60"
               )}
             >
               {/* Day number */}
-              <div className="flex items-center justify-between mb-1">
+              <div className="mb-1 flex items-center justify-between">
                 <span
                   className={cn(
-                    "w-6 h-6 flex items-center justify-center text-sm",
+                    "flex h-6 w-6 items-center justify-center text-sm",
                     isTodayDate
-                      ? "rounded-full bg-[var(--primitive-green-600)] text-white font-semibold"
+                      ? "rounded-full bg-[var(--primitive-green-600)] font-semibold text-white"
                       : "text-[var(--foreground-default)]"
                   )}
                 >
@@ -1138,8 +1030,8 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                       onEventClick?.(event);
                     }}
                     className={cn(
-                      "text-[10px] font-medium px-1.5 py-0.5 rounded truncate cursor-pointer",
-                      "hover:opacity-80 transition-opacity",
+                      "cursor-pointer truncate rounded px-1.5 py-0.5 text-[10px] font-medium",
+                      "transition-opacity hover:opacity-80",
                       getEventColorClass(event)
                     )}
                   >
@@ -1147,7 +1039,7 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                   </div>
                 ))}
                 {dayEvents.length > 3 && (
-                  <span className="text-[10px] text-[var(--foreground-muted)] pl-1">
+                  <span className="pl-1 text-[10px] text-[var(--foreground-muted)]">
                     +{dayEvents.length - 3} more
                   </span>
                 )}
@@ -1163,18 +1055,6 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
 /* ============================================
    Main RecruiterCalendarView Component
    ============================================ */
-export interface RecruiterCalendarViewProps {
-  events?: CalendarEvent[];
-  calendars?: CalendarConfig[];
-  initialView?: "day" | "week" | "month";
-  initialDate?: Date;
-  onEventClick?: (event: CalendarEvent) => void;
-  onSlotClick?: (start: Date, end: Date) => void;
-  onCreateEvent?: () => void;
-  timezone?: string;
-  className?: string;
-}
-
 const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
   events = [],
   calendars = [],
@@ -1199,10 +1079,7 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if typing in input
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         return;
       }
 
@@ -1277,18 +1154,12 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
   }, [events, filters]);
 
   const handleFilterToggle = (filterId: string) => {
-    setFilters((prev) =>
-      prev.map((f) =>
-        f.id === filterId ? { ...f, enabled: !f.enabled } : f
-      )
-    );
+    setFilters((prev) => prev.map((f) => (f.id === filterId ? { ...f, enabled: !f.enabled } : f)));
   };
 
   const handleCalendarToggle = (calendarId: string) => {
     setVisibleCalendars((prev) =>
-      prev.includes(calendarId)
-        ? prev.filter((id) => id !== calendarId)
-        : [...prev, calendarId]
+      prev.includes(calendarId) ? prev.filter((id) => id !== calendarId) : [...prev, calendarId]
     );
   };
 
@@ -1310,7 +1181,7 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <CalendarHeader
           selectedDate={selectedDate}
@@ -1355,16 +1226,13 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
       {/* Keyboard Shortcuts Modal */}
       {showShortcuts && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setShowShortcuts(false)}
-          />
-          <div className="relative bg-[var(--background-default)] rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowShortcuts(false)} />
+          <div className="relative mx-4 w-full max-w-md rounded-xl bg-[var(--background-default)] p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
               <button
                 onClick={() => setShowShortcuts(false)}
-                className="p-1 rounded hover:bg-[var(--primitive-neutral-200)] transition-colors"
+                className="rounded p-1 transition-colors hover:bg-[var(--primitive-neutral-200)]"
               >
                 <X size={18} />
               </button>
@@ -1372,14 +1240,12 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
             <div className="space-y-2">
               {KEYBOARD_SHORTCUTS.map((shortcut, i) => (
                 <div key={i} className="flex items-center justify-between py-1.5">
-                  <span className="text-sm text-[var(--foreground-muted)]">
-                    {shortcut.action}
-                  </span>
+                  <span className="text-sm text-[var(--foreground-muted)]">{shortcut.action}</span>
                   <div className="flex items-center gap-1">
                     {shortcut.keys.map((key, j) => (
                       <kbd
                         key={j}
-                        className="px-2 py-0.5 text-xs font-mono bg-[var(--primitive-neutral-100)] rounded border border-[var(--primitive-neutral-300)]"
+                        className="rounded border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] px-2 py-0.5 font-mono text-xs"
                       >
                         {key}
                       </kbd>
@@ -1412,8 +1278,5 @@ export {
   getEventPosition,
   getEventTypeIcon,
   getEventColorClass,
-  getUserTimezone,
-  getTimezoneAbbr,
   DEFAULT_FILTERS,
-  KEYBOARD_SHORTCUTS,
 };

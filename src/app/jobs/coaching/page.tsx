@@ -1,56 +1,63 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { isFuture, isPast } from "date-fns";
-import { GraduationCap, MagnifyingGlass } from "@phosphor-icons/react";
+import {
+  GraduationCap,
+  MagnifyingGlass,
+  CalendarDots,
+  ListBullets,
+  SquaresFour,
+} from "@phosphor-icons/react";
 import { PageHeader } from "@/components/shell/page-header";
-import { Spinner } from "@/components/ui/spinner";
-import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/components/ui/tabs";
-import { SearchInput } from "@/components/ui/search-input";
-import { SessionCard } from "./components/session-card";
-import { CoachBrowseCard } from "./components/coach-browse-card";
+import {
+  Button,
+  EmptyState,
+  SearchInput,
+  SegmentedController,
+  Spinner,
+  Tabs,
+  TabsListUnderline,
+  TabsTriggerUnderline,
+  TabsContent,
+  Chip,
+} from "@/components/ui";
+import { CoachCard, SessionCard } from "@/components/coaching";
+import type { Coach, Session, Sector, SessionFilterStatus } from "@/lib/coaching";
+import { SECTOR_INFO } from "@/lib/coaching";
 import { logger, formatError } from "@/lib/logger";
 
-interface CoachInfo {
-  id: string;
-  name: string;
-  avatar: string | null;
-  headline?: string;
-}
+// ---------------------------------------------------------------------------
+// Sector filter options
+// ---------------------------------------------------------------------------
 
-interface Session {
-  id: string;
-  coachId: string;
-  seekerId: string;
-  scheduledAt: string;
-  duration: number;
-  status: "scheduled" | "completed" | "cancelled";
-  meetingLink?: string;
-  coach: CoachInfo;
-  notes?: string;
-}
+const SECTOR_OPTIONS = Object.entries(SECTOR_INFO).map(([value, info]) => ({
+  value,
+  label: info.label,
+}));
 
-interface Coach {
-  id: string;
-  name: string;
-  avatar: string | null;
-  headline: string;
-  bio: string;
-  specialties: string[];
-  hourlyRate: number;
-  currency: string;
-  rating: number;
-  reviewCount: number;
-  totalSessions: number;
-}
+// ---------------------------------------------------------------------------
+// Main Page
+// ---------------------------------------------------------------------------
 
 export default function CoachingPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [coaches, setCoaches] = useState<Coach[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
 
+  // ---- Sessions tab state ----
+  const [sessionView, setSessionView] = useState<"list" | "calendar">("list");
+  const [sessionFilter, setSessionFilter] = useState<SessionFilterStatus>("all");
+
+  // ---- Browse tab state ----
+  const [searchQuery, setSearchQuery] = useState("");
+  const [browseView, setBrowseView] = useState<"grid" | "list">("grid");
+  const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
+  const [sortBy, setSortBy] = useState<"rating" | "sessions">("rating");
+
+  // ---- Fetch data ----
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,7 +72,9 @@ export default function CoachingPage() {
         setSessions(sessionsData.sessions || []);
         setCoaches(coachesData.coaches || []);
       } catch (error) {
-        logger.error("Error fetching coaching data", { error: formatError(error) });
+        logger.error("Error fetching coaching data", {
+          error: formatError(error),
+        });
       } finally {
         setLoading(false);
       }
@@ -74,6 +83,7 @@ export default function CoachingPage() {
     fetchData();
   }, []);
 
+  // ---- Session filtering ----
   const upcomingSessions = useMemo(
     () => sessions.filter((s) => s.status !== "cancelled" && isFuture(new Date(s.scheduledAt))),
     [sessions]
@@ -84,20 +94,64 @@ export default function CoachingPage() {
     [sessions]
   );
 
-  const filteredCoaches = useMemo(() => {
-    if (!searchQuery.trim()) return coaches;
-    const q = searchQuery.toLowerCase();
-    return coaches.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.headline.toLowerCase().includes(q) ||
-        c.specialties.some((s) => s.toLowerCase().includes(q))
-    );
-  }, [coaches, searchQuery]);
+  const filteredSessions = useMemo(() => {
+    const allSessions = [...upcomingSessions, ...pastSessions];
+    if (sessionFilter === "all") return allSessions;
+    return allSessions.filter((s) => s.status === sessionFilter.toLowerCase());
+  }, [upcomingSessions, pastSessions, sessionFilter]);
 
+  // ---- Coach filtering ----
+  const filteredCoaches = useMemo(() => {
+    let result = coaches;
+
+    // Text search
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((c) => {
+        const name = [c.firstName, c.lastName].filter(Boolean).join(" ").toLowerCase();
+        const headline = (c.headline ?? "").toLowerCase();
+        const expertise = c.expertise?.join(" ").toLowerCase() ?? "";
+        return name.includes(q) || headline.includes(q) || expertise.includes(q);
+      });
+    }
+
+    // Sector filter
+    if (selectedSector) {
+      result = result.filter((c) => c.sectors?.includes(selectedSector));
+    }
+
+    // Sort
+    if (sortBy === "rating") {
+      result = [...result].sort((a, b) => b.rating - a.rating);
+    } else {
+      result = [...result].sort((a, b) => (b.totalSessions ?? 0) - (a.totalSessions ?? 0));
+    }
+
+    return result;
+  }, [coaches, searchQuery, selectedSector, sortBy]);
+
+  // ---- Handlers ----
+  const handleViewProfile = useCallback(
+    (coach: Coach) => {
+      router.push(`/jobs/coaching/book?coach=${coach.id}`);
+    },
+    [router]
+  );
+
+  const handleBookSession = useCallback(() => {
+    router.push("/jobs/coaching/book");
+  }, [router]);
+
+  const handleJoinSession = useCallback((session: Session) => {
+    if (session.meetingLink) {
+      window.open(session.meetingLink, "_blank");
+    }
+  }, []);
+
+  // ---- Loading state ----
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -105,119 +159,273 @@ export default function CoachingPage() {
 
   return (
     <div>
-      <PageHeader title="Coaching" />
+      <PageHeader
+        title="Coaching"
+        actions={
+          <Button variant="primary" onClick={handleBookSession}>
+            Book a Session
+          </Button>
+        }
+      />
 
       <div className="px-8 py-8 lg:px-12">
         <Tabs defaultValue="sessions">
           <TabsListUnderline>
             <TabsTriggerUnderline value="sessions">My Sessions</TabsTriggerUnderline>
-            <TabsTriggerUnderline value="find">Find a Coach</TabsTriggerUnderline>
+            <TabsTriggerUnderline value="browse">Browse Coaches</TabsTriggerUnderline>
           </TabsListUnderline>
 
-          {/* My Sessions Tab */}
+          {/* ================================================================
+              TAB: My Sessions
+              ================================================================ */}
           <TabsContent value="sessions">
-            <div className="mt-6 space-y-8">
-              {/* Upcoming sessions */}
-              <section>
-                <h2 className="mb-4 text-heading-sm font-medium text-[var(--foreground-default)]">
-                  Upcoming
-                </h2>
-                {upcomingSessions.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    {upcomingSessions.map((session) => (
-                      <SessionCard key={session.id} session={session} />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptySessionsState />
-                )}
-              </section>
+            <div className="mt-6 space-y-6">
+              {/* Controls: View toggle + Status filter */}
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <SegmentedController
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "SCHEDULED", label: "Scheduled" },
+                    { value: "COMPLETED", label: "Completed" },
+                    { value: "CANCELLED", label: "Cancelled" },
+                  ]}
+                  value={sessionFilter}
+                  onValueChange={(val) => setSessionFilter(val as SessionFilterStatus)}
+                />
 
-              {/* Past sessions */}
-              {pastSessions.length > 0 && (
-                <section>
-                  <h2 className="mb-4 text-heading-sm font-medium text-[var(--foreground-default)]">
-                    Past
-                  </h2>
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    {pastSessions.map((session) => (
-                      <SessionCard key={session.id} session={session} />
-                    ))}
-                  </div>
-                </section>
+                <SegmentedController
+                  options={[
+                    {
+                      value: "list",
+                      label: "List",
+                      icon: <ListBullets size={16} />,
+                    },
+                    {
+                      value: "calendar",
+                      label: "Calendar",
+                      icon: <CalendarDots size={16} />,
+                    },
+                  ]}
+                  value={sessionView}
+                  onValueChange={(val) => setSessionView(val as "list" | "calendar")}
+                />
+              </div>
+
+              {/* Session list view */}
+              {sessionView === "list" && (
+                <div className="space-y-8">
+                  {/* Upcoming */}
+                  {sessionFilter === "all" && upcomingSessions.length > 0 && (
+                    <section>
+                      <h2 className="mb-4 text-body-strong font-semibold text-[var(--foreground-default)]">
+                        Upcoming
+                      </h2>
+                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        {upcomingSessions.map((session) => (
+                          <SessionCard
+                            key={session.id}
+                            session={session}
+                            userRole="seeker"
+                            onJoin={handleJoinSession}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Past */}
+                  {sessionFilter === "all" && pastSessions.length > 0 && (
+                    <section>
+                      <h2 className="mb-4 text-body-strong font-semibold text-[var(--foreground-default)]">
+                        Past
+                      </h2>
+                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        {pastSessions.map((session) => (
+                          <SessionCard key={session.id} session={session} userRole="seeker" />
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Filtered view */}
+                  {sessionFilter !== "all" && (
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                      {filteredSessions.length > 0 ? (
+                        filteredSessions.map((session) => (
+                          <SessionCard
+                            key={session.id}
+                            session={session}
+                            userRole="seeker"
+                            onJoin={handleJoinSession}
+                          />
+                        ))
+                      ) : (
+                        <div className="col-span-full">
+                          <EmptyState
+                            icon={
+                              <CalendarDots
+                                size={48}
+                                weight="light"
+                                className="text-[var(--foreground-disabled)]"
+                              />
+                            }
+                            title="No sessions found"
+                            description="No sessions match the selected filter."
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Overall empty state */}
+                  {sessions.length === 0 && (
+                    <EmptyState
+                      icon={
+                        <GraduationCap
+                          size={48}
+                          weight="light"
+                          className="text-[var(--foreground-disabled)]"
+                        />
+                      }
+                      title="No coaching sessions yet"
+                      description="Book your first session with a career coach to get started."
+                      action={{
+                        label: "Find a Coach",
+                        onClick: handleBookSession,
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+
+              {/* Calendar view placeholder */}
+              {sessionView === "calendar" && (
+                <EmptyState
+                  icon={
+                    <CalendarDots
+                      size={48}
+                      weight="light"
+                      className="text-[var(--foreground-disabled)]"
+                    />
+                  }
+                  title="Calendar view coming soon"
+                  description="View your sessions in a calendar format. This feature is under development."
+                />
               )}
             </div>
           </TabsContent>
 
-          {/* Find a Coach Tab */}
-          <TabsContent value="find">
+          {/* ================================================================
+              TAB: Browse Coaches
+              ================================================================ */}
+          <TabsContent value="browse">
             <div className="mt-6 space-y-6">
-              {/* Search */}
-              <SearchInput
-                placeholder="Search by name, specialty, or keyword..."
-                value={searchQuery}
-                onValueChange={setSearchQuery}
-                size="compact"
-              />
+              {/* Controls Row */}
+              <div className="flex flex-wrap items-center gap-4">
+                <SearchInput
+                  placeholder="Search by name, expertise, or company…"
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
+                  size="compact"
+                  className="min-w-[250px] flex-1"
+                />
 
-              {/* Coach grid */}
+                <SegmentedController
+                  options={[
+                    {
+                      value: "grid",
+                      label: "Grid",
+                      icon: <SquaresFour size={16} />,
+                    },
+                    {
+                      value: "list",
+                      label: "List",
+                      icon: <ListBullets size={16} />,
+                    },
+                  ]}
+                  value={browseView}
+                  onValueChange={(val) => setBrowseView(val as "grid" | "list")}
+                />
+
+                <SegmentedController
+                  options={[
+                    { value: "rating", label: "Highest Rated" },
+                    { value: "sessions", label: "Most Sessions" },
+                  ]}
+                  value={sortBy}
+                  onValueChange={(val) => setSortBy(val as "rating" | "sessions")}
+                />
+              </div>
+
+              {/* Sector Filters */}
+              <div className="flex flex-wrap gap-2">
+                <Chip
+                  variant="neutral"
+                  size="sm"
+                  selected={selectedSector === null}
+                  clickable
+                  onClick={() => setSelectedSector(null)}
+                >
+                  All Sectors
+                </Chip>
+                {SECTOR_OPTIONS.map((sector) => (
+                  <Chip
+                    key={sector.value}
+                    variant="neutral"
+                    size="sm"
+                    selected={selectedSector === sector.value}
+                    clickable
+                    onClick={() =>
+                      setSelectedSector(
+                        selectedSector === sector.value ? null : (sector.value as Sector)
+                      )
+                    }
+                  >
+                    {sector.label}
+                  </Chip>
+                ))}
+              </div>
+
+              {/* Coach Cards */}
               {filteredCoaches.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div
+                  className={
+                    browseView === "grid"
+                      ? "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
+                      : "space-y-4"
+                  }
+                >
                   {filteredCoaches.map((coach) => (
-                    <CoachBrowseCard key={coach.id} coach={coach} />
+                    <CoachCard
+                      key={coach.id}
+                      coach={coach}
+                      variant={browseView}
+                      onViewProfile={handleViewProfile}
+                      onClick={handleViewProfile}
+                    />
                   ))}
                 </div>
               ) : (
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
-                  <MagnifyingGlass
-                    size={48}
-                    weight="light"
-                    className="mx-auto mb-3 text-[var(--primitive-neutral-400)]"
-                  />
-                  <p className="text-body font-medium text-[var(--foreground-default)]">
-                    No coaches found
-                  </p>
-                  <p className="mt-1 text-caption text-[var(--foreground-muted)]">
-                    Try adjusting your search terms
-                  </p>
-                </div>
+                <EmptyState
+                  icon={
+                    <MagnifyingGlass
+                      size={48}
+                      weight="light"
+                      className="text-[var(--foreground-disabled)]"
+                    />
+                  }
+                  title="No coaches found"
+                  description={
+                    searchQuery
+                      ? "Try adjusting your search terms or sector filter."
+                      : "No coaches are available at the moment."
+                  }
+                />
               )}
             </div>
           </TabsContent>
         </Tabs>
       </div>
-    </div>
-  );
-}
-
-function EmptySessionsState() {
-  return (
-    <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
-      <GraduationCap
-        size={48}
-        weight="light"
-        className="mx-auto mb-3 text-[var(--primitive-neutral-400)]"
-      />
-      <p className="text-body font-medium text-[var(--foreground-default)]">
-        No coaching sessions yet
-      </p>
-      <p className="mt-1 text-caption text-[var(--foreground-muted)]">
-        <Link
-          href="#"
-          className="text-[var(--foreground-link)] underline hover:text-[var(--foreground-link-hover)]"
-          onClick={(e) => {
-            e.preventDefault();
-            // Switch to the Find a Coach tab
-            const trigger = document.querySelector(
-              '[data-radix-collection-item][value="find"]'
-            ) as HTMLButtonElement | null;
-            trigger?.click();
-          }}
-        >
-          Find a coach
-        </Link>{" "}
-        to get started
-      </p>
     </div>
   );
 }

@@ -1,199 +1,542 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Handshake, ChatCircle, MagnifyingGlass } from "@phosphor-icons/react";
+import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {
+  Handshake,
+  MagnifyingGlass,
+  ChatCircleDots,
+  UserCirclePlus,
+  Users,
+} from "@phosphor-icons/react";
 import { PageHeader } from "@/components/shell/page-header";
-import { Spinner } from "@/components/ui/spinner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
+import {
+  Button,
+  Spinner,
+  Badge,
+  Avatar,
+  Card,
+  CardContent,
+  SearchInput,
+  SegmentedController,
+  EmptyState,
+  Chip,
+} from "@/components/ui";
 import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/components/ui/tabs";
-import type { MyMentorData } from "./components/types";
+import { MentorListItem, MentorDetailPanel } from "@/components/coaching";
+import type {
+  Mentor,
+  MentorFilterType,
+  MyMentorData,
+  MyMenteeData,
+  MentorshipStatus,
+} from "@/lib/coaching";
 import { logger, formatError } from "@/lib/logger";
 
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
 
-function statusBadgeVariant(status: MyMentorData["status"]) {
-  switch (status) {
-    case "active":
-      return "success" as const;
-    case "pending":
-      return "warning" as const;
-    case "completed":
-      return "neutral" as const;
-    default:
-      return "neutral" as const;
-  }
-}
+const FILTER_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "recommended", label: "Recommended" },
+  { value: "available", label: "Available" },
+] as const;
 
-function statusLabel(status: MyMentorData["status"]): string {
-  switch (status) {
-    case "active":
-      return "Active";
-    case "pending":
-      return "Pending";
-    case "completed":
-      return "Completed";
-    default:
-      return status;
-  }
-}
+const STATUS_BADGE_MAP: Record<
+  MentorshipStatus,
+  { label: string; variant: "success" | "warning" | "neutral" | "info" }
+> = {
+  ACTIVE: { label: "Active", variant: "success" },
+  PENDING: { label: "Pending", variant: "warning" },
+  PAUSED: { label: "Paused", variant: "info" },
+  COMPLETED: { label: "Completed", variant: "neutral" },
+};
 
-/* ------------------------------------------------------------------ */
-/*  Page Component                                                     */
-/* ------------------------------------------------------------------ */
+// ---------------------------------------------------------------------------
+// Inner Content (needs Suspense for useSearchParams)
+// ---------------------------------------------------------------------------
 
-export default function MentoringPage() {
-  const [loading, setLoading] = useState(true);
-  const [assignments, setAssignments] = useState<MyMentorData[]>([]);
+function MentoringContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") ?? "find";
 
-  /* ---- data fetch ------------------------------------------------ */
+  // ---- State ----
+  const [mentors, setMentors] = useState<Mentor[]>([]);
+  const [mentorsLoading, setMentorsLoading] = useState(true);
+  const [myMentors, setMyMentors] = useState<MyMentorData[]>([]);
+  const [myMentees, setMyMentees] = useState<MyMenteeData[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<MentorFilterType>("all");
+  const [selectedMentorId, setSelectedMentorId] = useState<string | null>(
+    searchParams.get("mentor")
+  );
+
+  // ---- Fetch mentors for browse ----
   useEffect(() => {
-    const fetchAssignments = async () => {
+    const fetchMentors = async () => {
       try {
-        const res = await fetch("/api/mentor-assignments/mine");
+        const params = new URLSearchParams();
+        if (search) params.set("search", search);
+        if (filter !== "all") params.set("filter", filter);
+
+        const url = `/api/mentors${params.toString() ? `?${params.toString()}` : ""}`;
+        const res = await fetch(url);
 
         if (res.ok) {
           const data = await res.json();
-          setAssignments(data.assignments ?? []);
+          setMentors(data.mentors ?? []);
         } else {
-          setAssignments([]);
+          setMentors([]);
         }
       } catch (err) {
-        logger.error("Error fetching mentor assignments", { error: formatError(err) });
-        setAssignments([]);
+        logger.error("Error fetching mentors", {
+          error: formatError(err),
+        });
+        setMentors([]);
       } finally {
-        setLoading(false);
+        setMentorsLoading(false);
+      }
+    };
+
+    fetchMentors();
+  }, [search, filter]);
+
+  // ---- Fetch my mentors & mentees ----
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const [mentorsRes, menteesRes] = await Promise.all([
+          fetch("/api/mentor-assignments/mine"),
+          fetch("/api/mentor-assignments/mentees"),
+        ]);
+
+        if (mentorsRes.ok) {
+          const data = await mentorsRes.json();
+          setMyMentors(data.assignments ?? []);
+        }
+
+        if (menteesRes.ok) {
+          const data = await menteesRes.json();
+          setMyMentees(data.mentees ?? []);
+        }
+      } catch (err) {
+        logger.error("Error fetching assignments", {
+          error: formatError(err),
+        });
+      } finally {
+        setAssignmentsLoading(false);
       }
     };
 
     fetchAssignments();
   }, []);
 
-  /* ---- loading state --------------------------------------------- */
-  if (loading) {
-    return (
-      <div>
-        <PageHeader title="Mentoring" />
-        <div className="flex items-center justify-center py-32">
-          <Spinner size="lg" />
-        </div>
-      </div>
-    );
-  }
+  // ---- Client-side filtering ----
+  const filteredMentors = useMemo(() => {
+    let result = mentors;
 
-  /* ---- render ---------------------------------------------------- */
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          m.role.toLowerCase().includes(q) ||
+          (m.company ?? "").toLowerCase().includes(q) ||
+          (m.specialties ?? []).some((s) => s.toLowerCase().includes(q))
+      );
+    }
+
+    if (filter === "recommended") {
+      result = result.filter((m) => (m.matchScore ?? 0) >= 70);
+    }
+
+    return result;
+  }, [mentors, search, filter]);
+
+  // ---- Selected mentor for detail panel ----
+  const selectedMentor = useMemo(
+    () => filteredMentors.find((m) => m.id === selectedMentorId) ?? null,
+    [filteredMentors, selectedMentorId]
+  );
+
+  const selectMentor = useCallback(
+    (mentor: Mentor) => {
+      setSelectedMentorId(mentor.id);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("mentor", mentor.id);
+      router.push(`/jobs/mentoring?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  const clearSelection = useCallback(() => {
+    setSelectedMentorId(null);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("mentor");
+    router.push(`/jobs/mentoring?${params.toString()}`, { scroll: false });
+  }, [router, searchParams]);
+
+  const handleConnect = useCallback((mentor: Mentor) => {
+    // Navigate to messages or trigger intro request
+    logger.info("Mentor connect requested", { mentorId: mentor.id });
+  }, []);
+
+  const handleMessage = useCallback(
+    (mentorAccountId: string) => {
+      router.push(`/jobs/messages?contact=${mentorAccountId}`);
+    },
+    [router]
+  );
+
+  // ---- Render ----
   return (
     <div>
       <PageHeader title="Mentoring" />
 
       <div className="px-8 py-8 lg:px-12">
-        <Tabs defaultValue="my-mentors">
+        <Tabs defaultValue={initialTab}>
           <TabsListUnderline>
-            <TabsTriggerUnderline value="my-mentors">My Mentors</TabsTriggerUnderline>
-            <TabsTriggerUnderline value="find-mentors">Find Mentors</TabsTriggerUnderline>
+            <TabsTriggerUnderline value="find">Find Mentors</TabsTriggerUnderline>
+            <TabsTriggerUnderline value="my-mentors">
+              My Mentors
+              {myMentors.length > 0 && (
+                <Badge variant="neutral" size="sm" className="ml-2">
+                  {myMentors.length}
+                </Badge>
+              )}
+            </TabsTriggerUnderline>
+            <TabsTriggerUnderline value="my-mentees">
+              My Mentees
+              {myMentees.length > 0 && (
+                <Badge variant="neutral" size="sm" className="ml-2">
+                  {myMentees.length}
+                </Badge>
+              )}
+            </TabsTriggerUnderline>
           </TabsListUnderline>
 
-          {/* ---- My Mentors Tab ----------------------------------- */}
+          {/* ============================================================= */}
+          {/* Find Mentors Tab                                               */}
+          {/* ============================================================= */}
+          <TabsContent value="find">
+            <div className="mt-6 flex h-[calc(100vh-260px)] min-h-[400px]">
+              {/* Left panel: search + list */}
+              <div
+                className={`flex w-full flex-col border-[var(--border-muted)] lg:w-[400px] lg:shrink-0 lg:border-r ${
+                  selectedMentor ? "hidden lg:flex" : "flex"
+                }`}
+              >
+                {/* Search */}
+                <div className="px-2 pb-3">
+                  <SearchInput
+                    placeholder="Search mentors..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    size="compact"
+                  />
+                </div>
+
+                {/* Filter pills */}
+                <div className="px-2 pb-3">
+                  <SegmentedController
+                    options={FILTER_OPTIONS.map((f) => ({
+                      value: f.value,
+                      label: f.label,
+                    }))}
+                    value={filter}
+                    onValueChange={(v) => setFilter(v as MentorFilterType)}
+                    fullWidth
+                  />
+                </div>
+
+                {/* Scrollable list */}
+                <div className="flex-1 overflow-y-auto px-1 pb-4">
+                  {mentorsLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                      <Spinner size="md" />
+                    </div>
+                  ) : filteredMentors.length > 0 ? (
+                    <div className="space-y-1">
+                      {filteredMentors.map((mentor) => (
+                        <MentorListItem
+                          key={mentor.id}
+                          mentor={mentor}
+                          selected={mentor.id === selectedMentorId}
+                          onClick={selectMentor}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-12">
+                      <EmptyState
+                        icon={<MagnifyingGlass size={40} weight="light" />}
+                        title="No mentors found"
+                        description="Try adjusting your search or filters"
+                        size="sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right panel: detail */}
+              <div className={`flex-1 ${selectedMentor ? "flex" : "hidden lg:flex"}`}>
+                {selectedMentor ? (
+                  <MentorDetailPanel
+                    mentor={selectedMentor}
+                    onConnect={handleConnect}
+                    onBack={clearSelection}
+                    showBack
+                    className="w-full"
+                  />
+                ) : (
+                  <div className="flex flex-1 items-center justify-center">
+                    <EmptyState
+                      icon={<UserCirclePlus size={48} weight="light" />}
+                      title="Select a mentor"
+                      description="Choose a mentor from the list to view their profile"
+                      size="sm"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ============================================================= */}
+          {/* My Mentors Tab                                                 */}
+          {/* ============================================================= */}
           <TabsContent value="my-mentors">
             <div className="mt-6">
-              {assignments.length > 0 ? (
-                <div className="space-y-4">
-                  {assignments.map((assignment) => (
-                    <div
+              {assignmentsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Spinner size="lg" />
+                </div>
+              ) : myMentors.length > 0 ? (
+                <div className="space-y-3">
+                  {myMentors.map((assignment) => (
+                    <MentorAssignmentCard
                       key={assignment.id}
-                      className="flex items-start gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-0)] p-5"
-                    >
-                      {/* Avatar */}
-                      <Avatar
-                        src={assignment.mentor.avatar ?? undefined}
-                        name={assignment.mentor.name}
-                        size="default"
-                        className="shrink-0"
-                      />
-
-                      {/* Content */}
-                      <div className="min-w-0 flex-1">
-                        {/* Name + status */}
-                        <div className="mb-1 flex items-center gap-3">
-                          <p className="truncate text-body-sm font-semibold text-[var(--primitive-green-800)]">
-                            {assignment.mentor.name}
-                          </p>
-                          <Badge variant={statusBadgeVariant(assignment.status)} size="sm">
-                            {statusLabel(assignment.status)}
-                          </Badge>
-                        </div>
-
-                        {/* Headline */}
-                        <p className="mb-2 truncate text-caption text-[var(--primitive-neutral-600)]">
-                          {assignment.mentor.headline}
-                        </p>
-
-                        {/* Specialties */}
-                        <div className="mb-3 flex flex-wrap gap-1.5">
-                          {assignment.mentor.specialties.map((specialty) => (
-                            <Badge key={specialty} variant="neutral" size="sm">
-                              {specialty}
-                            </Badge>
-                          ))}
-                        </div>
-
-                        {/* Action for active mentors */}
-                        {assignment.status === "active" && (
-                          <Button
-                            variant="tertiary"
-                            size="sm"
-                            leftIcon={<ChatCircle size={16} weight="regular" />}
-                          >
-                            Message
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                      assignment={assignment}
+                      onMessage={() => handleMessage(assignment.accountId)}
+                    />
                   ))}
                 </div>
               ) : (
-                /* Empty state */
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-0)] p-8 text-center">
-                  <Handshake
-                    size={48}
-                    weight="light"
-                    className="mx-auto mb-3 text-[var(--foreground-subtle)]"
-                  />
-                  <p className="text-body font-medium text-[var(--foreground-default)]">
-                    No mentors yet
-                  </p>
-                  <p className="mt-1 text-caption text-[var(--foreground-muted)]">
-                    Find a mentor to guide your climate career.
-                  </p>
-                </div>
+                <EmptyState
+                  icon={<Handshake size={48} weight="light" />}
+                  title="No mentors yet"
+                  description="Find a mentor to guide your climate career journey."
+                  action={{
+                    label: "Find Mentors",
+                    onClick: () => router.push("/jobs/mentoring?tab=find"),
+                  }}
+                />
               )}
             </div>
           </TabsContent>
 
-          {/* ---- Find Mentors Tab --------------------------------- */}
-          <TabsContent value="find-mentors">
+          {/* ============================================================= */}
+          {/* My Mentees Tab                                                 */}
+          {/* ============================================================= */}
+          <TabsContent value="my-mentees">
             <div className="mt-6">
-              <div className="rounded-[16px] bg-[var(--primitive-green-100)] p-8 text-center">
-                <MagnifyingGlass
-                  size={40}
-                  weight="light"
-                  className="mx-auto mb-4 text-[var(--primitive-green-700)]"
+              {assignmentsLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Spinner size="lg" />
+                </div>
+              ) : myMentees.length > 0 ? (
+                <div className="space-y-3">
+                  {myMentees.map((mentee) => (
+                    <MenteeCard
+                      key={mentee.id}
+                      mentee={mentee}
+                      onMessage={() => handleMessage(mentee.accountId)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={<Users size={48} weight="light" />}
+                  title="No mentees yet"
+                  description="When someone requests you as a mentor, they'll appear here."
                 />
-                <p className="mb-4 text-body text-[var(--primitive-green-800)]">
-                  Browse available mentors and send introduction requests
-                </p>
-                <Link href="/jobs/mentoring/connect">
-                  <Button variant="primary">Find Mentors</Button>
-                </Link>
-              </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Mentor Assignment Card (My Mentors tab)
+// ---------------------------------------------------------------------------
+
+function MentorAssignmentCard({
+  assignment,
+  onMessage,
+}: {
+  assignment: MyMentorData;
+  onMessage: () => void;
+}) {
+  const status = STATUS_BADGE_MAP[assignment.status] ?? {
+    label: assignment.status,
+    variant: "neutral" as const,
+  };
+
+  const specialties = assignment.specialties ?? [];
+
+  return (
+    <Card>
+      <CardContent className="flex items-start gap-4 p-4">
+        <Avatar
+          size="default"
+          src={assignment.avatar ?? undefined}
+          fallback={assignment.name.charAt(0)}
+          className="shrink-0"
+        />
+
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="truncate text-body-sm font-semibold text-[var(--foreground-default)]">
+              {assignment.name}
+            </span>
+            <Badge variant={status.variant} size="sm">
+              {status.label}
+            </Badge>
+          </div>
+
+          {assignment.headline && (
+            <p className="mb-2 truncate text-caption text-[var(--foreground-muted)]">
+              {assignment.headline}
+            </p>
+          )}
+
+          {!assignment.headline && assignment.role && (
+            <p className="mb-2 truncate text-caption text-[var(--foreground-muted)]">
+              {assignment.role}
+              {assignment.specialty ? ` \u00B7 ${assignment.specialty}` : ""}
+            </p>
+          )}
+
+          {specialties.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {specialties.map((s) => (
+                <Chip key={s} variant="neutral" size="sm">
+                  {s}
+                </Chip>
+              ))}
+            </div>
+          )}
+
+          {assignment.status === "ACTIVE" && (
+            <Button variant="tertiary" size="sm" onClick={onMessage}>
+              <ChatCircleDots size={16} className="mr-1" />
+              Message
+            </Button>
+          )}
+        </div>
+
+        <div className="flex flex-col items-end gap-1 text-caption text-[var(--foreground-subtle)]">
+          <span>
+            Since{" "}
+            {new Date(assignment.startedAt).toLocaleDateString("en-US", {
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
+          {assignment.lastSessionAt && (
+            <span>
+              Last session{" "}
+              {new Date(assignment.lastSessionAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Mentee Card (My Mentees tab)
+// ---------------------------------------------------------------------------
+
+function MenteeCard({ mentee, onMessage }: { mentee: MyMenteeData; onMessage: () => void }) {
+  const status = STATUS_BADGE_MAP[mentee.status] ?? {
+    label: mentee.status,
+    variant: "neutral" as const,
+  };
+
+  return (
+    <Card>
+      <CardContent className="flex items-start gap-4 p-4">
+        <Avatar
+          size="default"
+          src={mentee.avatar ?? undefined}
+          fallback={mentee.name.charAt(0)}
+          className="shrink-0"
+        />
+
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            <span className="truncate text-body-sm font-semibold text-[var(--foreground-default)]">
+              {mentee.name}
+            </span>
+            <Badge variant={status.variant} size="sm">
+              {status.label}
+            </Badge>
+          </div>
+
+          {mentee.goal && (
+            <p className="mb-2 text-caption text-[var(--foreground-muted)]">Goal: {mentee.goal}</p>
+          )}
+
+          {mentee.status === "ACTIVE" && (
+            <Button variant="tertiary" size="sm" onClick={onMessage}>
+              <ChatCircleDots size={16} className="mr-1" />
+              Message
+            </Button>
+          )}
+        </div>
+
+        <div className="text-caption text-[var(--foreground-subtle)]">
+          Since{" "}
+          {new Date(mentee.startedAt).toLocaleDateString("en-US", {
+            month: "short",
+            year: "numeric",
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Page (Suspense wrapper for useSearchParams)
+// ---------------------------------------------------------------------------
+
+export default function MentoringPage() {
+  return (
+    <Suspense
+      fallback={
+        <div>
+          <PageHeader title="Mentoring" />
+          <div className="flex min-h-[60vh] items-center justify-center">
+            <Spinner size="lg" />
+          </div>
+        </div>
+      }
+    >
+      <MentoringContent />
+    </Suspense>
   );
 }

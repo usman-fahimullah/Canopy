@@ -1,22 +1,18 @@
 import Link from "next/link";
-import { CandidLogo } from "@/app/candid/components/CandidLogo";
+import { CandidLogo } from "@/components/brand/candid-logo";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--primitive-neutral-50)]">
       {/* Admin Header */}
-      <header className="bg-[var(--background-default)] border-b border-[var(--primitive-neutral-200)] sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header className="sticky top-0 z-50 border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/admin">
                 <CandidLogo width={100} height={25} />
               </Link>
-              <span className="px-2 py-1 bg-[var(--primitive-orange-100)] text-[var(--primitive-orange-700)] text-xs font-medium rounded">
+              <span className="rounded bg-[var(--primitive-orange-100)] px-2 py-1 text-xs font-medium text-[var(--primitive-orange-700)]">
                 Admin
               </span>
             </div>
@@ -53,7 +49,7 @@ export default function AdminLayout({
                 Analytics
               </Link>
               <Link
-                href="/candid/dashboard"
+                href="/jobs"
                 className="text-sm text-[var(--primitive-neutral-500)] hover:text-[var(--primitive-green-700)]"
               >
                 ← Back to App
@@ -64,9 +60,7 @@ export default function AdminLayout({
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
     </div>
   );
 }

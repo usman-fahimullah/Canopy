@@ -19,13 +19,12 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -38,7 +37,6 @@ export async function POST(request: NextRequest) {
     }
     const { coachId, sessionDate, sessionDuration } = result.data;
 
-
     // Get coach profile
     const coach = await prisma.coachProfile.findUnique({
       where: { id: coachId },
@@ -48,17 +46,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!coach) {
-      return NextResponse.json(
-        { error: "Coach not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Coach not found" }, { status: 404 });
     }
 
     if (!coach.stripeAccountId) {
-      return NextResponse.json(
-        { error: "Coach has not set up payments yet" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Coach has not set up payments yet" }, { status: 400 });
     }
 
     // Get mentee profile
@@ -74,10 +66,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!mentee) {
-      return NextResponse.json(
-        { error: "Mentee profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Mentee profile not found" }, { status: 404 });
     }
 
     // Calculate fees
@@ -113,8 +102,8 @@ export async function POST(request: NextRequest) {
         },
       },
       customer_email: user.email,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/sessions/booking-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/browse/${coachId}?booking=cancelled`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/jobs/coaching/book/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/jobs/coaching?booking=cancelled`,
       metadata: {
         coachId: coach.id,
         menteeId: mentee.id,
@@ -130,10 +119,10 @@ export async function POST(request: NextRequest) {
       url: session.url,
     });
   } catch (error) {
-    logger.error("Checkout session error", { error: formatError(error), endpoint: "/api/payments/checkout" });
-    return NextResponse.json(
-      { error: "Failed to create checkout session" },
-      { status: 500 }
-    );
+    logger.error("Checkout session error", {
+      error: formatError(error),
+      endpoint: "/api/payments/checkout",
+    });
+    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 });
   }
 }

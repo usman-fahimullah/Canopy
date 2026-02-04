@@ -9,10 +9,7 @@ import { RescheduleSessionSchema } from "@/lib/validators/api";
 
 // POST — reschedule a session
 // Body: { newDate: string (ISO), newTime: string (HH:MM) }
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Rate limit: 5 reschedules per minute per IP
     const ip = request.headers.get("x-forwarded-for") || "unknown";
@@ -26,7 +23,9 @@ export async function POST(
 
     const { id: sessionId } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -61,8 +60,7 @@ export async function POST(
     }
 
     // Must be at least 24 hours before session
-    const hoursUntilSession =
-      (session.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
+    const hoursUntilSession = (session.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
     if (hoursUntilSession < 24) {
       return NextResponse.json(
         { error: "Cannot reschedule within 24 hours of the session" },
@@ -86,11 +84,7 @@ export async function POST(
     }
 
     // Check new slot is available
-    const available = await isSlotAvailable(
-      session.coachId,
-      newDateTime,
-      session.duration
-    );
+    const available = await isSlotAvailable(session.coachId, newDateTime, session.duration);
 
     if (!available) {
       return NextResponse.json(
@@ -107,11 +101,11 @@ export async function POST(
 
     // Notify the other party
     const reschedulerName = isCoach
-      ? [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") || session.coach.account.name || "Your coach"
+      ? [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") ||
+        session.coach.account.name ||
+        "Your coach"
       : session.mentee.account.name || "Your mentee";
-    const recipientAccountId = isCoach
-      ? session.mentee.account.id
-      : session.coach.account.id;
+    const recipientAccountId = isCoach ? session.mentee.account.id : session.coach.account.id;
 
     await createNotification({
       accountId: recipientAccountId,
@@ -120,18 +114,21 @@ export async function POST(
       body: `${reschedulerName} has rescheduled the session to ${newDateTime.toLocaleDateString()}.`,
       data: {
         sessionId: session.id,
-        url: `/candid/sessions/${session.id}`,
+        url: `/jobs/coaching`,
       },
     }).catch((err) => {
-      logger.error("Failed to send reschedule notification", { error: formatError(err), endpoint: "/api/sessions/[id]/reschedule" });
+      logger.error("Failed to send reschedule notification", {
+        error: formatError(err),
+        endpoint: "/api/sessions/[id]/reschedule",
+      });
     });
 
     return NextResponse.json({ success: true, session: updated });
   } catch (error) {
-    logger.error("Reschedule session error", { error: formatError(error), endpoint: "/api/sessions/[id]/reschedule" });
-    return NextResponse.json(
-      { error: "Failed to reschedule session" },
-      { status: 500 }
-    );
+    logger.error("Reschedule session error", {
+      error: formatError(error),
+      endpoint: "/api/sessions/[id]/reschedule",
+    });
+    return NextResponse.json({ error: "Failed to reschedule session" }, { status: 500 });
   }
 }

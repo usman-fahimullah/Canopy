@@ -49,13 +49,17 @@ export function sessionBookingConfirmation(data: SessionBookingData) {
             <p style="margin: 8px 0;"><strong>Coach:</strong> ${data.coachName}</p>
           </div>
 
-          ${data.meetingLink ? `
+          ${
+            data.meetingLink
+              ? `
           <div style="text-align: center; margin: 24px 0;">
             <a href="${data.meetingLink}" style="background-color: #0D5C4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               Join Video Call
             </a>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
 
           <p style="color: #666;">
             Please ensure you're prepared and in a quiet space before your session begins.
@@ -88,7 +92,7 @@ Session Details:
 - Duration: ${data.sessionDuration} minutes
 - Coach: ${data.coachName}
 
-${data.meetingLink ? `Join your session: ${data.meetingLink}` : ''}
+${data.meetingLink ? `Join your session: ${data.meetingLink}` : ""}
 
 Please ensure you're prepared and in a quiet space before your session begins.
 
@@ -135,13 +139,17 @@ export function sessionReminder(data: SessionReminderData) {
             <p style="margin: 0;"><strong>📅 ${formattedDate} at ${formattedTime}</strong></p>
           </div>
 
-          ${data.meetingLink ? `
+          ${
+            data.meetingLink
+              ? `
           <div style="text-align: center; margin: 24px 0;">
             <a href="${data.meetingLink}" style="background-color: #0D5C4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               Add to Calendar
             </a>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
 
           <h3>Tips for a great session:</h3>
           <ul style="color: #666;">
@@ -212,7 +220,7 @@ export function coachApplicationApproved(data: CoachApprovalData) {
           </div>
 
           <div style="text-align: center; margin: 24px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/candid/coach-dashboard" style="background-color: #0D5C4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/candid/coach" style="background-color: #0D5C4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               Go to Your Dashboard
             </a>
           </div>
@@ -244,7 +252,7 @@ Next Steps:
 3. Connect your Stripe account for payments
 4. Start accepting bookings!
 
-Go to your dashboard: ${process.env.NEXT_PUBLIC_APP_URL}/candid/coach-dashboard
+Go to your dashboard: ${process.env.NEXT_PUBLIC_APP_URL}/candid/coach
 
 If you have any questions, feel free to reach out to our support team.
 
@@ -348,18 +356,22 @@ export function teamInviteEmail(data: TeamInviteData) {
 
           <div style="background-color: #F3F7F6; border-radius: 8px; padding: 24px; margin: 24px 0;">
             <h3 style="margin: 0 0 16px 0; color: #0A3D2C;">What you'll be able to do</h3>
-            ${data.role === "RECRUITER" ? `
+            ${
+              data.role === "RECRUITER"
+                ? `
             <ul style="margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 8px;">Post and manage job roles</li>
               <li style="margin-bottom: 8px;">Review and manage candidates</li>
               <li style="margin-bottom: 8px;">View hiring analytics</li>
             </ul>
-            ` : `
+            `
+                : `
             <ul style="margin: 0; padding-left: 20px; color: #333;">
               <li style="margin-bottom: 8px;">View candidates for your assigned roles</li>
               <li style="margin-bottom: 8px;">Leave feedback and evaluations</li>
             </ul>
-            `}
+            `
+            }
           </div>
 
           <div style="text-align: center; margin: 24px 0;">
@@ -436,7 +448,7 @@ export function newBookingNotification(data: NewBookingNotificationData) {
           </div>
 
           <div style="text-align: center; margin: 24px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/candid/coach-dashboard" style="background-color: #0D5C4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/candid/coach" style="background-color: #0D5C4D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               View in Dashboard
             </a>
           </div>
@@ -466,7 +478,7 @@ Session Details:
 - Time: ${formattedTime}
 - Duration: ${data.sessionDuration} minutes
 
-View in Dashboard: ${process.env.NEXT_PUBLIC_APP_URL}/candid/coach-dashboard
+View in Dashboard: ${process.env.NEXT_PUBLIC_APP_URL}/candid/coach
 
 The meeting link will be available in your dashboard before the session.
 

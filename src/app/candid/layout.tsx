@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { CandidLayoutInner } from "./components/CandidLayoutInner";
 
 export const metadata: Metadata = {
-  title: "Candid - Climate Career Mentorship & Coaching",
+  title: "Candid - Climate Career Coaching",
   description:
-    "You Can & You Did. A climate career mentorship and coaching platform connecting job seekers with experienced climate professionals.",
+    "A climate career coaching platform connecting job seekers with experienced climate professionals.",
 };
 
 export default function CandidLayout({
@@ -12,5 +11,7 @@ export default function CandidLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <CandidLayoutInner>{children}</CandidLayoutInner>;
+  // The coach sub-shell at /candid/coach/* has its own ShellLayout.
+  // This parent layout provides only shared metadata.
+  return <>{children}</>;
 }

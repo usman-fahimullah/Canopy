@@ -56,21 +56,18 @@ export default function ResetPasswordPage() {
   // Success state
   if (success) {
     return (
-      <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
+      <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
         <div className="text-center">
-          <div className="w-16 h-16 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-[var(--primitive-green-600)]" weight="bold" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
+            <CheckCircle className="h-8 w-8 text-[var(--primitive-green-600)]" weight="bold" />
           </div>
-          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
+          <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">
             Password updated
           </h1>
-          <p className="text-[var(--primitive-neutral-600)] mb-6">
+          <p className="mb-6 text-[var(--primitive-neutral-600)]">
             Your password has been successfully reset. You can now sign in with your new password.
           </p>
-          <Button
-            className="w-full"
-            onClick={() => router.push("/candid/dashboard")}
-          >
+          <Button className="w-full" onClick={() => router.push("/jobs")}>
             Go to dashboard
           </Button>
         </div>
@@ -79,19 +76,20 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-2">
+    <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
+      <div className="mb-8 text-center">
+        <h1 className="mb-2 text-2xl font-bold text-[var(--primitive-green-800)]">
           Set new password
         </h1>
-        <p className="text-[var(--primitive-neutral-600)]">
-          Enter your new password below
-        </p>
+        <p className="text-[var(--primitive-neutral-600)]">Enter your new password below</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium text-[var(--primitive-green-800)]">
+          <label
+            htmlFor="password"
+            className="text-sm font-medium text-[var(--primitive-green-800)]"
+          >
             New password
           </label>
           <Input
@@ -107,7 +105,10 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="confirmPassword" className="text-sm font-medium text-[var(--primitive-green-800)]">
+          <label
+            htmlFor="confirmPassword"
+            className="text-sm font-medium text-[var(--primitive-green-800)]"
+          >
             Confirm new password
           </label>
           <Input
@@ -123,16 +124,9 @@ export default function ResetPasswordPage() {
           />
         </div>
 
-        {error && (
-          <InputMessage status="error">{error}</InputMessage>
-        )}
+        {error && <InputMessage status="error">{error}</InputMessage>}
 
-        <Button
-          type="submit"
-          className="w-full"
-          loading={loading}
-          disabled={loading}
-        >
+        <Button type="submit" className="w-full" loading={loading} disabled={loading}>
           Update password
         </Button>
       </form>

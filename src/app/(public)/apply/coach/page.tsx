@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input, InputMessage } from "@/components/ui/input";
-import { CandidLogo } from "@/app/candid/components/CandidLogo";
+import { CandidLogo } from "@/components/brand/candid-logo";
 import {
   User,
   Briefcase,
@@ -109,17 +109,17 @@ export default function CoachApplicationPage() {
   if (step === "intro") {
     return (
       <ApplicationLayout>
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[var(--primitive-green-800)] mb-4">
+        <div className="mb-8 text-center">
+          <h1 className="mb-4 text-3xl font-bold text-[var(--primitive-green-800)]">
             Become a Candid Coach
           </h1>
-          <p className="text-lg text-[var(--primitive-neutral-600)] max-w-md mx-auto">
+          <p className="mx-auto max-w-md text-lg text-[var(--primitive-neutral-600)]">
             Share your climate expertise and help others transition into impactful careers.
           </p>
         </div>
 
-        <div className="bg-[var(--primitive-green-50)] rounded-xl p-6 mb-8">
-          <h2 className="font-semibold text-[var(--primitive-green-800)] mb-4">
+        <div className="mb-8 rounded-xl bg-[var(--primitive-green-50)] p-6">
+          <h2 className="mb-4 font-semibold text-[var(--primitive-green-800)]">
             What you&apos;ll get:
           </h2>
           <ul className="space-y-3 text-[var(--primitive-green-700)]">
@@ -142,10 +142,8 @@ export default function CoachApplicationPage() {
           </ul>
         </div>
 
-        <div className="bg-[var(--card-background)] border border-[var(--primitive-neutral-200)] rounded-xl p-6 mb-8">
-          <h2 className="font-semibold text-[var(--primitive-green-800)] mb-4">
-            Requirements:
-          </h2>
+        <div className="mb-8 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
+          <h2 className="mb-4 font-semibold text-[var(--primitive-green-800)]">Requirements:</h2>
           <ul className="space-y-2 text-[var(--primitive-neutral-600)]">
             <li>• 3+ years of experience in climate-related work</li>
             <li>• Active LinkedIn profile</li>
@@ -167,17 +165,18 @@ export default function CoachApplicationPage() {
     return (
       <ApplicationLayout>
         <div className="text-center">
-          <div className="w-20 h-20 bg-[var(--primitive-green-100)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
             <CheckCircle size={48} weight="fill" className="text-[var(--primitive-green-600)]" />
           </div>
-          <h1 className="text-2xl font-bold text-[var(--primitive-green-800)] mb-4">
+          <h1 className="mb-4 text-2xl font-bold text-[var(--primitive-green-800)]">
             Application Submitted!
           </h1>
-          <p className="text-[var(--primitive-neutral-600)] mb-8">
-            Thanks for applying to become a Candid coach. We&apos;ll review your application and get back to you within 3-5 business days.
+          <p className="mb-8 text-[var(--primitive-neutral-600)]">
+            Thanks for applying to become a Candid coach. We&apos;ll review your application and get
+            back to you within 3-5 business days.
           </p>
-          <div className="bg-[var(--primitive-neutral-50)] rounded-xl p-6 mb-8 text-left">
-            <h2 className="font-semibold text-[var(--primitive-green-800)] mb-3">
+          <div className="mb-8 rounded-xl bg-[var(--primitive-neutral-50)] p-6 text-left">
+            <h2 className="mb-3 font-semibold text-[var(--primitive-green-800)]">
               What happens next?
             </h2>
             <ol className="space-y-2 text-sm text-[var(--primitive-neutral-600)]">
@@ -200,14 +199,24 @@ export default function CoachApplicationPage() {
     <ApplicationLayout>
       {/* Progress */}
       <div className="mb-8">
-        <div className="flex justify-between text-sm text-[var(--primitive-neutral-600)] mb-2">
+        <div className="mb-2 flex justify-between text-sm text-[var(--primitive-neutral-600)]">
           <span>Step {["personal", "experience", "details", "review"].indexOf(step) + 1} of 4</span>
-          <span>{step === "personal" ? "Personal Info" : step === "experience" ? "Experience" : step === "details" ? "Coaching Details" : "Review"}</span>
+          <span>
+            {step === "personal"
+              ? "Personal Info"
+              : step === "experience"
+                ? "Experience"
+                : step === "details"
+                  ? "Coaching Details"
+                  : "Review"}
+          </span>
         </div>
-        <div className="h-2 bg-[var(--primitive-neutral-200)] rounded-full">
+        <div className="h-2 rounded-full bg-[var(--primitive-neutral-200)]">
           <div
-            className="h-full bg-[var(--primitive-green-600)] rounded-full transition-all"
-            style={{ width: `${(["personal", "experience", "details", "review"].indexOf(step) + 1) * 25}%` }}
+            className="h-full rounded-full bg-[var(--primitive-green-600)] transition-all"
+            style={{
+              width: `${(["personal", "experience", "details", "review"].indexOf(step) + 1) * 25}%`,
+            }}
           />
         </div>
       </div>
@@ -244,9 +253,7 @@ export default function CoachApplicationPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium text-[var(--primitive-green-800)]">
-              Email *
-            </label>
+            <label className="text-sm font-medium text-[var(--primitive-green-800)]">Email *</label>
             <Input
               type="email"
               value={formData.email}
@@ -286,7 +293,13 @@ export default function CoachApplicationPage() {
           <NavigationButtons
             onBack={() => setStep("intro")}
             onNext={() => setStep("experience")}
-            nextDisabled={!formData.firstName || !formData.lastName || !formData.email || !formData.linkedinUrl || !formData.headline}
+            nextDisabled={
+              !formData.firstName ||
+              !formData.lastName ||
+              !formData.email ||
+              !formData.linkedinUrl ||
+              !formData.headline
+            }
           />
         </div>
       )}
@@ -294,9 +307,7 @@ export default function CoachApplicationPage() {
       {/* Experience */}
       {step === "experience" && (
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-[var(--primitive-green-800)]">
-            Your Experience
-          </h2>
+          <h2 className="text-xl font-bold text-[var(--primitive-green-800)]">Your Experience</h2>
 
           <div className="space-y-1">
             <label className="text-sm font-medium text-[var(--primitive-green-800)]">
@@ -322,7 +333,7 @@ export default function CoachApplicationPage() {
                   key={option}
                   type="button"
                   onClick={() => toggleArrayField("expertise", option)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                     formData.expertise.includes(option)
                       ? "bg-[var(--primitive-green-600)] text-white"
                       : "bg-[var(--primitive-neutral-100)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-200)]"
@@ -344,7 +355,7 @@ export default function CoachApplicationPage() {
                   key={option}
                   type="button"
                   onClick={() => toggleArrayField("sectors", option)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                     formData.sectors.includes(option)
                       ? "bg-[var(--primitive-green-600)] text-white"
                       : "bg-[var(--primitive-neutral-100)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-200)]"
@@ -357,14 +368,12 @@ export default function CoachApplicationPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium text-[var(--primitive-green-800)]">
-              Bio *
-            </label>
+            <label className="text-sm font-medium text-[var(--primitive-green-800)]">Bio *</label>
             <textarea
               value={formData.bio}
               onChange={(e) => updateField("bio", e.target.value)}
               placeholder="Tell us about your background and what makes you a great coach..."
-              className="w-full px-4 py-3 border border-[var(--primitive-neutral-300)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)] focus:border-transparent resize-none"
+              className="w-full resize-none rounded-lg border border-[var(--primitive-neutral-300)] px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]"
               rows={4}
               maxLength={1000}
             />
@@ -376,7 +385,12 @@ export default function CoachApplicationPage() {
           <NavigationButtons
             onBack={() => setStep("personal")}
             onNext={() => setStep("details")}
-            nextDisabled={!formData.yearsInClimate || formData.expertise.length === 0 || formData.sectors.length === 0 || !formData.bio}
+            nextDisabled={
+              !formData.yearsInClimate ||
+              formData.expertise.length === 0 ||
+              formData.sectors.length === 0 ||
+              !formData.bio
+            }
           />
         </div>
       )}
@@ -384,9 +398,7 @@ export default function CoachApplicationPage() {
       {/* Coaching Details */}
       {step === "details" && (
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-[var(--primitive-green-800)]">
-            Coaching Details
-          </h2>
+          <h2 className="text-xl font-bold text-[var(--primitive-green-800)]">Coaching Details</h2>
 
           <div className="space-y-1">
             <label className="text-sm font-medium text-[var(--primitive-green-800)]">
@@ -426,7 +438,7 @@ export default function CoachApplicationPage() {
               value={formData.motivation}
               onChange={(e) => updateField("motivation", e.target.value)}
               placeholder="What motivates you to help others transition into climate careers?"
-              className="w-full px-4 py-3 border border-[var(--primitive-neutral-300)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)] focus:border-transparent resize-none"
+              className="w-full resize-none rounded-lg border border-[var(--primitive-neutral-300)] px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]"
               rows={4}
               maxLength={500}
             />
@@ -450,7 +462,7 @@ export default function CoachApplicationPage() {
             Review Your Application
           </h2>
 
-          <div className="bg-[var(--primitive-neutral-50)] rounded-xl p-6 space-y-4">
+          <div className="space-y-4 rounded-xl bg-[var(--primitive-neutral-50)] p-6">
             <ReviewItem label="Name" value={`${formData.firstName} ${formData.lastName}`} />
             <ReviewItem label="Email" value={formData.email} />
             <ReviewItem label="LinkedIn" value={formData.linkedinUrl} />
@@ -484,8 +496,8 @@ function ApplicationLayout({ children }: { children: React.ReactNode }) {
           <CandidLogo width={120} height={30} />
         </Link>
       </header>
-      <main className="max-w-xl mx-auto px-4 py-8">
-        <div className="bg-[var(--card-background)] rounded-2xl p-8 shadow-sm border border-[var(--primitive-neutral-200)]">
+      <main className="mx-auto max-w-xl px-4 py-8">
+        <div className="rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 shadow-sm">
           {children}
         </div>
       </main>
@@ -512,7 +524,12 @@ function NavigationButtons({
         <ArrowLeft size={18} className="mr-2" />
         Back
       </Button>
-      <Button onClick={onNext} disabled={nextDisabled || loading} loading={loading} className="flex-1">
+      <Button
+        onClick={onNext}
+        disabled={nextDisabled || loading}
+        loading={loading}
+        className="flex-1"
+      >
         {nextLabel}
         {!loading && <ArrowRight size={18} className="ml-2" />}
       </Button>

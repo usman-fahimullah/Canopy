@@ -10,12 +10,6 @@ const PROTECTED_PREFIXES = [
   "/onboarding/canopy",
   "/onboarding/jobs",
   "/onboarding/complete",
-  "/candid/dashboard",
-  "/candid/sessions",
-  "/candid/messages",
-  "/candid/profile",
-  "/candid/settings",
-  "/candid/coach-dashboard",
 ];
 
 // Auth pages — redirect away if already logged in

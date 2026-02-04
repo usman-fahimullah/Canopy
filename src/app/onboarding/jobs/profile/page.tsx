@@ -3,11 +3,12 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Phone, MapPin } from "@phosphor-icons/react";
+import { Camera, MapPin } from "@phosphor-icons/react";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
 import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Dropdown,
   DropdownTrigger,
@@ -15,7 +16,6 @@ import {
   DropdownContent,
   DropdownItem,
 } from "@/components/ui/dropdown";
-import { FormCard, FormField } from "@/components/ui/form-section";
 import { TALENT_STEPS } from "@/lib/onboarding/types";
 
 const pronounOptions = [
@@ -48,14 +48,11 @@ export default function TalentProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const step = TALENT_STEPS[0]; // profile
-  // Location is the only truly required field for profile step
   const canContinue = baseProfile.location.trim().length > 0;
 
   function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Create a preview URL for the uploaded file
     const url = URL.createObjectURL(file);
     setBaseProfile({ profilePhotoUrl: url });
   }
@@ -106,6 +103,7 @@ export default function TalentProfilePage() {
       step={step}
       currentStepIndex={0}
       totalSteps={TALENT_STEPS.length}
+      firstName={baseProfile.firstName}
       rightPanel={
         <Image
           src="/illustrations/onboarding-profile.svg"
@@ -125,33 +123,16 @@ export default function TalentProfilePage() {
         />
       }
     >
-      <div className="space-y-6">
-        {/* Profile photo */}
-        <div className="flex justify-center">
-          <button
-            type="button"
+      <div className="flex flex-col gap-6">
+        {/* Upload Profile Photo — tertiary button with camera icon */}
+        <div>
+          <Button
+            variant="tertiary"
+            leftIcon={<Camera size={20} weight="fill" />}
             onClick={() => fileInputRef.current?.click()}
-            className="group relative h-24 w-24 overflow-hidden rounded-full bg-[var(--background-subtle)] transition-all hover:ring-2 hover:ring-[var(--border-interactive-focus)] hover:ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2"
           >
-            {baseProfile.profilePhotoUrl ? (
-              <img
-                src={baseProfile.profilePhotoUrl}
-                alt="Profile photo"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <Camera size={32} weight="regular" className="text-[var(--foreground-subtle)]" />
-              </div>
-            )}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/20">
-              <Camera
-                size={24}
-                weight="bold"
-                className="text-white opacity-0 transition-opacity group-hover:opacity-100"
-              />
-            </div>
-          </button>
+            {baseProfile.profilePhotoUrl ? "Change Profile Photo" : "Upload Profile Photo"}
+          </Button>
           <input
             ref={fileInputRef}
             type="file"
@@ -159,76 +140,89 @@ export default function TalentProfilePage() {
             className="hidden"
             onChange={handlePhotoUpload}
           />
+          {baseProfile.profilePhotoUrl && (
+            <div className="mt-3 flex items-center gap-3">
+              <img
+                src={baseProfile.profilePhotoUrl}
+                alt="Profile preview"
+                className="h-10 w-10 rounded-full object-cover"
+              />
+              <span className="text-caption text-[var(--foreground-muted)]">Photo uploaded</span>
+            </div>
+          )}
         </div>
 
         {/* Pronouns */}
-        <FormCard>
-          <FormField label="Pronouns">
-            <Dropdown
-              value={baseProfile.pronouns}
-              onValueChange={(value) => setBaseProfile({ pronouns: value })}
-            >
-              <DropdownTrigger>
-                <DropdownValue placeholder="Select your pronouns" />
-              </DropdownTrigger>
-              <DropdownContent>
-                {pronounOptions.map((option) => (
-                  <DropdownItem key={option.value} value={option.value}>
-                    {option.label}
-                  </DropdownItem>
-                ))}
-              </DropdownContent>
-            </Dropdown>
-          </FormField>
-        </FormCard>
+        <div className="flex flex-col gap-2">
+          <label className="text-caption text-[var(--primitive-green-800)]">
+            What are your pronouns
+          </label>
+          <Dropdown
+            value={baseProfile.pronouns}
+            onValueChange={(value) => setBaseProfile({ pronouns: value })}
+          >
+            <DropdownTrigger>
+              <DropdownValue placeholder="Select a pronoun" />
+            </DropdownTrigger>
+            <DropdownContent>
+              {pronounOptions.map((option) => (
+                <DropdownItem key={option.value} value={option.value}>
+                  {option.label}
+                </DropdownItem>
+              ))}
+            </DropdownContent>
+          </Dropdown>
+        </div>
 
         {/* Ethnicity */}
-        <FormCard>
-          <FormField label="Ethnicity" helpText="Used for diversity reporting only">
-            <Dropdown
-              value={baseProfile.ethnicity}
-              onValueChange={(value) => setBaseProfile({ ethnicity: value })}
-            >
-              <DropdownTrigger>
-                <DropdownValue placeholder="Select your ethnicity" />
-              </DropdownTrigger>
-              <DropdownContent>
-                {ethnicityOptions.map((option) => (
-                  <DropdownItem key={option.value} value={option.value}>
-                    {option.label}
-                  </DropdownItem>
-                ))}
-              </DropdownContent>
-            </Dropdown>
-          </FormField>
-        </FormCard>
+        <div className="flex flex-col gap-2">
+          <label className="text-caption text-[var(--primitive-green-800)]">
+            What&apos;s your ethnicity
+          </label>
+          <Dropdown
+            value={baseProfile.ethnicity}
+            onValueChange={(value) => setBaseProfile({ ethnicity: value })}
+          >
+            <DropdownTrigger>
+              <DropdownValue placeholder="Select your ethnicity" />
+            </DropdownTrigger>
+            <DropdownContent>
+              {ethnicityOptions.map((option) => (
+                <DropdownItem key={option.value} value={option.value}>
+                  {option.label}
+                </DropdownItem>
+              ))}
+            </DropdownContent>
+          </Dropdown>
+        </div>
 
-        {/* Phone number */}
-        <FormCard>
-          <FormField label="Phone number" helpText="Optional">
-            <Input
-              placeholder="(555) 123-4567"
-              value={baseProfile.phone}
-              onChange={(e) => setBaseProfile({ phone: e.target.value })}
-              type="tel"
-              autoComplete="tel"
-              leftAddon={<Phone weight="regular" />}
-            />
-          </FormField>
-        </FormCard>
+        {/* Phone Number */}
+        <div className="flex flex-col gap-2">
+          <label className="text-caption font-medium text-[var(--primitive-green-800)]">
+            Phone Number (Optional)
+          </label>
+          <Input
+            placeholder="Enter your phone number"
+            value={baseProfile.phone}
+            onChange={(e) => setBaseProfile({ phone: e.target.value })}
+            type="tel"
+            autoComplete="tel"
+          />
+        </div>
 
         {/* Location */}
-        <FormCard>
-          <FormField label="Location" required>
-            <Input
-              placeholder="City, State"
-              value={baseProfile.location}
-              onChange={(e) => setBaseProfile({ location: e.target.value })}
-              autoComplete="address-level2"
-              leftAddon={<MapPin weight="regular" />}
-            />
-          </FormField>
-        </FormCard>
+        <div className="flex flex-col gap-2">
+          <label className="text-caption font-medium text-[var(--primitive-green-800)]">
+            Your Location
+          </label>
+          <Input
+            placeholder="Enter your location"
+            value={baseProfile.location}
+            onChange={(e) => setBaseProfile({ location: e.target.value })}
+            autoComplete="address-level2"
+            leftAddon={<MapPin weight="regular" />}
+          />
+        </div>
 
         {error && <p className="text-caption text-[var(--foreground-error)]">{error}</p>}
       </div>

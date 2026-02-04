@@ -13,7 +13,6 @@ import {
   DropdownContent,
   DropdownItem,
 } from "@/components/ui/dropdown";
-import { FormCard, FormField } from "@/components/ui/form-section";
 import { TALENT_STEPS } from "@/lib/onboarding/types";
 
 const careerStageOptions = [
@@ -45,7 +44,7 @@ const jobTypeOptions = [
 
 export default function TalentCareerPage() {
   const router = useRouter();
-  const { talentData, setTalentData } = useOnboardingForm();
+  const { talentData, setTalentData, baseProfile } = useOnboardingForm();
 
   const step = TALENT_STEPS[1]; // career
   const canContinue =
@@ -77,6 +76,7 @@ export default function TalentCareerPage() {
       step={step}
       currentStepIndex={1}
       totalSteps={TALENT_STEPS.length}
+      firstName={baseProfile.firstName}
       rightPanel={
         <Image
           src="/illustrations/onboarding-profile.svg"
@@ -94,59 +94,62 @@ export default function TalentCareerPage() {
         />
       }
     >
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6">
         {/* Career stage */}
-        <FormCard>
-          <FormField label="First off, where are you in your career?" required>
-            <Dropdown
-              value={talentData.careerStage ?? undefined}
-              onValueChange={(value) => setTalentData({ careerStage: value })}
-            >
-              <DropdownTrigger>
-                <DropdownValue placeholder="Select your career stage" />
-              </DropdownTrigger>
-              <DropdownContent>
-                {careerStageOptions.map((option) => (
-                  <DropdownItem key={option.value} value={option.value}>
-                    {option.label}
-                  </DropdownItem>
-                ))}
-              </DropdownContent>
-            </Dropdown>
-          </FormField>
-        </FormCard>
+        <div className="flex flex-col gap-2">
+          <label className="text-caption text-[var(--primitive-green-800)]">
+            First off, where are you in your career?
+          </label>
+          <Dropdown
+            value={talentData.careerStage ?? undefined}
+            onValueChange={(value) => setTalentData({ careerStage: value })}
+          >
+            <DropdownTrigger>
+              <DropdownValue placeholder="Select an option" />
+            </DropdownTrigger>
+            <DropdownContent>
+              {careerStageOptions.map((option) => (
+                <DropdownItem key={option.value} value={option.value}>
+                  {option.label}
+                </DropdownItem>
+              ))}
+            </DropdownContent>
+          </Dropdown>
+        </div>
 
         {/* Goals */}
-        <FormCard>
-          <FormField label="What are your goals?" required>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {goalOptions.map((option) => (
-                <CheckboxWithLabel
-                  key={option.value}
-                  label={option.label}
-                  checked={talentData.goals.includes(option.value)}
-                  onCheckedChange={() => toggleGoal(option.value)}
-                />
-              ))}
-            </div>
-          </FormField>
-        </FormCard>
+        <div className="flex flex-col gap-4">
+          <label className="text-caption text-[var(--primitive-green-800)]">
+            What are your goals?
+          </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {goalOptions.map((option) => (
+              <CheckboxWithLabel
+                key={option.value}
+                label={option.label}
+                checked={talentData.goals.includes(option.value)}
+                onCheckedChange={() => toggleGoal(option.value)}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* Job type interests */}
-        <FormCard>
-          <FormField label="What types of jobs interest you?" required>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {jobTypeOptions.map((option) => (
-                <CheckboxWithLabel
-                  key={option.value}
-                  label={option.label}
-                  checked={talentData.jobTypeInterests.includes(option.value)}
-                  onCheckedChange={() => toggleJobType(option.value)}
-                />
-              ))}
-            </div>
-          </FormField>
-        </FormCard>
+        <div className="flex flex-col gap-4">
+          <label className="text-caption text-[var(--primitive-green-800)]">
+            What type of job are you interested in?
+          </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {jobTypeOptions.map((option) => (
+              <CheckboxWithLabel
+                key={option.value}
+                label={option.label}
+                checked={talentData.jobTypeInterests.includes(option.value)}
+                onCheckedChange={() => toggleJobType(option.value)}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </OnboardingShell>
   );

@@ -69,19 +69,22 @@ export const TALENT_STEPS: StepConfig[] = [
     id: "profile",
     path: "profile",
     title: "Build your profile",
-    subtitle: "Let's get to know you",
+    subtitle:
+      "Hey \u{1F44B} {firstName}, lets build a profile that's tailored just for you, creating a more personalized pathways experience that will help you grow and succeed.",
   },
   {
     id: "career",
     path: "career",
     title: "Your Career Journey",
-    subtitle: "Help us understand where you are",
+    subtitle:
+      "Hey \u{1F44B} {firstName}, tell us about your career journey so we can match you with the right opportunities and help you grow.",
   },
   {
     id: "skills",
     path: "skills",
-    title: "Skills & Preferences",
-    subtitle: "Tell us what you're looking for",
+    title: "Add your skills",
+    subtitle:
+      "Hey \u{1F44B} {firstName}, lets build a profile that's tailored just for you, creating a more personalized pathways experience that will help you grow and succeed.",
   },
 ];
 

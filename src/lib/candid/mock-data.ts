@@ -30,7 +30,8 @@ export const coaches: CandidCoach[] = [
     firstName: "Sarah",
     lastName: "Chen",
     role: "coach",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
     bio: "Former McKinsey consultant turned climate investor. I help professionals transition from traditional industries into climate tech, particularly in deep tech and hardware. I've helped 50+ people make the leap.",
     linkedIn: "https://linkedin.com/in/sarahchen",
     location: "San Francisco, CA",
@@ -69,7 +70,8 @@ export const coaches: CandidCoach[] = [
     firstName: "Marcus",
     lastName: "Johnson",
     role: "coach",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
     bio: "20+ years in energy policy, from Capitol Hill to the Department of Energy. I specialize in helping people navigate government careers and understand the policy landscape.",
     linkedIn: "https://linkedin.com/in/marcusjohnson",
     location: "Washington, DC",
@@ -108,7 +110,8 @@ export const coaches: CandidCoach[] = [
     firstName: "Elena",
     lastName: "Rodriguez",
     role: "coach",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop&crop=face",
     bio: "I've built sustainability programs at Fortune 500 companies and now run corporate climate strategy at a major tech company. I help people break into corporate sustainability roles.",
     linkedIn: "https://linkedin.com/in/elenarodriguez",
     location: "Seattle, WA",
@@ -121,14 +124,22 @@ export const coaches: CandidCoach[] = [
       { title: "Director of Sustainability", company: "Microsoft", years: 4 },
       { title: "Sustainability Manager", company: "Patagonia", years: 3 },
     ],
-    expertise: ["Corporate sustainability", "ESG strategy", "Stakeholder engagement", "Career pivots"],
+    expertise: [
+      "Corporate sustainability",
+      "ESG strategy",
+      "Stakeholder engagement",
+      "Career pivots",
+    ],
     sessionTypes: ["coaching", "career-planning", "resume-review"],
     hourlyRate: 135,
     monthlyRate: 375,
     availability: {
       monday: [{ start: "08:00", end: "10:00" }],
       tuesday: [],
-      wednesday: [{ start: "08:00", end: "10:00" }, { start: "16:00", end: "18:00" }],
+      wednesday: [
+        { start: "08:00", end: "10:00" },
+        { start: "16:00", end: "18:00" },
+      ],
       thursday: [],
       friday: [{ start: "08:00", end: "10:00" }],
       saturday: [],
@@ -146,7 +157,8 @@ export const coaches: CandidCoach[] = [
     firstName: "David",
     lastName: "Okonkwo",
     role: "coach",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
     bio: "Engineer turned clean energy executive. I've helped scale solar companies from startup to IPO. I focus on helping technical professionals move into leadership roles in clean energy.",
     linkedIn: "https://linkedin.com/in/davidokonkwo",
     location: "Austin, TX",
@@ -159,7 +171,12 @@ export const coaches: CandidCoach[] = [
       { title: "Engineering Director", company: "First Solar", years: 5 },
       { title: "Senior Engineer", company: "Tesla Energy", years: 4 },
     ],
-    expertise: ["Technical leadership", "Clean energy industry", "Engineering management", "Startup scaling"],
+    expertise: [
+      "Technical leadership",
+      "Clean energy industry",
+      "Engineering management",
+      "Startup scaling",
+    ],
     sessionTypes: ["coaching", "career-planning", "mock-interview"],
     hourlyRate: 140,
     monthlyRate: 380,
@@ -184,7 +201,8 @@ export const coaches: CandidCoach[] = [
     firstName: "Amanda",
     lastName: "Foster",
     role: "coach",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
     bio: "Former Wall Street analyst who pivoted to climate finance. Now I help finance professionals understand how to apply their skills to climate investing and sustainable finance.",
     linkedIn: "https://linkedin.com/in/amandafoster",
     location: "New York, NY",
@@ -226,7 +244,8 @@ export const mentors: CandidMentor[] = [
     firstName: "Jordan",
     lastName: "Lee",
     role: "mentor",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     bio: "Made the switch from automotive to EV industry 2 years ago. Happy to share my journey and help with resume reviews for anyone looking to break into clean transportation.",
     linkedIn: "https://linkedin.com/in/jordanlee",
     location: "Irvine, CA",
@@ -247,7 +266,8 @@ export const mentors: CandidMentor[] = [
     firstName: "Priya",
     lastName: "Sharma",
     role: "mentor",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
     bio: "Research analyst at World Resources Institute. I transitioned from academia to think tanks and love helping researchers find impactful climate roles.",
     linkedIn: "https://linkedin.com/in/priyasharma",
     location: "Washington, DC",
@@ -268,7 +288,8 @@ export const mentors: CandidMentor[] = [
     firstName: "Alex",
     lastName: "Thompson",
     role: "mentor",
-    avatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=150&h=150&fit=crop&crop=face",
     bio: "Data scientist focused on carbon removal research. Former software engineer who made the climate pivot. I help tech folks understand where their skills fit in climate.",
     linkedIn: "https://linkedin.com/in/alexthompson",
     location: "Oakland, CA",
@@ -293,7 +314,8 @@ export const seekers: CandidSeeker[] = [
     firstName: "Jamie",
     lastName: "Wilson",
     role: "seeker",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
     bio: "Marketing professional looking to transition into climate tech. Passionate about using storytelling to drive climate action.",
     location: "Los Angeles, CA",
     timezone: "America/Los_Angeles",
@@ -303,7 +325,11 @@ export const seekers: CandidSeeker[] = [
     currentRole: "Marketing Manager",
     currentCompany: "Spotify",
     yearsExperience: 5,
-    goals: ["Find a climate-focused role within 6 months", "Build network in sustainability space", "Understand corporate sustainability landscape"],
+    goals: [
+      "Find a climate-focused role within 6 months",
+      "Build network in sustainability space",
+      "Understand corporate sustainability landscape",
+    ],
     skills: ["Brand strategy", "Content marketing", "Stakeholder communication", "Data analytics"],
     cohort: "January 2025",
     matchedCoachId: "coach-1",
@@ -315,7 +341,8 @@ export const seekers: CandidSeeker[] = [
     firstName: "Michael",
     lastName: "Chen",
     role: "seeker",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
     bio: "Finance professional with 8 years in investment banking. Ready to apply my skills to climate finance and impact investing.",
     location: "New York, NY",
     timezone: "America/New_York",
@@ -325,7 +352,11 @@ export const seekers: CandidSeeker[] = [
     currentRole: "Vice President",
     currentCompany: "J.P. Morgan",
     yearsExperience: 8,
-    goals: ["Transition to climate-focused fund", "Understand climate finance landscape", "Build relationships with climate investors"],
+    goals: [
+      "Transition to climate-focused fund",
+      "Understand climate finance landscape",
+      "Build relationships with climate investors",
+    ],
     skills: ["Financial modeling", "Due diligence", "Deal structuring", "Investor relations"],
     cohort: "January 2025",
     matchedCoachId: "coach-5",
@@ -336,7 +367,8 @@ export const seekers: CandidSeeker[] = [
     firstName: "Sofia",
     lastName: "Martinez",
     role: "seeker",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+    avatar:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
     bio: "Environmental science graduate looking to break into climate policy. Interned at EPA and passionate about environmental justice.",
     location: "Denver, CO",
     timezone: "America/Denver",
@@ -344,7 +376,11 @@ export const seekers: CandidSeeker[] = [
     targetSectors: ["policy", "nonprofit"],
     currentRole: "Recent Graduate",
     yearsExperience: 1,
-    goals: ["Land first full-time policy role", "Understand federal hiring process", "Build DC network"],
+    goals: [
+      "Land first full-time policy role",
+      "Understand federal hiring process",
+      "Build DC network",
+    ],
     skills: ["Policy research", "Data analysis", "Technical writing", "Stakeholder engagement"],
     cohort: "January 2025",
     matchedCoachId: "coach-2",
@@ -406,7 +442,8 @@ export const sessions: Session[] = [
     notes: "Intro session - discussed background, goals, and created 90-day action plan",
     feedback: {
       rating: 5,
-      comment: "Sarah was incredibly helpful! She gave me a clear framework for thinking about my transition and specific companies to target.",
+      comment:
+        "Sarah was incredibly helpful! She gave me a clear framework for thinking about my transition and specific companies to target.",
       wouldRecommend: true,
       submittedAt: daysAgo(6),
     },
@@ -454,7 +491,8 @@ export const messages: Message[] = [
     id: "msg-1",
     threadId: "thread-1",
     senderId: "coach-1",
-    content: "Hi Jamie! Looking forward to our first session. Before we meet, could you send me your current resume and a list of 5-10 companies you're interested in?",
+    content:
+      "Hi Jamie! Looking forward to our first session. Before we meet, could you send me your current resume and a list of 5-10 companies you're interested in?",
     createdAt: daysAgo(8),
     readAt: daysAgo(8),
   },
@@ -462,7 +500,8 @@ export const messages: Message[] = [
     id: "msg-2",
     threadId: "thread-1",
     senderId: "seeker-1",
-    content: "Hi Sarah! So excited to work with you. I've attached my resume. For companies, I'm looking at: Watershed, Persefoni, Patch, Sylvera, and Climate Arc. Also interested in larger companies with strong sustainability programs.",
+    content:
+      "Hi Sarah! So excited to work with you. I've attached my resume. For companies, I'm looking at: Watershed, Persefoni, Patch, Sylvera, and Climate Arc. Also interested in larger companies with strong sustainability programs.",
     createdAt: daysAgo(8),
     readAt: daysAgo(7),
   },
@@ -470,7 +509,8 @@ export const messages: Message[] = [
     id: "msg-3",
     threadId: "thread-1",
     senderId: "coach-1",
-    content: "Great list! I actually know people at Watershed and Sylvera. Let's discuss warm intros during our session. Also, I'd add Sphere and Sinai Technologies to your list - they're hiring for marketing roles right now.",
+    content:
+      "Great list! I actually know people at Watershed and Sylvera. Let's discuss warm intros during our session. Also, I'd add Sphere and Sinai Technologies to your list - they're hiring for marketing roles right now.",
     createdAt: daysAgo(7),
     readAt: daysAgo(7),
   },
@@ -478,14 +518,16 @@ export const messages: Message[] = [
     id: "msg-4",
     threadId: "thread-1",
     senderId: "coach-1",
-    content: "Hey Jamie! Quick note - I saw that Persefoni just posted a Marketing Manager role that looks perfect for your background. Want me to make an intro to their Head of Marketing?",
+    content:
+      "Hey Jamie! Quick note - I saw that Persefoni just posted a Marketing Manager role that looks perfect for your background. Want me to make an intro to their Head of Marketing?",
     createdAt: daysAgo(0),
   },
   {
     id: "msg-5",
     threadId: "thread-1",
     senderId: "coach-1",
-    content: "Also, don't forget to update your LinkedIn headline before you start reaching out. We talked about this in our last session!",
+    content:
+      "Also, don't forget to update your LinkedIn headline before you start reaching out. We talked about this in our last session!",
     createdAt: daysAgo(0),
   },
   // Thread 2: Seeker-1 with Mentor-1
@@ -493,7 +535,8 @@ export const messages: Message[] = [
     id: "msg-6",
     threadId: "thread-2",
     senderId: "seeker-1",
-    content: "Hey Jordan! Sarah recommended I reach out to you since you made the switch to Rivian. I'd love to learn about your experience transitioning into the EV space.",
+    content:
+      "Hey Jordan! Sarah recommended I reach out to you since you made the switch to Rivian. I'd love to learn about your experience transitioning into the EV space.",
     createdAt: daysAgo(14),
     readAt: daysAgo(14),
   },
@@ -501,7 +544,8 @@ export const messages: Message[] = [
     id: "msg-7",
     threadId: "thread-2",
     senderId: "mentor-1",
-    content: "Hi Jamie! Happy to help. The transition was definitely a journey but so worth it. I scheduled us for a resume review session next week - looking forward to it!",
+    content:
+      "Hi Jamie! Happy to help. The transition was definitely a journey but so worth it. I scheduled us for a resume review session next week - looking forward to it!",
     createdAt: daysAgo(13),
     readAt: daysAgo(13),
   },
@@ -509,7 +553,8 @@ export const messages: Message[] = [
     id: "msg-8",
     threadId: "thread-2",
     senderId: "mentor-1",
-    content: "Just saw your updated resume. Really strong! A few quick thoughts: 1) Lead with impact metrics, 2) Add a 'Climate Interest' section, 3) The Spotify work translates really well to mission-driven companies. Let's discuss more in our session!",
+    content:
+      "Just saw your updated resume. Really strong! A few quick thoughts: 1) Lead with impact metrics, 2) Add a 'Climate Interest' section, 3) The Spotify work translates really well to mission-driven companies. Let's discuss more in our session!",
     createdAt: daysAgo(2),
     readAt: daysAgo(2),
   },
@@ -525,7 +570,7 @@ export const notifications: Notification[] = [
     body: "Your coaching session with Sarah Chen is in 2 days",
     read: false,
     createdAt: daysAgo(0),
-    actionUrl: "/candid/sessions/session-1",
+    actionUrl: "/jobs/coaching",
   },
   {
     id: "notif-2",
@@ -535,7 +580,7 @@ export const notifications: Notification[] = [
     body: "I saw that Persefoni just posted a Marketing Manager role...",
     read: false,
     createdAt: daysAgo(0),
-    actionUrl: "/candid/messages/thread-1",
+    actionUrl: "/jobs/messages?thread=thread-1",
   },
   {
     id: "notif-3",
@@ -554,7 +599,8 @@ export const resources: Resource[] = [
   {
     id: "resource-1",
     title: "Breaking into Climate Tech: A Complete Guide",
-    description: "Everything you need to know about transitioning into climate tech, including top companies, skills in demand, and networking strategies.",
+    description:
+      "Everything you need to know about transitioning into climate tech, including top companies, skills in demand, and networking strategies.",
     type: "guide",
     sector: "climate-tech",
     url: "#",
@@ -563,7 +609,8 @@ export const resources: Resource[] = [
   {
     id: "resource-2",
     title: "Climate Finance Career Pathways",
-    description: "A comprehensive overview of roles in climate finance, from ESG analysis to impact investing, with salary benchmarks.",
+    description:
+      "A comprehensive overview of roles in climate finance, from ESG analysis to impact investing, with salary benchmarks.",
     type: "guide",
     sector: "finance",
     url: "#",
@@ -572,7 +619,8 @@ export const resources: Resource[] = [
   {
     id: "resource-3",
     title: "Resume Template: Climate Career Transition",
-    description: "A proven resume template designed for career changers entering the climate space.",
+    description:
+      "A proven resume template designed for career changers entering the climate space.",
     type: "template",
     url: "#",
     createdAt: daysAgo(14),
@@ -580,7 +628,8 @@ export const resources: Resource[] = [
   {
     id: "resource-4",
     title: "Federal Climate Jobs: How to Navigate USAJobs",
-    description: "Step-by-step guide to finding and applying for climate roles in the federal government.",
+    description:
+      "Step-by-step guide to finding and applying for climate roles in the federal government.",
     type: "guide",
     sector: "policy",
     url: "#",
@@ -610,7 +659,9 @@ export function getSessionsForUser(userId: string): Session[] {
 }
 
 export function getMessagesForThread(threadId: string): Message[] {
-  return messages.filter((m) => m.threadId === threadId).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  return messages
+    .filter((m) => m.threadId === threadId)
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 }
 
 export function getThreadsForUser(userId: string): MessageThread[] {
@@ -622,9 +673,14 @@ export function getThreadsForUser(userId: string): MessageThread[] {
         .filter((m) => m.threadId === thread.id)
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0],
     }))
-    .sort((a, b) => (b.lastMessage?.createdAt.getTime() || 0) - (a.lastMessage?.createdAt.getTime() || 0));
+    .sort(
+      (a, b) =>
+        (b.lastMessage?.createdAt.getTime() || 0) - (a.lastMessage?.createdAt.getTime() || 0)
+    );
 }
 
 export function getNotificationsForUser(userId: string): Notification[] {
-  return notifications.filter((n) => n.userId === userId).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return notifications
+    .filter((n) => n.userId === userId)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }

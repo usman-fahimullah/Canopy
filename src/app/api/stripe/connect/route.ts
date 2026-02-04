@@ -8,13 +8,12 @@ import { logger, formatError } from "@/lib/logger";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get coach profile
@@ -30,10 +29,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!coach) {
-      return NextResponse.json(
-        { error: "Coach profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Coach profile not found" }, { status: 404 });
     }
 
     let stripeAccountId = coach.stripeAccountId;
@@ -67,8 +63,8 @@ export async function POST(request: NextRequest) {
     // Create account link for onboarding
     const accountLink = await stripe.accountLinks.create({
       account: stripeAccountId,
-      refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/settings/payments?refresh=true`,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/settings/payments?success=true`,
+      refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/coach/settings?refresh=true`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/candid/coach/settings?success=true`,
       type: "account_onboarding",
     });
 
@@ -77,11 +73,11 @@ export async function POST(request: NextRequest) {
       accountId: stripeAccountId,
     });
   } catch (error) {
-    logger.error("Stripe Connect error", { error: formatError(error), endpoint: "/api/stripe/connect" });
-    return NextResponse.json(
-      { error: "Failed to create Stripe Connect account" },
-      { status: 500 }
-    );
+    logger.error("Stripe Connect error", {
+      error: formatError(error),
+      endpoint: "/api/stripe/connect",
+    });
+    return NextResponse.json({ error: "Failed to create Stripe Connect account" }, { status: 500 });
   }
 }
 
@@ -89,13 +85,12 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get coach profile
@@ -108,10 +103,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!coach) {
-      return NextResponse.json(
-        { error: "Coach profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Coach profile not found" }, { status: 404 });
     }
 
     if (!coach.stripeAccountId) {
@@ -134,10 +126,10 @@ export async function GET(request: NextRequest) {
       accountId: account.id,
     });
   } catch (error) {
-    logger.error("Stripe Connect status error", { error: formatError(error), endpoint: "/api/stripe/connect" });
-    return NextResponse.json(
-      { error: "Failed to get Stripe Connect status" },
-      { status: 500 }
-    );
+    logger.error("Stripe Connect status error", {
+      error: formatError(error),
+      endpoint: "/api/stripe/connect",
+    });
+    return NextResponse.json({ error: "Failed to get Stripe Connect status" }, { status: 500 });
   }
 }

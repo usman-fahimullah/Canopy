@@ -47,7 +47,10 @@ export async function createNotification(params: CreateNotificationParams) {
   // Send email if requested and payload provided
   if (sendEmailNotification && emailPayload) {
     await sendEmail(emailPayload).catch((err) => {
-      logger.error("Notification email send failed", { error: formatError(err), endpoint: "lib/notifications" });
+      logger.error("Notification email send failed", {
+        error: formatError(err),
+        endpoint: "lib/notifications",
+      });
     });
   }
 
@@ -73,7 +76,10 @@ export async function createSessionBookedNotifications(session: {
     account: { id: string; email: string; name?: string | null };
   };
 }) {
-  const coachName = [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") || session.coach.account.name || "Your Coach";
+  const coachName =
+    [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") ||
+    session.coach.account.name ||
+    "Your Coach";
   const menteeName = session.mentee.account.name || "A mentee";
 
   // Notify mentee (booking confirmation)
@@ -94,7 +100,7 @@ export async function createSessionBookedNotifications(session: {
     body: `Your session with ${coachName} is confirmed for ${session.scheduledAt.toLocaleDateString()}.`,
     data: {
       sessionId: session.id,
-      url: `/candid/sessions/${session.id}`,
+      url: `/jobs/coaching`,
     },
     sendEmailNotification: true,
     emailPayload: menteeEmail,
@@ -116,7 +122,7 @@ export async function createSessionBookedNotifications(session: {
     body: `${menteeName} has booked a session with you on ${session.scheduledAt.toLocaleDateString()}.`,
     data: {
       sessionId: session.id,
-      url: `/candid/coach-dashboard`,
+      url: `/candid/coach`,
     },
     sendEmailNotification: true,
     emailPayload: coachEmail,
@@ -138,8 +144,11 @@ export async function createReviewRequestNotification(session: {
     account: { id: string; email: string; name?: string | null };
   };
 }) {
-  const coachName = [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") || session.coach.account.name || "your coach";
-  const reviewLink = `${process.env.NEXT_PUBLIC_APP_URL}/candid/sessions/${session.id}`;
+  const coachName =
+    [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") ||
+    session.coach.account.name ||
+    "your coach";
+  const reviewLink = `${process.env.NEXT_PUBLIC_APP_URL}/jobs/coaching`;
 
   const emailPayload = reviewRequest({
     recipientName: session.mentee.account.name || "there",
@@ -156,7 +165,7 @@ export async function createReviewRequestNotification(session: {
     body: `Your session with ${coachName} is complete. Share your feedback!`,
     data: {
       sessionId: session.id,
-      url: `/candid/sessions/${session.id}`,
+      url: `/jobs/coaching`,
     },
     sendEmailNotification: true,
     emailPayload,
@@ -179,7 +188,10 @@ export async function createSessionReminderNotification(session: {
     account: { id: string; email: string; name?: string | null };
   };
 }) {
-  const coachName = [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") || session.coach.account.name || "your coach";
+  const coachName =
+    [session.coach.firstName, session.coach.lastName].filter(Boolean).join(" ") ||
+    session.coach.account.name ||
+    "your coach";
   const menteeName = session.mentee.account.name || "your mentee";
 
   // Notify mentee
@@ -198,7 +210,7 @@ export async function createSessionReminderNotification(session: {
     body: `Your session with ${coachName} is tomorrow.`,
     data: {
       sessionId: session.id,
-      url: `/candid/sessions/${session.id}`,
+      url: `/jobs/coaching`,
     },
     sendEmailNotification: true,
     emailPayload: menteeEmail,
@@ -212,7 +224,7 @@ export async function createSessionReminderNotification(session: {
     body: `Your session with ${menteeName} is tomorrow.`,
     data: {
       sessionId: session.id,
-      url: `/candid/coach-dashboard`,
+      url: `/candid/coach/sessions`,
     },
     sendEmailNotification: false, // Coaches get fewer emails
   });
@@ -231,12 +243,13 @@ export async function createNewMessageNotification(params: {
     accountId: params.recipientAccountId,
     type: "NEW_MESSAGE",
     title: `New message from ${params.senderName}`,
-    body: params.messagePreview.length > 100
-      ? params.messagePreview.slice(0, 100) + "..."
-      : params.messagePreview,
+    body:
+      params.messagePreview.length > 100
+        ? params.messagePreview.slice(0, 100) + "..."
+        : params.messagePreview,
     data: {
       conversationId: params.conversationId,
-      url: `/candid/messages?thread=${params.conversationId}`,
+      url: `/jobs/messages?thread=${params.conversationId}`,
     },
     sendEmailNotification: false, // Messages use in-app only by default
   });
@@ -263,7 +276,7 @@ export async function createSessionCancelledNotification(params: {
     body: `${params.cancelledByName} has cancelled the session on ${params.session.scheduledAt.toLocaleDateString()}.${params.refundInfo ? ` ${params.refundInfo}` : ""}`,
     data: {
       sessionId: params.session.id,
-      url: `/candid/sessions`,
+      url: `/jobs/coaching`,
     },
     sendEmailNotification: true,
     emailPayload: {
@@ -294,7 +307,7 @@ export async function createCoachStatusNotification(params: {
       ? "Congratulations! Your coach application has been approved. Set up your profile to start accepting sessions."
       : "We appreciate your interest. Unfortunately, your application was not approved at this time.",
     data: {
-      url: isApproved ? "/candid/coach-dashboard" : "/candid/dashboard",
+      url: isApproved ? "/candid/coach" : "/jobs",
     },
     sendEmailNotification: isApproved, // Only email for approvals
   });
