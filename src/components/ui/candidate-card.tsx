@@ -4,12 +4,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarGroup, type AvatarData } from "./avatar";
 import { Badge } from "./badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./tooltip";
+import { Checkbox } from "./checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 import {
   ChatCircle,
   Calendar,
@@ -19,59 +15,68 @@ import {
   ThumbsUp,
   ThumbsDown,
   Minus,
+  Star,
+  CaretDown,
+  CaretUp,
 } from "@phosphor-icons/react";
 
 /**
  * Candidate Card Components for ATS
  *
- * Displays candidate information in pipeline views (Kanban) and list views.
+ * Clean, minimal cards inspired by modern ATS design.
+ * Prioritizes scannability with clear visual hierarchy:
+ * - Name + avatar as primary anchor
+ * - Rating + meta as compact secondary info
+ * - Tags as lightweight colored pills
+ * - Reviewer section with collapsed summary / expanded detail
  */
 
-/**
- * Score color configuration for consistent theming
- */
+// ============================================
+// SCORE CONFIGURATION
+// Uses design system --match-* tokens
+// ============================================
+
 const scoreConfig = {
   excellent: {
-    bg: "bg-green-100 dark:bg-green-900/30",
-    text: "text-green-700 dark:text-green-400",
-    fill: "bg-green-500",
+    bg: "bg-[var(--match-high-background)]",
+    text: "text-[var(--match-high-foreground)]",
+    fill: "bg-[var(--match-high-accent)]",
   },
   good: {
-    bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-700 dark:text-blue-400",
-    fill: "bg-blue-500",
+    bg: "bg-[var(--match-high-background)]",
+    text: "text-[var(--match-high-foreground)]",
+    fill: "bg-[var(--match-high-accent)]",
   },
   average: {
-    bg: "bg-yellow-100 dark:bg-yellow-900/30",
-    text: "text-yellow-700 dark:text-yellow-400",
-    fill: "bg-yellow-500",
+    bg: "bg-[var(--match-medium-background)]",
+    text: "text-[var(--match-medium-foreground)]",
+    fill: "bg-[var(--match-medium-accent)]",
   },
   poor: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    text: "text-red-700 dark:text-red-400",
-    fill: "bg-red-500",
+    bg: "bg-[var(--match-low-background)]",
+    text: "text-[var(--match-low-foreground)]",
+    fill: "bg-[var(--match-low-accent)]",
   },
 } as const;
 
 type ScoreLevel = keyof typeof scoreConfig;
 
-/**
- * Decision types for reviewer recommendations
- * Standard ATS pattern: Strong Yes, Yes, Maybe, No
- */
+// ============================================
+// DECISION PILL
+// ============================================
+
 type DecisionType = "strong_yes" | "yes" | "maybe" | "no" | "pending";
 
-/**
- * Decision pill styling configuration
- * Colors based on semantic feedback: green for positive, amber for neutral, red for negative
- */
-const decisionConfig: Record<DecisionType, {
-  bg: string;
-  text: string;
-  border?: string;
-  icon?: React.ElementType;
-  label: string;
-}> = {
+const decisionConfig: Record<
+  DecisionType,
+  {
+    bg: string;
+    text: string;
+    border?: string;
+    icon?: React.ElementType;
+    label: string;
+  }
+> = {
   strong_yes: {
     bg: "bg-[var(--primitive-green-500)]",
     text: "text-white",
@@ -106,16 +111,9 @@ const decisionConfig: Record<DecisionType, {
   },
 };
 
-/**
- * DecisionPill - Displays reviewer recommendation status
- * Shows colored pills with icons for Strong Yes, Yes, Maybe, No
- */
 interface DecisionPillProps extends React.HTMLAttributes<HTMLSpanElement> {
-  /** Decision type */
   decision: DecisionType;
-  /** Show icon alongside text */
   showIcon?: boolean;
-  /** Size variant */
   size?: "sm" | "default";
 }
 
@@ -127,8 +125,9 @@ const DecisionPill = React.forwardRef<HTMLSpanElement, DecisionPillProps>(
     return (
       <span
         ref={ref}
+        role="status"
         className={cn(
-          "inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap",
+          "inline-flex items-center gap-1 whitespace-nowrap rounded-full font-medium",
           config.bg,
           config.text,
           config.border,
@@ -140,7 +139,7 @@ const DecisionPill = React.forwardRef<HTMLSpanElement, DecisionPillProps>(
         {showIcon && Icon && (
           <Icon
             weight={decision === "strong_yes" ? "fill" : "bold"}
-            className={cn(size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5")}
+            className={cn(size === "sm" ? "h-3 w-3" : "h-3.5 w-3.5")}
           />
         )}
         {config.label}
@@ -150,20 +149,15 @@ const DecisionPill = React.forwardRef<HTMLSpanElement, DecisionPillProps>(
 );
 DecisionPill.displayName = "DecisionPill";
 
-/**
- * DaysInStage - Shows how long a candidate has been in the current stage
- * Includes urgency coloring based on threshold
- */
+// ============================================
+// DAYS IN STAGE
+// ============================================
+
 interface DaysInStageProps extends React.HTMLAttributes<HTMLSpanElement> {
-  /** Number of days in current stage */
   days: number;
-  /** Warning threshold (days) - shows amber when exceeded */
   warningThreshold?: number;
-  /** Critical threshold (days) - shows red when exceeded */
   criticalThreshold?: number;
-  /** Show icon */
   showIcon?: boolean;
-  /** Compact mode for tight spaces */
   compact?: boolean;
 }
 
@@ -180,13 +174,8 @@ const DaysInStage = React.forwardRef<HTMLSpanElement, DaysInStageProps>(
     },
     ref
   ) => {
-    const getStatus = () => {
-      if (days >= criticalThreshold) return "critical";
-      if (days >= warningThreshold) return "warning";
-      return "normal";
-    };
-
-    const status = getStatus();
+    const status =
+      days >= criticalThreshold ? "critical" : days >= warningThreshold ? "warning" : "normal";
 
     const statusClasses = {
       normal: "text-foreground-muted",
@@ -199,6 +188,7 @@ const DaysInStage = React.forwardRef<HTMLSpanElement, DaysInStageProps>(
     return (
       <span
         ref={ref}
+        aria-label={`${days} days in current stage${status === "critical" ? ", needs attention" : ""}`}
         className={cn(
           "inline-flex items-center gap-1 text-caption",
           statusClasses[status],
@@ -207,58 +197,51 @@ const DaysInStage = React.forwardRef<HTMLSpanElement, DaysInStageProps>(
         {...props}
       >
         {showIcon && (
-          <Icon
-            weight={status === "critical" ? "fill" : "regular"}
-            className="w-3 h-3"
-          />
+          <Icon weight={status === "critical" ? "fill" : "regular"} className="h-3.5 w-3.5" />
         )}
-        {compact ? `${days}d` : `${days} days in stage`}
+        {compact ? `${days} days in stage` : `${days} days in stage`}
       </span>
     );
   }
 );
 DaysInStage.displayName = "DaysInStage";
 
-/**
- * CandidateActivity - Shows recent activity indicators
- * Comment time, scheduled interview, etc.
- */
+// ============================================
+// CANDIDATE ACTIVITY
+// ============================================
+
 interface CandidateActivityProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Last comment timestamp (relative string like "2h ago", "1 day ago") */
   lastComment?: string;
-  /** Scheduled interview datetime */
   scheduledInterview?: string;
-  /** Show "Not scheduled" if no interview scheduled */
   showNotScheduled?: boolean;
 }
 
 const CandidateActivity = React.forwardRef<HTMLDivElement, CandidateActivityProps>(
   ({ className, lastComment, scheduledInterview, showNotScheduled = false, ...props }, ref) => {
     const hasActivity = lastComment || scheduledInterview || showNotScheduled;
-
     if (!hasActivity) return null;
 
     return (
       <div
         ref={ref}
-        className={cn("flex items-center gap-3 text-caption", className)}
+        className={cn("flex items-center gap-3 text-caption text-foreground-muted", className)}
         {...props}
       >
         {lastComment && (
-          <span className="inline-flex items-center gap-1 text-foreground-muted">
-            <ChatCircle weight="regular" className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1">
+            <ChatCircle weight="regular" className="h-3.5 w-3.5" />
             {lastComment}
           </span>
         )}
         {scheduledInterview && (
-          <span className="inline-flex items-center gap-1 text-[var(--primitive-green-600)]">
-            <Calendar weight="regular" className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1 text-[var(--foreground-success)]">
+            <Calendar weight="regular" className="h-3.5 w-3.5" />
             {scheduledInterview}
           </span>
         )}
         {!scheduledInterview && showNotScheduled && (
           <span className="inline-flex items-center gap-1 text-foreground-subtle">
-            <Calendar weight="regular" className="w-3.5 h-3.5" />
+            <Calendar weight="regular" className="h-3.5 w-3.5" />
             Not scheduled
           </span>
         )}
@@ -268,10 +251,10 @@ const CandidateActivity = React.forwardRef<HTMLDivElement, CandidateActivityProp
 );
 CandidateActivity.displayName = "CandidateActivity";
 
-/**
- * CandidateTags - Display semantic tags for candidates
- * Supports colored variants for different tag types
- */
+// ============================================
+// CANDIDATE TAGS
+// ============================================
+
 type TagVariant = "default" | "green" | "blue" | "amber" | "purple" | "pink";
 
 interface CandidateTag {
@@ -289,15 +272,12 @@ const tagVariantClasses: Record<TagVariant, string> = {
 };
 
 interface CandidateTagsProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Array of tags with optional variants */
   tags: CandidateTag[] | string[];
-  /** Maximum tags to show */
   maxVisible?: number;
 }
 
 const CandidateTags = React.forwardRef<HTMLDivElement, CandidateTagsProps>(
   ({ className, tags, maxVisible = 3, ...props }, ref) => {
-    // Normalize tags to CandidateTag format
     const normalizedTags: CandidateTag[] = tags.map((tag) =>
       typeof tag === "string" ? { label: tag, variant: "default" } : tag
     );
@@ -307,16 +287,12 @@ const CandidateTags = React.forwardRef<HTMLDivElement, CandidateTagsProps>(
     const remainingCount = hiddenTags.length;
 
     return (
-      <div
-        ref={ref}
-        className={cn("flex flex-wrap gap-1", className)}
-        {...props}
-      >
+      <div ref={ref} className={cn("flex flex-wrap items-center gap-1.5", className)} {...props}>
         {visibleTags.map((tag, index) => (
           <span
             key={index}
             className={cn(
-              "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium",
+              "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
               tagVariantClasses[tag.variant || "default"]
             )}
           >
@@ -327,12 +303,12 @@ const CandidateTags = React.forwardRef<HTMLDivElement, CandidateTagsProps>(
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--primitive-neutral-200)] text-[var(--primitive-neutral-600)] cursor-help">
+                <span className="inline-flex cursor-help items-center rounded-md bg-[var(--primitive-neutral-200)] px-2 py-0.5 text-xs font-medium text-[var(--primitive-neutral-600)]">
                   +{remainingCount}
                 </span>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs">
-                <p className="font-medium mb-1">More tags</p>
+                <p className="mb-1 font-medium">More tags</p>
                 <p className="text-foreground-subtle">
                   {hiddenTags.map((t) => t.label).join(", ")}
                 </p>
@@ -346,24 +322,44 @@ const CandidateTags = React.forwardRef<HTMLDivElement, CandidateTagsProps>(
 );
 CandidateTags.displayName = "CandidateTags";
 
+// ============================================
+// CANDIDATE CARD — Main Container
+// Clean, minimal card with generous whitespace
+// ============================================
+
 interface CandidateCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  /** Whether the card is compact (for Kanban) or expanded (for list view) */
   variant?: "compact" | "expanded";
-  /** Show loading skeleton */
   loading?: boolean;
+  /** Visual selected state */
+  selected?: boolean;
+  /** Show selection checkbox */
+  selectable?: boolean;
+  /** Selection callback */
+  onSelectionChange?: (selected: boolean) => void;
 }
 
 const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
-  ({ className, children, variant = "compact", loading = false, ...props }, ref) => {
+  (
+    {
+      className,
+      children,
+      variant = "compact",
+      loading = false,
+      selected = false,
+      selectable = false,
+      onSelectionChange,
+      ...props
+    },
+    ref
+  ) => {
     if (loading) {
       return (
         <div
           ref={ref}
           className={cn(
-            "bg-surface rounded-lg border border-border animate-pulse",
-            variant === "compact" && "p-3",
-            variant === "expanded" && "p-4",
+            "animate-pulse rounded-xl border border-[var(--card-border)] bg-[var(--card-background)]",
+            variant === "compact" ? "p-4" : "p-5",
             className
           )}
           {...props}
@@ -376,16 +372,48 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
     return (
       <div
         ref={ref}
+        role={selectable ? "option" : "article"}
+        tabIndex={0}
+        aria-selected={selectable ? selected : undefined}
         className={cn(
-          "bg-surface rounded-lg border border-border transition-all cursor-pointer",
-          "hover:border-border-emphasis hover:shadow-md",
-          "focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2",
-          variant === "compact" && "p-3 shadow-card",
-          variant === "expanded" && "p-4 shadow-sm",
+          // Base
+          "group relative rounded-xl border bg-[var(--card-background)] text-[var(--card-foreground)]",
+          // Transitions
+          "transition-all duration-200 ease-[var(--ease-default)]",
+          // Hover — subtle lift + shadow
+          "hover:-translate-y-px hover:border-[var(--card-border-hover)] hover:shadow-[var(--shadow-card-hover)]",
+          // Focus
+          "focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none",
+          // Active
+          "active:scale-[0.995] active:shadow-[var(--shadow-card)]",
+          // Cursor
+          "cursor-pointer",
+          // Variant sizing
+          variant === "compact" ? "p-4" : "p-5",
+          // Default vs selected border
+          selected
+            ? "border-[var(--border-brand)] bg-[var(--card-background-selected)]"
+            : "border-[var(--card-border)]",
           className
         )}
         {...props}
       >
+        {/* Selection checkbox — overlays top-left, visible on hover or when selected */}
+        {selectable && (
+          <div
+            className={cn(
+              "absolute left-3 top-3 z-10 transition-opacity duration-150",
+              selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            )}
+          >
+            <Checkbox
+              checked={selected}
+              onCheckedChange={(checked) => onSelectionChange?.(Boolean(checked))}
+              aria-label="Select candidate"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
         {children}
       </div>
     );
@@ -393,45 +421,45 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
 );
 CandidateCard.displayName = "CandidateCard";
 
-/**
- * Skeleton loading state for CandidateCard
- */
+// ============================================
+// SKELETON
+// ============================================
+
 interface CandidateCardSkeletonProps {
   variant?: "compact" | "expanded";
 }
 
 const CandidateCardSkeleton = ({ variant = "compact" }: CandidateCardSkeletonProps) => (
   <div className="space-y-3">
-    {/* Header skeleton */}
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-full bg-background-emphasized" />
+      <div className="h-10 w-10 rounded-full bg-[var(--background-emphasized)]" />
       <div className="flex-1 space-y-2">
-        <div className="h-4 w-32 bg-background-emphasized rounded" />
-        <div className="h-3 w-24 bg-background-emphasized rounded" />
+        <div className="h-4 w-32 rounded bg-[var(--background-emphasized)]" />
+        <div className="h-3 w-24 rounded bg-[var(--background-emphasized)]" />
       </div>
     </div>
-    {/* Skills skeleton */}
-    <div className="flex gap-1">
-      <div className="h-5 w-16 bg-background-emphasized rounded-full" />
-      <div className="h-5 w-20 bg-background-emphasized rounded-full" />
-      <div className="h-5 w-14 bg-background-emphasized rounded-full" />
+    <div className="flex gap-1.5">
+      <div className="h-5 w-16 rounded-md bg-[var(--background-emphasized)]" />
+      <div className="h-5 w-20 rounded-md bg-[var(--background-emphasized)]" />
     </div>
     {variant === "expanded" && (
       <>
-        {/* Meta skeleton */}
         <div className="flex gap-4">
-          <div className="h-3 w-20 bg-background-emphasized rounded" />
-          <div className="h-3 w-24 bg-background-emphasized rounded" />
+          <div className="h-3 w-20 rounded bg-[var(--background-emphasized)]" />
+          <div className="h-3 w-24 rounded bg-[var(--background-emphasized)]" />
         </div>
-        {/* Actions skeleton */}
-        <div className="flex gap-2 pt-2 border-t border-border">
-          <div className="h-8 w-20 bg-background-emphasized rounded" />
-          <div className="h-8 w-20 bg-background-emphasized rounded" />
+        <div className="flex gap-2 border-t border-[var(--border-muted)] pt-3">
+          <div className="h-8 w-20 rounded bg-[var(--background-emphasized)]" />
+          <div className="h-8 w-20 rounded bg-[var(--background-emphasized)]" />
         </div>
       </>
     )}
   </div>
 );
+
+// ============================================
+// CANDIDATE HEADER
+// ============================================
 
 interface CandidateHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
@@ -443,24 +471,13 @@ interface CandidateHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
 const CandidateHeader = React.forwardRef<HTMLDivElement, CandidateHeaderProps>(
   ({ className, name, email, avatarUrl, ...props }, ref) => {
     return (
-      <div
-        ref={ref}
-        className={cn("flex items-center gap-3", className)}
-        {...props}
-      >
-        <Avatar
-          size="default"
-          src={avatarUrl}
-          name={name}
-          alt={name}
-        />
+      <div ref={ref} className={cn("flex items-center gap-3", className)} {...props}>
+        <Avatar size="default" src={avatarUrl} name={name} alt={name} />
         <div className="min-w-0 flex-1">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <p className="text-body-sm font-medium text-foreground truncate">
-                  {name}
-                </p>
+                <p className="truncate text-body-sm font-semibold text-foreground">{name}</p>
               </TooltipTrigger>
               <TooltipContent side="top">
                 <p>{name}</p>
@@ -468,15 +485,17 @@ const CandidateHeader = React.forwardRef<HTMLDivElement, CandidateHeaderProps>(
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          {email && (
-            <p className="text-caption text-foreground-subtle truncate">{email}</p>
-          )}
+          {email && <p className="truncate text-caption text-foreground-subtle">{email}</p>}
         </div>
       </div>
     );
   }
 );
 CandidateHeader.displayName = "CandidateHeader";
+
+// ============================================
+// CANDIDATE META
+// ============================================
 
 interface CandidateMetaProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -503,20 +522,19 @@ interface CandidateMetaItemProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
 }
 
-const CandidateMetaItem = React.forwardRef<
-  HTMLSpanElement,
-  CandidateMetaItemProps
->(({ className, icon, children, ...props }, ref) => (
-  <span
-    ref={ref}
-    className={cn("flex items-center gap-1", className)}
-    {...props}
-  >
-    {icon && <span className="text-foreground-subtle">{icon}</span>}
-    {children}
-  </span>
-));
+const CandidateMetaItem = React.forwardRef<HTMLSpanElement, CandidateMetaItemProps>(
+  ({ className, icon, children, ...props }, ref) => (
+    <span ref={ref} className={cn("flex items-center gap-1", className)} {...props}>
+      {icon && <span className="text-foreground-subtle">{icon}</span>}
+      {children}
+    </span>
+  )
+);
 CandidateMetaItem.displayName = "CandidateMetaItem";
+
+// ============================================
+// CANDIDATE SKILLS
+// ============================================
 
 interface CandidateSkillsProps extends React.HTMLAttributes<HTMLDivElement> {
   skills: string[];
@@ -530,11 +548,7 @@ const CandidateSkills = React.forwardRef<HTMLDivElement, CandidateSkillsProps>(
     const remainingCount = hiddenSkills.length;
 
     return (
-      <div
-        ref={ref}
-        className={cn("flex flex-wrap gap-1", className)}
-        {...props}
-      >
+      <div ref={ref} className={cn("flex flex-wrap gap-1.5", className)} {...props}>
         {visibleSkills.map((skill) => (
           <Badge key={skill} variant="secondary" size="sm">
             {skill}
@@ -551,10 +565,8 @@ const CandidateSkills = React.forwardRef<HTMLDivElement, CandidateSkillsProps>(
                 </span>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs">
-                <p className="font-medium mb-1">Additional Skills</p>
-                <p className="text-foreground-subtle">
-                  {hiddenSkills.join(", ")}
-                </p>
+                <p className="mb-1 font-medium">Additional Skills</p>
+                <p className="text-foreground-subtle">{hiddenSkills.join(", ")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -565,17 +577,25 @@ const CandidateSkills = React.forwardRef<HTMLDivElement, CandidateSkillsProps>(
 );
 CandidateSkills.displayName = "CandidateSkills";
 
+// ============================================
+// CANDIDATE SCORE
+// @deprecated Use MatchScoreBadge from match-score.tsx instead
+// ============================================
+
 interface CandidateScoreProps extends React.HTMLAttributes<HTMLDivElement> {
   score: number;
   label?: string;
-  /** Color variant based on score thresholds */
+  /** @deprecated Use MatchScoreBadge for proper token support */
   variant?: "auto" | ScoreLevel;
-  /** Show progress bar */
   showProgress?: boolean;
 }
 
+/** @deprecated Use MatchScoreBadge from @/components/ui/match-score instead */
 const CandidateScore = React.forwardRef<HTMLDivElement, CandidateScoreProps>(
-  ({ className, score, label = "Match", variant = "auto", showProgress = false, ...props }, ref) => {
+  (
+    { className, score, label = "Match", variant = "auto", showProgress = false, ...props },
+    ref
+  ) => {
     const getScoreLevel = (): ScoreLevel => {
       if (variant !== "auto") return variant;
       if (score >= 85) return "excellent";
@@ -588,22 +608,14 @@ const CandidateScore = React.forwardRef<HTMLDivElement, CandidateScoreProps>(
     const config = scoreConfig[level];
 
     return (
-      <div
-        ref={ref}
-        className={cn("flex items-center gap-2", className)}
-        {...props}
-      >
+      <div ref={ref} className={cn("flex items-center gap-2", className)} {...props}>
         <div
-          className={cn(
-            "px-2 py-1 rounded-md text-caption font-medium",
-            config.bg,
-            config.text
-          )}
+          className={cn("rounded-md px-2 py-1 text-caption font-medium", config.bg, config.text)}
         >
           {score}%
         </div>
         {showProgress && (
-          <div className="flex-1 h-1.5 bg-background-muted rounded-full overflow-hidden">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--background-muted)]">
             <div
               className={cn("h-full rounded-full transition-all", config.fill)}
               style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
@@ -617,6 +629,10 @@ const CandidateScore = React.forwardRef<HTMLDivElement, CandidateScoreProps>(
 );
 CandidateScore.displayName = "CandidateScore";
 
+// ============================================
+// CANDIDATE ACTIONS
+// ============================================
+
 interface CandidateActionsProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
@@ -626,7 +642,7 @@ const CandidateActions = React.forwardRef<HTMLDivElement, CandidateActionsProps>
     <div
       ref={ref}
       className={cn(
-        "flex items-center gap-2 pt-2 mt-2 border-t border-border",
+        "mt-3 flex items-center gap-2 border-t border-[var(--border-muted)] pt-3",
         className
       )}
       {...props}
@@ -637,9 +653,10 @@ const CandidateActions = React.forwardRef<HTMLDivElement, CandidateActionsProps>
 );
 CandidateActions.displayName = "CandidateActions";
 
-/**
- * Stage indicator showing current pipeline stage
- */
+// ============================================
+// CANDIDATE STAGE
+// ============================================
+
 interface CandidateStageProps extends React.HTMLAttributes<HTMLDivElement> {
   stage: string;
   color?: string;
@@ -647,14 +664,10 @@ interface CandidateStageProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const CandidateStage = React.forwardRef<HTMLDivElement, CandidateStageProps>(
   ({ className, stage, color, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("flex items-center gap-1.5", className)}
-      {...props}
-    >
+    <div ref={ref} className={cn("flex items-center gap-1.5", className)} {...props}>
       <div
-        className="w-1.5 h-1.5 rounded-full"
-        style={{ backgroundColor: color || "#94a3b8" }}
+        className="h-2 w-2 rounded-full"
+        style={{ backgroundColor: color || `var(--border-emphasis)` }}
       />
       <span className="text-caption text-foreground-muted">{stage}</span>
     </div>
@@ -662,13 +675,13 @@ const CandidateStage = React.forwardRef<HTMLDivElement, CandidateStageProps>(
 );
 CandidateStage.displayName = "CandidateStage";
 
-/**
- * Application date/time indicator
- */
+// ============================================
+// CANDIDATE DATE
+// ============================================
+
 interface CandidateDateProps extends React.HTMLAttributes<HTMLSpanElement> {
   date: Date | string;
   prefix?: string;
-  /** Show relative time (e.g., "2 days ago") instead of absolute date */
   relative?: boolean;
 }
 
@@ -696,10 +709,7 @@ const CandidateDate = React.forwardRef<HTMLSpanElement, CandidateDateProps>(
     const dateObj = typeof date === "string" ? new Date(date) : date;
     const formatted = relative
       ? getRelativeTime(dateObj)
-      : dateObj.toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        });
+      : dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
     return (
       <TooltipProvider>
@@ -707,7 +717,7 @@ const CandidateDate = React.forwardRef<HTMLSpanElement, CandidateDateProps>(
           <TooltipTrigger asChild>
             <span
               ref={ref}
-              className={cn("text-caption text-foreground-subtle cursor-help", className)}
+              className={cn("cursor-help text-caption text-foreground-subtle", className)}
               {...props}
             >
               {prefix} {formatted}
@@ -730,39 +740,38 @@ const CandidateDate = React.forwardRef<HTMLSpanElement, CandidateDateProps>(
 );
 CandidateDate.displayName = "CandidateDate";
 
-/**
- * Star Rating display component
- * Shows filled/empty stars based on rating
- */
+// ============================================
+// STAR RATING — Uses Phosphor Star icon
+// ============================================
+
 interface StarRatingProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Rating value (0-5) */
   rating: number;
-  /** Maximum stars to show */
   maxStars?: number;
-  /** Size of the stars */
   size?: "sm" | "md" | "lg";
-  /** Show numeric value alongside stars */
   showValue?: boolean;
 }
 
+const starSizes = {
+  sm: 14,
+  md: 16,
+  lg: 20,
+} as const;
+
 const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
   ({ className, rating, maxStars = 5, size = "sm", showValue = false, ...props }, ref) => {
-    const sizeClasses = {
-      sm: "w-3.5 h-3.5",
-      md: "w-4 h-4",
-      lg: "w-5 h-5",
-    };
-
-    const roundedRating = Math.round(rating * 2) / 2; // Round to nearest 0.5
+    const roundedRating = Math.round(rating * 2) / 2;
+    const iconSize = starSizes[size];
 
     return (
       <div
         ref={ref}
+        role="img"
+        aria-label={`Rating: ${rating.toFixed(1)} out of ${maxStars} stars`}
         className={cn("flex items-center gap-0.5", className)}
         {...props}
       >
         {showValue && (
-          <span className="text-caption font-medium text-foreground-muted mr-1">
+          <span className="mr-1 text-caption font-medium text-foreground-muted">
             {rating.toFixed(1)}
           </span>
         )}
@@ -771,19 +780,12 @@ const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
           const halfFilled = !filled && index < roundedRating;
 
           return (
-            <svg
+            <Star
               key={index}
-              className={cn(
-                sizeClasses[size],
-                filled || halfFilled ? "text-rating-filled" : "text-rating-empty"
-              )}
-              viewBox="0 0 20 20"
-              fill={filled || halfFilled ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth={filled || halfFilled ? 0 : 1.5}
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
+              size={iconSize}
+              weight={filled || halfFilled ? "fill" : "regular"}
+              className={cn(filled || halfFilled ? "text-rating-filled" : "text-rating-empty")}
+            />
           );
         })}
       </div>
@@ -792,34 +794,23 @@ const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
 );
 StarRating.displayName = "StarRating";
 
-/**
- * Reviewer data type for CandidateReviewers
- */
+// ============================================
+// REVIEWER ROW
+// ============================================
+
 interface ReviewerData {
   name: string;
   avatarUrl?: string;
-  /** Review status - rating (0-5), decision, or "in_review" */
   status: "in_review" | number | DecisionType;
-  /** Optional rating (if using decision for status) */
   rating?: number;
-  /** Avatar color for fallback */
   color?: "green" | "blue" | "purple" | "red" | "orange" | "yellow";
 }
 
-/**
- * Reviewer row component - shows reviewer avatar, name, and status/rating/decision
- * Enhanced to support DecisionPill display
- */
 interface ReviewerRowProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Reviewer name */
   name: string;
-  /** Reviewer avatar URL */
   avatarUrl?: string;
-  /** Review status - "in_review", numeric rating, or decision type */
   status: "in_review" | number | DecisionType;
-  /** Optional separate rating (shown alongside decision) */
   rating?: number;
-  /** Avatar color */
   color?: "green" | "blue" | "purple" | "red" | "orange" | "yellow";
 }
 
@@ -834,16 +825,12 @@ const ReviewerRow = React.forwardRef<HTMLDivElement, ReviewerRowProps>(
         className={cn("flex items-center justify-between py-1.5", className)}
         {...props}
       >
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
           <Avatar size="xs" src={avatarUrl} name={name} alt={name} color={color} />
-          <span className="text-caption text-foreground-muted truncate">{name}</span>
+          <span className="truncate text-caption text-foreground-muted">{name}</span>
         </div>
         <div className="flex items-center gap-2">
-          {/* Show rating stars if provided alongside decision */}
-          {rating !== undefined && (
-            <StarRating rating={rating} maxStars={5} size="sm" />
-          )}
-          {/* Show decision pill, rating stars, or in-review badge */}
+          {rating !== undefined && <StarRating rating={rating} maxStars={5} size="sm" />}
           {status === "in_review" ? (
             <Badge variant="feature" size="sm">
               In Review
@@ -860,16 +847,15 @@ const ReviewerRow = React.forwardRef<HTMLDivElement, ReviewerRowProps>(
 );
 ReviewerRow.displayName = "ReviewerRow";
 
-/**
- * Candidate card header for Kanban - matches Figma design
- * Shows avatar, name, star rating (avg reviewer score), match score (AI), and applied date
- */
+// ============================================
+// KANBAN HEADER
+// Clean layout: avatar + name on left, meta below name
+// ============================================
+
 interface CandidateKanbanHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
   avatarUrl?: string;
-  /** Average reviewer rating (0-5 stars) */
   rating?: number;
-  /** AI-generated match score (0-100%) */
   matchScore?: number;
   appliedDate?: Date | string;
 }
@@ -887,35 +873,36 @@ const CandidateKanbanHeader = React.forwardRef<HTMLDivElement, CandidateKanbanHe
       return `Applied ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
     };
 
-    // Determine match score color based on value using semantic tokens
-    const getMatchScoreColor = (score: number) => {
-      if (score >= 85) return "text-match-high-fg";
-      if (score >= 70) return "text-match-medium-fg";
-      if (score >= 50) return "text-foreground-warning";
-      return "text-match-low-fg";
-    };
-
     const hasMetaInfo = rating !== undefined || matchScore !== undefined || appliedDate;
 
     return (
       <div ref={ref} className={cn("flex items-center gap-3", className)} {...props}>
         <Avatar size="default" src={avatarUrl} name={name} alt={name} />
         <div className="min-w-0 flex-1">
-          <p className="text-body-sm font-semibold text-foreground truncate">{name}</p>
+          <p className="truncate text-body-sm font-semibold text-foreground">{name}</p>
           {hasMetaInfo && (
-            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {rating !== undefined && (
-                <div className="flex items-center gap-0.5">
-                  <svg className="w-3.5 h-3.5 text-rating-filled" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
+                <div className="flex items-center gap-1">
+                  <Star size={13} weight="fill" className="text-rating-filled" />
                   <span className="text-caption text-foreground-muted">{rating.toFixed(1)}</span>
                 </div>
               )}
               {matchScore !== undefined && (
                 <>
-                  {rating !== undefined && <span className="text-foreground-subtle">•</span>}
-                  <span className={cn("text-caption font-medium", getMatchScoreColor(matchScore))}>
+                  {rating !== undefined && (
+                    <span className="text-xs text-foreground-subtle">·</span>
+                  )}
+                  <span
+                    className={cn(
+                      "text-caption font-medium",
+                      matchScore >= 75
+                        ? "text-[var(--match-high-foreground)]"
+                        : matchScore >= 50
+                          ? "text-[var(--match-medium-foreground)]"
+                          : "text-[var(--match-low-foreground)]"
+                    )}
+                  >
                     {matchScore}% match
                   </span>
                 </>
@@ -923,14 +910,12 @@ const CandidateKanbanHeader = React.forwardRef<HTMLDivElement, CandidateKanbanHe
               {appliedDate && (
                 <>
                   {(rating !== undefined || matchScore !== undefined) && (
-                    <span className="text-foreground-subtle">•</span>
+                    <span className="text-xs text-foreground-subtle">·</span>
                   )}
-                  <div className="flex items-center gap-1 text-caption text-foreground-muted">
-                    <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <circle cx="8" cy="8" r="6" />
-                    </svg>
-                    <span>{formatAppliedDate(appliedDate)}</span>
-                  </div>
+                  <span className="flex items-center gap-1 text-caption text-foreground-muted">
+                    <Clock size={12} weight="regular" />
+                    {formatAppliedDate(appliedDate)}
+                  </span>
                 </>
               )}
             </div>
@@ -942,17 +927,16 @@ const CandidateKanbanHeader = React.forwardRef<HTMLDivElement, CandidateKanbanHe
 );
 CandidateKanbanHeader.displayName = "CandidateKanbanHeader";
 
-/**
- * Reviewers section for candidate card - collapsible list of reviewers
- * Enhanced with collapsed summary showing avatar stack and decision counts
- */
+// ============================================
+// CANDIDATE REVIEWERS — Collapsible section
+// Collapsed: avatar stack + "X/Y reviewed" + decision summary
+// Expanded: individual reviewer rows with stars/decisions
+// ============================================
+
 interface CandidateReviewersProps extends React.HTMLAttributes<HTMLDivElement> {
   reviewers: ReviewerData[];
-  /** Max reviewers to show before collapsing */
   maxVisible?: number;
-  /** Always expanded */
   expanded?: boolean;
-  /** Show collapsed summary with avatar stack (default: true when >1 reviewer) */
   showSummary?: boolean;
 }
 
@@ -960,13 +944,11 @@ const CandidateReviewers = React.forwardRef<HTMLDivElement, CandidateReviewersPr
   ({ className, reviewers, maxVisible = 3, expanded = false, showSummary, ...props }, ref) => {
     const [isExpanded, setIsExpanded] = React.useState(expanded);
 
-    // Calculate summary metrics
     const reviewedCount = reviewers.filter(
       (r) => r.status !== "in_review" && r.status !== "pending"
     ).length;
     const totalCount = reviewers.length;
 
-    // Count decisions for summary
     const decisionCounts = reviewers.reduce(
       (acc, r) => {
         if (r.status === "strong_yes" || r.status === "yes") acc.yes++;
@@ -977,10 +959,8 @@ const CandidateReviewers = React.forwardRef<HTMLDivElement, CandidateReviewersPr
       { yes: 0, no: 0, maybe: 0 }
     );
 
-    // Determine if we should show collapsed summary
     const shouldShowSummary = showSummary ?? (totalCount > 1 && !isExpanded);
 
-    // Convert reviewers to AvatarData for AvatarGroup
     const avatarData: AvatarData[] = reviewers.map((r) => ({
       name: r.name,
       src: r.avatarUrl,
@@ -991,78 +971,58 @@ const CandidateReviewers = React.forwardRef<HTMLDivElement, CandidateReviewersPr
     const hiddenCount = reviewers.length - maxVisible;
 
     return (
-      <div ref={ref} className={cn("mt-3 pt-3 border-t border-border-muted", className)} {...props}>
-        {/* Collapsed summary view */}
+      <div
+        ref={ref}
+        className={cn("mt-3 border-t border-[var(--border-muted)] pt-3", className)}
+        {...props}
+      >
+        {/* Collapsed summary */}
         {shouldShowSummary && !isExpanded ? (
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
-            className="w-full flex items-center justify-between py-1 px-1 -mx-1 rounded-md hover:bg-background-subtle transition-colors"
+            className="-mx-1 flex w-full items-center justify-between rounded-md px-1 py-1.5 transition-colors hover:bg-[var(--background-subtle)]"
           >
             <div className="flex items-center gap-2">
-              {/* Stacked avatars */}
-              <AvatarGroup
-                avatars={avatarData}
-                size="xs"
-                max={4}
-                variant="ring"
-              />
+              <AvatarGroup avatars={avatarData} size="xs" max={4} variant="ring" />
               <span className="text-caption text-foreground-muted">
                 {reviewedCount}/{totalCount} reviewed
               </span>
             </div>
             <div className="flex items-center gap-2">
-              {/* Decision counts */}
               {decisionCounts.yes > 0 && (
-                <span className="text-caption text-[var(--primitive-green-600)] font-medium">
+                <span className="text-caption font-medium text-[var(--foreground-success)]">
                   {decisionCounts.yes} yes
                 </span>
               )}
               {decisionCounts.maybe > 0 && (
-                <span className="text-caption text-[var(--primitive-yellow-600)] font-medium">
+                <span className="text-caption font-medium text-[var(--foreground-warning)]">
                   {decisionCounts.maybe} maybe
                 </span>
               )}
               {decisionCounts.no > 0 && (
-                <span className="text-caption text-[var(--primitive-red-600)] font-medium">
+                <span className="text-caption font-medium text-[var(--foreground-error)]">
                   {decisionCounts.no} no
                 </span>
               )}
-              {/* Expand chevron */}
-              <svg
-                className="w-4 h-4 text-foreground-muted"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <CaretDown size={14} weight="bold" className="text-foreground-muted" />
             </div>
           </button>
         ) : (
           <>
-            {/* Expanded header with collapse button */}
+            {/* Expanded header */}
             {totalCount > 1 && isExpanded && (
               <button
                 type="button"
                 onClick={() => setIsExpanded(false)}
-                className="w-full flex items-center justify-between mb-2 text-caption text-foreground-muted hover:text-foreground transition-colors"
+                className="mb-2 flex w-full items-center justify-between text-caption text-foreground-muted transition-colors hover:text-foreground"
               >
                 <span>{totalCount} reviewers</span>
-                <svg
-                  className="w-4 h-4"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M4 10l4-4 4 4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <CaretUp size={14} weight="bold" />
               </button>
             )}
             {/* Reviewer rows */}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {visibleReviewers.map((reviewer, index) => (
                 <ReviewerRow
                   key={index}
@@ -1091,6 +1051,10 @@ const CandidateReviewers = React.forwardRef<HTMLDivElement, CandidateReviewersPr
 );
 CandidateReviewers.displayName = "CandidateReviewers";
 
+// ============================================
+// EXPORTS
+// ============================================
+
 export {
   CandidateCard,
   CandidateCardSkeleton,
@@ -1107,7 +1071,6 @@ export {
   ReviewerRow,
   StarRating,
   scoreConfig,
-  // New components
   DecisionPill,
   decisionConfig,
   DaysInStage,
@@ -1116,10 +1079,4 @@ export {
   tagVariantClasses,
 };
 
-export type {
-  ScoreLevel,
-  DecisionType,
-  ReviewerData,
-  CandidateTag,
-  TagVariant,
-};
+export type { ScoreLevel, DecisionType, ReviewerData, CandidateTag, TagVariant };
