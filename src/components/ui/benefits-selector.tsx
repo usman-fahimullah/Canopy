@@ -4,12 +4,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Badge } from "./badge";
-import { PencilSimple, Plus, X, Check } from "@phosphor-icons/react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./popover";
+import { PencilSimple, ShieldPlus, X, Check } from "@phosphor-icons/react";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalBody, ModalFooter } from "./modal";
 
 /**
  * BenefitsSelector component
@@ -145,159 +141,136 @@ const BenefitsSelector = React.forwardRef<HTMLDivElement, BenefitsSelectorProps>
 
     return (
       <div ref={ref} className={cn("space-y-3", className)}>
-        {/* Company Benefits Toggle with Customize */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              onUseCompanyDefaultsChange(!useCompanyDefaults);
-              if (!useCompanyDefaults) {
-                // When enabling company defaults, select all
-                selectAll();
-              }
-            }}
-            disabled={disabled}
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-full border",
-              "text-caption font-medium",
-              "transition-all duration-150",
-              useCompanyDefaults
-                ? "bg-primary-100 border-primary-300 text-primary-800"
-                : "bg-surface border-border text-foreground-muted hover:border-border-emphasis",
-              disabled && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            <span
-              className={cn(
-                "flex items-center justify-center w-5 h-5 rounded-full",
-                useCompanyDefaults
-                  ? "bg-primary-600 text-white"
-                  : "bg-background-muted"
-              )}
-            >
-              {useCompanyDefaults ? (
-                <Check weight="bold" className="w-3 h-3" />
-              ) : (
-                <Plus weight="bold" className="w-3 h-3 text-foreground-muted" />
-              )}
-            </span>
-            {companyName} Benefits
-          </button>
+        {/* Company Benefits Row */}
+        <div
+          className={cn(
+            "flex w-full items-center gap-3",
+            "rounded-2xl border px-4 py-3",
+            "border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)]",
+            disabled && "opacity-50"
+          )}
+        >
+          {/* Icon */}
+          <div className="shrink-0 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-red-500)] p-1">
+            <ShieldPlus size={32} weight="fill" className="text-white" />
+          </div>
 
-          <Popover open={customizeOpen} onOpenChange={setCustomizeOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={disabled}
-                leftIcon={<PencilSimple weight="regular" className="w-4 h-4" />}
-                className="text-foreground-muted hover:text-foreground"
-              >
-                Customize
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="start">
-              <div className="p-3 border-b border-border-muted">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-foreground">
-                    Select Benefits
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={selectAll}
-                      className="text-caption text-foreground-link hover:text-foreground-link-hover"
-                    >
-                      Select all
-                    </button>
-                    <span className="text-foreground-muted">|</span>
-                    <button
-                      type="button"
-                      onClick={clearAll}
-                      className="text-caption text-foreground-link hover:text-foreground-link-hover"
-                    >
-                      Clear all
-                    </button>
-                  </div>
+          {/* Label */}
+          <span className="min-w-0 flex-1 text-body text-[var(--foreground-default)]">
+            {companyName} Benefits
+          </span>
+
+          {/* Customize Button */}
+          <Button
+            variant="inverse"
+            disabled={disabled}
+            leftIcon={<PencilSimple weight="regular" className="h-5 w-5" />}
+            onClick={() => setCustomizeOpen(true)}
+          >
+            Customize
+          </Button>
+
+          {/* Benefits Selection Modal */}
+          <Modal open={customizeOpen} onOpenChange={setCustomizeOpen}>
+            <ModalContent>
+              <ModalHeader>
+                <ModalTitle>Select Benefits</ModalTitle>
+              </ModalHeader>
+              <ModalBody>
+                <div className="mb-2 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={selectAll}
+                    className="text-caption text-foreground-link hover:text-foreground-link-hover"
+                  >
+                    Select all
+                  </button>
+                  <span className="text-foreground-muted">|</span>
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    className="text-caption text-foreground-link hover:text-foreground-link-hover"
+                  >
+                    Clear all
+                  </button>
                 </div>
-              </div>
-              <div className="max-h-80 overflow-y-auto p-2">
-                {categories.map((category) => (
-                  <div key={category.id} className="mb-3 last:mb-0">
-                    <div className="px-2 py-1 text-caption font-medium text-foreground-muted">
-                      {category.name}
-                    </div>
-                    <div className="space-y-0.5">
-                      {category.benefits.map((benefit) => {
-                        const isSelected = selectedBenefits.includes(benefit.id);
-                        return (
-                          <button
-                            key={benefit.id}
-                            type="button"
-                            onClick={() => toggleBenefit(benefit.id)}
-                            className={cn(
-                              "flex items-center gap-2 w-full px-2 py-1.5 rounded-md",
-                              "text-body-sm text-foreground",
-                              "transition-colors duration-150",
-                              isSelected
-                                ? "bg-primary-100 text-primary-800"
-                                : "hover:bg-background-muted"
-                            )}
-                          >
-                            <span
+                <div className="max-h-96 space-y-4 overflow-y-auto">
+                  {categories.map((category) => (
+                    <div key={category.id}>
+                      <div className="px-2 py-1 text-caption font-medium text-foreground-muted">
+                        {category.name}
+                      </div>
+                      <div className="space-y-0.5">
+                        {category.benefits.map((benefit) => {
+                          const isSelected = selectedBenefits.includes(benefit.id);
+                          return (
+                            <button
+                              key={benefit.id}
+                              type="button"
+                              onClick={() => toggleBenefit(benefit.id)}
                               className={cn(
-                                "flex items-center justify-center w-4 h-4 rounded border",
-                                "transition-all duration-150",
+                                "flex w-full items-center gap-2 rounded-md px-2 py-1.5",
+                                "text-body-sm text-[var(--foreground-default)]",
+                                "transition-colors duration-150",
                                 isSelected
-                                  ? "bg-primary-600 border-primary-600"
-                                  : "bg-surface border-border"
+                                  ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand-emphasis)]"
+                                  : "hover:bg-[var(--background-interactive-hover)]"
                               )}
                             >
-                              {isSelected && (
-                                <Check weight="bold" className="w-3 h-3 text-white" />
-                              )}
-                            </span>
-                            {benefit.label}
-                          </button>
-                        );
-                      })}
+                              <span
+                                className={cn(
+                                  "flex h-4 w-4 items-center justify-center rounded border",
+                                  "transition-all duration-150",
+                                  isSelected
+                                    ? "border-[var(--primitive-green-600)] bg-[var(--primitive-green-600)]"
+                                    : "border-[var(--border-default)] bg-[var(--background-default)]"
+                                )}
+                              >
+                                {isSelected && (
+                                  <Check weight="bold" className="h-3 w-3 text-white" />
+                                )}
+                              </span>
+                              {benefit.label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <div className="p-3 border-t border-border-muted bg-background-subtle">
-                <div className="text-caption text-foreground-muted">
-                  {selectedBenefits.length} benefits selected
+                  ))}
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </ModalBody>
+              <ModalFooter>
+                <div className="flex w-full items-center justify-between">
+                  <span className="text-caption text-[var(--foreground-muted)]">
+                    {selectedBenefits.length} benefits selected
+                  </span>
+                  <Button variant="primary" onClick={() => setCustomizeOpen(false)}>
+                    Done
+                  </Button>
+                </div>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
         </div>
 
         {/* Selected benefits display (when not using company defaults) */}
         {!useCompanyDefaults && selectedBenefitObjects.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {selectedBenefitObjects.slice(0, 5).map((benefit) => (
-              <Badge
-                key={benefit.id}
-                variant="secondary"
-                className="gap-1 pr-1"
-              >
+              <Badge key={benefit.id} variant="secondary" className="gap-1 pr-1">
                 {benefit.label}
                 <button
                   type="button"
                   onClick={() => toggleBenefit(benefit.id)}
                   disabled={disabled}
-                  className="ml-1 hover:bg-background-emphasized rounded-full p-0.5 transition-colors"
+                  className="ml-1 rounded-full p-0.5 transition-colors hover:bg-background-emphasized"
                 >
-                  <X weight="bold" className="w-3 h-3" />
+                  <X weight="bold" className="h-3 w-3" />
                 </button>
               </Badge>
             ))}
             {selectedBenefitObjects.length > 5 && (
-              <Badge variant="secondary">
-                +{selectedBenefitObjects.length - 5} more
-              </Badge>
+              <Badge variant="secondary">+{selectedBenefitObjects.length - 5} more</Badge>
             )}
           </div>
         )}
