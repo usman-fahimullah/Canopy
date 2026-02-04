@@ -4,13 +4,7 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn, getInitials } from "@/lib/utils";
-import {
-  Clock,
-  Warning,
-  Star,
-  User,
-  BookmarkSimple,
-} from "@phosphor-icons/react";
+import { CheckCircle, Clock, Warning, Star, User, BookmarkSimple } from "@phosphor-icons/react";
 import { SimpleTooltip } from "./tooltip";
 
 /* ============================================
@@ -40,21 +34,17 @@ import { SimpleTooltip } from "./tooltip";
 // ============================================
 
 const avatarVariants = cva(
-  [
-    "relative flex shrink-0 overflow-hidden",
-    "border border-[var(--avatar-border)]",
-    "select-none",
-  ],
+  ["relative flex shrink-0 overflow-hidden", "border border-[var(--avatar-border)]", "select-none"],
   {
     variants: {
       // Figma sizes: 128px, 96px, 64px, 48px, 32px, 24px
       size: {
         "2xl": "h-32 w-32", // 128px
-        xl: "h-24 w-24",    // 96px
-        lg: "h-16 w-16",    // 64px
+        xl: "h-24 w-24", // 96px
+        lg: "h-16 w-16", // 64px
         default: "h-12 w-12", // 48px
-        sm: "h-8 w-8",      // 32px
-        xs: "h-6 w-6",      // 24px
+        sm: "h-8 w-8", // 32px
+        xs: "h-6 w-6", // 24px
       },
       // Shape variants
       shape: {
@@ -79,12 +69,12 @@ const avatarVariants = cva(
 type AvatarSize = NonNullable<VariantProps<typeof avatarVariants>["size"]>;
 
 const fontSizeMap: Record<AvatarSize, string> = {
-  "2xl": "text-5xl font-semibold tracking-wide",  // 48px
-  xl: "text-4xl font-semibold tracking-wide",     // 36px
-  lg: "text-2xl font-semibold tracking-wide",     // 24px
+  "2xl": "text-5xl font-semibold tracking-wide", // 48px
+  xl: "text-4xl font-semibold tracking-wide", // 36px
+  lg: "text-2xl font-semibold tracking-wide", // 24px
   default: "text-xl font-semibold tracking-wide", // 20px
-  sm: "text-sm font-semibold tracking-normal",    // 14px - single initial
-  xs: "text-xs font-bold tracking-normal",        // 12px - single initial
+  sm: "text-sm font-semibold tracking-normal", // 14px - single initial
+  xs: "text-xs font-bold tracking-normal", // 12px - single initial
 };
 
 // Number of initials to show based on size (#2)
@@ -94,8 +84,8 @@ const initialsCountMap: Record<AvatarSize, number> = {
   xl: 2,
   lg: 2,
   default: 2,
-  sm: 1,  // Single initial for small sizes
-  xs: 1,  // Single initial for extra small
+  sm: 1, // Single initial for small sizes
+  xs: 1, // Single initial for extra small
 };
 
 // ============================================
@@ -193,7 +183,8 @@ const outlinedColorConfig: Record<AvatarColor, { bg: string; text: string; borde
   purple: {
     bg: "bg-transparent dark:bg-transparent",
     text: "text-[var(--avatar-purple-foreground)] dark:text-[var(--primitive-purple-400)]",
-    border: "border-2 border-[var(--avatar-purple-border)] dark:border-[var(--primitive-purple-500)]",
+    border:
+      "border-2 border-[var(--avatar-purple-border)] dark:border-[var(--primitive-purple-500)]",
   },
   red: {
     bg: "bg-transparent dark:bg-transparent",
@@ -203,17 +194,20 @@ const outlinedColorConfig: Record<AvatarColor, { bg: string; text: string; borde
   orange: {
     bg: "bg-transparent dark:bg-transparent",
     text: "text-[var(--avatar-orange-foreground)] dark:text-[var(--primitive-orange-400)]",
-    border: "border-2 border-[var(--avatar-orange-border)] dark:border-[var(--primitive-orange-500)]",
+    border:
+      "border-2 border-[var(--avatar-orange-border)] dark:border-[var(--primitive-orange-500)]",
   },
   yellow: {
     bg: "bg-transparent dark:bg-transparent",
     text: "text-[var(--avatar-yellow-foreground)] dark:text-[var(--primitive-yellow-400)]",
-    border: "border-2 border-[var(--avatar-yellow-border)] dark:border-[var(--primitive-yellow-500)]",
+    border:
+      "border-2 border-[var(--avatar-yellow-border)] dark:border-[var(--primitive-yellow-500)]",
   },
   neutral: {
     bg: "bg-transparent dark:bg-transparent",
     text: "text-[var(--avatar-neutral-foreground)] dark:text-[var(--primitive-neutral-400)]",
-    border: "border-2 border-[var(--avatar-neutral-border)] dark:border-[var(--primitive-neutral-500)]",
+    border:
+      "border-2 border-[var(--avatar-neutral-border)] dark:border-[var(--primitive-neutral-500)]",
   },
 };
 
@@ -266,13 +260,22 @@ const statusSizeMap: Record<AvatarSize, { size: string; border: string; position
 // BADGE INDICATOR CONFIGURATION
 // ============================================
 
-export type AvatarBadge = "success" | "critical" | "favorite" | "bipoc" | "bookmark";
+export type AvatarBadge = "success" | "critical" | "favorite" | "bipoc" | "bookmark" | "clock";
 
-const badgeConfig: Record<AvatarBadge, { bg: string; iconColor: string; label: string; icon: React.ElementType }> = {
+const badgeConfig: Record<
+  AvatarBadge,
+  { bg: string; iconColor: string; label: string; icon: React.ElementType }
+> = {
   success: {
     bg: "bg-[var(--primitive-green-200)]",
     iconColor: "text-[var(--primitive-green-600)]",
     label: "Success",
+    icon: CheckCircle,
+  },
+  clock: {
+    bg: "bg-[var(--primitive-green-200)]",
+    iconColor: "text-[var(--primitive-green-600)]",
+    label: "Clock",
     icon: Clock,
   },
   critical: {
@@ -302,12 +305,12 @@ const badgeConfig: Record<AvatarBadge, { bg: string; iconColor: string; label: s
 };
 
 const badgeSizeMap: Record<AvatarSize, { container: string; icon: string; offset: string }> = {
-  xs: { container: "w-3 h-3", icon: "w-2 h-2", offset: "-bottom-0.5 -right-0.5" },
-  sm: { container: "w-4 h-4", icon: "w-2.5 h-2.5", offset: "-bottom-1 -right-1" },
-  default: { container: "w-5 h-5", icon: "w-3 h-3", offset: "-bottom-1 -right-1" },
-  lg: { container: "w-6 h-6", icon: "w-3.5 h-3.5", offset: "-bottom-1.5 -right-1.5" },
-  xl: { container: "w-7 h-7", icon: "w-4 h-4", offset: "-bottom-2 -right-2" },
-  "2xl": { container: "w-8 h-8", icon: "w-5 h-5", offset: "-bottom-2 -right-2" },
+  xs: { container: "w-3.5 h-3.5", icon: "w-2 h-2", offset: "bottom-[-2px] right-[-2px]" },
+  sm: { container: "w-4 h-4", icon: "w-2.5 h-2.5", offset: "bottom-[-3px] right-[-3px]" },
+  default: { container: "w-5 h-5", icon: "w-3.5 h-3.5", offset: "bottom-[-4px] right-[-4px]" },
+  lg: { container: "w-5 h-5", icon: "w-3.5 h-3.5", offset: "bottom-[-4px] right-[-4px]" },
+  xl: { container: "w-6 h-6", icon: "w-4 h-4", offset: "bottom-[-4px] right-[-4px]" },
+  "2xl": { container: "w-7 h-7", icon: "w-5 h-5", offset: "bottom-[-4px] right-[-4px]" },
 };
 
 // Icon size mapping for icon fallback
@@ -325,7 +328,8 @@ const iconSizeMap: Record<AvatarSize, string> = {
 // ============================================
 
 export interface AvatarProps
-  extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>,
+  extends
+    React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>,
     VariantProps<typeof avatarVariants> {
   /** Image source URL */
   src?: string;
@@ -373,10 +377,7 @@ export interface AvatarProps
 // AVATAR COMPONENT
 // ============================================
 
-const Avatar = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Root>,
-  AvatarProps
->(
+const Avatar = React.forwardRef<React.ElementRef<typeof AvatarPrimitive.Root>, AvatarProps>(
   (
     {
       className,
@@ -416,7 +417,8 @@ const Avatar = React.forwardRef<
     }, [src]);
 
     // Determine color from name or email (#20, #25)
-    const avatarColor = color || (name ? getColorFromString(name) : email ? getColorFromString(email) : "neutral");
+    const avatarColor =
+      color || (name ? getColorFromString(name) : email ? getColorFromString(email) : "neutral");
 
     // Get color classes based on variant (#12, #13, #9)
     const getColorClasses = () => {
@@ -497,9 +499,9 @@ const Avatar = React.forwardRef<
             // Focus ring (#28)
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--avatar-ring)] focus-visible:ring-offset-2",
             // Hover: scale + lift (#17)
-            "hover:scale-105 hover:-translate-y-0.5",
+            "hover:-translate-y-0.5 hover:scale-105",
             // Active/press feedback (#19)
-            "active:scale-[0.98] active:translate-y-0",
+            "active:translate-y-0 active:scale-[0.98]",
             shape === "circle" ? "rounded-full" : "rounded-xl",
           ]
         )}
@@ -546,17 +548,18 @@ const Avatar = React.forwardRef<
             delayMs={src ? 0 : 600}
           >
             {/* Priority: fallback > icon > initials */}
-            {fallback || (IconComponent ? (
-              <IconComponent
-                weight="fill"
-                className={cn(iconClass, "select-none")}
-                aria-hidden="true"
-              />
-            ) : (
-              <span className={cn(fontClass, "select-none")} aria-hidden="true">
-                {initials}
-              </span>
-            ))}
+            {fallback ||
+              (IconComponent ? (
+                <IconComponent
+                  weight="fill"
+                  className={cn(iconClass, "select-none")}
+                  aria-hidden="true"
+                />
+              ) : (
+                <span className={cn(fontClass, "select-none")} aria-hidden="true">
+                  {initials}
+                </span>
+              ))}
           </AvatarPrimitive.Fallback>
         </AvatarPrimitive.Root>
 
@@ -578,7 +581,9 @@ const Avatar = React.forwardRef<
             )}
             style={
               status === "online" && statusConfig[status].pulseColor
-                ? { "--avatar-status-pulse-color": statusConfig[status].pulseColor } as React.CSSProperties
+                ? ({
+                    "--avatar-status-pulse-color": statusConfig[status].pulseColor,
+                  } as React.CSSProperties)
                 : undefined
             }
             title={statusConfig[status].label}
@@ -599,12 +604,10 @@ const Avatar = React.forwardRef<
             )}
             title={badgeData.label}
           >
-            {badgeIcon || (BadgeIcon && (
-              <BadgeIcon
-                weight="fill"
-                className={cn(badgeSize.icon, badgeData.iconColor)}
-              />
-            ))}
+            {badgeIcon ||
+              (BadgeIcon && (
+                <BadgeIcon weight="fill" className={cn(badgeSize.icon, badgeData.iconColor)} />
+              ))}
           </span>
         )}
       </WrapperElement>
@@ -613,11 +616,7 @@ const Avatar = React.forwardRef<
     // Wrap with tooltip if enabled (#18)
     if (showTooltip && (name || tooltipContent)) {
       return (
-        <SimpleTooltip
-          content={tooltipContent || name}
-          side={tooltipSide}
-          delayDuration={300}
-        >
+        <SimpleTooltip content={tooltipContent || name} side={tooltipSide} delayDuration={300}>
           {avatarElement}
         </SimpleTooltip>
       );
@@ -762,9 +761,7 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
         {...props}
       >
         {orderedAvatars.map((avatar, index) => {
-          const zIndex = reverse
-            ? visibleAvatars.length - index
-            : index + 1;
+          const zIndex = reverse ? visibleAvatars.length - index : index + 1;
 
           return (
             <div
@@ -803,10 +800,7 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
         })}
         {remainingCount > 0 && (
           <div
-            className={cn(
-              "relative group",
-              onOverflowClick && "cursor-pointer"
-            )}
+            className={cn("group relative", onOverflowClick && "cursor-pointer")}
             style={{ zIndex: reverse ? 0 : visibleAvatars.length + 1 }}
             onClick={() => onOverflowClick?.(hiddenAvatars)}
             onKeyDown={(e) => {
@@ -823,10 +817,11 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
               className={cn(
                 avatarVariants({ size, shape }),
                 "flex items-center justify-center",
-                "bg-[var(--primitive-neutral-200)] text-[var(--primitive-neutral-600)] font-medium",
+                "bg-[var(--primitive-neutral-200)] font-medium text-[var(--primitive-neutral-600)]",
                 fontSizeMap[size || "default"],
                 getBorderClass(),
-                onOverflowClick && "transition-transform duration-200 motion-reduce:transition-none group-hover:scale-110"
+                onOverflowClick &&
+                  "transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none"
               )}
             >
               +{remainingCount}
@@ -834,12 +829,12 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
             {/* Tooltip showing hidden names */}
             <div
               className={cn(
-                "absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2",
+                "absolute bottom-full left-1/2 mb-2 -translate-x-1/2 px-3 py-2",
                 "bg-[var(--primitive-neutral-800)] text-white",
-                "text-sm rounded-lg shadow-lg",
-                "opacity-0 invisible group-hover:opacity-100 group-hover:visible",
-                "transition-all duration-200 z-50",
-                "whitespace-nowrap max-w-xs"
+                "rounded-lg text-sm shadow-lg",
+                "invisible opacity-0 group-hover:visible group-hover:opacity-100",
+                "z-50 transition-all duration-200",
+                "max-w-xs whitespace-nowrap"
               )}
               role="tooltip"
             >
@@ -857,7 +852,7 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
               </div>
               <div
                 className={cn(
-                  "absolute top-full left-1/2 -translate-x-1/2",
+                  "absolute left-1/2 top-full -translate-x-1/2",
                   "border-4 border-transparent border-t-[var(--primitive-neutral-800)]"
                 )}
               />
@@ -910,17 +905,13 @@ const AvatarStack = React.forwardRef<HTMLDivElement, AvatarStackProps>(
     const showOverflow = remainingCount > 0;
 
     return (
-      <div
-        ref={ref}
-        className={cn("flex items-center gap-2", className)}
-        {...props}
-      >
+      <div ref={ref} className={cn("flex items-center gap-2", className)} {...props}>
         <div className={cn("flex items-start", paddingRightClass)}>
           {visibleAvatars.map((avatar, index) => (
             <div
               key={avatar.id || index}
               className={cn(
-                "rounded-full border-2 border-white overflow-hidden shrink-0",
+                "shrink-0 overflow-hidden rounded-full border-2 border-white",
                 shape === "square" && "rounded-xl",
                 index > 0 && overlapClass
               )}
@@ -942,7 +933,7 @@ const AvatarStack = React.forwardRef<HTMLDivElement, AvatarStackProps>(
           {showOverflow && (
             <div
               className={cn(
-                "rounded-full border-2 border-white overflow-hidden shrink-0",
+                "shrink-0 overflow-hidden rounded-full border-2 border-white",
                 shape === "square" && "rounded-xl",
                 "bg-[var(--primitive-blue-200)]",
                 "flex items-center justify-center",
@@ -953,7 +944,7 @@ const AvatarStack = React.forwardRef<HTMLDivElement, AvatarStackProps>(
             >
               <span
                 className={cn(
-                  "text-[var(--primitive-green-800)] font-bold text-center",
+                  "text-center font-bold text-[var(--primitive-green-800)]",
                   overflowFontClass
                 )}
               >
@@ -966,7 +957,7 @@ const AvatarStack = React.forwardRef<HTMLDivElement, AvatarStackProps>(
         <div
           className={cn(
             "flex items-center gap-0.5 text-sm text-[var(--primitive-neutral-800)]",
-            "flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap"
+            "min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
           )}
         >
           {showCount && <span>{totalCount}</span>}
@@ -1005,7 +996,11 @@ interface AvatarStatusIndicatorProps {
   className?: string;
 }
 
-const AvatarStatusIndicator = ({ status, size = "default", className }: AvatarStatusIndicatorProps) => (
+const AvatarStatusIndicator = ({
+  status,
+  size = "default",
+  className,
+}: AvatarStatusIndicatorProps) => (
   <span
     role="status"
     aria-label={statusConfig[status].label}
@@ -1022,7 +1017,9 @@ const AvatarStatusIndicator = ({ status, size = "default", className }: AvatarSt
     )}
     style={
       status === "online" && statusConfig[status].pulseColor
-        ? { "--avatar-status-pulse-color": statusConfig[status].pulseColor } as React.CSSProperties
+        ? ({
+            "--avatar-status-pulse-color": statusConfig[status].pulseColor,
+          } as React.CSSProperties)
         : undefined
     }
     title={statusConfig[status].label}
@@ -1036,7 +1033,12 @@ interface AvatarBadgeIndicatorProps {
   className?: string;
 }
 
-const AvatarBadgeIndicator = ({ badge, size = "default", customIcon, className }: AvatarBadgeIndicatorProps) => {
+const AvatarBadgeIndicator = ({
+  badge,
+  size = "default",
+  customIcon,
+  className,
+}: AvatarBadgeIndicatorProps) => {
   const badgeData = badgeConfig[badge];
   const badgeSize = badgeSizeMap[size];
   const BadgeIcon = badgeData.icon;
@@ -1056,10 +1058,7 @@ const AvatarBadgeIndicator = ({ badge, size = "default", customIcon, className }
       title={badgeData.label}
     >
       {customIcon || (
-        <BadgeIcon
-          weight="fill"
-          className={cn(badgeSize.icon, badgeData.iconColor)}
-        />
+        <BadgeIcon weight="fill" className={cn(badgeSize.icon, badgeData.iconColor)} />
       )}
     </span>
   );
@@ -1072,7 +1071,12 @@ interface AvatarInitialsProps {
   className?: string;
 }
 
-const AvatarInitials = ({ name, maxInitials, size = "default", className }: AvatarInitialsProps) => {
+const AvatarInitials = ({
+  name,
+  maxInitials,
+  size = "default",
+  className,
+}: AvatarInitialsProps) => {
   const effectiveMax = maxInitials ?? initialsCountMap[size];
   const initials = getInitials(name, effectiveMax);
   const fontClass = fontSizeMap[size];
