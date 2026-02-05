@@ -7,7 +7,7 @@ import { Chip } from "@/components/ui/chip";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Toast } from "@/components/ui/toast";
-import { ChartDonut, Briefcase, FolderSimple, Plus } from "@phosphor-icons/react";
+import { Target, Briefcase, FolderSimple, Plus } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
 import type { GoalCategoryKey } from "@/lib/profile/goal-categories";
 
@@ -25,6 +25,8 @@ import {
   GoalsIllustration,
   ExperienceIllustration,
   FilesIllustration,
+  SummaryIllustration,
+  SkillsIllustration,
 } from "@/components/profile/illustrations";
 import { StreakBadge } from "@/components/profile/streak-badge";
 
@@ -293,12 +295,12 @@ export default function ProfilePage() {
   /* ---- Loading state ---------------------------------------------- */
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl">
+      <div>
         {/* Profile Header skeleton - Full width, 256px cover */}
-        <div className="w-full">
+        <div className="w-full border-b border-[var(--border-muted)]">
           <Skeleton className="h-[256px] w-full rounded-none" />
-          <div className="px-6 pb-6">
-            <div className="relative -mt-20 mb-4">
+          <div className="px-8 pb-8 lg:px-12 xl:px-[72px]">
+            <div className="relative -mt-16 mb-4">
               <Skeleton variant="circular" className="h-[128px] w-[128px]" />
             </div>
             <Skeleton className="mb-3 h-12 w-64" />
@@ -306,18 +308,21 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* CTA Cards skeleton */}
-        <div className="mt-8 grid grid-cols-1 gap-4 px-6 md:grid-cols-2">
-          <Skeleton className="h-[200px] rounded-[16px]" />
-          <Skeleton className="h-[200px] rounded-[16px]" />
-        </div>
-
-        {/* Section containers skeleton */}
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="mt-8">
-            <Skeleton className="h-[200px] w-full rounded-[16px]" />
+        {/* Content sections with responsive padding */}
+        <div className="mx-auto max-w-4xl px-8 lg:px-12 xl:px-[72px]">
+          {/* CTA Cards skeleton */}
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Skeleton className="h-[180px] rounded-[16px]" />
+            <Skeleton className="h-[180px] rounded-[16px]" />
           </div>
-        ))}
+
+          {/* Section containers skeleton */}
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="mt-8">
+              <Skeleton className="h-[200px] w-full rounded-[16px]" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -325,7 +330,7 @@ export default function ProfilePage() {
   /* ---- Error state ----------------------------------------------- */
   if (error) {
     return (
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-4xl px-8 py-12 lg:px-12 xl:px-[72px]">
         <Card>
           <CardContent className="p-12">
             <EmptyState
@@ -348,9 +353,12 @@ export default function ProfilePage() {
   const selectedGoal = goals.find((g) => g.id === selectedGoalId);
   const selectedGoalIndex = goals.findIndex((g) => g.id === selectedGoalId);
 
+  const hasSummary = !!seeker?.summary;
+  const hasSkills = seeker?.skills && seeker.skills.length > 0;
+
   /* ---- Render ----------------------------------------------------- */
   return (
-    <div className="mx-auto max-w-4xl">
+    <div>
       {/* ---- Toast Notifications ----------------------------------- */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-[var(--z-toast)]">
@@ -364,6 +372,7 @@ export default function ProfilePage() {
           </Toast>
         </div>
       )}
+
       {/* ---- Profile Header (Full Width) ----------------------------- */}
       <ProfileHeader
         name={account?.name ?? null}
@@ -380,62 +389,113 @@ export default function ProfilePage() {
           xUrl: account?.xUrl,
           websiteUrl: account?.websiteUrl,
         }}
-        hasSummary={!!seeker?.summary}
-        skills={seeker?.skills ?? []}
         onEditCover={() => setActiveModal("cover")}
         onEditPhoto={() => setActiveModal("photo")}
         onEditContact={() => setActiveModal("contact")}
         onEditSocials={() => setActiveModal("socials")}
         onShare={() => setActiveModal("share")}
-        onEditSummary={() => setActiveModal("bio")}
-        onEditSkills={() => setActiveModal("skills")}
       />
 
-      {/* ---- Summary + Skills (show only when filled) -------------- */}
-      {(seeker?.summary || (seeker?.skills && seeker.skills.length > 0)) && (
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-          {seeker?.summary && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-body-strong text-[var(--foreground-default)]">
-                    Your Summary
-                  </h3>
-                  <Button variant="link" onClick={() => setActiveModal("bio")}>
-                    Edit
+      {/* ---- Content sections — 48px padding per Figma (node 2219:6763) */}
+      <div className="flex flex-col gap-12 px-12 pb-12 pt-6">
+        {/* ---- Empty State CTA Cards (Summary & Skills) -------------- */}
+        {(!hasSummary || !hasSkills) && (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Summary CTA Card - Figma: purple/lavender bg with illustration */}
+            {!hasSummary && (
+              <div className="flex items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--primitive-purple-100)] p-6">
+                <div className="flex max-w-[280px] flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-body-strong text-[var(--foreground-default)]">
+                      Add a summary about yourself.
+                    </h3>
+                    <p className="text-caption text-[var(--foreground-muted)]">
+                      Tell your career story, and show recruiters what you&apos;re made of!
+                    </p>
+                  </div>
+                  <Button variant="inverse" onClick={() => setActiveModal("bio")} className="w-fit">
+                    Write Your Story
                   </Button>
                 </div>
-                <p className="text-body text-[var(--foreground-muted)]">{seeker.summary}</p>
-              </CardContent>
-            </Card>
-          )}
+                <div className="hidden shrink-0 sm:block">
+                  <SummaryIllustration width={160} height={130} />
+                </div>
+              </div>
+            )}
 
-          {seeker?.skills && seeker.skills.length > 0 && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-body-strong text-[var(--foreground-default)]">Skills</h3>
-                  <Button variant="link" onClick={() => setActiveModal("skills")}>
-                    Edit
+            {/* Skills CTA Card - Figma: neutral bg with person illustration */}
+            {!hasSkills && (
+              <div className="relative flex items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--primitive-neutral-100)] p-6">
+                <div className="flex max-w-[280px] flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-body-strong text-[var(--foreground-default)]">
+                      Add your skills
+                    </h3>
+                    <p className="text-caption text-[var(--foreground-muted)]">
+                      Quickly add relevant skills to your profile, showcasing your expertise to help
+                      you stand out in a competitive landscape.
+                    </p>
+                  </div>
+                  <Button
+                    variant="inverse"
+                    onClick={() => setActiveModal("skills")}
+                    className="w-fit"
+                  >
+                    Add Skills
                   </Button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {seeker.skills.map((skill) => (
-                    <Chip key={skill} variant="neutral" size="md">
-                      {skill}
-                    </Chip>
-                  ))}
+                <div className="hidden shrink-0 sm:block">
+                  <SkillsIllustration width={160} height={130} />
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
+              </div>
+            )}
+          </div>
+        )}
 
-      {/* ---- Goals Section ----------------------------------------- */}
-      <div className="mt-8">
+        {/* ---- Filled Summary + Skills Cards (show only when filled) -- */}
+        {(hasSummary || hasSkills) && (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {hasSummary && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-body-strong text-[var(--foreground-default)]">
+                      Your Summary
+                    </h3>
+                    <Button variant="link" onClick={() => setActiveModal("bio")}>
+                      Edit
+                    </Button>
+                  </div>
+                  <p className="text-body text-[var(--foreground-muted)]">{seeker?.summary}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {hasSkills && (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-body-strong text-[var(--foreground-default)]">Skills</h3>
+                    <Button variant="link" onClick={() => setActiveModal("skills")}>
+                      Edit
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {seeker?.skills?.map((skill) => (
+                      <Chip key={skill} variant="neutral" size="md">
+                        {skill}
+                      </Chip>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* ---- Goals Section ----------------------------------------- */}
         <ProfileSectionContainer
-          icon={<ChartDonut size={24} weight="fill" />}
+          icon={<Target size={24} weight="fill" className="text-[var(--primitive-orange-500)]" />}
           title="Your Goals"
           count={goals.length}
           headerExtra={
@@ -479,10 +539,8 @@ export default function ProfilePage() {
             ))}
           </ProfileSectionListContent>
         </ProfileSectionContainer>
-      </div>
 
-      {/* ---- Work Experience Section ------------------------------- */}
-      <div className="mt-8">
+        {/* ---- Work Experience Section ------------------------------- */}
         <ProfileSectionContainer
           icon={<Briefcase size={24} weight="fill" />}
           title="Your Work Experience"
@@ -521,10 +579,8 @@ export default function ProfilePage() {
             ))}
           </ProfileSectionListContent>
         </ProfileSectionContainer>
-      </div>
 
-      {/* ---- Files Section ----------------------------------------- */}
-      <div className="mt-8">
+        {/* ---- Files Section ----------------------------------------- */}
         <ProfileSectionContainer
           icon={<FolderSimple size={24} weight="fill" />}
           title="Your Files"
@@ -549,16 +605,15 @@ export default function ProfilePage() {
             )}
           </ProfileSectionListContent>
         </ProfileSectionContainer>
-      </div>
 
-      {/* ---- Footer ------------------------------------------------ */}
-      <div className="mt-12 rounded-[var(--radius-card)] bg-[var(--background-brand-subtle)] py-8 text-center">
-        <p className="bg-gradient-to-r from-[var(--primitive-green-600)] to-[var(--primitive-orange-500)] bg-clip-text text-heading-sm font-bold text-transparent">
-          Building your climate career since 2024
-        </p>
+        {/* ---- Footer ------------------------------------------------ */}
+        <div className="rounded-[var(--radius-card)] bg-[var(--background-brand-subtle)] py-8 text-center">
+          <p className="bg-gradient-to-r from-[var(--primitive-green-600)] to-[var(--primitive-orange-500)] bg-clip-text text-heading-sm font-bold text-transparent">
+            Building your climate career since 2024
+          </p>
+        </div>
       </div>
-
-      <div className="h-8" />
+      {/* End of content sections wrapper */}
 
       {/* ---- All Modals -------------------------------------------- */}
 
