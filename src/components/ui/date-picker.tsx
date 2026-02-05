@@ -524,7 +524,7 @@ function CalendarMonth({
                     "relative flex items-center justify-center",
                     buttonSize,
                     "transition-all duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+                    "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none",
                     // Base text - 18px per Figma
                     "text-lg font-normal leading-6",
                     // Border radius logic for connected pill shape
@@ -824,7 +824,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
               "border-[var(--input-border)]",
               "text-left text-lg leading-6",
               "transition-all duration-150",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+              "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none",
               // Default state
               !error && !success && ["hover:border-[var(--input-border-hover)]"],
               // Error state
@@ -869,7 +869,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
                   "hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]",
                   "transition-colors duration-150",
                   "cursor-pointer",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+                  "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none"
                 )}
                 aria-label="Clear date"
               >
@@ -908,7 +908,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+                    "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none"
                   )}
                 >
                   <CaretLeft size={24} weight="bold" />
@@ -926,7 +926,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+                    "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none"
                   )}
                 >
                   <CaretRight size={24} weight="bold" />
@@ -1053,7 +1053,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
               "border-[var(--input-border)]",
               "text-left text-lg leading-6",
               "transition-all duration-150",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+              "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none",
               // Default state
               !error && !success && ["hover:border-[var(--input-border-hover)]"],
               // Error state
@@ -1100,7 +1100,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
                   "hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]",
                   "transition-colors duration-150",
                   "cursor-pointer",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+                  "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none"
                 )}
                 aria-label="Clear date range"
               >
@@ -1139,7 +1139,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+                    "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none"
                   )}
                 >
                   <CaretLeft size={24} weight="bold" />
@@ -1165,7 +1165,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+                    "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none"
                   )}
                 >
                   <CaretRight size={24} weight="bold" />

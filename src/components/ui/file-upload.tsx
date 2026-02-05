@@ -18,7 +18,7 @@ const dropzoneVariants = cva(
   cn(
     "relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed",
     "transition-colors cursor-pointer",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-interactive-focus"
+    "focus-visible:outline-none focus-visible:border-[var(--border-interactive-focus)]"
   ),
   {
     variants: {

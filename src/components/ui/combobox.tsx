@@ -135,7 +135,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
               // Hover state
               "hover:border-[var(--select-border-hover)]",
               // Focus state
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+              "focus-visible:border-[var(--select-border-focus)] focus-visible:outline-none",
               "focus-visible:bg-[var(--select-background-open)]",
               // Open state
               open && "border-[var(--select-border-focus)] bg-[var(--select-background-open)]",
@@ -147,13 +147,13 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
               error && [
                 "border-[var(--select-border-error)]",
                 "hover:border-[var(--select-border-error)]",
-                "focus-visible:ring-[var(--ring-color-error)]",
+                "focus-visible:border-[var(--select-border-error)]",
               ],
               // Success state
               success && [
                 "border-[var(--select-border-success)]",
                 "hover:border-[var(--select-border-success)]",
-                "focus-visible:ring-[var(--ring-color-success)]",
+                "focus-visible:border-[var(--select-border-success)]",
               ],
               className
             )}

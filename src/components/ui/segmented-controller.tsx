@@ -194,7 +194,6 @@ const SegmentedController = React.forwardRef<HTMLDivElement, SegmentedController
                 // Figma: 14px font, gap 4px
                 "ease-default whitespace-nowrap text-sm transition-all duration-150",
                 "outline-none",
-                "focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                 // Figma: selected = green-800 (#0A3D2C), unselected = neutral-700 (#3d3a37)
                 isSelected
                   ? "text-[var(--primitive-green-800)]"

@@ -225,7 +225,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           ref={trackRef}
           className={cn(
             "relative h-6 w-full cursor-pointer rounded-full",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+            "focus-visible:outline-none",
             disabled && "cursor-not-allowed opacity-50"
           )}
           style={{ backgroundColor: trackBgColor }}

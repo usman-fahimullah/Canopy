@@ -33,7 +33,7 @@ const inputVariants = cva(
     "text-lg text-[var(--input-foreground)]",
     "placeholder:text-[var(--input-foreground-placeholder)]",
     "transition-all duration-normal ease-default",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+    "focus-visible:outline-none focus-visible:border-[var(--input-border-focus)]",
     "disabled:cursor-not-allowed disabled:opacity-50",
     "file:border-0 file:bg-transparent file:text-body-sm file:font-medium",
   ],
@@ -44,7 +44,7 @@ const inputVariants = cva(
         error: [
           "border-[var(--input-border-error)]",
           "hover:border-[var(--input-border-error)]",
-          "focus-visible:ring-[var(--ring-color-error)]",
+          "focus-visible:border-[var(--input-border-error)]",
         ],
         success: [
           "border-[var(--input-border-success)]",
@@ -117,9 +117,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "p-4",
             "ease-default transition-all duration-normal",
             "hover:border-[var(--input-border-hover)]",
-            "focus-within:ring-2 focus-within:ring-[var(--ring-color)] focus-within:ring-offset-2",
+            "focus-within:border-[var(--input-border-focus)]",
             error &&
-              "border-[var(--input-border-error)] focus-within:ring-[var(--ring-color-error)] hover:border-[var(--input-border-error)]",
+              "border-[var(--input-border-error)] focus-within:border-[var(--input-border-error)] hover:border-[var(--input-border-error)]",
             success &&
               "border-[var(--input-border-success)] hover:border-[var(--input-border-success)]",
             className

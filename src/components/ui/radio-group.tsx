@@ -21,7 +21,7 @@ const radioItemVariants = cva(
     "peer shrink-0",
     "rounded-full border",
     "transition-[border-color,background-color,transform] duration-100 ease-out",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background-default",
+    "focus-visible:outline-none focus-visible:border-[var(--input-border-focus)]",
     "disabled:cursor-not-allowed disabled:opacity-50",
     "active:scale-95",
   ],
@@ -36,7 +36,7 @@ const radioItemVariants = cva(
         true: [
           "border-[var(--radio-border-error)]",
           "bg-[var(--radio-background-error)]",
-          "focus-visible:ring-[var(--ring-color-error)]",
+          "focus-visible:border-[var(--radio-border-error)]",
           "hover:border-[var(--radio-border-error)]",
           "data-[state=checked]:border-[var(--radio-border-error)]",
           "data-[state=checked]:bg-[var(--radio-border-error)]",
@@ -44,7 +44,7 @@ const radioItemVariants = cva(
         false: [
           "border-[var(--radio-border)]",
           "bg-[var(--radio-background)]",
-          "focus-visible:ring-[var(--ring-color)]",
+          "focus-visible:border-[var(--radio-border-checked)]",
           "hover:border-[var(--radio-border-hover)]",
           "hover:bg-[var(--radio-background-hover)]",
           "data-[state=checked]:border-[var(--radio-border-checked)]",

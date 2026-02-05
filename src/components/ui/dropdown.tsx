@@ -53,7 +53,7 @@ const DropdownTrigger = React.forwardRef<
       // Hover: border neutral-300
       "hover:border-[var(--select-border-hover)]",
       // Focus: ring indicator
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+      "focus-visible:border-[var(--select-border-focus)] focus-visible:outline-none",
       // Disabled state
       "disabled:cursor-not-allowed disabled:opacity-50",
       // Figma: placeholder color neutral-600
@@ -71,7 +71,7 @@ const DropdownTrigger = React.forwardRef<
         "border-[var(--select-border-error)]",
         "hover:border-[var(--select-border-error)]",
         "data-[placeholder]:text-[var(--select-foreground-error)]",
-        "focus-visible:ring-[var(--ring-color-error)]",
+        "focus-visible:border-[var(--select-border-error)]",
       ],
       className
     )}

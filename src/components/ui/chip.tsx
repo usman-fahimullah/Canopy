@@ -32,7 +32,7 @@ const chipVariants = cva(
     "inline-flex items-center gap-1.5 rounded-full",
     "font-medium select-none",
     "transition-all duration-150 ease-out",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+    "focus-visible:outline-none",
   ],
   {
     variants: {
@@ -119,7 +119,7 @@ const closeButtonVariants = cva(
   [
     "shrink-0 rounded-full p-0.5",
     "transition-colors duration-150",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+    "focus-visible:outline-none",
     "cursor-pointer",
   ],
   {
@@ -128,42 +128,42 @@ const closeButtonVariants = cva(
         neutral: [
           "text-[var(--chip-neutral-foreground)]",
           "hover:bg-[var(--chip-neutral-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-neutral-500)]",
+          "",
         ],
         primary: [
           "text-[var(--chip-primary-foreground)]",
           "hover:bg-[var(--chip-primary-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-green-500)]",
+          "",
         ],
         blue: [
           "text-[var(--chip-blue-foreground)]",
           "hover:bg-[var(--chip-blue-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-blue-500)]",
+          "",
         ],
         red: [
           "text-[var(--chip-red-foreground)]",
           "hover:bg-[var(--chip-red-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-red-500)]",
+          "",
         ],
         orange: [
           "text-[var(--chip-orange-foreground)]",
           "hover:bg-[var(--chip-orange-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-orange-500)]",
+          "",
         ],
         yellow: [
           "text-[var(--chip-yellow-foreground)]",
           "hover:bg-[var(--chip-yellow-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-yellow-500)]",
+          "",
         ],
         purple: [
           "text-[var(--chip-purple-foreground)]",
           "hover:bg-[var(--chip-purple-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-purple-500)]",
+          "",
         ],
         selected: [
           "text-[var(--chip-selected-foreground)]",
           "hover:bg-[var(--chip-selected-close-background-hover)]",
-          "focus-visible:ring-[var(--primitive-green-300)]",
+          "",
         ],
       },
     },
@@ -432,7 +432,7 @@ const AddChipButton = React.forwardRef<HTMLButtonElement, AddChipButtonProps>(
           "hover:text-[var(--chip-add-foreground-hover)]",
           "hover:bg-[var(--chip-add-background-hover)]",
           "transition-colors duration-150 ease-out",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+          "focus-visible:outline-none",
           sizeClasses[size],
           disabled && "cursor-not-allowed opacity-50",
           className
