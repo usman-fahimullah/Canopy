@@ -91,8 +91,8 @@ export default function TalentSkillsPage() {
           lastName: baseProfile.lastName || undefined,
           linkedinUrl: baseProfile.linkedinUrl || undefined,
           bio: baseProfile.bio || undefined,
-          careerStage: talentData.careerStage,
-          yearsExperience: talentData.yearsExperience,
+          careerStage: talentData.careerStage || undefined,
+          yearsExperience: talentData.yearsExperience || undefined,
           jobTitle: talentData.jobTitle || undefined,
           skills: talentData.skills,
           sectors: talentData.sectors,
@@ -107,10 +107,10 @@ export default function TalentSkillsPage() {
                   .filter((exp) => exp.title && exp.company)
                   .map(({ id: _id, ...rest }) => rest)
               : undefined,
-          roleTypes: talentData.roleTypes,
-          transitionTimeline: talentData.transitionTimeline,
-          locationPreference: talentData.locationPreference,
-          remotePreference: talentData.remotePreference,
+          roleTypes: talentData.roleTypes.length > 0 ? talentData.roleTypes : undefined,
+          transitionTimeline: talentData.transitionTimeline || undefined,
+          locationPreference: talentData.locationPreference || undefined,
+          remotePreference: talentData.remotePreference || undefined,
           salaryRange:
             talentData.salaryMin || talentData.salaryMax
               ? {
