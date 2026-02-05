@@ -78,17 +78,21 @@ export function ProfileHeader({
         <Image src={cover.src} alt={cover.alt} fill className="object-cover" priority />
         {isOwner && (
           <div className="absolute right-6 top-6 flex gap-2">
-            <Button
-              variant="secondary"
-              size="icon-sm"
+            {/* Figma: teal/green circular buttons */}
+            <button
               onClick={onEditCover}
               aria-label="Edit background"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
             >
-              <PencilSimple size={18} weight="bold" />
-            </Button>
-            <Button variant="secondary" size="icon-sm" onClick={onShare} aria-label="Share profile">
-              <ShareNetwork size={18} weight="bold" />
-            </Button>
+              <PencilSimple size={20} weight="bold" />
+            </button>
+            <button
+              onClick={onShare}
+              aria-label="Share profile"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
+            >
+              <ShareNetwork size={20} weight="bold" />
+            </button>
           </div>
         )}
       </div>
@@ -98,24 +102,25 @@ export function ProfileHeader({
         {/* Avatar overlapping cover - Figma: 128px, -80px overlap, 6px white border */}
         <div className="relative -mt-20 mb-4">
           <div className="relative inline-block">
-            {/* Use box-shadow for the white ring since Avatar has overflow:hidden */}
-            <Avatar
-              src={avatar ?? undefined}
-              name={name ?? undefined}
-              size="2xl"
-              shape="circle"
-              className="h-[128px] w-[128px] !border-[6px] !border-white shadow-[0_0_0_2px_rgba(0,0,0,0.05)]"
-            />
+            {/* White ring wrapper around avatar */}
+            <div className="rounded-full border-[6px] border-white shadow-[0_0_0_2px_rgba(0,0,0,0.05)]">
+              <Avatar
+                src={avatar ?? undefined}
+                name={name ?? undefined}
+                size="2xl"
+                shape="circle"
+                color="purple"
+                className="h-[116px] w-[116px] !border-0"
+              />
+            </div>
             {isOwner && (
-              <Button
-                variant="secondary"
-                size="icon-sm"
-                className="absolute -bottom-1 -right-1"
+              <button
                 onClick={onEditPhoto}
                 aria-label="Edit profile photo"
+                className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
               >
-                <PencilSimple size={14} weight="bold" />
-              </Button>
+                <PencilSimple size={16} weight="bold" />
+              </button>
             )}
           </div>
         </div>
@@ -127,9 +132,9 @@ export function ProfileHeader({
           </h1>
           {badge && (
             <Badge
-              variant="info"
+              variant="default"
               size="lg"
-              className="bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
+              className="!bg-[var(--primitive-purple-200)] !text-[var(--primitive-purple-700)]"
             >
               🎓 {badge}
             </Badge>
@@ -179,14 +184,13 @@ export function ProfileHeader({
                 </SocialButton>
               )}
               {isOwner && (
-                <Button
-                  variant="secondary"
-                  size="icon-sm"
+                <button
                   onClick={onEditSocials}
                   aria-label="Add more socials"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
                 >
                   <Plus size={16} weight="bold" />
-                </Button>
+                </button>
               )}
             </div>
           ) : isOwner ? (
@@ -200,45 +204,46 @@ export function ProfileHeader({
           ) : null}
         </div>
 
-        {/* CTA Cards - Summary & Skills - Figma: inside header as containers */}
+        {/* CTA Cards - Summary & Skills - Figma: horizontal layout with illustration on right */}
         {isOwner && (!hasSummary || skills.length === 0) && (
           <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Summary CTA Card - Figma: purple background #f7f2ff */}
+            {/* Summary CTA Card - Figma: white bg, border, horizontal layout */}
             {!hasSummary && (
-              <div className="rounded-[16px] bg-[var(--primitive-purple-100)] p-6">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <SummaryIllustration />
-                  <div className="space-y-2">
-                    <h3 className="text-body-strong text-[var(--foreground-default)]">
-                      Tell Your Climate Story
-                    </h3>
-                    <p className="text-caption text-[var(--foreground-muted)]">
-                      Share your journey and passion for sustainability
-                    </p>
-                  </div>
-                  <Button variant="inverse" onClick={onEditSummary}>
+              <div className="flex items-center justify-between rounded-[16px] border border-[var(--border-muted)] bg-white p-6">
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-body-strong text-[var(--foreground-default)]">
+                    Add a summary about yourself.
+                  </h3>
+                  <p className="text-caption text-[var(--foreground-muted)]">
+                    Tell your career story, and show recruiters what you&apos;re made of!
+                  </p>
+                  <Button variant="outline" onClick={onEditSummary} className="w-fit">
                     Write Your Story
                   </Button>
+                </div>
+                <div className="ml-4 shrink-0">
+                  <SummaryIllustration width={100} height={100} />
                 </div>
               </div>
             )}
 
-            {/* Skills CTA Card - Figma: neutral background #faf9f7 */}
+            {/* Skills CTA Card - Figma: white bg, border, horizontal layout with person illustration */}
             {skills.length === 0 && (
-              <div className="rounded-[16px] bg-[var(--primitive-neutral-100)] p-6">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <SkillsIllustration />
-                  <div className="space-y-2">
-                    <h3 className="text-body-strong text-[var(--foreground-default)]">
-                      Showcase Your Skills
-                    </h3>
-                    <p className="text-caption text-[var(--foreground-muted)]">
-                      Add skills to help employers find you
-                    </p>
-                  </div>
-                  <Button variant="inverse" onClick={onEditSkills}>
+              <div className="flex items-center justify-between rounded-[16px] border border-[var(--border-muted)] bg-white p-6">
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-body-strong text-[var(--foreground-default)]">
+                    Add your skills
+                  </h3>
+                  <p className="text-caption text-[var(--foreground-muted)]">
+                    Quickly add relevant skills to your profile, showcasing your expertise to help
+                    you stand out in a competitive landscape.
+                  </p>
+                  <Button variant="outline" onClick={onEditSkills} className="w-fit">
                     Add Skills
                   </Button>
+                </div>
+                <div className="ml-4 shrink-0">
+                  <SkillsIllustration width={100} height={100} />
                 </div>
               </div>
             )}
