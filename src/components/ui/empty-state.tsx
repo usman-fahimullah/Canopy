@@ -33,23 +33,25 @@ const emptyStateVariants = cva("flex flex-col items-center justify-center text-c
   },
 });
 
-const iconContainerVariants = cva(
-  "flex items-center justify-center rounded-full bg-background-muted",
-  {
-    variants: {
-      size: {
-        sm: "h-12 w-12",
-        md: "h-16 w-16",
-        lg: "h-20 w-20",
-      },
+const iconContainerVariants = cva("flex items-center justify-center rounded-full", {
+  variants: {
+    size: {
+      sm: "h-12 w-12",
+      md: "h-16 w-16",
+      lg: "h-20 w-20",
     },
-    defaultVariants: {
-      size: "md",
+    branded: {
+      true: "bg-[var(--shell-nav-item-active-bg,var(--background-muted))]",
+      false: "bg-background-muted",
     },
-  }
-);
+  },
+  defaultVariants: {
+    size: "md",
+    branded: false,
+  },
+});
 
-const iconVariants = cva("text-foreground-muted", {
+const iconVariants = cva("", {
   variants: {
     size: {
       sm: "h-6 w-6",
@@ -93,6 +95,8 @@ export interface EmptyStateProps
     label: string;
     onClick: () => void;
   };
+  /** If true, tint the icon container with the current shell's accent color */
+  branded?: boolean;
 }
 
 const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
@@ -106,6 +110,7 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
       description,
       action,
       secondaryAction,
+      branded = false,
       children,
       ...props
     },
@@ -123,7 +128,7 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
         {(icon || IconComponent) && (
           <div
             className={cn(
-              iconContainerVariants({ size }),
+              iconContainerVariants({ size, branded }),
               "animate-scale-in transition-all duration-normal",
               "hover:scale-105 hover:shadow-sm"
             )}
@@ -133,6 +138,9 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
                 <IconComponent
                   className={cn(
                     iconVariants({ size }),
+                    branded
+                      ? "text-[var(--shell-nav-item-active-text,var(--foreground-muted))]"
+                      : "text-foreground-muted",
                     "transition-transform duration-slow",
                     preset === "search" && "animate-[bounce_2s_ease-in-out_infinite]",
                     preset === "inbox" && "animate-[pulse_2s_ease-in-out_infinite]"

@@ -1676,6 +1676,45 @@
     --candid-schedule-card-empty-bg: var(--primitive-neutral-100);
 
     /* ============================================
+       SHELL-AGNOSTIC NAV TOKENS
+       Default values — overridden per shell via [data-shell]
+       ============================================ */
+
+    --shell-nav-sidebar-bg: var(--background-default);
+    --shell-nav-sidebar-border: var(--primitive-neutral-200);
+    --shell-nav-item-hover: var(--primitive-neutral-200);
+    --shell-nav-item-active-bg: var(--primitive-green-100);
+    --shell-nav-item-active-text: var(--primitive-green-800);
+    --shell-nav-accent: var(--primitive-green-600);
+    --shell-page-bg: var(--primitive-neutral-100);
+    --shell-header-bg: var(--background-default);
+    --shell-header-border: var(--primitive-neutral-200);
+  }
+
+  /* ── Shell overrides: Green Jobs Board (talent) ────────── */
+  [data-shell="talent"] {
+    --shell-nav-item-hover: var(--primitive-green-100);
+    --shell-nav-item-active-bg: var(--primitive-green-200);
+    --shell-nav-item-active-text: var(--primitive-green-800);
+    --shell-nav-accent: var(--primitive-green-600);
+  }
+
+  /* ── Shell overrides: Candid (coach) ───────────────────── */
+  [data-shell="coach"] {
+    --shell-nav-item-hover: var(--primitive-blue-100);
+    --shell-nav-item-active-bg: var(--primitive-blue-100);
+    --shell-nav-item-active-text: var(--candid-dark);
+    --shell-nav-accent: var(--candid-dark);
+  }
+
+  /* ── Shell overrides: Canopy (employer) ────────────────── */
+  [data-shell="employer"] {
+    --shell-nav-item-hover: var(--primitive-green-100);
+    --shell-nav-item-active-bg: var(--primitive-green-100);
+    --shell-nav-item-active-text: var(--primitive-green-800);
+    --shell-nav-accent: var(--primitive-green-700);
+
+    /* ============================================
        DENSITY
        ============================================ */
 

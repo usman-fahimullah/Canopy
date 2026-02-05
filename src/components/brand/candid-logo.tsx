@@ -1,28 +1,38 @@
 "use client";
 
-import React from "react";
+import { cn } from "@/lib/utils";
 
 interface CandidLogoProps {
+  /** Optional className for the SVG element */
   className?: string;
+  /** Width in pixels (height auto-scales from 128×32 aspect ratio) */
   width?: number;
+  /** Height in pixels (overrides auto-scaling if set) */
   height?: number;
+  /** Fill color (defaults to currentColor) */
   color?: string;
+  /** Accessible label (defaults to "Candid") */
+  "aria-label"?: string;
 }
 
 export function CandidLogo({
-  className = "",
+  className,
   width = 128,
-  height = 32,
+  height,
   color = "currentColor",
+  "aria-label": ariaLabel = "Candid",
 }: CandidLogoProps) {
+  const computedHeight = height ?? (32 / 128) * width;
   return (
     <svg
       width={width}
-      height={height}
+      height={computedHeight}
       viewBox="0 0 128 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
+      aria-label={ariaLabel}
+      role="img"
+      className={cn("shrink-0", className)}
     >
       <path
         d="M99.4401 0.0361892L99.4139 0L99.5843 2.09854C99.6879 3.37414 99.1214 4.61136 98.0894 5.3634L96.3916 6.60059L96.4361 6.59698C98.9796 6.39057 101.447 7.52829 102.948 9.5993L102.974 9.6355L102.804 7.53696C102.7 6.26135 103.267 5.02413 104.299 4.2721L105.997 3.0349L105.952 3.0385C103.409 3.24493 100.941 2.10719 99.4401 0.0361892Z"

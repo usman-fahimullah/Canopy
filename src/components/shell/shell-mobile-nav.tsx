@@ -11,6 +11,7 @@ import { useShell } from "@/lib/shell/shell-context";
 import { ShellNotificationBell } from "./notification-bell";
 import { ProfileDropdown } from "./profile-dropdown";
 import type { ShellNavConfig, ShellNavItem, EmployerOrgRole } from "@/lib/shell/types";
+import { ShellLogo } from "@/components/brand/shell-logo";
 import { cn } from "@/lib/utils";
 
 interface ShellMobileNavProps {
@@ -108,23 +109,15 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
         )}
       >
         {/* Logo */}
-        <Link href={config.logoHref} className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-[var(--candid-background-brand)] flex items-center justify-center">
-            <span className="text-xs font-bold text-white">
-              {config.shell === "talent"
-                ? "G"
-                : config.shell === "coach"
-                  ? "C"
-                  : "E"}
-            </span>
-          </div>
+        <Link href={config.logoHref} className="flex items-center">
+          <ShellLogo shell={config.shell} collapsed className="text-[var(--foreground-default)]" />
         </Link>
 
         {/* Right actions */}
         <div className="flex items-center gap-1">
           <ShellNotificationBell shell={config.shell} />
           <ProfileDropdown>
-            <button className="rounded-full p-1.5 hover:bg-[var(--candid-nav-item-hover)] transition-colors">
+            <button className="rounded-full p-1.5 transition-colors hover:bg-[var(--shell-nav-item-hover)]">
               {user?.avatar ? (
                 <Image
                   src={user.avatar}
@@ -134,7 +127,7 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
                   className="rounded-full object-cover"
                 />
               ) : (
-                <div className="h-7 w-7 rounded-full bg-[var(--background-emphasized)] flex items-center justify-center">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--background-emphasized)]">
                   <span className="text-caption-sm font-semibold text-foreground-muted">
                     {(user?.name || "U").charAt(0).toUpperCase()}
                   </span>
@@ -144,7 +137,7 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
           </ProfileDropdown>
           <button
             onClick={() => setMenuOpen(true)}
-            className="rounded-full p-2 text-foreground-muted hover:bg-[var(--candid-nav-item-hover)] transition-colors"
+            className="rounded-full p-2 text-foreground-muted transition-colors hover:bg-[var(--shell-nav-item-hover)]"
             aria-label="Open menu"
           >
             <List size={20} weight="bold" />
@@ -161,15 +154,13 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
             onClick={() => setMenuOpen(false)}
           />
           {/* Panel */}
-          <div className="fixed inset-y-0 right-0 z-50 w-72 bg-[var(--background-default)] shadow-xl lg:hidden animate-in slide-in-from-right">
+          <div className="animate-in slide-in-from-right fixed inset-y-0 right-0 z-50 w-72 bg-[var(--background-default)] shadow-xl lg:hidden">
             {/* Menu header */}
-            <div className="flex h-14 items-center justify-between px-4 border-b border-[var(--candid-nav-sidebar-border)]">
-              <span className="text-body-sm font-semibold text-foreground-default">
-                Menu
-              </span>
+            <div className="flex h-14 items-center justify-between border-b border-[var(--shell-nav-sidebar-border)] px-4">
+              <span className="text-foreground-default text-body-sm font-semibold">Menu</span>
               <button
                 onClick={() => setMenuOpen(false)}
-                className="rounded-full p-2 text-foreground-muted hover:bg-[var(--candid-nav-item-hover)]"
+                className="rounded-full p-2 text-foreground-muted hover:bg-[var(--shell-nav-item-hover)]"
                 aria-label="Close menu"
               >
                 <X size={18} weight="bold" />
@@ -177,7 +168,10 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
             </div>
 
             {/* Full nav */}
-            <nav className="overflow-y-auto p-3 space-y-1" style={{ maxHeight: "calc(100vh - 56px)" }}>
+            <nav
+              className="space-y-1 overflow-y-auto p-3"
+              style={{ maxHeight: "calc(100vh - 56px)" }}
+            >
               {config.sections
                 .filter((s) => {
                   if (!s.progressive) return true;
@@ -187,34 +181,29 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
                 .map((section) => (
                   <div key={section.id}>
                     {section.label && (
-                      <p className="px-2 pt-3 pb-1 text-caption text-foreground-subtle font-medium">
+                      <p className="px-2 pb-1 pt-3 text-caption font-medium text-foreground-subtle">
                         {section.label}
                       </p>
                     )}
                     {section.items.filter(isItemVisible).map((item) => {
                       const active = isActive(item.href);
-                      const hasBadge =
-                        item.badgeKey === "unreadMessages" && unreadCount > 0;
+                      const hasBadge = item.badgeKey === "unreadMessages" && unreadCount > 0;
 
                       return (
                         <Link
                           key={item.id}
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-3 rounded-lg h-11 px-3 transition-colors",
+                            "flex h-11 items-center gap-3 rounded-lg px-3 transition-colors",
                             active
-                              ? "bg-[var(--candid-nav-sidebar-item-active)] font-bold text-[var(--candid-foreground-brand)]"
-                              : "text-foreground-muted hover:bg-[var(--candid-nav-item-hover)]"
+                              ? "bg-[var(--shell-nav-item-active-bg)] font-bold text-[var(--shell-nav-accent)]"
+                              : "text-foreground-muted hover:bg-[var(--shell-nav-item-hover)]"
                           )}
                         >
                           {renderTabIcon(item)}
                           <span className="flex-1 text-body-sm">{item.label}</span>
                           {hasBadge && (
-                            <NotificationBadge
-                              count={unreadCount}
-                              variant="alert"
-                              size="sm"
-                            />
+                            <NotificationBadge count={unreadCount} variant="alert" size="sm" />
                           )}
                         </Link>
                       );
@@ -223,14 +212,14 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
                 ))}
 
               {/* Settings */}
-              <div className="border-t border-[var(--candid-nav-sidebar-border)] mt-2 pt-2">
+              <div className="mt-2 border-t border-[var(--shell-nav-sidebar-border)] pt-2">
                 <Link
                   href={config.settingsHref}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg h-11 px-3 transition-colors",
+                    "flex h-11 items-center gap-3 rounded-lg px-3 transition-colors",
                     pathname.startsWith(config.settingsHref)
-                      ? "bg-[var(--candid-nav-sidebar-item-active)] font-bold text-[var(--candid-foreground-brand)]"
-                      : "text-foreground-muted hover:bg-[var(--candid-nav-item-hover)]"
+                      ? "bg-[var(--shell-nav-item-active-bg)] font-bold text-[var(--shell-nav-accent)]"
+                      : "text-foreground-muted hover:bg-[var(--shell-nav-item-hover)]"
                   )}
                 >
                   <Gear size={22} weight="fill" className="shrink-0" />
@@ -243,49 +232,38 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
       )}
 
       {/* ── Bottom Tab Bar ───────────────────────────────── */}
-      <div className="fixed bottom-0 inset-x-0 z-40 border-t border-[var(--candid-nav-sidebar-border)] bg-[var(--background-default)] lg:hidden safe-area-bottom">
+      <div className="safe-area-bottom fixed inset-x-0 bottom-0 z-40 border-t border-[var(--shell-nav-sidebar-border)] bg-[var(--background-default)] lg:hidden">
         <div className="flex h-14 items-center justify-around px-2">
           {tabBarItems.map((item) => {
             const active = isActive(item.href);
-            const hasBadge =
-              item.badgeKey === "unreadMessages" && unreadCount > 0;
+            const hasBadge = item.badgeKey === "unreadMessages" && unreadCount > 0;
 
             return (
               <Link
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1",
+                  "relative flex flex-1 flex-col items-center justify-center gap-0.5 py-1",
                   "transition-colors",
-                  active
-                    ? "text-[var(--candid-foreground-brand)]"
-                    : "text-foreground-muted"
+                  active ? "text-[var(--shell-nav-accent)]" : "text-foreground-muted"
                 )}
               >
                 <span className="relative">
                   {renderTabIcon(item)}
                   {hasBadge && (
-                    <span className="absolute -right-1.5 -top-1 ">
-                      <NotificationBadge
-                        count={unreadCount}
-                        variant="alert"
-                        size="sm"
-                        max={9}
-                      />
+                    <span className="absolute -right-1.5 -top-1">
+                      <NotificationBadge count={unreadCount} variant="alert" size="sm" max={9} />
                     </span>
                   )}
                 </span>
                 <span
-                  className={cn(
-                    "text-[10px] leading-tight",
-                    active ? "font-bold" : "font-medium"
-                  )}
+                  className={cn("text-[10px] leading-tight", active ? "font-bold" : "font-medium")}
                 >
                   {item.label}
                 </span>
                 {/* Active indicator bar */}
                 {active && (
-                  <span className="absolute top-0 left-1/4 right-1/4 h-0.5 rounded-full bg-[var(--candid-foreground-brand)]" />
+                  <span className="absolute left-1/4 right-1/4 top-0 h-0.5 rounded-full bg-[var(--shell-nav-accent)]" />
                 )}
               </Link>
             );
