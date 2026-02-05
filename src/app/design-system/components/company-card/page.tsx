@@ -31,11 +31,6 @@ const companyCardProps = [
     description: "Climate industry pathway (e.g., 'energy', 'agriculture', 'conservation')",
   },
   {
-    name: "pathwayIcon",
-    type: "React.ReactNode",
-    description: "Custom icon to override the default pathway icon",
-  },
-  {
     name: "isPartner",
     type: "boolean",
     default: "false",

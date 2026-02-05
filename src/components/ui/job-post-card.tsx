@@ -3,16 +3,17 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { BookmarkSimple, ArrowRight } from "@phosphor-icons/react";
+import { BookmarkSimple } from "@phosphor-icons/react";
 import { Avatar } from "./avatar";
-import { Badge } from "./badge";
 import { InfoTag } from "./info-tag";
 import { PathwayTag, type PathwayType } from "./pathway-tag";
 import { Button } from "./button";
 
 /**
  * JobPostCard component based on Trails Design System
- * Figma: Node 1451:11804
+ *
+ * @figma https://figma.com/design/q1985VWRuwMkSc1hIqu5X9/Trails-Design-System?node-id=1451-11805
+ * @figma https://figma.com/design/q1985VWRuwMkSc1hIqu5X9/Trails-Design-System?node-id=1516-15166
  *
  * Displays a job posting with company info, job title, pathway tag,
  * status badges, and hover state with action buttons.
@@ -24,6 +25,10 @@ import { Button } from "./button";
  * - Padding: 16px
  * - Shadow: 1px 2px 16px rgba(31, 29, 28, 0.08) - Level 1
  * - Shadow hover: 2px 4px 16px rgba(31, 29, 28, 0.12) - Level 2
+ *
+ * Layout:
+ * - Default: Header (avatar + company name) → Job Title → Tags row (PathwayTag minimized + InfoTags)
+ * - Hover: Header → Job Title → Action buttons ("Save It" + "View Job")
  */
 
 const jobPostCardVariants = cva(
@@ -51,8 +56,7 @@ const jobPostCardVariants = cva(
 export type JobPostStatus = "default" | "featured" | "bipoc-owned" | "closing-soon";
 
 export interface JobPostCardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof jobPostCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof jobPostCardVariants> {
   /** Company name */
   companyName: string;
   /** Company logo URL */
@@ -61,8 +65,6 @@ export interface JobPostCardProps
   jobTitle: string;
   /** Pathway/industry type */
   pathway?: PathwayType;
-  /** Pathway icon (optional override) */
-  pathwayIcon?: React.ReactNode;
   /** Status badge variant */
   status?: JobPostStatus;
   /** Tags to display (e.g., "Remote", "Full-time") */
@@ -84,23 +86,20 @@ export interface JobPostCardProps
 /** Status badge configuration */
 const statusConfig: Record<
   Exclude<JobPostStatus, "default">,
-  { label: string; variant: "feature" | "warning" | "info"; bgColor: string; textColor: string }
+  { label: string; bgColor: string; textColor: string }
 > = {
   featured: {
     label: "Featured",
-    variant: "feature",
     bgColor: "bg-[var(--primitive-blue-100)]",
     textColor: "text-[var(--primitive-blue-500)]",
   },
   "bipoc-owned": {
     label: "BIPOC Owned",
-    variant: "info",
     bgColor: "bg-[var(--primitive-purple-100)]",
     textColor: "text-[var(--primitive-purple-500)]",
   },
   "closing-soon": {
     label: "Closing Soon",
-    variant: "warning",
     bgColor: "bg-[var(--primitive-orange-100)]",
     textColor: "text-[var(--primitive-orange-500)]",
   },
@@ -115,7 +114,6 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
       companyLogo,
       jobTitle,
       pathway,
-      pathwayIcon,
       status = "default",
       tags = [],
       saved = false,
@@ -130,11 +128,6 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
   ) => {
     const [isHovered, setIsHovered] = React.useState(false);
     const statusData = status !== "default" ? statusConfig[status] : null;
-
-    // Generate initials from company name for avatar fallback
-    const getCompanyInitial = (name: string) => {
-      return name.charAt(0).toUpperCase();
-    };
 
     return (
       <div
@@ -156,13 +149,12 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
         tabIndex={onClick ? 0 : undefined}
         {...props}
       >
-        {/* Top Section: Company info + Pathway + Status */}
+        {/* Top Section: Company info + Job Title */}
         <div className="flex flex-col gap-3">
-          {/* Header Row: Company avatar, name, pathway tag, status badge */}
+          {/* Header Row: Company avatar + name (+ optional status badge) */}
           <div className="flex items-center gap-2">
-            {/* Company Info */}
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              {/* Company Avatar */}
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              {/* Figma: 32px avatar, rounded-lg, border neutral-300 */}
               <Avatar
                 size="sm"
                 src={companyLogo}
@@ -170,28 +162,18 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
                 alt={`${companyName} logo`}
                 className="shrink-0"
               />
-              {/* Company Name */}
-              <span className="text-sm text-[var(--primitive-neutral-800)] truncate">
+              {/* Figma: 14px regular, neutral-800, truncate */}
+              <span className="truncate text-sm text-[var(--foreground-default)]">
                 {companyName}
               </span>
             </div>
 
-            {/* Pathway Tag */}
-            {pathway && (
-              <PathwayTag
-                pathway={pathway}
-                icon={pathwayIcon}
-                minimized
-                className="shrink-0"
-              />
-            )}
-
-            {/* Status Badge */}
+            {/* Status Badge (only for non-default status variants) */}
             {statusData && (
               <div
                 className={cn(
-                  "shrink-0 flex items-center justify-center",
-                  "px-2 py-1 rounded-full",
+                  "flex shrink-0 items-center justify-center",
+                  "rounded-full px-2 py-1",
                   statusData.bgColor
                 )}
               >
@@ -202,17 +184,18 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
             )}
           </div>
 
-          {/* Job Title */}
-          <h3 className="text-2xl font-medium text-[var(--primitive-neutral-800)] leading-8 line-clamp-2">
+          {/* Figma: 24px medium, neutral-800, 32px line-height */}
+          <h3 className="line-clamp-2 text-2xl font-medium leading-8 text-[var(--foreground-default)]">
             {jobTitle}
           </h3>
         </div>
 
-        {/* Bottom Section: Tags or Action Buttons */}
-        <div className="flex items-center justify-between">
+        {/* Bottom Section: Tags (default) or Action Buttons (hover) */}
+        <div className="flex items-center gap-2">
           {isHovered ? (
-            // Hover state: Save button + View Job button
+            // Hover state: "Save It" button + "View Job" button
             <>
+              {/* Figma: blue-100 bg, rounded-2xl, px-4 py-3.5, bookmark icon + "Save It" text */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -220,26 +203,29 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
                   onSave?.();
                 }}
                 className={cn(
-                  "flex items-center justify-center",
-                  "p-3 rounded-2xl",
-                  "bg-[var(--primitive-blue-100)]",
+                  "inline-flex items-center justify-center gap-1",
+                  "rounded-2xl px-4 py-3.5",
+                  "bg-[var(--button-secondary-background)]",
                   "transition-colors duration-150",
-                  "hover:bg-[var(--primitive-blue-200)]",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2"
+                  "hover:bg-[var(--button-secondary-background-hover)]",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
                 )}
                 aria-label={saved ? "Remove from saved" : "Save job"}
               >
                 <BookmarkSimple
-                  size={24}
+                  size={20}
                   weight={saved ? "fill" : "regular"}
-                  className="text-[var(--primitive-neutral-800)]"
+                  className="text-[var(--button-secondary-foreground)]"
                 />
+                <span className="text-sm font-bold text-[var(--button-secondary-foreground)]">
+                  {saved ? "Saved" : "Save It"}
+                </span>
               </button>
 
+              {/* Figma: neutral-200 bg (tertiary), rounded-2xl, text only */}
               <Button
-                variant="inverse"
+                variant="tertiary"
                 size="default"
-                rightIcon={<ArrowRight size={24} weight="bold" />}
                 onClick={(e) => {
                   e.stopPropagation();
                   onViewJob?.();
@@ -250,12 +236,13 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
               </Button>
             </>
           ) : (
-            // Default state: Tags
-            <div className="flex items-center gap-2 flex-wrap">
+            // Default state: PathwayTag (minimized) + InfoTags
+            <>
+              {pathway && <PathwayTag pathway={pathway} minimized className="shrink-0" />}
               {tags.slice(0, 2).map((tag, index) => (
                 <InfoTag key={index}>{tag}</InfoTag>
               ))}
-            </div>
+            </>
           )}
         </div>
       </div>

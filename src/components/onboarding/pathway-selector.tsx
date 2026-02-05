@@ -1,59 +1,7 @@
 "use client";
 
-import {
-  PathwayTag,
-  pathwayLabels,
-  type PathwayType,
-} from "@/components/ui/pathway-tag";
-import {
-  Lightning,
-  Desktop,
-  Car,
-  Plant,
-  Leaf,
-  Drop,
-  Tree,
-  Factory,
-  HardHat,
-  Buildings,
-  Bank,
-  Coins,
-  Scales,
-  Flask,
-  GraduationCap,
-  Recycle,
-  PaintBrush,
-  Broadcast,
-  FirstAidKit,
-  Airplane,
-  Basketball,
-} from "@phosphor-icons/react";
+import { PathwayTag, pathwayLabels, type PathwayType } from "@/components/ui/pathway-tag";
 import { cn } from "@/lib/utils";
-
-/** Icon mapping for each pathway type */
-const pathwayIcons: Record<PathwayType, React.ReactNode> = {
-  energy: <Lightning />,
-  technology: <Desktop />,
-  transportation: <Car />,
-  agriculture: <Plant />,
-  conservation: <Leaf />,
-  water: <Drop />,
-  forestry: <Tree />,
-  manufacturing: <Factory />,
-  construction: <HardHat />,
-  "real-estate": <Buildings />,
-  "urban-planning": <Bank />,
-  finance: <Coins />,
-  policy: <Scales />,
-  research: <Flask />,
-  education: <GraduationCap />,
-  "waste-management": <Recycle />,
-  "arts-culture": <PaintBrush />,
-  media: <Broadcast />,
-  medical: <FirstAidKit />,
-  tourism: <Airplane />,
-  sports: <Basketball />,
-};
 
 /** All pathway types in display order */
 const ALL_PATHWAYS: PathwayType[] = Object.keys(pathwayLabels) as PathwayType[];
@@ -69,12 +17,7 @@ interface PathwaySelectorProps {
   className?: string;
 }
 
-export function PathwaySelector({
-  selected,
-  onChange,
-  max = 5,
-  className,
-}: PathwaySelectorProps) {
+export function PathwaySelector({ selected, onChange, max = 5, className }: PathwaySelectorProps) {
   function toggle(pathway: string) {
     if (selected.includes(pathway)) {
       onChange(selected.filter((p) => p !== pathway));
@@ -91,13 +34,9 @@ export function PathwaySelector({
           const isDisabled = !isSelected && selected.length >= max;
 
           return (
-            <div
-              key={pathway}
-              className={cn(isDisabled && "opacity-40 cursor-not-allowed")}
-            >
+            <div key={pathway} className={cn(isDisabled && "cursor-not-allowed opacity-40")}>
               <PathwayTag
                 pathway={pathway}
-                icon={pathwayIcons[pathway]}
                 selected={isSelected}
                 onClick={isDisabled ? undefined : () => toggle(pathway)}
               />

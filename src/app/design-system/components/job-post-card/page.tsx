@@ -12,7 +12,7 @@ import {
 import { CodePreview } from "@/components/design-system/CodeBlock";
 import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
-import { Leaf, Sun, Lightning, Drop } from "@phosphor-icons/react";
+import { Leaf } from "@phosphor-icons/react";
 
 // Props documentation
 const jobPostCardProps = [
@@ -37,11 +37,6 @@ const jobPostCardProps = [
     name: "pathway",
     type: "PathwayType",
     description: "Climate industry pathway (e.g., 'energy', 'agriculture', 'conservation')",
-  },
-  {
-    name: "pathwayIcon",
-    type: "React.ReactNode",
-    description: "Custom icon to override the default pathway icon",
   },
   {
     name: "status",
@@ -153,43 +148,40 @@ export default function JobPostCardPage() {
       >
         <div className="relative rounded-lg bg-background-subtle p-6">
           <div className="max-w-[350px]">
-            <div className="relative rounded-[12px] bg-[var(--primitive-neutral-0)] p-4 shadow-[1px_2px_16px_rgba(31,29,28,0.08)]">
+            <div className="relative flex h-[200px] flex-col justify-between rounded-[12px] bg-[var(--primitive-neutral-0)] p-4 shadow-[1px_2px_16px_rgba(31,29,28,0.08)]">
               {/* Header Row */}
-              <div className="relative mb-3 flex items-center gap-2">
-                <div className="flex flex-1 items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primitive-neutral-200)] text-xs font-medium">
-                    A
+              <div className="flex flex-col gap-3">
+                <div className="relative flex items-center gap-2">
+                  <div className="flex flex-1 items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-neutral-200)] text-xs font-medium">
+                      A
+                    </div>
+                    <span className="text-sm text-[var(--foreground-default)]">Acme Corp</span>
                   </div>
-                  <span className="text-sm text-[var(--primitive-neutral-800)]">Acme Corp</span>
+                  <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                    1
+                  </div>
                 </div>
-                <div className="rounded-lg bg-[var(--primitive-green-200)] px-2 py-1 text-sm font-bold text-[var(--primitive-green-700)]">
-                  <Leaf size={16} weight="fill" />
-                </div>
-                <div className="rounded-full bg-[var(--primitive-blue-100)] px-2 py-1">
-                  <span className="text-sm font-bold text-[var(--primitive-blue-500)]">
-                    Featured
-                  </span>
-                </div>
-                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
-                  1
-                </div>
-              </div>
-              {/* Title */}
-              <div className="relative mb-4">
-                <h3 className="text-2xl font-medium text-[var(--primitive-neutral-800)]">
-                  Solar Installation Lead
-                </h3>
-                <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
-                  2
+                {/* Title */}
+                <div className="relative">
+                  <h3 className="text-2xl font-medium text-[var(--foreground-default)]">
+                    Solar Installation Lead
+                  </h3>
+                  <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
+                    2
+                  </div>
                 </div>
               </div>
-              {/* Tags */}
-              <div className="relative flex gap-2">
-                <div className="rounded-full bg-[var(--primitive-neutral-200)] px-2 py-1">
-                  <span className="text-sm text-[var(--primitive-neutral-700)]">Remote</span>
+              {/* Tags Row: PathwayTag + InfoTags */}
+              <div className="relative flex items-center gap-2">
+                <div className="rounded-lg bg-[var(--primitive-green-200)] px-2 py-1">
+                  <Leaf size={20} weight="fill" className="text-[var(--primitive-green-700)]" />
                 </div>
-                <div className="rounded-full bg-[var(--primitive-neutral-200)] px-2 py-1">
-                  <span className="text-sm text-[var(--primitive-neutral-700)]">Full-time</span>
+                <div className="rounded-lg bg-[var(--primitive-neutral-200)] px-2 py-1">
+                  <span className="text-sm text-[var(--foreground-default)]">Remote</span>
+                </div>
+                <div className="rounded-lg bg-[var(--primitive-neutral-200)] px-2 py-1">
+                  <span className="text-sm text-[var(--foreground-default)]">Full-time</span>
                 </div>
                 <div className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">
                   3
@@ -200,15 +192,15 @@ export default function JobPostCardPage() {
           <div className="mt-6 grid grid-cols-3 gap-2 text-sm">
             <div>
               <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">1</span> Header
-              (Company, Pathway, Status)
+              (Avatar + Company Name)
             </div>
             <div>
               <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">2</span> Job
               Title
             </div>
             <div>
-              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">3</span> Tags /
-              Actions (hover)
+              <span className="rounded bg-background-muted px-1.5 py-0.5 font-mono">3</span> Tags
+              (Pathway + Info) / Actions (hover)
             </div>
           </div>
         </div>

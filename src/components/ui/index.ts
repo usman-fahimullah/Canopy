@@ -102,6 +102,7 @@ export {
   PathwayTag,
   pathwayColors,
   pathwayLabels,
+  pathwayDefaultIcons,
   type PathwayTagProps,
   type PathwayType,
 } from "./pathway-tag";

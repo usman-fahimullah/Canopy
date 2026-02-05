@@ -2,6 +2,30 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import type { Icon } from "@phosphor-icons/react";
+import {
+  Lightning,
+  Desktop,
+  Car,
+  Plant,
+  Leaf,
+  Drop,
+  Tree,
+  Factory,
+  HardHat,
+  Buildings,
+  Bank,
+  Coins,
+  Scales,
+  Flask,
+  GraduationCap,
+  Recycle,
+  PaintBrush,
+  Broadcast,
+  FirstAidKit,
+  Airplane,
+  Basketball,
+} from "@phosphor-icons/react";
 
 /**
  * PathwayTag Component - Trails Design System
@@ -200,6 +224,37 @@ export const pathwayLabels: Record<PathwayType, string> = {
   policy: "Policy",
 };
 
+/** Default Phosphor icon for each pathway type */
+const pathwayDefaultIcons: Record<PathwayType, Icon> = {
+  // GREEN family
+  agriculture: Plant,
+  finance: Coins,
+  forestry: Tree,
+  transportation: Car,
+  "waste-management": Recycle,
+  // BLUE family
+  conservation: Leaf,
+  research: Flask,
+  sports: Basketball,
+  water: Drop,
+  // ORANGE family
+  construction: HardHat,
+  manufacturing: Factory,
+  "real-estate": Buildings,
+  "urban-planning": Bank,
+  // RED family
+  education: GraduationCap,
+  medical: FirstAidKit,
+  tourism: Airplane,
+  // YELLOW family
+  energy: Lightning,
+  technology: Desktop,
+  // PURPLE family
+  "arts-culture": PaintBrush,
+  media: Broadcast,
+  policy: Scales,
+};
+
 export interface PathwayTagProps {
   /** Pathway type determines the color */
   pathway: PathwayType;
@@ -219,21 +274,16 @@ export interface PathwayTagProps {
 
 const PathwayTag = React.forwardRef<HTMLDivElement, PathwayTagProps>(
   (
-    {
-      pathway,
-      icon,
-      children,
-      minimized = false,
-      selected = false,
-      onClick,
-      className,
-      ...props
-    },
+    { pathway, icon, children, minimized = false, selected = false, onClick, className, ...props },
     ref
   ) => {
     const colors = pathwayColors[pathway] || pathwayColors.agriculture;
     const label = children ?? pathwayLabels[pathway];
     const isClickable = !!onClick;
+
+    // Resolve the icon: use provided icon prop, or fall back to built-in default
+    const DefaultIcon = pathwayDefaultIcons[pathway];
+    const resolvedIcon = icon ?? (DefaultIcon ? <DefaultIcon /> : null);
 
     // Figma specs: 20px icon, 14px text, 8px radius, px-2 py-1 padding
     return (
@@ -266,7 +316,7 @@ const PathwayTag = React.forwardRef<HTMLDivElement, PathwayTagProps>(
           // Selected state: add border
           selected && ["border", colors.selectedBorder],
           // Font: 14px bold, 20px line-height
-          "text-sm leading-5 font-bold",
+          "text-sm font-bold leading-5",
           "select-none",
           // Interactive styles
           isClickable && "cursor-pointer",
@@ -278,11 +328,11 @@ const PathwayTag = React.forwardRef<HTMLDivElement, PathwayTagProps>(
         {...props}
       >
         {/* Icon: 20px size, Fill weight (per Figma specs) */}
-        {icon && (
-          <span className="shrink-0 flex items-center justify-center w-5 h-5">
-            {React.isValidElement(icon)
+        {resolvedIcon && (
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+            {React.isValidElement(resolvedIcon)
               ? React.cloneElement(
-                  icon as React.ReactElement<{
+                  resolvedIcon as React.ReactElement<{
                     size?: number;
                     weight?: string;
                     className?: string;
@@ -292,11 +342,11 @@ const PathwayTag = React.forwardRef<HTMLDivElement, PathwayTagProps>(
                     weight: "fill",
                     className: cn(
                       "w-5 h-5",
-                      (icon.props as { className?: string })?.className
+                      (resolvedIcon.props as { className?: string })?.className
                     ),
                   }
                 )
-              : icon}
+              : resolvedIcon}
           </span>
         )}
         {/* Text label (hidden when minimized) */}
@@ -308,4 +358,4 @@ const PathwayTag = React.forwardRef<HTMLDivElement, PathwayTagProps>(
 
 PathwayTag.displayName = "PathwayTag";
 
-export { PathwayTag, pathwayColors };
+export { PathwayTag, pathwayColors, pathwayDefaultIcons };

@@ -5,7 +5,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { CheckCircle } from "@phosphor-icons/react";
 import { Avatar } from "./avatar";
-import { Badge } from "./badge";
 import { InfoTag } from "./info-tag";
 import { PathwayTag, type PathwayType } from "./pathway-tag";
 
@@ -51,16 +50,13 @@ const companyCardVariants = cva(
 );
 
 export interface CompanyCardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof companyCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof companyCardVariants> {
   /** Company name */
   companyName: string;
   /** Company logo URL */
   companyLogo?: string;
   /** Pathway/industry type */
   pathway?: PathwayType;
-  /** Pathway icon (optional override) */
-  pathwayIcon?: React.ReactNode;
   /** Whether company is a partner */
   isPartner?: boolean;
   /** Whether company is BIPOC owned */
@@ -79,7 +75,6 @@ const CompanyCard = React.forwardRef<HTMLDivElement, CompanyCardProps>(
       companyName,
       companyLogo,
       pathway,
-      pathwayIcon,
       isPartner = false,
       isBipocOwned = false,
       jobCount,
@@ -95,48 +90,41 @@ const CompanyCard = React.forwardRef<HTMLDivElement, CompanyCardProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          companyCardVariants({ size }),
-          onClick && "cursor-pointer",
-          className
-        )}
+        className={cn(companyCardVariants({ size }), onClick && "cursor-pointer", className)}
         onClick={onClick}
         role={onClick ? "button" : undefined}
         tabIndex={onClick ? 0 : undefined}
         {...props}
       >
         {/* Content Container */}
-        <div className="flex items-start gap-3 flex-1 h-full">
+        <div className="flex h-full flex-1 items-start gap-3">
           {/* Left: Company Info */}
-          <div className="flex flex-col justify-between flex-1 h-full min-w-0">
+          <div className="flex h-full min-w-0 flex-1 flex-col justify-between">
             {/* Company Name */}
-            <h3 className="text-2xl font-medium text-[var(--primitive-neutral-800)] leading-8 line-clamp-2">
+            <h3 className="line-clamp-2 text-2xl font-medium leading-8 text-[var(--primitive-neutral-800)]">
               {companyName}
             </h3>
 
             {/* Tags Row */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Pathway Tag */}
               {pathway && (
                 <PathwayTag
                   pathway={pathway}
-                  icon={pathwayIcon}
                   minimized={showMinimizedPathway}
                   className="shrink-0"
                 />
               )}
 
               {/* Job Count Tag */}
-              {jobCount !== undefined && jobCount > 0 && (
-                <InfoTag>{jobCount} Jobs</InfoTag>
-              )}
+              {jobCount !== undefined && jobCount > 0 && <InfoTag>{jobCount} Jobs</InfoTag>}
 
               {/* Partner Badge - only show when isPartner */}
               {isPartner && (
                 <div
                   className={cn(
                     "flex items-center justify-center",
-                    "px-2 py-1 rounded-full",
+                    "rounded-full px-2 py-1",
                     "bg-[var(--primitive-blue-100)]"
                   )}
                 >
@@ -164,7 +152,7 @@ const CompanyCard = React.forwardRef<HTMLDivElement, CompanyCardProps>(
                 className={cn(
                   "absolute -bottom-1 -right-1",
                   "flex items-center justify-center",
-                  "w-5 h-5 rounded-full",
+                  "h-5 w-5 rounded-full",
                   "bg-[var(--primitive-green-200)]",
                   "border-2 border-white"
                 )}
