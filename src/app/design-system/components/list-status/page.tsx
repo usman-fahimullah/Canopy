@@ -25,9 +25,9 @@ const listStatusProps = [
   },
   {
     name: "size",
-    type: '"xs" | "sm" | "default" | "lg" | "xl" | "2xl" | "3xl"',
+    type: '"sm" | "default" | "lg" | "xl" | "2xl" | "3xl"',
     default: '"default"',
-    description: "Size of the status badge (12px, 16px, 20px, 24px, 28px, 40px, or 54px diameter).",
+    description: "Size of the status badge (16px, 20px, 24px, 28px, 40px, or 54px diameter).",
   },
   {
     name: "icon",
@@ -213,11 +213,10 @@ export default function ListStatusPage() {
       <ComponentCard
         id="sizes"
         title="Sizes"
-        description="Available size options from extra small (12px) to 3xl (54px)"
+        description="Available size options from small (16px) to 3xl (54px)"
       >
         <CodePreview
-          code={`<ListStatus variant="success" size="xs" />  {/* 12px */}
-<ListStatus variant="success" size="sm" />  {/* 16px */}
+          code={`<ListStatus variant="success" size="sm" />  {/* 16px */}
 <ListStatus variant="success" size="default" />  {/* 20px */}
 <ListStatus variant="success" size="lg" />  {/* 24px */}
 <ListStatus variant="success" size="xl" />  {/* 28px */}
@@ -225,7 +224,7 @@ export default function ListStatusPage() {
 <ListStatus variant="success" size="3xl" />  {/* 54px */}`}
         >
           <div className="flex items-end gap-6">
-            {(["xs", "sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
+            {(["sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
               <div key={size} className="flex flex-col items-center gap-2">
                 <ListStatus variant="success" size={size} />
                 <span className="text-caption text-foreground-muted">{size}</span>
@@ -357,8 +356,8 @@ export default function ListStatusPage() {
           <p className="mb-4 text-caption-strong text-foreground">Proportional Sizing Guide</p>
           <div className="flex items-end gap-6">
             {[
-              { avatarSize: "xs" as const, badgeSize: "xs" as const, label: "24px + 12px" },
-              { avatarSize: "sm" as const, badgeSize: "xs" as const, label: "32px + 12px" },
+              { avatarSize: "xs" as const, badgeSize: "sm" as const, label: "24px + 16px" },
+              { avatarSize: "sm" as const, badgeSize: "sm" as const, label: "32px + 16px" },
               {
                 avatarSize: "default" as const,
                 badgeSize: "default" as const,
@@ -402,7 +401,7 @@ export default function ListStatusPage() {
               <div className="relative">
                 <Avatar name={item.name} size="sm" />
                 <span className="absolute -bottom-0.5 -right-0.5">
-                  <ListStatus variant={item.status} size="xs" />
+                  <ListStatus variant={item.status} size="sm" />
                 </span>
               </div>
               <div className="min-w-0 flex-1">
@@ -425,7 +424,7 @@ export default function ListStatusPage() {
             <thead>
               <tr className="border-b border-border-muted text-left">
                 <th className="py-2 pr-4 text-caption-strong text-foreground-muted">Variant</th>
-                {(["xs", "sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
+                {(["sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
                   <th
                     key={size}
                     className="px-4 py-2 text-center text-caption-strong text-foreground-muted"
@@ -444,7 +443,7 @@ export default function ListStatusPage() {
                         {variant}
                       </code>
                     </td>
-                    {(["xs", "sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
+                    {(["sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
                       <td key={size} className="px-4 py-3 text-center">
                         <ListStatus variant={variant} size={size} />
                       </td>

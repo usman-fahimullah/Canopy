@@ -70,7 +70,6 @@ const listStatusVariants = cva(
   {
     variants: {
       size: {
-        xs: "size-3 border", // 12px, 1px border
         sm: "size-4 border-[1.5px]", // 16px, 1.5px border
         default: "size-5 border-2", // 20px, 2px border (Figma default)
         lg: "size-6 border-[2.5px]", // 24px, 2.5px border
@@ -86,7 +85,6 @@ const listStatusVariants = cva(
 );
 
 const iconSizeMap: Record<NonNullable<VariantProps<typeof listStatusVariants>["size"]>, string> = {
-  xs: "size-2", // 8px
   sm: "size-2.5", // 10px
   default: "size-3.5", // 14px
   lg: "size-4", // 16px
