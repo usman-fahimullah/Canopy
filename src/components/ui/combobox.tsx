@@ -135,9 +135,8 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
               // Hover state
               "hover:border-[var(--select-border-hover)]",
               // Focus state
-              "focus:outline-none focus:ring-0",
-              "focus:border-[var(--select-border-focus)]",
-              "focus:bg-[var(--select-background-open)]",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+              "focus-visible:bg-[var(--select-background-open)]",
               // Open state
               open && "border-[var(--select-border-focus)] bg-[var(--select-background-open)]",
               // Disabled state
@@ -148,13 +147,13 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
               error && [
                 "border-[var(--select-border-error)]",
                 "hover:border-[var(--select-border-error)]",
-                "focus:border-[var(--select-border-error)]",
+                "focus-visible:ring-[var(--ring-color-error)]",
               ],
               // Success state
               success && [
                 "border-[var(--select-border-success)]",
                 "hover:border-[var(--select-border-success)]",
-                "focus:border-[var(--select-border-success)]",
+                "focus-visible:ring-[var(--ring-color-success)]",
               ],
               className
             )}
@@ -186,7 +185,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
                   className={cn(
                     "flex h-6 w-6 items-center justify-center rounded-full",
                     "text-[var(--foreground-muted)]",
-                    "hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]",
+                    "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]",
                     "transition-all duration-[var(--duration-fast)]"
                   )}
                 >
@@ -520,7 +519,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
                     className={cn(
                       "ml-1 flex h-5 w-5 items-center justify-center rounded-full",
                       "text-[var(--foreground-muted)]",
-                      "hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]",
+                      "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]",
                       "transition-all duration-[var(--duration-fast)]"
                     )}
                   >

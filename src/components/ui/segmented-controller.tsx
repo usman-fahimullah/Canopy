@@ -42,8 +42,7 @@ export interface SegmentedControllerOption {
   disabled?: boolean;
 }
 
-export interface SegmentedControllerProps
-  extends VariantProps<typeof segmentedControllerVariants> {
+export interface SegmentedControllerProps extends VariantProps<typeof segmentedControllerVariants> {
   /** Array of options to display (2-5 items) */
   options: SegmentedControllerOption[];
   /** Currently selected value */
@@ -60,10 +59,7 @@ export interface SegmentedControllerProps
   "aria-label"?: string;
 }
 
-const SegmentedController = React.forwardRef<
-  HTMLDivElement,
-  SegmentedControllerProps
->(
+const SegmentedController = React.forwardRef<HTMLDivElement, SegmentedControllerProps>(
   (
     {
       options,
@@ -78,9 +74,7 @@ const SegmentedController = React.forwardRef<
     },
     ref
   ) => {
-    const [internalValue, setInternalValue] = React.useState(
-      defaultValue || options[0]?.value
-    );
+    const [internalValue, setInternalValue] = React.useState(defaultValue || options[0]?.value);
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     const value = controlledValue ?? internalValue;
@@ -104,9 +98,7 @@ const SegmentedController = React.forwardRef<
       if (disabled || optionDisabled) return;
 
       const enabledOptions = options.filter((opt) => !opt.disabled);
-      const currentEnabledIndex = enabledOptions.findIndex(
-        (opt) => opt.value === optionValue
-      );
+      const currentEnabledIndex = enabledOptions.findIndex((opt) => opt.value === optionValue);
 
       let newIndex = currentEnabledIndex;
 
@@ -124,9 +116,7 @@ const SegmentedController = React.forwardRef<
         case "ArrowLeft":
         case "ArrowUp":
           e.preventDefault();
-          newIndex =
-            (currentEnabledIndex - 1 + enabledOptions.length) %
-            enabledOptions.length;
+          newIndex = (currentEnabledIndex - 1 + enabledOptions.length) % enabledOptions.length;
           break;
         case "Home":
           e.preventDefault();
@@ -145,9 +135,7 @@ const SegmentedController = React.forwardRef<
 
       // Focus the next button
       const buttons = containerRef.current?.querySelectorAll('[role="tab"]');
-      const nextButtonIndex = options.findIndex(
-        (opt) => opt.value === nextOption.value
-      );
+      const nextButtonIndex = options.findIndex((opt) => opt.value === nextOption.value);
       (buttons?.[nextButtonIndex] as HTMLElement)?.focus();
     };
 
@@ -169,7 +157,7 @@ const SegmentedController = React.forwardRef<
         aria-label={ariaLabel}
         className={cn(
           segmentedControllerVariants({ fullWidth }),
-          disabled && "opacity-50 cursor-not-allowed",
+          disabled && "cursor-not-allowed opacity-50",
           className
         )}
         style={{
@@ -180,7 +168,7 @@ const SegmentedController = React.forwardRef<
         {/* Sliding pill indicator */}
         <div
           // Figma: white bg, rounded-xl (12px), shadow 1px 3px 16px rgba(31,29,28,0.08)
-          className="absolute top-1 bottom-1 rounded-xl bg-[var(--background-default)] transition-[left] duration-200 ease-out shadow-[1px_3px_16px_0px_rgba(31,29,28,0.08)]"
+          className="absolute bottom-1 top-1 rounded-xl bg-[var(--background-default)] shadow-[1px_3px_16px_0px_rgba(31,29,28,0.08)] transition-[left] duration-200 ease-out"
           style={{
             left: `calc(${selectedIndex * tabWidthPercent}% + 4px)`,
             width: `calc(${tabWidthPercent}% - 8px)`,
@@ -204,9 +192,9 @@ const SegmentedController = React.forwardRef<
                 // Figma: rounded-xl (12px), p-3 (12px)
                 "rounded-xl p-3",
                 // Figma: 14px font, gap 4px
-                "text-sm whitespace-nowrap transition-all duration-150 ease-default",
+                "ease-default whitespace-nowrap text-sm transition-all duration-150",
                 "outline-none",
-                "focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
+                "focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                 // Figma: selected = green-800 (#0A3D2C), unselected = neutral-700 (#3d3a37)
                 isSelected
                   ? "text-[var(--primitive-green-800)]"
@@ -214,15 +202,11 @@ const SegmentedController = React.forwardRef<
                 isDisabled && "cursor-not-allowed"
               )}
               onClick={() => handleSelect(option.value, option.disabled)}
-              onKeyDown={(e) =>
-                handleKeyDown(e, index, option.value, option.disabled)
-              }
+              onKeyDown={(e) => handleKeyDown(e, index, option.value, option.disabled)}
             >
               {/* Invisible bold text to reserve space and prevent layout shift */}
-              <span className="font-bold invisible flex items-center gap-1" aria-hidden="true">
-                {option.icon && (
-                  <span className="shrink-0 w-4 h-4">{option.icon}</span>
-                )}
+              <span className="invisible flex items-center gap-1 font-bold" aria-hidden="true">
+                {option.icon && <span className="h-4 w-4 shrink-0">{option.icon}</span>}
                 {option.label}
               </span>
               {/* Visible content positioned absolutely over the invisible text */}
@@ -238,8 +222,8 @@ const SegmentedController = React.forwardRef<
                   // Figma: 16px icon, selected = green-800, unselected = neutral-600
                   <span
                     className={cn(
-                      "shrink-0 flex items-center justify-center w-4 h-4",
-                      "[&>svg]:w-4 [&>svg]:h-4",
+                      "flex h-4 w-4 shrink-0 items-center justify-center",
+                      "[&>svg]:h-4 [&>svg]:w-4",
                       isSelected
                         ? "text-[var(--primitive-green-800)]"
                         : "text-[var(--primitive-neutral-600)]"

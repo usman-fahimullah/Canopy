@@ -6,24 +6,22 @@ import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
 import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { FormCard, FormField } from "@/components/ui/form-section";
+import { InlineMessage } from "@/components/ui/inline-message";
 import { COACH_STEPS } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
-import {
-  CreditCard,
-  ShieldCheck,
-  ArrowSquareOut,
-  CheckCircle,
-} from "@phosphor-icons/react";
+import { CreditCard, ShieldCheck, ArrowSquareOut, CheckCircle } from "@phosphor-icons/react";
 
 export default function CoachPayoutPage() {
   const router = useRouter();
   const { coachData, setCoachData } = useOnboardingForm();
   const [isConnecting, setIsConnecting] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
 
   const step = COACH_STEPS[4]; // payout
 
   async function handleConnectStripe() {
     setIsConnecting(true);
+    setStripeError(null);
 
     try {
       const res = await fetch("/api/stripe/connect", { method: "POST" });
@@ -34,11 +32,14 @@ export default function CoachPayoutPage() {
           return;
         }
       }
-      // If we couldn't get a URL, show it as connected for now
-      // (Stripe integration may not be set up yet)
-      setCoachData({ stripeConnected: true });
+      // If we couldn't get a redirect URL, let the user know
+      setStripeError(
+        "Stripe setup is not available right now. You can skip this step and set up payouts later from your dashboard."
+      );
     } catch {
-      // Stripe may not be configured yet — allow skip
+      setStripeError(
+        "Could not connect to Stripe. Please check your internet connection and try again, or skip this step for now."
+      );
     } finally {
       setIsConnecting(false);
     }
@@ -96,29 +97,21 @@ export default function CoachPayoutPage() {
                 )}
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--background-brand-subtle)]">
-                  <CreditCard
-                    size={24}
-                    weight="bold"
-                    className="text-[var(--foreground-brand)]"
-                  />
+                  <CreditCard size={24} weight="bold" className="text-[var(--foreground-brand)]" />
                 </div>
                 <div className="flex-1">
                   <p className="text-body-sm font-medium text-[var(--foreground-default)]">
-                    {isConnecting
-                      ? "Connecting to Stripe..."
-                      : "Connect with Stripe"}
+                    {isConnecting ? "Connecting to Stripe..." : "Connect with Stripe"}
                   </p>
                   <p className="mt-0.5 text-caption text-[var(--foreground-muted)]">
                     Set up direct deposits to your bank account
                   </p>
                 </div>
-                <ArrowSquareOut
-                  size={20}
-                  className="shrink-0 text-[var(--foreground-subtle)]"
-                />
+                <ArrowSquareOut size={20} className="shrink-0 text-[var(--foreground-subtle)]" />
               </button>
             )}
           </FormField>
+          {stripeError && <InlineMessage variant="warning">{stripeError}</InlineMessage>}
         </FormCard>
 
         {/* Security Note */}
@@ -134,9 +127,9 @@ export default function CoachPayoutPage() {
                 Secure payments
               </p>
               <p className="mt-1 text-caption text-[var(--foreground-muted)]">
-                Stripe handles all payment processing. We never store your
-                banking details. You&apos;ll receive payouts directly to your
-                bank account within 2-7 business days of each session.
+                Stripe handles all payment processing. We never store your banking details.
+                You&apos;ll receive payouts directly to your bank account within 2-7 business days
+                of each session.
               </p>
             </div>
           </div>
@@ -158,8 +151,7 @@ export default function CoachPayoutPage() {
               {
                 step: "2",
                 title: "You deliver the session",
-                description:
-                  "Conduct your coaching session via video call or in person.",
+                description: "Conduct your coaching session via video call or in person.",
               },
               {
                 step: "3",

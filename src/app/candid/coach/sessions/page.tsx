@@ -21,36 +21,16 @@ interface Session {
   meetingLink: string | null;
   mentee?: {
     id: string;
-    account: { name: string; email: string };
-  };
-  client?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    photoUrl: string | null;
-  };
-  seeker?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    photoUrl: string | null;
+    name?: string;
+    avatar?: string | null;
+    email?: string;
   };
 }
 
 function getClientInfo(session: Session) {
-  const person = session.client || session.seeker || session.mentee;
-  if (!person) return { name: "Unknown Client", photoUrl: null };
-
-  if ("firstName" in person) {
-    return {
-      name: `${person.firstName} ${person.lastName}`,
-      photoUrl: person.photoUrl,
-    };
-  }
-  if ("account" in person) {
-    return { name: person.account.name, photoUrl: null };
-  }
-  return { name: "Unknown Client", photoUrl: null };
+  const mentee = session.mentee;
+  if (!mentee) return { name: "Unknown Client", avatar: null };
+  return { name: mentee.name ?? "Unknown Client", avatar: mentee.avatar ?? null };
 }
 
 function getStatusBadge(status: string) {
@@ -190,7 +170,7 @@ export default function CoachSessionsPage() {
                 >
                   <Avatar
                     size="default"
-                    src={client.photoUrl || undefined}
+                    src={client.avatar || undefined}
                     name={client.name}
                     color="green"
                   />

@@ -35,10 +35,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    let sessions;
+    let rawSessions;
 
     if (role === "coach" && account.coachProfile) {
-      sessions = await prisma.session.findMany({
+      rawSessions = await prisma.session.findMany({
         where: {
           coachId: account.coachProfile.id,
           ...(status
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         },
         include: {
           mentee: {
-            include: { account: { select: { name: true, email: true } } },
+            include: { account: { select: { name: true, email: true, avatar: true } } },
           },
           booking: true,
           review: true,
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         take: 100,
       });
     } else if (account.seekerProfile) {
-      sessions = await prisma.session.findMany({
+      rawSessions = await prisma.session.findMany({
         where: {
           menteeId: account.seekerProfile.id,
           ...(status
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         },
         include: {
           coach: {
-            include: { account: { select: { name: true } } },
+            include: { account: { select: { name: true, email: true, avatar: true } } },
           },
           booking: true,
           review: true,
@@ -76,6 +76,41 @@ export async function GET(request: NextRequest) {
     } else {
       return NextResponse.json({ sessions: [] });
     }
+
+    // Flatten participant data to match SessionParticipant shape
+    // Components expect coach.name, coach.avatar (not coach.account.name)
+    const sessions = rawSessions.map((s) => {
+      const { coach, mentee, ...rest } = s as Record<string, unknown>;
+
+      const result: Record<string, unknown> = { ...rest };
+
+      if (coach && typeof coach === "object") {
+        const c = coach as Record<string, unknown>;
+        const acct = c.account as Record<string, unknown> | undefined;
+        result.coach = {
+          id: c.id,
+          firstName: c.firstName,
+          lastName: c.lastName,
+          name: acct?.name ?? ([c.firstName, c.lastName].filter(Boolean).join(" ") || undefined),
+          avatar: acct?.avatar ?? undefined,
+          photoUrl: c.photoUrl ?? undefined,
+          headline: c.headline ?? undefined,
+        };
+      }
+
+      if (mentee && typeof mentee === "object") {
+        const m = mentee as Record<string, unknown>;
+        const acct = m.account as Record<string, unknown> | undefined;
+        result.mentee = {
+          id: m.id,
+          name: acct?.name ?? undefined,
+          avatar: acct?.avatar ?? undefined,
+          email: acct?.email ?? undefined,
+        };
+      }
+
+      return result;
+    });
 
     return NextResponse.json({ sessions });
   } catch (error) {

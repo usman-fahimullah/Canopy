@@ -7,6 +7,7 @@ import { StepNavigation } from "@/components/onboarding/step-navigation";
 import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { InlineMessage } from "@/components/ui/inline-message";
 import { FormCard, FormField, FormRow } from "@/components/ui/form-section";
 import { EMPLOYER_STEPS } from "@/lib/onboarding/types";
 
@@ -47,13 +48,15 @@ export default function EmployerCompanyPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || "We couldn\u2019t save your company details. Please try again.");
         return;
       }
 
       router.push("/onboarding/canopy/size-industry");
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        "Could not connect to the server. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -162,7 +165,7 @@ export default function EmployerCompanyPage() {
           </FormRow>
         </FormCard>
 
-        {error && <p className="text-caption text-[var(--foreground-error)]">{error}</p>}
+        {error && <InlineMessage variant="critical">{error}</InlineMessage>}
       </div>
     </OnboardingShell>
   );

@@ -9,6 +9,7 @@ import { StepNavigation } from "@/components/onboarding/step-navigation";
 import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { InlineMessage } from "@/components/ui/inline-message";
 import {
   Dropdown,
   DropdownTrigger,
@@ -45,7 +46,8 @@ export default function TalentProfilePage() {
   const { baseProfile, setBaseProfile } = useOnboardingForm();
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const step = TALENT_STEPS[0]; // profile
@@ -58,18 +60,18 @@ export default function TalentProfilePage() {
     // Validate file type
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowedTypes.includes(file.type)) {
-      setError("Please upload a JPEG, PNG, WebP, or GIF image.");
+      setPhotoError("Unsupported file format. Please upload a JPEG, PNG, WebP, or GIF image.");
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      setError("Image must be 5MB or less.");
+      setPhotoError("This image is too large. Please choose a file under 5 MB.");
       return;
     }
 
     setUploadingPhoto(true);
-    setError(null);
+    setPhotoError(null);
 
     try {
       const formData = new FormData();
@@ -82,14 +84,16 @@ export default function TalentProfilePage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Failed to upload photo");
+        setPhotoError(data.error || "Upload failed. Please check your connection and try again.");
         return;
       }
 
       const { url } = await res.json();
       setBaseProfile({ profilePhotoUrl: url });
     } catch {
-      setError("Failed to upload photo. Please try again.");
+      setPhotoError(
+        "Could not connect to the server. Please check your internet connection and try again."
+      );
     } finally {
       setUploadingPhoto(false);
     }
@@ -98,7 +102,7 @@ export default function TalentProfilePage() {
   async function handleContinue() {
     if (!canContinue) return;
     setLoading(true);
-    setError(null);
+    setFormError(null);
 
     try {
       const res = await fetch("/api/onboarding", {
@@ -123,13 +127,15 @@ export default function TalentProfilePage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setFormError(data.error || "We couldn\u2019t save your profile. Please try again.");
         return;
       }
 
       router.push("/onboarding/jobs/career");
     } catch {
-      setError("Network error. Please try again.");
+      setFormError(
+        "Could not connect to the server. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -190,8 +196,17 @@ export default function TalentProfilePage() {
                 src={baseProfile.profilePhotoUrl}
                 alt="Profile preview"
                 className="h-10 w-10 rounded-full object-cover"
+                onError={() => {
+                  setBaseProfile({ profilePhotoUrl: "" });
+                  setPhotoError("Your profile photo could not be loaded. Please upload it again.");
+                }}
               />
               <span className="text-caption text-[var(--foreground-muted)]">Photo uploaded</span>
+            </div>
+          )}
+          {photoError && (
+            <div className="mt-2">
+              <InlineMessage variant="critical">{photoError}</InlineMessage>
             </div>
           )}
         </div>
@@ -268,7 +283,7 @@ export default function TalentProfilePage() {
           />
         </div>
 
-        {error && <p className="text-caption text-[var(--foreground-error)]">{error}</p>}
+        {formError && <InlineMessage variant="critical">{formError}</InlineMessage>}
       </div>
     </OnboardingShell>
   );

@@ -4,11 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
-import {
-  useOnboardingForm,
-  type CoachWeeklySchedule,
-} from "@/components/onboarding/form-context";
+import { useOnboardingForm, type CoachWeeklySchedule } from "@/components/onboarding/form-context";
 import { FormCard } from "@/components/ui/form-section";
+import { Alert } from "@/components/ui/alert";
 import { COACH_STEPS } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
 import {
@@ -66,9 +64,7 @@ export default function CoachPreviewPage() {
     },
     {
       label: "Tagline & bio",
-      complete:
-        coachData.tagline.trim().length >= 10 &&
-        coachData.bio.trim().length >= 100,
+      complete: coachData.tagline.trim().length >= 10 && coachData.bio.trim().length >= 100,
       editPath: "/onboarding/coach/about",
     },
     {
@@ -91,8 +87,7 @@ export default function CoachPreviewPage() {
       complete:
         coachData.services.length > 0 &&
         coachData.services.every(
-          (s) =>
-            s.name.trim().length >= 3 && s.description.trim().length >= 10
+          (s) => s.name.trim().length >= 3 && s.description.trim().length >= 10
         ),
       editPath: "/onboarding/coach/services",
     },
@@ -106,9 +101,7 @@ export default function CoachPreviewPage() {
   const allComplete = checks.every((c) => c.complete);
   const completedCount = checks.filter((c) => c.complete).length;
 
-  const activeDays = DAYS.filter(
-    (d) => coachData.weeklySchedule[d.key] !== null
-  );
+  const activeDays = DAYS.filter((d) => coachData.weeklySchedule[d.key] !== null);
 
   async function handleSubmit() {
     setIsSubmitting(true);
@@ -159,13 +152,15 @@ export default function CoachPreviewPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to submit");
+        throw new Error(data.error || "We couldn\u2019t launch your profile. Please try again.");
       }
 
       router.push("/candid/coach/dashboard");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Something went wrong"
+        err instanceof Error
+          ? err.message
+          : "Could not connect to the server. Please check your internet connection and try again."
       );
     } finally {
       setIsSubmitting(false);
@@ -191,16 +186,9 @@ export default function CoachPreviewPage() {
       <div className="space-y-6">
         {/* Error banner */}
         {error && (
-          <div className="flex items-center gap-3 rounded-xl border border-[var(--border-error)] bg-[var(--background-error)] p-4">
-            <WarningCircle
-              size={20}
-              weight="bold"
-              className="shrink-0 text-[var(--foreground-error)]"
-            />
-            <p className="text-caption text-[var(--foreground-error)]">
-              {error}
-            </p>
-          </div>
+          <Alert variant="critical" dismissible onDismiss={() => setError(null)}>
+            {error}
+          </Alert>
         )}
 
         {/* Completeness checklist */}
@@ -296,11 +284,7 @@ export default function CoachPreviewPage() {
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
-                    <User
-                      size={28}
-                      weight="light"
-                      className="text-[var(--foreground-subtle)]"
-                    />
+                    <User size={28} weight="light" className="text-[var(--foreground-subtle)]" />
                   </div>
                 )}
               </div>
@@ -349,9 +333,7 @@ export default function CoachPreviewPage() {
         {/* Services Summary */}
         <FormCard>
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-body-sm font-medium text-[var(--foreground-default)]">
-              Services
-            </p>
+            <p className="text-body-sm font-medium text-[var(--foreground-default)]">Services</p>
             <button
               type="button"
               onClick={() => router.push("/onboarding/coach/services")}
@@ -368,10 +350,7 @@ export default function CoachPreviewPage() {
                 className="flex items-center justify-between rounded-lg border border-[var(--border-muted)] px-4 py-3"
               >
                 <div className="flex items-center gap-3">
-                  <Briefcase
-                    size={18}
-                    className="text-[var(--foreground-subtle)]"
-                  />
+                  <Briefcase size={18} className="text-[var(--foreground-subtle)]" />
                   <div>
                     <p className="text-caption font-medium text-[var(--foreground-default)]">
                       {service.name || "Unnamed service"}
@@ -419,10 +398,7 @@ export default function CoachPreviewPage() {
                     className="flex items-center justify-between rounded-lg border border-[var(--border-muted)] px-4 py-2"
                   >
                     <div className="flex items-center gap-2">
-                      <CalendarCheck
-                        size={16}
-                        className="text-[var(--foreground-subtle)]"
-                      />
+                      <CalendarCheck size={16} className="text-[var(--foreground-subtle)]" />
                       <span className="text-caption font-medium text-[var(--foreground-default)]">
                         {day.short}
                       </span>
@@ -434,9 +410,7 @@ export default function CoachPreviewPage() {
                 );
               })
             ) : (
-              <p className="text-caption text-[var(--foreground-muted)]">
-                No availability set
-              </p>
+              <p className="text-caption text-[var(--foreground-muted)]">No availability set</p>
             )}
           </div>
         </FormCard>

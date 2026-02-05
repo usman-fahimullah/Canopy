@@ -44,10 +44,10 @@ const searchInputVariants = cva(
       state: {
         default: "border-[var(--input-border)] hover:border-[var(--input-border-hover)]",
         hover: "border-[var(--input-border-hover)]",
-        focused: "border-[var(--primitive-green-600)]",
-        typing: "border-[var(--primitive-green-600)]",
-        error: "border-[var(--primitive-red-600)]",
-        focusedError: "border-[var(--primitive-red-600)]",
+        focused: "border-[var(--input-border-focus)]",
+        typing: "border-[var(--input-border-focus)]",
+        error: "border-[var(--input-border-error)]",
+        focusedError: "border-[var(--input-border-error)]",
       },
       size: {
         default: "h-14 px-4 gap-2",
@@ -62,7 +62,8 @@ const searchInputVariants = cva(
 );
 
 export interface SearchInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
     VariantProps<typeof searchInputVariants> {
   /** Error state */
   error?: boolean;
@@ -95,9 +96,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     ref
   ) => {
     const [isFocused, setIsFocused] = React.useState(false);
-    const [internalValue, setInternalValue] = React.useState(
-      defaultValue ?? value ?? ""
-    );
+    const [internalValue, setInternalValue] = React.useState(defaultValue ?? value ?? "");
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -136,10 +135,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div className={cn("w-full", containerClassName)}>
         <div
-          className={cn(
-            searchInputVariants({ state, size }),
-            className
-          )}
+          className={cn(searchInputVariants({ state, size }), className)}
           onClick={() => inputRef.current?.focus()}
         >
           {/* Search Icon */}
@@ -151,13 +147,11 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
 
           {/* Cursor indicator when focused without value */}
           {isFocused && !hasValue && (
-            <div className="w-0 flex items-center justify-center h-[21px]">
+            <div className="flex h-[21px] w-0 items-center justify-center">
               <div
                 className={cn(
-                  "w-[1px] h-full animate-pulse",
-                  error
-                    ? "bg-[var(--primitive-red-600)]"
-                    : "bg-[var(--primitive-green-600)]"
+                  "h-full w-[1px] animate-pulse",
+                  error ? "bg-[var(--input-border-error)]" : "bg-[var(--input-border-focus)]"
                 )}
               />
             </div>
@@ -172,12 +166,12 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             onFocus={handleFocus}
             onBlur={handleBlur}
             className={cn(
-              "flex-1 bg-transparent outline-none min-w-0",
-              "font-medium text-lg tracking-[-0.36px] leading-6",
-              "placeholder:text-[var(--primitive-neutral-600)]",
+              "min-w-0 flex-1 bg-transparent outline-none",
+              "text-lg font-medium leading-6 tracking-[-0.36px]",
+              "placeholder:text-[var(--input-foreground-placeholder)]",
               hasValue
-                ? "text-[var(--primitive-green-800)]"
-                : "text-[var(--primitive-neutral-600)]"
+                ? "text-[var(--foreground-brand-emphasis)]"
+                : "text-[var(--foreground-subtle)]"
             )}
             {...props}
           />
@@ -187,16 +181,14 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
             <WarningOctagon
               size={24}
               weight="fill"
-              className="shrink-0 text-[var(--primitive-red-600)]"
+              className="shrink-0 text-[var(--foreground-error)]"
             />
           )}
         </div>
 
         {/* Error Message */}
         {error && errorMessage && (
-          <p className="mt-1.5 text-sm text-[var(--primitive-red-600)]">
-            {errorMessage}
-          </p>
+          <p className="mt-1.5 text-sm text-[var(--foreground-error)]">{errorMessage}</p>
         )}
       </div>
     );
@@ -222,10 +214,10 @@ const locationInputVariants = cva(
       state: {
         default: "border-[var(--input-border)] hover:border-[var(--input-border-hover)]",
         hover: "border-[var(--input-border-hover)]",
-        focused: "border-[var(--primitive-green-600)]",
-        typing: "border-[var(--primitive-green-600)]",
-        error: "border-[var(--primitive-red-600)]",
-        focusedError: "border-[var(--primitive-red-600)]",
+        focused: "border-[var(--input-border-focus)]",
+        typing: "border-[var(--input-border-focus)]",
+        error: "border-[var(--input-border-error)]",
+        focusedError: "border-[var(--input-border-error)]",
       },
       size: {
         default: "h-14 px-4 gap-2 w-[218px]",
@@ -241,7 +233,8 @@ const locationInputVariants = cva(
 );
 
 export interface LocationInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
     VariantProps<typeof locationInputVariants> {
   /** Error state */
   error?: boolean;
@@ -275,9 +268,7 @@ const LocationInput = React.forwardRef<HTMLInputElement, LocationInputProps>(
     ref
   ) => {
     const [isFocused, setIsFocused] = React.useState(false);
-    const [internalValue, setInternalValue] = React.useState(
-      defaultValue ?? value ?? ""
-    );
+    const [internalValue, setInternalValue] = React.useState(defaultValue ?? value ?? "");
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useImperativeHandle(ref, () => inputRef.current!);
@@ -316,10 +307,7 @@ const LocationInput = React.forwardRef<HTMLInputElement, LocationInputProps>(
     return (
       <div className={cn("shrink-0", containerClassName)}>
         <div
-          className={cn(
-            locationInputVariants({ state, size }),
-            className
-          )}
+          className={cn(locationInputVariants({ state, size }), className)}
           onClick={() => inputRef.current?.focus()}
         >
           {/* Map Pin Icon */}
@@ -331,13 +319,11 @@ const LocationInput = React.forwardRef<HTMLInputElement, LocationInputProps>(
 
           {/* Cursor indicator when focused without value */}
           {isFocused && !hasValue && (
-            <div className="w-0 flex items-center justify-center h-[21px]">
+            <div className="flex h-[21px] w-0 items-center justify-center">
               <div
                 className={cn(
-                  "w-[1px] h-full animate-pulse",
-                  error
-                    ? "bg-[var(--primitive-red-600)]"
-                    : "bg-[var(--primitive-green-600)]"
+                  "h-full w-[1px] animate-pulse",
+                  error ? "bg-[var(--input-border-error)]" : "bg-[var(--input-border-focus)]"
                 )}
               />
             </div>
@@ -353,13 +339,11 @@ const LocationInput = React.forwardRef<HTMLInputElement, LocationInputProps>(
             onBlur={handleBlur}
             placeholder={placeholder}
             className={cn(
-              "flex-1 bg-transparent outline-none min-w-0",
-              "font-medium text-lg tracking-[-0.36px] leading-6",
-              "placeholder:text-[var(--primitive-neutral-600)]",
-              "text-ellipsis overflow-hidden whitespace-nowrap",
-              hasValue
-                ? "text-[var(--primitive-neutral-700)]"
-                : "text-[var(--primitive-neutral-600)]"
+              "min-w-0 flex-1 bg-transparent outline-none",
+              "text-lg font-medium leading-6 tracking-[-0.36px]",
+              "placeholder:text-[var(--input-foreground-placeholder)]",
+              "overflow-hidden text-ellipsis whitespace-nowrap",
+              hasValue ? "text-[var(--foreground-muted)]" : "text-[var(--foreground-subtle)]"
             )}
             {...props}
           />
@@ -369,16 +353,14 @@ const LocationInput = React.forwardRef<HTMLInputElement, LocationInputProps>(
             <WarningOctagon
               size={24}
               weight="fill"
-              className="shrink-0 text-[var(--primitive-red-600)]"
+              className="shrink-0 text-[var(--foreground-error)]"
             />
           )}
         </div>
 
         {/* Error Message */}
         {error && errorMessage && (
-          <p className="mt-1.5 text-sm text-[var(--primitive-red-600)]">
-            {errorMessage}
-          </p>
+          <p className="mt-1.5 text-sm text-[var(--foreground-error)]">{errorMessage}</p>
         )}
       </div>
     );
@@ -402,60 +384,59 @@ export interface RecentlySearchedItemProps {
   className?: string;
 }
 
-const RecentlySearchedItem = React.forwardRef<
-  HTMLDivElement,
-  RecentlySearchedItemProps
->(({ text, onClick, onDelete, className }, ref) => {
-  const [isHovered, setIsHovered] = React.useState(false);
+const RecentlySearchedItem = React.forwardRef<HTMLDivElement, RecentlySearchedItemProps>(
+  ({ text, onClick, onDelete, className }, ref) => {
+    const [isHovered, setIsHovered] = React.useState(false);
 
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "flex items-center gap-1 px-4 py-3 w-full",
-        "cursor-pointer",
-        "transition-colors duration-fast",
-        isHovered && "bg-[var(--input-background)] rounded-2xl",
-        className
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
-    >
-      {/* Text */}
-      <div className="flex-1 min-w-0">
-        <p
-          className={cn(
-            "font-medium text-lg tracking-[-0.36px] leading-6",
-            "text-[var(--primitive-neutral-800)]",
-            "text-ellipsis overflow-hidden whitespace-nowrap"
-          )}
-        >
-          {text}
-        </p>
-      </div>
-
-      {/* Delete Button */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete?.();
-        }}
+    return (
+      <div
+        ref={ref}
         className={cn(
-          "shrink-0 p-2.5 rounded-2xl",
+          "flex w-full items-center gap-1 px-4 py-3",
+          "cursor-pointer",
           "transition-colors duration-fast",
-          isHovered
-            ? "bg-[var(--primitive-neutral-200)] hover:bg-[var(--primitive-neutral-300)]"
-            : "bg-[var(--primitive-neutral-0)] hover:bg-[var(--primitive-neutral-200)]"
+          isHovered && "rounded-2xl bg-[var(--input-background)]",
+          className
         )}
-        aria-label={`Remove "${text}" from recent searches`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={onClick}
       >
-        <X size={24} weight="bold" className="text-[var(--primitive-neutral-900)]" />
-      </button>
-    </div>
-  );
-});
+        {/* Text */}
+        <div className="min-w-0 flex-1">
+          <p
+            className={cn(
+              "text-lg font-medium leading-6 tracking-[-0.36px]",
+              "text-[var(--primitive-neutral-800)]",
+              "overflow-hidden text-ellipsis whitespace-nowrap"
+            )}
+          >
+            {text}
+          </p>
+        </div>
+
+        {/* Delete Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete?.();
+          }}
+          className={cn(
+            "shrink-0 rounded-2xl p-2.5",
+            "transition-colors duration-fast",
+            isHovered
+              ? "bg-[var(--primitive-neutral-200)] hover:bg-[var(--primitive-neutral-300)]"
+              : "bg-[var(--primitive-neutral-0)] hover:bg-[var(--primitive-neutral-200)]"
+          )}
+          aria-label={`Remove "${text}" from recent searches`}
+        >
+          <X size={24} weight="bold" className="text-[var(--primitive-neutral-900)]" />
+        </button>
+      </div>
+    );
+  }
+);
 
 RecentlySearchedItem.displayName = "RecentlySearchedItem";
 
@@ -481,21 +462,8 @@ export interface RecentlySearchedDropdownProps {
   open?: boolean;
 }
 
-const RecentlySearchedDropdown = React.forwardRef<
-  HTMLDivElement,
-  RecentlySearchedDropdownProps
->(
-  (
-    {
-      items,
-      onItemClick,
-      onItemDelete,
-      maxItems = 5,
-      className,
-      open = true,
-    },
-    ref
-  ) => {
+const RecentlySearchedDropdown = React.forwardRef<HTMLDivElement, RecentlySearchedDropdownProps>(
+  ({ items, onItemClick, onItemDelete, maxItems = 5, className, open = true }, ref) => {
     if (!open || items.length === 0) return null;
 
     const displayItems = items.slice(0, maxItems);
@@ -505,7 +473,7 @@ const RecentlySearchedDropdown = React.forwardRef<
         ref={ref}
         className={cn(
           "bg-[var(--primitive-neutral-0)]",
-          "rounded-xl overflow-hidden px-4",
+          "overflow-hidden rounded-xl px-4",
           "shadow-[2px_4px_16px_0px_rgba(31,29,28,0.12)]",
           className
         )}
@@ -600,8 +568,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     );
     const [isSearchFocused, setIsSearchFocused] = React.useState(false);
 
-    const currentSearchValue =
-      searchValue !== undefined ? searchValue : internalSearchValue;
+    const currentSearchValue = searchValue !== undefined ? searchValue : internalSearchValue;
     const currentLocationValue =
       locationValue !== undefined ? locationValue : internalLocationValue;
 
@@ -620,10 +587,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
     };
 
     const handleSearch = () => {
-      onSearch?.(
-        currentSearchValue,
-        showLocation ? currentLocationValue : undefined
-      );
+      onSearch?.(currentSearchValue, showLocation ? currentLocationValue : undefined);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -632,13 +596,12 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
       }
     };
 
-    const shouldShowDropdown =
-      showRecentSearches && isSearchFocused && recentSearches.length > 0;
+    const shouldShowDropdown = showRecentSearches && isSearchFocused && recentSearches.length > 0;
 
     return (
       <div ref={ref} className={cn("flex flex-col gap-2", className)}>
         {/* Main search bar row */}
-        <div className="flex items-center gap-4 h-14">
+        <div className="flex h-14 items-center gap-4">
           {/* Search Input */}
           <SearchInput
             value={currentSearchValue}
@@ -666,12 +629,7 @@ const SearchBar = React.forwardRef<HTMLDivElement, SearchBarProps>(
           )}
 
           {/* Search Button */}
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleSearch}
-            className="shrink-0"
-          >
+          <Button variant="primary" size="lg" onClick={handleSearch} className="shrink-0">
             {buttonText}
           </Button>
         </div>

@@ -87,9 +87,8 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
 
     // Colors based on variant - using CSS custom property values
     // These are accessed via getComputedStyle at runtime for proper dark mode support
-    const variantColor = variant === "poppy"
-      ? "var(--primitive-orange-500)"
-      : "var(--primitive-blue-500)";
+    const variantColor =
+      variant === "poppy" ? "var(--primitive-orange-500)" : "var(--primitive-blue-500)";
     // Use CSS variable values that respond to dark mode
     const trackBgColor = "var(--background-muted)";
     const dotInactiveColor = "var(--border-emphasis)";
@@ -215,13 +214,9 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
     return (
       <div ref={ref} className={cn("w-full", className)} {...props}>
         {(label || showValue) && (
-          <div className="flex items-center justify-between mb-2">
-            {label && (
-              <span className="text-body text-foreground">{label}</span>
-            )}
-            {showValue && (
-              <span className="text-body text-foreground-muted">{percentage}%</span>
-            )}
+          <div className="mb-2 flex items-center justify-between">
+            {label && <span className="text-body text-foreground">{label}</span>}
+            {showValue && <span className="text-body text-foreground-muted">{percentage}%</span>}
           </div>
         )}
 
@@ -229,8 +224,9 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
         <div
           ref={trackRef}
           className={cn(
-            "relative h-6 w-full rounded-full cursor-pointer",
-            disabled && "opacity-50 cursor-not-allowed"
+            "relative h-6 w-full cursor-pointer rounded-full",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+            disabled && "cursor-not-allowed opacity-50"
           )}
           style={{ backgroundColor: trackBgColor }}
           onMouseDown={handleMouseDown}
@@ -281,8 +277,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
                 style={{
                   width: showHoverState ? 10 : 6,
                   height: showHoverState ? 10 : 6,
-                  backgroundColor:
-                    isAtZero && !showHoverState ? dotInactiveColor : variantColor,
+                  backgroundColor: isAtZero && !showHoverState ? dotInactiveColor : variantColor,
                 }}
               />
             </div>

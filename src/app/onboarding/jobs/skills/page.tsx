@@ -11,6 +11,7 @@ import { MultiCombobox, type ComboboxOption } from "@/components/ui/combobox";
 import { Chip } from "@/components/ui/chip";
 import { Input } from "@/components/ui/input";
 import { SalaryRangeInput } from "@/components/ui/currency-input";
+import { InlineMessage } from "@/components/ui/inline-message";
 import { TALENT_STEPS } from "@/lib/onboarding/types";
 import { pathwayLabels, type PathwayType } from "@/components/ui/pathway-tag";
 import { jobCategoryLabels, type JobCategoryType } from "@/components/ui/category-tag";
@@ -123,13 +124,15 @@ export default function TalentSkillsPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || "We couldn\u2019t save your preferences. Please try again.");
         return;
       }
 
       router.push("/jobs/dashboard");
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        "Could not connect to the server. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -299,7 +302,11 @@ export default function TalentSkillsPage() {
         </div>
       </div>
 
-      {error && <p className="mt-4 text-caption text-[var(--foreground-error)]">{error}</p>}
+      {error && (
+        <div className="mt-4">
+          <InlineMessage variant="critical">{error}</InlineMessage>
+        </div>
+      )}
     </OnboardingShell>
   );
 }

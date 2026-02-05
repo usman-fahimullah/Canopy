@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GraduationCap, Buildings } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, InlineMessage } from "@/components/ui";
 import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { SHELL_ONBOARDING_SLUGS, STEPS_BY_SHELL, type Shell } from "@/lib/onboarding/types";
 
@@ -74,7 +74,7 @@ export default function OnboardingIntentPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || "We couldn\u2019t save your selection. Please try again.");
         return;
       }
 
@@ -84,7 +84,9 @@ export default function OnboardingIntentPage() {
       const firstStep = STEPS_BY_SHELL[shell][0];
       router.push(`/onboarding/${slug}/${firstStep.path}`);
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        "Could not connect to the server. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -246,9 +248,7 @@ export default function OnboardingIntentPage() {
           ))}
         </div>
 
-        {error && (
-          <p className="text-center text-caption text-[var(--primitive-red-600)]">{error}</p>
-        )}
+        {error && <InlineMessage variant="critical">{error}</InlineMessage>}
 
         {/* Sign in link */}
         <p className="text-center text-caption text-foreground-muted">

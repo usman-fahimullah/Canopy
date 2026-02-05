@@ -19,38 +19,29 @@ import { cn } from "@/lib/utils";
  */
 const textareaVariants = cva(
   [
-    // Figma: bg #faf9f7 (neutral-100), border #f2ede9 (neutral-200), 8px radius, 16px padding
     "flex w-full rounded-lg border",
-    "bg-[var(--primitive-neutral-100)]",
-    "border-[var(--primitive-neutral-200)]",
+    "bg-[var(--input-background)]",
+    "border-[var(--input-border)]",
     "p-4",
-    "text-lg text-[var(--foreground-default)] leading-6",  // Figma: 18px font, black text
-    "placeholder:text-[var(--primitive-neutral-600)]",  // Figma: #7a7671
+    "text-lg text-[var(--input-foreground)] leading-6",
+    "placeholder:text-[var(--input-foreground-placeholder)]",
     "transition-all duration-normal ease-default",
-    "focus:outline-none focus:ring-0",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
     "disabled:cursor-not-allowed disabled:opacity-50",
-    "resize-y min-h-[120px]",  // allow vertical resize, minimum height
+    "resize-y min-h-[120px]",
   ],
   {
     variants: {
       variant: {
-        default: [
-          "hover:border-[var(--primitive-neutral-300)]",
-          // Figma: focus state uses green-600 (#3ba36f) border
-          "focus:border-[var(--primitive-green-600)]",
-          "focus:bg-[var(--primitive-neutral-100)]",
-        ],
-        // Figma: error state uses red-600 (#e90000) border
+        default: ["hover:border-[var(--input-border-hover)]"],
         error: [
-          "border-[var(--primitive-red-600)]",
-          "hover:border-[var(--primitive-red-700)]",
-          "focus:border-[var(--primitive-red-600)]",
+          "border-[var(--input-border-error)]",
+          "hover:border-[var(--input-border-error)]",
+          "focus-visible:ring-[var(--ring-color-error)]",
         ],
-        // Figma: success state uses green-600 (#3ba36f) border (same as focus)
         success: [
-          "border-[var(--primitive-green-600)]",
-          "hover:border-[var(--primitive-green-700)]",
-          "focus:border-[var(--primitive-green-600)]",
+          "border-[var(--input-border-success)]",
+          "hover:border-[var(--input-border-success)]",
         ],
       },
     },
@@ -61,8 +52,7 @@ const textareaVariants = cva(
 );
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-    VariantProps<typeof textareaVariants> {
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement>, VariantProps<typeof textareaVariants> {
   /** Error state - shows red border and styling */
   error?: boolean;
   /** Success state - shows green border */

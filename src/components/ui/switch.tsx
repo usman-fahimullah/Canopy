@@ -37,13 +37,13 @@ const switchVariants = cva(
       error: {
         true: [
           "bg-[var(--primitive-red-200)]",
-          "focus-visible:ring-[var(--primitive-red-500)]",
+          "focus-visible:ring-[var(--ring-color-error)]",
           "data-[state=checked]:bg-[var(--primitive-red-500)]",
         ],
         false: [
           "bg-[var(--switch-background)]",
           "hover:bg-[var(--switch-background-hover)]",
-          "focus-visible:ring-[var(--switch-background-checked)]",
+          "focus-visible:ring-[var(--ring-color)]",
           "disabled:bg-[var(--switch-background-disabled)]",
           "data-[state=checked]:bg-[var(--switch-background-checked)]",
           "data-[state=checked]:hover:bg-[var(--switch-background-checked-hover)]",

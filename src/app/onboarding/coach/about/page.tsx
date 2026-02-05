@@ -7,6 +7,7 @@ import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCard, FormField, FormRow } from "@/components/ui/form-section";
+import { InlineMessage } from "@/components/ui/inline-message";
 import { COACH_STEPS } from "@/lib/onboarding/types";
 import { cn } from "@/lib/utils";
 import { Camera, User } from "@phosphor-icons/react";
@@ -21,6 +22,7 @@ export default function CoachAboutPage() {
   const [photoPreview, setPhotoPreview] = useState<string>(coachData.photoUrl || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const step = COACH_STEPS[0]; // about
   const canContinue =
@@ -35,8 +37,17 @@ export default function CoachAboutPage() {
       const file = e.target.files?.[0];
       if (!file) return;
 
+      setPhotoError(null);
+
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!allowedTypes.includes(file.type)) {
+        setPhotoError("Unsupported file format. Please upload a JPEG, PNG, WebP, or GIF image.");
+        return;
+      }
+
       if (file.size > 5 * 1024 * 1024) {
-        return; // Max 5MB
+        setPhotoError("This image is too large. Please choose a file under 5 MB.");
+        return;
       }
 
       const reader = new FileReader();
@@ -44,6 +55,9 @@ export default function CoachAboutPage() {
         const dataUrl = reader.result as string;
         setPhotoPreview(dataUrl);
         setCoachData({ photoUrl: dataUrl });
+      };
+      reader.onerror = () => {
+        setPhotoError("Could not read this file. Please try a different image.");
       };
       reader.readAsDataURL(file);
     },
@@ -75,13 +89,15 @@ export default function CoachAboutPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || "We couldn\u2019t save your profile. Please try again.");
         return;
       }
 
       router.push("/onboarding/coach/expertise");
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        "Could not connect to the server. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -194,6 +210,11 @@ export default function CoachAboutPage() {
                 </ul>
               </div>
             </div>
+            {photoError && (
+              <div className="mt-2">
+                <InlineMessage variant="critical">{photoError}</InlineMessage>
+              </div>
+            )}
           </FormField>
         </FormCard>
 
@@ -259,7 +280,7 @@ export default function CoachAboutPage() {
           </FormField>
         </FormCard>
 
-        {error && <p className="text-caption text-[var(--foreground-error)]">{error}</p>}
+        {error && <InlineMessage variant="critical">{error}</InlineMessage>}
       </div>
     </OnboardingShell>
   );

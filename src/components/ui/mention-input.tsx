@@ -35,10 +35,10 @@ const mentionInputVariants = cva(
       state: {
         default: "border-[var(--input-border)] hover:border-[var(--input-border-hover)]",
         hover: "border-[var(--input-border-hover)]",
-        focused: "border-[var(--primitive-green-600)]",
-        typing: "border-[var(--primitive-green-600)]",
-        error: "border-[var(--primitive-red-600)]",
-        focusedError: "border-[var(--primitive-red-600)]",
+        focused: "border-[var(--input-border-focus)]",
+        typing: "border-[var(--input-border-focus)]",
+        error: "border-[var(--input-border-error)]",
+        focusedError: "border-[var(--input-border-error)]",
       },
       size: {
         default: "h-14 px-4 gap-3 rounded-2xl",
@@ -66,10 +66,10 @@ const mentionTextareaVariants = cva(
       state: {
         default: "border-[var(--input-border)] hover:border-[var(--input-border-hover)]",
         hover: "border-[var(--input-border-hover)]",
-        focused: "border-[var(--primitive-green-600)]",
-        typing: "border-[var(--primitive-green-600)]",
-        error: "border-[var(--primitive-red-600)]",
-        focusedError: "border-[var(--primitive-red-600)]",
+        focused: "border-[var(--input-border-focus)]",
+        typing: "border-[var(--input-border-focus)]",
+        error: "border-[var(--input-border-error)]",
+        focusedError: "border-[var(--input-border-error)]",
       },
       size: {
         default: "rounded-2xl",
@@ -577,7 +577,7 @@ const MentionInput = React.forwardRef<HTMLInputElement, MentionInputProps>(
                 className={cn(
                   "shrink-0 transition-colors duration-fast",
                   isFocused ? "text-[var(--foreground-brand)]" : "text-[var(--foreground-muted)]",
-                  error && "text-[var(--primitive-red-600)]"
+                  error && "text-[var(--foreground-error)]"
                 )}
               />
 
@@ -587,7 +587,7 @@ const MentionInput = React.forwardRef<HTMLInputElement, MentionInputProps>(
                   <div
                     className={cn(
                       "h-full w-[1px] animate-pulse",
-                      error ? "bg-[var(--primitive-red-600)]" : "bg-[var(--primitive-green-600)]"
+                      error ? "bg-[var(--foreground-error)]" : "bg-[var(--foreground-success)]"
                     )}
                   />
                 </div>
@@ -623,7 +623,7 @@ const MentionInput = React.forwardRef<HTMLInputElement, MentionInputProps>(
                 <WarningOctagon
                   size={iconSize}
                   weight="fill"
-                  className="shrink-0 text-[var(--primitive-red-600)]"
+                  className="shrink-0 text-[var(--foreground-error)]"
                 />
               )}
             </div>
@@ -647,7 +647,7 @@ const MentionInput = React.forwardRef<HTMLInputElement, MentionInputProps>(
 
         {/* Error Message */}
         {error && errorMessage && (
-          <p id="mention-error" className="mt-1.5 text-sm text-[var(--primitive-red-600)]">
+          <p id="mention-error" className="mt-1.5 text-sm text-[var(--foreground-error)]">
             {errorMessage}
           </p>
         )}
@@ -913,7 +913,7 @@ const MentionTextarea = React.forwardRef<HTMLTextAreaElement, MentionTextareaPro
 
         {/* Error Message */}
         {error && errorMessage && (
-          <p id="textarea-error" className="mt-1.5 text-sm text-[var(--primitive-red-600)]">
+          <p id="textarea-error" className="mt-1.5 text-sm text-[var(--foreground-error)]">
             {errorMessage}
           </p>
         )}
@@ -978,8 +978,8 @@ const NoteInput: React.FC<NoteInputProps> = ({
       className={cn(
         "rounded-2xl border border-[var(--border-muted)] bg-[var(--background-subtle)] p-1",
         "transition-all duration-fast",
-        "focus-within:border-[var(--primitive-green-600)]",
-        error && "border-[var(--primitive-red-600)]",
+        "focus-within:border-[var(--input-border-focus)]",
+        error && "border-[var(--input-border-error)]",
         className
       )}
     >
@@ -1074,7 +1074,7 @@ const NoteInput: React.FC<NoteInputProps> = ({
 
       {/* Error Message */}
       {error && errorMessage && (
-        <p className="px-3 pb-2 text-sm text-[var(--primitive-red-600)]">{errorMessage}</p>
+        <p className="px-3 pb-2 text-sm text-[var(--foreground-error)]">{errorMessage}</p>
       )}
     </div>
   );

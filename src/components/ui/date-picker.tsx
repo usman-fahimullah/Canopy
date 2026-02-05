@@ -27,22 +27,11 @@ import {
   startOfYear,
   endOfYear,
 } from "date-fns";
-import {
-  CalendarBlank,
-  CaretLeft,
-  CaretRight,
-  CaretDown,
-  X,
-  Check,
-} from "@phosphor-icons/react";
+import { CalendarBlank, CaretLeft, CaretRight, CaretDown, X, Check } from "@phosphor-icons/react";
 import type { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 /**
  * Enhanced DatePicker
@@ -201,8 +190,18 @@ const defaultRangePresets: DatePreset[] = [
 // ============================================
 
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -252,7 +251,7 @@ function MonthYearSelector({ month, onMonthChange }: MonthYearSelectorProps) {
             setShowYearDropdown(false);
           }}
           className={cn(
-            "flex items-center gap-1 px-2 py-1 rounded-lg",
+            "flex items-center gap-1 rounded-lg px-2 py-1",
             "text-lg font-semibold text-[var(--foreground-default)]",
             "hover:bg-[var(--primitive-neutral-200)]",
             "transition-colors duration-150"
@@ -263,7 +262,7 @@ function MonthYearSelector({ month, onMonthChange }: MonthYearSelectorProps) {
         </button>
 
         {showMonthDropdown && (
-          <div className="absolute top-full left-0 mt-1 z-50 bg-[var(--primitive-neutral-0)] rounded-xl shadow-lg border border-[var(--primitive-neutral-200)] py-2 min-w-[140px] max-h-[280px] overflow-y-auto">
+          <div className="absolute left-0 top-full z-50 mt-1 max-h-[280px] min-w-[140px] overflow-y-auto rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-0)] py-2 shadow-lg">
             {MONTHS.map((monthName, index) => (
               <button
                 key={monthName}
@@ -273,7 +272,8 @@ function MonthYearSelector({ month, onMonthChange }: MonthYearSelectorProps) {
                   "w-full px-3 py-2 text-left text-sm",
                   "hover:bg-[var(--primitive-neutral-100)]",
                   "transition-colors duration-150",
-                  getMonth(month) === index && "bg-[var(--primitive-green-100)] text-[var(--primitive-green-800)] font-medium"
+                  getMonth(month) === index &&
+                    "bg-[var(--primitive-green-100)] font-medium text-[var(--primitive-green-800)]"
                 )}
               >
                 {monthName}
@@ -292,7 +292,7 @@ function MonthYearSelector({ month, onMonthChange }: MonthYearSelectorProps) {
             setShowMonthDropdown(false);
           }}
           className={cn(
-            "flex items-center gap-1 px-2 py-1 rounded-lg",
+            "flex items-center gap-1 rounded-lg px-2 py-1",
             "text-lg font-semibold text-[var(--foreground-default)]",
             "hover:bg-[var(--primitive-neutral-200)]",
             "transition-colors duration-150"
@@ -303,7 +303,7 @@ function MonthYearSelector({ month, onMonthChange }: MonthYearSelectorProps) {
         </button>
 
         {showYearDropdown && (
-          <div className="absolute top-full left-0 mt-1 z-50 bg-[var(--primitive-neutral-0)] rounded-xl shadow-lg border border-[var(--primitive-neutral-200)] py-2 min-w-[100px] max-h-[280px] overflow-y-auto">
+          <div className="absolute left-0 top-full z-50 mt-1 max-h-[280px] min-w-[100px] overflow-y-auto rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-0)] py-2 shadow-lg">
             {years.map((year) => (
               <button
                 key={year}
@@ -313,7 +313,8 @@ function MonthYearSelector({ month, onMonthChange }: MonthYearSelectorProps) {
                   "w-full px-3 py-2 text-left text-sm",
                   "hover:bg-[var(--primitive-neutral-100)]",
                   "transition-colors duration-150",
-                  getYear(month) === year && "bg-[var(--primitive-green-100)] text-[var(--primitive-green-800)] font-medium"
+                  getYear(month) === year &&
+                    "bg-[var(--primitive-green-100)] font-medium text-[var(--primitive-green-800)]"
                 )}
               >
                 {year}
@@ -411,12 +412,8 @@ function CalendarMonth({
 
     // Check hover preview range
     if (selectedRange?.from && hoverDate && !selectedRange.to) {
-      const start = isBefore(selectedRange.from, hoverDate)
-        ? selectedRange.from
-        : hoverDate;
-      const end = isAfter(hoverDate, selectedRange.from)
-        ? hoverDate
-        : selectedRange.from;
+      const start = isBefore(selectedRange.from, hoverDate) ? selectedRange.from : hoverDate;
+      const end = isAfter(hoverDate, selectedRange.from) ? hoverDate : selectedRange.from;
       return isWithinInterval(date, { start, end });
     }
 
@@ -451,14 +448,14 @@ function CalendarMonth({
     <div className="p-4">
       {/* Month Header with Dropdowns */}
       {showHeader && onMonthChange && (
-        <div className="flex items-center justify-center mb-4">
+        <div className="mb-4 flex items-center justify-center">
           <MonthYearSelector month={month} onMonthChange={onMonthChange} />
         </div>
       )}
 
       {/* Simple header if no dropdown needed */}
       {showHeader && !onMonthChange && (
-        <div className="text-center mb-4">
+        <div className="mb-4 text-center">
           <span className="text-lg font-semibold text-[var(--foreground-default)]">
             {format(month, "MMMM yyyy")}
           </span>
@@ -466,7 +463,7 @@ function CalendarMonth({
       )}
 
       {/* Weekday Headers */}
-      <div className="grid grid-cols-7 gap-0 mb-2">
+      <div className="mb-2 grid grid-cols-7 gap-0">
         {WEEKDAYS.map((weekday) => (
           <div
             key={weekday}
@@ -527,7 +524,7 @@ function CalendarMonth({
                     "relative flex items-center justify-center",
                     buttonSize,
                     "transition-all duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-blue-400)] focus-visible:ring-offset-2",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                     // Base text - 18px per Figma
                     "text-lg font-normal leading-6",
                     // Border radius logic for connected pill shape
@@ -538,37 +535,61 @@ function CalendarMonth({
                     // Single day range or non-range selected: fully rounded
                     isRangeMode && isSingleDayRange && "rounded-full",
                     // Range start (not single day): rounded left, flat right
-                    isRangeMode && rangeStart && !isSingleDayRange && "rounded-l-full rounded-r-none",
+                    isRangeMode &&
+                      rangeStart &&
+                      !isSingleDayRange &&
+                      "rounded-l-full rounded-r-none",
                     // Range end (not single day): flat left, rounded right
-                    isRangeMode && rangeEnd && !isSingleDayRange && "rounded-r-full rounded-l-none",
+                    isRangeMode && rangeEnd && !isSingleDayRange && "rounded-l-none rounded-r-full",
                     // Range middle: no radius (square) for seamless connection
                     isRangeMode && isRangeMiddle && "rounded-none",
                     // Outside month (other month state) - muted text
                     outsideMonth && "text-[var(--primitive-neutral-500)]",
                     // Default state - white bg, neutral-800 text
-                    !disabled && !isSelected && !today && !outsideMonth && !due && !inRange &&
+                    !disabled &&
+                      !isSelected &&
+                      !today &&
+                      !outsideMonth &&
+                      !due &&
+                      !inRange &&
                       "bg-[var(--primitive-neutral-0)] text-[var(--primitive-neutral-800)] hover:bg-[var(--primitive-neutral-200)]",
                     // In range but not selected - transparent bg to show container's blue-100
-                    !disabled && !isSelected && !outsideMonth && inRange &&
+                    !disabled &&
+                      !isSelected &&
+                      !outsideMonth &&
+                      inRange &&
                       "bg-transparent text-[var(--primitive-neutral-800)] hover:bg-[var(--primitive-blue-200)]",
                     // Today state - neutral-200 bg (filled), bold text
-                    today && !isSelected && !outsideMonth && !due && !inRange &&
-                      "bg-[var(--primitive-neutral-200)] text-[var(--primitive-neutral-800)] font-bold",
+                    today &&
+                      !isSelected &&
+                      !outsideMonth &&
+                      !due &&
+                      !inRange &&
+                      "bg-[var(--primitive-neutral-200)] font-bold text-[var(--primitive-neutral-800)]",
                     // Today in range but not selected
-                    today && !isSelected && !outsideMonth && !due && inRange &&
-                      "bg-transparent text-[var(--primitive-neutral-800)] font-bold",
+                    today &&
+                      !isSelected &&
+                      !outsideMonth &&
+                      !due &&
+                      inRange &&
+                      "bg-transparent font-bold text-[var(--primitive-neutral-800)]",
                     // Selected state - blue-400 bg, white text, bold
-                    isSelected && !outsideMonth && !due &&
-                      "bg-[var(--primitive-blue-400)] text-[var(--primitive-neutral-0)] font-bold",
+                    isSelected &&
+                      !outsideMonth &&
+                      !due &&
+                      "bg-[var(--primitive-blue-400)] font-bold text-[var(--primitive-neutral-0)]",
                     // Due date (not selected) - blue-200 bg, blue-800 text
-                    isDueNotSelected && !outsideMonth &&
+                    isDueNotSelected &&
+                      !outsideMonth &&
                       "bg-[var(--primitive-blue-200)] text-[var(--primitive-blue-800)]",
                     // Due date (selected) - blue-400 bg, white text, bold
-                    isDueSelected && !outsideMonth &&
-                      "bg-[var(--primitive-blue-400)] text-[var(--primitive-neutral-0)] font-bold",
+                    isDueSelected &&
+                      !outsideMonth &&
+                      "bg-[var(--primitive-blue-400)] font-bold text-[var(--primitive-neutral-0)]",
                     // Disabled state - neutral-500 text, no background
-                    disabled && !outsideMonth &&
-                      "text-[var(--primitive-neutral-500)] cursor-not-allowed"
+                    disabled &&
+                      !outsideMonth &&
+                      "cursor-not-allowed text-[var(--primitive-neutral-500)]"
                   )}
                 >
                   <span>{format(date, "d")}</span>
@@ -576,15 +597,10 @@ function CalendarMonth({
                   {/* Diagonal strikethrough for disabled dates (matching Figma) */}
                   {disabled && !outsideMonth && (
                     <span
-                      className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      className="pointer-events-none absolute inset-0 flex items-center justify-center"
                       aria-hidden="true"
                     >
-                      <svg
-                        width="30"
-                        height="1"
-                        viewBox="0 0 30 1"
-                        className="rotate-[-20deg]"
-                      >
+                      <svg width="30" height="1" viewBox="0 0 30 1" className="rotate-[-20deg]">
                         <line
                           x1="0"
                           y1="0.5"
@@ -602,10 +618,10 @@ function CalendarMonth({
                     <span
                       className={cn(
                         "absolute flex items-center justify-center rounded-full",
-                        "bg-[var(--primitive-blue-100)] border-2 border-[var(--primitive-neutral-0)]",
+                        "border-2 border-[var(--primitive-neutral-0)] bg-[var(--primitive-blue-100)]",
                         size === "44"
-                          ? "bottom-0 right-0 w-5 h-5 -mb-0.5 -mr-0.5"
-                          : "bottom-0 right-0 w-5 h-5"
+                          ? "bottom-0 right-0 -mb-0.5 -mr-0.5 h-5 w-5"
+                          : "bottom-0 right-0 h-5 w-5"
                       )}
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
@@ -629,7 +645,7 @@ function CalendarMonth({
 
                   {/* Availability indicator (green dot) */}
                   {available && !disabled && !outsideMonth && !due && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[var(--primitive-green-500)]" />
+                    <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[var(--primitive-green-500)]" />
                   )}
                 </button>
               </div>
@@ -671,7 +687,7 @@ function PresetsSidebar({
               type="button"
               onClick={() => onPresetClick(preset)}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm",
+                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
                 "transition-colors duration-150",
                 isSelected
                   ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-800)]"
@@ -681,7 +697,7 @@ function PresetsSidebar({
               {/* Radio indicator - matches RadioGroupItem styling */}
               <span
                 className={cn(
-                  "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
                   "transition-colors duration-150",
                   isSelected
                     ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
@@ -689,7 +705,7 @@ function PresetsSidebar({
                 )}
               >
                 {isSelected && (
-                  <span className="w-2 h-2 rounded-full bg-[var(--foreground-on-emphasis)]" />
+                  <span className="h-2 w-2 rounded-full bg-[var(--foreground-on-emphasis)]" />
                 )}
               </span>
               <span className={cn(isSelected && "font-medium")}>{preset.label}</span>
@@ -702,7 +718,7 @@ function PresetsSidebar({
           <button
             type="button"
             className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm",
+              "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
               "transition-colors duration-150",
               isCustomSelected
                 ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-800)]"
@@ -711,7 +727,7 @@ function PresetsSidebar({
           >
             <span
               className={cn(
-                "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2",
                 "transition-colors duration-150",
                 isCustomSelected
                   ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
@@ -719,7 +735,7 @@ function PresetsSidebar({
               )}
             >
               {isCustomSelected && (
-                <span className="w-2 h-2 rounded-full bg-[var(--foreground-on-emphasis)]" />
+                <span className="h-2 w-2 rounded-full bg-[var(--foreground-on-emphasis)]" />
               )}
             </span>
             <span className={cn(isCustomSelected && "font-medium")}>Custom</span>
@@ -734,10 +750,7 @@ function PresetsSidebar({
 // ENHANCED DATE PICKER (SINGLE)
 // ============================================
 
-const DatePickerEnhanced = React.forwardRef<
-  HTMLButtonElement,
-  DatePickerEnhancedProps
->(
+const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhancedProps>(
   (
     {
       value,
@@ -761,9 +774,7 @@ const DatePickerEnhanced = React.forwardRef<
     ref
   ) => {
     const [open, setOpen] = React.useState(false);
-    const [currentMonth, setCurrentMonth] = React.useState(
-      value || startOfToday()
-    );
+    const [currentMonth, setCurrentMonth] = React.useState(value || startOfToday());
     const [selectedPreset, setSelectedPreset] = React.useState<string | undefined>();
 
     const handleSelect = (date: Date) => {
@@ -809,44 +820,33 @@ const DatePickerEnhanced = React.forwardRef<
               // Base styles matching Input component
               "flex w-full items-center gap-3",
               "rounded-2xl border p-4",
-              "bg-[var(--primitive-neutral-100)]",
-              "border-[var(--primitive-neutral-200)]",
-              "text-lg leading-6 text-left",
+              "bg-[var(--input-background)]",
+              "border-[var(--input-border)]",
+              "text-left text-lg leading-6",
               "transition-all duration-150",
-              "focus:outline-none focus:ring-0",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
               // Default state
-              !error &&
-                !success && [
-                  "hover:border-[var(--primitive-neutral-300)]",
-                  "focus:border-[var(--primitive-green-600)]",
-                ],
+              !error && !success && ["hover:border-[var(--input-border-hover)]"],
               // Error state
               error && [
-                "border-[var(--primitive-red-600)]",
+                "border-[var(--input-border-error)]",
                 "hover:border-[var(--primitive-red-700)]",
-                "focus:border-[var(--primitive-red-600)]",
               ],
               // Success state
               success && [
-                "border-[var(--primitive-green-600)]",
+                "border-[var(--input-border-success)]",
                 "hover:border-[var(--primitive-green-700)]",
-                "focus:border-[var(--primitive-green-600)]",
               ],
               // Disabled state
               disabled && "cursor-not-allowed opacity-50",
               className
             )}
           >
-            <CalendarBlank
-              size={24}
-              className="shrink-0 text-[var(--primitive-neutral-600)]"
-            />
+            <CalendarBlank size={24} className="shrink-0 text-[var(--primitive-neutral-600)]" />
             <span
               className={cn(
                 "flex-1 truncate",
-                value
-                  ? "text-[var(--foreground-default)]"
-                  : "text-[var(--primitive-neutral-600)]"
+                value ? "text-[var(--foreground-default)]" : "text-[var(--primitive-neutral-600)]"
               )}
             >
               {value ? format(value, dateFormat) : placeholder}
@@ -863,13 +863,13 @@ const DatePickerEnhanced = React.forwardRef<
                   }
                 }}
                 className={cn(
-                  "shrink-0 -mr-2 inline-flex items-center justify-center",
+                  "-mr-2 inline-flex shrink-0 items-center justify-center",
                   "h-8 w-8 rounded-lg",
                   "text-[var(--primitive-neutral-600)]",
                   "hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]",
                   "transition-colors duration-150",
                   "cursor-pointer",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]"
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
                 )}
                 aria-label="Clear date"
               >
@@ -880,7 +880,7 @@ const DatePickerEnhanced = React.forwardRef<
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-auto p-0 bg-[var(--primitive-neutral-0)] rounded-2xl shadow-xl border-[var(--primitive-neutral-200)]"
+          className="w-auto rounded-2xl border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-0)] p-0 shadow-xl"
           align="start"
           sideOffset={8}
         >
@@ -908,17 +908,14 @@ const DatePickerEnhanced = React.forwardRef<
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]"
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
                   )}
                 >
                   <CaretLeft size={24} weight="bold" />
                 </button>
 
                 {/* Month/Year Selector */}
-                <MonthYearSelector
-                  month={currentMonth}
-                  onMonthChange={setCurrentMonth}
-                />
+                <MonthYearSelector month={currentMonth} onMonthChange={setCurrentMonth} />
 
                 <button
                   type="button"
@@ -929,7 +926,7 @@ const DatePickerEnhanced = React.forwardRef<
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]"
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
                   )}
                 >
                   <CaretRight size={24} weight="bold" />
@@ -962,10 +959,7 @@ DatePickerEnhanced.displayName = "DatePicker";
 // ENHANCED DATE RANGE PICKER
 // ============================================
 
-const DateRangePickerEnhanced = React.forwardRef<
-  HTMLButtonElement,
-  DateRangePickerEnhancedProps
->(
+const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePickerEnhancedProps>(
   (
     {
       value,
@@ -991,9 +985,7 @@ const DateRangePickerEnhanced = React.forwardRef<
     ref
   ) => {
     const [open, setOpen] = React.useState(false);
-    const [currentMonth, setCurrentMonth] = React.useState(
-      value?.from || startOfToday()
-    );
+    const [currentMonth, setCurrentMonth] = React.useState(value?.from || startOfToday());
     const [hoverDate, setHoverDate] = React.useState<Date | null>(null);
     const [selectedPreset, setSelectedPreset] = React.useState<string | undefined>();
 
@@ -1057,38 +1049,29 @@ const DateRangePickerEnhanced = React.forwardRef<
               // Base styles matching Input component
               "flex w-full items-center gap-3",
               "rounded-2xl border p-4",
-              "bg-[var(--primitive-neutral-100)]",
-              "border-[var(--primitive-neutral-200)]",
-              "text-lg leading-6 text-left",
+              "bg-[var(--input-background)]",
+              "border-[var(--input-border)]",
+              "text-left text-lg leading-6",
               "transition-all duration-150",
-              "focus:outline-none focus:ring-0",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
               // Default state
-              !error &&
-                !success && [
-                  "hover:border-[var(--primitive-neutral-300)]",
-                  "focus:border-[var(--primitive-green-600)]",
-                ],
+              !error && !success && ["hover:border-[var(--input-border-hover)]"],
               // Error state
               error && [
-                "border-[var(--primitive-red-600)]",
+                "border-[var(--input-border-error)]",
                 "hover:border-[var(--primitive-red-700)]",
-                "focus:border-[var(--primitive-red-600)]",
               ],
               // Success state
               success && [
-                "border-[var(--primitive-green-600)]",
+                "border-[var(--input-border-success)]",
                 "hover:border-[var(--primitive-green-700)]",
-                "focus:border-[var(--primitive-green-600)]",
               ],
               // Disabled state
               disabled && "cursor-not-allowed opacity-50",
               className
             )}
           >
-            <CalendarBlank
-              size={24}
-              className="shrink-0 text-[var(--primitive-neutral-600)]"
-            />
+            <CalendarBlank size={24} className="shrink-0 text-[var(--primitive-neutral-600)]" />
             <span
               className={cn(
                 "flex-1 truncate",
@@ -1111,13 +1094,13 @@ const DateRangePickerEnhanced = React.forwardRef<
                   }
                 }}
                 className={cn(
-                  "shrink-0 -mr-2 inline-flex items-center justify-center",
+                  "-mr-2 inline-flex shrink-0 items-center justify-center",
                   "h-8 w-8 rounded-lg",
                   "text-[var(--primitive-neutral-600)]",
                   "hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]",
                   "transition-colors duration-150",
                   "cursor-pointer",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]"
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
                 )}
                 aria-label="Clear date range"
               >
@@ -1128,7 +1111,7 @@ const DateRangePickerEnhanced = React.forwardRef<
         </PopoverTrigger>
 
         <PopoverContent
-          className="w-auto p-0 bg-[var(--primitive-neutral-0)] rounded-2xl shadow-xl border-[var(--primitive-neutral-200)]"
+          className="w-auto rounded-2xl border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-0)] p-0 shadow-xl"
           align="start"
           sideOffset={8}
         >
@@ -1156,7 +1139,7 @@ const DateRangePickerEnhanced = React.forwardRef<
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]"
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
                   )}
                 >
                   <CaretLeft size={24} weight="bold" />
@@ -1164,10 +1147,7 @@ const DateRangePickerEnhanced = React.forwardRef<
 
                 {/* Show two month selectors for dual view */}
                 <div className="flex items-center gap-8">
-                  <MonthYearSelector
-                    month={currentMonth}
-                    onMonthChange={setCurrentMonth}
-                  />
+                  <MonthYearSelector month={currentMonth} onMonthChange={setCurrentMonth} />
                   {numberOfMonths === 2 && (
                     <MonthYearSelector
                       month={addMonths(currentMonth, 1)}
@@ -1185,7 +1165,7 @@ const DateRangePickerEnhanced = React.forwardRef<
                     "hover:bg-[var(--primitive-neutral-200)]",
                     "text-[var(--foreground-default)]",
                     "transition-colors duration-150",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]"
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
                   )}
                 >
                   <CaretRight size={24} weight="bold" />
@@ -1229,7 +1209,7 @@ const DateRangePickerEnhanced = React.forwardRef<
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-[var(--primitive-neutral-200)]">
+              <div className="flex items-center justify-end gap-2 border-t border-[var(--primitive-neutral-200)] px-4 py-3">
                 <Button
                   variant="tertiary"
                   size="sm"

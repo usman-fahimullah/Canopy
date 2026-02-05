@@ -36,13 +36,13 @@ const checkboxVariants = cva(
         true: [
           "border-[var(--checkbox-border-error)]",
           "bg-[var(--checkbox-background-error)]",
-          "focus-visible:ring-[var(--primitive-red-500)]",
-          "hover:border-[var(--primitive-red-600)]",
+          "focus-visible:ring-[var(--ring-color-error)]",
+          "hover:border-[var(--checkbox-border-error)]",
         ],
         false: [
           "border-[var(--checkbox-border)]",
           "bg-[var(--checkbox-background)]",
-          "focus-visible:ring-[var(--checkbox-border-checked)]",
+          "focus-visible:ring-[var(--ring-color)]",
           "hover:border-[var(--checkbox-border-hover)]",
           "hover:bg-[var(--checkbox-background-hover)]",
           "data-[state=checked]:border-[var(--checkbox-border-checked)]",

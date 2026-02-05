@@ -32,7 +32,7 @@ const chipVariants = cva(
     "inline-flex items-center gap-1.5 rounded-full",
     "font-medium select-none",
     "transition-all duration-150 ease-out",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
   ],
   {
     variants: {
@@ -178,8 +178,7 @@ const closeButtonVariants = cva(
    ============================================ */
 
 export interface ChipProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onClick">,
-    VariantProps<typeof chipVariants> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onClick">, VariantProps<typeof chipVariants> {
   /** Text content of the chip */
   children: React.ReactNode;
   /** Optional icon to display on the left */
@@ -256,14 +255,14 @@ const Chip = React.forwardRef<HTMLDivElement, ChipProps>(
         onKeyDown={handleKeyDown}
         className={cn(
           chipVariants({ variant, size, selected, clickable: isClickable }),
-          disabled && "opacity-50 cursor-not-allowed pointer-events-none",
+          disabled && "pointer-events-none cursor-not-allowed opacity-50",
           className
         )}
         {...props}
       >
         {/* Optional leading icon */}
         {icon && (
-          <span className="shrink-0 flex items-center justify-center">
+          <span className="flex shrink-0 items-center justify-center">
             {React.isValidElement(icon)
               ? React.cloneElement(
                   icon as React.ReactElement<{ size?: number; className?: string }>,
@@ -318,7 +317,10 @@ export interface ChipMoreProps extends VariantProps<typeof chipVariants> {
 }
 
 const ChipMore = React.forwardRef<HTMLButtonElement, ChipMoreProps>(
-  ({ count, variant = "neutral", size = "md", onClick, disabled = false, className, ...props }, ref) => {
+  (
+    { count, variant = "neutral", size = "md", onClick, disabled = false, className, ...props },
+    ref
+  ) => {
     return (
       <button
         ref={ref}
@@ -327,7 +329,7 @@ const ChipMore = React.forwardRef<HTMLButtonElement, ChipMoreProps>(
         disabled={disabled}
         className={cn(
           chipVariants({ variant, size, clickable: true }),
-          disabled && "opacity-50 cursor-not-allowed",
+          disabled && "cursor-not-allowed opacity-50",
           className
         )}
         aria-label={count !== undefined ? `Show ${count} more items` : "Show more"}
@@ -376,9 +378,7 @@ const ChipGroup = React.forwardRef<HTMLDivElement, ChipGroupProps>(
 
     return (
       <div ref={ref} className={cn("flex flex-col gap-2", className)} {...props}>
-        {label && (
-          <span className="text-sm text-[var(--foreground-muted)]">{label}</span>
-        )}
+        {label && <span className="text-sm text-[var(--foreground-muted)]">{label}</span>}
         <div role="list" className={cn("flex flex-wrap items-center", gapClass)}>
           {visibleChildren}
           {hiddenCount > 0 && <ChipMore count={hiddenCount} onClick={onShowMore} />}
@@ -432,9 +432,9 @@ const AddChipButton = React.forwardRef<HTMLButtonElement, AddChipButtonProps>(
           "hover:text-[var(--chip-add-foreground-hover)]",
           "hover:bg-[var(--chip-add-background-hover)]",
           "transition-colors duration-150 ease-out",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
           sizeClasses[size],
-          disabled && "opacity-50 cursor-not-allowed",
+          disabled && "cursor-not-allowed opacity-50",
           className
         )}
         {...props}

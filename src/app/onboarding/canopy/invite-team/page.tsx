@@ -16,6 +16,7 @@ import {
   DropdownItem,
 } from "@/components/ui";
 import { Plus, Trash, EnvelopeSimple, Users } from "@phosphor-icons/react";
+import { InlineMessage } from "@/components/ui/inline-message";
 import { EMPLOYER_STEPS } from "@/lib/onboarding/types";
 
 const roleOptions = [
@@ -99,13 +100,15 @@ export default function EmployerInviteTeamPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || "We couldn\u2019t complete your setup. Please try again.");
         return;
       }
 
       router.push("/onboarding/complete");
     } catch {
-      setError("Network error. Please try again.");
+      setError(
+        "Could not connect to the server. Please check your internet connection and try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -236,7 +239,11 @@ export default function EmployerInviteTeamPage() {
         </div>
       </div>
 
-      {error && <p className="mt-4 text-caption text-[var(--foreground-error)]">{error}</p>}
+      {error && (
+        <div className="mt-4">
+          <InlineMessage variant="critical">{error}</InlineMessage>
+        </div>
+      )}
     </OnboardingShell>
   );
 }

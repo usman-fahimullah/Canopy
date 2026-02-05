@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
 
@@ -59,8 +60,9 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const path = `${account.id}/avatar-${timestamp}.${ext}`;
 
-    // Upload to Supabase storage
-    const { error: uploadError } = await supabase.storage
+    // Upload to Supabase storage using admin client (bypasses RLS)
+    const adminClient = createAdminClient();
+    const { error: uploadError } = await adminClient.storage
       .from("avatars")
       .upload(path, file, { cacheControl: "3600", upsert: true });
 
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the public URL
-    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    const { data: urlData } = adminClient.storage.from("avatars").getPublicUrl(path);
 
     // Update account with new avatar URL
     await prisma.account.update({
@@ -120,11 +122,12 @@ export async function DELETE(request: NextRequest) {
     // If there's an existing avatar URL, try to delete the file from storage
     if (account.avatar && account.avatar.includes("avatars/")) {
       try {
+        const adminClient = createAdminClient();
         // Extract the path from the URL
         const url = new URL(account.avatar);
         const pathMatch = url.pathname.match(/avatars\/(.+)/);
         if (pathMatch) {
-          await supabase.storage.from("avatars").remove([pathMatch[1]]);
+          await adminClient.storage.from("avatars").remove([pathMatch[1]]);
         }
       } catch {
         // Ignore deletion errors for old files

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
 import { z } from "zod";
@@ -105,7 +106,8 @@ export async function POST(request: NextRequest) {
     const ext = file.name.split(".").pop() || "pdf";
     const path = `${seekerId}/${typeResult.data}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
+    const adminClient = createAdminClient();
+    const { error: uploadError } = await adminClient.storage
       .from(bucket)
       .upload(path, file, { cacheControl: "3600", upsert: true });
 
@@ -117,7 +119,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+    const { data: urlData } = adminClient.storage.from(bucket).getPublicUrl(path);
 
     // Update seeker profile with file URL
     const updateField = typeResult.data === "resume" ? "resumeUrl" : "coverLetterUrl";
@@ -172,7 +174,8 @@ export async function DELETE(request: NextRequest) {
     const bucket = typeResult.data === "resume" ? "resumes" : "cover-letters";
     const path = `${seekerId}/${typeResult.data}.pdf`;
 
-    await supabase.storage.from(bucket).remove([path]);
+    const adminClient = createAdminClient();
+    await adminClient.storage.from(bucket).remove([path]);
 
     // Clear the URL from the seeker profile
     const updateField = typeResult.data === "resume" ? "resumeUrl" : "coverLetterUrl";
