@@ -125,6 +125,11 @@ export const componentsNav: NavItem[] = [
         label: "Mention Input",
         href: "/design-system/components/mention-input",
       },
+      {
+        id: "currency-input",
+        label: "Currency Input",
+        href: "/design-system/components/currency-input",
+      },
     ],
   },
   {
@@ -572,6 +577,13 @@ export const searchIndex: SearchItem[] = [
     href: "/design-system/components/mention-input",
     keywords: ["@mention", "tag", "user"],
   },
+  {
+    id: "currency-input",
+    title: "Currency Input",
+    category: "Form Controls",
+    href: "/design-system/components/currency-input",
+    keywords: ["money", "salary", "price", "dollar", "currency", "range"],
+  },
 
   // Components - Data Display
   {
@@ -911,7 +923,19 @@ export const searchIndex: SearchItem[] = [
     title: "Data Table",
     category: "Data",
     href: "/design-system/components/data-table",
-    keywords: ["table", "grid", "list", "sort"],
+    keywords: [
+      "table",
+      "grid",
+      "list",
+      "sort",
+      "export",
+      "csv",
+      "excel",
+      "bulk edit",
+      "compare",
+      "comparison",
+      "keyboard navigation",
+    ],
   },
   {
     id: "charts",

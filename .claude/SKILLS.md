@@ -1,6 +1,42 @@
 # Canopy Claude Skills & Commands Reference
 
-Quick reference for all available Claude Code commands and rules.
+Quick reference for all available Claude Code commands, skills, agents, and rules.
+
+---
+
+## 🎯 NEW: Auto-Activating Skills
+
+Skills now **automatically suggest themselves** based on your prompts and the files you're working with. This is powered by the hook system.
+
+### How It Works
+
+1. You ask a question or start working on code
+2. The skill-activation-prompt hook analyzes your request
+3. Relevant skills are suggested automatically
+4. You get consistent, high-quality guidance
+
+### Available Skills
+
+| Skill             | Triggers On                     | Purpose                           |
+| ----------------- | ------------------------------- | --------------------------------- |
+| `frontend-design` | UI, design, components, styling | Creative frontend design patterns |
+| `component-docs`  | documentation, storybook, props | Component documentation standards |
+| `figma-workflow`  | figma, design spec, implement   | Figma to code implementation      |
+| `code-quality`    | api, validation, auth, logging  | Code quality standards            |
+| `design-system`   | icons, tokens, buttons, inputs  | Design system compliance          |
+
+---
+
+## 🤖 Specialized Agents
+
+Use agents for complex multi-step tasks:
+
+| Agent                        | Purpose                        | When to Use                    |
+| ---------------------------- | ------------------------------ | ------------------------------ |
+| `code-architecture-reviewer` | Review code for best practices | After implementing features    |
+| `frontend-error-fixer`       | Debug React/TS errors          | When encountering build errors |
+| `documentation-architect`    | Generate comprehensive docs    | For new features/components    |
+| `refactor-planner`           | Plan refactoring strategies    | Before major restructuring     |
 
 ---
 
@@ -8,67 +44,50 @@ Quick reference for all available Claude Code commands and rules.
 
 ### Code Quality
 
-| Command | Usage | Description |
-|---------|-------|-------------|
-| `/code-review` | `/code-review` | Review uncommitted changes for code quality issues |
-| `/code-review --staged` | Review only staged changes | |
-| `/quality-scan` | `/quality-scan` | Full codebase audit with health score |
-| `/quality-scan --security` | Security-focused scan only | |
-| `/quality-scan --quick` | Fast scan, critical issues only | |
-| `/fix-quality console` | Replace console.log → logger | |
-| `/fix-quality auth` | Add missing authorization checks | |
-| `/fix-quality validation` | Add Zod validation to API routes | |
-| `/fix-quality loading-states` | Add loading/error/empty states | |
-| `/fix-quality all` | Fix all auto-fixable issues | |
+| Command                 | Description                           |
+| ----------------------- | ------------------------------------- |
+| `/code-review`          | Review uncommitted changes            |
+| `/code-review --staged` | Review only staged changes            |
+| `/quality-scan`         | Full codebase audit with health score |
+| `/fix-quality all`      | Fix all auto-fixable issues           |
 
 ### Design System
 
-| Command | Usage | Description |
-|---------|-------|-------------|
-| `/design-review` | `/design-review` | Review UI changes for design compliance |
-| `/design-review --staged` | Review only staged UI changes | |
-| `/design-scan` | `/design-scan` | Full design system audit with score |
-| `/design-scan --tokens` | Token usage analysis only | |
-| `/design-scan --components` | Component adoption analysis only | |
-| `/fix-design icons` | Migrate Lucide/Heroicons → Phosphor | |
-| `/fix-design colors` | Convert hardcoded colors → tokens | |
-| `/fix-design spacing` | Convert px values → Tailwind scale | |
-| `/fix-design buttons` | Replace raw `<button>` → `<Button>` | |
-| `/fix-design inputs` | Replace raw `<input>` → design system | |
-| `/fix-design all` | Fix all design issues | |
+| Command           | Description                             |
+| ----------------- | --------------------------------------- |
+| `/design-review`  | Review UI changes for design compliance |
+| `/design-scan`    | Full design system audit                |
+| `/fix-design all` | Auto-fix design issues                  |
 
 ### Figma Implementation
 
-| Command | Usage | Description |
-|---------|-------|-------------|
-| `/figma-implement <url>` | Guided implementation from Figma | |
-| `/figma-implement <url> --component` | New UI component | |
-| `/figma-implement <url> --page` | New page/route | |
-| `/figma-verify <url> <path>` | Verify implementation matches Figma | |
+| Command                      | Description                          |
+| ---------------------------- | ------------------------------------ |
+| `/figma-implement <url>`     | Guided implementation from Figma     |
+| `/figma-verify <url> <path>` | Verify implementation matches design |
 
 ---
 
 ## 📋 Rules (Auto-Applied)
 
-### Always Active (`trigger: always`)
+### Always Active
 
-| Rule | Purpose |
-|------|---------|
-| `code-quality-standards` | Security, type safety, logging, testing standards |
-| `design-audit-standards` | Component usage, tokens, icons, typography |
-| `design-first-implementation` | Figma → code workflow, component mapping |
-| `scale-first-engineering` | Multi-tenant architecture patterns |
-| `no-external-companies` | Brand guidelines, no competitor references |
+| Rule                          | Purpose                                  |
+| ----------------------------- | ---------------------------------------- |
+| `code-quality-standards`      | Security, type safety, logging standards |
+| `design-audit-standards`      | Component usage, tokens, icons           |
+| `design-first-implementation` | Figma → code workflow                    |
+| `scale-first-engineering`     | Multi-tenant architecture                |
+| `no-external-companies`       | Brand guidelines                         |
 
 ### Triggered by Context
 
-| Rule | Triggers | Purpose |
-|------|----------|---------|
-| `pre-merge-checklist` | `pr, review, merge` | PR review checklist |
-| `figma-verification-standards` | `figma, design, implement` | Figma verification process |
-| `figma-implementation` | `figma, design` | Token reference guide |
-| `component-documentation` | `component, ui, create` | Component docs template |
-| `design-system-sync` | `component, ui, update` | Keep docs in sync |
+| Rule                           | Triggers                 |
+| ------------------------------ | ------------------------ |
+| `pre-merge-checklist`          | pr, review, merge        |
+| `figma-verification-standards` | figma, design, implement |
+| `component-documentation`      | component, ui, create    |
+| `design-system-sync`           | component, ui, update    |
 
 ---
 
@@ -80,9 +99,9 @@ Quick reference for all available Claude Code commands and rules.
 # 1. If implementing from Figma
 /figma-implement <figma-url>
 
-# 2. Code quality is enforced via rules (automatic)
+# 2. Skills auto-activate based on your work
 
-# 3. Before committing, verify
+# 3. Before committing
 /code-review
 /design-review
 ```
@@ -102,109 +121,63 @@ Quick reference for all available Claude Code commands and rules.
 /code-review --staged
 ```
 
-### Implementing a Figma Design
-
-```bash
-# 1. Start guided implementation
-/figma-implement https://figma.com/design/xxx?node-id=yyy
-
-# 2. After implementing, verify
-/figma-verify https://figma.com/design/xxx?node-id=yyy src/components/MyComponent.tsx
-```
-
-### Periodic Codebase Audit
-
-```bash
-# Full audit
-/quality-scan
-/design-scan
-
-# Review the reports and prioritize fixes
-```
-
 ---
 
 ## 🎯 Key Standards Summary
 
-### Code Quality (from `code-quality-standards`)
+### Code Quality
 
-| Standard | Requirement |
-|----------|-------------|
-| Authorization | Every API route must check auth |
-| Validation | Zod schemas on all inputs |
-| Logging | Use `logger.*` not `console.*` |
-| Types | No `any`, strict TypeScript |
-| States | Loading, empty, error on all data fetching |
-| Testing | Tests required for new features |
+- Authorization on every API route
+- Zod validation on all inputs
+- Use `logger` not `console`
+- No `any` types - strict TypeScript
+- Loading/empty/error states on data fetching
 
-### Design System (from `design-audit-standards`)
+### Design System
 
-| Standard | Requirement |
-|----------|-------------|
-| Components | Use `<Button>` not `<button>` |
-| Colors | Use tokens not hex values |
-| Spacing | Use Tailwind scale not `[Xpx]` |
-| Typography | Use scale classes not custom sizes |
-| Icons | Phosphor only, no Lucide/Heroicons |
-| Dark Mode | All colors via tokens |
-
-### Figma Implementation (from `figma-verification-standards`)
-
-| Standard | Requirement |
-|----------|-------------|
-| Extract | Use MCP tools to get design data |
-| Map | Match Figma layers to components |
-| Tokens | Map all values to CSS tokens |
-| States | Implement all Figma states |
-| Variants | Implement all Figma variants |
-| Verify | Run `/figma-verify` before done |
-| Document | Add `@figma` link in code |
+- Phosphor icons only (not Lucide/Heroicons)
+- Design tokens (not hardcoded colors)
+- Tailwind spacing scale (not arbitrary pixels)
+- Design system components (`<Button>` not `<button>`)
 
 ---
 
-## 📁 File Locations
+## 📁 File Structure
 
 ```
 .claude/
-├── commands/           # Slash commands
+├── hooks/                 # Auto-activation hooks (NEW)
+│   ├── skill-activation-prompt.sh
+│   ├── skill-activation-prompt.ts
+│   └── post-tool-use-tracker.sh
+│
+├── skills/                # Modular skills (<500 lines each)
+│   ├── skill-rules.json   # Activation configuration
+│   ├── frontend-design/
+│   ├── component-docs/
+│   ├── figma-workflow/
+│   ├── code-quality/
+│   └── design-system/
+│
+├── agents/                # Specialized agents (NEW)
+│   ├── code-architecture-reviewer.md
+│   ├── frontend-error-fixer.md
+│   ├── documentation-architect.md
+│   └── refactor-planner.md
+│
+├── commands/              # Slash commands
 │   ├── code-review.md
 │   ├── design-review.md
-│   ├── design-scan.md
-│   ├── figma-implement.md
-│   ├── figma-verify.md
-│   ├── fix-design.md
-│   ├── fix-quality.md
-│   └── quality-scan.md
+│   └── ...
 │
-├── rules/              # Auto-applied rules
+├── rules/                 # Auto-applied rules
 │   ├── code-quality-standards.md
-│   ├── component-documentation.md
 │   ├── design-audit-standards.md
-│   ├── design-first-implementation.md
-│   ├── design-system-sync.md
-│   ├── figma-implementation.md
-│   ├── figma-verification-standards.md
-│   ├── no-external-companies.md
-│   ├── pre-merge-checklist.md
-│   └── scale-first-engineering.md
+│   └── ...
 │
-├── settings.local.json  # Permissions
-└── SKILLS.md            # This file
+├── settings.local.json    # Permissions & hooks config
+└── SKILLS.md              # This file
 ```
-
----
-
-## 🔧 Useful Aliases
-
-You can reference these in conversations:
-
-| Say This | Claude Understands |
-|----------|-------------------|
-| "review my code" | Runs code quality checks |
-| "check the design" | Runs design compliance checks |
-| "implement from Figma" | Triggers Figma implementation workflow |
-| "prepare for PR" | Runs pre-merge checklist |
-| "audit the codebase" | Runs full quality + design scans |
 
 ---
 
@@ -213,12 +186,14 @@ You can reference these in conversations:
 Both `/quality-scan` and `/design-scan` output health scores:
 
 ### Code Quality Score (out of 100)
+
 - Security: 25 pts
 - Type Safety: 25 pts
 - Code Quality: 25 pts
 - Test Coverage: 25 pts
 
 ### Design System Score (out of 100)
+
 - Component Adoption: 25 pts
 - Token Compliance: 25 pts
 - Icon Library: 25 pts
@@ -228,19 +203,23 @@ Both `/quality-scan` and `/design-scan` output health scores:
 
 ## 🆘 Troubleshooting
 
+### Skills not suggesting?
+
+- Check hooks are executable: `ls -la .claude/hooks/*.sh`
+- Verify skill-rules.json is valid JSON
+- Check settings.local.json has hooks configured
+
 ### Command not working?
+
 - Check `.claude/commands/` for the file
 - Ensure command name matches filename
 
 ### Rule not triggering?
+
 - Check the `trigger:` line in the rule file
 - Rules trigger on keywords in your message
 
-### Figma MCP not connecting?
-- Ensure Figma desktop app is open
-- Check that the file is accessible
-- Verify MCP permissions in `settings.local.json`
-
 ---
 
-*Last updated: February 2026*
+_Last updated: February 2026_
+_Modernized with auto-activation hooks, modular skills, and specialized agents_

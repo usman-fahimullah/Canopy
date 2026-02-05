@@ -105,6 +105,13 @@ export {
   type PathwayTagProps,
   type PathwayType,
 } from "./pathway-tag";
+export {
+  PathwayIllustration,
+  getAllPathwayIllustrationPaths,
+  PATHWAY_ILLUSTRATION_PATHS,
+  type PathwayIllustrationProps,
+  type PathwayIllustrationSize,
+} from "./pathway-illustration";
 
 // Layout & Display
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
@@ -624,10 +631,15 @@ export {
   MentionHighlight,
   MentionSuggestionList,
   NoteInput,
+  mentionInputVariants,
+  mentionTextareaVariants,
   type MentionUser,
   type MentionData,
   type MentionInputProps,
   type MentionTextareaProps,
+  type MentionHighlightProps,
+  type MentionSuggestionListProps,
+  type NoteInputProps,
 } from "./mention-input";
 
 // Scheduler / Calendar — extracted components

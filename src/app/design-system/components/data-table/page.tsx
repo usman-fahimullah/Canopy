@@ -75,6 +75,11 @@ import {
   DotsThree,
   CaretRight,
   CaretDown,
+  DownloadSimple,
+  PencilSimple,
+  ArrowsOutLineHorizontal,
+  FileCsv,
+  FileXls,
 } from "@phosphor-icons/react";
 import {
   ComponentCard,
@@ -660,6 +665,66 @@ const columnProps = [
   { name: "sticky", type: "boolean", default: "false", description: "Make column sticky" },
   { name: "defaultVisible", type: "boolean", default: "true", description: "Visible by default" },
   { name: "editable", type: "boolean", default: "false", description: "Enable inline editing" },
+];
+
+// Export functionality props
+const exportProps = [
+  {
+    name: "exportable",
+    type: "boolean",
+    default: "false",
+    description: "Enable export functionality with CSV, Excel, and JSON options",
+  },
+  {
+    name: "exportFilename",
+    type: "string",
+    default: '"table-export"',
+    description: "Base filename for exported files (without extension)",
+  },
+  {
+    name: "exportFormatValue",
+    type: "(value: unknown, column: Column<T>, row: T) => string",
+    default: "undefined",
+    description: "Custom formatter for cell values during export",
+  },
+];
+
+// Bulk edit functionality props
+const bulkEditProps = [
+  {
+    name: "bulkEditable",
+    type: "boolean",
+    default: "false",
+    description: "Enable bulk editing of selected rows",
+  },
+  {
+    name: "onBulkEdit",
+    type: "(rowIds: string[], columnId: string, value: unknown) => void",
+    default: "undefined",
+    description: "Callback when bulk edit is applied",
+  },
+];
+
+// Comparison mode props
+const comparisonProps = [
+  {
+    name: "comparable",
+    type: "boolean",
+    default: "false",
+    description: "Enable comparison mode for side-by-side row comparison",
+  },
+  {
+    name: "maxCompareRows",
+    type: "number",
+    default: "4",
+    description: "Maximum number of rows that can be compared at once",
+  },
+  {
+    name: "compareTitle",
+    type: "string",
+    default: '"Compare Items"',
+    description: "Title for the comparison modal",
+  },
 ];
 
 export default function DataTablePage() {
@@ -1351,6 +1416,378 @@ import {
         </CodePreview>
       </ComponentCard>
 
+      {/* Export Functionality */}
+      <ComponentCard
+        id="export"
+        title="Export Functionality"
+        description="Export table data to CSV, Excel (TSV), or JSON formats"
+      >
+        <div className="space-y-6">
+          <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+            <div className="flex items-start gap-3">
+              <DownloadSimple
+                className="mt-0.5 h-5 w-5 text-[var(--foreground-brand)]"
+                weight="bold"
+              />
+              <div>
+                <h4 className="font-semibold text-[var(--foreground-default)]">Export Formats</h4>
+                <ul className="mt-2 space-y-1 text-sm text-[var(--foreground-muted)]">
+                  <li className="flex items-center gap-2">
+                    <FileCsv className="h-4 w-4" /> <strong>CSV</strong> - Comma-separated values,
+                    universal compatibility
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <FileXls className="h-4 w-4" /> <strong>Excel (TSV)</strong> - Tab-separated
+                    values, opens directly in Excel
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="h-4 w-4 text-center text-xs font-bold">{"{}"}</span>{" "}
+                    <strong>JSON</strong> - Structured data format for developers
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <CodePreview
+            code={`import { DataTable, exportTableData, type Column } from "@/components/ui";
+
+// Enable export via prop
+<DataTable
+  data={candidates}
+  columns={columns}
+  exportable                           // Enable export dropdown
+  exportFilename="candidates"          // Custom filename
+  exportFormatValue={(value, column, row) => {
+    // Custom formatting for specific columns
+    if (column.id === "matchScore") return \`\${value}%\`;
+    if (column.id === "appliedDate") return new Date(value).toLocaleDateString();
+    return String(value ?? "");
+  }}
+/>
+
+// Or use the utility function directly
+import { exportTableData } from "@/components/ui";
+
+const handleExport = () => {
+  exportTableData({
+    data: selectedRows,
+    columns: columns,
+    filename: "selected-candidates",
+    format: "csv", // or "xlsx", "json"
+    formatValue: (value, column) => {
+      // Custom value formatting
+      return String(value ?? "");
+    },
+  });
+};`}
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-[var(--foreground-muted)]">
+                Export dropdown appears in the toolbar when{" "}
+                <code className="rounded bg-[var(--background-muted)] px-1">exportable</code> is
+                enabled.
+              </span>
+              <Button variant="secondary" size="sm">
+                <DownloadSimple className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            </div>
+          </CodePreview>
+        </div>
+      </ComponentCard>
+
+      {/* Bulk Edit Functionality */}
+      <ComponentCard
+        id="bulk-edit"
+        title="Bulk Edit"
+        description="Edit a column value across multiple selected rows at once"
+      >
+        <div className="space-y-6">
+          <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+            <div className="flex items-start gap-3">
+              <PencilSimple
+                className="mt-0.5 h-5 w-5 text-[var(--foreground-brand)]"
+                weight="bold"
+              />
+              <div>
+                <h4 className="font-semibold text-[var(--foreground-default)]">
+                  How Bulk Edit Works
+                </h4>
+                <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-[var(--foreground-muted)]">
+                  <li>Select multiple rows using checkboxes</li>
+                  <li>Click the &quot;Bulk Edit&quot; button in the toolbar</li>
+                  <li>Choose a column to edit from the dropdown</li>
+                  <li>Enter the new value (supports text, select, or number inputs)</li>
+                  <li>Apply changes to update all selected rows</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <CodePreview
+            code={`import { DataTable } from "@/components/ui";
+
+// Enable bulk editing
+<DataTable
+  data={candidates}
+  columns={columns}
+  selectable                           // Required for bulk edit
+  bulkEditable                         // Enable bulk edit button
+  onBulkEdit={(rowIds, columnId, value) => {
+    // Handle the bulk update
+    console.log(\`Updating \${rowIds.length} rows\`);
+    console.log(\`Column: \${columnId}, New value: \${value}\`);
+
+    // Call your API or update state
+    updateCandidates(rowIds, { [columnId]: value });
+  }}
+/>
+
+// Column configuration for editable columns
+const columns: Column<Candidate>[] = [
+  {
+    id: "stage",
+    header: "Stage",
+    accessorKey: "stage",
+    editable: true,  // Mark as editable for bulk edit
+    editConfig: {
+      type: "select",
+      options: [
+        { label: "Applied", value: "applied" },
+        { label: "Screening", value: "screening" },
+        { label: "Interview", value: "interview" },
+        { label: "Offer", value: "offer" },
+      ],
+    },
+  },
+  {
+    id: "notes",
+    header: "Notes",
+    accessorKey: "notes",
+    editable: true,
+    editConfig: {
+      type: "text",
+      placeholder: "Enter notes...",
+    },
+  },
+];`}
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-[var(--foreground-muted)]">
+                Select rows to enable bulk edit. Only columns with{" "}
+                <code className="rounded bg-[var(--background-muted)] px-1">editable: true</code>{" "}
+                can be bulk edited.
+              </span>
+              <Button variant="secondary" size="sm">
+                <PencilSimple className="mr-2 h-4 w-4" />
+                Bulk Edit
+              </Button>
+            </div>
+          </CodePreview>
+        </div>
+      </ComponentCard>
+
+      {/* Comparison Mode */}
+      <ComponentCard
+        id="comparison-mode"
+        title="Comparison Mode"
+        description="Compare selected rows side-by-side to identify differences"
+      >
+        <div className="space-y-6">
+          <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+            <div className="flex items-start gap-3">
+              <ArrowsOutLineHorizontal
+                className="mt-0.5 h-5 w-5 text-[var(--foreground-brand)]"
+                weight="bold"
+              />
+              <div>
+                <h4 className="font-semibold text-[var(--foreground-default)]">
+                  Comparison Features
+                </h4>
+                <ul className="mt-2 space-y-1 text-sm text-[var(--foreground-muted)]">
+                  <li>• Side-by-side view of selected rows</li>
+                  <li>• Highlights differences between rows</li>
+                  <li>• Useful for comparing candidates, products, or configurations</li>
+                  <li>• Configurable maximum rows (default: 4)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <CodePreview
+            code={`import { DataTable } from "@/components/ui";
+
+// Enable comparison mode
+<DataTable
+  data={candidates}
+  columns={columns}
+  selectable                           // Required for comparison
+  comparable                           // Enable compare button
+  maxCompareRows={4}                   // Max rows to compare (default: 4)
+  compareTitle="Compare Candidates"   // Modal title
+/>
+
+// Usage flow:
+// 1. Select 2-4 rows using checkboxes
+// 2. Click "Compare" button in toolbar
+// 3. View side-by-side comparison in modal
+// 4. Differences are highlighted with background color`}
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-[var(--foreground-muted)]">
+                Select 2-4 rows to enable comparison. The compare button appears when valid
+                selection count is reached.
+              </span>
+              <Button variant="secondary" size="sm">
+                <ArrowsOutLineHorizontal className="mr-2 h-4 w-4" />
+                Compare (2)
+              </Button>
+            </div>
+          </CodePreview>
+
+          <div className="rounded-lg border border-[var(--border-default)] p-4">
+            <h4 className="mb-3 font-medium text-[var(--foreground-default)]">
+              Comparison View Preview
+            </h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border-muted)]">
+                    <th className="px-3 py-2 text-left font-medium text-[var(--foreground-muted)]">
+                      Field
+                    </th>
+                    <th className="px-3 py-2 text-left font-medium">Sarah Chen</th>
+                    <th className="px-3 py-2 text-left font-medium">Marcus Johnson</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-[var(--border-muted)]">
+                    <td className="px-3 py-2 font-medium text-[var(--foreground-muted)]">Role</td>
+                    <td className="bg-[var(--background-warning)]/20 px-3 py-2">Solar Engineer</td>
+                    <td className="bg-[var(--background-warning)]/20 px-3 py-2">Wind Technician</td>
+                  </tr>
+                  <tr className="border-b border-[var(--border-muted)]">
+                    <td className="px-3 py-2 font-medium text-[var(--foreground-muted)]">
+                      Match Score
+                    </td>
+                    <td className="bg-[var(--background-warning)]/20 px-3 py-2">92%</td>
+                    <td className="bg-[var(--background-warning)]/20 px-3 py-2">85%</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-2 font-medium text-[var(--foreground-muted)]">Source</td>
+                    <td className="px-3 py-2">LinkedIn</td>
+                    <td className="px-3 py-2">LinkedIn</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-3 text-xs text-[var(--foreground-muted)]">
+              Rows with different values are highlighted with a yellow background.
+            </p>
+          </div>
+        </div>
+      </ComponentCard>
+
+      {/* Keyboard Navigation */}
+      <ComponentCard
+        id="keyboard-navigation"
+        title="Keyboard Navigation"
+        description="Navigate and interact with the table using keyboard shortcuts"
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+              <h4 className="mb-3 font-semibold text-[var(--foreground-default)]">
+                Navigation Keys
+              </h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Move between cells</span>
+                  <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                    ↑ ↓ ← →
+                  </kbd>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Jump to first/last row</span>
+                  <span>
+                    <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                      Home
+                    </kbd>
+                    <span className="mx-1">/</span>
+                    <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                      End
+                    </kbd>
+                  </span>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Page up/down</span>
+                  <span>
+                    <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                      PgUp
+                    </kbd>
+                    <span className="mx-1">/</span>
+                    <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                      PgDn
+                    </kbd>
+                  </span>
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4">
+              <h4 className="mb-3 font-semibold text-[var(--foreground-default)]">Action Keys</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Select/deselect row</span>
+                  <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                    Space
+                  </kbd>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Enter edit mode</span>
+                  <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                    Enter
+                  </kbd>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Cancel / Exit</span>
+                  <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                    Escape
+                  </kbd>
+                </li>
+                <li className="flex justify-between">
+                  <span className="text-[var(--foreground-muted)]">Select all</span>
+                  <kbd className="rounded bg-[var(--background-muted)] px-2 py-0.5 font-mono text-xs">
+                    ⌘/Ctrl + A
+                  </kbd>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <CodePreview
+            code={`import { DataTable } from "@/components/ui";
+
+// Keyboard navigation is enabled by default
+// when the table is focused
+<DataTable
+  data={candidates}
+  columns={columns}
+  selectable                // Enables Space to select
+  editable                  // Enables Enter to edit
+  aria-label="Candidates"   // Required for accessibility
+/>
+
+// Focus the table to enable keyboard navigation
+// Click anywhere in the table or Tab to focus`}
+          >
+            <div className="text-sm text-[var(--foreground-muted)]">
+              Click on the table or use Tab to focus, then use arrow keys to navigate.
+            </div>
+          </CodePreview>
+        </div>
+      </ComponentCard>
+
       {/* Complete Example */}
       <ComponentCard
         id="complete-example"
@@ -1575,6 +2012,18 @@ import { DataTable, type Column } from "@/components/ui";
         <PropsTable props={legacyDataTableProps} />
       </ComponentCard>
 
+      <ComponentCard id="export-props" title="Export Props">
+        <PropsTable props={exportProps} />
+      </ComponentCard>
+
+      <ComponentCard id="bulk-edit-props" title="Bulk Edit Props">
+        <PropsTable props={bulkEditProps} />
+      </ComponentCard>
+
+      <ComponentCard id="comparison-props" title="Comparison Mode Props">
+        <PropsTable props={comparisonProps} />
+      </ComponentCard>
+
       {/* Usage Guide */}
       <UsageGuide
         dos={[
@@ -1584,6 +2033,10 @@ import { DataTable, type Column } from "@/components/ui";
           "Use BulkActionsToolbar when implementing row selection",
           "Add proper aria-labels for accessibility",
           "Use skeleton loading states for async data",
+          "Enable exportable for tables where users need to download data",
+          "Use bulkEditable when users need to update multiple rows with the same value",
+          "Enable comparable for decision-making workflows (comparing candidates, options)",
+          "Always provide onBulkEdit callback when using bulk edit to persist changes",
         ]}
         donts={[
           "Don't import directly from data-table.tsx (deprecated)",
@@ -1591,6 +2044,9 @@ import { DataTable, type Column } from "@/components/ui";
           "Don't hardcode stage/source colors - use the helper components",
           "Don't forget to handle empty states",
           "Don't skip keyboard navigation support",
+          "Don't enable comparison mode without selectable - it requires row selection",
+          "Don't allow comparing more than 4-5 rows at once - it becomes unreadable",
+          "Don't use bulk edit without proper validation on the backend",
         ]}
       />
 
@@ -1599,9 +2055,12 @@ import { DataTable, type Column } from "@/components/ui";
         items={[
           "**Keyboard Navigation**: Arrow keys move between cells, Enter activates row actions, Space toggles selection",
           "**Screen Readers**: Tables use proper semantic markup (thead, tbody, th, td) with scope attributes",
-          "**Focus Management**: Focus is visible and trapped appropriately in popovers and dropdowns",
+          "**Focus Management**: Focus is visible and trapped appropriately in popovers, dropdowns, and modals",
           "**ARIA**: Tables include aria-label, sortable columns announce sort state, selection state is announced",
           "**Color Contrast**: All text meets WCAG AA contrast requirements, status colors have text labels",
+          "**Export**: Export menu is keyboard accessible with proper focus management",
+          "**Bulk Edit Modal**: Modal traps focus, Escape closes, Enter submits when input is focused",
+          "**Comparison View**: Comparison modal is fully keyboard navigable with proper heading structure",
         ]}
       />
 

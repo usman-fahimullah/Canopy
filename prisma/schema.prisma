@@ -859,6 +859,7 @@ model Pathway {
   slug         String   @unique
   description  String?  @db.Text
   icon         String?  // Phosphor icon name (e.g., "Leaf", "Tree", "Lightning")
+  illustration String?  // Path to spot illustration SVG (e.g., "/illustrations/pathways/energy.svg")
   color        String?  // Color family: green, blue, orange, red, yellow, purple
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
