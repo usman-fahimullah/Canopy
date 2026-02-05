@@ -47,8 +47,8 @@ export function OnboardingShell({
   const contextLabel = shell ? SHELL_CONTEXT_LABELS[shell] : "Account setup";
 
   return (
-    <div className="flex min-h-screen flex-col bg-[var(--background-default)]">
-      {/* ── Top bar ────────────────────────────────────────────── */}
+    <div className="flex h-screen flex-col overflow-hidden bg-[var(--background-default)]">
+      {/* ── Top bar (fixed) ──────────────────────────────────── */}
       <header className="shrink-0 border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)]">
         <div className="flex items-center justify-between">
           {/* Left: Change account type chip + context label */}
@@ -157,9 +157,9 @@ export function OnboardingShell({
       </header>
 
       {/* ── Two-panel content area ────────────────────────────── */}
-      <main className="flex flex-1">
-        {/* Left panel — white background, form content */}
-        <div className="flex flex-1 flex-col bg-[var(--background-default)]">
+      <main className="flex min-h-0 flex-1">
+        {/* Left panel — scrollable form content */}
+        <div className="flex flex-1 flex-col overflow-y-auto bg-[var(--background-default)]">
           <div className="flex flex-1 flex-col px-6 py-8 sm:px-12 sm:py-12 lg:px-[72px]">
             {/* Step indicator */}
             {hasProgress && (
@@ -188,7 +188,7 @@ export function OnboardingShell({
           </div>
         </div>
 
-        {/* Right panel — illustration area, hidden on mobile */}
+        {/* Right panel — fixed illustration area, hidden on mobile */}
         {rightPanel !== undefined && (
           <div className="hidden w-[640px] shrink-0 items-center justify-center bg-[var(--primitive-neutral-100)] lg:flex">
             {rightPanel}
@@ -196,7 +196,7 @@ export function OnboardingShell({
         )}
       </main>
 
-      {/* ── Footer (full-width, pinned to bottom) ──────────── */}
+      {/* ── Footer (fixed at bottom) ─────────────────────────── */}
       {footer}
     </div>
   );

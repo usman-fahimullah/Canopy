@@ -79,11 +79,11 @@ export default function TalentCareerPage() {
       firstName={baseProfile.firstName}
       rightPanel={
         <Image
-          src="/illustrations/onboarding-profile.svg"
-          alt=""
-          width={400}
-          height={400}
-          className="max-w-[80%]"
+          src="/illustrations/onboarding-career-journey.svg"
+          alt="Your career journey illustration"
+          width={640}
+          height={640}
+          className="max-w-[85%]"
         />
       }
       footer={

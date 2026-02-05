@@ -10,7 +10,7 @@ import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { MultiCombobox, type ComboboxOption } from "@/components/ui/combobox";
 import { Chip } from "@/components/ui/chip";
 import { Input } from "@/components/ui/input";
-import { FormRow } from "@/components/ui/form-section";
+import { SalaryRangeInput } from "@/components/ui/currency-input";
 import { TALENT_STEPS } from "@/lib/onboarding/types";
 import { pathwayLabels, type PathwayType } from "@/components/ui/pathway-tag";
 import { jobCategoryLabels, type JobCategoryType } from "@/components/ui/category-tag";
@@ -127,7 +127,7 @@ export default function TalentSkillsPage() {
         return;
       }
 
-      router.push("/onboarding/complete");
+      router.push("/jobs/dashboard");
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -144,11 +144,11 @@ export default function TalentSkillsPage() {
       firstName={baseProfile.firstName}
       rightPanel={
         <Image
-          src="/illustrations/onboarding-skills.svg"
-          alt=""
-          width={400}
-          height={400}
-          className="max-w-[80%]"
+          src="/illustrations/onboarding-skills-new.svg"
+          alt="Add your skills illustration"
+          width={640}
+          height={640}
+          className="max-w-[85%]"
         />
       }
       footer={
@@ -157,7 +157,7 @@ export default function TalentSkillsPage() {
           onContinue={handleContinue}
           canContinue={canContinue}
           loading={loading}
-          continueLabel="Find my matches"
+          continueLabel="Continue"
         />
       }
     >
@@ -289,24 +289,13 @@ export default function TalentSkillsPage() {
           <p className="text-caption-sm text-[var(--foreground-muted)]">
             Optional — helps us match better
           </p>
-          <FormRow>
-            <div>
-              <Input
-                placeholder="Min (e.g. 60000)"
-                value={talentData.salaryMin}
-                onChange={(e) => setTalentData({ salaryMin: e.target.value })}
-                type="number"
-              />
-            </div>
-            <div>
-              <Input
-                placeholder="Max (e.g. 90000)"
-                value={talentData.salaryMax}
-                onChange={(e) => setTalentData({ salaryMax: e.target.value })}
-                type="number"
-              />
-            </div>
-          </FormRow>
+          <SalaryRangeInput
+            value={{ min: talentData.salaryMin, max: talentData.salaryMax }}
+            onValueChange={(value) => setTalentData({ salaryMin: value.min, salaryMax: value.max })}
+            minPlaceholder="e.g. 60k"
+            maxPlaceholder="e.g. 120k"
+            helperText="Type 60k for $60,000 or 1.5m for $1,500,000. Math works too: 50k * 2"
+          />
         </div>
       </div>
 

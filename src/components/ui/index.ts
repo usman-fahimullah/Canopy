@@ -989,3 +989,12 @@ export {
 
 // Collection Card (Job Seeker Portal)
 export { CollectionCard, type CollectionCardProps } from "./collection-card";
+
+// Currency Input
+export {
+  CurrencyInput,
+  SalaryRangeInput,
+  type CurrencyCode,
+  type CurrencyInputProps,
+  type SalaryRangeInputProps,
+} from "./currency-input";

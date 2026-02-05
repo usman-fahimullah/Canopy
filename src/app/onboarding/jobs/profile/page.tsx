@@ -106,11 +106,11 @@ export default function TalentProfilePage() {
       firstName={baseProfile.firstName}
       rightPanel={
         <Image
-          src="/illustrations/onboarding-profile.svg"
-          alt=""
-          width={400}
-          height={400}
-          className="max-w-[80%]"
+          src="/illustrations/onboarding-build-profile.svg"
+          alt="Build your profile illustration"
+          width={640}
+          height={640}
+          className="max-w-[85%]"
           priority
         />
       }
