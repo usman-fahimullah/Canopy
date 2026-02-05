@@ -72,35 +72,35 @@ export function ProfileHeader({
   const cover = getCoverPreset(coverImage);
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full border-b border-[var(--primitive-neutral-300)] bg-white pb-[104px]">
       {/* Cover image - Figma: 256px height */}
-      <div className="relative h-[256px] w-full overflow-hidden">
+      <div className="relative mb-[-80px] h-[256px] w-full overflow-hidden">
         <Image src={cover.src} alt={cover.alt} fill className="object-cover" priority />
         {isOwner && (
-          <div className="absolute right-6 top-6 flex gap-2">
-            {/* Figma: teal/green circular buttons */}
+          <div className="absolute right-14 top-12 flex gap-3">
+            {/* Figma: cream/beige rounded-16px buttons with dark icons */}
             <button
               onClick={onEditCover}
               aria-label="Edit background"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
+              className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-neutral-300)]"
             >
-              <PencilSimple size={20} weight="bold" />
+              <PencilSimple size={24} weight="regular" />
             </button>
             <button
               onClick={onShare}
               aria-label="Share profile"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
+              className="flex h-12 w-12 items-center justify-center rounded-[16px] bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-neutral-300)]"
             >
-              <ShareNetwork size={20} weight="bold" />
+              <ShareNetwork size={24} weight="regular" />
             </button>
           </div>
         )}
       </div>
 
       {/* Avatar + info area */}
-      <div className="px-6 pb-6">
-        {/* Avatar overlapping cover - Figma: 128px, -80px overlap, 6px white border */}
-        <div className="relative -mt-20 mb-4">
+      <div className="px-12">
+        {/* Avatar overlapping cover - Figma: 128px, 6px white border */}
+        <div className="relative mb-3">
           <div className="relative inline-block">
             {/* White ring wrapper around avatar */}
             <div className="rounded-full border-[6px] border-white shadow-[0_0_0_2px_rgba(0,0,0,0.05)]">
@@ -117,9 +117,9 @@ export function ProfileHeader({
               <button
                 onClick={onEditPhoto}
                 aria-label="Edit profile photo"
-                className="absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
+                className="absolute bottom-0 left-[101px] flex h-12 w-12 items-center justify-center rounded-[16px] border-[6px] border-white bg-[var(--primitive-blue-200)] text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-blue-300)]"
               >
-                <PencilSimple size={16} weight="bold" />
+                <PencilSimple size={24} weight="regular" />
               </button>
             )}
           </div>
@@ -134,7 +134,7 @@ export function ProfileHeader({
             <Badge
               variant="default"
               size="lg"
-              className="!bg-[var(--primitive-purple-200)] !text-[var(--primitive-purple-700)]"
+              className="!rounded-[48px] !bg-[var(--primitive-blue-100)] !px-2 !py-2 !text-[var(--primitive-blue-500)]"
             >
               🎓 {badge}
             </Badge>
@@ -187,63 +187,70 @@ export function ProfileHeader({
                 <button
                   onClick={onEditSocials}
                   aria-label="Add more socials"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primitive-green-700)] text-white transition-colors hover:bg-[var(--primitive-green-800)]"
+                  className="flex h-10 w-10 items-center justify-center rounded-[16px] bg-[var(--primitive-blue-200)] text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-blue-300)]"
                 >
-                  <Plus size={16} weight="bold" />
+                  <Plus size={20} weight="regular" />
                 </button>
               )}
             </div>
           ) : isOwner ? (
-            <Button
-              variant="ghost"
-              leftIcon={<Plus size={16} weight="bold" />}
-              onClick={onEditSocials}
-            >
-              Add Your Socials
-            </Button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onEditSocials}
+                aria-label="Add socials"
+                className="flex h-10 w-10 items-center justify-center rounded-[16px] bg-[var(--primitive-blue-200)] text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-blue-300)]"
+              >
+                <Plus size={20} weight="regular" />
+              </button>
+              <span className="text-body text-[var(--foreground-muted)]">Add Your Socials</span>
+            </div>
           ) : null}
         </div>
 
         {/* CTA Cards - Summary & Skills - Figma: horizontal layout with illustration on right */}
         {isOwner && (!hasSummary || skills.length === 0) && (
-          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Summary CTA Card - Figma: white bg, border, horizontal layout */}
+          <div className="mt-6 flex w-full gap-4 py-6">
+            {/* Summary CTA Card - Figma: purple-100 bg, no border, horizontal layout */}
             {!hasSummary && (
-              <div className="flex items-center justify-between rounded-[16px] border border-[var(--border-muted)] bg-white p-6">
-                <div className="flex flex-col gap-3">
-                  <h3 className="text-body-strong text-[var(--foreground-default)]">
-                    Add a summary about yourself.
-                  </h3>
-                  <p className="text-caption text-[var(--foreground-muted)]">
-                    Tell your career story, and show recruiters what you&apos;re made of!
-                  </p>
-                  <Button variant="outline" onClick={onEditSummary} className="w-fit">
+              <div className="flex flex-1 items-start justify-between rounded-[16px] bg-[var(--primitive-purple-100)] px-6 py-4">
+                <div className="flex w-[304px] flex-col gap-4 py-6">
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-body-strong text-[var(--foreground-default)]">
+                      Add a summary about yourself.
+                    </h3>
+                    <p className="text-caption text-[var(--foreground-default)]">
+                      Tell your career story, and show recruiters what you&apos;re made of!
+                    </p>
+                  </div>
+                  <Button variant="inverse" onClick={onEditSummary} className="w-fit">
                     Write Your Story
                   </Button>
                 </div>
-                <div className="ml-4 shrink-0">
-                  <SummaryIllustration width={100} height={100} />
+                <div className="shrink-0">
+                  <SummaryIllustration width={166} height={138} />
                 </div>
               </div>
             )}
 
-            {/* Skills CTA Card - Figma: white bg, border, horizontal layout with person illustration */}
+            {/* Skills CTA Card - Figma: neutral-100 bg, no border, horizontal layout with person illustration */}
             {skills.length === 0 && (
-              <div className="flex items-center justify-between rounded-[16px] border border-[var(--border-muted)] bg-white p-6">
-                <div className="flex flex-col gap-3">
-                  <h3 className="text-body-strong text-[var(--foreground-default)]">
-                    Add your skills
-                  </h3>
-                  <p className="text-caption text-[var(--foreground-muted)]">
-                    Quickly add relevant skills to your profile, showcasing your expertise to help
-                    you stand out in a competitive landscape.
-                  </p>
-                  <Button variant="outline" onClick={onEditSkills} className="w-fit">
+              <div className="relative flex flex-1 items-start justify-between overflow-hidden rounded-[16px] bg-[var(--primitive-neutral-100)] px-6 py-4">
+                <div className="flex w-[304px] flex-col gap-4 py-6">
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-body-strong text-[var(--foreground-default)]">
+                      Add your skills
+                    </h3>
+                    <p className="text-caption text-[var(--foreground-default)]">
+                      Quickly add relevant skills to your profile, showcasing your expertise to help
+                      you stand out in a competitive landscape.
+                    </p>
+                  </div>
+                  <Button variant="inverse" onClick={onEditSkills} className="w-fit">
                     Add Skills
                   </Button>
                 </div>
-                <div className="ml-4 shrink-0">
-                  <SkillsIllustration width={100} height={100} />
+                <div className="absolute right-0 top-9 shrink-0">
+                  <SkillsIllustration width={156} height={208} />
                 </div>
               </div>
             )}
