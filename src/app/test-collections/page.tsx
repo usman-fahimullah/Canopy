@@ -125,41 +125,42 @@ const testCollections: TestCollection[] = [
 export default function TestCollectionsPage() {
   return (
     <div className="min-h-screen bg-[var(--background-default)] p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-heading-lg font-bold text-[var(--foreground-default)] mb-4">
+          <h1 className="mb-4 text-heading-lg font-bold text-[var(--foreground-default)]">
             Collection Card Gradient System
           </h1>
-          <p className="text-body text-[var(--foreground-muted)] max-w-3xl">
-            Dynamic gradients based on pathway combinations. Same pathways always produce
-            the same gradient, regardless of order. Same-family pathways use cohesive
-            within-family gradients, while cross-family combinations create vibrant transitions.
+          <p className="max-w-3xl text-body text-[var(--foreground-muted)]">
+            Dynamic gradients based on pathway combinations. Same pathways always produce the same
+            gradient, regardless of order. Same-family pathways use cohesive within-family
+            gradients, while cross-family combinations create vibrant transitions.
           </p>
         </div>
 
         {/* Collections Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {testCollections.map((collection, index) => (
-            <CollectionCard
-              key={index}
-              title={collection.title}
-              pathways={collection.pathways}
-              jobCount={collection.jobCount}
-              description={collection.description}
-              href={`/collections/${collection.title.toLowerCase().replace(/\s+/g, "-")}`}
-            />
+            <div key={index} className="h-[416px]">
+              <CollectionCard
+                title={collection.title}
+                pathways={collection.pathways}
+                jobCount={collection.jobCount}
+                description={collection.description}
+                href={`/collections/${collection.title.toLowerCase().replace(/\s+/g, "-")}`}
+              />
+            </div>
           ))}
         </div>
 
         {/* Legend */}
-        <div className="mt-16 p-6 bg-[var(--background-subtle)] rounded-xl">
-          <h2 className="text-heading-sm font-bold text-[var(--foreground-default)] mb-4">
+        <div className="mt-16 rounded-xl bg-[var(--background-subtle)] p-6">
+          <h2 className="mb-4 text-heading-sm font-bold text-[var(--foreground-default)]">
             How It Works
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-body-sm text-[var(--foreground-muted)]">
+          <div className="grid grid-cols-1 gap-4 text-body-sm text-[var(--foreground-muted)] md:grid-cols-2">
             <div>
-              <h3 className="text-body-strong text-[var(--foreground-default)] mb-2">
+              <h3 className="mb-2 text-body-strong text-[var(--foreground-default)]">
                 Same-Family Gradients
               </h3>
               <ul className="space-y-1">
@@ -169,7 +170,7 @@ export default function TestCollectionsPage() {
               </ul>
             </div>
             <div>
-              <h3 className="text-body-strong text-[var(--foreground-default)] mb-2">
+              <h3 className="mb-2 text-body-strong text-[var(--foreground-default)]">
                 Cross-Family Gradients
               </h3>
               <ul className="space-y-1">
@@ -179,7 +180,7 @@ export default function TestCollectionsPage() {
               </ul>
             </div>
             <div>
-              <h3 className="text-body-strong text-[var(--foreground-default)] mb-2">
+              <h3 className="mb-2 text-body-strong text-[var(--foreground-default)]">
                 Order Normalization
               </h3>
               <ul className="space-y-1">
@@ -189,7 +190,7 @@ export default function TestCollectionsPage() {
               </ul>
             </div>
             <div>
-              <h3 className="text-body-strong text-[var(--foreground-default)] mb-2">
+              <h3 className="mb-2 text-body-strong text-[var(--foreground-default)]">
                 Pathway Families
               </h3>
               <ul className="space-y-1">

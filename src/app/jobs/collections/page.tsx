@@ -249,20 +249,20 @@ export default function CollectionsPage() {
             <SectionHeader title="Featured Collections" />
             <div className="scrollbar-hide mt-4 flex gap-4 overflow-x-auto pb-4">
               {featuredCollections.map((collection) => (
-                <CollectionCard
-                  key={collection.id}
-                  title={collection.title}
-                  jobCount={collection.jobCount}
-                  pathways={getCollectionPathways(collection)}
-                  description={collection.description ?? undefined}
-                  href={`/jobs/collections/${collection.slug}`}
-                  sponsor={
-                    collection.sponsor
-                      ? { name: collection.sponsor.name, logo: collection.sponsor.logo ?? "" }
-                      : undefined
-                  }
-                  className="w-[280px] shrink-0"
-                />
+                <div key={collection.id} className="h-[416px] w-[280px] shrink-0">
+                  <CollectionCard
+                    title={collection.title}
+                    jobCount={collection.jobCount}
+                    pathways={getCollectionPathways(collection)}
+                    description={collection.description ?? undefined}
+                    href={`/jobs/collections/${collection.slug}`}
+                    sponsor={
+                      collection.sponsor
+                        ? { name: collection.sponsor.name, logo: collection.sponsor.logo ?? "" }
+                        : undefined
+                    }
+                  />
+                </div>
               ))}
             </div>
           </section>
@@ -315,19 +315,20 @@ export default function CollectionsPage() {
           <SectionHeader title="All Collections" />
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {allCollections.map((collection) => (
-              <CollectionCard
-                key={collection.id}
-                title={collection.title}
-                jobCount={collection.jobCount}
-                pathways={getCollectionPathways(collection)}
-                description={collection.description ?? undefined}
-                href={`/jobs/collections/${collection.slug}`}
-                sponsor={
-                  collection.sponsor
-                    ? { name: collection.sponsor.name, logo: collection.sponsor.logo ?? "" }
-                    : undefined
-                }
-              />
+              <div key={collection.id} className="h-[416px]">
+                <CollectionCard
+                  title={collection.title}
+                  jobCount={collection.jobCount}
+                  pathways={getCollectionPathways(collection)}
+                  description={collection.description ?? undefined}
+                  href={`/jobs/collections/${collection.slug}`}
+                  sponsor={
+                    collection.sponsor
+                      ? { name: collection.sponsor.name, logo: collection.sponsor.logo ?? "" }
+                      : undefined
+                  }
+                />
+              </div>
             ))}
           </div>
         </section>
