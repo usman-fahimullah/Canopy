@@ -1,0 +1,673 @@
+"use client";
+
+/**
+ * JobApplicationTable - Collapsible table for tracking job applications
+ *
+ * @figma https://www.figma.com/design/q1985VWRuwMkSc1hIqu5X9/Trails-Design-System?node-id=4643-18073
+ *
+ * This component is designed for the job seeker portal (Green Jobs Board)
+ * to help candidates track their applications across different pipeline stages.
+ */
+
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import {
+  CaretDown,
+  CaretRight,
+  Bookmark,
+  PaperPlaneTilt,
+  ChatsCircle,
+  HandCoins,
+  Trophy,
+  Prohibit,
+  Star,
+  SmileyNervous,
+  SmileyWink,
+  Smiley,
+  SmileyMeh,
+  SmileySad,
+  SmileyXEyes,
+} from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
+import { Avatar } from "./avatar";
+import { Button } from "./button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
+
+// ============================================
+// TYPES
+// ============================================
+
+export type ApplicationSection =
+  | "saved"
+  | "applied"
+  | "interview"
+  | "offer"
+  | "hired"
+  | "ineligible";
+
+export type EmojiReaction = "excited" | "happy" | "meh" | "nervous" | "shocked" | "none";
+
+export interface JobApplication {
+  id: string;
+  jobTitle: string;
+  company: string;
+  companyInitials?: string;
+  companyLogo?: string;
+  stage: ApplicationSection;
+  activity: Date | string;
+  reaction?: EmojiReaction;
+  isFavorite?: boolean;
+}
+
+export interface JobApplicationTableProps {
+  section: ApplicationSection;
+  applications: JobApplication[];
+  isOpen?: boolean;
+  onToggle?: () => void;
+  onStageChange?: (applicationId: string, newStage: ApplicationSection) => void;
+  onReactionChange?: (applicationId: string, reaction: EmojiReaction) => void;
+  onFavoriteToggle?: (applicationId: string) => void;
+  onExploreJobs?: () => void;
+  className?: string;
+}
+
+// ============================================
+// SECTION CONFIG
+// ============================================
+
+interface SectionConfig {
+  label: string;
+  icon: React.ElementType;
+  iconColor: string;
+  emptyTitle: string;
+  emptyDescription: string;
+  emptyCta: string;
+}
+
+export const sectionConfig: Record<ApplicationSection, SectionConfig> = {
+  saved: {
+    label: "Saved",
+    icon: Bookmark,
+    iconColor: "text-[var(--primitive-blue-500)]",
+    emptyTitle: "No saved jobs yet!",
+    emptyDescription:
+      "Discover and find hundreds of jobs in Pathways! Save it and don't forget it!",
+    emptyCta: "Explore Jobs",
+  },
+  applied: {
+    label: "Applied",
+    icon: PaperPlaneTilt,
+    iconColor: "text-[var(--primitive-yellow-500)]",
+    emptyTitle: "No applications yet!",
+    emptyDescription: "Start applying to jobs that match your skills and interests.",
+    emptyCta: "Find Jobs",
+  },
+  interview: {
+    label: "Interview",
+    icon: ChatsCircle,
+    iconColor: "text-[var(--primitive-green-600)]",
+    emptyTitle: "No interviews scheduled!",
+    emptyDescription: "Keep applying and you'll get interview invitations soon.",
+    emptyCta: "View Applications",
+  },
+  offer: {
+    label: "Offer",
+    icon: HandCoins,
+    iconColor: "text-[var(--primitive-purple-500)]",
+    emptyTitle: "No offers yet!",
+    emptyDescription: "Keep going through the interview process. Offers will come!",
+    emptyCta: "View Interviews",
+  },
+  hired: {
+    label: "Hired",
+    icon: Trophy,
+    iconColor: "text-[var(--primitive-green-500)]",
+    emptyTitle: "No hired positions yet!",
+    emptyDescription: "When you accept an offer, it will appear here.",
+    emptyCta: "View Offers",
+  },
+  ineligible: {
+    label: "Ineligible",
+    icon: Prohibit,
+    iconColor: "text-[var(--primitive-red-500)]",
+    emptyTitle: "No ineligible applications!",
+    emptyDescription: "Applications that didn't proceed will show up here.",
+    emptyCta: "View All Applications",
+  },
+};
+
+// ============================================
+// STAGE COLORS (for dropdown pills)
+// ============================================
+
+export const stageColors: Record<
+  ApplicationSection,
+  { bg: string; text: string; iconColor: string }
+> = {
+  saved: {
+    bg: "bg-[var(--primitive-blue-200)]",
+    text: "text-[var(--primitive-blue-600)]",
+    iconColor: "text-[var(--primitive-blue-600)]",
+  },
+  applied: {
+    bg: "bg-[var(--primitive-yellow-100)]",
+    text: "text-[var(--primitive-yellow-700)]",
+    iconColor: "text-[var(--primitive-yellow-700)]",
+  },
+  interview: {
+    bg: "bg-[var(--primitive-green-100)]",
+    text: "text-[var(--primitive-green-700)]",
+    iconColor: "text-[var(--primitive-green-700)]",
+  },
+  offer: {
+    bg: "bg-[var(--primitive-purple-100)]",
+    text: "text-[var(--primitive-purple-700)]",
+    iconColor: "text-[var(--primitive-purple-700)]",
+  },
+  hired: {
+    bg: "bg-[var(--primitive-green-200)]",
+    text: "text-[var(--primitive-green-800)]",
+    iconColor: "text-[var(--primitive-green-800)]",
+  },
+  ineligible: {
+    bg: "bg-[var(--primitive-red-100)]",
+    text: "text-[var(--primitive-red-700)]",
+    iconColor: "text-[var(--primitive-red-700)]",
+  },
+};
+
+// ============================================
+// EMOJI CONFIG
+// ============================================
+
+const emojiConfig: Record<
+  Exclude<EmojiReaction, "none">,
+  { icon: React.ElementType; label: string }
+> = {
+  excited: { icon: SmileyWink, label: "Excited" },
+  happy: { icon: Smiley, label: "Happy" },
+  meh: { icon: SmileyMeh, label: "Meh" },
+  nervous: { icon: SmileyNervous, label: "Nervous" },
+  shocked: { icon: SmileyXEyes, label: "Shocked" },
+};
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function formatActivityTime(activity: Date | string): string {
+  const date = typeof activity === "string" ? new Date(activity) : activity;
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}mins ago`;
+  if (diffHours === 1) return "An hour ago";
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 14) return "Last week";
+
+  return date.toLocaleDateString();
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+// ============================================
+// SUB-COMPONENTS
+// ============================================
+
+/** Section Header */
+interface SectionHeaderProps {
+  section: ApplicationSection;
+  count: number;
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+function SectionHeader({ section, count, isOpen, onToggle }: SectionHeaderProps) {
+  const config = sectionConfig[section];
+  const Icon = config.icon;
+  const CaretIcon = isOpen ? CaretDown : CaretRight;
+
+  return (
+    <div className="flex items-center gap-3 bg-[var(--primitive-neutral-0)] px-3 pb-2 pt-3">
+      <button
+        onClick={onToggle}
+        className="flex items-center justify-center rounded-[var(--radius-md)] p-2.5 transition-colors hover:bg-[var(--primitive-neutral-200)]"
+        aria-expanded={isOpen}
+        aria-label={isOpen ? "Collapse section" : "Expand section"}
+      >
+        <CaretIcon size={20} weight="bold" className="text-[var(--primitive-green-800)]" />
+      </button>
+      <div className="flex items-center gap-2.5">
+        <Icon size={24} weight="fill" className={config.iconColor} />
+        <span className="text-body-strong text-[var(--primitive-neutral-800)]">{config.label}</span>
+        <div className="flex items-center rounded bg-[var(--primitive-neutral-200)] px-0.5">
+          <span className="w-5 text-center text-caption-strong text-[var(--primitive-neutral-800)]">
+            {count}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Table Header Row */
+interface TableHeaderRowProps {
+  onSort?: (column: string, direction: "asc" | "desc") => void;
+}
+
+function TableHeaderRow({ onSort }: TableHeaderRowProps) {
+  const sortableColumns = ["jobTitle", "company", "activity"];
+
+  const renderSortButton = (label: string, column: string, width?: string) => {
+    const isSortable = sortableColumns.includes(column);
+
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-between border-r border-[var(--primitive-neutral-300)] px-3 py-1",
+          width || "flex-1"
+        )}
+      >
+        <span className="flex-1 truncate text-caption text-[var(--primitive-neutral-900)]">
+          {label}
+        </span>
+        {isSortable && (
+          <button
+            onClick={() => onSort?.(column, "asc")}
+            className="rounded-full p-2 transition-colors hover:bg-[var(--primitive-neutral-200)]"
+          >
+            <CaretDown size={24} className="text-[var(--primitive-neutral-800)]" />
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] pb-2">
+      {renderSortButton("Job Title", "jobTitle", "w-[250px] pl-6")}
+      {renderSortButton("Company", "company", "w-[250px]")}
+      <div className="flex flex-1 items-center border-r border-[var(--primitive-neutral-300)] px-3 py-1">
+        <span className="flex-1 truncate text-caption text-[var(--primitive-neutral-900)]">
+          Stage
+        </span>
+      </div>
+      {renderSortButton("Activity", "activity")}
+      <div className="flex flex-1 items-center justify-center px-3 py-1">
+        <span className="flex-1 truncate text-center text-caption text-[var(--primitive-neutral-900)]">
+          Reaction
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Stage Dropdown Pill */
+interface StagePillProps {
+  currentStage: ApplicationSection;
+  onStageChange?: (newStage: ApplicationSection) => void;
+}
+
+function StagePill({ currentStage, onStageChange }: StagePillProps) {
+  const colors = stageColors[currentStage];
+  const config = sectionConfig[currentStage];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn(
+            "flex items-center justify-between gap-2 rounded-lg p-2",
+            colors.bg,
+            "cursor-pointer transition-opacity hover:opacity-90"
+          )}
+        >
+          <span className={cn("text-caption-strong", colors.text)}>{config.label}</span>
+          <CaretDown size={24} className={colors.iconColor} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-[180px]">
+        {(Object.keys(sectionConfig) as ApplicationSection[]).map((stage) => (
+          <DropdownMenuItem
+            key={stage}
+            onClick={() => onStageChange?.(stage)}
+            className={cn(stage === currentStage && "bg-[var(--primitive-neutral-100)]")}
+          >
+            <span className={cn("mr-2 size-3 rounded-full", stageColors[stage].bg)} />
+            {sectionConfig[stage].label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Emoji Reaction Button */
+interface EmojiReactionButtonProps {
+  reaction?: EmojiReaction;
+  onReactionChange?: (reaction: EmojiReaction) => void;
+}
+
+function EmojiReactionButton({ reaction = "none", onReactionChange }: EmojiReactionButtonProps) {
+  const currentEmoji = reaction !== "none" ? emojiConfig[reaction] : null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={cn(
+            "flex w-[100px] items-center justify-center gap-1 rounded-full border border-[var(--primitive-neutral-300)] px-2 py-1",
+            "cursor-pointer transition-colors hover:bg-[var(--primitive-neutral-100)]"
+          )}
+        >
+          {currentEmoji ? (
+            <>
+              <currentEmoji.icon
+                size={16}
+                weight="fill"
+                className="text-[var(--primitive-purple-500)]"
+              />
+              <span className="text-caption-strong text-[var(--primitive-purple-500)]">
+                {currentEmoji.label}
+              </span>
+            </>
+          ) : (
+            <span className="text-caption text-[var(--primitive-neutral-600)]">Add</span>
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="center" className="w-[140px]">
+        {(
+          Object.entries(emojiConfig) as [
+            Exclude<EmojiReaction, "none">,
+            typeof emojiConfig.excited,
+          ][]
+        ).map(([key, config]) => (
+          <DropdownMenuItem
+            key={key}
+            onClick={() => onReactionChange?.(key as EmojiReaction)}
+            className={cn(key === reaction && "bg-[var(--primitive-purple-100)]")}
+          >
+            <config.icon
+              size={16}
+              weight="fill"
+              className="mr-2 text-[var(--primitive-purple-500)]"
+            />
+            {config.label}
+          </DropdownMenuItem>
+        ))}
+        {reaction !== "none" && (
+          <DropdownMenuItem
+            onClick={() => onReactionChange?.("none")}
+            className="text-[var(--primitive-neutral-600)]"
+          >
+            Remove
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Table Row */
+interface TableRowProps {
+  application: JobApplication;
+  onStageChange?: (applicationId: string, newStage: ApplicationSection) => void;
+  onReactionChange?: (applicationId: string, reaction: EmojiReaction) => void;
+  onFavoriteToggle?: (applicationId: string) => void;
+}
+
+function TableRow({
+  application,
+  onStageChange,
+  onReactionChange,
+  onFavoriteToggle,
+}: TableRowProps) {
+  return (
+    <div className="flex h-[80px] items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]">
+      {/* Job Title Cell */}
+      <div className="flex w-[250px] items-center gap-3 overflow-hidden py-6 pl-6 pr-3">
+        <button
+          onClick={() => onFavoriteToggle?.(application.id)}
+          className="shrink-0 transition-colors"
+          aria-label={application.isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          <Star
+            size={24}
+            weight={application.isFavorite ? "fill" : "regular"}
+            className={
+              application.isFavorite
+                ? "text-[var(--primitive-yellow-500)]"
+                : "text-[var(--primitive-neutral-200)]"
+            }
+          />
+        </button>
+        <Avatar
+          name={application.company}
+          src={application.companyLogo}
+          size="sm"
+          className="shrink-0"
+        />
+        <span className="truncate text-caption text-[var(--primitive-neutral-800)]">
+          {application.jobTitle}
+        </span>
+      </div>
+
+      {/* Company Cell */}
+      <div className="flex h-[80px] w-[250px] items-center px-3 py-6">
+        <span className="truncate text-caption text-[var(--primitive-neutral-600)]">
+          {application.company}
+        </span>
+      </div>
+
+      {/* Stage Cell */}
+      <div className="relative h-[80px] min-w-0 flex-1 px-3">
+        <div className="absolute left-3 top-5">
+          <StagePill
+            currentStage={application.stage}
+            onStageChange={(stage) => onStageChange?.(application.id, stage)}
+          />
+        </div>
+      </div>
+
+      {/* Activity Cell */}
+      <div className="flex h-[80px] min-w-0 flex-1 items-center px-3 py-6">
+        <span className="w-full truncate text-center text-caption text-[var(--primitive-neutral-600)]">
+          {formatActivityTime(application.activity)}
+        </span>
+      </div>
+
+      {/* Reaction Cell */}
+      <div className="flex h-[80px] min-w-0 flex-1 items-center justify-center py-6">
+        <EmojiReactionButton
+          reaction={application.reaction}
+          onReactionChange={(reaction) => onReactionChange?.(application.id, reaction)}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Empty State */
+interface EmptyStateProps {
+  section: ApplicationSection;
+  onAction?: () => void;
+}
+
+function EmptyState({ section, onAction }: EmptyStateProps) {
+  const config = sectionConfig[section];
+  const Icon = config.icon;
+
+  return (
+    <div className="flex h-[204px] flex-col items-center justify-center gap-4 overflow-hidden p-6">
+      <div className="flex size-6 items-center justify-center rounded bg-[var(--primitive-blue-500)]">
+        <Icon size={18} weight="fill" className="text-white" />
+      </div>
+      <div className="flex w-[492px] flex-col items-center justify-center">
+        <span className="text-body-strong text-[var(--primitive-neutral-900)]">
+          {config.emptyTitle}
+        </span>
+        <p className="w-[300px] text-center text-caption text-[var(--primitive-neutral-600)]">
+          {config.emptyDescription}
+        </p>
+      </div>
+      <Button variant="inverse" size="md" onClick={onAction}>
+        {config.emptyCta}
+      </Button>
+    </div>
+  );
+}
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
+
+export function JobApplicationTable({
+  section,
+  applications,
+  isOpen = true,
+  onToggle,
+  onStageChange,
+  onReactionChange,
+  onFavoriteToggle,
+  onExploreJobs,
+  className,
+}: JobApplicationTableProps) {
+  const [internalOpen, setInternalOpen] = React.useState(isOpen);
+  const isControlled = onToggle !== undefined;
+  const open = isControlled ? isOpen : internalOpen;
+
+  const handleToggle = () => {
+    if (isControlled) {
+      onToggle?.();
+    } else {
+      setInternalOpen((prev) => !prev);
+    }
+  };
+
+  const filteredApplications = applications.filter((app) => app.stage === section);
+  const isEmpty = filteredApplications.length === 0;
+
+  return (
+    <div className={cn("w-full overflow-hidden", className)}>
+      <SectionHeader
+        section={section}
+        count={filteredApplications.length}
+        isOpen={open}
+        onToggle={handleToggle}
+      />
+
+      {open && (
+        <>
+          {isEmpty ? (
+            <EmptyState section={section} onAction={onExploreJobs} />
+          ) : (
+            <>
+              <TableHeaderRow />
+              {filteredApplications.map((application) => (
+                <TableRow
+                  key={application.id}
+                  application={application}
+                  onStageChange={onStageChange}
+                  onReactionChange={onReactionChange}
+                  onFavoriteToggle={onFavoriteToggle}
+                />
+              ))}
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// COMPOSITE COMPONENT: ApplicationTracker
+// ============================================
+
+export interface ApplicationTrackerProps {
+  applications: JobApplication[];
+  onStageChange?: (applicationId: string, newStage: ApplicationSection) => void;
+  onReactionChange?: (applicationId: string, reaction: EmojiReaction) => void;
+  onFavoriteToggle?: (applicationId: string) => void;
+  onExploreJobs?: () => void;
+  defaultOpenSections?: ApplicationSection[];
+  className?: string;
+}
+
+/**
+ * ApplicationTracker - Full application tracking dashboard
+ *
+ * Renders all sections (Saved, Applied, Interview, Offer, Hired, Ineligible)
+ * with their respective applications.
+ */
+export function ApplicationTracker({
+  applications,
+  onStageChange,
+  onReactionChange,
+  onFavoriteToggle,
+  onExploreJobs,
+  defaultOpenSections = ["saved", "applied", "interview"],
+  className,
+}: ApplicationTrackerProps) {
+  const [openSections, setOpenSections] = React.useState<Set<ApplicationSection>>(
+    new Set(defaultOpenSections)
+  );
+
+  const toggleSection = (section: ApplicationSection) => {
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  };
+
+  const sections: ApplicationSection[] = [
+    "saved",
+    "applied",
+    "interview",
+    "offer",
+    "hired",
+    "ineligible",
+  ];
+
+  return (
+    <div className={cn("flex flex-col divide-y divide-[var(--primitive-neutral-300)]", className)}>
+      {sections.map((section) => (
+        <JobApplicationTable
+          key={section}
+          section={section}
+          applications={applications}
+          isOpen={openSections.has(section)}
+          onToggle={() => toggleSection(section)}
+          onStageChange={onStageChange}
+          onReactionChange={onReactionChange}
+          onFavoriteToggle={onFavoriteToggle}
+          onExploreJobs={onExploreJobs}
+        />
+      ))}
+    </div>
+  );
+}

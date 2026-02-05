@@ -44,17 +44,55 @@ export default function TalentProfilePage() {
   const router = useRouter();
   const { baseProfile, setBaseProfile } = useOnboardingForm();
   const [loading, setLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const step = TALENT_STEPS[0]; // profile
   const canContinue = baseProfile.location.trim().length > 0;
 
-  function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setBaseProfile({ profilePhotoUrl: url });
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      setError("Please upload a JPEG, PNG, WebP, or GIF image.");
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image must be 5MB or less.");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/profile/photo", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Failed to upload photo");
+        return;
+      }
+
+      const { url } = await res.json();
+      setBaseProfile({ profilePhotoUrl: url });
+    } catch {
+      setError("Failed to upload photo. Please try again.");
+    } finally {
+      setUploadingPhoto(false);
+    }
   }
 
   async function handleContinue() {
@@ -130,13 +168,19 @@ export default function TalentProfilePage() {
             variant="tertiary"
             leftIcon={<Camera size={20} weight="fill" />}
             onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingPhoto}
+            loading={uploadingPhoto}
           >
-            {baseProfile.profilePhotoUrl ? "Change Profile Photo" : "Upload Profile Photo"}
+            {uploadingPhoto
+              ? "Uploading..."
+              : baseProfile.profilePhotoUrl
+                ? "Change Profile Photo"
+                : "Upload Profile Photo"}
           </Button>
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             className="hidden"
             onChange={handlePhotoUpload}
           />

@@ -335,6 +335,11 @@ export const componentsNav: NavItem[] = [
         label: "Role Template Card",
         href: "/design-system/components/role-template-card",
       },
+      {
+        id: "job-application-table",
+        label: "Job Application Table",
+        href: "/design-system/components/job-application-table",
+      },
     ],
   },
 ];
@@ -1131,6 +1136,31 @@ export const searchIndex: SearchItem[] = [
     category: "ATS",
     href: "/design-system/components/role-template-card",
     keywords: ["template", "role", "job", "card"],
+  },
+  {
+    id: "job-application-table",
+    title: "Job Application Table",
+    category: "ATS",
+    href: "/design-system/components/job-application-table",
+    keywords: [
+      "application",
+      "tracking",
+      "pipeline",
+      "job seeker",
+      "emoji",
+      "reaction",
+      "saved",
+      "applied",
+      "interview",
+      "offer",
+      "hired",
+      "ineligible",
+      "favorite",
+      "star",
+      "stage",
+      "collapsible",
+      "table",
+    ],
   },
 ];
 
