@@ -19,14 +19,15 @@ const listStatusProps = [
     name: "variant",
     type: '"critical" | "favorite" | "success" | "bipoc" | "bookmark"',
     default: "-",
+    required: true,
     description:
       "The status variant to display. Each variant has a unique color scheme and default icon.",
   },
   {
     name: "size",
-    type: '"xs" | "sm" | "default" | "lg" | "xl"',
+    type: '"xs" | "sm" | "default" | "lg" | "xl" | "2xl" | "3xl"',
     default: '"default"',
-    description: "Size of the status badge (12px, 16px, 20px, 24px, or 28px diameter).",
+    description: "Size of the status badge (12px, 16px, 20px, 24px, 28px, 40px, or 54px diameter).",
   },
   {
     name: "icon",
@@ -39,6 +40,12 @@ const listStatusProps = [
     type: "boolean",
     default: "true",
     description: "Whether to show the white border around the badge.",
+  },
+  {
+    name: "ref",
+    type: "React.Ref<HTMLSpanElement>",
+    default: "undefined",
+    description: "Forwarded ref to the underlying span element.",
   },
   {
     name: "className",
@@ -79,7 +86,7 @@ const variantDetails = [
     description: "Use to highlight BIPOC-owned businesses or candidates.",
     bgColor: "purple-200",
     iconColor: "purple-600",
-    icon: "CheckCircle",
+    icon: "Heart",
   },
   {
     variant: "bookmark" as const,
@@ -143,7 +150,8 @@ export default function ListStatusPage() {
           },
           {
             name: "Border",
-            description: "2px white border with subtle shadow for visibility on light backgrounds",
+            description:
+              "White border that scales proportionally with the badge size (~10% of container)",
           },
         ]}
       />
@@ -205,17 +213,19 @@ export default function ListStatusPage() {
       <ComponentCard
         id="sizes"
         title="Sizes"
-        description="Available size options from extra small (12px) to extra large (28px)"
+        description="Available size options from extra small (12px) to 3xl (54px)"
       >
         <CodePreview
           code={`<ListStatus variant="success" size="xs" />  {/* 12px */}
 <ListStatus variant="success" size="sm" />  {/* 16px */}
 <ListStatus variant="success" size="default" />  {/* 20px */}
 <ListStatus variant="success" size="lg" />  {/* 24px */}
-<ListStatus variant="success" size="xl" />  {/* 28px */}`}
+<ListStatus variant="success" size="xl" />  {/* 28px */}
+<ListStatus variant="success" size="2xl" />  {/* 40px */}
+<ListStatus variant="success" size="3xl" />  {/* 54px */}`}
         >
           <div className="flex items-end gap-6">
-            {(["xs", "sm", "default", "lg", "xl"] as const).map((size) => (
+            {(["xs", "sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
               <div key={size} className="flex flex-col items-center gap-2">
                 <ListStatus variant="success" size={size} />
                 <span className="text-caption text-foreground-muted">{size}</span>
@@ -296,50 +306,80 @@ export default function ListStatusPage() {
       <ComponentCard
         id="with-avatar"
         title="With Avatar"
-        description="Position the status badge on user avatars"
+        description="Position the status badge on user avatars. Badge size should scale proportionally with the avatar."
       >
         <CodePreview
-          code={`<div className="relative inline-flex">
-  <Avatar name="Jane Doe" size="lg" />
+          code={`{/* 48px avatar (default) + 20px badge (default) */}
+<div className="relative inline-flex">
+  <Avatar name="Jane Doe" size="default" />
   <span className="absolute -bottom-0.5 -right-0.5">
-    <ListStatus variant="success" size="sm" />
+    <ListStatus variant="success" />
   </span>
 </div>`}
         >
           <div className="flex items-center gap-8">
             {/* Success - Verified */}
             <div className="relative inline-flex">
-              <Avatar name="Jane Doe" size="lg" />
+              <Avatar name="Jane Doe" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="success" size="sm" />
+                <ListStatus variant="success" />
               </span>
             </div>
 
             {/* Favorite */}
             <div className="relative inline-flex">
-              <Avatar name="John Smith" size="lg" />
+              <Avatar name="John Smith" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="favorite" size="sm" />
+                <ListStatus variant="favorite" />
               </span>
             </div>
 
             {/* BIPOC Owned */}
             <div className="relative inline-flex">
-              <Avatar name="Maria Garcia" size="lg" />
+              <Avatar name="Maria Garcia" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="bipoc" size="sm" />
+                <ListStatus variant="bipoc" />
               </span>
             </div>
 
             {/* Critical */}
             <div className="relative inline-flex">
-              <Avatar name="Alex Kim" size="lg" />
+              <Avatar name="Alex Kim" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="critical" size="sm" />
+                <ListStatus variant="critical" />
               </span>
             </div>
           </div>
         </CodePreview>
+
+        {/* Proportional sizing guide */}
+        <div className="mt-6 border-t border-border-muted pt-6">
+          <p className="mb-4 text-caption-strong text-foreground">Proportional Sizing Guide</p>
+          <div className="flex items-end gap-6">
+            {[
+              { avatarSize: "xs" as const, badgeSize: "xs" as const, label: "24px + 12px" },
+              { avatarSize: "sm" as const, badgeSize: "xs" as const, label: "32px + 12px" },
+              {
+                avatarSize: "default" as const,
+                badgeSize: "default" as const,
+                label: "48px + 20px",
+              },
+              { avatarSize: "lg" as const, badgeSize: "xl" as const, label: "64px + 28px" },
+              { avatarSize: "xl" as const, badgeSize: "2xl" as const, label: "96px + 40px" },
+              { avatarSize: "2xl" as const, badgeSize: "3xl" as const, label: "128px + 54px" },
+            ].map(({ avatarSize, badgeSize, label }) => (
+              <div key={avatarSize} className="flex flex-col items-center gap-2">
+                <div className="relative inline-flex">
+                  <Avatar name="Jane Doe" size={avatarSize} />
+                  <span className="absolute -bottom-0.5 -right-0.5">
+                    <ListStatus variant="success" size={badgeSize} />
+                  </span>
+                </div>
+                <span className="text-caption text-foreground-muted">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </ComponentCard>
 
       {/* In a List */}
@@ -360,7 +400,7 @@ export default function ListStatusPage() {
               className="flex items-center gap-3 rounded-lg bg-background-subtle p-3"
             >
               <div className="relative">
-                <Avatar name={item.name} size="default" />
+                <Avatar name={item.name} size="sm" />
                 <span className="absolute -bottom-0.5 -right-0.5">
                   <ListStatus variant={item.status} size="xs" />
                 </span>
@@ -385,7 +425,7 @@ export default function ListStatusPage() {
             <thead>
               <tr className="border-b border-border-muted text-left">
                 <th className="py-2 pr-4 text-caption-strong text-foreground-muted">Variant</th>
-                {(["xs", "sm", "default", "lg", "xl"] as const).map((size) => (
+                {(["xs", "sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
                   <th
                     key={size}
                     className="px-4 py-2 text-center text-caption-strong text-foreground-muted"
@@ -404,7 +444,7 @@ export default function ListStatusPage() {
                         {variant}
                       </code>
                     </td>
-                    {(["xs", "sm", "default", "lg", "xl"] as const).map((size) => (
+                    {(["xs", "sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
                       <td key={size} className="px-4 py-3 text-center">
                         <ListStatus variant={variant} size={size} />
                       </td>

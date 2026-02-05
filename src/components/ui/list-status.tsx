@@ -3,12 +3,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import {
-  CheckCircle,
-  Warning,
-  Star,
-  BookmarkSimple,
-} from "@phosphor-icons/react";
+import { CheckCircle, Heart, Warning, Star, BookmarkSimple } from "@phosphor-icons/react";
 
 /**
  * ListStatus component based on Figma Design System (1281:4500)
@@ -20,7 +15,7 @@ import {
  *
  * Figma Specs:
  * - Size: 20px diameter (default)
- * - Border: 2px white
+ * - Border: white, scales proportionally (~10% of container size)
  * - Border radius: full (24px in Figma, but we use rounded-full)
  * - Icon: 14px (fits within 14px inner area after border)
  *
@@ -28,7 +23,7 @@ import {
  * - Critical: red-100 bg (#FFEBF4), red-500 icon (#FF5C5C), Warning icon
  * - Favorite: yellow-100 bg (#FFF7D6), yellow-400 icon (#FFCE47), Star icon
  * - Success: green-200 bg (#DCFAC8), green-600 icon (#3BA36F), CheckCircle icon
- * - BIPOC Owned: purple-200 bg (#F1E0FF), purple-600 icon (#5B1DB8), CheckCircle icon
+ * - BIPOC Owned: purple-200 bg (#F1E0FF), purple-600 icon (#5B1DB8), Heart icon
  * - Bookmark: blue-100 bg (#E5F1FF), blue-500 icon (#3369FF), Bookmark icon
  */
 
@@ -60,7 +55,7 @@ const listStatusConfig: Record<
     bg: "bg-[var(--primitive-purple-200)]",
     iconColor: "text-[var(--primitive-purple-600)]",
     label: "BIPOC Owned",
-    icon: CheckCircle,
+    icon: Heart,
   },
   bookmark: {
     bg: "bg-[var(--primitive-blue-100)]",
@@ -71,21 +66,17 @@ const listStatusConfig: Record<
 };
 
 const listStatusVariants = cva(
-  [
-    "inline-flex items-center justify-center",
-    "rounded-full",
-    "border-2 border-white",
-    // Shadow for better visibility on light backgrounds
-    "shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
-  ],
+  ["inline-flex items-center justify-center", "rounded-full", "border-white"],
   {
     variants: {
       size: {
-        xs: "size-3", // 12px
-        sm: "size-4", // 16px
-        default: "size-5", // 20px (Figma default)
-        lg: "size-6", // 24px
-        xl: "size-7", // 28px
+        xs: "size-3 border", // 12px, 1px border
+        sm: "size-4 border-[1.5px]", // 16px, 1.5px border
+        default: "size-5 border-2", // 20px, 2px border (Figma default)
+        lg: "size-6 border-[2.5px]", // 24px, 2.5px border
+        xl: "size-7 border-[3px]", // 28px, 3px border
+        "2xl": "size-10 border-4", // 40px, 4px border
+        "3xl": "size-[54px] border-[5px]", // 54px, 5px border
       },
     },
     defaultVariants: {
@@ -100,10 +91,13 @@ const iconSizeMap: Record<NonNullable<VariantProps<typeof listStatusVariants>["s
   default: "size-3.5", // 14px
   lg: "size-4", // 16px
   xl: "size-5", // 20px
+  "2xl": "size-7", // 28px
+  "3xl": "size-9", // 36px
 };
 
 export interface ListStatusProps
-  extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children">,
+  extends
+    Omit<React.HTMLAttributes<HTMLSpanElement>, "children">,
     VariantProps<typeof listStatusVariants> {
   /** The status variant to display */
   variant: ListStatusVariant;
@@ -114,17 +108,7 @@ export interface ListStatusProps
 }
 
 const ListStatus = React.forwardRef<HTMLSpanElement, ListStatusProps>(
-  (
-    {
-      className,
-      variant,
-      size = "default",
-      icon,
-      bordered = true,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, variant, size = "default", icon, bordered = true, ...props }, ref) => {
     const config = listStatusConfig[variant];
     const IconComponent = config.icon;
     const iconSize = iconSizeMap[size || "default"];
@@ -135,12 +119,7 @@ const ListStatus = React.forwardRef<HTMLSpanElement, ListStatusProps>(
         role="status"
         aria-label={config.label}
         title={config.label}
-        className={cn(
-          listStatusVariants({ size }),
-          config.bg,
-          !bordered && "border-0 shadow-none",
-          className
-        )}
+        className={cn(listStatusVariants({ size }), config.bg, !bordered && "border-0", className)}
         {...props}
       >
         {icon || (
