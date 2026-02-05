@@ -27,6 +27,7 @@ import {
   SmileyMeh,
   SmileySad,
   SmileyXEyes,
+  Check,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "./avatar";
@@ -143,43 +144,88 @@ export const sectionConfig: Record<ApplicationSection, SectionConfig> = {
 
 // ============================================
 // STAGE COLORS (for dropdown pills)
+// Based on Figma: node-id=3145-16691 (MigrateToFilterPill)
 // ============================================
 
 export const stageColors: Record<
   ApplicationSection,
-  { bg: string; text: string; iconColor: string }
+  {
+    bg: string;
+    text: string;
+    iconColor: string;
+    hoverBorder: string;
+    selectedBg: string;
+    selectedText: string;
+    iconBg: string;
+  }
 > = {
   saved: {
     bg: "bg-[var(--primitive-blue-200)]",
     text: "text-[var(--primitive-blue-600)]",
     iconColor: "text-[var(--primitive-blue-600)]",
+    hoverBorder: "border-[var(--primitive-blue-300)]",
+    selectedBg: "bg-[var(--primitive-blue-100)]",
+    selectedText: "text-[var(--primitive-blue-500)]",
+    iconBg: "bg-[var(--primitive-blue-500)]",
   },
   applied: {
-    bg: "bg-[var(--primitive-yellow-100)]",
-    text: "text-[var(--primitive-yellow-700)]",
-    iconColor: "text-[var(--primitive-yellow-700)]",
+    bg: "bg-[var(--primitive-purple-200)]",
+    text: "text-[var(--primitive-purple-600)]",
+    iconColor: "text-[var(--primitive-purple-600)]",
+    hoverBorder: "border-[var(--primitive-purple-300)]",
+    selectedBg: "bg-[var(--primitive-purple-100)]",
+    selectedText: "text-[var(--primitive-purple-500)]",
+    iconBg: "bg-[var(--primitive-purple-500)]",
   },
   interview: {
-    bg: "bg-[var(--primitive-green-100)]",
-    text: "text-[var(--primitive-green-700)]",
-    iconColor: "text-[var(--primitive-green-700)]",
+    bg: "bg-[var(--primitive-orange-200)]",
+    text: "text-[var(--primitive-orange-600)]",
+    iconColor: "text-[var(--primitive-orange-600)]",
+    hoverBorder: "border-[var(--primitive-orange-300)]",
+    selectedBg: "bg-[var(--primitive-orange-100)]",
+    selectedText: "text-[var(--primitive-orange-500)]",
+    iconBg: "bg-[var(--primitive-orange-500)]",
   },
   offer: {
-    bg: "bg-[var(--primitive-purple-100)]",
-    text: "text-[var(--primitive-purple-700)]",
-    iconColor: "text-[var(--primitive-purple-700)]",
+    bg: "bg-[var(--primitive-green-200)]",
+    text: "text-[var(--primitive-green-600)]",
+    iconColor: "text-[var(--primitive-green-600)]",
+    hoverBorder: "border-[var(--primitive-green-300)]",
+    selectedBg: "bg-[var(--primitive-green-100)]",
+    selectedText: "text-[var(--primitive-green-500)]",
+    iconBg: "bg-[var(--primitive-green-500)]",
   },
   hired: {
-    bg: "bg-[var(--primitive-green-200)]",
+    bg: "bg-[var(--primitive-neutral-100)]",
     text: "text-[var(--primitive-green-800)]",
     iconColor: "text-[var(--primitive-green-800)]",
+    hoverBorder: "border-[var(--primitive-neutral-300)]",
+    selectedBg:
+      "bg-gradient-to-r from-[var(--primitive-red-200)] via-[var(--primitive-yellow-200)] to-[var(--primitive-green-200)]",
+    selectedText: "text-[var(--primitive-green-800)]",
+    iconBg:
+      "bg-gradient-to-br from-[var(--primitive-red-400)] via-[var(--primitive-yellow-400)] to-[var(--primitive-green-400)]",
   },
   ineligible: {
-    bg: "bg-[var(--primitive-red-100)]",
-    text: "text-[var(--primitive-red-700)]",
-    iconColor: "text-[var(--primitive-red-700)]",
+    bg: "bg-[var(--primitive-red-200)]",
+    text: "text-[var(--primitive-red-600)]",
+    iconColor: "text-[var(--primitive-red-600)]",
+    hoverBorder: "border-[var(--primitive-red-300)]",
+    selectedBg: "bg-[var(--primitive-red-100)]",
+    selectedText: "text-[var(--primitive-red-500)]",
+    iconBg: "bg-[var(--primitive-red-500)]",
   },
 };
+
+// Stage order for determining past/future states in dropdown
+const stageOrder: ApplicationSection[] = [
+  "saved",
+  "applied",
+  "interview",
+  "offer",
+  "hired",
+  "ineligible",
+];
 
 // ============================================
 // EMOJI CONFIG
@@ -320,41 +366,142 @@ function TableHeaderRow({ onSort }: TableHeaderRowProps) {
   );
 }
 
-/** Stage Dropdown Pill */
+/** Stage Dropdown Pill
+ * @figma https://www.figma.com/design/q1985VWRuwMkSc1hIqu5X9/Trails-Design-System?node-id=3145-16691
+ * @figma https://www.figma.com/design/q1985VWRuwMkSc1hIqu5X9/Trails-Design-System?node-id=4663-4359
+ *
+ * Features:
+ * - Stage-colored pill with hover border effect
+ * - Dropdown with "Migrate to:" header
+ * - List items show Past/Selected/Default states based on pipeline position
+ */
 interface StagePillProps {
   currentStage: ApplicationSection;
   onStageChange?: (newStage: ApplicationSection) => void;
+}
+
+/** Determine the visual state of a stage option in the dropdown */
+type StageItemState = "past" | "selected" | "default";
+
+function getStageItemState(
+  optionStage: ApplicationSection,
+  currentStage: ApplicationSection
+): StageItemState {
+  const currentIndex = stageOrder.indexOf(currentStage);
+  const optionIndex = stageOrder.indexOf(optionStage);
+
+  if (optionStage === currentStage) return "selected";
+  if (optionIndex < currentIndex) return "past";
+  return "default";
 }
 
 function StagePill({ currentStage, onStageChange }: StagePillProps) {
   const colors = stageColors[currentStage];
   const config = sectionConfig[currentStage];
 
+  // Map stage to hover border color CSS variable
+  const hoverBorderColorVar: Record<ApplicationSection, string> = {
+    saved: "var(--primitive-blue-300)",
+    applied: "var(--primitive-purple-300)",
+    interview: "var(--primitive-orange-300)",
+    offer: "var(--primitive-green-300)",
+    hired: "var(--primitive-neutral-300)",
+    ineligible: "var(--primitive-red-300)",
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "flex items-center justify-between gap-2 rounded-lg p-2",
+            "flex w-[140px] items-center justify-between gap-2 rounded-lg border-2 border-transparent p-2 transition-all",
             colors.bg,
-            "cursor-pointer transition-opacity hover:opacity-90"
+            "cursor-pointer"
           )}
+          style={
+            {
+              "--hover-border-color": hoverBorderColorVar[currentStage],
+            } as React.CSSProperties
+          }
+          // Using a hover style via inline CSS custom property
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = hoverBorderColorVar[currentStage];
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "transparent";
+          }}
         >
           <span className={cn("text-caption-strong", colors.text)}>{config.label}</span>
           <CaretDown size={24} className={colors.iconColor} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[180px]">
-        {(Object.keys(sectionConfig) as ApplicationSection[]).map((stage) => (
-          <DropdownMenuItem
-            key={stage}
-            onClick={() => onStageChange?.(stage)}
-            className={cn(stage === currentStage && "bg-[var(--primitive-neutral-100)]")}
-          >
-            <span className={cn("mr-2 size-3 rounded-full", stageColors[stage].bg)} />
-            {sectionConfig[stage].label}
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent
+        align="start"
+        className="w-[198px] p-4 shadow-[2px_4px_16px_rgba(31,29,28,0.12)]"
+      >
+        {/* Header */}
+        <div className="mb-2 px-2 text-caption text-[var(--primitive-neutral-600)]">
+          Migrate to:
+        </div>
+
+        {/* Stage options with visual state progression */}
+        <div className="flex flex-col gap-2">
+          {stageOrder.map((stage) => {
+            const stageConfig = sectionConfig[stage];
+            const stageColorConfig = stageColors[stage];
+            const itemState = getStageItemState(stage, currentStage);
+
+            return (
+              <button
+                key={stage}
+                onClick={() => onStageChange?.(stage)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors",
+                  // Background based on state
+                  itemState === "selected" && stageColorConfig.selectedBg,
+                  itemState === "past" && "bg-[var(--primitive-neutral-100)]",
+                  itemState === "default" &&
+                    "bg-[var(--primitive-neutral-0)] hover:bg-[var(--primitive-neutral-100)]"
+                )}
+              >
+                {/* Icon box */}
+                <div
+                  className={cn(
+                    "flex size-6 items-center justify-center rounded",
+                    // Icon background based on state
+                    itemState === "selected" && stageColorConfig.iconBg,
+                    itemState === "past" &&
+                      "border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]",
+                    itemState === "default" &&
+                      "border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]"
+                  )}
+                >
+                  {itemState === "selected" ? (
+                    <Check size={16} weight="bold" className="text-white" />
+                  ) : itemState === "past" ? (
+                    <Check
+                      size={16}
+                      weight="bold"
+                      className="text-[var(--primitive-neutral-300)]"
+                    />
+                  ) : null}
+                </div>
+
+                {/* Label */}
+                <span
+                  className={cn(
+                    "text-caption-strong",
+                    itemState === "selected" && stageColorConfig.selectedText,
+                    itemState === "past" && "text-[var(--primitive-neutral-500)]",
+                    itemState === "default" && "text-[var(--primitive-green-800)]"
+                  )}
+                >
+                  {stageConfig.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -529,7 +676,7 @@ function EmptyState({ section, onAction }: EmptyStateProps) {
           {config.emptyDescription}
         </p>
       </div>
-      <Button variant="inverse" size="md" onClick={onAction}>
+      <Button variant="inverse" size="default" onClick={onAction}>
         {config.emptyCta}
       </Button>
     </div>

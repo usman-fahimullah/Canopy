@@ -474,7 +474,7 @@ const applications: JobApplication[] = [
           SECTION 9: ACCESSIBILITY
           ============================================ */}
       <AccessibilityInfo
-        notes={[
+        items={[
           "**Keyboard**: Collapsible sections are keyboard accessible via Tab + Enter/Space",
           "**ARIA**: Expand/collapse button uses aria-expanded",
           "**Focus**: All interactive elements have visible focus states",
