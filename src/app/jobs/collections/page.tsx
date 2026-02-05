@@ -14,6 +14,7 @@ import {
 import { type PathwayType, pathwayLabels } from "@/components/ui/pathway-tag";
 import { ArrowCircleRight } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import { getCollectionPathways } from "@/lib/jobs/helpers";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -49,40 +50,6 @@ const FEATURED_PATHWAYS: PathwayType[] = [
   "research",
   "technology",
 ];
-
-/* ------------------------------------------------------------------ */
-/*  Helper function to derive pathways from collection data            */
-/* ------------------------------------------------------------------ */
-
-// Since collections don't store pathways directly, we derive them from
-// gradient colors or use defaults. In a real implementation, you might
-// want to add a pathways field to the Collection model.
-function getCollectionPathways(collection: Collection): PathwayType[] {
-  // For now, assign pathways based on collection title keywords
-  const title = collection.title.toLowerCase();
-
-  if (title.includes("urban") || title.includes("city")) {
-    return ["urban-planning", "construction", "transportation"];
-  }
-  if (title.includes("planet") || title.includes("global") || title.includes("conservation")) {
-    return ["conservation", "research", "policy"];
-  }
-  if (title.includes("game") || title.includes("sport")) {
-    return ["sports"];
-  }
-  if (title.includes("knowledge") || title.includes("education") || title.includes("research")) {
-    return ["education", "research", "media"];
-  }
-  if (title.includes("energy") || title.includes("clean") || title.includes("renewable")) {
-    return ["energy", "technology"];
-  }
-  if (title.includes("finance") || title.includes("green finance") || title.includes("esg")) {
-    return ["finance"];
-  }
-
-  // Default pathways
-  return ["conservation", "energy"];
-}
 
 /* ------------------------------------------------------------------ */
 /*  Loading Skeleton                                                   */

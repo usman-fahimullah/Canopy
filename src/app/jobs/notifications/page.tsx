@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Bell,
@@ -79,7 +80,10 @@ export default function TalentNotificationsPage() {
   const markRead = async (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch((err) => {
-      logger.error("Failed to mark notification as read", { error: formatError(err), notificationId: id });
+      logger.error("Failed to mark notification as read", {
+        error: formatError(err),
+        notificationId: id,
+      });
     });
   };
 
@@ -110,7 +114,7 @@ export default function TalentNotificationsPage() {
 
       <div className="px-8 py-6 lg:px-12">
         {notifications.length === 0 ? (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
+          <Card variant="outlined" className="p-12 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-neutral-100)]">
               <Bell size={28} className="text-foreground-muted" />
             </div>
@@ -118,7 +122,7 @@ export default function TalentNotificationsPage() {
             <p className="mt-1 text-caption text-foreground-muted">
               You&apos;re all caught up. New notifications will appear here.
             </p>
-          </div>
+          </Card>
         ) : (
           <div className="space-y-6">
             {groups.map((group) => (
@@ -133,17 +137,17 @@ export default function TalentNotificationsPage() {
                       <button
                         key={notif.id}
                         onClick={() => markRead(notif.id)}
-                        className={`flex w-full items-start gap-4 rounded-[16px] border bg-[var(--card-background)] px-6 py-4 text-left transition-colors ${
+                        className={`flex w-full items-start gap-4 rounded-[var(--radius-2xl)] border bg-[var(--card-background)] px-6 py-4 text-left transition-colors ${
                           notif.read
-                            ? "border-[var(--primitive-neutral-200)]"
-                            : "bg-[var(--primitive-green-100)]/30 border-[var(--primitive-green-200)]"
+                            ? "border-[var(--border-muted)]"
+                            : "bg-[var(--background-success)]/30 border-[var(--border-success)]"
                         }`}
                       >
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--background-success)]">
                           <Icon
                             size={20}
                             weight="fill"
-                            className="text-[var(--primitive-green-700)]"
+                            className="text-[var(--foreground-success)]"
                           />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -163,7 +167,7 @@ export default function TalentNotificationsPage() {
                           })}
                         </span>
                         {!notif.read && (
-                          <span className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--primitive-green-500)]" />
+                          <span className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-[var(--foreground-success)]" />
                         )}
                       </button>
                     );

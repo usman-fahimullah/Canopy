@@ -4,8 +4,12 @@ import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/shell/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Chip } from "@/components/ui/chip";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Table, CalendarBlank, Briefcase } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import { stageBadgeVariant, stageLabel } from "@/lib/jobs/helpers";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -30,43 +34,6 @@ interface Application {
 type StageFilter = "All" | "Applied" | "Screening" | "Interview" | "Offer";
 
 const STAGE_FILTERS: StageFilter[] = ["All", "Applied", "Screening", "Interview", "Offer"];
-
-/**
- * Map an application status/stage to a Badge variant.
- * Uses the same convention as the talent dashboard.
- */
-function stageBadgeVariant(stage: string) {
-  switch (stage.toLowerCase()) {
-    case "applied":
-    case "new":
-      return "info" as const;
-    case "screening":
-    case "reviewing":
-      return "default" as const;
-    case "interview":
-      return "feature" as const;
-    case "offer":
-      return "warning" as const;
-    case "hired":
-      return "success" as const;
-    case "rejected":
-      return "error" as const;
-    default:
-      return "neutral" as const;
-  }
-}
-
-/** Normalise raw status strings into a display label */
-function stageLabel(stage: string): string {
-  switch (stage.toLowerCase()) {
-    case "new":
-      return "Applied";
-    case "reviewing":
-      return "Screening";
-    default:
-      return stage.charAt(0).toUpperCase() + stage.slice(1);
-  }
-}
 
 /* ------------------------------------------------------------------ */
 /*  Page Component                                                     */
@@ -135,18 +102,15 @@ export default function ApplicationsPage() {
           {STAGE_FILTERS.map((filter) => {
             const isActive = stageFilter === filter;
             return (
-              <button
+              <Chip
                 key={filter}
-                type="button"
+                variant="neutral"
+                size="lg"
+                selected={isActive}
                 onClick={() => setStageFilter(filter)}
-                className={`rounded-[16px] px-4 py-2 text-caption font-bold transition-colors ${
-                  isActive
-                    ? "bg-[var(--primitive-green-800)] text-[var(--primitive-blue-100)]"
-                    : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] hover:bg-[var(--primitive-neutral-300)]"
-                }`}
               >
                 {filter}
-              </button>
+              </Chip>
             );
           })}
         </div>
@@ -157,11 +121,11 @@ export default function ApplicationsPage() {
             {filteredApplications.map((app) => (
               <div
                 key={app.id}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card"
+                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card"
               >
                 {/* Icon */}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
-                  <Briefcase size={20} weight="fill" className="text-[var(--primitive-blue-600)]" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--background-info)]">
+                  <Briefcase size={20} weight="fill" className="text-[var(--foreground-info)]" />
                 </div>
 
                 {/* Role + Company */}
@@ -192,14 +156,14 @@ export default function ApplicationsPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
+          <Card variant="outlined" className="p-8 text-center">
             <Table
               size={32}
               weight="light"
               className="mx-auto mb-3 text-[var(--foreground-subtle)]"
             />
             <p className="text-body text-[var(--foreground-muted)]">No applications yet</p>
-          </div>
+          </Card>
         )}
       </div>
     </div>

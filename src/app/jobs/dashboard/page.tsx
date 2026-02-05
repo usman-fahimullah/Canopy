@@ -8,6 +8,8 @@ import { DashboardChecklist } from "@/components/shell/dashboard-checklist";
 import { Spinner } from "@/components/ui/spinner";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { stageBadgeVariant } from "@/lib/jobs/helpers";
+import { Card } from "@/components/ui/card";
 import {
   MagnifyingGlass,
   Table,
@@ -62,25 +64,6 @@ function getGreeting() {
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
-}
-
-function stageBadgeVariant(stage: string) {
-  switch (stage.toLowerCase()) {
-    case "applied":
-      return "info";
-    case "screening":
-      return "default";
-    case "interview":
-      return "feature";
-    case "offer":
-      return "warning";
-    case "hired":
-      return "success";
-    case "rejected":
-      return "error";
-    default:
-      return "neutral";
-  }
 }
 
 export default function TalentDashboardPage() {
@@ -143,7 +126,7 @@ export default function TalentDashboardPage() {
 
       {/* Greeting + Quick Actions */}
       <div className="flex flex-col gap-6 px-8 py-6 lg:px-12">
-        <h2 className="text-heading-md font-medium text-[var(--primitive-green-800)]">
+        <h2 className="text-heading-md font-medium text-[var(--foreground-brand-emphasis)]">
           {getGreeting()}
         </h2>
         <div className="flex flex-wrap gap-3">
@@ -151,7 +134,7 @@ export default function TalentDashboardPage() {
             href="/jobs/search"
             className={cn(
               buttonVariants({ variant: "primary" }),
-              "rounded-[16px] px-4 py-4 text-body font-bold"
+              "rounded-2xl px-4 py-4 text-body font-bold"
             )}
           >
             <MagnifyingGlass size={20} weight="bold" />
@@ -161,7 +144,7 @@ export default function TalentDashboardPage() {
             href="/jobs/applications"
             className={cn(
               buttonVariants({ variant: "tertiary" }),
-              "rounded-[16px] px-4 py-4 text-body font-bold"
+              "rounded-2xl px-4 py-4 text-body font-bold"
             )}
           >
             <Table size={20} weight="fill" />
@@ -171,7 +154,7 @@ export default function TalentDashboardPage() {
             href="/jobs/profile"
             className={cn(
               buttonVariants({ variant: "tertiary" }),
-              "rounded-[16px] px-4 py-4 text-body font-bold"
+              "rounded-2xl px-4 py-4 text-body font-bold"
             )}
           >
             <User size={20} weight="bold" />
@@ -212,16 +195,12 @@ export default function TalentDashboardPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-5 transition-shadow hover:shadow-card"
+              className="flex flex-col gap-3 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-4 py-5 transition-shadow hover:shadow-card"
             >
               <div className="flex items-center justify-between">
                 <p className="text-caption text-foreground-muted">{stat.label}</p>
-                <div className="rounded-lg bg-[var(--primitive-green-100)] p-1.5">
-                  <stat.icon
-                    size={16}
-                    weight="bold"
-                    className="text-[var(--primitive-green-700)]"
-                  />
+                <div className="rounded-lg bg-[var(--background-brand-subtle)] p-1.5">
+                  <stat.icon size={16} weight="bold" className="text-[var(--foreground-brand)]" />
                 </div>
               </div>
               <p className="text-foreground-default text-heading-sm font-semibold">{stat.value}</p>
@@ -240,7 +219,7 @@ export default function TalentDashboardPage() {
             href="/jobs/search"
             className={cn(
               buttonVariants({ variant: "inverse" }),
-              "rounded-[16px] px-4 py-3.5 text-caption font-bold"
+              "rounded-2xl px-4 py-3.5 text-caption font-bold"
             )}
           >
             View All
@@ -254,10 +233,10 @@ export default function TalentDashboardPage() {
               <Link
                 key={job.id}
                 href={`/jobs/search/${job.id}`}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-4 transition-shadow hover:shadow-card"
+                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4 transition-shadow hover:shadow-card"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
-                  <Buildings size={20} weight="fill" className="text-[var(--primitive-blue-600)]" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background-info)]">
+                  <Buildings size={20} weight="fill" className="text-[var(--foreground-info)]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-foreground-default truncate text-body font-medium">
@@ -288,11 +267,11 @@ export default function TalentDashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
+          <Card variant="outlined" className="p-8 text-center">
             <p className="text-body text-foreground-muted">
               No job matches yet. Complete your profile to get personalized recommendations.
             </p>
-          </div>
+          </Card>
         )}
       </section>
 
@@ -304,7 +283,7 @@ export default function TalentDashboardPage() {
             href="/jobs/applications"
             className={cn(
               buttonVariants({ variant: "inverse" }),
-              "rounded-[16px] px-4 py-3.5 text-caption font-bold"
+              "rounded-2xl px-4 py-3.5 text-caption font-bold"
             )}
           >
             View All
@@ -317,7 +296,7 @@ export default function TalentDashboardPage() {
             {data.recentApplications.map((app) => (
               <div
                 key={app.id}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-4"
+                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4"
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-foreground-default truncate text-body font-medium">
@@ -336,11 +315,11 @@ export default function TalentDashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
+          <Card variant="outlined" className="p-8 text-center">
             <p className="text-body text-foreground-muted">
               You haven&apos;t applied to any roles yet. Browse jobs to get started.
             </p>
-          </div>
+          </Card>
         )}
       </section>
     </div>

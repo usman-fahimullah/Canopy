@@ -23,12 +23,13 @@ import { Button } from "./button";
  * - Background: white (#FFFFFF)
  * - Border radius: 12px
  * - Padding: 16px
- * - Shadow: 1px 2px 16px rgba(31, 29, 28, 0.08) - Level 1
- * - Shadow hover: 2px 4px 16px rgba(31, 29, 28, 0.12) - Level 2
+ * - Shadow: Level 1 default, Level 2 on hover
  *
- * Layout:
- * - Default: Header (avatar + company name) → Job Title → Tags row (PathwayTag minimized + InfoTags)
- * - Hover: Header → Job Title → Action buttons ("Save It" + "View Job")
+ * Motion:
+ * - Card: translateY(-2px) lift + shadow transition on hover
+ * - Tags row: slide down/out on hover (200ms, ease-out)
+ * - Buttons row: slide up/in on hover (200ms, ease-out)
+ * - Both rows always in DOM for smooth CSS transitions
  */
 
 const jobPostCardVariants = cva(
@@ -37,7 +38,10 @@ const jobPostCardVariants = cva(
     "bg-[var(--primitive-neutral-0)]",
     "rounded-[12px]",
     "p-4",
-    "transition-all duration-200 ease-out",
+    // Use card motion tokens: transform + shadow
+    "transition-[transform,box-shadow]",
+    "duration-[var(--duration-moderate)]",
+    "ease-[var(--ease-out)]",
   ],
   {
     variants: {
@@ -134,11 +138,11 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
         ref={ref}
         className={cn(
           jobPostCardVariants({ size }),
-          // Shadow - Figma Level 1 default, Level 2 on hover
-          isHovered
-            ? "shadow-[2px_4px_16px_rgba(31,29,28,0.12)]"
-            : "shadow-[1px_2px_16px_rgba(31,29,28,0.08)]",
-          // Cursor and hover state
+          // Shadow tokens
+          "shadow-[var(--shadow-card)]",
+          // Hover: lift + elevated shadow
+          isHovered && "-translate-y-0.5 shadow-[var(--shadow-card-hover)]",
+          // Cursor
           (onClick || onViewJob) && "cursor-pointer",
           className
         )}
@@ -154,7 +158,6 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
           {/* Header Row: Company avatar + name (+ optional status badge) */}
           <div className="flex items-center gap-2">
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              {/* Figma: 32px avatar, rounded-lg, border neutral-300 */}
               <Avatar
                 size="sm"
                 src={companyLogo}
@@ -162,13 +165,11 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
                 alt={`${companyName} logo`}
                 className="shrink-0"
               />
-              {/* Figma: 14px regular, neutral-800, truncate */}
               <span className="truncate text-sm text-[var(--foreground-default)]">
                 {companyName}
               </span>
             </div>
 
-            {/* Status Badge (only for non-default status variants) */}
             {statusData && (
               <div
                 className={cn(
@@ -184,66 +185,67 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
             )}
           </div>
 
-          {/* Figma: 24px medium, neutral-800, 32px line-height */}
           <h3 className="line-clamp-2 text-2xl font-medium leading-8 text-[var(--foreground-default)]">
             {jobTitle}
           </h3>
         </div>
 
-        {/* Bottom Section: Tags (default) or Action Buttons (hover) */}
-        <div className="flex items-center gap-2">
-          {isHovered ? (
-            // Hover state: "Save It" button + "View Job" button
-            <>
-              {/* Figma: blue-100 bg, rounded-2xl, px-4 py-3.5, bookmark icon + "Save It" text */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSave?.();
-                }}
-                className={cn(
-                  "inline-flex items-center justify-center gap-1",
-                  "rounded-2xl px-4 py-3.5",
-                  "bg-[var(--button-secondary-background)]",
-                  "transition-colors duration-150",
-                  "hover:bg-[var(--button-secondary-background-hover)]",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
-                )}
-                aria-label={saved ? "Remove from saved" : "Save job"}
-              >
-                <BookmarkSimple
-                  size={20}
-                  weight={saved ? "fill" : "regular"}
-                  className="text-[var(--button-secondary-foreground)]"
-                />
-                <span className="text-sm font-bold text-[var(--button-secondary-foreground)]">
-                  {saved ? "Saved" : "Save It"}
-                </span>
-              </button>
+        {/* Bottom Section: Stacked rows with slide transition
+            Both rows are always in the DOM. We use a clipping container
+            and translateY to slide them in/out. */}
+        <div className="relative h-12 overflow-hidden">
+          {/* Tags row — slides down and fades out on hover */}
+          <div
+            className={cn(
+              "absolute inset-x-0 top-0 flex items-center gap-2",
+              "transition-[transform,opacity] duration-[var(--duration-moderate)] ease-[var(--ease-out)]",
+              isHovered
+                ? "pointer-events-none translate-y-3 opacity-0"
+                : "translate-y-0 opacity-100"
+            )}
+            aria-hidden={isHovered}
+          >
+            {pathway && <PathwayTag pathway={pathway} minimized className="shrink-0" />}
+            {tags.slice(0, 2).map((tag, index) => (
+              <InfoTag key={index}>{tag}</InfoTag>
+            ))}
+          </div>
 
-              {/* Figma: neutral-200 bg (tertiary), rounded-2xl, text only */}
-              <Button
-                variant="tertiary"
-                size="default"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onViewJob?.();
-                }}
-                className="shrink-0"
-              >
-                {actionText}
-              </Button>
-            </>
-          ) : (
-            // Default state: PathwayTag (minimized) + InfoTags
-            <>
-              {pathway && <PathwayTag pathway={pathway} minimized className="shrink-0" />}
-              {tags.slice(0, 2).map((tag, index) => (
-                <InfoTag key={index}>{tag}</InfoTag>
-              ))}
-            </>
-          )}
+          {/* Action buttons row — slides up from below on hover */}
+          <div
+            className={cn(
+              "absolute inset-x-0 top-0 flex items-center gap-2",
+              "transition-[transform,opacity] duration-[var(--duration-moderate)] ease-[var(--ease-out)]",
+              isHovered
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none -translate-y-3 opacity-0"
+            )}
+            aria-hidden={!isHovered}
+          >
+            <Button
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSave?.();
+              }}
+              aria-label={saved ? "Remove from saved" : "Save job"}
+            >
+              <BookmarkSimple size={20} weight={saved ? "fill" : "regular"} />
+              {saved ? "Saved" : "Save It"}
+            </Button>
+
+            <Button
+              variant="tertiary"
+              size="default"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewJob?.();
+              }}
+              className="shrink-0"
+            >
+              {actionText}
+            </Button>
+          </div>
         </div>
       </div>
     );

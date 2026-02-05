@@ -261,8 +261,8 @@ export default function TalentSettingsPage() {
                   onClick={() => setActiveSection(item.id)}
                   className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors ${
                     isActive
-                      ? "bg-[var(--primitive-green-100)] text-[var(--primitive-green-800)]"
-                      : "text-foreground-muted hover:bg-[var(--primitive-neutral-100)]"
+                      ? "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand-emphasis)]"
+                      : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
                   }`}
                 >
                   <Icon size={20} weight={isActive ? "fill" : "regular"} />
@@ -274,7 +274,7 @@ export default function TalentSettingsPage() {
             {/* Sign out */}
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[var(--primitive-red-600)] transition-colors hover:bg-[var(--primitive-red-100)]"
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[var(--foreground-error)] transition-colors hover:bg-[var(--background-error)]"
             >
               <SignOut size={20} weight="regular" />
               <span className="text-body-sm font-medium">Sign out</span>
@@ -322,9 +322,9 @@ export default function TalentSettingsPage() {
                 )}
               </div>
 
-              <div className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
+              <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)]">
                 {/* Avatar & name header */}
-                <div className="flex items-center gap-4 border-b border-[var(--primitive-neutral-200)] px-6 py-6">
+                <div className="flex items-center gap-4 border-b border-[var(--border-muted)] px-6 py-6">
                   <Avatar
                     size="lg"
                     src={profile.avatar || undefined}
@@ -360,7 +360,7 @@ export default function TalentSettingsPage() {
                 </div>
 
                 {/* Email (read-only) */}
-                <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] px-6 py-4">
+                <div className="flex items-center justify-between border-b border-[var(--border-muted)] px-6 py-4">
                   <div>
                     <p className="text-foreground-default text-body-sm font-medium">Email</p>
                     <div className="mt-1 flex items-center gap-2">
@@ -373,7 +373,7 @@ export default function TalentSettingsPage() {
                 </div>
 
                 {/* Bio */}
-                <div className="border-b border-[var(--primitive-neutral-200)] px-6 py-4">
+                <div className="border-b border-[var(--border-muted)] px-6 py-4">
                   <p className="text-foreground-default mb-1 text-body-sm font-medium">Bio</p>
                   {!isEditing ? (
                     <p className="text-caption text-foreground-muted">
@@ -426,7 +426,7 @@ export default function TalentSettingsPage() {
                 </p>
               </div>
 
-              <div className="divide-y divide-[var(--primitive-neutral-200)] rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
+              <div className="divide-y divide-[var(--border-muted)] rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)]">
                 <div className="px-6 py-4">
                   <SwitchWithLabel
                     label="Job alerts"
@@ -473,12 +473,12 @@ export default function TalentSettingsPage() {
                 </p>
               </div>
 
-              <div className="divide-y divide-[var(--primitive-neutral-200)] rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)]">
+              <div className="divide-y divide-[var(--border-muted)] rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)]">
                 {/* Profile visibility */}
                 <div className="px-6 py-4">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 rounded-lg bg-[var(--primitive-green-100)] p-2">
-                      <Eye size={18} className="text-[var(--primitive-green-700)]" />
+                    <div className="mt-0.5 rounded-lg bg-[var(--background-brand-subtle)] p-2">
+                      <Eye size={18} className="text-[var(--foreground-brand)]" />
                     </div>
                     <div className="flex-1">
                       <SwitchWithLabel
@@ -494,8 +494,8 @@ export default function TalentSettingsPage() {
                 {/* Search visibility */}
                 <div className="px-6 py-4">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 rounded-lg bg-[var(--primitive-green-100)] p-2">
-                      <MagnifyingGlass size={18} className="text-[var(--primitive-green-700)]" />
+                    <div className="mt-0.5 rounded-lg bg-[var(--background-brand-subtle)] p-2">
+                      <MagnifyingGlass size={18} className="text-[var(--foreground-brand)]" />
                     </div>
                     <div className="flex-1">
                       <SwitchWithLabel
@@ -512,7 +512,7 @@ export default function TalentSettingsPage() {
                 <div className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 rounded-lg bg-[var(--primitive-neutral-200)] p-2">
+                      <div className="mt-0.5 rounded-lg bg-[var(--background-muted)] p-2">
                         <Download size={18} className="text-[var(--foreground-muted)]" />
                       </div>
                       <div>
@@ -532,11 +532,11 @@ export default function TalentSettingsPage() {
                 <div className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 rounded-lg bg-[var(--primitive-red-100)] p-2">
-                        <Trash size={18} className="text-[var(--primitive-red-600)]" />
+                      <div className="mt-0.5 rounded-lg bg-[var(--background-error)] p-2">
+                        <Trash size={18} className="text-[var(--foreground-error)]" />
                       </div>
                       <div>
-                        <p className="text-body-sm font-medium text-[var(--primitive-red-600)]">
+                        <p className="text-body-sm font-medium text-[var(--foreground-error)]">
                           Delete account
                         </p>
                         <p className="text-caption text-foreground-muted">
@@ -554,7 +554,7 @@ export default function TalentSettingsPage() {
                       </Button>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <p className="text-caption font-medium text-[var(--primitive-red-600)]">
+                        <p className="text-caption font-medium text-[var(--foreground-error)]">
                           Not available yet
                         </p>
                         <Button

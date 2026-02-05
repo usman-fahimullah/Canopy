@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/components/ui/tabs";
 import { BookOpen } from "@phosphor-icons/react";
+import { Card } from "@/components/ui/card";
 import { PathwayCard } from "./components/pathway-card";
 import { CourseCard } from "./components/course-card";
 import { CertificationCard } from "./components/certification-card";
@@ -170,7 +171,7 @@ export default function TreehousePage() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
+                <Card variant="outlined" className="p-12 text-center">
                   <BookOpen
                     size={40}
                     weight="light"
@@ -182,7 +183,7 @@ export default function TreehousePage() {
                   <p className="mt-1 text-caption text-[var(--foreground-muted)]">
                     Browse the Explore tab to find courses
                   </p>
-                </div>
+                </Card>
               )}
             </div>
           </TabsContent>
@@ -204,7 +205,7 @@ export default function TreehousePage() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
+                <Card variant="outlined" className="p-12 text-center">
                   <BookOpen
                     size={40}
                     weight="light"
@@ -216,13 +217,13 @@ export default function TreehousePage() {
                   <p className="mt-1 text-caption text-[var(--foreground-muted)]">
                     Explore learning pathways to begin earning certifications
                   </p>
-                </div>
+                </Card>
               )}
 
               {/* Summary if earned certs exist */}
               {earnedCerts.length > 0 && (
-                <div className="mt-6 rounded-[16px] border border-[var(--primitive-green-200)] bg-[var(--primitive-green-100)] p-4">
-                  <p className="text-body font-medium text-[var(--primitive-green-800)]">
+                <div className="mt-6 rounded-[var(--radius-2xl)] border border-[var(--border-success)] bg-[var(--background-success)] p-4">
+                  <p className="text-body font-medium text-[var(--foreground-brand-emphasis)]">
                     {earnedCerts.length} certification{earnedCerts.length !== 1 ? "s" : ""} earned
                   </p>
                 </div>

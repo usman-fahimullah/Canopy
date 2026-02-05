@@ -11,6 +11,8 @@ import {
   PathwayIllustration,
   EmptyStateNoResults,
   Button,
+  Chip,
+  Card,
   Skeleton,
   SkeletonCard,
   DropdownMenu,
@@ -21,6 +23,12 @@ import {
 import { type PathwayType, pathwayLabels } from "@/components/ui/pathway-tag";
 import { ArrowCircleRight, PencilSimple, CaretDown, Faders } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import {
+  getLocationTypeLabel,
+  getEmploymentTypeLabel,
+  getJobStatus,
+  getCollectionPathways,
+} from "@/lib/jobs/helpers";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -109,71 +117,6 @@ const FEATURED_PATHWAYS: PathwayType[] = [
   "education",
   "energy",
 ];
-
-/* ------------------------------------------------------------------ */
-/*  Helper functions                                                   */
-/* ------------------------------------------------------------------ */
-
-function getLocationTypeLabel(locationType: string): string {
-  switch (locationType) {
-    case "REMOTE":
-      return "Remote";
-    case "HYBRID":
-      return "Hybrid";
-    case "ONSITE":
-      return "Onsite";
-    default:
-      return locationType;
-  }
-}
-
-function getEmploymentTypeLabel(employmentType: string): string {
-  switch (employmentType) {
-    case "FULL_TIME":
-      return "Full-Time";
-    case "PART_TIME":
-      return "Part-Time";
-    case "CONTRACT":
-      return "Contract";
-    case "INTERNSHIP":
-      return "Internship";
-    default:
-      return employmentType;
-  }
-}
-
-function getJobStatus(job: JobMatch): "default" | "featured" | "bipoc-owned" | "closing-soon" {
-  if (job.organization?.isBipocOwned || job.isBipocOwned) return "bipoc-owned";
-  if (job.isFeatured) return "featured";
-  if (job.isClosingSoon) return "closing-soon";
-  return "default";
-}
-
-// Derive pathways from collection title (since API doesn't include pathways field yet)
-function getCollectionPathways(collection: CollectionFromAPI): PathwayType[] {
-  const title = collection.title.toLowerCase();
-
-  if (title.includes("urban") || title.includes("city")) {
-    return ["urban-planning", "construction", "transportation"];
-  }
-  if (title.includes("planet") || title.includes("global") || title.includes("conservation")) {
-    return ["conservation", "research", "policy"];
-  }
-  if (title.includes("game") || title.includes("sport")) {
-    return ["sports"];
-  }
-  if (title.includes("knowledge") || title.includes("education") || title.includes("research")) {
-    return ["education", "research", "media"];
-  }
-  if (title.includes("energy") || title.includes("clean") || title.includes("renewable")) {
-    return ["energy", "technology"];
-  }
-  if (title.includes("finance") || title.includes("green finance") || title.includes("esg")) {
-    return ["finance"];
-  }
-
-  return ["conservation", "energy"];
-}
 
 /* ------------------------------------------------------------------ */
 /*  Loading Skeletons                                                  */
@@ -276,18 +219,10 @@ function FilterChip({
   onClick?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-caption font-medium transition-colors ${
-        active
-          ? "bg-[var(--primitive-green-800)] text-[var(--primitive-neutral-0)]"
-          : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] hover:bg-[var(--primitive-neutral-300)]"
-      }`}
-    >
+    <Chip variant="neutral" size="lg" selected={active} onClick={onClick}>
       {label}
       {hasDropdown && <CaretDown size={16} weight="bold" />}
-    </button>
+    </Chip>
   );
 }
 
@@ -320,14 +255,14 @@ function SectionHeader({
             <ArrowCircleRight size={20} weight="fill" />
           </Link>
         ) : (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
             onClick={onLinkClick}
-            className="inline-flex items-center gap-1 text-body font-medium text-[var(--foreground-default)] transition-colors hover:text-[var(--foreground-brand)]"
+            className="text-body font-medium text-[var(--foreground-default)] hover:text-[var(--foreground-brand)]"
           >
             {linkText}
             <ArrowCircleRight size={20} weight="fill" />
-          </button>
+          </Button>
         ))}
     </div>
   );
@@ -603,17 +538,10 @@ export default function JobsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-caption font-medium transition-colors ${
-                    filters.datePosted !== "all"
-                      ? "bg-[var(--primitive-green-800)] text-[var(--primitive-neutral-0)]"
-                      : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] hover:bg-[var(--primitive-neutral-300)]"
-                  }`}
-                >
+                <Chip variant="neutral" size="lg" selected={filters.datePosted !== "all"}>
                   Date Posted
                   <CaretDown size={16} weight="bold" />
-                </button>
+                </Chip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem onSelect={() => {}}>Any time</DropdownMenuItem>
@@ -625,17 +553,10 @@ export default function JobsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-caption font-medium transition-colors ${
-                    filters.workplace !== "all"
-                      ? "bg-[var(--primitive-green-800)] text-[var(--primitive-neutral-0)]"
-                      : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] hover:bg-[var(--primitive-neutral-300)]"
-                  }`}
-                >
+                <Chip variant="neutral" size="lg" selected={filters.workplace !== "all"}>
                   Workplace
                   <CaretDown size={16} weight="bold" />
-                </button>
+                </Chip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 <DropdownMenuItem onSelect={() => setWorkplaceFilter("all")}>All</DropdownMenuItem>
@@ -656,19 +577,16 @@ export default function JobsPage() {
             <FilterChip label="Job Role" hasDropdown />
             <FilterChip label="Salary" hasDropdown />
 
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] px-4 py-2.5 text-caption font-medium text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-neutral-100)]"
-            >
+            <Button variant="outline" size="sm">
               <Faders size={16} weight="bold" />
               All Filters
-            </button>
+            </Button>
           </div>
 
           {/* Results Count */}
           <p className="text-body text-[var(--foreground-muted)]">
             Showing{" "}
-            <span className="font-semibold text-[var(--primitive-green-700)]">{jobs.length}</span>{" "}
+            <span className="font-semibold text-[var(--foreground-brand)]">{jobs.length}</span>{" "}
             Results
           </p>
 

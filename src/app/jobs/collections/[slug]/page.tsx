@@ -8,6 +8,7 @@ import {
   JobPostCard,
   PathwayTag,
   Button,
+  Chip,
   Skeleton,
   SkeletonCard,
   EmptyStateNoResults,
@@ -19,6 +20,12 @@ import {
 import { type PathwayType } from "@/components/ui/pathway-tag";
 import { ArrowLeft, CaretDown, Faders } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import {
+  getLocationTypeLabel,
+  getEmploymentTypeLabel,
+  getJobStatus,
+  getCollectionPathways,
+} from "@/lib/jobs/helpers";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -78,67 +85,6 @@ type WorkplaceFilter = "all" | "REMOTE" | "HYBRID" | "ONSITE";
 /*  Helper functions                                                   */
 /* ------------------------------------------------------------------ */
 
-function getLocationTypeLabel(locationType: string): string {
-  switch (locationType) {
-    case "REMOTE":
-      return "Remote";
-    case "HYBRID":
-      return "Hybrid";
-    case "ONSITE":
-      return "Onsite";
-    default:
-      return locationType;
-  }
-}
-
-function getEmploymentTypeLabel(employmentType: string): string {
-  switch (employmentType) {
-    case "FULL_TIME":
-      return "Full-Time";
-    case "PART_TIME":
-      return "Part-Time";
-    case "CONTRACT":
-      return "Contract";
-    case "INTERNSHIP":
-      return "Internship";
-    default:
-      return employmentType;
-  }
-}
-
-function getJobStatus(job: Job): "default" | "featured" | "bipoc-owned" | "closing-soon" {
-  if (job.organization?.isBipocOwned || job.isBipocOwned) return "bipoc-owned";
-  if (job.isFeatured) return "featured";
-  if (job.isClosingSoon) return "closing-soon";
-  return "default";
-}
-
-// Derive pathways from collection title
-function getCollectionPathways(collection: Collection): PathwayType[] {
-  const title = collection.title.toLowerCase();
-
-  if (title.includes("urban") || title.includes("city")) {
-    return ["urban-planning", "construction", "transportation"];
-  }
-  if (title.includes("planet") || title.includes("global") || title.includes("conservation")) {
-    return ["conservation", "research", "policy"];
-  }
-  if (title.includes("game") || title.includes("sport")) {
-    return ["sports"];
-  }
-  if (title.includes("knowledge") || title.includes("education") || title.includes("research")) {
-    return ["education", "research", "media"];
-  }
-  if (title.includes("energy") || title.includes("clean") || title.includes("renewable")) {
-    return ["energy", "technology"];
-  }
-  if (title.includes("finance") || title.includes("green finance") || title.includes("esg")) {
-    return ["finance"];
-  }
-
-  return ["conservation", "energy"];
-}
-
 // Generate gradient CSS from colors array
 function getGradientStyle(gradientColors: string[] | null): React.CSSProperties {
   if (!gradientColors || gradientColors.length === 0) {
@@ -152,37 +98,6 @@ function getGradientStyle(gradientColors: string[] | null): React.CSSProperties 
   return {
     background: `linear-gradient(135deg, ${gradientColors.join(", ")})`,
   };
-}
-
-/* ------------------------------------------------------------------ */
-/*  Filter Chip Component                                              */
-/* ------------------------------------------------------------------ */
-
-function FilterChip({
-  label,
-  active,
-  hasDropdown,
-  onClick,
-}: {
-  label: string;
-  active?: boolean;
-  hasDropdown?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-caption font-medium transition-colors ${
-        active
-          ? "bg-[var(--primitive-green-800)] text-[var(--primitive-neutral-0)]"
-          : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] hover:bg-[var(--primitive-neutral-300)]"
-      }`}
-    >
-      {label}
-      {hasDropdown && <CaretDown size={16} weight="bold" />}
-    </button>
-  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -402,25 +317,21 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
 
         {/* Filter Chips Row */}
         <div className="flex flex-wrap gap-3">
-          <FilterChip
-            label="BIPOC Owned"
-            active={bipocFilter}
+          <Chip
+            variant="neutral"
+            size="lg"
+            selected={bipocFilter}
             onClick={() => setBipocFilter(!bipocFilter)}
-          />
+          >
+            BIPOC Owned
+          </Chip>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-caption font-medium transition-colors ${
-                  workplaceFilter !== "all"
-                    ? "bg-[var(--primitive-green-800)] text-[var(--primitive-neutral-0)]"
-                    : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-green-800)] hover:bg-[var(--primitive-neutral-300)]"
-                }`}
-              >
+              <Chip variant="neutral" size="lg" selected={workplaceFilter !== "all"}>
                 Workplace
                 <CaretDown size={16} weight="bold" />
-              </button>
+              </Chip>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               <DropdownMenuItem onSelect={() => setWorkplaceFilter("all")}>All</DropdownMenuItem>
@@ -436,16 +347,19 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <FilterChip label="Experience" hasDropdown />
-          <FilterChip label="Salary" hasDropdown />
+          <Chip variant="neutral" size="lg">
+            Experience
+            <CaretDown size={16} weight="bold" />
+          </Chip>
+          <Chip variant="neutral" size="lg">
+            Salary
+            <CaretDown size={16} weight="bold" />
+          </Chip>
 
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] px-4 py-2.5 text-caption font-medium text-[var(--primitive-green-800)] transition-colors hover:bg-[var(--primitive-neutral-100)]"
-          >
+          <Button variant="outline" size="sm">
             <Faders size={16} weight="bold" />
             All Filters
-          </button>
+          </Button>
         </div>
 
         {/* Results Count */}
