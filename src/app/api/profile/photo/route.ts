@@ -61,7 +61,20 @@ export async function POST(request: NextRequest) {
     const path = `${account.id}/avatar-${timestamp}.${ext}`;
 
     // Upload to Supabase storage using admin client (bypasses RLS)
-    const adminClient = createAdminClient();
+    let adminClient;
+    try {
+      adminClient = createAdminClient();
+    } catch (configError) {
+      logger.error("Supabase admin client not configured", {
+        error: formatError(configError),
+        endpoint: "/api/profile/photo",
+      });
+      return NextResponse.json(
+        { error: "Storage service is not configured. Please contact support." },
+        { status: 503 }
+      );
+    }
+
     const { error: uploadError } = await adminClient.storage
       .from("avatars")
       .upload(path, file, { cacheControl: "3600", upsert: true });
@@ -69,10 +82,11 @@ export async function POST(request: NextRequest) {
     if (uploadError) {
       logger.error("Photo upload failed", {
         error: formatError(uploadError),
+        uploadErrorMessage: uploadError.message,
         endpoint: "/api/profile/photo",
         accountId: account.id,
       });
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+      return NextResponse.json({ error: `Upload failed: ${uploadError.message}` }, { status: 500 });
     }
 
     // Get the public URL
@@ -91,11 +105,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: urlData.publicUrl }, { status: 201 });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     logger.error("Photo upload error", {
       error: formatError(error),
+      message,
       endpoint: "/api/profile/photo",
     });
-    return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 });
+    return NextResponse.json({ error: `Failed to upload photo: ${message}` }, { status: 500 });
   }
 }
 
