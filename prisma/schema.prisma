@@ -32,7 +32,16 @@ model Account {
   // Onboarding fields (shared across roles)
   pronouns    String?  // e.g., "he/him", "she/her", "they/them"
   ethnicity   String?  // For diversity reporting
-  linkedinUrl String?  // LinkedIn profile URL
+  birthday    DateTime?
+
+  // Social URLs
+  linkedinUrl   String?  // LinkedIn profile URL
+  instagramUrl  String?
+  threadsUrl    String?
+  facebookUrl   String?
+  blueskyUrl    String?
+  xUrl          String?
+  websiteUrl    String?
 
   // Multi-role onboarding
   entryIntent         String?   // "talent" | "coach" | "employer" — what brought them here
@@ -209,6 +218,7 @@ model SeekerProfile {
 
   // Professional info
   resumeUrl       String?
+  coverLetterUrl  String?
   portfolioUrl    String?
   headline        String?
 
@@ -910,24 +920,25 @@ model CollectionJob {
 // =================================================================
 
 model Goal {
-  id          String     @id @default(cuid())
+  id          String        @id @default(cuid())
 
   seekerId    String
   seeker      SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
   title       String
-  description String?    @db.Text
-  icon        String?    // Phosphor icon name
+  description String?       @db.Text
+  icon        String?       // Phosphor icon name
+  category    GoalCategory?
 
-  progress    Int        @default(0) // 0-100
+  progress    Int           @default(0) // 0-100
   targetDate  DateTime?
   completedAt DateTime?
-  status      GoalStatus @default(ACTIVE)
+  status      GoalStatus    @default(ACTIVE)
 
   milestones  Milestone[]
 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Milestone {
@@ -948,6 +959,13 @@ enum GoalStatus {
   ACTIVE
   COMPLETED
   ARCHIVED
+}
+
+enum GoalCategory {
+  INTERVIEWING
+  NETWORKING
+  COMPENSATION
+  ORGANIZATION
 }
 
 // =================================================================

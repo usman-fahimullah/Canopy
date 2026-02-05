@@ -3,12 +3,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import {
-  Info,
-  CheckCircle,
-  Warning,
-  XCircle,
-} from "@phosphor-icons/react";
+import { Info, CheckCircle, Warning, XCircle } from "@phosphor-icons/react";
 
 /**
  * Input component based on Figma Design (5909:10500)
@@ -36,8 +31,8 @@ const inputVariants = cva(
     "flex w-full rounded-lg border",
     "bg-[var(--primitive-neutral-100)]",
     "border-[var(--primitive-neutral-200)]",
-    "text-lg text-foreground",  // Figma: 18px font, black text
-    "placeholder:text-[var(--primitive-neutral-600)]",  // Figma: #7a7671
+    "text-lg text-foreground", // Figma: 18px font, black text
+    "placeholder:text-[var(--primitive-neutral-600)]", // Figma: #7a7671
     "transition-all duration-normal ease-default",
     "focus:outline-none focus:ring-0",
     "disabled:cursor-not-allowed disabled:opacity-50",
@@ -64,10 +59,31 @@ const inputVariants = cva(
           "hover:border-[var(--primitive-green-700)]",
           "focus:border-[var(--primitive-green-600)]",
         ],
+        // Dashed border — for inline task inputs in goal modals
+        dashed: [
+          "border-dashed",
+          "border-[var(--primitive-neutral-300)]",
+          "bg-transparent",
+          "hover:border-[var(--primitive-neutral-400)]",
+          "focus:border-[var(--primitive-green-600)]",
+          "focus:border-solid",
+          "focus:bg-[var(--primitive-neutral-100)]",
+        ],
+        // Large text with only a dashed bottom border — for goal title inputs
+        "dashed-title": [
+          "border-0 border-b-2 border-dashed",
+          "border-[var(--primitive-neutral-300)]",
+          "bg-transparent",
+          "rounded-none",
+          "text-heading-sm font-bold",
+          "hover:border-[var(--primitive-neutral-400)]",
+          "focus:border-[var(--primitive-green-600)]",
+          "focus:border-solid",
+        ],
       },
       inputSize: {
-        default: "p-4",  // Figma: 16px padding
-        lg: "p-4 text-lg",  // Figma: 18px font for forms
+        default: "p-4", // Figma: 16px padding
+        lg: "p-4 text-lg", // Figma: 18px font for forms
         sm: "p-3 text-sm",
       },
     },
@@ -79,7 +95,8 @@ const inputVariants = cva(
 );
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
     VariantProps<typeof inputVariants> {
   /** Error state - shows red border and styling */
   error?: boolean;
@@ -93,17 +110,7 @@ export interface InputProps
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    {
-      className,
-      type,
-      variant,
-      inputSize,
-      error,
-      success,
-      leftAddon,
-      rightAddon,
-      ...props
-    },
+    { className, type, variant, inputSize, error, success, leftAddon, rightAddon, ...props },
     ref
   ) => {
     // Determine effective variant based on state props
@@ -120,20 +127,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "bg-[var(--primitive-neutral-100)]",
             "border-[var(--primitive-neutral-200)]",
             "p-4",
-            "transition-all duration-normal ease-default",
+            "ease-default transition-all duration-normal",
             "hover:border-[var(--primitive-neutral-300)]",
             // Figma: focus uses green-600 border
             "focus-within:border-[var(--primitive-green-600)]",
             // Figma: error uses red-600 border
             error && "border-[var(--primitive-red-600)] hover:border-[var(--primitive-red-700)]",
             // Figma: success uses green-600 border
-            success && "border-[var(--primitive-green-600)] hover:border-[var(--primitive-green-700)]",
+            success &&
+              "border-[var(--primitive-green-600)] hover:border-[var(--primitive-green-700)]",
             className
           )}
         >
           {leftAddon && (
             // Figma: 24px left icon, neutral-600 color (#7a7671)
-            <div className="flex items-center text-[var(--primitive-neutral-600)] [&>svg]:w-6 [&>svg]:h-6">
+            <div className="flex items-center text-[var(--primitive-neutral-600)] [&>svg]:h-6 [&>svg]:w-6">
               {leftAddon}
             </div>
           )}
@@ -142,7 +150,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               // Input inside container - no borders, inherit bg
               // Figma: 18px font, black text, placeholder neutral-600
-              "flex-1 bg-transparent text-lg text-[var(--foreground-default)] leading-6",
+              "flex-1 bg-transparent text-lg leading-6 text-[var(--foreground-default)]",
               "placeholder:text-[var(--primitive-neutral-600)]",
               "outline-none",
               "disabled:cursor-not-allowed disabled:opacity-50"
@@ -153,7 +161,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
           {rightAddon && (
             // Figma: 16px right icon, green-800 color (#0A3D2C)
-            <div className="flex items-center text-[var(--primitive-green-800)] [&>svg]:w-4 [&>svg]:h-4">
+            <div className="flex items-center text-[var(--primitive-green-800)] [&>svg]:h-4 [&>svg]:w-4">
               {rightAddon}
             </div>
           )}
@@ -167,7 +175,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         className={cn(
           inputVariants({ variant: effectiveVariant, inputSize }),
           // Figma: filled state uses black text
-          "text-[var(--foreground-default)] leading-6",
+          "leading-6 text-[var(--foreground-default)]",
           className
         )}
         ref={ref}
@@ -204,10 +212,7 @@ export interface InputMessageProps extends React.HTMLAttributes<HTMLDivElement> 
   children: React.ReactNode;
 }
 
-const statusConfig: Record<
-  InputMessageStatus,
-  { icon: React.ElementType; className: string }
-> = {
+const statusConfig: Record<InputMessageStatus, { icon: React.ElementType; className: string }> = {
   error: {
     icon: XCircle,
     // Figma: red-500 (#ff5c5c)
@@ -240,25 +245,18 @@ const InputMessage = React.forwardRef<HTMLDivElement, InputMessageProps>(
         ref={ref}
         className={cn(
           // Figma: flex, gap 8px, py-1 (4px), rounded-sm
-          "flex items-start gap-2 px-0 py-1 rounded-sm",
+          "flex items-start gap-2 rounded-sm px-0 py-1",
           className
         )}
         role={status === "error" ? "alert" : "status"}
         {...props}
       >
         {/* Figma: 16px icon container */}
-        <div className={cn("flex items-center justify-center shrink-0 size-4", config.className)}>
-          <Icon weight="fill" className="w-[18px] h-[18px]" />
+        <div className={cn("flex size-4 shrink-0 items-center justify-center", config.className)}>
+          <Icon weight="fill" className="h-[18px] w-[18px]" />
         </div>
         {/* Figma: 14px font, 20px line-height */}
-        <p
-          className={cn(
-            "flex-1 text-sm leading-5",
-            config.className
-          )}
-        >
-          {children}
-        </p>
+        <p className={cn("flex-1 text-sm leading-5", config.className)}>{children}</p>
       </div>
     );
   }
@@ -285,15 +283,8 @@ const InputWithMessage = React.forwardRef<HTMLInputElement, InputWithMessageProp
 
     return (
       <div className="flex flex-col gap-0">
-        <Input
-          ref={ref}
-          error={error}
-          success={success}
-          {...inputProps}
-        />
-        {message && (
-          <InputMessage status={effectiveStatus}>{message}</InputMessage>
-        )}
+        <Input ref={ref} error={error} success={success} {...inputProps} />
+        {message && <InputMessage status={effectiveStatus}>{message}</InputMessage>}
       </div>
     );
   }

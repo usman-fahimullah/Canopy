@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         { status: 422 }
       );
     }
-    const { title, description, icon, targetDate, milestones } = result.data;
+    const { title, description, icon, category, targetDate, milestones } = result.data;
 
     const goal = await prisma.goal.create({
       data: {
@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
         title: title.trim(),
         description: description || null,
         icon: icon || null,
+        category: category || null,
         targetDate: targetDate ? new Date(targetDate) : null,
         milestones:
           milestones && milestones.length > 0

@@ -42,13 +42,25 @@ export const AdminReviewActionSchema = z.object({
 
 // --- Goals ---
 
+export const GoalCategoryEnum = z.enum([
+  "INTERVIEWING",
+  "NETWORKING",
+  "COMPENSATION",
+  "ORGANIZATION",
+]);
+
 export const CreateGoalSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
     .transform((v) => v.trim()),
-  description: z.string().nullable().optional(),
+  description: z
+    .string()
+    .max(250, "Description must be 250 characters or fewer")
+    .nullable()
+    .optional(),
   icon: z.string().nullable().optional(),
+  category: GoalCategoryEnum.nullable().optional(),
   targetDate: z.string().nullable().optional(),
   milestones: z
     .array(z.object({ title: z.string().min(1) }))
@@ -58,10 +70,15 @@ export const CreateGoalSchema = z.object({
 
 export const UpdateGoalSchema = z.object({
   title: z.string().optional(),
-  description: z.string().nullable().optional(),
+  description: z
+    .string()
+    .max(250, "Description must be 250 characters or fewer")
+    .nullable()
+    .optional(),
   progress: z.number().min(0).max(100).optional(),
   status: z.string().optional(),
   icon: z.string().nullable().optional(),
+  category: GoalCategoryEnum.nullable().optional(),
   targetDate: z.string().nullable().optional(),
 });
 
@@ -117,9 +134,7 @@ export const SendMessageSchema = z
     attachmentUrls: z.array(z.string().url()).optional(),
   })
   .refine(
-    (data) =>
-      (data.content?.trim()?.length ?? 0) > 0 ||
-      (data.attachmentUrls?.length ?? 0) > 0,
+    (data) => (data.content?.trim()?.length ?? 0) > 0 || (data.attachmentUrls?.length ?? 0) > 0,
     { message: "Message content or attachments required" }
   );
 
@@ -132,7 +147,11 @@ export const UpdateSessionSchema = z.object({
 });
 
 export const CancelSessionSchema = z.object({
-  reason: z.string().max(500, "Reason must be 500 characters or fewer").optional().default("No reason provided"),
+  reason: z
+    .string()
+    .max(500, "Reason must be 500 characters or fewer")
+    .optional()
+    .default("No reason provided"),
 });
 
 export const RescheduleSessionSchema = z.object({
@@ -188,7 +207,15 @@ export const UpdateProfileSchema = z.object({
   bio: z.string().nullable().optional(),
   pronouns: z.string().nullable().optional(),
   ethnicity: z.string().nullable().optional(),
+  birthday: z.string().nullable().optional(),
+  // Social URLs
   linkedinUrl: z.string().nullable().optional(),
+  instagramUrl: z.string().nullable().optional(),
+  threadsUrl: z.string().nullable().optional(),
+  facebookUrl: z.string().nullable().optional(),
+  blueskyUrl: z.string().nullable().optional(),
+  xUrl: z.string().nullable().optional(),
+  websiteUrl: z.string().nullable().optional(),
   // Seeker profile fields
   headline: z.string().nullable().optional(),
   skills: z.array(z.string()).optional(),
@@ -197,8 +224,11 @@ export const UpdateProfileSchema = z.object({
   yearsExperience: z.number().nullable().optional(),
   targetSectors: z.array(z.string()).optional(),
   resumeUrl: z.string().nullable().optional(),
+  coverLetterUrl: z.string().nullable().optional(),
   portfolioUrl: z.string().nullable().optional(),
-  summary: z.string().nullable().optional(),
+  summary: z.string().max(250, "Summary must be 250 characters or fewer").nullable().optional(),
+  coverImage: z.string().nullable().optional(),
+  badge: z.string().nullable().optional(),
   isMentor: z.boolean().optional(),
   mentorBio: z.string().nullable().optional(),
   mentorTopics: z.array(z.string()).optional(),
@@ -226,7 +256,11 @@ export const UpdateCoachProfileSchema = z.object({
 export const CheckoutSchema = z.object({
   coachId: z.string().min(1, "Coach ID is required"),
   sessionDate: z.string().datetime({ message: "Session date must be a valid ISO datetime" }),
-  sessionDuration: z.number().int().min(15, "Duration must be at least 15 minutes").max(180, "Duration must be at most 180 minutes"),
+  sessionDuration: z
+    .number()
+    .int()
+    .min(15, "Duration must be at least 15 minutes")
+    .max(180, "Duration must be at most 180 minutes"),
 });
 
 export const RefundSchema = z.object({
@@ -254,9 +288,7 @@ export const CoachApplySchema = z.object({
   headline: z.string().min(1, "Headline is required"),
   bio: z.string().min(1, "Bio is required"),
   yearsInClimate: z.number().optional(),
-  expertise: z
-    .array(z.string())
-    .min(1, "At least one area of expertise is required"),
+  expertise: z.array(z.string()).min(1, "At least one area of expertise is required"),
   sectors: z.array(z.string()).min(1, "At least one sector is required"),
   sessionRate: z.number().optional(),
   availability: z.string().optional(),

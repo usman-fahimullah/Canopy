@@ -84,7 +84,14 @@ export async function PATCH(request: NextRequest) {
       bio,
       pronouns,
       ethnicity,
+      birthday,
       linkedinUrl,
+      instagramUrl,
+      threadsUrl,
+      facebookUrl,
+      blueskyUrl,
+      xUrl,
+      websiteUrl,
       // Seeker profile fields
       headline,
       skills,
@@ -93,8 +100,11 @@ export async function PATCH(request: NextRequest) {
       yearsExperience,
       targetSectors,
       resumeUrl,
+      coverLetterUrl,
       portfolioUrl,
       summary,
+      coverImage,
+      badge,
       isMentor,
       mentorBio,
       mentorTopics,
@@ -110,7 +120,14 @@ export async function PATCH(request: NextRequest) {
     if (bio !== undefined) accountUpdate.bio = bio;
     if (pronouns !== undefined) accountUpdate.pronouns = pronouns;
     if (ethnicity !== undefined) accountUpdate.ethnicity = ethnicity;
+    if (birthday !== undefined) accountUpdate.birthday = birthday ? new Date(birthday) : null;
     if (linkedinUrl !== undefined) accountUpdate.linkedinUrl = linkedinUrl;
+    if (instagramUrl !== undefined) accountUpdate.instagramUrl = instagramUrl;
+    if (threadsUrl !== undefined) accountUpdate.threadsUrl = threadsUrl;
+    if (facebookUrl !== undefined) accountUpdate.facebookUrl = facebookUrl;
+    if (blueskyUrl !== undefined) accountUpdate.blueskyUrl = blueskyUrl;
+    if (xUrl !== undefined) accountUpdate.xUrl = xUrl;
+    if (websiteUrl !== undefined) accountUpdate.websiteUrl = websiteUrl;
 
     if (Object.keys(accountUpdate).length > 0) {
       await prisma.account.update({
@@ -129,8 +146,11 @@ export async function PATCH(request: NextRequest) {
       if (yearsExperience !== undefined) seekerUpdate.yearsExperience = yearsExperience;
       if (targetSectors !== undefined) seekerUpdate.targetSectors = targetSectors;
       if (resumeUrl !== undefined) seekerUpdate.resumeUrl = resumeUrl;
+      if (coverLetterUrl !== undefined) seekerUpdate.coverLetterUrl = coverLetterUrl;
       if (portfolioUrl !== undefined) seekerUpdate.portfolioUrl = portfolioUrl;
       if (summary !== undefined) seekerUpdate.summary = summary;
+      if (coverImage !== undefined) seekerUpdate.coverImage = coverImage;
+      if (badge !== undefined) seekerUpdate.badge = badge;
       if (isMentor !== undefined) seekerUpdate.isMentor = isMentor;
       if (mentorBio !== undefined) seekerUpdate.mentorBio = mentorBio;
       if (mentorTopics !== undefined) seekerUpdate.mentorTopics = mentorTopics;

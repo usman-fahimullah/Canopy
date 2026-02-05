@@ -8,6 +8,7 @@ const BUCKETS = {
   avatars: "avatars",
   messageAttachments: "message-attachments",
   resumes: "resumes",
+  coverLetters: "cover-letters",
 } as const;
 
 type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];
@@ -23,12 +24,10 @@ export async function uploadFile(
 ): Promise<{ url: string; error?: string }> {
   const supabase = createClient();
 
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(path, file, {
-      cacheControl: "3600",
-      upsert: true,
-    });
+  const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+    cacheControl: "3600",
+    upsert: true,
+  });
 
   if (error) {
     logger.error("Storage upload failed", { error: formatError(error), endpoint: "lib/storage" });
@@ -36,9 +35,7 @@ export async function uploadFile(
   }
 
   // Get public URL
-  const { data: urlData } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(data.path);
+  const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
 
   return { url: urlData.publicUrl };
 }
@@ -81,6 +78,18 @@ export async function uploadResume(
 }
 
 /**
+ * Upload a cover letter
+ */
+export async function uploadCoverLetter(
+  file: File,
+  seekerId: string
+): Promise<{ url: string; error?: string }> {
+  const ext = file.name.split(".").pop() || "pdf";
+  const path = `${seekerId}/cover-letter.${ext}`;
+  return uploadFile(file, BUCKETS.coverLetters, path);
+}
+
+/**
  * Delete a file from Supabase Storage
  */
 export async function deleteFile(
@@ -89,9 +98,7 @@ export async function deleteFile(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = createClient();
 
-  const { error } = await supabase.storage
-    .from(bucket)
-    .remove([path]);
+  const { error } = await supabase.storage.from(bucket).remove([path]);
 
   if (error) {
     logger.error("Storage delete failed", { error: formatError(error), endpoint: "lib/storage" });

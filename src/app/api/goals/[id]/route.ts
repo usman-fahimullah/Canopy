@@ -53,12 +53,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         { status: 422 }
       );
     }
-    const { title, description, progress, status, icon, targetDate } = result.data;
+    const { title, description, progress, status, icon, category, targetDate } = result.data;
 
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (icon !== undefined) updateData.icon = icon;
+    if (category !== undefined) updateData.category = category;
     if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
     if (progress !== undefined) updateData.progress = Math.min(100, Math.max(0, progress));
     if (status !== undefined) {

@@ -1,0 +1,211 @@
+{
+  "version": "1.0",
+  "description": "Skill activation triggers for Canopy. Controls when skills automatically suggest or activate.",
+  "skills": {
+    "frontend-design": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Frontend design aesthetics and creative UI patterns",
+      "promptTriggers": {
+        "keywords": [
+          "design",
+          "aesthetic",
+          "visual",
+          "UI design",
+          "creative",
+          "layout",
+          "styling",
+          "beautiful",
+          "typography",
+          "color palette",
+          "motion",
+          "animation",
+          "responsive",
+          "dark mode",
+          "light mode"
+        ],
+        "intentPatterns": [
+          "(make|create|design|build).*?(beautiful|creative|stunning|polished)",
+          "(improve|enhance).*?(design|visual|aesthetic)",
+          "(style|design).*?(component|page|UI|interface)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": ["src/components/**/*.tsx", "src/app/**/page.tsx"],
+        "contentPatterns": ["className=", "tailwind", "animate-"]
+      }
+    },
+    "component-docs": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Component documentation standards and templates",
+      "promptTriggers": {
+        "keywords": [
+          "document",
+          "documentation",
+          "storybook",
+          "props",
+          "component docs",
+          "README",
+          "usage example",
+          "API reference"
+        ],
+        "intentPatterns": [
+          "(document|write docs|add docs).*?(component|UI)",
+          "(create|add).*?(storybook|documentation)",
+          "(how to|explain).*?use.*?component"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": ["src/components/**/*.stories.tsx", "src/components/**/README.md"]
+      }
+    },
+    "figma-workflow": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Figma to code implementation workflow",
+      "promptTriggers": {
+        "keywords": [
+          "figma",
+          "design spec",
+          "design file",
+          "implement design",
+          "from design",
+          "design handoff",
+          "design tokens",
+          "figma link",
+          "figma url"
+        ],
+        "intentPatterns": [
+          "(implement|build|create).*?from.*?figma",
+          "figma.*?(implement|build|create)",
+          "(match|follow|use).*?design"
+        ]
+      }
+    },
+    "code-quality": {
+      "type": "guardrail",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Code quality standards: auth, validation, logging, types",
+      "promptTriggers": {
+        "keywords": [
+          "api route",
+          "endpoint",
+          "validation",
+          "zod",
+          "auth",
+          "authorization",
+          "security",
+          "logging",
+          "logger",
+          "error handling",
+          "type safety",
+          "typescript"
+        ],
+        "intentPatterns": [
+          "(create|add|implement).*?(api|route|endpoint)",
+          "(add|implement).*?(validation|auth|security)",
+          "(fix|improve).*?(error handling|logging|types)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": ["src/app/api/**/*.ts", "src/lib/**/*.ts"],
+        "contentPatterns": ["export.*?(GET|POST|PUT|DELETE|PATCH)", "NextRequest", "NextResponse"]
+      }
+    },
+    "design-system": {
+      "type": "guardrail",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Design system: tokens, icons, components",
+      "promptTriggers": {
+        "keywords": [
+          "design system",
+          "icon",
+          "phosphor",
+          "button",
+          "input",
+          "form",
+          "color token",
+          "spacing",
+          "component library",
+          "ui component"
+        ],
+        "intentPatterns": [
+          "(use|add|create).*?(icon|button|input|component)",
+          "(replace|migrate).*?(icon|color|spacing)",
+          "(check|verify).*?design system"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": ["src/components/**/*.tsx"],
+        "contentPatterns": ["lucide-react", "heroicons", "#[0-9a-fA-F]{6}", "rgb\\(", "hsl\\("]
+      }
+    },
+    "scale-engineering": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Multi-tenant and scalable architecture patterns",
+      "promptTriggers": {
+        "keywords": [
+          "multi-tenant",
+          "tenant",
+          "organization",
+          "scalable",
+          "architecture",
+          "database design",
+          "schema",
+          "prisma"
+        ],
+        "intentPatterns": [
+          "(design|implement).*?(multi-tenant|scalable)",
+          "(add|create).*?tenant",
+          "(database|schema).*?(design|pattern)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": ["prisma/schema.prisma"]
+      }
+    },
+    "pre-merge": {
+      "type": "guardrail",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Pre-merge checklist and PR review standards",
+      "promptTriggers": {
+        "keywords": [
+          "pr",
+          "pull request",
+          "merge",
+          "review",
+          "code review",
+          "ready to merge",
+          "checklist"
+        ],
+        "intentPatterns": [
+          "(create|open|submit).*?pr",
+          "(review|check).*?(before|for).*?merge",
+          "ready.*?(merge|pr|review)"
+        ]
+      }
+    }
+  },
+  "notes": {
+    "enforcement_types": {
+      "suggest": "Skill appears as suggestion, doesn't block execution",
+      "block": "Must use skill before proceeding (guardrail)",
+      "warn": "Shows warning but allows proceeding"
+    },
+    "priority_levels": {
+      "critical": "Highest - Always trigger when matched",
+      "high": "Important - Trigger for most matches",
+      "medium": "Moderate - Trigger for clear matches",
+      "low": "Optional - Trigger only for explicit matches"
+    }
+  }
+}
