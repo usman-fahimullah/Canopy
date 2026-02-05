@@ -671,6 +671,8 @@ enum NotificationType {
   COACH_REJECTED
   PAYMENT_RECEIVED
   MENTOR_REQUEST
+  GOAL_DUE_SOON      // Goal due in 3 days
+  GOAL_INACTIVE      // Goal hasn't been updated in 5 days
 }
 
 // =================================================================
@@ -776,6 +778,7 @@ model Application {
   source         String?
 
   scores         Score[]
+  goals          Goal[]    // Related goals for this application
 
   rejectedAt     DateTime?
   hiredAt        DateTime?
@@ -926,8 +929,13 @@ model Goal {
   seekerId    String
   seeker      SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
+  // Optional link to a job application
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
   title       String
   description String?       @db.Text
+  notes       String?       @db.Text  // Journal/reflection notes
   icon        String?       // Phosphor icon name
   category    GoalCategory?
 
@@ -940,6 +948,8 @@ model Goal {
 
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@index([applicationId])
 }
 
 model Milestone {
@@ -952,6 +962,7 @@ model Milestone {
   completed   Boolean   @default(false)
   completedAt DateTime?
   order       Int       @default(0)
+  resources   String?   @db.Text // JSON array of {title: string, url: string} (max 3 resources)
 
   createdAt   DateTime  @default(now())
 }

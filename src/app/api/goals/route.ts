@@ -26,14 +26,35 @@ export async function GET() {
       return NextResponse.json({ error: "Seeker profile not found" }, { status: 404 });
     }
 
-    const goals = await prisma.goal.findMany({
+    const goalsRaw = await prisma.goal.findMany({
       where: { seekerId: account.seekerProfile.id },
       include: {
         milestones: { orderBy: { order: "asc" } },
+        application: {
+          select: {
+            id: true,
+            job: {
+              select: {
+                id: true,
+                title: true,
+                organization: { select: { name: true } },
+              },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
+
+    // Parse milestone resources JSON
+    const goals = goalsRaw.map((goal) => ({
+      ...goal,
+      milestones: goal.milestones.map((m) => ({
+        ...m,
+        resources: m.resources ? JSON.parse(m.resources) : null,
+      })),
+    }));
 
     return NextResponse.json({ goals });
   } catch (error) {
@@ -81,9 +102,23 @@ export async function POST(request: NextRequest) {
         { status: 422 }
       );
     }
-    const { title, description, icon, category, targetDate, milestones } = result.data;
+    const { title, description, icon, category, targetDate, applicationId, milestones } =
+      result.data;
 
-    const goal = await prisma.goal.create({
+    // Validate applicationId belongs to this seeker if provided
+    if (applicationId) {
+      const application = await prisma.application.findFirst({
+        where: { id: applicationId, seekerId: account.seekerProfile.id },
+      });
+      if (!application) {
+        return NextResponse.json(
+          { error: "Application not found or doesn't belong to you" },
+          { status: 404 }
+        );
+      }
+    }
+
+    const goalRaw = await prisma.goal.create({
       data: {
         seekerId: account.seekerProfile.id,
         title: title.trim(),
@@ -91,6 +126,7 @@ export async function POST(request: NextRequest) {
         icon: icon || null,
         category: category || null,
         targetDate: targetDate ? new Date(targetDate) : null,
+        applicationId: applicationId || null,
         milestones:
           milestones && milestones.length > 0
             ? {
@@ -101,8 +137,31 @@ export async function POST(request: NextRequest) {
               }
             : undefined,
       },
-      include: { milestones: true },
+      include: {
+        milestones: true,
+        application: {
+          select: {
+            id: true,
+            job: {
+              select: {
+                id: true,
+                title: true,
+                organization: { select: { name: true } },
+              },
+            },
+          },
+        },
+      },
     });
+
+    // Parse milestone resources JSON
+    const goal = {
+      ...goalRaw,
+      milestones: goalRaw.milestones.map((m) => ({
+        ...m,
+        resources: m.resources ? JSON.parse(m.resources) : null,
+      })),
+    };
 
     return NextResponse.json({ goal }, { status: 201 });
   } catch (error) {

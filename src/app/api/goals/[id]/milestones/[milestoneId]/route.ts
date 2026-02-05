@@ -3,14 +3,15 @@ import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
+import { UpdateMilestoneSchema } from "@/lib/validators/api";
 
 type Params = { params: Promise<{ id: string; milestoneId: string }> };
 
-// PATCH — toggle milestone completion
+// PATCH — update milestone (toggle completion, update resources, etc.)
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    const { success } = await standardLimiter.check(30, `milestone-toggle:${ip}`);
+    const { success } = await standardLimiter.check(30, `milestone-update:${ip}`);
     if (!success) {
       return NextResponse.json(
         { error: "Too many requests. Please try again shortly." },
@@ -52,32 +53,84 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Milestone not found" }, { status: 404 });
     }
 
-    // Toggle completion
-    const nowCompleted = !milestone.completed;
+    // Parse and validate body
+    const body = await request.json();
+    const result = UpdateMilestoneSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: result.error.flatten() },
+        { status: 422 }
+      );
+    }
+
+    const { title, completed, resources } = result.data;
+
+    // Determine if we're toggling completion or doing a full update
+    const isToggle = completed !== undefined && title === undefined && resources === undefined;
+    let nowCompleted = milestone.completed;
+
+    if (isToggle) {
+      // Toggle completion
+      nowCompleted = !milestone.completed;
+    } else if (completed !== undefined) {
+      nowCompleted = completed;
+    }
+
+    // Build update data
+    const updateData: {
+      title?: string;
+      completed?: boolean;
+      completedAt?: Date | null;
+      resources?: string | null;
+    } = {};
+
+    if (title !== undefined) {
+      updateData.title = title.trim();
+    }
+
+    if (completed !== undefined || isToggle) {
+      updateData.completed = nowCompleted;
+      updateData.completedAt = nowCompleted ? new Date() : null;
+    }
+
+    if (resources !== undefined) {
+      updateData.resources = resources === null ? null : JSON.stringify(resources);
+    }
+
     const updatedMilestone = await prisma.milestone.update({
       where: { id: milestoneId },
-      data: {
-        completed: nowCompleted,
-        completedAt: nowCompleted ? new Date() : null,
+      data: updateData,
+    });
+
+    // Recalculate goal progress if completion changed
+    let newProgress = goal.progress;
+    if (completed !== undefined || isToggle) {
+      const totalMilestones = goal.milestones.length;
+      const completedCount =
+        goal.milestones.filter((m) => m.id !== milestoneId && m.completed).length +
+        (nowCompleted ? 1 : 0);
+      newProgress = totalMilestones > 0 ? Math.round((completedCount / totalMilestones) * 100) : 0;
+
+      await prisma.goal.update({
+        where: { id: goalId },
+        data: { progress: newProgress },
+      });
+    }
+
+    // Parse resources for response
+    const parsedResources = updatedMilestone.resources
+      ? JSON.parse(updatedMilestone.resources)
+      : null;
+
+    return NextResponse.json({
+      milestone: {
+        ...updatedMilestone,
+        resources: parsedResources,
       },
+      goalProgress: newProgress,
     });
-
-    // Recalculate goal progress based on milestone completion
-    const totalMilestones = goal.milestones.length;
-    const completedCount =
-      goal.milestones.filter((m) => m.id !== milestoneId && m.completed).length +
-      (nowCompleted ? 1 : 0);
-    const newProgress =
-      totalMilestones > 0 ? Math.round((completedCount / totalMilestones) * 100) : 0;
-
-    await prisma.goal.update({
-      where: { id: goalId },
-      data: { progress: newProgress },
-    });
-
-    return NextResponse.json({ milestone: updatedMilestone, goalProgress: newProgress });
   } catch (error) {
-    logger.error("Toggle milestone error", {
+    logger.error("Update milestone error", {
       error: formatError(error),
       endpoint: "/api/goals/[id]/milestones/[milestoneId]",
     });

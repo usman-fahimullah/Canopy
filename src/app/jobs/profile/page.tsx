@@ -26,6 +26,7 @@ import {
   ExperienceIllustration,
   FilesIllustration,
 } from "@/components/profile/illustrations";
+import { StreakBadge } from "@/components/profile/streak-badge";
 
 // Modals
 import { ChangeCoverModal } from "@/components/profile/modals/change-cover-modal";
@@ -36,6 +37,7 @@ import { WriteBioModal } from "@/components/profile/modals/write-bio-modal";
 import { AddSkillsModal } from "@/components/profile/modals/add-skills-modal";
 import { CreateGoalModal } from "@/components/profile/modals/create-goal-modal";
 import { GoalDetailModal } from "@/components/profile/modals/goal-detail-modal";
+import { BrowseTemplatesModal } from "@/components/profile/modals/browse-templates-modal";
 import { AddExperienceModal } from "@/components/profile/modals/add-experience-modal";
 import { EditExperienceListModal } from "@/components/profile/modals/edit-experience-list-modal";
 import { UploadFilesModal } from "@/components/profile/modals/upload-files-modal";
@@ -84,18 +86,41 @@ interface Account {
   seekerProfile: SeekerProfile | null;
 }
 
+interface MilestoneResource {
+  title: string;
+  url: string;
+}
+
 interface Goal {
   id: string;
   title: string;
   description: string | null;
+  notes: string | null;
   category: GoalCategoryKey | null;
   progress: number;
   status: string;
+  targetDate: string | null;
   milestones: Array<{
     id: string;
     title: string;
     completed: boolean;
+    resources?: MilestoneResource[] | null;
   }>;
+  application?: {
+    id: string;
+    job: {
+      id: string;
+      title: string;
+      organization?: { name: string } | null;
+    };
+  } | null;
+}
+
+interface ApplicationOption {
+  id: string;
+  jobTitle: string;
+  company: string;
+  appliedAt: string;
 }
 
 interface Experience {
@@ -120,6 +145,11 @@ export default function ProfilePage() {
   const [account, setAccount] = useState<Account | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [recentApplications, setRecentApplications] = useState<ApplicationOption[]>([]);
+  const [streak, setStreak] = useState<{ streak: number; isActiveToday: boolean }>({
+    streak: 0,
+    isActiveToday: false,
+  });
   const [saving, setSaving] = useState(false);
 
   // Toast state
@@ -131,6 +161,12 @@ export default function ProfilePage() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [editingExperienceId, setEditingExperienceId] = useState<string | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<{
+    title: string;
+    description: string;
+    category: GoalCategoryKey;
+    tasks: string[];
+  } | null>(null);
 
   /* ---- Data fetching ---------------------------------------------- */
 
@@ -158,6 +194,18 @@ export default function ProfilePage() {
     }
   }, []);
 
+  const fetchStreak = useCallback(async () => {
+    try {
+      const res = await fetch("/api/goals/streak");
+      if (!res.ok) throw new Error("Failed to load streak");
+      const data = await res.json();
+      setStreak({ streak: data.streak ?? 0, isActiveToday: data.isActiveToday ?? false });
+    } catch (err) {
+      logger.error("Error fetching streak", { error: formatError(err) });
+      // Don't throw - streak is not critical
+    }
+  }, []);
+
   const fetchExperiences = useCallback(async () => {
     try {
       const res = await fetch("/api/experience");
@@ -170,17 +218,44 @@ export default function ProfilePage() {
     }
   }, []);
 
+  const fetchRecentApplications = useCallback(async () => {
+    try {
+      const res = await fetch("/api/jobs/applications?limit=10&days=30");
+      if (!res.ok) return; // Not critical, just skip
+      const data = await res.json();
+      setRecentApplications(
+        (data.applications ?? []).map(
+          (app: { id: string; job: { title: string; company: string }; appliedAt: string }) => ({
+            id: app.id,
+            jobTitle: app.job?.title ?? "Unknown Job",
+            company: app.job?.company ?? "Unknown Company",
+            appliedAt: app.appliedAt,
+          })
+        )
+      );
+    } catch (err) {
+      logger.error("Error fetching applications", { error: formatError(err) });
+      // Not critical - just don't show application linking
+    }
+  }, []);
+
   const loadAllData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      await Promise.all([fetchProfile(), fetchGoals(), fetchExperiences()]);
+      await Promise.all([
+        fetchProfile(),
+        fetchGoals(),
+        fetchExperiences(),
+        fetchStreak(),
+        fetchRecentApplications(),
+      ]);
     } catch {
       setError("We couldn't load your profile. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [fetchProfile, fetchGoals, fetchExperiences]);
+  }, [fetchProfile, fetchGoals, fetchExperiences, fetchStreak, fetchRecentApplications]);
 
   useEffect(() => {
     loadAllData();
@@ -363,8 +438,15 @@ export default function ProfilePage() {
           icon={<ChartDonut size={24} weight="fill" />}
           title="Your Goals"
           count={goals.length}
+          headerExtra={
+            goals.length > 0 ? (
+              <StreakBadge streak={streak.streak} isActiveToday={streak.isActiveToday} />
+            ) : null
+          }
           actionLabel="Add new goal"
           onAction={() => setActiveModal("createGoal")}
+          secondaryActionLabel="Browse templates"
+          onSecondaryAction={() => setActiveModal("browseTemplates")}
           isEmpty={goals.length === 0}
           emptyState={
             <ProfileSectionEmptyState
@@ -388,6 +470,7 @@ export default function ProfilePage() {
                 title={goal.title}
                 progress={goal.progress}
                 category={goal.category}
+                targetDate={goal.targetDate}
                 onView={(id) => {
                   setSelectedGoalId(id);
                   setActiveModal("goalDetail");
@@ -582,7 +665,14 @@ export default function ProfilePage() {
 
       <CreateGoalModal
         open={activeModal === "createGoal"}
-        onOpenChange={(open) => !open && setActiveModal(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveModal(null);
+            setSelectedTemplate(null);
+          }
+        }}
+        initialTemplate={selectedTemplate}
+        applications={recentApplications}
         onSave={async (data) => {
           setSaving(true);
           try {
@@ -593,12 +683,15 @@ export default function ProfilePage() {
                 title: data.title,
                 description: data.description || null,
                 category: data.category,
+                targetDate: data.dueDate?.toISOString() || null,
                 milestones: data.milestones.map((m) => ({ title: m })),
+                applicationId: data.applicationId || null,
               }),
             });
             if (res.ok) {
               await fetchGoals();
               setActiveModal(null);
+              setSelectedTemplate(null);
               showToast("Goal created");
             } else {
               showToast("Failed to create goal", "critical");
@@ -613,6 +706,20 @@ export default function ProfilePage() {
         loading={saving}
       />
 
+      <BrowseTemplatesModal
+        open={activeModal === "browseTemplates"}
+        onOpenChange={(open) => !open && setActiveModal(null)}
+        onSelectTemplate={(template) => {
+          setSelectedTemplate({
+            title: template.title,
+            description: template.description,
+            category: template.category,
+            tasks: template.tasks,
+          });
+          setActiveModal("createGoal");
+        }}
+      />
+
       {selectedGoal && (
         <GoalDetailModal
           open={activeModal === "goalDetail"}
@@ -622,7 +729,20 @@ export default function ProfilePage() {
               setSelectedGoalId(null);
             }
           }}
-          goal={selectedGoal}
+          goal={{
+            ...selectedGoal,
+            notes: selectedGoal.notes ?? null,
+            application: selectedGoal.application
+              ? {
+                  id: selectedGoal.application.id,
+                  job: {
+                    id: selectedGoal.application.job.id,
+                    title: selectedGoal.application.job.title,
+                    company: selectedGoal.application.job.organization?.name ?? null,
+                  },
+                }
+              : null,
+          }}
           onUpdateTitle={async (title) => {
             await fetch(`/api/goals/${selectedGoal.id}`, {
               method: "PATCH",
@@ -639,6 +759,14 @@ export default function ProfilePage() {
             });
             await fetchGoals();
           }}
+          onUpdateNotes={async (notes) => {
+            await fetch(`/api/goals/${selectedGoal.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ notes }),
+            });
+            await fetchGoals();
+          }}
           onUpdateCategory={async (category) => {
             await fetch(`/api/goals/${selectedGoal.id}`, {
               method: "PATCH",
@@ -651,7 +779,7 @@ export default function ProfilePage() {
             await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
               method: "PATCH",
             });
-            await fetchGoals();
+            await Promise.all([fetchGoals(), fetchStreak()]);
           }}
           onAddMilestone={async (title) => {
             await fetch(`/api/goals/${selectedGoal.id}`, {
@@ -664,6 +792,14 @@ export default function ProfilePage() {
           onDeleteMilestone={async (milestoneId) => {
             await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
               method: "DELETE",
+            });
+            await fetchGoals();
+          }}
+          onUpdateMilestoneResources={async (milestoneId, resources) => {
+            await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ resources }),
             });
             await fetchGoals();
           }}

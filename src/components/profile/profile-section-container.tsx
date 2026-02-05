@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button, Badge } from "@/components/ui";
 import { Plus } from "@phosphor-icons/react";
 
 /**
@@ -30,10 +29,16 @@ interface ProfileSectionContainerProps {
   title: string;
   /** Item count (shown as badge) */
   count?: number;
+  /** Extra content to display after title/count (e.g., streak badge) */
+  headerExtra?: React.ReactNode;
   /** Action button label */
   actionLabel: string;
   /** Action button callback */
   onAction: () => void;
+  /** Secondary action label (optional link-style button) */
+  secondaryActionLabel?: string;
+  /** Secondary action callback */
+  onSecondaryAction?: () => void;
   /** Whether to show the content area */
   isEmpty?: boolean;
   /** Empty state content */
@@ -46,14 +51,17 @@ export function ProfileSectionContainer({
   icon,
   title,
   count,
+  headerExtra,
   actionLabel,
   onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
   isEmpty = false,
   emptyState,
   children,
 }: ProfileSectionContainerProps) {
   return (
-    <div className="overflow-hidden rounded-[16px] border border-[var(--primitive-neutral-300)]">
+    <div className="overflow-hidden rounded-[16px] border border-[var(--border-muted)]">
       {/* Header row - Figma: inside container, white bg */}
       <div className="flex items-center justify-between bg-white px-6 py-4">
         <div className="flex items-center gap-2.5">
@@ -69,11 +77,20 @@ export function ProfileSectionContainer({
               {count}
             </Badge>
           )}
+          {/* Extra content (e.g., streak badge) */}
+          {headerExtra}
         </div>
-        {/* Action button - Figma: Inverse button, no icon */}
-        <Button variant="inverse" onClick={onAction}>
-          {actionLabel}
-        </Button>
+        {/* Action buttons */}
+        <div className="flex items-center gap-3">
+          {secondaryActionLabel && onSecondaryAction && (
+            <Button variant="link" onClick={onSecondaryAction}>
+              {secondaryActionLabel}
+            </Button>
+          )}
+          <Button variant="inverse" onClick={onAction}>
+            {actionLabel}
+          </Button>
+        </div>
       </div>
 
       {/* Content area */}

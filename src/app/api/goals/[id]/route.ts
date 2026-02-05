@@ -53,14 +53,42 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         { status: 422 }
       );
     }
-    const { title, description, progress, status, icon, category, targetDate } = result.data;
+    const {
+      title,
+      description,
+      notes,
+      progress,
+      status,
+      icon,
+      category,
+      targetDate,
+      applicationId,
+    } = result.data;
+
+    // Validate applicationId belongs to this seeker if provided
+    if (applicationId !== undefined && applicationId !== null) {
+      const application = await prisma.application.findFirst({
+        where: {
+          id: applicationId,
+          seekerId: account.seekerProfile.id,
+        },
+      });
+      if (!application) {
+        return NextResponse.json(
+          { error: "Application not found or doesn't belong to you" },
+          { status: 404 }
+        );
+      }
+    }
 
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
+    if (notes !== undefined) updateData.notes = notes;
     if (icon !== undefined) updateData.icon = icon;
     if (category !== undefined) updateData.category = category;
     if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
+    if (applicationId !== undefined) updateData.applicationId = applicationId;
     if (progress !== undefined) updateData.progress = Math.min(100, Math.max(0, progress));
     if (status !== undefined) {
       updateData.status = status;
@@ -73,7 +101,20 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const updated = await prisma.goal.update({
       where: { id: goalId },
       data: updateData,
-      include: { milestones: { orderBy: { order: "asc" } } },
+      include: {
+        milestones: { orderBy: { order: "asc" } },
+        application: {
+          include: {
+            job: {
+              select: {
+                id: true,
+                title: true,
+                organization: { select: { name: true } },
+              },
+            },
+          },
+        },
+      },
     });
 
     return NextResponse.json({ goal: updated });

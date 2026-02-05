@@ -312,3 +312,150 @@ export async function createCoachStatusNotification(params: {
     sendEmailNotification: isApproved, // Only email for approvals
   });
 }
+
+// =============================================================================
+// GOAL REMINDERS
+// =============================================================================
+
+/**
+ * Send notification when a goal is due soon (3 days before target date)
+ */
+export async function createGoalDueSoonNotification(params: {
+  accountId: string;
+  goalId: string;
+  goalTitle: string;
+  daysUntilDue: number;
+}) {
+  await createNotification({
+    accountId: params.accountId,
+    type: "GOAL_DUE_SOON",
+    title: `Goal due ${params.daysUntilDue === 1 ? "tomorrow" : `in ${params.daysUntilDue} days`}`,
+    body: params.goalTitle,
+    data: {
+      goalId: params.goalId,
+      url: `/jobs/profile?goal=${params.goalId}`,
+    },
+    sendEmailNotification: false, // In-app only by default
+  });
+}
+
+/**
+ * Send notification when a goal hasn't been updated for 5+ days
+ */
+export async function createGoalInactiveNotification(params: {
+  accountId: string;
+  goalId: string;
+  goalTitle: string;
+  daysSinceUpdate: number;
+}) {
+  await createNotification({
+    accountId: params.accountId,
+    type: "GOAL_INACTIVE",
+    title: "Check in on your goal",
+    body: `You haven't updated "${params.goalTitle}" in ${params.daysSinceUpdate} days`,
+    data: {
+      goalId: params.goalId,
+      url: `/jobs/profile?goal=${params.goalId}`,
+    },
+    sendEmailNotification: false, // In-app only by default
+  });
+}
+
+/**
+ * Check and send goal reminder notifications for all seekers
+ * This should be run as a daily cron job
+ */
+export async function processGoalReminders() {
+  const now = new Date();
+  const threeDaysFromNow = new Date(now);
+  threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+
+  const fiveDaysAgo = new Date(now);
+  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+
+  // Find goals that are due in 3 days (within the next 24 hours of the 3-day mark)
+  const dueSoonGoals = await prisma.goal.findMany({
+    where: {
+      status: "ACTIVE",
+      targetDate: {
+        gte: new Date(threeDaysFromNow.setHours(0, 0, 0, 0)),
+        lt: new Date(threeDaysFromNow.setHours(23, 59, 59, 999)),
+      },
+    },
+    include: {
+      seeker: {
+        include: { account: true },
+      },
+    },
+  });
+
+  // Send due soon notifications
+  for (const goal of dueSoonGoals) {
+    if (!goal.seeker?.account) continue;
+
+    // Check if we already sent a notification for this goal today
+    const existingNotification = await prisma.notification.findFirst({
+      where: {
+        accountId: goal.seeker.account.id,
+        type: "GOAL_DUE_SOON",
+        data: { contains: goal.id },
+        createdAt: { gte: new Date(now.setHours(0, 0, 0, 0)) },
+      },
+    });
+
+    if (existingNotification) continue;
+
+    await createGoalDueSoonNotification({
+      accountId: goal.seeker.account.id,
+      goalId: goal.id,
+      goalTitle: goal.title,
+      daysUntilDue: 3,
+    });
+  }
+
+  // Find goals that haven't been updated in 5+ days
+  const inactiveGoals = await prisma.goal.findMany({
+    where: {
+      status: "ACTIVE",
+      updatedAt: { lt: fiveDaysAgo },
+    },
+    include: {
+      seeker: {
+        include: { account: true },
+      },
+    },
+  });
+
+  // Send inactive notifications (max once per 5 days per goal)
+  for (const goal of inactiveGoals) {
+    if (!goal.seeker?.account) continue;
+
+    // Check if we sent an inactive notification for this goal in the last 5 days
+    const existingNotification = await prisma.notification.findFirst({
+      where: {
+        accountId: goal.seeker.account.id,
+        type: "GOAL_INACTIVE",
+        data: { contains: goal.id },
+        createdAt: { gte: fiveDaysAgo },
+      },
+    });
+
+    if (existingNotification) continue;
+
+    const daysSinceUpdate = Math.floor(
+      (now.getTime() - goal.updatedAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    await createGoalInactiveNotification({
+      accountId: goal.seeker.account.id,
+      goalId: goal.id,
+      goalTitle: goal.title,
+      daysSinceUpdate,
+    });
+  }
+
+  return {
+    dueSoonNotifications: dueSoonGoals.length,
+    inactiveNotifications: inactiveGoals.length,
+  };
+}

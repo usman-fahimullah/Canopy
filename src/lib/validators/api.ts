@@ -62,6 +62,7 @@ export const CreateGoalSchema = z.object({
   icon: z.string().nullable().optional(),
   category: GoalCategoryEnum.nullable().optional(),
   targetDate: z.string().nullable().optional(),
+  applicationId: z.string().nullable().optional(), // Link to job application
   milestones: z
     .array(z.object({ title: z.string().min(1) }))
     .max(20, "Maximum 20 milestones allowed")
@@ -75,11 +76,19 @@ export const UpdateGoalSchema = z.object({
     .max(250, "Description must be 250 characters or fewer")
     .nullable()
     .optional(),
+  notes: z.string().max(1000, "Notes must be 1000 characters or fewer").nullable().optional(),
   progress: z.number().min(0).max(100).optional(),
   status: z.string().optional(),
   icon: z.string().nullable().optional(),
   category: GoalCategoryEnum.nullable().optional(),
   targetDate: z.string().nullable().optional(),
+  applicationId: z.string().nullable().optional(), // Link to job application
+});
+
+// Milestone resource schema (for task links)
+export const MilestoneResourceSchema = z.object({
+  title: z.string().min(1, "Title is required").max(100, "Title must be 100 characters or fewer"),
+  url: z.string().url("Must be a valid URL"),
 });
 
 export const AddMilestoneSchema = z.object({
@@ -87,6 +96,17 @@ export const AddMilestoneSchema = z.object({
     .string()
     .min(1, "Title is required")
     .transform((v) => v.trim()),
+  resources: z.array(MilestoneResourceSchema).max(3, "Maximum 3 resources allowed").optional(),
+});
+
+export const UpdateMilestoneSchema = z.object({
+  title: z.string().min(1).optional(),
+  completed: z.boolean().optional(),
+  resources: z
+    .array(MilestoneResourceSchema)
+    .max(3, "Maximum 3 resources allowed")
+    .nullable()
+    .optional(),
 });
 
 // --- Experience ---
