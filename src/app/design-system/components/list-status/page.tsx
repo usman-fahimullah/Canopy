@@ -27,7 +27,7 @@ const listStatusProps = [
     name: "size",
     type: '"sm" | "default" | "lg" | "xl" | "2xl" | "3xl"',
     default: '"default"',
-    description: "Size of the status badge (16px, 20px, 24px, 28px, 40px, or 54px diameter).",
+    description: "Size of the status badge (16px, 20px, 24px, 32px, 48px, or 64px diameter).",
   },
   {
     name: "icon",
@@ -213,15 +213,15 @@ export default function ListStatusPage() {
       <ComponentCard
         id="sizes"
         title="Sizes"
-        description="Available size options from small (16px) to 3xl (54px)"
+        description="Available size options from small (16px) to 3xl (64px)"
       >
         <CodePreview
           code={`<ListStatus variant="success" size="sm" />  {/* 16px */}
 <ListStatus variant="success" size="default" />  {/* 20px */}
 <ListStatus variant="success" size="lg" />  {/* 24px */}
-<ListStatus variant="success" size="xl" />  {/* 28px */}
-<ListStatus variant="success" size="2xl" />  {/* 40px */}
-<ListStatus variant="success" size="3xl" />  {/* 54px */}`}
+<ListStatus variant="success" size="xl" />  {/* 32px */}
+<ListStatus variant="success" size="2xl" />  {/* 48px */}
+<ListStatus variant="success" size="3xl" />  {/* 64px */}`}
         >
           <div className="flex items-end gap-6">
             {(["sm", "default", "lg", "xl", "2xl", "3xl"] as const).map((size) => (
@@ -308,11 +308,11 @@ export default function ListStatusPage() {
         description="Position the status badge on user avatars. Badge size should scale proportionally with the avatar."
       >
         <CodePreview
-          code={`{/* 48px avatar (default) + 20px badge (default) */}
+          code={`{/* 48px avatar (default) + 24px badge (lg) — 50% ratio */}
 <div className="relative inline-flex">
   <Avatar name="Jane Doe" size="default" />
   <span className="absolute -bottom-0.5 -right-0.5">
-    <ListStatus variant="success" />
+    <ListStatus variant="success" size="lg" />
   </span>
 </div>`}
         >
@@ -321,7 +321,7 @@ export default function ListStatusPage() {
             <div className="relative inline-flex">
               <Avatar name="Jane Doe" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="success" />
+                <ListStatus variant="success" size="lg" />
               </span>
             </div>
 
@@ -329,7 +329,7 @@ export default function ListStatusPage() {
             <div className="relative inline-flex">
               <Avatar name="John Smith" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="favorite" />
+                <ListStatus variant="favorite" size="lg" />
               </span>
             </div>
 
@@ -337,7 +337,7 @@ export default function ListStatusPage() {
             <div className="relative inline-flex">
               <Avatar name="Maria Garcia" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="bipoc" />
+                <ListStatus variant="bipoc" size="lg" />
               </span>
             </div>
 
@@ -345,7 +345,7 @@ export default function ListStatusPage() {
             <div className="relative inline-flex">
               <Avatar name="Alex Kim" size="default" />
               <span className="absolute -bottom-0.5 -right-0.5">
-                <ListStatus variant="critical" />
+                <ListStatus variant="critical" size="lg" />
               </span>
             </div>
           </div>
@@ -360,12 +360,12 @@ export default function ListStatusPage() {
               { avatarSize: "sm" as const, badgeSize: "sm" as const, label: "32px + 16px" },
               {
                 avatarSize: "default" as const,
-                badgeSize: "default" as const,
-                label: "48px + 20px",
+                badgeSize: "lg" as const,
+                label: "48px + 24px",
               },
-              { avatarSize: "lg" as const, badgeSize: "xl" as const, label: "64px + 28px" },
-              { avatarSize: "xl" as const, badgeSize: "2xl" as const, label: "96px + 40px" },
-              { avatarSize: "2xl" as const, badgeSize: "3xl" as const, label: "128px + 54px" },
+              { avatarSize: "lg" as const, badgeSize: "xl" as const, label: "64px + 32px" },
+              { avatarSize: "xl" as const, badgeSize: "2xl" as const, label: "96px + 48px" },
+              { avatarSize: "2xl" as const, badgeSize: "3xl" as const, label: "128px + 64px" },
             ].map(({ avatarSize, badgeSize, label }) => (
               <div key={avatarSize} className="flex flex-col items-center gap-2">
                 <div className="relative inline-flex">

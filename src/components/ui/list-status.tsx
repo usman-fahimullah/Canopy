@@ -70,12 +70,12 @@ const listStatusVariants = cva(
   {
     variants: {
       size: {
-        sm: "size-4 border-[1.5px]", // 16px, 1.5px border
-        default: "size-5 border-2", // 20px, 2px border (Figma default)
-        lg: "size-6 border-[2.5px]", // 24px, 2.5px border
-        xl: "size-7 border-[3px]", // 28px, 3px border
-        "2xl": "size-10 border-4", // 40px, 4px border
-        "3xl": "size-[54px] border-[5px]", // 54px, 5px border
+        sm: "size-4 border-[1.5px]", // 16px — pairs with xs avatar (24px)
+        default: "size-5 border-2", // 20px — Figma default
+        lg: "size-6 border-[2.5px]", // 24px — pairs with default avatar (48px)
+        xl: "size-8 border-[3px]", // 32px — pairs with lg avatar (64px)
+        "2xl": "size-12 border-4", // 48px — pairs with xl avatar (96px)
+        "3xl": "size-16 border-[5px]", // 64px — pairs with 2xl avatar (128px)
       },
     },
     defaultVariants: {
@@ -89,8 +89,8 @@ const iconSizeMap: Record<NonNullable<VariantProps<typeof listStatusVariants>["s
   default: "size-3.5", // 14px
   lg: "size-4", // 16px
   xl: "size-5", // 20px
-  "2xl": "size-7", // 28px
-  "3xl": "size-9", // 36px
+  "2xl": "size-8", // 32px
+  "3xl": "size-10", // 40px
 };
 
 export interface ListStatusProps
