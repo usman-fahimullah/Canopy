@@ -894,6 +894,18 @@ export {
   type GoalType,
 } from "./progress-meter";
 
+// Progress Steps (Job Seeker Pipeline)
+export {
+  ProgressStep,
+  ProgressStepsBar,
+  stepColors as progressStepColors,
+  stepLabels as progressStepLabels,
+  type ProgressStepProps,
+  type ProgressStepsBarProps,
+  type ProgressStepType,
+  type ProgressStepPosition,
+} from "./progress-steps";
+
 // Skeleton
 export { Skeleton, SkeletonText, SkeletonCard } from "./skeleton";
 
@@ -1010,3 +1022,38 @@ export {
   type CurrencyInputProps,
   type SalaryRangeInputProps,
 } from "./currency-input";
+
+// List Item
+export {
+  List,
+  listVariants,
+  ListItem,
+  listItemVariants,
+  ListItemLeading,
+  ListItemContent,
+  ListItemDateBadge,
+  ListItemTitle,
+  ListItemDescription,
+  ListItemMeta,
+  ListItemTrailing,
+  ListItemTrailingText,
+  ListGroup,
+  ListGroupHeader,
+  type ListProps,
+  type ListItemProps,
+  type ListItemLeadingProps,
+  type ListItemMetaProps,
+} from "./list-item";
+
+// Job Application Table (Job Seeker Portal)
+export {
+  JobApplicationTable,
+  ApplicationTracker,
+  sectionConfig as applicationSectionConfig,
+  stageColors as applicationStageColors,
+  type ApplicationSection,
+  type EmojiReaction,
+  type JobApplication,
+  type JobApplicationTableProps,
+  type ApplicationTrackerProps,
+} from "./job-application-table";

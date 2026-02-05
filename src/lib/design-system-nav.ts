@@ -160,11 +160,17 @@ export const componentsNav: NavItem[] = [
         label: "Progress Meter",
         href: "/design-system/components/progress-meter",
       },
+      {
+        id: "progress-steps",
+        label: "Progress Steps",
+        href: "/design-system/components/progress-steps",
+      },
       { id: "list-status", label: "List Status", href: "/design-system/components/list-status" },
       { id: "skeleton", label: "Skeleton", href: "/design-system/components/skeleton" },
       { id: "empty-state", label: "Empty State", href: "/design-system/components/empty-state" },
       { id: "stat-card", label: "Stat Card", href: "/design-system/components/stat-card" },
       { id: "timeline", label: "Timeline", href: "/design-system/components/timeline" },
+      { id: "list-item", label: "List Item", href: "/design-system/components/list-item" },
     ],
   },
   {
@@ -664,6 +670,25 @@ export const searchIndex: SearchItem[] = [
     keywords: ["circular", "steps", "goal", "meter"],
   },
   {
+    id: "progress-steps",
+    title: "Progress Steps",
+    category: "Data Display",
+    href: "/design-system/components/progress-steps",
+    keywords: [
+      "pipeline",
+      "steps",
+      "funnel",
+      "saved",
+      "applied",
+      "interviewing",
+      "offers",
+      "hired",
+      "job seeker",
+      "chevron",
+      "arrow",
+    ],
+  },
+  {
     id: "list-status",
     title: "List Status",
     category: "Data Display",
@@ -697,6 +722,13 @@ export const searchIndex: SearchItem[] = [
     category: "Data Display",
     href: "/design-system/components/timeline",
     keywords: ["history", "events", "activity"],
+  },
+  {
+    id: "list-item",
+    title: "List Item",
+    category: "Data Display",
+    href: "/design-system/components/list-item",
+    keywords: ["list", "row", "item", "settings", "navigation", "selection"],
   },
 
   // Components - Overlays
