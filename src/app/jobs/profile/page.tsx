@@ -3,28 +3,29 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Chip } from "@/components/ui/chip";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Toast } from "@/components/ui/toast";
-import {
-  Target,
-  Briefcase,
-  FolderSimple,
-  Plus,
-  PencilSimple,
-  UploadSimple,
-} from "@phosphor-icons/react";
+import { ChartDonut, Briefcase, FolderSimple, Plus } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
 import type { GoalCategoryKey } from "@/lib/profile/goal-categories";
 
 // Profile components
 import { ProfileHeader } from "@/components/profile/profile-header";
-import { ProfileSectionCard } from "@/components/profile/profile-section-card";
+import {
+  ProfileSectionContainer,
+  ProfileSectionEmptyState,
+  ProfileSectionListContent,
+} from "@/components/profile/profile-section-container";
 import { GoalListItem } from "@/components/profile/goal-list-item";
 import { ExperienceListItem } from "@/components/profile/experience-list-item";
 import { FileListItem } from "@/components/profile/file-list-item";
+import {
+  GoalsIllustration,
+  ExperienceIllustration,
+  FilesIllustration,
+} from "@/components/profile/illustrations";
 
 // Modals
 import { ChangeCoverModal } from "@/components/profile/modals/change-cover-modal";
@@ -218,50 +219,28 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-4xl">
-        {/* Cover + avatar skeleton */}
-        <Card className="overflow-hidden">
-          <Skeleton className="h-[180px] w-full rounded-none" />
+        {/* Profile Header skeleton - Full width, 256px cover */}
+        <div className="w-full">
+          <Skeleton className="h-[256px] w-full rounded-none" />
           <div className="px-6 pb-6">
-            <div className="relative -mt-12 mb-4">
-              <Skeleton variant="circular" className="h-24 w-24" />
+            <div className="relative -mt-20 mb-4">
+              <Skeleton variant="circular" className="h-[128px] w-[128px]" />
             </div>
-            <Skeleton className="mb-2 h-7 w-48" />
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="mb-3 h-12 w-64" />
+            <Skeleton className="h-5 w-40" />
           </div>
-        </Card>
-
-        {/* Summary + Skills skeleton */}
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Card>
-            <CardContent className="p-6">
-              <Skeleton className="mb-4 h-5 w-32" />
-              <SkeletonText lines={3} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <Skeleton className="mb-4 h-5 w-20" />
-              <div className="flex flex-wrap gap-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-8 w-20 rounded-full" />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Sections skeleton */}
+        {/* CTA Cards skeleton */}
+        <div className="mt-8 grid grid-cols-1 gap-4 px-6 md:grid-cols-2">
+          <Skeleton className="h-[200px] rounded-[16px]" />
+          <Skeleton className="h-[200px] rounded-[16px]" />
+        </div>
+
+        {/* Section containers skeleton */}
         {[1, 2, 3].map((i) => (
           <div key={i} className="mt-8">
-            <div className="flex items-center gap-2">
-              <Skeleton variant="circular" className="h-5 w-5" />
-              <Skeleton className="h-6 w-40" />
-            </div>
-            <Card className="mt-4">
-              <CardContent className="p-6">
-                <SkeletonText lines={2} />
-              </CardContent>
-            </Card>
+            <Skeleton className="h-[200px] w-full rounded-[16px]" />
           </div>
         ))}
       </div>
@@ -310,208 +289,183 @@ export default function ProfilePage() {
           </Toast>
         </div>
       )}
-      {/* ---- Profile Header ---------------------------------------- */}
-      <Card className="overflow-hidden">
-        <ProfileHeader
-          name={account?.name ?? null}
-          avatar={account?.avatar ?? null}
-          location={account?.location ?? null}
-          badge={seeker?.badge ?? null}
-          coverImage={seeker?.coverImage ?? null}
-          socialLinks={{
-            linkedinUrl: account?.linkedinUrl,
-            instagramUrl: account?.instagramUrl,
-            threadsUrl: account?.threadsUrl,
-            facebookUrl: account?.facebookUrl,
-            blueskyUrl: account?.blueskyUrl,
-            xUrl: account?.xUrl,
-            websiteUrl: account?.websiteUrl,
-          }}
-          onEditCover={() => setActiveModal("cover")}
-          onEditPhoto={() => setActiveModal("photo")}
-          onEditContact={() => setActiveModal("contact")}
-          onEditSocials={() => setActiveModal("socials")}
-          onShare={() => setActiveModal("share")}
-        />
-      </Card>
+      {/* ---- Profile Header (Full Width) ----------------------------- */}
+      <ProfileHeader
+        name={account?.name ?? null}
+        avatar={account?.avatar ?? null}
+        location={account?.location ?? null}
+        badge={seeker?.badge ?? null}
+        coverImage={seeker?.coverImage ?? null}
+        socialLinks={{
+          linkedinUrl: account?.linkedinUrl,
+          instagramUrl: account?.instagramUrl,
+          threadsUrl: account?.threadsUrl,
+          facebookUrl: account?.facebookUrl,
+          blueskyUrl: account?.blueskyUrl,
+          xUrl: account?.xUrl,
+          websiteUrl: account?.websiteUrl,
+        }}
+        hasSummary={!!seeker?.summary}
+        skills={seeker?.skills ?? []}
+        onEditCover={() => setActiveModal("cover")}
+        onEditPhoto={() => setActiveModal("photo")}
+        onEditContact={() => setActiveModal("contact")}
+        onEditSocials={() => setActiveModal("socials")}
+        onShare={() => setActiveModal("share")}
+        onEditSummary={() => setActiveModal("bio")}
+        onEditSkills={() => setActiveModal("skills")}
+      />
 
-      {/* ---- Summary + Skills (side by side) ----------------------- */}
-      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-        <ProfileSectionCard
-          title="Your Summary"
-          isEmpty={!seeker?.summary}
-          emptyTitle="Add a summary about yourself"
-          emptyDescription="Tell your career story in the climate space"
-          emptyActionLabel="Write Your Story"
-          onAction={() => setActiveModal("bio")}
-          onEdit={() => setActiveModal("bio")}
-        >
-          <p className="text-body text-[var(--foreground-muted)]">{seeker?.summary}</p>
-        </ProfileSectionCard>
+      {/* ---- Summary + Skills (show only when filled) -------------- */}
+      {(seeker?.summary || (seeker?.skills && seeker.skills.length > 0)) && (
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+          {seeker?.summary && (
+            <Card>
+              <CardContent className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-body-strong text-[var(--foreground-default)]">
+                    Your Summary
+                  </h3>
+                  <Button variant="link" onClick={() => setActiveModal("bio")}>
+                    Edit
+                  </Button>
+                </div>
+                <p className="text-body text-[var(--foreground-muted)]">{seeker.summary}</p>
+              </CardContent>
+            </Card>
+          )}
 
-        <ProfileSectionCard
-          title="Skills"
-          isEmpty={!seeker?.skills?.length}
-          emptyTitle="Add your skills"
-          emptyDescription="Quickly add relevant skills to your profile"
-          emptyActionLabel="Add Skills"
-          onAction={() => setActiveModal("skills")}
-          onEdit={() => setActiveModal("skills")}
-        >
-          <div className="flex flex-wrap gap-2">
-            {seeker?.skills?.map((skill) => (
-              <Chip key={skill} variant="neutral" size="md">
-                {skill}
-              </Chip>
-            ))}
-          </div>
-        </ProfileSectionCard>
-      </div>
+          {seeker?.skills && seeker.skills.length > 0 && (
+            <Card>
+              <CardContent className="p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-body-strong text-[var(--foreground-default)]">Skills</h3>
+                  <Button variant="link" onClick={() => setActiveModal("skills")}>
+                    Edit
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {seeker.skills.map((skill) => (
+                    <Chip key={skill} variant="neutral" size="md">
+                      {skill}
+                    </Chip>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* ---- Goals Section ----------------------------------------- */}
       <div className="mt-8">
-        <SectionHeader
-          icon={<Target size={20} weight="fill" />}
+        <ProfileSectionContainer
+          icon={<ChartDonut size={24} weight="fill" />}
           title="Your Goals"
           count={goals.length}
           actionLabel="Add new goal"
           onAction={() => setActiveModal("createGoal")}
-        />
-
-        {goals.length === 0 ? (
-          <Card className="mt-4">
-            <CardContent className="p-6">
-              <EmptyState
-                title="What are your goals?"
-                description="Set career goals and track your progress"
-                size="sm"
-                action={{
-                  label: "Add Goal",
-                  onClick: () => setActiveModal("createGoal"),
+          isEmpty={goals.length === 0}
+          emptyState={
+            <ProfileSectionEmptyState
+              illustration={<GoalsIllustration />}
+              title="What are your goals?"
+              description="Set career goals and track your progress towards your dream climate job."
+              actionLabel="Add Goal"
+              onAction={() => setActiveModal("createGoal")}
+            />
+          }
+        >
+          <ProfileSectionListContent
+            showAddButton
+            addLabel="Add another goal"
+            onAdd={() => setActiveModal("createGoal")}
+          >
+            {goals.map((goal) => (
+              <GoalListItem
+                key={goal.id}
+                id={goal.id}
+                title={goal.title}
+                progress={goal.progress}
+                category={goal.category}
+                onView={(id) => {
+                  setSelectedGoalId(id);
+                  setActiveModal("goalDetail");
                 }}
               />
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="mt-4">
-            <CardContent className="px-6 py-2">
-              {goals.map((goal) => (
-                <GoalListItem
-                  key={goal.id}
-                  id={goal.id}
-                  title={goal.title}
-                  progress={goal.progress}
-                  category={goal.category}
-                  onView={(id) => {
-                    setSelectedGoalId(id);
-                    setActiveModal("goalDetail");
-                  }}
-                />
-              ))}
-              <div className="border-t border-[var(--border-muted)] py-3">
-                <Button
-                  variant="ghost"
-                  leftIcon={<Plus size={16} weight="bold" />}
-                  onClick={() => setActiveModal("createGoal")}
-                >
-                  Add another goal
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            ))}
+          </ProfileSectionListContent>
+        </ProfileSectionContainer>
       </div>
 
       {/* ---- Work Experience Section ------------------------------- */}
       <div className="mt-8">
-        <SectionHeader
-          icon={<Briefcase size={20} weight="fill" />}
+        <ProfileSectionContainer
+          icon={<Briefcase size={24} weight="fill" />}
           title="Your Work Experience"
           count={experiences.length}
           actionLabel={experiences.length > 0 ? "Edit your experience" : "Add your experience"}
           onAction={() =>
             setActiveModal(experiences.length > 0 ? "editExperienceList" : "addExperience")
           }
-        />
-
-        {experiences.length === 0 ? (
-          <Card className="mt-4">
-            <CardContent className="p-6">
-              <EmptyState
-                title="Tell us about your experiences."
-                description="Share your work history to build your climate career profile"
-                size="sm"
-                action={{
-                  label: "Add Experiences",
-                  onClick: () => setActiveModal("addExperience"),
-                }}
+          isEmpty={experiences.length === 0}
+          emptyState={
+            <ProfileSectionEmptyState
+              illustration={<ExperienceIllustration />}
+              title="Tell us about your experiences."
+              description="Share your work history to build your climate career profile."
+              actionLabel="Add Experience"
+              onAction={() => setActiveModal("addExperience")}
+            />
+          }
+        >
+          <ProfileSectionListContent
+            showAddButton
+            addLabel="Add your experience"
+            onAdd={() => setActiveModal("addExperience")}
+          >
+            {experiences.map((exp) => (
+              <ExperienceListItem
+                key={exp.id}
+                companyName={exp.companyName}
+                jobTitle={exp.jobTitle}
+                employmentType={exp.employmentType}
+                startDate={exp.startDate}
+                endDate={exp.endDate}
+                isCurrent={exp.isCurrent}
+                companyLogo={exp.companyLogo}
               />
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="mt-4">
-            <CardContent className="px-6 py-2">
-              {experiences.map((exp) => (
-                <ExperienceListItem
-                  key={exp.id}
-                  companyName={exp.companyName}
-                  jobTitle={exp.jobTitle}
-                  employmentType={exp.employmentType}
-                  startDate={exp.startDate}
-                  endDate={exp.endDate}
-                  isCurrent={exp.isCurrent}
-                  companyLogo={exp.companyLogo}
-                />
-              ))}
-              <div className="border-t border-[var(--border-muted)] py-3">
-                <Button
-                  variant="ghost"
-                  leftIcon={<Plus size={16} weight="bold" />}
-                  onClick={() => setActiveModal("addExperience")}
-                >
-                  Add your experience
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            ))}
+          </ProfileSectionListContent>
+        </ProfileSectionContainer>
       </div>
 
       {/* ---- Files Section ----------------------------------------- */}
       <div className="mt-8">
-        <SectionHeader
-          icon={<FolderSimple size={20} weight="fill" />}
+        <ProfileSectionContainer
+          icon={<FolderSimple size={24} weight="fill" />}
           title="Your Files"
           count={[seeker?.resumeUrl, seeker?.coverLetterUrl].filter(Boolean).length}
           actionLabel="Upload your files"
           onAction={() => setActiveModal("uploadFiles")}
-          actionIcon={<UploadSimple size={16} />}
-        />
-
-        {!seeker?.resumeUrl && !seeker?.coverLetterUrl ? (
-          <Card className="mt-4">
-            <CardContent className="p-6">
-              <EmptyState
-                title="Nothing here yet."
-                description="Upload your resume and cover letter"
-                size="sm"
-                action={{
-                  label: "Upload Files",
-                  onClick: () => setActiveModal("uploadFiles"),
-                }}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="mt-4">
-            <CardContent className="px-6 py-2">
-              {seeker?.resumeUrl && <FileListItem name="Resume.pdf" url={seeker.resumeUrl} />}
-              {seeker?.coverLetterUrl && (
-                <FileListItem name="Cover_Letter.pdf" url={seeker.coverLetterUrl} />
-              )}
-            </CardContent>
-          </Card>
-        )}
+          isEmpty={!seeker?.resumeUrl && !seeker?.coverLetterUrl}
+          emptyState={
+            <ProfileSectionEmptyState
+              illustration={<FilesIllustration />}
+              title="Nothing here yet."
+              description="Upload your resume and cover letter to share with employers."
+              actionLabel="Upload Files"
+              onAction={() => setActiveModal("uploadFiles")}
+            />
+          }
+        >
+          <ProfileSectionListContent>
+            {seeker?.resumeUrl && <FileListItem name="Resume.pdf" url={seeker.resumeUrl} />}
+            {seeker?.coverLetterUrl && (
+              <FileListItem name="Cover_Letter.pdf" url={seeker.coverLetterUrl} />
+            )}
+          </ProfileSectionListContent>
+        </ProfileSectionContainer>
       </div>
 
       {/* ---- Footer ------------------------------------------------ */}
@@ -917,43 +871,6 @@ export default function ProfilePage() {
         skills={seeker?.skills ?? []}
         profileUrl={typeof window !== "undefined" ? window.location.href : ""}
       />
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Section Header (internal helper)                                    */
-/* ------------------------------------------------------------------ */
-
-function SectionHeader({
-  icon,
-  title,
-  count,
-  actionLabel,
-  onAction,
-  actionIcon,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  count: number;
-  actionLabel: string;
-  onAction: () => void;
-  actionIcon?: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <span className="text-[var(--foreground-brand)]">{icon}</span>
-        <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">{title}</h2>
-        {count > 0 && (
-          <Badge variant="neutral" size="sm">
-            {count}
-          </Badge>
-        )}
-      </div>
-      <Button variant="link" leftIcon={actionIcon || <PencilSimple size={16} />} onClick={onAction}>
-        {actionLabel}
-      </Button>
     </div>
   );
 }
