@@ -16,20 +16,21 @@ import {
   ArrowCircleRight,
   MapPin,
   Plus,
+  WarningCircle,
 } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
 
-interface Job {
+interface DashboardRole {
   id: string;
   title: string;
   location: string | null;
   locationType: string;
   status: string;
   publishedAt: string | null;
-  _count?: { applications: number };
+  applicationCount: number;
 }
 
-interface Application {
+interface DashboardApplication {
   id: string;
   stage: string;
   createdAt: string;
@@ -46,11 +47,11 @@ interface Application {
 
 interface DashboardData {
   activeRolesCount: number;
-  recentRoles: Job[];
+  recentRoles: DashboardRole[];
   candidateCount: number;
   newApplicationCount: number;
   hiredCount: number;
-  recentApplications: Application[];
+  recentApplications: DashboardApplication[];
   pipelineStats: Record<string, number>;
 }
 
@@ -90,75 +91,61 @@ const PIPELINE_STAGES = ["Applied", "Screening", "Interview", "Offer", "Hired"];
 
 export default function EmployerDashboardPage() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<DashboardData>(initialData);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [jobsRes, applicationsRes, candidatesRes] = await Promise.all([
-          fetch("/api/jobs"),
-          fetch("/api/applications"),
-          fetch("/api/candidates"),
-        ]);
-
-        const jobsData = jobsRes.ok ? await jobsRes.json() : { jobs: [] };
-        const applicationsData = applicationsRes.ok
-          ? await applicationsRes.json()
-          : { applications: [] };
-        const candidatesData = candidatesRes.ok ? await candidatesRes.json() : { candidates: [] };
-
-        const allJobs: Job[] = jobsData.jobs || [];
-        const allApplications: Application[] = applicationsData.applications || [];
-        const allCandidates = candidatesData.candidates || [];
-
-        const activeJobs = allJobs.filter((j) => j.status === "PUBLISHED");
-
-        // Calculate pipeline stats
-        const pipelineStats: Record<string, number> = {};
-        PIPELINE_STAGES.forEach((stage) => {
-          pipelineStats[stage] = allApplications.filter(
-            (a) => a.stage.toLowerCase() === stage.toLowerCase()
-          ).length;
-        });
-
-        // Count recent applications (last 7 days)
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const recentApps = allApplications.filter((a) => new Date(a.createdAt) >= sevenDaysAgo);
-
-        const hiredApps = allApplications.filter((a) => a.stage.toLowerCase() === "hired");
-
-        setData({
-          activeRolesCount: activeJobs.length,
-          recentRoles: allJobs
-            .sort((a, b) => {
-              const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-              const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-              return dateB - dateA;
-            })
-            .slice(0, 5),
-          candidateCount: allCandidates.length,
-          newApplicationCount: recentApps.length,
-          hiredCount: hiredApps.length,
-          recentApplications: allApplications
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .slice(0, 5),
-          pipelineStats,
-        });
-      } catch (error) {
-        logger.error("Error fetching dashboard data", { error: formatError(error) });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchDashboard();
   }, []);
+
+  async function fetchDashboard() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/canopy/dashboard");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Failed to load dashboard (${res.status})`);
+      }
+      const dashboardData: DashboardData = await res.json();
+      setData(dashboardData);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load dashboard";
+      logger.error("Error fetching dashboard data", { error: formatError(err) });
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner size="lg" />
+      <div>
+        <PageHeader title="Home" />
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Spinner size="lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <PageHeader title="Home" />
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-8">
+          <WarningCircle size={48} weight="duotone" className="text-[var(--foreground-error)]" />
+          <p className="text-body text-[var(--foreground-muted)]">{error}</p>
+          <button
+            onClick={fetchDashboard}
+            className={cn(
+              buttonVariants({ variant: "tertiary" }),
+              "rounded-[var(--radius-button)]"
+            )}
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
@@ -171,7 +158,7 @@ export default function EmployerDashboardPage() {
 
       {/* Greeting + Quick Actions */}
       <div className="flex flex-col gap-6 px-8 py-6 lg:px-12">
-        <h2 className="text-heading-md font-medium text-[var(--primitive-green-800)]">
+        <h2 className="text-heading-md font-medium text-[var(--foreground-brand-emphasis)]">
           {getGreeting()}
         </h2>
         <div className="flex flex-wrap gap-3">
@@ -179,7 +166,7 @@ export default function EmployerDashboardPage() {
             href="/canopy/roles"
             className={cn(
               buttonVariants({ variant: "primary" }),
-              "rounded-[16px] px-4 py-4 text-body font-bold"
+              "rounded-[var(--radius-2xl)] px-4 py-4 text-body font-bold"
             )}
           >
             <Plus size={20} weight="bold" />
@@ -189,7 +176,7 @@ export default function EmployerDashboardPage() {
             href="/canopy/candidates"
             className={cn(
               buttonVariants({ variant: "tertiary" }),
-              "rounded-[16px] px-4 py-4 text-body font-bold"
+              "rounded-[var(--radius-2xl)] px-4 py-4 text-body font-bold"
             )}
           >
             <Users size={20} weight="bold" />
@@ -199,7 +186,7 @@ export default function EmployerDashboardPage() {
             href="/canopy/team"
             className={cn(
               buttonVariants({ variant: "tertiary" }),
-              "rounded-[16px] px-4 py-4 text-body font-bold"
+              "rounded-[var(--radius-2xl)] px-4 py-4 text-body font-bold"
             )}
           >
             <UsersFour size={20} weight="bold" />
@@ -240,15 +227,17 @@ export default function EmployerDashboardPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-4 py-5 transition-shadow hover:shadow-card"
+              className="flex flex-col gap-3 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-4 py-5 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
             >
               <div className="flex items-center justify-between">
-                <p className="text-caption text-foreground-muted">{stat.label}</p>
-                <div className="rounded-lg bg-[var(--primitive-blue-100)] p-1.5">
-                  <stat.icon size={16} weight="bold" className="text-[var(--primitive-blue-600)]" />
+                <p className="text-caption text-[var(--foreground-muted)]">{stat.label}</p>
+                <div className="rounded-lg bg-[var(--background-info)] p-1.5">
+                  <stat.icon size={16} weight="bold" className="text-[var(--foreground-info)]" />
                 </div>
               </div>
-              <p className="text-foreground-default text-heading-sm font-semibold">{stat.value}</p>
+              <p className="text-heading-sm font-semibold text-[var(--foreground-default)]">
+                {stat.value}
+              </p>
             </Link>
           ))}
         </div>
@@ -257,12 +246,14 @@ export default function EmployerDashboardPage() {
       {/* Active Roles */}
       <section className="px-8 py-6 lg:px-12">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-foreground-default text-heading-sm font-medium">Active Roles</h2>
+          <h2 className="text-heading-sm font-medium text-[var(--foreground-default)]">
+            Active Roles
+          </h2>
           <Link
             href="/canopy/roles"
             className={cn(
               buttonVariants({ variant: "inverse" }),
-              "rounded-[16px] px-4 py-3.5 text-caption font-bold"
+              "rounded-[var(--radius-2xl)] px-4 py-3.5 text-caption font-bold"
             )}
           >
             View All
@@ -276,27 +267,27 @@ export default function EmployerDashboardPage() {
               <Link
                 key={job.id}
                 href={`/canopy/roles/${job.id}`}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-4 transition-shadow hover:shadow-card"
+                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background-info)]">
                   <BriefcaseMetal
                     size={20}
                     weight="fill"
-                    className="text-[var(--primitive-blue-600)]"
+                    className="text-[var(--foreground-info)]"
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-foreground-default truncate text-body font-medium">
+                  <p className="truncate text-body font-medium text-[var(--foreground-default)]">
                     {job.title}
                   </p>
-                  <div className="flex items-center gap-2 text-caption text-foreground-muted">
+                  <div className="flex items-center gap-2 text-caption text-[var(--foreground-muted)]">
                     {job.location && (
                       <span className="flex items-center gap-1">
                         <MapPin size={12} />
                         {job.location}
                       </span>
                     )}
-                    <span>{job._count?.applications || 0} applications</span>
+                    <span>{job.applicationCount} applications</span>
                   </div>
                 </div>
                 <Badge variant={statusBadgeVariant(job.status)}>
@@ -306,8 +297,8 @@ export default function EmployerDashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
-            <p className="text-body text-foreground-muted">
+          <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] p-8 text-center">
+            <p className="text-body text-[var(--foreground-muted)]">
               No roles posted yet. Create your first job listing to start receiving applications.
             </p>
           </div>
@@ -317,14 +308,14 @@ export default function EmployerDashboardPage() {
       {/* Recent Applications */}
       <section className="px-8 py-6 lg:px-12">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-foreground-default text-heading-sm font-medium">
+          <h2 className="text-heading-sm font-medium text-[var(--foreground-default)]">
             Recent Applications
           </h2>
           <Link
             href="/canopy/candidates"
             className={cn(
               buttonVariants({ variant: "inverse" }),
-              "rounded-[16px] px-4 py-3.5 text-caption font-bold"
+              "rounded-[var(--radius-2xl)] px-4 py-3.5 text-caption font-bold"
             )}
           >
             View All
@@ -337,13 +328,13 @@ export default function EmployerDashboardPage() {
             {data.recentApplications.map((app) => (
               <div
                 key={app.id}
-                className="flex items-center gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-4"
+                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-foreground-default truncate text-body font-medium">
+                  <p className="truncate text-body font-medium text-[var(--foreground-default)]">
                     {app.candidate.name}
                   </p>
-                  <p className="text-caption text-foreground-muted">
+                  <p className="text-caption text-[var(--foreground-muted)]">
                     {app.job.title} ·{" "}
                     {new Date(app.createdAt).toLocaleDateString("en-US", {
                       month: "short",
@@ -356,8 +347,8 @@ export default function EmployerDashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8 text-center">
-            <p className="text-body text-foreground-muted">
+          <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] p-8 text-center">
+            <p className="text-body text-[var(--foreground-muted)]">
               No applications yet. Post a role to start receiving candidates.
             </p>
           </div>
@@ -367,10 +358,10 @@ export default function EmployerDashboardPage() {
       {/* Hiring Pipeline */}
       {totalInPipeline > 0 && (
         <section className="px-8 py-6 lg:px-12">
-          <h2 className="text-foreground-default mb-4 text-heading-sm font-medium">
+          <h2 className="mb-4 text-heading-sm font-medium text-[var(--foreground-default)]">
             Hiring Pipeline
           </h2>
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
+          <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] p-6">
             <div className="flex items-end gap-1">
               {PIPELINE_STAGES.map((stage) => {
                 const count = data.pipelineStats[stage] || 0;
@@ -378,12 +369,16 @@ export default function EmployerDashboardPage() {
                   totalInPipeline > 0 ? Math.max((count / totalInPipeline) * 120, 8) : 8;
                 return (
                   <div key={stage} className="flex flex-1 flex-col items-center gap-2">
-                    <span className="text-foreground-default text-caption-strong">{count}</span>
+                    <span className="text-caption-strong text-[var(--foreground-default)]">
+                      {count}
+                    </span>
                     <div
-                      className="w-full rounded-t-lg bg-[var(--primitive-blue-200)] transition-all"
+                      className="w-full rounded-t-lg bg-[var(--background-info)] transition-all"
                       style={{ height: `${height}px` }}
                     />
-                    <span className="text-center text-caption text-foreground-muted">{stage}</span>
+                    <span className="text-center text-caption text-[var(--foreground-muted)]">
+                      {stage}
+                    </span>
                   </div>
                 );
               })}
