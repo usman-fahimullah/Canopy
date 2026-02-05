@@ -1,6 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useShell } from "@/lib/shell/shell-context";
+import { ShellNotificationBell } from "./notification-bell";
 
 interface PageHeaderProps {
   /** Page title displayed in the header */
@@ -12,21 +14,24 @@ interface PageHeaderProps {
 }
 
 /**
- * Shared 108px white header bar for all shell pages.
- * Follows the Candid dashboard pattern.
+ * Shared 108px header bar for all shell pages.
+ * Includes notification bell on the right side.
  */
 export function PageHeader({ title, actions, className }: PageHeaderProps) {
+  const { currentShell } = useShell();
+
   return (
     <div
       className={cn(
-        "flex h-[108px] items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-8 lg:px-12",
+        "flex h-[108px] items-center justify-between border-b border-[var(--shell-header-border)] bg-[var(--shell-header-bg)] px-8 lg:px-12",
         className
       )}
     >
-      <h1 className="text-heading-md font-medium text-[var(--primitive-green-800)]">
-        {title}
-      </h1>
-      {actions && <div className="flex items-center gap-3">{actions}</div>}
+      <h1 className="text-heading-md font-medium text-[var(--foreground-default)]">{title}</h1>
+      <div className="flex items-center gap-3">
+        {actions}
+        <ShellNotificationBell shell={currentShell} />
+      </div>
     </div>
   );
 }

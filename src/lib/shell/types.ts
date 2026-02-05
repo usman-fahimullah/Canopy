@@ -28,6 +28,8 @@ export interface ShellNavItem {
   badgeKey?: string;
   /** Employer-only: which org roles can see this item */
   requiredRoles?: EmployerOrgRole[];
+  /** Child items for expandable sub-navigation (rendered with caret toggle) */
+  children?: ShellNavItem[];
 }
 
 /** A nav section (group of items with optional heading) */
@@ -68,6 +70,8 @@ export interface ShellNavConfig {
   settingsHref: string;
   /** Path to notifications page for this shell */
   notificationsHref: string;
+  /** Utility items rendered in the bottom zone (Settings, Admin, etc.) */
+  utilityItems?: ShellNavItem[];
 }
 
 // ---------------------------------------------------------------------------

@@ -12,6 +12,7 @@ import {
   ChartDonut,
   GraduationCap,
   Handshake,
+  Gear,
 } from "@phosphor-icons/react";
 import { TreehouseIcon } from "@/components/Icons/treehouse-icon";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
@@ -112,6 +113,15 @@ export const talentNavConfig: ShellNavConfig = {
     emptyMessage: "No recent applications",
     itemHrefPrefix: "/jobs/applications/",
   },
+  utilityItems: [
+    {
+      id: "settings",
+      href: "/jobs/settings",
+      label: "Settings",
+      icon: Gear,
+      iconWeight: "fill",
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------
@@ -180,6 +190,15 @@ export const coachNavConfig: ShellNavConfig = {
     emptyMessage: "No recent conversations",
     itemHrefPrefix: "/candid/coach/messages/",
   },
+  utilityItems: [
+    {
+      id: "settings",
+      href: "/candid/coach/settings",
+      label: "Settings",
+      icon: Gear,
+      iconWeight: "fill",
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------
@@ -244,6 +263,15 @@ export const employerNavConfig: ShellNavConfig = {
     emptyMessage: "No recent postings",
     itemHrefPrefix: "/canopy/roles/",
   },
+  utilityItems: [
+    {
+      id: "settings",
+      href: "/canopy/settings",
+      label: "Settings",
+      icon: Gear,
+      iconWeight: "fill",
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------

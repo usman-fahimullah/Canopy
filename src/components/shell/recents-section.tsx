@@ -53,11 +53,11 @@ export function RecentsSection({ config }: RecentsSectionProps) {
   const visibleItems = items.slice(0, maxItems);
 
   return (
-    <div className="mt-2 px-3">
+    <div className="mt-3">
       {/* Section header with toggle */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="hover:text-foreground-default flex w-full items-center justify-between px-2 py-1.5 text-caption text-foreground-muted transition-colors"
+        className="flex w-full items-center justify-between px-3 py-1.5 text-caption text-foreground-muted transition-colors hover:text-[var(--foreground-default)]"
       >
         <span className="font-medium">{config.label}</span>
         {expanded ? <CaretUp size={14} weight="bold" /> : <CaretDown size={14} weight="bold" />}
@@ -68,11 +68,11 @@ export function RecentsSection({ config }: RecentsSectionProps) {
         <div className="mt-0.5 space-y-0.5">
           {loading ? (
             // Skeleton
-            <div className="space-y-1 px-2">
+            <div className="space-y-1 px-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-7 animate-pulse rounded-md bg-[var(--background-subtle)]"
+                  className="h-7 animate-pulse rounded-md bg-[var(--background-muted)]"
                 />
               ))}
             </div>
@@ -82,18 +82,18 @@ export function RecentsSection({ config }: RecentsSectionProps) {
                 key={item.id}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 rounded-lg px-2 py-1.5",
+                  "flex items-center gap-2 rounded-[var(--shell-nav-item-radius)] px-3 py-1.5",
                   "text-caption text-foreground-muted",
-                  "hover:text-foreground-default hover:bg-[var(--shell-nav-item-hover)]",
+                  "hover:bg-[var(--shell-nav-item-hover)] hover:text-[var(--foreground-default)]",
                   "truncate transition-colors"
                 )}
               >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-foreground-subtle" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--foreground-subtle)]" />
                 <span className="truncate">{item.title}</span>
               </Link>
             ))
           ) : (
-            <p className="px-2 py-1.5 text-caption text-foreground-subtle">{config.emptyMessage}</p>
+            <p className="px-3 py-1.5 text-caption text-foreground-subtle">{config.emptyMessage}</p>
           )}
         </div>
       )}

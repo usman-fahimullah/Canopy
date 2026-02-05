@@ -550,7 +550,7 @@
     --input-foreground-placeholder: var(--primitive-neutral-500);
     --input-border: var(--primitive-neutral-200);
     --input-border-hover: var(--primitive-neutral-300);
-    --input-border-focus: var(--primitive-green-500);
+    --input-border-focus: var(--primitive-blue-500);
     --input-border-error: var(--primitive-red-500);
     --input-border-success: var(--primitive-green-500);
 
@@ -560,7 +560,7 @@
     --select-background-open: var(--primitive-neutral-0);
     --select-border: var(--primitive-neutral-200);
     --select-border-hover: var(--primitive-neutral-300);
-    --select-border-focus: var(--primitive-green-500);
+    --select-border-focus: var(--primitive-blue-500);
     --select-border-success: var(--primitive-green-500);
     --select-border-error: var(--primitive-red-500);
     --select-foreground: var(--primitive-green-800);
@@ -1445,13 +1445,13 @@
     --shadow-tooltip: 0 2px 4px 0 rgb(0 0 0 / 0.1), 0 6px 20px -2px rgb(0 0 0 / 0.18);
     --shadow-button: 0 1px 3px 0 rgb(0 0 0 / 0.1);
     --shadow-button-active: inset 0 2px 4px 0 rgb(0 0 0 / 0.16);
-    --shadow-focus: 0 0 0 2px var(--primitive-neutral-0), 0 0 0 4px var(--primitive-green-500);
+    --shadow-focus: 0 0 0 2px var(--primitive-neutral-0), 0 0 0 4px var(--primitive-blue-500);
 
     /* ============================================
        FOCUS RING
        ============================================ */
 
-    --ring-color: var(--primitive-green-500);
+    --ring-color: var(--primitive-blue-500);
     --ring-color-error: var(--primitive-red-500);
     --ring-color-success: var(--primitive-green-500);
     --ring-color-inverse: var(--primitive-neutral-0);
@@ -1680,12 +1680,17 @@
        Default values — overridden per shell via [data-shell]
        ============================================ */
 
-    --shell-nav-sidebar-bg: var(--background-default);
+    --shell-nav-sidebar-bg: var(--background-subtle);
     --shell-nav-sidebar-border: var(--primitive-neutral-200);
     --shell-nav-item-hover: var(--primitive-neutral-200);
     --shell-nav-item-active-bg: var(--primitive-green-100);
     --shell-nav-item-active-text: var(--primitive-green-800);
     --shell-nav-accent: var(--primitive-green-600);
+    --shell-nav-item-inactive-opacity: 0.74;
+    --shell-nav-utility-opacity: 0.75;
+    --shell-nav-signout-color: var(--foreground-error);
+    --shell-nav-icon-size: 18px;
+    --shell-nav-item-radius: var(--radius-lg);
     --shell-page-bg: var(--primitive-neutral-100);
     --shell-header-bg: var(--background-default);
     --shell-header-border: var(--primitive-neutral-200);
@@ -1936,7 +1941,7 @@
     --input-foreground-placeholder: var(--primitive-neutral-600);
     --input-border: var(--primitive-neutral-300);
     --input-border-hover: var(--primitive-neutral-400);
-    --input-border-focus: var(--primitive-green-500);
+    --input-border-focus: var(--primitive-blue-500);
     --input-border-error: var(--primitive-red-500);
     --input-border-success: var(--primitive-green-500);
 
@@ -1945,7 +1950,7 @@
     --select-background-open: var(--primitive-neutral-100);
     --select-border: var(--primitive-neutral-300);
     --select-border-hover: var(--primitive-neutral-400);
-    --select-border-focus: var(--primitive-green-500);
+    --select-border-focus: var(--primitive-blue-500);
     --select-border-success: var(--primitive-green-500);
     --select-border-error: var(--primitive-red-500);
     --select-foreground: var(--primitive-neutral-800);
@@ -2370,7 +2375,7 @@
     --shadow-tooltip: 0 2px 4px 0 rgb(0 0 0 / 0.26), 0 6px 20px -2px rgb(0 0 0 / 0.4);
     --shadow-button: 0 1px 3px 0 rgb(0 0 0 / 0.26);
     --shadow-button-active: inset 0 2px 4px 0 rgb(0 0 0 / 0.36);
-    --shadow-focus: 0 0 0 2px var(--primitive-neutral-800), 0 0 0 4px var(--primitive-green-500);
+    --shadow-focus: 0 0 0 2px var(--primitive-neutral-800), 0 0 0 4px var(--primitive-blue-500);
 
     /* Overlay */
     --overlay-subtle: rgba(0, 0, 0, 0.5);
@@ -2378,7 +2383,7 @@
     --overlay-heavy: rgba(0, 0, 0, 0.85);
 
     /* Focus Ring */
-    --ring-color: var(--primitive-green-500);
+    --ring-color: var(--primitive-blue-500);
     --ring-color-error: var(--primitive-red-500);
     --ring-color-success: var(--primitive-green-500);
     --ring-color-inverse: var(--primitive-neutral-800);
