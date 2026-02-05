@@ -112,7 +112,7 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
       itemBase,
       active
         ? "bg-[var(--primitive-neutral-200)]"
-        : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:opacity-100 hover:bg-[var(--shell-nav-item-hover)]"
+        : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:opacity-100"
     );
   }
 
@@ -152,7 +152,7 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
             <button
               className={cn(
                 "flex w-full items-center gap-3 rounded-[var(--shell-nav-item-radius)] p-3",
-                "transition-colors hover:bg-[var(--shell-nav-item-hover)]",
+                "transition-opacity hover:opacity-80",
                 collapsed && "justify-center"
               )}
             >
@@ -275,7 +275,7 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
                                     "flex items-center gap-3 rounded-[var(--shell-nav-item-radius)] p-2 transition-colors",
                                     childActive
                                       ? "bg-[var(--primitive-neutral-200)]"
-                                      : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
+                                      : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:opacity-100"
                                   )}
                                 >
                                   {renderIcon(child, 16)}
@@ -312,7 +312,7 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
                 itemBase,
                 active
                   ? "bg-[var(--primitive-neutral-200)]"
-                  : "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
+                  : "opacity-[var(--shell-nav-utility-opacity)] hover:opacity-100"
               )}
               title={collapsed ? item.label : undefined}
             >
@@ -328,7 +328,7 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
           className={cn(
             "flex w-full items-center gap-3 rounded-[var(--shell-nav-item-radius)] p-3 transition-colors",
             collapsed && "justify-center",
-            "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
+            "opacity-[var(--shell-nav-utility-opacity)] hover:opacity-100"
           )}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
