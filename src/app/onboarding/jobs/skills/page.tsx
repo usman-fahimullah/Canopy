@@ -87,8 +87,8 @@ export default function TalentSkillsPage() {
         body: JSON.stringify({
           action: "complete-role",
           shell: "talent",
-          firstName: baseProfile.firstName,
-          lastName: baseProfile.lastName,
+          firstName: baseProfile.firstName || undefined,
+          lastName: baseProfile.lastName || undefined,
           linkedinUrl: baseProfile.linkedinUrl || undefined,
           bio: baseProfile.bio || undefined,
           careerStage: talentData.careerStage,
