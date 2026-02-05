@@ -81,19 +81,12 @@ export function ProfileHeader({
             <Button
               variant="secondary"
               size="icon-sm"
-              className="bg-[var(--primitive-blue-200)] hover:bg-[var(--primitive-blue-300)]"
               onClick={onEditCover}
               aria-label="Edit background"
             >
               <PencilSimple size={18} weight="bold" />
             </Button>
-            <Button
-              variant="secondary"
-              size="icon-sm"
-              className="bg-[var(--primitive-blue-200)] hover:bg-[var(--primitive-blue-300)]"
-              onClick={onShare}
-              aria-label="Share profile"
-            >
+            <Button variant="secondary" size="icon-sm" onClick={onShare} aria-label="Share profile">
               <ShareNetwork size={18} weight="bold" />
             </Button>
           </div>
@@ -105,20 +98,19 @@ export function ProfileHeader({
         {/* Avatar overlapping cover - Figma: 128px, -80px overlap, 6px white border */}
         <div className="relative -mt-20 mb-4">
           <div className="relative inline-block">
-            <div className="rounded-full border-[6px] border-white">
-              <Avatar
-                src={avatar ?? undefined}
-                name={name ?? undefined}
-                size="2xl"
-                shape="circle"
-                className="h-[128px] w-[128px]"
-              />
-            </div>
+            {/* Use box-shadow for the white ring since Avatar has overflow:hidden */}
+            <Avatar
+              src={avatar ?? undefined}
+              name={name ?? undefined}
+              size="2xl"
+              shape="circle"
+              className="h-[128px] w-[128px] !border-[6px] !border-white shadow-[0_0_0_2px_rgba(0,0,0,0.05)]"
+            />
             {isOwner && (
               <Button
                 variant="secondary"
                 size="icon-sm"
-                className="absolute -bottom-1 -right-1 bg-[var(--primitive-blue-200)] hover:bg-[var(--primitive-blue-300)]"
+                className="absolute -bottom-1 -right-1"
                 onClick={onEditPhoto}
                 aria-label="Edit profile photo"
               >
@@ -190,7 +182,6 @@ export function ProfileHeader({
                 <Button
                   variant="secondary"
                   size="icon-sm"
-                  className="bg-[var(--primitive-blue-200)] hover:bg-[var(--primitive-blue-300)]"
                   onClick={onEditSocials}
                   aria-label="Add more socials"
                 >
