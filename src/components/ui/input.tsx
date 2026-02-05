@@ -33,7 +33,7 @@ const inputVariants = cva(
     "text-lg text-[var(--input-foreground)]",
     "placeholder:text-[var(--input-foreground-placeholder)]",
     "transition-all duration-normal ease-default",
-    "focus-visible:outline-none focus-visible:border-[var(--input-border-focus)]",
+    "focus-visible:outline-none focus-visible:border-[var(--input-border-focus)] focus-visible:hover:border-[var(--input-border-focus)]",
     "disabled:cursor-not-allowed disabled:opacity-50",
     "file:border-0 file:bg-transparent file:text-body-sm file:font-medium",
   ],
@@ -117,7 +117,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "p-4",
             "ease-default transition-all duration-normal",
             "hover:border-[var(--input-border-hover)]",
-            "focus-within:border-[var(--input-border-focus)]",
+            "focus-within:border-[var(--input-border-focus)] focus-within:hover:border-[var(--input-border-focus)]",
             error &&
               "border-[var(--input-border-error)] focus-within:border-[var(--input-border-error)] hover:border-[var(--input-border-error)]",
             success &&

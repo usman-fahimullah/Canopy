@@ -869,7 +869,7 @@
     --switch-background: var(--primitive-neutral-400);
     --switch-background-hover: var(--primitive-neutral-500);
     --switch-background-checked: var(--primitive-blue-500);
-    --switch-background-checked-hover: var(--primitive-blue-600);
+    --switch-background-checked-hover: var(--primitive-blue-400);
     --switch-background-disabled: var(--primitive-neutral-300);
     --switch-thumb: var(--primitive-neutral-0);
     --switch-thumb-border: var(--primitive-neutral-400);
@@ -880,7 +880,7 @@
     --checkbox-background: var(--primitive-neutral-0);
     --checkbox-background-hover: var(--primitive-neutral-100);
     --checkbox-background-checked: var(--primitive-blue-500);
-    --checkbox-background-checked-hover: var(--primitive-blue-600);
+    --checkbox-background-checked-hover: var(--primitive-blue-400);
     --checkbox-background-disabled: var(--primitive-neutral-200);
     --checkbox-background-error: var(--primitive-red-100);
     --checkbox-border: var(--primitive-neutral-400);
@@ -894,7 +894,7 @@
     --radio-background: var(--primitive-neutral-0);
     --radio-background-hover: var(--primitive-neutral-100);
     --radio-background-checked: var(--primitive-blue-500);
-    --radio-background-checked-hover: var(--primitive-blue-600);
+    --radio-background-checked-hover: var(--primitive-blue-400);
     --radio-background-disabled: var(--primitive-neutral-200);
     --radio-background-error: var(--primitive-red-100);
     --radio-border: var(--primitive-neutral-400);
@@ -2157,7 +2157,7 @@
     --switch-background: var(--primitive-neutral-500);
     --switch-background-hover: var(--primitive-neutral-600);
     --switch-background-checked: var(--primitive-blue-500);
-    --switch-background-checked-hover: var(--primitive-blue-600);
+    --switch-background-checked-hover: var(--primitive-blue-400);
     --switch-background-disabled: var(--primitive-neutral-300);
     --switch-thumb: var(--primitive-neutral-0);
     --switch-thumb-border: var(--primitive-neutral-500);

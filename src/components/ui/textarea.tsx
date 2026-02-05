@@ -26,7 +26,7 @@ const textareaVariants = cva(
     "text-lg text-[var(--input-foreground)] leading-6",
     "placeholder:text-[var(--input-foreground-placeholder)]",
     "transition-all duration-normal ease-default",
-    "focus-visible:outline-none focus-visible:border-[var(--input-border-focus)]",
+    "focus-visible:outline-none focus-visible:border-[var(--input-border-focus)] focus-visible:hover:border-[var(--input-border-focus)]",
     "disabled:cursor-not-allowed disabled:opacity-50",
     "resize-y min-h-[120px]",
   ],

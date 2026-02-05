@@ -135,7 +135,7 @@ const Combobox = React.forwardRef<HTMLButtonElement, ComboboxProps>(
               // Hover state
               "hover:border-[var(--select-border-hover)]",
               // Focus state
-              "focus-visible:border-[var(--select-border-focus)] focus-visible:outline-none",
+              "focus-visible:border-[var(--select-border-focus)] focus-visible:outline-none focus-visible:hover:border-[var(--select-border-focus)]",
               "focus-visible:bg-[var(--select-background-open)]",
               // Open state
               open && "border-[var(--select-border-focus)] bg-[var(--select-background-open)]",
@@ -472,7 +472,7 @@ const MultiCombobox = React.forwardRef<HTMLDivElement, MultiComboboxProps>(
               // Hover state
               "hover:border-[var(--select-border-hover)]",
               // Focus state
-              "focus-within:border-[var(--select-border-focus)]",
+              "focus-within:border-[var(--select-border-focus)] focus-within:hover:border-[var(--select-border-focus)]",
               "focus-within:bg-[var(--select-background-open)]",
               // Open state
               open && "border-[var(--select-border-focus)] bg-[var(--select-background-open)]",

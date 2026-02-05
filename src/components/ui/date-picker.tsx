@@ -824,7 +824,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
               "border-[var(--input-border)]",
               "text-left text-lg leading-6",
               "transition-all duration-150",
-              "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none",
+              "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none focus-visible:hover:border-[var(--input-border-focus)]",
               // Default state
               !error && !success && ["hover:border-[var(--input-border-hover)]"],
               // Error state
@@ -1053,7 +1053,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
               "border-[var(--input-border)]",
               "text-left text-lg leading-6",
               "transition-all duration-150",
-              "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none",
+              "focus-visible:border-[var(--input-border-focus)] focus-visible:outline-none focus-visible:hover:border-[var(--input-border-focus)]",
               // Default state
               !error && !success && ["hover:border-[var(--input-border-hover)]"],
               // Error state
