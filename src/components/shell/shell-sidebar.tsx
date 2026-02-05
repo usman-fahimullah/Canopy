@@ -111,8 +111,8 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
     return cn(
       itemBase,
       active
-        ? "bg-[var(--shell-nav-item-active-bg)]"
-        : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:bg-[var(--shell-nav-item-hover)]"
+        ? "bg-[var(--primitive-neutral-200)]"
+        : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:opacity-100 hover:bg-[var(--shell-nav-item-hover)]"
     );
   }
 
@@ -131,8 +131,8 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
       {/* ── TOP ZONE: Logo ──────────────────────────────── */}
       <div
         className={cn(
-          "flex shrink-0 items-center border-b border-[var(--shell-nav-sidebar-border)]",
-          collapsed ? "justify-center px-3 py-5" : "px-6 py-7"
+          "flex h-[108px] shrink-0 items-center border-b border-[var(--shell-nav-sidebar-border)]",
+          collapsed ? "justify-center px-3" : "px-6"
         )}
       >
         <Link href={config.logoHref} className="flex items-center">
@@ -274,8 +274,8 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
                                   className={cn(
                                     "flex items-center gap-3 rounded-[var(--shell-nav-item-radius)] p-2 transition-colors",
                                     childActive
-                                      ? "bg-[var(--shell-nav-item-active-bg)]"
-                                      : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:bg-[var(--shell-nav-item-hover)]"
+                                      ? "bg-[var(--primitive-neutral-200)]"
+                                      : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
                                   )}
                                 >
                                   {renderIcon(child, 16)}
@@ -311,8 +311,8 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
               className={cn(
                 itemBase,
                 active
-                  ? "bg-[var(--shell-nav-item-active-bg)]"
-                  : "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)]"
+                  ? "bg-[var(--primitive-neutral-200)]"
+                  : "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
               )}
               title={collapsed ? item.label : undefined}
             >
@@ -328,7 +328,7 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
           className={cn(
             "flex w-full items-center gap-3 rounded-[var(--shell-nav-item-radius)] p-3 transition-colors",
             collapsed && "justify-center",
-            "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)]"
+            "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
           )}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >

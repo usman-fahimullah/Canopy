@@ -241,8 +241,8 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
                           className={cn(
                             "flex items-center gap-3 rounded-[var(--shell-nav-item-radius)] p-3 transition-colors",
                             active
-                              ? "bg-[var(--shell-nav-item-active-bg)]"
-                              : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:bg-[var(--shell-nav-item-hover)]"
+                              ? "bg-[var(--primitive-neutral-200)]"
+                              : "opacity-[var(--shell-nav-item-inactive-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
                           )}
                         >
                           {renderMenuIcon(item)}
@@ -269,8 +269,8 @@ export function ShellMobileNav({ config }: ShellMobileNavProps) {
                     className={cn(
                       "flex items-center gap-3 rounded-[var(--shell-nav-item-radius)] p-3 transition-colors",
                       active
-                        ? "bg-[var(--shell-nav-item-active-bg)]"
-                        : "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)]"
+                        ? "bg-[var(--primitive-neutral-200)]"
+                        : "opacity-[var(--shell-nav-utility-opacity)] hover:bg-[var(--shell-nav-item-hover)] hover:opacity-100"
                     )}
                   >
                     {item.icon && (
