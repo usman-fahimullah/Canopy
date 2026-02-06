@@ -225,7 +225,7 @@ export const employerNavConfig: ShellNavConfig = {
         {
           id: "roles",
           href: "/canopy/roles",
-          label: "Roles",
+          label: "Manage Roles",
           icon: BriefcaseMetal,
           iconWeight: "fill",
           requiredRoles: ["ADMIN", "RECRUITER"],

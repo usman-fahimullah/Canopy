@@ -164,11 +164,36 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PATCH /api/canopy/roles/[id]
  *
- * Update job status (publish, pause, close).
+ * Update a role's details. Supports partial updates — only provided fields
+ * are changed. Covers all editable job fields for the role editor.
  */
 const UpdateJobSchema = z.object({
+  // Status management
   status: z.enum(["DRAFT", "PUBLISHED", "PAUSED", "CLOSED"]).optional(),
+
+  // Core details
   title: z.string().min(1).max(200).optional(),
+  description: z.string().optional(),
+  location: z.string().optional().nullable(),
+  locationType: z.enum(["ONSITE", "REMOTE", "HYBRID"]).optional(),
+  employmentType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"]).optional(),
+
+  // Compensation
+  salaryMin: z.number().int().positive().optional().nullable(),
+  salaryMax: z.number().int().positive().optional().nullable(),
+  salaryCurrency: z.string().optional(),
+
+  // Climate-specific
+  climateCategory: z.string().optional().nullable(),
+  impactDescription: z.string().optional().nullable(),
+  requiredCerts: z.array(z.string()).optional(),
+  greenSkills: z.array(z.string()).optional(),
+
+  // Experience
+  experienceLevel: z.enum(["ENTRY", "INTERMEDIATE", "SENIOR", "EXECUTIVE"]).optional().nullable(),
+
+  // Dates
+  closesAt: z.string().datetime().optional().nullable(),
 });
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -209,15 +234,47 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       );
     }
 
+    // Build update payload from provided fields only
+    const data = result.data;
     const updateData: Record<string, unknown> = {};
-    if (result.data.status) {
-      updateData.status = result.data.status;
-      if (result.data.status === "PUBLISHED" && !updateData.publishedAt) {
+
+    // Status + auto-set publishedAt
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+      if (data.status === "PUBLISHED") {
         updateData.publishedAt = new Date();
       }
     }
-    if (result.data.title) {
-      updateData.title = result.data.title;
+
+    // Core fields
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.locationType !== undefined) updateData.locationType = data.locationType;
+    if (data.employmentType !== undefined) updateData.employmentType = data.employmentType;
+
+    // Compensation
+    if (data.salaryMin !== undefined) updateData.salaryMin = data.salaryMin;
+    if (data.salaryMax !== undefined) updateData.salaryMax = data.salaryMax;
+    if (data.salaryCurrency !== undefined) updateData.salaryCurrency = data.salaryCurrency;
+
+    // Climate-specific
+    if (data.climateCategory !== undefined) updateData.climateCategory = data.climateCategory;
+    if (data.impactDescription !== undefined) updateData.impactDescription = data.impactDescription;
+    if (data.requiredCerts !== undefined) updateData.requiredCerts = data.requiredCerts;
+    if (data.greenSkills !== undefined) updateData.greenSkills = data.greenSkills;
+
+    // Experience
+    if (data.experienceLevel !== undefined) updateData.experienceLevel = data.experienceLevel;
+
+    // Dates
+    if (data.closesAt !== undefined) {
+      updateData.closesAt = data.closesAt ? new Date(data.closesAt) : null;
+    }
+
+    // Don't allow empty updates
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
     }
 
     const updated = await prisma.job.updateMany({

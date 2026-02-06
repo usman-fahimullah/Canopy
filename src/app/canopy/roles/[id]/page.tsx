@@ -77,8 +77,6 @@ import {
   ListChecks,
   User,
   Nut,
-  GridFour,
-  Buildings,
   Link as LinkIcon,
   CalendarBlank,
   File,
@@ -253,8 +251,69 @@ export default function RoleEditPage() {
   // DATA FETCHING STATE
   // ============================================
   const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
   const [fetchError, setFetchError] = React.useState<string | null>(null);
-  const [dataLoaded, setDataLoaded] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+
+  // Store raw API data for Candidates tab and status display
+  interface ApplicationData {
+    id: string;
+    stage: string;
+    stageOrder: number;
+    matchScore: number | null;
+    matchReasons: string | null;
+    source: string | null;
+    coverLetter: string | null;
+    formResponses: string | null;
+    knockoutPassed: boolean;
+    rejectedAt: string | null;
+    hiredAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    seeker: {
+      id: string;
+      headline: string | null;
+      resumeUrl: string | null;
+      skills: string[];
+      greenSkills: string[];
+      certifications: string[];
+      yearsExperience: number | null;
+      account: {
+        id: string;
+        name: string | null;
+        email: string;
+        avatar: string | null;
+      };
+    };
+  }
+
+  interface JobData {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    location: string | null;
+    locationType: string;
+    employmentType: string;
+    salaryMin: number | null;
+    salaryMax: number | null;
+    salaryCurrency: string;
+    climateCategory: string | null;
+    impactDescription: string | null;
+    requiredCerts: string[];
+    greenSkills: string[];
+    status: string;
+    publishedAt: string | null;
+    closesAt: string | null;
+    stages: { id: string; name: string }[];
+    createdAt: string;
+    updatedAt: string;
+  }
+
+  const [jobData, setJobData] = React.useState<JobData | null>(null);
+  const [applications, setApplications] = React.useState<ApplicationData[]>([]);
+  const [stageCounts, setStageCounts] = React.useState<Record<string, number>>({});
+  const [totalApplications, setTotalApplications] = React.useState(0);
 
   // Form state
   const [roleTitle, setRoleTitle] = React.useState("");
@@ -698,6 +757,34 @@ export default function RoleEditPage() {
   // ============================================
   // DATA FETCHING — Load role from API
   // ============================================
+
+  // Mapping helpers: DB enums → form values
+  const employmentTypeToForm: Record<string, string> = {
+    FULL_TIME: "full-time",
+    PART_TIME: "part-time",
+    CONTRACT: "contract",
+    INTERNSHIP: "internship",
+  };
+
+  const formToEmploymentType: Record<string, string> = {
+    "full-time": "FULL_TIME",
+    "part-time": "PART_TIME",
+    contract: "CONTRACT",
+    internship: "INTERNSHIP",
+  };
+
+  const locationTypeToForm: Record<string, string> = {
+    ONSITE: "onsite",
+    REMOTE: "remote",
+    HYBRID: "hybrid",
+  };
+
+  const formToLocationType: Record<string, string> = {
+    onsite: "ONSITE",
+    remote: "REMOTE",
+    hybrid: "HYBRID",
+  };
+
   React.useEffect(() => {
     const fetchRole = async () => {
       try {
@@ -715,33 +802,48 @@ export default function RoleEditPage() {
         }
 
         const data = await res.json();
-        const job = data.job;
+        const job = data.job as JobData;
 
-        // Populate form state from API response
+        // Store raw API data for Candidates tab and status display
+        setJobData(job);
+        setApplications(data.applications || []);
+        setStageCounts(data.stageCounts || {});
+        setTotalApplications(data.totalApplications || 0);
+
+        // Map DB values → form state for Job Post tab
         if (job.title) setRoleTitle(job.title);
         if (job.climateCategory) setJobCategory(job.climateCategory);
         if (job.employmentType) {
-          const typeMap: Record<string, string> = {
-            FULL_TIME: "full-time",
-            PART_TIME: "part-time",
-            CONTRACT: "contract",
-            INTERNSHIP: "internship",
-          };
-          setPositionType(typeMap[job.employmentType] || "");
+          setPositionType(employmentTypeToForm[job.employmentType] || "");
         }
         if (job.description) setDescription(job.description);
         if (job.location) {
           const parts = job.location.split(", ");
           if (parts[0]) setCity(parts[0]);
-          if (parts[1]) setState(parts[1].toLowerCase());
-          if (parts[2]) setCountry(parts[2].toLowerCase());
+          if (parts[1]) {
+            // Match against usStates values (lowercase)
+            const stateMatch = usStates.find(
+              (s) =>
+                s.label.toLowerCase() === parts[1].toLowerCase() ||
+                s.value === parts[1].toLowerCase()
+            );
+            if (stateMatch) setState(stateMatch.value);
+          }
+          if (parts[2]) {
+            const countryMatch = countries.find(
+              (c) =>
+                c.label.toLowerCase() === parts[2].toLowerCase() ||
+                c.value === parts[2].toLowerCase()
+            );
+            if (countryMatch) setCountry(countryMatch.value);
+          }
         }
-        if (job.locationType) setWorkplaceType(job.locationType.toLowerCase());
+        if (job.locationType) {
+          setWorkplaceType(locationTypeToForm[job.locationType] || "onsite");
+        }
         if (job.salaryMin) setMinPay(String(job.salaryMin));
         if (job.salaryMax) setMaxPay(String(job.salaryMax));
         if (job.closesAt) setClosingDate(new Date(job.closesAt));
-
-        setDataLoaded(true);
       } catch (err) {
         logger.error("Error fetching role detail", { error: formatError(err) });
         setFetchError("Failed to load role details");
@@ -751,7 +853,73 @@ export default function RoleEditPage() {
     };
 
     fetchRole();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roleId]);
+
+  // ============================================
+  // SAVE HANDLER — PATCH role to API
+  // ============================================
+  const handleSaveRole = async () => {
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      // Build location string from parts
+      const locationParts = [city, state, country].filter(Boolean);
+      const locationString = locationParts.length > 0 ? locationParts.join(", ") : null;
+
+      const payload: Record<string, unknown> = {
+        title: roleTitle || undefined,
+        description: description || undefined,
+        location: locationString,
+        locationType: formToLocationType[workplaceType] || "ONSITE",
+        employmentType: formToEmploymentType[positionType] || undefined,
+        climateCategory: jobCategory || null,
+        salaryMin: minPay ? Number(minPay) : null,
+        salaryMax: maxPay ? Number(maxPay) : null,
+        salaryCurrency: "USD",
+        closesAt: closingDate ? closingDate.toISOString() : null,
+      };
+
+      // Remove undefined values
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] === undefined) delete payload[key];
+      });
+
+      const res = await fetch(`/api/canopy/roles/${roleId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save role");
+      }
+
+      // Update local jobData to reflect changes
+      if (jobData) {
+        setJobData({
+          ...jobData,
+          title: roleTitle || jobData.title,
+          description: description || jobData.description,
+          location: locationString,
+          locationType: formToLocationType[workplaceType] || jobData.locationType,
+          employmentType: formToEmploymentType[positionType] || jobData.employmentType,
+          climateCategory: jobCategory || null,
+          salaryMin: minPay ? Number(minPay) : null,
+          salaryMax: maxPay ? Number(maxPay) : null,
+          closesAt: closingDate ? closingDate.toISOString() : null,
+        });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save role";
+      logger.error("Error saving role", { error: formatError(err) });
+      setSaveError(message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // ============================================
   // LOADING & ERROR STATES
@@ -787,2015 +955,1991 @@ export default function RoleEditPage() {
     );
   }
 
+  // Determine status badge variant
+  const statusBadge = () => {
+    const status = jobData?.status || "DRAFT";
+    switch (status) {
+      case "PUBLISHED":
+        return (
+          <Badge variant="success" size="sm">
+            Published
+          </Badge>
+        );
+      case "PAUSED":
+        return (
+          <Badge variant="warning" size="sm">
+            Paused
+          </Badge>
+        );
+      case "CLOSED":
+        return (
+          <Badge variant="neutral" size="sm">
+            Closed
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="feature" size="sm">
+            Draft
+          </Badge>
+        );
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
-      {/* Top Navigation Bar */}
-      <header className="border-b border-[var(--primitive-neutral-100)] bg-[var(--background-default)]">
-        <div className="flex items-center justify-between">
-          {/* Left: Logo */}
-          <div className="flex h-full items-center px-12 py-4">
-            <Link href="/" className="flex items-center py-[15px]">
-              <div className="flex items-center gap-1">
-                <span className="text-body font-medium text-foreground">Green Jobs Board</span>
-                <span className="text-[var(--primitive-green-900)]">*</span>
-              </div>
-            </Link>
-          </div>
+    <div>
+      {/* Save Error Banner */}
+      {saveError && (
+        <div className="px-8 pt-4">
+          <Banner
+            type="critical"
+            title={saveError}
+            dismissible
+            onDismiss={() => setSaveError(null)}
+          />
+        </div>
+      )}
 
-          {/* Center: Navigation Tabs */}
-          <div className="flex flex-1 items-center justify-center gap-3 px-1 py-6">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
-            >
-              <GridFour weight="regular" className="h-4 w-4" />
-              <span>Dashboard</span>
+      {/* Page Header */}
+      <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-8 py-6 lg:px-12">
+        <div className="relative flex items-center justify-between">
+          {/* Left: Back + Title + Badge */}
+          <div className="flex min-w-0 max-w-[320px] items-center gap-3">
+            <Link href="/canopy/roles">
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <ArrowLeft size={18} weight="bold" />
+              </Button>
             </Link>
-            <Link
-              href="/roles"
-              className="flex items-center gap-1 rounded-2xl bg-[var(--primitive-blue-100)] px-4 py-3 text-caption text-foreground"
-            >
-              <Nut weight="regular" className="h-4 w-4" />
-              <span>Manage Roles</span>
-            </Link>
-            <Link
-              href="/organization"
-              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
-            >
-              <Buildings weight="regular" className="h-4 w-4" />
-              <span>Organization</span>
-            </Link>
-            <Link
-              href="/profile"
-              className="flex items-center gap-1 rounded-xl px-4 py-2 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
-            >
-              <div className="h-6 w-6 overflow-hidden rounded-2xl border border-[var(--primitive-neutral-200)]">
-                <Avatar name="Soobin Han" size="xs" />
-              </div>
-              <span>Profile</span>
-            </Link>
-          </div>
-
-          {/* Right: Organization selector */}
-          <div className="flex h-full items-center px-8 py-4">
-            <div className="flex items-center gap-2 rounded-2xl p-2">
-              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--primitive-blue-600)]">
-                <span className="text-caption-sm font-bold text-white">SA</span>
-              </div>
-              <span className="text-caption text-foreground">Seattle Aquarium</span>
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <h1 className="truncate text-heading-sm text-foreground">
+                {roleTitle || "Untitled Role"}
+              </h1>
+              {statusBadge()}
             </div>
+          </div>
+
+          {/* Center: Segmented Controller - absolutely centered */}
+          <div className="absolute left-1/2 -translate-x-1/2">
+            <SegmentedController
+              options={[
+                {
+                  value: "job-post",
+                  label: "Job Post",
+                  icon: <PencilSimpleLine weight="regular" />,
+                },
+                {
+                  value: "apply-form",
+                  label: "Apply Form",
+                  icon: <ListChecks weight="regular" />,
+                },
+                { value: "candidates", label: "Candidates", icon: <User weight="regular" /> },
+              ]}
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-[420px]"
+            />
+          </div>
+
+          {/* Right: Save + Settings */}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleSaveRole} disabled={saving}>
+              {saving ? <Spinner size="sm" /> : null}
+              {saving ? "Saving..." : "Save Draft"}
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              rightIcon={<CaretDown weight="bold" className="h-4 w-4" />}
+            >
+              Review Role
+            </Button>
+            <Button variant="tertiary" size="icon" className="h-12 w-12 rounded-full">
+              <Nut weight="regular" className="h-6 w-6" />
+            </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Page Content with left border and rounded corners */}
-      <div className="rounded-bl-3xl rounded-tl-3xl border-l border-[var(--primitive-neutral-200)]">
-        {/* Page Header */}
-        <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-12 py-6">
-          <div className="relative flex items-center justify-between">
-            {/* Left: Icon + Title + Badge - with truncation */}
-            <div className="flex min-w-0 max-w-[280px] items-center gap-3">
-              <CircleDashed
-                weight="regular"
-                className="h-5 w-5 shrink-0 text-[var(--primitive-neutral-400)]"
-              />
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <h1 className="truncate text-heading-sm text-foreground">
-                  {roleTitle || "Untitled Role"}
-                </h1>
-                <Badge variant="feature" size="sm" className="w-fit">
-                  Draft
-                </Badge>
-              </div>
-            </div>
-
-            {/* Center: Segmented Controller - absolutely centered */}
-            <div className="absolute left-1/2 -translate-x-1/2">
-              <SegmentedController
-                options={[
-                  {
-                    value: "job-post",
-                    label: "Job Post",
-                    icon: <PencilSimpleLine weight="regular" />,
-                  },
-                  {
-                    value: "apply-form",
-                    label: "Apply Form",
-                    icon: <ListChecks weight="regular" />,
-                  },
-                  { value: "candidates", label: "Candidates", icon: <User weight="regular" /> },
-                ]}
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-[420px]"
-              />
-            </div>
-
-            {/* Right: Buttons */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="primary"
-                size="lg"
-                rightIcon={<CaretDown weight="bold" className="h-4 w-4" />}
-              >
-                Review Role
-              </Button>
-              <Button variant="tertiary" size="icon" className="h-12 w-12 rounded-full">
-                <Nut weight="regular" className="h-6 w-6" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <main className="bg-[var(--primitive-neutral-100)] px-12 py-6">
-          {/* ============================================
+      {/* Main Content */}
+      <main className="bg-[var(--primitive-neutral-100)] px-12 py-6">
+        {/* ============================================
               APPLY FORM TAB
               ============================================ */}
-          {activeTab === "apply-form" && (
-            <div className="flex flex-col gap-4">
-              {/* Apply Form Header Card */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
-                {/* Title Section */}
-                <div className="border-b border-[var(--primitive-neutral-200)] p-6">
-                  <h2 className="text-heading-sm text-foreground">Apply Form</h2>
-                </div>
-
-                {/* Info Banner */}
-                <div className="mx-6 my-4">
-                  <Banner
-                    type="feature"
-                    subtle
-                    dismissible={false}
-                    title="Customize how you want candidates to apply."
-                    action={
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="tertiary"
-                          size="sm"
-                          leftIcon={<Eye weight="regular" className="h-4 w-4" />}
-                          onClick={() => window.open(`/apply/${params.id}?preview=true`, "_blank")}
-                        >
-                          Preview
-                        </Button>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => {
-                            /* Feature: Save changes functionality — requires API endpoint implementation */
-                          }}
-                        >
-                          Save Changes
-                        </Button>
-                      </div>
-                    }
-                    className="rounded-xl"
-                  />
-                </div>
-
-                {/* Shareable Link Banner */}
-                <div className="mx-6 my-4">
-                  <Banner
-                    type="success"
-                    subtle
-                    dismissible={false}
-                    title="Share this link with candidates"
-                    action={
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] px-3 py-2">
-                          <LinkChain
-                            weight="regular"
-                            className="h-4 w-4 text-[var(--primitive-neutral-600)]"
-                          />
-                          <code className="font-mono text-caption text-foreground">
-                            {applicationLink}
-                          </code>
-                        </div>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          leftIcon={
-                            linkCopied ? (
-                              <Check weight="bold" className="h-4 w-4" />
-                            ) : (
-                              <Copy weight="regular" className="h-4 w-4" />
-                            )
-                          }
-                          onClick={copyLink}
-                        >
-                          {linkCopied ? "Copied!" : "Copy Link"}
-                        </Button>
-                      </div>
-                    }
-                    className="rounded-xl"
-                  />
-                </div>
+        {activeTab === "apply-form" && (
+          <div className="flex flex-col gap-4">
+            {/* Apply Form Header Card */}
+            <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
+              {/* Title Section */}
+              <div className="border-b border-[var(--primitive-neutral-200)] p-6">
+                <h2 className="text-heading-sm text-foreground">Apply Form</h2>
               </div>
 
-              {/* Personal Info Card */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
-                {/* Header */}
-                <div className="border-b border-[var(--primitive-neutral-200)] p-6">
-                  <h2 className="text-body-strong text-foreground">Personal Info</h2>
-                </div>
-
-                {/* Personal Details Row */}
-                <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
-                      <User weight="regular" className="h-5 w-5 text-[var(--primitive-blue-500)]" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-body-sm font-medium text-foreground">
-                        Personal Details
-                      </span>
-                      <span className="text-caption text-foreground-subtle">
-                        Provide a detailed overview of the responsibilities and qualifications
-                        expected from the job applicant.
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="tertiary"
-                    size="sm"
-                    onClick={handleOpenPersonalDetailsModal}
-                    leftIcon={<PencilSimpleLine weight="regular" className="h-4 w-4" />}
-                  >
-                    Edit Details
-                  </Button>
-                </div>
-
-                {/* Career Details Row */}
-                <div className="flex items-center justify-between p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
-                      <ChatCenteredText
-                        weight="regular"
-                        className="h-5 w-5 text-[var(--primitive-green-600)]"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-body-sm font-medium text-foreground">
-                        Career Details
-                      </span>
-                      <span className="text-caption text-foreground-subtle">
-                        What are the key responsibilities that a candidate must fulfill to be
-                        considered for this role?
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="tertiary"
-                    size="sm"
-                    onClick={handleOpenCareerDetailsModal}
-                    leftIcon={<PencilSimpleLine weight="regular" className="h-4 w-4" />}
-                  >
-                    Edit Details
-                  </Button>
-                </div>
-              </div>
-
-              {/* Questions Section Card */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
-                {/* Header with Toggle */}
-                <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                  <Switch checked={questionsEnabled} onCheckedChange={setQuestionsEnabled} />
-                  <h2 className="text-body-strong text-foreground">Questions</h2>
-                </div>
-
-                {questionsEnabled && (
-                  <>
-                    {/* Question Items with Drag and Drop */}
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <SortableContext
-                        items={questions.map((q) => q.id)}
-                        strategy={verticalListSortingStrategy}
+              {/* Info Banner */}
+              <div className="mx-6 my-4">
+                <Banner
+                  type="feature"
+                  subtle
+                  dismissible={false}
+                  title="Customize how you want candidates to apply."
+                  action={
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="tertiary"
+                        size="sm"
+                        leftIcon={<Eye weight="regular" className="h-4 w-4" />}
+                        onClick={() => window.open(`/apply/${params.id}?preview=true`, "_blank")}
                       >
-                        {questions.map((question) => (
-                          <SortableQuestionItem
-                            key={question.id}
-                            question={question}
-                            onEdit={handleEditQuestion}
-                            onDelete={handleDeleteQuestion}
-                            getIconWithBg={getQuestionIconWithBg}
-                          />
-                        ))}
-                      </SortableContext>
-                    </DndContext>
-
-                    {/* Add Question Button with Dropdown */}
-                    <div className="p-4 px-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="tertiary"
-                            size="lg"
-                            leftIcon={<Plus weight="bold" className="h-5 w-5" />}
-                          >
-                            Add a question
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-64 p-2">
-                          <div className="mb-1 px-3 py-2">
-                            <span className="text-caption-strong text-foreground">
-                              Choose Question Type
-                            </span>
-                          </div>
-                          <DropdownMenuItem
-                            onClick={() => handleAddQuestion("text")}
-                            className="flex items-center gap-3 py-3"
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-blue-100)]">
-                              <ListBullets
-                                weight="regular"
-                                className="h-4 w-4 text-[var(--primitive-blue-500)]"
-                              />
-                            </div>
-                            <span className="text-body-sm">Text</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleAddQuestion("yes-no")}
-                            className="flex items-center gap-3 py-3"
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-red-100)]">
-                              <Circle
-                                weight="regular"
-                                className="h-4 w-4 text-[var(--primitive-red-500)]"
-                              />
-                            </div>
-                            <span className="text-body-sm">Yes/No</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleAddQuestion("multiple-choice")}
-                            className="flex items-center gap-3 py-3"
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-yellow-100)]">
-                              <CheckSquare
-                                weight="regular"
-                                className="h-4 w-4 text-[var(--primitive-yellow-600)]"
-                              />
-                            </div>
-                            <span className="text-body-sm">Multiple choice</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleAddQuestion("file-upload")}
-                            className="flex items-center gap-3 py-3"
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-blue-100)]">
-                              <Upload
-                                weight="regular"
-                                className="h-4 w-4 text-[var(--primitive-blue-500)]"
-                              />
-                            </div>
-                            <span className="text-body-sm">File upload</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        Preview
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                          /* Feature: Save changes functionality — requires API endpoint implementation */
+                        }}
+                      >
+                        Save Changes
+                      </Button>
                     </div>
-                  </>
-                )}
+                  }
+                  className="rounded-xl"
+                />
+              </div>
+
+              {/* Shareable Link Banner */}
+              <div className="mx-6 my-4">
+                <Banner
+                  type="success"
+                  subtle
+                  dismissible={false}
+                  title="Share this link with candidates"
+                  action={
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] px-3 py-2">
+                        <LinkChain
+                          weight="regular"
+                          className="h-4 w-4 text-[var(--primitive-neutral-600)]"
+                        />
+                        <code className="font-mono text-caption text-foreground">
+                          {applicationLink}
+                        </code>
+                      </div>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        leftIcon={
+                          linkCopied ? (
+                            <Check weight="bold" className="h-4 w-4" />
+                          ) : (
+                            <Copy weight="regular" className="h-4 w-4" />
+                          )
+                        }
+                        onClick={copyLink}
+                      >
+                        {linkCopied ? "Copied!" : "Copy Link"}
+                      </Button>
+                    </div>
+                  }
+                  className="rounded-xl"
+                />
               </div>
             </div>
-          )}
 
-          {/* ============================================
+            {/* Personal Info Card */}
+            <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
+              {/* Header */}
+              <div className="border-b border-[var(--primitive-neutral-200)] p-6">
+                <h2 className="text-body-strong text-foreground">Personal Info</h2>
+              </div>
+
+              {/* Personal Details Row */}
+              <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+                    <User weight="regular" className="h-5 w-5 text-[var(--primitive-blue-500)]" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-body-sm font-medium text-foreground">
+                      Personal Details
+                    </span>
+                    <span className="text-caption text-foreground-subtle">
+                      Provide a detailed overview of the responsibilities and qualifications
+                      expected from the job applicant.
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="sm"
+                  onClick={handleOpenPersonalDetailsModal}
+                  leftIcon={<PencilSimpleLine weight="regular" className="h-4 w-4" />}
+                >
+                  Edit Details
+                </Button>
+              </div>
+
+              {/* Career Details Row */}
+              <div className="flex items-center justify-between p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
+                    <ChatCenteredText
+                      weight="regular"
+                      className="h-5 w-5 text-[var(--primitive-green-600)]"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-body-sm font-medium text-foreground">Career Details</span>
+                    <span className="text-caption text-foreground-subtle">
+                      What are the key responsibilities that a candidate must fulfill to be
+                      considered for this role?
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="sm"
+                  onClick={handleOpenCareerDetailsModal}
+                  leftIcon={<PencilSimpleLine weight="regular" className="h-4 w-4" />}
+                >
+                  Edit Details
+                </Button>
+              </div>
+            </div>
+
+            {/* Questions Section Card */}
+            <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
+              {/* Header with Toggle */}
+              <div className="flex items-center gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                <Switch checked={questionsEnabled} onCheckedChange={setQuestionsEnabled} />
+                <h2 className="text-body-strong text-foreground">Questions</h2>
+              </div>
+
+              {questionsEnabled && (
+                <>
+                  {/* Question Items with Drag and Drop */}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={questions.map((q) => q.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {questions.map((question) => (
+                        <SortableQuestionItem
+                          key={question.id}
+                          question={question}
+                          onEdit={handleEditQuestion}
+                          onDelete={handleDeleteQuestion}
+                          getIconWithBg={getQuestionIconWithBg}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+
+                  {/* Add Question Button with Dropdown */}
+                  <div className="p-4 px-6">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="tertiary"
+                          size="lg"
+                          leftIcon={<Plus weight="bold" className="h-5 w-5" />}
+                        >
+                          Add a question
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-64 p-2">
+                        <div className="mb-1 px-3 py-2">
+                          <span className="text-caption-strong text-foreground">
+                            Choose Question Type
+                          </span>
+                        </div>
+                        <DropdownMenuItem
+                          onClick={() => handleAddQuestion("text")}
+                          className="flex items-center gap-3 py-3"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-blue-100)]">
+                            <ListBullets
+                              weight="regular"
+                              className="h-4 w-4 text-[var(--primitive-blue-500)]"
+                            />
+                          </div>
+                          <span className="text-body-sm">Text</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleAddQuestion("yes-no")}
+                          className="flex items-center gap-3 py-3"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-red-100)]">
+                            <Circle
+                              weight="regular"
+                              className="h-4 w-4 text-[var(--primitive-red-500)]"
+                            />
+                          </div>
+                          <span className="text-body-sm">Yes/No</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleAddQuestion("multiple-choice")}
+                          className="flex items-center gap-3 py-3"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-yellow-100)]">
+                            <CheckSquare
+                              weight="regular"
+                              className="h-4 w-4 text-[var(--primitive-yellow-600)]"
+                            />
+                          </div>
+                          <span className="text-body-sm">Multiple choice</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleAddQuestion("file-upload")}
+                          className="flex items-center gap-3 py-3"
+                        >
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--primitive-blue-100)]">
+                            <Upload
+                              weight="regular"
+                              className="h-4 w-4 text-[var(--primitive-blue-500)]"
+                            />
+                          </div>
+                          <span className="text-body-sm">File upload</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ============================================
               PERSONAL DETAILS MODAL - Figma Design 523:6134
               ============================================ */}
-          <Modal open={personalDetailsModalOpen} onOpenChange={setPersonalDetailsModalOpen}>
-            <ModalContent size="md">
-              <ModalHeader
-                icon={<User weight="regular" className="h-6 w-6 text-foreground" />}
-                iconBg="bg-[var(--primitive-blue-200)]"
-              >
-                <ModalTitle>Personal Details</ModalTitle>
-              </ModalHeader>
+        <Modal open={personalDetailsModalOpen} onOpenChange={setPersonalDetailsModalOpen}>
+          <ModalContent size="md">
+            <ModalHeader
+              icon={<User weight="regular" className="h-6 w-6 text-foreground" />}
+              iconBg="bg-[var(--primitive-blue-200)]"
+            >
+              <ModalTitle>Personal Details</ModalTitle>
+            </ModalHeader>
 
-              <ModalBody>
-                <ModalDescription className="text-body text-foreground">
-                  Select what should be included or required in the apply form.
-                </ModalDescription>
+            <ModalBody>
+              <ModalDescription className="text-body text-foreground">
+                Select what should be included or required in the apply form.
+              </ModalDescription>
 
-                {/* Table - Figma: border rounded-16 */}
-                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
-                  {/* Table Header - Figma: bg neutral-200, p-16 */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-200)] p-4">
-                    <span className="flex-1 text-body text-foreground">Field</span>
-                    <span className="flex-1 text-body text-foreground">Require an answer</span>
+              {/* Table - Figma: border rounded-16 */}
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                {/* Table Header - Figma: bg neutral-200, p-16 */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-200)] p-4">
+                  <span className="flex-1 text-body text-foreground">Field</span>
+                  <span className="flex-1 text-body text-foreground">Require an answer</span>
+                </div>
+
+                {/* Name Row - Always required, opacity 50% */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch checked={true} disabled />
+                    <span className="text-body text-foreground">Name</span>
                   </div>
-
-                  {/* Name Row - Always required, opacity 50% */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch checked={true} disabled />
-                      <span className="text-body text-foreground">Name</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox checked={true} disabled />
-                      <span className="text-caption text-foreground-brand">Always required</span>
-                    </div>
-                  </div>
-
-                  {/* Email Row - Always required, opacity 50% */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch checked={true} disabled />
-                      <span className="text-body text-foreground">Email</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox checked={true} disabled />
-                      <span className="text-caption text-foreground-brand">Always required</span>
-                    </div>
-                  </div>
-
-                  {/* Date of Birth Row */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempPersonalDetails.dateOfBirth.visible}
-                        onCheckedChange={(checked) =>
-                          setTempPersonalDetails({
-                            ...tempPersonalDetails,
-                            dateOfBirth: { ...tempPersonalDetails.dateOfBirth, visible: checked },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">Date of birth</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempPersonalDetails.dateOfBirth.required}
-                        disabled={!tempPersonalDetails.dateOfBirth.visible}
-                        onCheckedChange={(checked) =>
-                          setTempPersonalDetails({
-                            ...tempPersonalDetails,
-                            dateOfBirth: {
-                              ...tempPersonalDetails.dateOfBirth,
-                              required: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {tempPersonalDetails.dateOfBirth.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Pronouns Row */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempPersonalDetails.pronouns.visible}
-                        onCheckedChange={(checked) =>
-                          setTempPersonalDetails({
-                            ...tempPersonalDetails,
-                            pronouns: { ...tempPersonalDetails.pronouns, visible: checked },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">Pronouns</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempPersonalDetails.pronouns.required}
-                        disabled={!tempPersonalDetails.pronouns.visible}
-                        onCheckedChange={(checked) =>
-                          setTempPersonalDetails({
-                            ...tempPersonalDetails,
-                            pronouns: {
-                              ...tempPersonalDetails.pronouns,
-                              required: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {tempPersonalDetails.pronouns.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Location Row - Last row, no bottom border */}
-                  <div className="flex items-center gap-2 p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempPersonalDetails.location.visible}
-                        onCheckedChange={(checked) =>
-                          setTempPersonalDetails({
-                            ...tempPersonalDetails,
-                            location: { ...tempPersonalDetails.location, visible: checked },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">Location</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempPersonalDetails.location.required}
-                        disabled={!tempPersonalDetails.location.visible}
-                        onCheckedChange={(checked) =>
-                          setTempPersonalDetails({
-                            ...tempPersonalDetails,
-                            location: {
-                              ...tempPersonalDetails.location,
-                              required: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {tempPersonalDetails.location.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox checked={true} disabled />
+                    <span className="text-caption text-foreground-brand">Always required</span>
                   </div>
                 </div>
-              </ModalBody>
 
-              <ModalFooter>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  onClick={() => setPersonalDetailsModalOpen(false)}
-                >
-                  Discard
-                </Button>
-                <Button type="button" variant="primary" onClick={handleSavePersonalDetails}>
-                  Apply Changes
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
+                {/* Email Row - Always required, opacity 50% */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch checked={true} disabled />
+                    <span className="text-body text-foreground">Email</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox checked={true} disabled />
+                    <span className="text-caption text-foreground-brand">Always required</span>
+                  </div>
+                </div>
 
-          {/* ============================================
+                {/* Date of Birth Row */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempPersonalDetails.dateOfBirth.visible}
+                      onCheckedChange={(checked) =>
+                        setTempPersonalDetails({
+                          ...tempPersonalDetails,
+                          dateOfBirth: { ...tempPersonalDetails.dateOfBirth, visible: checked },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">Date of birth</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempPersonalDetails.dateOfBirth.required}
+                      disabled={!tempPersonalDetails.dateOfBirth.visible}
+                      onCheckedChange={(checked) =>
+                        setTempPersonalDetails({
+                          ...tempPersonalDetails,
+                          dateOfBirth: {
+                            ...tempPersonalDetails.dateOfBirth,
+                            required: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    {tempPersonalDetails.dateOfBirth.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Pronouns Row */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempPersonalDetails.pronouns.visible}
+                      onCheckedChange={(checked) =>
+                        setTempPersonalDetails({
+                          ...tempPersonalDetails,
+                          pronouns: { ...tempPersonalDetails.pronouns, visible: checked },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">Pronouns</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempPersonalDetails.pronouns.required}
+                      disabled={!tempPersonalDetails.pronouns.visible}
+                      onCheckedChange={(checked) =>
+                        setTempPersonalDetails({
+                          ...tempPersonalDetails,
+                          pronouns: {
+                            ...tempPersonalDetails.pronouns,
+                            required: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    {tempPersonalDetails.pronouns.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Location Row - Last row, no bottom border */}
+                <div className="flex items-center gap-2 p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempPersonalDetails.location.visible}
+                      onCheckedChange={(checked) =>
+                        setTempPersonalDetails({
+                          ...tempPersonalDetails,
+                          location: { ...tempPersonalDetails.location, visible: checked },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">Location</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempPersonalDetails.location.required}
+                      disabled={!tempPersonalDetails.location.visible}
+                      onCheckedChange={(checked) =>
+                        setTempPersonalDetails({
+                          ...tempPersonalDetails,
+                          location: {
+                            ...tempPersonalDetails.location,
+                            required: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    {tempPersonalDetails.location.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                type="button"
+                variant="tertiary"
+                onClick={() => setPersonalDetailsModalOpen(false)}
+              >
+                Discard
+              </Button>
+              <Button type="button" variant="primary" onClick={handleSavePersonalDetails}>
+                Apply Changes
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* ============================================
               CAREER DETAILS MODAL
               ============================================ */}
-          <Modal open={careerDetailsModalOpen} onOpenChange={setCareerDetailsModalOpen}>
-            <ModalContent size="md">
-              <ModalHeader
-                icon={<Briefcase weight="regular" className="h-6 w-6 text-foreground" />}
-                iconBg="bg-[var(--primitive-green-200)]"
-              >
-                <ModalTitle>Career Details</ModalTitle>
-              </ModalHeader>
+        <Modal open={careerDetailsModalOpen} onOpenChange={setCareerDetailsModalOpen}>
+          <ModalContent size="md">
+            <ModalHeader
+              icon={<Briefcase weight="regular" className="h-6 w-6 text-foreground" />}
+              iconBg="bg-[var(--primitive-green-200)]"
+            >
+              <ModalTitle>Career Details</ModalTitle>
+            </ModalHeader>
 
-              <ModalBody>
-                <ModalDescription className="text-body-sm text-foreground-muted">
-                  Select what should be included or required in the apply form.
-                </ModalDescription>
+            <ModalBody>
+              <ModalDescription className="text-body-sm text-foreground-muted">
+                Select what should be included or required in the apply form.
+              </ModalDescription>
 
-                {/* Table Container */}
-                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
-                  {/* Table Header Row */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-4">
-                    <div className="flex-1">
-                      <span className="text-caption font-medium text-foreground-subtle">Field</span>
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-caption font-medium text-foreground-subtle">
-                        Require
-                      </span>
-                    </div>
+              {/* Table Container */}
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                {/* Table Header Row */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-4">
+                  <div className="flex-1">
+                    <span className="text-caption font-medium text-foreground-subtle">Field</span>
                   </div>
-
-                  {/* Current Role Row */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempCareerDetails.currentRole.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            currentRole: { ...tempCareerDetails.currentRole, visible: checked },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">Current Role</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempCareerDetails.currentRole.required}
-                        disabled={!tempCareerDetails.currentRole.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            currentRole: {
-                              ...tempCareerDetails.currentRole,
-                              required: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {tempCareerDetails.currentRole.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Current Company Row */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempCareerDetails.currentCompany.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            currentCompany: {
-                              ...tempCareerDetails.currentCompany,
-                              visible: checked,
-                            },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">Current Company</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempCareerDetails.currentCompany.required}
-                        disabled={!tempCareerDetails.currentCompany.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            currentCompany: {
-                              ...tempCareerDetails.currentCompany,
-                              required: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {tempCareerDetails.currentCompany.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Years of Experience Row */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempCareerDetails.yearsExperience.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            yearsExperience: {
-                              ...tempCareerDetails.yearsExperience,
-                              visible: checked,
-                            },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">Years of Experience</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempCareerDetails.yearsExperience.required}
-                        disabled={!tempCareerDetails.yearsExperience.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            yearsExperience: {
-                              ...tempCareerDetails.yearsExperience,
-                              required: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {tempCareerDetails.yearsExperience.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* LinkedIn Row */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempCareerDetails.linkedIn.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            linkedIn: { ...tempCareerDetails.linkedIn, visible: checked },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">LinkedIn Profile</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempCareerDetails.linkedIn.required}
-                        disabled={!tempCareerDetails.linkedIn.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            linkedIn: { ...tempCareerDetails.linkedIn, required: checked === true },
-                          })
-                        }
-                      />
-                      {tempCareerDetails.linkedIn.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Portfolio Row - Last row, no bottom border */}
-                  <div className="flex items-center gap-2 p-4">
-                    <div className="flex flex-1 items-center gap-3">
-                      <Switch
-                        checked={tempCareerDetails.portfolio.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            portfolio: { ...tempCareerDetails.portfolio, visible: checked },
-                          })
-                        }
-                      />
-                      <span className="text-body text-foreground">Portfolio URL</span>
-                    </div>
-                    <div className="flex flex-1 items-center gap-2">
-                      <Checkbox
-                        checked={tempCareerDetails.portfolio.required}
-                        disabled={!tempCareerDetails.portfolio.visible}
-                        onCheckedChange={(checked) =>
-                          setTempCareerDetails({
-                            ...tempCareerDetails,
-                            portfolio: {
-                              ...tempCareerDetails.portfolio,
-                              required: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {tempCareerDetails.portfolio.required && (
-                        <span className="text-caption text-foreground-brand">Required</span>
-                      )}
-                    </div>
+                  <div className="flex-1">
+                    <span className="text-caption font-medium text-foreground-subtle">Require</span>
                   </div>
                 </div>
-              </ModalBody>
 
-              <ModalFooter>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  onClick={() => setCareerDetailsModalOpen(false)}
-                >
-                  Discard
-                </Button>
-                <Button type="button" variant="primary" onClick={handleSaveCareerDetails}>
-                  Apply Changes
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
+                {/* Current Role Row */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempCareerDetails.currentRole.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          currentRole: { ...tempCareerDetails.currentRole, visible: checked },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">Current Role</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempCareerDetails.currentRole.required}
+                      disabled={!tempCareerDetails.currentRole.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          currentRole: {
+                            ...tempCareerDetails.currentRole,
+                            required: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    {tempCareerDetails.currentRole.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
 
-          {/* ============================================
+                {/* Current Company Row */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempCareerDetails.currentCompany.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          currentCompany: {
+                            ...tempCareerDetails.currentCompany,
+                            visible: checked,
+                          },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">Current Company</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempCareerDetails.currentCompany.required}
+                      disabled={!tempCareerDetails.currentCompany.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          currentCompany: {
+                            ...tempCareerDetails.currentCompany,
+                            required: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    {tempCareerDetails.currentCompany.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Years of Experience Row */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempCareerDetails.yearsExperience.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          yearsExperience: {
+                            ...tempCareerDetails.yearsExperience,
+                            visible: checked,
+                          },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">Years of Experience</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempCareerDetails.yearsExperience.required}
+                      disabled={!tempCareerDetails.yearsExperience.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          yearsExperience: {
+                            ...tempCareerDetails.yearsExperience,
+                            required: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    {tempCareerDetails.yearsExperience.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* LinkedIn Row */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempCareerDetails.linkedIn.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          linkedIn: { ...tempCareerDetails.linkedIn, visible: checked },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">LinkedIn Profile</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempCareerDetails.linkedIn.required}
+                      disabled={!tempCareerDetails.linkedIn.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          linkedIn: { ...tempCareerDetails.linkedIn, required: checked === true },
+                        })
+                      }
+                    />
+                    {tempCareerDetails.linkedIn.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Portfolio Row - Last row, no bottom border */}
+                <div className="flex items-center gap-2 p-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <Switch
+                      checked={tempCareerDetails.portfolio.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          portfolio: { ...tempCareerDetails.portfolio, visible: checked },
+                        })
+                      }
+                    />
+                    <span className="text-body text-foreground">Portfolio URL</span>
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Checkbox
+                      checked={tempCareerDetails.portfolio.required}
+                      disabled={!tempCareerDetails.portfolio.visible}
+                      onCheckedChange={(checked) =>
+                        setTempCareerDetails({
+                          ...tempCareerDetails,
+                          portfolio: {
+                            ...tempCareerDetails.portfolio,
+                            required: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    {tempCareerDetails.portfolio.required && (
+                      <span className="text-caption text-foreground-brand">Required</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                type="button"
+                variant="tertiary"
+                onClick={() => setCareerDetailsModalOpen(false)}
+              >
+                Discard
+              </Button>
+              <Button type="button" variant="primary" onClick={handleSaveCareerDetails}>
+                Apply Changes
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* ============================================
               TEXT QUESTION MODAL
               ============================================ */}
-          <Modal open={textQuestionModalOpen} onOpenChange={setTextQuestionModalOpen}>
-            <ModalContent size="md">
-              <ModalHeader
-                icon={
-                  <TextAlignLeft
-                    weight="regular"
-                    className="h-6 w-6 text-[var(--primitive-blue-700)]"
-                  />
-                }
-                iconBg="bg-[var(--primitive-blue-200)]"
-              >
-                <ModalTitle>Text</ModalTitle>
-              </ModalHeader>
+        <Modal open={textQuestionModalOpen} onOpenChange={setTextQuestionModalOpen}>
+          <ModalContent size="md">
+            <ModalHeader
+              icon={
+                <TextAlignLeft
+                  weight="regular"
+                  className="h-6 w-6 text-[var(--primitive-blue-700)]"
+                />
+              }
+              iconBg="bg-[var(--primitive-blue-200)]"
+            >
+              <ModalTitle>Text</ModalTitle>
+            </ModalHeader>
 
-              <ModalBody className="gap-6">
-                {/* Question Title Field */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Question title</label>
-                  <Input
-                    value={tempTextQuestion.title}
-                    onChange={(e) =>
-                      setTempTextQuestion({ ...tempTextQuestion, title: e.target.value })
-                    }
-                    placeholder="Write your question?"
-                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
-                  />
-                </div>
+            <ModalBody className="gap-6">
+              {/* Question Title Field */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Question title</label>
+                <Input
+                  value={tempTextQuestion.title}
+                  onChange={(e) =>
+                    setTempTextQuestion({ ...tempTextQuestion, title: e.target.value })
+                  }
+                  placeholder="Write your question?"
+                  className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                />
+              </div>
 
-                {/* Answer Type Selection */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Answer Type</label>
-                  <RadioGroup
-                    value={tempTextQuestion.answerType}
-                    onValueChange={(value) =>
-                      setTempTextQuestion({
-                        ...tempTextQuestion,
-                        answerType: value as "long" | "short",
-                      })
-                    }
-                    className="grid grid-cols-2 gap-3"
+              {/* Answer Type Selection */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Answer Type</label>
+                <RadioGroup
+                  value={tempTextQuestion.answerType}
+                  onValueChange={(value) =>
+                    setTempTextQuestion({
+                      ...tempTextQuestion,
+                      answerType: value as "long" | "short",
+                    })
+                  }
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {/* Long Answer Option */}
+                  <label
+                    htmlFor="long-answer"
+                    className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
+                      tempTextQuestion.answerType === "long"
+                        ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
+                        : "border-[var(--primitive-neutral-300)]"
+                    }`}
                   >
-                    {/* Long Answer Option */}
-                    <label
-                      htmlFor="long-answer"
-                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
-                        tempTextQuestion.answerType === "long"
-                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
-                          : "border-[var(--primitive-neutral-300)]"
-                      }`}
-                    >
-                      {/* Preview Box */}
-                      <div className="mb-2 flex h-[162px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)]">
-                        <div
-                          className={`flex h-[89px] w-[85%] items-start rounded-lg p-3 ${
+                    {/* Preview Box */}
+                    <div className="mb-2 flex h-[162px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)]">
+                      <div
+                        className={`flex h-[89px] w-[85%] items-start rounded-lg p-3 ${
+                          tempTextQuestion.answerType === "long"
+                            ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                            : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
+                        }`}
+                      >
+                        <span
+                          className={`text-body ${
                             tempTextQuestion.answerType === "long"
-                              ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                              : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
+                              ? "font-medium text-foreground-info"
+                              : "text-foreground-subtle"
                           }`}
                         >
-                          <span
-                            className={`text-body ${
-                              tempTextQuestion.answerType === "long"
-                                ? "font-medium text-foreground-info"
-                                : "text-foreground-subtle"
-                            }`}
-                          >
-                            Write an answer
-                          </span>
-                        </div>
+                          Write an answer
+                        </span>
                       </div>
-                      {/* Radio Button with Label */}
-                      <div className="flex w-full items-center gap-1">
-                        <RadioGroupItem value="long" id="long-answer" />
-                        <span className="text-caption text-foreground">Long Answer</span>
-                      </div>
-                    </label>
+                    </div>
+                    {/* Radio Button with Label */}
+                    <div className="flex w-full items-center gap-1">
+                      <RadioGroupItem value="long" id="long-answer" />
+                      <span className="text-caption text-foreground">Long Answer</span>
+                    </div>
+                  </label>
 
-                    {/* Short Answer Option */}
-                    <label
-                      htmlFor="short-answer"
-                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
-                        tempTextQuestion.answerType === "short"
-                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
-                          : "border-[var(--primitive-neutral-300)]"
-                      }`}
-                    >
-                      {/* Preview Box */}
-                      <div className="mb-2 flex h-[162px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)]">
-                        <div
-                          className={`w-[85%] rounded-lg p-4 ${
+                  {/* Short Answer Option */}
+                  <label
+                    htmlFor="short-answer"
+                    className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
+                      tempTextQuestion.answerType === "short"
+                        ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
+                        : "border-[var(--primitive-neutral-300)]"
+                    }`}
+                  >
+                    {/* Preview Box */}
+                    <div className="mb-2 flex h-[162px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)]">
+                      <div
+                        className={`w-[85%] rounded-lg p-4 ${
+                          tempTextQuestion.answerType === "short"
+                            ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                            : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
+                        }`}
+                      >
+                        <span
+                          className={`text-body ${
                             tempTextQuestion.answerType === "short"
-                              ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                              : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
+                              ? "font-medium text-foreground-info"
+                              : "text-foreground-subtle"
                           }`}
                         >
-                          <span
-                            className={`text-body ${
-                              tempTextQuestion.answerType === "short"
-                                ? "font-medium text-foreground-info"
-                                : "text-foreground-subtle"
-                            }`}
-                          >
-                            Write an answer
-                          </span>
-                        </div>
+                          Write an answer
+                        </span>
                       </div>
-                      {/* Radio Button with Label */}
-                      <div className="flex w-full items-center gap-1">
-                        <RadioGroupItem value="short" id="short-answer" />
-                        <span className="text-caption text-foreground">Short Answer</span>
-                      </div>
-                    </label>
-                  </RadioGroup>
-                </div>
+                    </div>
+                    {/* Radio Button with Label */}
+                    <div className="flex w-full items-center gap-1">
+                      <RadioGroupItem value="short" id="short-answer" />
+                      <span className="text-caption text-foreground">Short Answer</span>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
 
-                {/* Settings Section */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Settings</label>
-                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
-                    {/* Hide from apply form */}
-                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
-                      <span className="text-body text-foreground">Hide from apply form</span>
-                      <Switch
-                        checked={tempTextQuestion.hideFromApplyForm}
-                        onCheckedChange={(checked) =>
-                          setTempTextQuestion({ ...tempTextQuestion, hideFromApplyForm: checked })
-                        }
-                      />
-                    </div>
-                    {/* Require an answer */}
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <span className="text-body text-foreground">Require an answer</span>
-                      <Switch
-                        checked={tempTextQuestion.requireAnswer}
-                        onCheckedChange={(checked) =>
-                          setTempTextQuestion({ ...tempTextQuestion, requireAnswer: checked })
-                        }
-                      />
-                    </div>
+              {/* Settings Section */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Settings</label>
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                  {/* Hide from apply form */}
+                  <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
+                    <span className="text-body text-foreground">Hide from apply form</span>
+                    <Switch
+                      checked={tempTextQuestion.hideFromApplyForm}
+                      onCheckedChange={(checked) =>
+                        setTempTextQuestion({ ...tempTextQuestion, hideFromApplyForm: checked })
+                      }
+                    />
+                  </div>
+                  {/* Require an answer */}
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-body text-foreground">Require an answer</span>
+                    <Switch
+                      checked={tempTextQuestion.requireAnswer}
+                      onCheckedChange={(checked) =>
+                        setTempTextQuestion({ ...tempTextQuestion, requireAnswer: checked })
+                      }
+                    />
                   </div>
                 </div>
-              </ModalBody>
+              </div>
+            </ModalBody>
 
-              <ModalFooter>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="lg"
-                  onClick={handleDiscardTextQuestion}
-                >
-                  Discard
-                </Button>
-                <Button type="button" variant="primary" size="lg" onClick={handleSaveTextQuestion}>
-                  Apply Changes
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
+            <ModalFooter>
+              <Button
+                type="button"
+                variant="tertiary"
+                size="lg"
+                onClick={handleDiscardTextQuestion}
+              >
+                Discard
+              </Button>
+              <Button type="button" variant="primary" size="lg" onClick={handleSaveTextQuestion}>
+                Apply Changes
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
-          {/* ============================================
+        {/* ============================================
               YES/NO QUESTION MODAL
               ============================================ */}
-          <Modal open={yesNoQuestionModalOpen} onOpenChange={setYesNoQuestionModalOpen}>
-            <ModalContent size="md">
-              <ModalHeader
-                icon={
-                  <Circle weight="regular" className="h-6 w-6 text-[var(--primitive-red-500)]" />
-                }
-                iconBg="bg-[var(--primitive-red-100)]"
-              >
-                <ModalTitle>Yes/No</ModalTitle>
-              </ModalHeader>
+        <Modal open={yesNoQuestionModalOpen} onOpenChange={setYesNoQuestionModalOpen}>
+          <ModalContent size="md">
+            <ModalHeader
+              icon={<Circle weight="regular" className="h-6 w-6 text-[var(--primitive-red-500)]" />}
+              iconBg="bg-[var(--primitive-red-100)]"
+            >
+              <ModalTitle>Yes/No</ModalTitle>
+            </ModalHeader>
 
-              <ModalBody className="gap-6">
-                {/* Question Title Field */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Question title</label>
-                  <Input
-                    value={tempYesNoQuestion.title}
-                    onChange={(e) =>
-                      setTempYesNoQuestion({ ...tempYesNoQuestion, title: e.target.value })
-                    }
-                    placeholder="Write your yes/no question?"
-                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
-                  />
-                </div>
+            <ModalBody className="gap-6">
+              {/* Question Title Field */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Question title</label>
+                <Input
+                  value={tempYesNoQuestion.title}
+                  onChange={(e) =>
+                    setTempYesNoQuestion({ ...tempYesNoQuestion, title: e.target.value })
+                  }
+                  placeholder="Write your yes/no question?"
+                  className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                />
+              </div>
 
-                {/* Preview Section */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Answer Preview</label>
-                  <div className="rounded-2xl bg-[var(--primitive-neutral-100)] p-6">
-                    <div className="flex gap-4">
-                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--primitive-blue-500)]">
-                          <div className="h-2.5 w-2.5 rounded-full bg-[var(--primitive-blue-500)]" />
-                        </div>
-                        <span className="text-body-sm text-foreground">Yes</span>
+              {/* Preview Section */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Answer Preview</label>
+                <div className="rounded-2xl bg-[var(--primitive-neutral-100)] p-6">
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--primitive-blue-500)]">
+                        <div className="h-2.5 w-2.5 rounded-full bg-[var(--primitive-blue-500)]" />
                       </div>
-                      <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
-                        <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
-                        <span className="text-body-sm text-foreground">No</span>
-                      </div>
+                      <span className="text-body-sm text-foreground">Yes</span>
                     </div>
-                  </div>
-                </div>
-
-                {/* Settings Section */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Settings</label>
-                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
-                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
-                      <span className="text-body text-foreground">Hide from apply form</span>
-                      <Switch
-                        checked={tempYesNoQuestion.hideFromApplyForm}
-                        onCheckedChange={(checked) =>
-                          setTempYesNoQuestion({ ...tempYesNoQuestion, hideFromApplyForm: checked })
-                        }
-                      />
+                    <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
+                      <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
+                      <span className="text-body-sm text-foreground">No</span>
                     </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <span className="text-body text-foreground">Require an answer</span>
-                      <Switch
-                        checked={tempYesNoQuestion.requireAnswer}
-                        onCheckedChange={(checked) =>
-                          setTempYesNoQuestion({ ...tempYesNoQuestion, requireAnswer: checked })
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </ModalBody>
-
-              <ModalFooter>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="lg"
-                  onClick={handleDiscardYesNoQuestion}
-                >
-                  Discard
-                </Button>
-                <Button type="button" variant="primary" size="lg" onClick={handleSaveYesNoQuestion}>
-                  Apply Changes
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* ============================================
-              MULTIPLE CHOICE QUESTION MODAL
-              ============================================ */}
-          <Modal open={multipleChoiceModalOpen} onOpenChange={setMultipleChoiceModalOpen}>
-            <ModalContent size="md">
-              <ModalHeader
-                icon={
-                  <CheckSquare
-                    weight="regular"
-                    className="h-6 w-6 text-[var(--primitive-yellow-600)]"
-                  />
-                }
-                iconBg="bg-[var(--primitive-yellow-100)]"
-              >
-                <ModalTitle>Multiple Choice</ModalTitle>
-              </ModalHeader>
-
-              <ModalBody className="gap-6">
-                {/* Question Title Field */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Question title</label>
-                  <Input
-                    value={tempMultipleChoice.title}
-                    onChange={(e) =>
-                      setTempMultipleChoice({ ...tempMultipleChoice, title: e.target.value })
-                    }
-                    placeholder="Write your question?"
-                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
-                  />
-                </div>
-
-                {/* Selection Type - Single vs Multiple */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Selection Type</label>
-                  <RadioGroup
-                    value={tempMultipleChoice.allowMultiple ? "multiple" : "single"}
-                    onValueChange={(value) =>
-                      setTempMultipleChoice({
-                        ...tempMultipleChoice,
-                        allowMultiple: value === "multiple",
-                      })
-                    }
-                    className="grid grid-cols-2 gap-3"
-                  >
-                    {/* Single Answer Option */}
-                    <label
-                      htmlFor="single-answer"
-                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
-                        !tempMultipleChoice.allowMultiple
-                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
-                          : "border-[var(--primitive-neutral-300)]"
-                      }`}
-                    >
-                      {/* Preview Box */}
-                      <div className="mb-2 flex h-[120px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)] p-4">
-                        <div className="flex w-full flex-col gap-2">
-                          <div
-                            className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
-                              !tempMultipleChoice.allowMultiple
-                                ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
-                            }`}
-                          >
-                            <div
-                              className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                                !tempMultipleChoice.allowMultiple
-                                  ? "border-[var(--primitive-blue-500)]"
-                                  : "border-[var(--primitive-neutral-400)]"
-                              }`}
-                            >
-                              {!tempMultipleChoice.allowMultiple && (
-                                <div className="h-2 w-2 rounded-full bg-[var(--primitive-blue-500)]" />
-                              )}
-                            </div>
-                            <span className="text-caption">Option A</span>
-                          </div>
-                          <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)] px-3 py-2">
-                            <div className="h-4 w-4 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
-                            <span className="text-caption text-foreground-subtle">Option B</span>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Radio Button with Label */}
-                      <div className="flex w-full items-center gap-1">
-                        <RadioGroupItem value="single" id="single-answer" />
-                        <span className="text-caption text-foreground">Single Answer</span>
-                      </div>
-                    </label>
-
-                    {/* Multiple Answers Option */}
-                    <label
-                      htmlFor="multiple-answers"
-                      className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
-                        tempMultipleChoice.allowMultiple
-                          ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
-                          : "border-[var(--primitive-neutral-300)]"
-                      }`}
-                    >
-                      {/* Preview Box */}
-                      <div className="mb-2 flex h-[120px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)] p-4">
-                        <div className="flex w-full flex-col gap-2">
-                          <div
-                            className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
-                              tempMultipleChoice.allowMultiple
-                                ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
-                            }`}
-                          >
-                            <div
-                              className={`flex h-4 w-4 items-center justify-center rounded-md border-2 ${
-                                tempMultipleChoice.allowMultiple
-                                  ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
-                                  : "border-[var(--primitive-neutral-400)]"
-                              }`}
-                            >
-                              {tempMultipleChoice.allowMultiple && (
-                                <Check weight="bold" className="h-3 w-3 text-white" />
-                              )}
-                            </div>
-                            <span className="text-caption">Option A</span>
-                          </div>
-                          <div
-                            className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
-                              tempMultipleChoice.allowMultiple
-                                ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
-                                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
-                            }`}
-                          >
-                            <div
-                              className={`flex h-4 w-4 items-center justify-center rounded-md border-2 ${
-                                tempMultipleChoice.allowMultiple
-                                  ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
-                                  : "border-[var(--primitive-neutral-400)]"
-                              }`}
-                            >
-                              {tempMultipleChoice.allowMultiple && (
-                                <Check weight="bold" className="h-3 w-3 text-white" />
-                              )}
-                            </div>
-                            <span className="text-caption">Option B</span>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Radio Button with Label */}
-                      <div className="flex w-full items-center gap-1">
-                        <RadioGroupItem value="multiple" id="multiple-answers" />
-                        <span className="text-caption text-foreground">Multiple Answers</span>
-                      </div>
-                    </label>
-                  </RadioGroup>
-                </div>
-
-                {/* Options Section */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Answer Options</label>
-                  <div className="flex flex-col gap-2">
-                    {tempMultipleChoice.options.map((option, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <div className="flex flex-1 items-center gap-3 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3">
-                          {/* Show radio circle or checkbox square based on selection type */}
-                          {tempMultipleChoice.allowMultiple ? (
-                            <div className="h-5 w-5 rounded-md border-2 border-[var(--primitive-neutral-400)]" />
-                          ) : (
-                            <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
-                          )}
-                          <Input
-                            value={option}
-                            onChange={(e) => handleUpdateOption(index, e.target.value)}
-                            placeholder={`Option ${index + 1}`}
-                            className="flex-1 border-0 bg-transparent p-0 text-body-sm focus-visible:ring-0"
-                          />
-                        </div>
-                        {tempMultipleChoice.options.length > 2 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveOption(index)}
-                            className="shrink-0 text-[var(--primitive-red-500)] hover:bg-[var(--primitive-red-100)]"
-                          >
-                            <Trash weight="regular" className="h-5 w-5" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="tertiary"
-                    onClick={handleAddOption}
-                    leftIcon={<Plus weight="bold" className="h-4 w-4" />}
-                    className="self-start"
-                  >
-                    Add option
-                  </Button>
-                </div>
-
-                {/* Settings Section */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Settings</label>
-                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
-                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
-                      <span className="text-body text-foreground">Hide from apply form</span>
-                      <Switch
-                        checked={tempMultipleChoice.hideFromApplyForm}
-                        onCheckedChange={(checked) =>
-                          setTempMultipleChoice({
-                            ...tempMultipleChoice,
-                            hideFromApplyForm: checked,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <span className="text-body text-foreground">Require an answer</span>
-                      <Switch
-                        checked={tempMultipleChoice.requireAnswer}
-                        onCheckedChange={(checked) =>
-                          setTempMultipleChoice({ ...tempMultipleChoice, requireAnswer: checked })
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </ModalBody>
-
-              <ModalFooter>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="lg"
-                  onClick={handleDiscardMultipleChoice}
-                >
-                  Discard
-                </Button>
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="lg"
-                  onClick={handleSaveMultipleChoice}
-                >
-                  Apply Changes
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* ============================================
-              FILE UPLOAD QUESTION MODAL
-              ============================================ */}
-          <Modal open={fileUploadModalOpen} onOpenChange={setFileUploadModalOpen}>
-            <ModalContent size="md">
-              <ModalHeader
-                icon={
-                  <Upload weight="regular" className="h-6 w-6 text-[var(--primitive-blue-700)]" />
-                }
-                iconBg="bg-[var(--primitive-blue-200)]"
-              >
-                <ModalTitle>File Upload</ModalTitle>
-              </ModalHeader>
-
-              <ModalBody className="gap-6">
-                {/* Question Title Field */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Question title</label>
-                  <Input
-                    value={tempFileUpload.title}
-                    onChange={(e) =>
-                      setTempFileUpload({ ...tempFileUpload, title: e.target.value })
-                    }
-                    placeholder="e.g., Upload your resume"
-                    className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
-                  />
-                </div>
-
-                {/* Accepted File Types */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Accepted file types</label>
-                  <div className="flex flex-wrap gap-3">
-                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
-                      <Checkbox
-                        checked={tempFileUpload.acceptedTypes.pdf}
-                        onCheckedChange={(checked) =>
-                          setTempFileUpload({
-                            ...tempFileUpload,
-                            acceptedTypes: {
-                              ...tempFileUpload.acceptedTypes,
-                              pdf: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      <span className="text-body-sm">PDF</span>
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
-                      <Checkbox
-                        checked={tempFileUpload.acceptedTypes.doc}
-                        onCheckedChange={(checked) =>
-                          setTempFileUpload({
-                            ...tempFileUpload,
-                            acceptedTypes: {
-                              ...tempFileUpload.acceptedTypes,
-                              doc: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      <span className="text-body-sm">DOC/DOCX</span>
-                    </label>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
-                      <Checkbox
-                        checked={tempFileUpload.acceptedTypes.images}
-                        onCheckedChange={(checked) =>
-                          setTempFileUpload({
-                            ...tempFileUpload,
-                            acceptedTypes: {
-                              ...tempFileUpload.acceptedTypes,
-                              images: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      <span className="text-body-sm">Images (PNG, JPG)</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Upload Preview */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Upload Preview</label>
-                  <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-8">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
-                      <Upload
-                        weight="regular"
-                        className="h-6 w-6 text-[var(--primitive-blue-500)]"
-                      />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-body-sm font-medium text-foreground">
-                        Drop files here or click to upload
-                      </p>
-                      <p className="text-caption text-foreground-subtle">
-                        Max file size: {tempFileUpload.maxFileSize}MB
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Settings Section */}
-                <div className="flex flex-col gap-3">
-                  <label className="text-body text-foreground">Settings</label>
-                  <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
-                    <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
-                      <span className="text-body text-foreground">Hide from apply form</span>
-                      <Switch
-                        checked={tempFileUpload.hideFromApplyForm}
-                        onCheckedChange={(checked) =>
-                          setTempFileUpload({ ...tempFileUpload, hideFromApplyForm: checked })
-                        }
-                      />
-                    </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <span className="text-body text-foreground">Require an answer</span>
-                      <Switch
-                        checked={tempFileUpload.requireAnswer}
-                        onCheckedChange={(checked) =>
-                          setTempFileUpload({ ...tempFileUpload, requireAnswer: checked })
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </ModalBody>
-
-              <ModalFooter>
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size="lg"
-                  onClick={handleDiscardFileUpload}
-                >
-                  Discard
-                </Button>
-                <Button type="button" variant="primary" size="lg" onClick={handleSaveFileUpload}>
-                  Apply Changes
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-
-          {/* ============================================
-              CANDIDATES TAB
-              ============================================ */}
-          {activeTab === "candidates" && (
-            <div className="space-y-4">
-              {/* Header Card */}
-              <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <h2 className="mb-1 text-heading-sm text-foreground">Applications</h2>
-                    <p className="text-body-sm text-foreground-muted">
-                      3 candidates have applied for this role
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="tertiary" size="sm">
-                      Export CSV
-                    </Button>
-                    <Button variant="primary" size="sm">
-                      Filter
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="rounded-xl bg-[var(--primitive-neutral-100)] p-4">
-                    <div className="mb-1 text-heading-md text-foreground">3</div>
-                    <div className="text-caption text-foreground-muted">Total Applications</div>
-                  </div>
-                  <div className="rounded-xl bg-[var(--primitive-blue-100)] p-4">
-                    <div className="mb-1 text-heading-md text-foreground">1</div>
-                    <div className="text-caption text-foreground-muted">New</div>
-                  </div>
-                  <div className="rounded-xl bg-[var(--primitive-yellow-100)] p-4">
-                    <div className="mb-1 text-heading-md text-foreground">1</div>
-                    <div className="text-caption text-foreground-muted">In Review</div>
-                  </div>
-                  <div className="rounded-xl bg-[var(--primitive-green-100)] p-4">
-                    <div className="mb-1 text-heading-md text-foreground">1</div>
-                    <div className="text-caption text-foreground-muted">Interview</div>
                   </div>
                 </div>
               </div>
 
-              {/* Applications List */}
+              {/* Settings Section */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Settings</label>
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                  <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
+                    <span className="text-body text-foreground">Hide from apply form</span>
+                    <Switch
+                      checked={tempYesNoQuestion.hideFromApplyForm}
+                      onCheckedChange={(checked) =>
+                        setTempYesNoQuestion({ ...tempYesNoQuestion, hideFromApplyForm: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-body text-foreground">Require an answer</span>
+                    <Switch
+                      checked={tempYesNoQuestion.requireAnswer}
+                      onCheckedChange={(checked) =>
+                        setTempYesNoQuestion({ ...tempYesNoQuestion, requireAnswer: checked })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                type="button"
+                variant="tertiary"
+                size="lg"
+                onClick={handleDiscardYesNoQuestion}
+              >
+                Discard
+              </Button>
+              <Button type="button" variant="primary" size="lg" onClick={handleSaveYesNoQuestion}>
+                Apply Changes
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* ============================================
+              MULTIPLE CHOICE QUESTION MODAL
+              ============================================ */}
+        <Modal open={multipleChoiceModalOpen} onOpenChange={setMultipleChoiceModalOpen}>
+          <ModalContent size="md">
+            <ModalHeader
+              icon={
+                <CheckSquare
+                  weight="regular"
+                  className="h-6 w-6 text-[var(--primitive-yellow-600)]"
+                />
+              }
+              iconBg="bg-[var(--primitive-yellow-100)]"
+            >
+              <ModalTitle>Multiple Choice</ModalTitle>
+            </ModalHeader>
+
+            <ModalBody className="gap-6">
+              {/* Question Title Field */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Question title</label>
+                <Input
+                  value={tempMultipleChoice.title}
+                  onChange={(e) =>
+                    setTempMultipleChoice({ ...tempMultipleChoice, title: e.target.value })
+                  }
+                  placeholder="Write your question?"
+                  className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                />
+              </div>
+
+              {/* Selection Type - Single vs Multiple */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Selection Type</label>
+                <RadioGroup
+                  value={tempMultipleChoice.allowMultiple ? "multiple" : "single"}
+                  onValueChange={(value) =>
+                    setTempMultipleChoice({
+                      ...tempMultipleChoice,
+                      allowMultiple: value === "multiple",
+                    })
+                  }
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {/* Single Answer Option */}
+                  <label
+                    htmlFor="single-answer"
+                    className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
+                      !tempMultipleChoice.allowMultiple
+                        ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
+                        : "border-[var(--primitive-neutral-300)]"
+                    }`}
+                  >
+                    {/* Preview Box */}
+                    <div className="mb-2 flex h-[120px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)] p-4">
+                      <div className="flex w-full flex-col gap-2">
+                        <div
+                          className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
+                            !tempMultipleChoice.allowMultiple
+                              ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                              : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
+                          }`}
+                        >
+                          <div
+                            className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
+                              !tempMultipleChoice.allowMultiple
+                                ? "border-[var(--primitive-blue-500)]"
+                                : "border-[var(--primitive-neutral-400)]"
+                            }`}
+                          >
+                            {!tempMultipleChoice.allowMultiple && (
+                              <div className="h-2 w-2 rounded-full bg-[var(--primitive-blue-500)]" />
+                            )}
+                          </div>
+                          <span className="text-caption">Option A</span>
+                        </div>
+                        <div className="flex items-center gap-2 rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)] px-3 py-2">
+                          <div className="h-4 w-4 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
+                          <span className="text-caption text-foreground-subtle">Option B</span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Radio Button with Label */}
+                    <div className="flex w-full items-center gap-1">
+                      <RadioGroupItem value="single" id="single-answer" />
+                      <span className="text-caption text-foreground">Single Answer</span>
+                    </div>
+                  </label>
+
+                  {/* Multiple Answers Option */}
+                  <label
+                    htmlFor="multiple-answers"
+                    className={`flex cursor-pointer flex-col items-center rounded-2xl border px-4 pb-2 pt-4 transition-colors ${
+                      tempMultipleChoice.allowMultiple
+                        ? "border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)]"
+                        : "border-[var(--primitive-neutral-300)]"
+                    }`}
+                  >
+                    {/* Preview Box */}
+                    <div className="mb-2 flex h-[120px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[var(--primitive-neutral-200)] p-4">
+                      <div className="flex w-full flex-col gap-2">
+                        <div
+                          className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
+                            tempMultipleChoice.allowMultiple
+                              ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                              : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
+                          }`}
+                        >
+                          <div
+                            className={`flex h-4 w-4 items-center justify-center rounded-md border-2 ${
+                              tempMultipleChoice.allowMultiple
+                                ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
+                                : "border-[var(--primitive-neutral-400)]"
+                            }`}
+                          >
+                            {tempMultipleChoice.allowMultiple && (
+                              <Check weight="bold" className="h-3 w-3 text-white" />
+                            )}
+                          </div>
+                          <span className="text-caption">Option A</span>
+                        </div>
+                        <div
+                          className={`flex items-center gap-2 rounded-lg px-3 py-2 ${
+                            tempMultipleChoice.allowMultiple
+                              ? "border border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-100)]"
+                              : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)]"
+                          }`}
+                        >
+                          <div
+                            className={`flex h-4 w-4 items-center justify-center rounded-md border-2 ${
+                              tempMultipleChoice.allowMultiple
+                                ? "border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)]"
+                                : "border-[var(--primitive-neutral-400)]"
+                            }`}
+                          >
+                            {tempMultipleChoice.allowMultiple && (
+                              <Check weight="bold" className="h-3 w-3 text-white" />
+                            )}
+                          </div>
+                          <span className="text-caption">Option B</span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Radio Button with Label */}
+                    <div className="flex w-full items-center gap-1">
+                      <RadioGroupItem value="multiple" id="multiple-answers" />
+                      <span className="text-caption text-foreground">Multiple Answers</span>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
+
+              {/* Options Section */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Answer Options</label>
+                <div className="flex flex-col gap-2">
+                  {tempMultipleChoice.options.map((option, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="flex flex-1 items-center gap-3 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3">
+                        {/* Show radio circle or checkbox square based on selection type */}
+                        {tempMultipleChoice.allowMultiple ? (
+                          <div className="h-5 w-5 rounded-md border-2 border-[var(--primitive-neutral-400)]" />
+                        ) : (
+                          <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
+                        )}
+                        <Input
+                          value={option}
+                          onChange={(e) => handleUpdateOption(index, e.target.value)}
+                          placeholder={`Option ${index + 1}`}
+                          className="flex-1 border-0 bg-transparent p-0 text-body-sm focus-visible:ring-0"
+                        />
+                      </div>
+                      {tempMultipleChoice.options.length > 2 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveOption(index)}
+                          className="shrink-0 text-[var(--primitive-red-500)] hover:bg-[var(--primitive-red-100)]"
+                        >
+                          <Trash weight="regular" className="h-5 w-5" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  onClick={handleAddOption}
+                  leftIcon={<Plus weight="bold" className="h-4 w-4" />}
+                  className="self-start"
+                >
+                  Add option
+                </Button>
+              </div>
+
+              {/* Settings Section */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Settings</label>
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                  <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
+                    <span className="text-body text-foreground">Hide from apply form</span>
+                    <Switch
+                      checked={tempMultipleChoice.hideFromApplyForm}
+                      onCheckedChange={(checked) =>
+                        setTempMultipleChoice({
+                          ...tempMultipleChoice,
+                          hideFromApplyForm: checked,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-body text-foreground">Require an answer</span>
+                    <Switch
+                      checked={tempMultipleChoice.requireAnswer}
+                      onCheckedChange={(checked) =>
+                        setTempMultipleChoice({ ...tempMultipleChoice, requireAnswer: checked })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                type="button"
+                variant="tertiary"
+                size="lg"
+                onClick={handleDiscardMultipleChoice}
+              >
+                Discard
+              </Button>
+              <Button type="button" variant="primary" size="lg" onClick={handleSaveMultipleChoice}>
+                Apply Changes
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* ============================================
+              FILE UPLOAD QUESTION MODAL
+              ============================================ */}
+        <Modal open={fileUploadModalOpen} onOpenChange={setFileUploadModalOpen}>
+          <ModalContent size="md">
+            <ModalHeader
+              icon={
+                <Upload weight="regular" className="h-6 w-6 text-[var(--primitive-blue-700)]" />
+              }
+              iconBg="bg-[var(--primitive-blue-200)]"
+            >
+              <ModalTitle>File Upload</ModalTitle>
+            </ModalHeader>
+
+            <ModalBody className="gap-6">
+              {/* Question Title Field */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Question title</label>
+                <Input
+                  value={tempFileUpload.title}
+                  onChange={(e) => setTempFileUpload({ ...tempFileUpload, title: e.target.value })}
+                  placeholder="e.g., Upload your resume"
+                  className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                />
+              </div>
+
+              {/* Accepted File Types */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Accepted file types</label>
+                <div className="flex flex-wrap gap-3">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                    <Checkbox
+                      checked={tempFileUpload.acceptedTypes.pdf}
+                      onCheckedChange={(checked) =>
+                        setTempFileUpload({
+                          ...tempFileUpload,
+                          acceptedTypes: {
+                            ...tempFileUpload.acceptedTypes,
+                            pdf: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    <span className="text-body-sm">PDF</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                    <Checkbox
+                      checked={tempFileUpload.acceptedTypes.doc}
+                      onCheckedChange={(checked) =>
+                        setTempFileUpload({
+                          ...tempFileUpload,
+                          acceptedTypes: {
+                            ...tempFileUpload.acceptedTypes,
+                            doc: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    <span className="text-body-sm">DOC/DOCX</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                    <Checkbox
+                      checked={tempFileUpload.acceptedTypes.images}
+                      onCheckedChange={(checked) =>
+                        setTempFileUpload({
+                          ...tempFileUpload,
+                          acceptedTypes: {
+                            ...tempFileUpload.acceptedTypes,
+                            images: checked === true,
+                          },
+                        })
+                      }
+                    />
+                    <span className="text-body-sm">Images (PNG, JPG)</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Upload Preview */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Upload Preview</label>
+                <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-8">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
+                    <Upload weight="regular" className="h-6 w-6 text-[var(--primitive-blue-500)]" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-body-sm font-medium text-foreground">
+                      Drop files here or click to upload
+                    </p>
+                    <p className="text-caption text-foreground-subtle">
+                      Max file size: {tempFileUpload.maxFileSize}MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Settings Section */}
+              <div className="flex flex-col gap-3">
+                <label className="text-body text-foreground">Settings</label>
+                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+                  <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
+                    <span className="text-body text-foreground">Hide from apply form</span>
+                    <Switch
+                      checked={tempFileUpload.hideFromApplyForm}
+                      onCheckedChange={(checked) =>
+                        setTempFileUpload({ ...tempFileUpload, hideFromApplyForm: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-body text-foreground">Require an answer</span>
+                    <Switch
+                      checked={tempFileUpload.requireAnswer}
+                      onCheckedChange={(checked) =>
+                        setTempFileUpload({ ...tempFileUpload, requireAnswer: checked })
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button type="button" variant="tertiary" size="lg" onClick={handleDiscardFileUpload}>
+                Discard
+              </Button>
+              <Button type="button" variant="primary" size="lg" onClick={handleSaveFileUpload}>
+                Apply Changes
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* ============================================
+              CANDIDATES TAB
+              ============================================ */}
+        {activeTab === "candidates" && (
+          <div className="space-y-4">
+            {/* Header Card */}
+            <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 className="mb-1 text-heading-sm text-foreground">Applications</h2>
+                  <p className="text-body-sm text-foreground-muted">
+                    {totalApplications}{" "}
+                    {totalApplications === 1 ? "candidate has" : "candidates have"} applied for this
+                    role
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="tertiary" size="sm">
+                    Export CSV
+                  </Button>
+                  <Button variant="primary" size="sm">
+                    Filter
+                  </Button>
+                </div>
+              </div>
+
+              {/* Stats — dynamic from stageCounts */}
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <div className="rounded-xl bg-[var(--primitive-neutral-100)] p-4">
+                  <div className="mb-1 text-heading-md text-foreground">{totalApplications}</div>
+                  <div className="text-caption text-foreground-muted">Total Applications</div>
+                </div>
+                {(jobData?.stages || []).slice(0, 3).map((stage) => (
+                  <div key={stage.id} className="rounded-xl bg-[var(--primitive-blue-100)] p-4">
+                    <div className="mb-1 text-heading-md text-foreground">
+                      {stageCounts[stage.id] || 0}
+                    </div>
+                    <div className="text-caption text-foreground-muted">{stage.name}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Applications List */}
+            {applications.length === 0 ? (
+              <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-12 text-center">
+                <User
+                  weight="regular"
+                  className="mx-auto mb-3 h-12 w-12 text-[var(--primitive-neutral-400)]"
+                />
+                <h3 className="mb-1 text-body-strong text-foreground">No applications yet</h3>
+                <p className="text-body-sm text-foreground-muted">
+                  Applications will appear here once candidates start applying.
+                </p>
+              </div>
+            ) : (
               <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
                 {/* Table Header */}
                 <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-6 py-3">
                   <div className="grid grid-cols-12 gap-4 text-caption font-semibold text-foreground-muted">
                     <div className="col-span-3">Candidate</div>
-                    <div className="col-span-2">Location</div>
+                    <div className="col-span-2">Source</div>
                     <div className="col-span-2">Experience</div>
                     <div className="col-span-2">Applied</div>
                     <div className="col-span-1">Match</div>
-                    <div className="col-span-1">Status</div>
+                    <div className="col-span-1">Stage</div>
                     <div className="col-span-1 text-right">Actions</div>
                   </div>
                 </div>
 
-                {/* Application Rows */}
+                {/* Application Rows — dynamic */}
                 <div className="divide-y divide-[var(--primitive-neutral-200)]">
-                  {/* Application 1 */}
-                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
-                    <div className="grid grid-cols-12 items-center gap-4">
-                      <div className="col-span-3 flex items-center gap-3">
-                        <Avatar name="Sarah Chen" size="default" />
-                        <div>
-                          <div className="text-body-sm font-medium text-foreground">Sarah Chen</div>
-                          <div className="text-caption text-foreground-muted">
-                            sarah.chen@example.com
+                  {applications.map((app) => (
+                    <div
+                      key={app.id}
+                      className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]"
+                    >
+                      <div className="grid grid-cols-12 items-center gap-4">
+                        <div className="col-span-3 flex items-center gap-3">
+                          <Avatar
+                            name={app.seeker.account.name || app.seeker.account.email}
+                            src={app.seeker.account.avatar || undefined}
+                            size="default"
+                          />
+                          <div>
+                            <div className="text-body-sm font-medium text-foreground">
+                              {app.seeker.account.name || "Unknown"}
+                            </div>
+                            <div className="text-caption text-foreground-muted">
+                              {app.seeker.account.email}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">
-                        San Francisco, CA
-                      </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">
-                        5-10 years
-                      </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">
-                        2 days ago
-                      </div>
-                      <div className="col-span-1">
-                        <Badge variant="success" size="sm">
-                          92%
-                        </Badge>
-                      </div>
-                      <div className="col-span-1">
-                        <Badge variant="neutral" size="sm">
-                          New
-                        </Badge>
-                      </div>
-                      <div className="col-span-1 flex justify-end">
-                        <Button variant="tertiary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Application 2 */}
-                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
-                    <div className="grid grid-cols-12 items-center gap-4">
-                      <div className="col-span-3 flex items-center gap-3">
-                        <Avatar name="Marcus Johnson" size="default" />
-                        <div>
-                          <div className="text-body-sm font-medium text-foreground">
-                            Marcus Johnson
-                          </div>
-                          <div className="text-caption text-foreground-muted">
-                            marcus.j@example.com
-                          </div>
+                        <div className="col-span-2 text-body-sm text-foreground-muted">
+                          {app.source || "Direct"}
+                        </div>
+                        <div className="col-span-2 text-body-sm text-foreground-muted">
+                          {formatExperience(app.seeker.yearsExperience)}
+                        </div>
+                        <div className="col-span-2 text-body-sm text-foreground-muted">
+                          {formatRelativeTime(app.createdAt)}
+                        </div>
+                        <div className="col-span-1">
+                          {app.matchScore !== null ? (
+                            <Badge variant={getMatchScoreBadgeVariant(app.matchScore)} size="sm">
+                              {Math.round(app.matchScore)}%
+                            </Badge>
+                          ) : (
+                            <span className="text-caption text-foreground-muted">—</span>
+                          )}
+                        </div>
+                        <div className="col-span-1">
+                          <Badge variant={getStageBadgeVariant(app.stage)} size="sm">
+                            {formatStageName(app.stage)}
+                          </Badge>
+                        </div>
+                        <div className="col-span-1 flex justify-end">
+                          <Button variant="tertiary" size="sm">
+                            View
+                          </Button>
                         </div>
                       </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">
-                        Austin, TX
-                      </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">3-5 years</div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">
-                        5 days ago
-                      </div>
-                      <div className="col-span-1">
-                        <Badge variant="warning" size="sm">
-                          85%
-                        </Badge>
-                      </div>
-                      <div className="col-span-1">
-                        <Badge variant="info" size="sm">
-                          Reviewing
-                        </Badge>
-                      </div>
-                      <div className="col-span-1 flex justify-end">
-                        <Button variant="tertiary" size="sm">
-                          View
-                        </Button>
-                      </div>
                     </div>
-                  </div>
-
-                  {/* Application 3 */}
-                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
-                    <div className="grid grid-cols-12 items-center gap-4">
-                      <div className="col-span-3 flex items-center gap-3">
-                        <Avatar name="Priya Patel" size="default" />
-                        <div>
-                          <div className="text-body-sm font-medium text-foreground">
-                            Priya Patel
-                          </div>
-                          <div className="text-caption text-foreground-muted">
-                            priya.patel@example.com
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">
-                        New York, NY
-                      </div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">10+ years</div>
-                      <div className="col-span-2 text-body-sm text-foreground-muted">
-                        7 days ago
-                      </div>
-                      <div className="col-span-1">
-                        <Badge variant="success" size="sm">
-                          88%
-                        </Badge>
-                      </div>
-                      <div className="col-span-1">
-                        <Badge variant="info" size="sm">
-                          Interview
-                        </Badge>
-                      </div>
-                      <div className="col-span-1 flex justify-end">
-                        <Button variant="tertiary" size="sm">
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          {/* ============================================
+        {/* ============================================
               JOB POST TAB
               ============================================ */}
-          {activeTab === "job-post" && (
-            <div className="flex gap-4">
-              {/* Left Column - Form */}
-              <div className="flex flex-1 flex-col gap-4">
-                {/* Basic Info Card */}
-                <FormCard>
-                  <FormTitleInput
-                    placeholder="Untitled Role"
-                    value={roleTitle}
-                    onChange={(e) => setRoleTitle(e.target.value)}
-                    required
-                  />
+        {activeTab === "job-post" && (
+          <div className="flex gap-4">
+            {/* Left Column - Form */}
+            <div className="flex flex-1 flex-col gap-4">
+              {/* Basic Info Card */}
+              <FormCard>
+                <FormTitleInput
+                  placeholder="Untitled Role"
+                  value={roleTitle}
+                  onChange={(e) => setRoleTitle(e.target.value)}
+                  required
+                />
 
-                  <FormField label="Job Category" required>
-                    <Select value={jobCategory} onValueChange={setJobCategory}>
+                <FormField label="Job Category" required>
+                  <Select value={jobCategory} onValueChange={setJobCategory}>
+                    <SelectTrigger size="lg">
+                      <SelectValue placeholder="Select a Job Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {jobCategories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormField>
+
+                <FormRow columns={2}>
+                  <FormField label="Position Type" required>
+                    <Select value={positionType} onValueChange={setPositionType}>
                       <SelectTrigger size="lg">
-                        <SelectValue placeholder="Select a Job Category" />
+                        <SelectValue placeholder="Select a Position Type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {jobCategories.map((cat) => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
+                        {positionTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormField>
+                  <FormField label="Level of Experience" required>
+                    <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                      <SelectTrigger size="lg">
+                        <SelectValue placeholder="Select Experience Level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {experienceLevels.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormField>
+                </FormRow>
+              </FormCard>
+
+              {/* Role Information Card */}
+              <FormCard>
+                <FormSection title="Role Information">
+                  <FormField
+                    label="Role Description"
+                    required
+                    helpText="Provide a detailed overview of the responsibilities and qualifications expected from the job applicant."
+                  >
+                    <RichTextEditor
+                      content={description}
+                      onChange={setDescription}
+                      placeholder="Write your role description here"
+                      minHeight="100px"
+                    >
+                      <RichTextToolbar />
+                    </RichTextEditor>
+                    <div className="mt-2 flex justify-end">
+                      <RichTextCharacterCounter htmlContent={description} max={250} />
+                    </div>
+                  </FormField>
+
+                  <FormField
+                    label="Primary Responsibilities"
+                    helpText="What are the key responsibilities a candidate must fulfill to be considered for this role?"
+                  >
+                    <RichTextEditor
+                      content={responsibilities}
+                      onChange={setResponsibilities}
+                      placeholder="What are the primary responsibilities for this job?"
+                      minHeight="100px"
+                    >
+                      <RichTextToolbar />
+                    </RichTextEditor>
+                    <div className="mt-2 flex justify-end">
+                      <RichTextCharacterCounter htmlContent={responsibilities} max={250} />
+                    </div>
+                  </FormField>
+
+                  <FormField
+                    label="Required Qualifications"
+                    helpText="What are the essential qualifications required for a candidate to be eligible for consideration for this role."
+                  >
+                    <RichTextEditor
+                      content={requiredQuals}
+                      onChange={setRequiredQuals}
+                      placeholder="What are the required qualifications for this job?"
+                      minHeight="100px"
+                    >
+                      <RichTextToolbar />
+                    </RichTextEditor>
+                    <div className="mt-2 flex justify-end">
+                      <RichTextCharacterCounter htmlContent={requiredQuals} max={250} />
+                    </div>
+                  </FormField>
+
+                  <FormField
+                    label="Desired Qualifications"
+                    helpText="What are the qualifications that, while not mandatory, are highly advantageous for the position."
+                  >
+                    <RichTextEditor
+                      content={desiredQuals}
+                      onChange={setDesiredQuals}
+                      placeholder="What are the desired qualifications for this job?"
+                      minHeight="100px"
+                    >
+                      <RichTextToolbar />
+                    </RichTextEditor>
+                    <div className="mt-2 flex justify-end">
+                      <RichTextCharacterCounter htmlContent={desiredQuals} max={250} />
+                    </div>
+                  </FormField>
+                </FormSection>
+              </FormCard>
+
+              {/* Education Requirements Card */}
+              <FormCard>
+                <FormSection title="Education Requirements">
+                  <FormField label="Education Level">
+                    <Select value={educationLevel} onValueChange={setEducationLevel}>
+                      <SelectTrigger size="lg">
+                        <SelectValue placeholder="Education Level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {educationLevels.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </FormField>
 
-                  <FormRow columns={2}>
-                    <FormField label="Position Type" required>
-                      <Select value={positionType} onValueChange={setPositionType}>
-                        <SelectTrigger size="lg">
-                          <SelectValue placeholder="Select a Position Type" />
+                  <FormField
+                    label="Specific Education Requirements"
+                    helpText="Outline the degrees, credentials, and training required to support students with disabilities and diverse learning needs effectively."
+                  >
+                    <RichTextEditor
+                      content={educationDetails}
+                      onChange={setEducationDetails}
+                      placeholder="Add any information regarding any specific education requirements"
+                      minHeight="100px"
+                    >
+                      <RichTextToolbar />
+                    </RichTextEditor>
+                    <div className="mt-2 flex justify-end">
+                      <RichTextCharacterCounter htmlContent={educationDetails} max={250} />
+                    </div>
+                  </FormField>
+                </FormSection>
+              </FormCard>
+
+              {/* Workplace Information Card */}
+              <FormCard>
+                <FormSection title="Workplace Information">
+                  <FormField label="Workplace Type" required>
+                    <SegmentedController
+                      options={[
+                        { value: "onsite", label: "Onsite" },
+                        { value: "remote", label: "Remote" },
+                        { value: "hybrid", label: "Hybrid" },
+                      ]}
+                      value={workplaceType}
+                      onValueChange={setWorkplaceType}
+                    />
+                  </FormField>
+
+                  {workplaceType !== "remote" && (
+                    <FormField label="Office Location">
+                      <FormRow columns={3}>
+                        <Input
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          placeholder="City"
+                          inputSize="lg"
+                        />
+                        <Select value={state} onValueChange={setState}>
+                          <SelectTrigger size="lg">
+                            <SelectValue placeholder="State" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {usStates.map((s) => (
+                              <SelectItem key={s.value} value={s.value}>
+                                {s.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select value={country} onValueChange={setCountry}>
+                          <SelectTrigger size="lg">
+                            <SelectValue placeholder="Country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countries.map((c) => (
+                              <SelectItem key={c.value} value={c.value}>
+                                {c.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormRow>
+                    </FormField>
+                  )}
+                </FormSection>
+              </FormCard>
+
+              {/* Compensation & Benefits Card */}
+              <FormCard>
+                <FormSection title="Compensation & Benefits Information">
+                  {/* Compensation subsection */}
+                  <FormField
+                    label="Compensation"
+                    helpText="Outline the pay range, and incentives needed to fairly reward, attract, and retain someone in this role."
+                  >
+                    <div className="flex items-center gap-4">
+                      <Select value={payType} onValueChange={setPayType}>
+                        <SelectTrigger size="lg" className="w-[340px]">
+                          <SelectValue placeholder="Pay Type" />
                         </SelectTrigger>
                         <SelectContent>
-                          {positionTypes.map((type) => (
+                          {payTypes.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                    </FormField>
-                    <FormField label="Level of Experience" required>
-                      <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                        <SelectTrigger size="lg">
-                          <SelectValue placeholder="Select Experience Level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {experienceLevels.map((level) => (
-                            <SelectItem key={level.value} value={level.value}>
-                              {level.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormField>
-                  </FormRow>
-                </FormCard>
-
-                {/* Role Information Card */}
-                <FormCard>
-                  <FormSection title="Role Information">
-                    <FormField
-                      label="Role Description"
-                      required
-                      helpText="Provide a detailed overview of the responsibilities and qualifications expected from the job applicant."
-                    >
-                      <RichTextEditor
-                        content={description}
-                        onChange={setDescription}
-                        placeholder="Write your role description here"
-                        minHeight="100px"
-                      >
-                        <RichTextToolbar />
-                      </RichTextEditor>
-                      <div className="mt-2 flex justify-end">
-                        <RichTextCharacterCounter htmlContent={description} max={250} />
-                      </div>
-                    </FormField>
-
-                    <FormField
-                      label="Primary Responsibilities"
-                      helpText="What are the key responsibilities a candidate must fulfill to be considered for this role?"
-                    >
-                      <RichTextEditor
-                        content={responsibilities}
-                        onChange={setResponsibilities}
-                        placeholder="What are the primary responsibilities for this job?"
-                        minHeight="100px"
-                      >
-                        <RichTextToolbar />
-                      </RichTextEditor>
-                      <div className="mt-2 flex justify-end">
-                        <RichTextCharacterCounter htmlContent={responsibilities} max={250} />
-                      </div>
-                    </FormField>
-
-                    <FormField
-                      label="Required Qualifications"
-                      helpText="What are the essential qualifications required for a candidate to be eligible for consideration for this role."
-                    >
-                      <RichTextEditor
-                        content={requiredQuals}
-                        onChange={setRequiredQuals}
-                        placeholder="What are the required qualifications for this job?"
-                        minHeight="100px"
-                      >
-                        <RichTextToolbar />
-                      </RichTextEditor>
-                      <div className="mt-2 flex justify-end">
-                        <RichTextCharacterCounter htmlContent={requiredQuals} max={250} />
-                      </div>
-                    </FormField>
-
-                    <FormField
-                      label="Desired Qualifications"
-                      helpText="What are the qualifications that, while not mandatory, are highly advantageous for the position."
-                    >
-                      <RichTextEditor
-                        content={desiredQuals}
-                        onChange={setDesiredQuals}
-                        placeholder="What are the desired qualifications for this job?"
-                        minHeight="100px"
-                      >
-                        <RichTextToolbar />
-                      </RichTextEditor>
-                      <div className="mt-2 flex justify-end">
-                        <RichTextCharacterCounter htmlContent={desiredQuals} max={250} />
-                      </div>
-                    </FormField>
-                  </FormSection>
-                </FormCard>
-
-                {/* Education Requirements Card */}
-                <FormCard>
-                  <FormSection title="Education Requirements">
-                    <FormField label="Education Level">
-                      <Select value={educationLevel} onValueChange={setEducationLevel}>
-                        <SelectTrigger size="lg">
-                          <SelectValue placeholder="Education Level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {educationLevels.map((level) => (
-                            <SelectItem key={level.value} value={level.value}>
-                              {level.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormField>
-
-                    <FormField
-                      label="Specific Education Requirements"
-                      helpText="Outline the degrees, credentials, and training required to support students with disabilities and diverse learning needs effectively."
-                    >
-                      <RichTextEditor
-                        content={educationDetails}
-                        onChange={setEducationDetails}
-                        placeholder="Add any information regarding any specific education requirements"
-                        minHeight="100px"
-                      >
-                        <RichTextToolbar />
-                      </RichTextEditor>
-                      <div className="mt-2 flex justify-end">
-                        <RichTextCharacterCounter htmlContent={educationDetails} max={250} />
-                      </div>
-                    </FormField>
-                  </FormSection>
-                </FormCard>
-
-                {/* Workplace Information Card */}
-                <FormCard>
-                  <FormSection title="Workplace Information">
-                    <FormField label="Workplace Type" required>
-                      <SegmentedController
-                        options={[
-                          { value: "onsite", label: "Onsite" },
-                          { value: "remote", label: "Remote" },
-                          { value: "hybrid", label: "Hybrid" },
-                        ]}
-                        value={workplaceType}
-                        onValueChange={setWorkplaceType}
+                      <Input
+                        value={minPay}
+                        onChange={(e) => setMinPay(e.target.value)}
+                        placeholder="Minimum Pay Amount"
+                        inputSize="lg"
+                        leftAddon={<span className="text-body font-medium">$</span>}
+                        className="flex-1"
                       />
-                    </FormField>
-
-                    {workplaceType !== "remote" && (
-                      <FormField label="Office Location">
-                        <FormRow columns={3}>
-                          <Input
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            placeholder="City"
-                            inputSize="lg"
-                          />
-                          <Select value={state} onValueChange={setState}>
-                            <SelectTrigger size="lg">
-                              <SelectValue placeholder="State" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {usStates.map((s) => (
-                                <SelectItem key={s.value} value={s.value}>
-                                  {s.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Select value={country} onValueChange={setCountry}>
-                            <SelectTrigger size="lg">
-                              <SelectValue placeholder="Country" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {countries.map((c) => (
-                                <SelectItem key={c.value} value={c.value}>
-                                  {c.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormRow>
-                      </FormField>
-                    )}
-                  </FormSection>
-                </FormCard>
-
-                {/* Compensation & Benefits Card */}
-                <FormCard>
-                  <FormSection title="Compensation & Benefits Information">
-                    {/* Compensation subsection */}
-                    <FormField
-                      label="Compensation"
-                      helpText="Outline the pay range, and incentives needed to fairly reward, attract, and retain someone in this role."
-                    >
-                      <div className="flex items-center gap-4">
-                        <Select value={payType} onValueChange={setPayType}>
-                          <SelectTrigger size="lg" className="w-[340px]">
-                            <SelectValue placeholder="Pay Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {payTypes.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          value={minPay}
-                          onChange={(e) => setMinPay(e.target.value)}
-                          placeholder="Minimum Pay Amount"
-                          inputSize="lg"
-                          leftAddon={<span className="text-body font-medium">$</span>}
-                          className="flex-1"
-                        />
-                        <span className="text-[var(--primitive-neutral-500)]">—</span>
-                        <Input
-                          value={maxPay}
-                          onChange={(e) => setMaxPay(e.target.value)}
-                          placeholder="Maximum Pay Amount"
-                          inputSize="lg"
-                          leftAddon={<span className="text-body font-medium">$</span>}
-                          className="flex-1"
-                        />
-                      </div>
-                    </FormField>
-
-                    <FormField label="Pay frequency">
-                      <SegmentedController
-                        options={[
-                          { value: "weekly", label: "Weekly" },
-                          { value: "bi-weekly", label: "Bi-Weekly" },
-                          { value: "monthly", label: "Monthly" },
-                        ]}
-                        value={payFrequency}
-                        onValueChange={setPayFrequency}
+                      <span className="text-[var(--primitive-neutral-500)]">—</span>
+                      <Input
+                        value={maxPay}
+                        onChange={(e) => setMaxPay(e.target.value)}
+                        placeholder="Maximum Pay Amount"
+                        inputSize="lg"
+                        leftAddon={<span className="text-body font-medium">$</span>}
+                        className="flex-1"
                       />
-                    </FormField>
-
-                    {/* Benefits subsection */}
-                    <FormField
-                      label="Benefits"
-                      helpText="Outline the benefits needed to fairly reward, attract, and retain someone in this role."
-                    >
-                      <BenefitsSelector
-                        categories={defaultBenefitCategories}
-                        selectedBenefits={selectedBenefits}
-                        onSelectionChange={setSelectedBenefits}
-                        useCompanyDefaults={useCompanyBenefits}
-                        onUseCompanyDefaultsChange={setUseCompanyBenefits}
-                        companyName="Company"
-                      />
-                      <RichTextEditor
-                        content={compensationDetails}
-                        onChange={setCompensationDetails}
-                        placeholder="Add any details on compensation or benefits."
-                        minHeight="100px"
-                      >
-                        <RichTextToolbar />
-                      </RichTextEditor>
-                      <div className="mt-2 flex justify-end">
-                        <RichTextCharacterCounter htmlContent={compensationDetails} max={250} />
-                      </div>
-                    </FormField>
-                  </FormSection>
-                </FormCard>
-              </div>
-
-              {/* Right Column - Sidebar */}
-              <div className="sticky top-6 flex w-[480px] flex-col gap-4 self-start">
-                {/* Role Settings Card - Figma 188:6269 */}
-                <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
-                  {/* Header */}
-                  <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-200)] p-6">
-                    <SlidersHorizontal
-                      weight="regular"
-                      className="h-6 w-6 text-[var(--primitive-neutral-600)]"
-                    />
-                    <h2 className="flex-1 text-body-strong text-foreground">Role Settings</h2>
-                  </div>
-
-                  {/* Show Recruiter */}
-                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                    <span className="text-body leading-6 text-foreground">Show Recruiter</span>
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        name="Soobin Han"
-                        size="sm"
-                        className="border border-[var(--primitive-neutral-300)]"
-                      />
-                      <div className="flex flex-1 flex-col">
-                        <span className="text-body leading-6 text-foreground">Soobin Han</span>
-                        <span className="text-caption leading-4 text-foreground-subtle">
-                          Sr. Technical Recruiter
-                        </span>
-                      </div>
-                      <Switch checked={showRecruiter} onCheckedChange={setShowRecruiter} />
                     </div>
-                  </div>
+                  </FormField>
 
-                  {/* Closing Date */}
-                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                    <label className="text-body leading-6 text-foreground">Closing Date</label>
-                    <DatePicker
-                      value={closingDate}
-                      onChange={setClosingDate}
-                      placeholder="Select closing date"
-                      className="rounded-xl"
+                  <FormField label="Pay frequency">
+                    <SegmentedController
+                      options={[
+                        { value: "weekly", label: "Weekly" },
+                        { value: "bi-weekly", label: "Bi-Weekly" },
+                        { value: "monthly", label: "Monthly" },
+                      ]}
+                      value={payFrequency}
+                      onValueChange={setPayFrequency}
                     />
-                  </div>
+                  </FormField>
 
-                  {/* External Link */}
-                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                    <label className="text-body leading-6 text-foreground">External Link</label>
-                    <Input
-                      value={externalLink}
-                      onChange={(e) => setExternalLink(e.target.value)}
-                      placeholder="https://example.com/apply"
-                      inputSize="lg"
-                      leftAddon={<LinkIcon weight="regular" />}
-                      className="rounded-xl"
+                  {/* Benefits subsection */}
+                  <FormField
+                    label="Benefits"
+                    helpText="Outline the benefits needed to fairly reward, attract, and retain someone in this role."
+                  >
+                    <BenefitsSelector
+                      categories={defaultBenefitCategories}
+                      selectedBenefits={selectedBenefits}
+                      onSelectionChange={setSelectedBenefits}
+                      useCompanyDefaults={useCompanyBenefits}
+                      onUseCompanyDefaultsChange={setUseCompanyBenefits}
+                      companyName="Company"
                     />
-                  </div>
+                    <RichTextEditor
+                      content={compensationDetails}
+                      onChange={setCompensationDetails}
+                      placeholder="Add any details on compensation or benefits."
+                      minHeight="100px"
+                    >
+                      <RichTextToolbar />
+                    </RichTextEditor>
+                    <div className="mt-2 flex justify-end">
+                      <RichTextCharacterCounter htmlContent={compensationDetails} max={250} />
+                    </div>
+                  </FormField>
+                </FormSection>
+              </FormCard>
+            </div>
 
-                  {/* Required Files */}
-                  <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                    <div className="flex items-center gap-3">
-                      <span className="flex-1 text-body leading-6 text-foreground">
-                        Required Files
+            {/* Right Column - Sidebar */}
+            <div className="sticky top-6 flex w-[480px] flex-col gap-4 self-start">
+              {/* Role Settings Card - Figma 188:6269 */}
+              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
+                {/* Header */}
+                <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-200)] p-6">
+                  <SlidersHorizontal
+                    weight="regular"
+                    className="h-6 w-6 text-[var(--primitive-neutral-600)]"
+                  />
+                  <h2 className="flex-1 text-body-strong text-foreground">Role Settings</h2>
+                </div>
+
+                {/* Show Recruiter */}
+                <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                  <span className="text-body leading-6 text-foreground">Show Recruiter</span>
+                  <div className="flex items-center gap-2">
+                    <Avatar
+                      name="Soobin Han"
+                      size="sm"
+                      className="border border-[var(--primitive-neutral-300)]"
+                    />
+                    <div className="flex flex-1 flex-col">
+                      <span className="text-body leading-6 text-foreground">Soobin Han</span>
+                      <span className="text-caption leading-4 text-foreground-subtle">
+                        Sr. Technical Recruiter
                       </span>
-                      <Folder
-                        weight="regular"
-                        className="h-6 w-6 text-[var(--primitive-neutral-600)]"
-                      />
                     </div>
-                    <div className="flex flex-col gap-3">
-                      <SwitchWithLabel
-                        label="Resume"
-                        labelPosition="right"
-                        checked={requireResume}
-                        onCheckedChange={setRequireResume}
-                      />
-                      <SwitchWithLabel
-                        label="Cover Letter"
-                        labelPosition="right"
-                        checked={requireCoverLetter}
-                        onCheckedChange={setRequireCoverLetter}
-                      />
-                      <SwitchWithLabel
-                        label="Portfolio"
-                        labelPosition="right"
-                        checked={requirePortfolio}
-                        onCheckedChange={setRequirePortfolio}
-                      />
-                    </div>
+                    <Switch checked={showRecruiter} onCheckedChange={setShowRecruiter} />
                   </div>
                 </div>
 
-                {/* Role Template Card */}
-                <RoleTemplateCard
-                  onSaveTemplate={handleSaveTemplate}
-                  isSaved={templateSaved}
-                  loading={savingTemplate}
-                />
-              </div>
-            </div>
-          )}
+                {/* Closing Date */}
+                <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                  <label className="text-body leading-6 text-foreground">Closing Date</label>
+                  <DatePicker
+                    value={closingDate}
+                    onChange={setClosingDate}
+                    placeholder="Select closing date"
+                    className="rounded-xl"
+                  />
+                </div>
 
-          {/* Footer */}
-          <div className="mt-12 text-center">
-            <p className="text-caption">
-              <span className="text-foreground-brand">Make an </span>
-              <span className="font-semibold text-foreground-brand">Impact.</span>
-            </p>
+                {/* External Link */}
+                <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                  <label className="text-body leading-6 text-foreground">External Link</label>
+                  <Input
+                    value={externalLink}
+                    onChange={(e) => setExternalLink(e.target.value)}
+                    placeholder="https://example.com/apply"
+                    inputSize="lg"
+                    leftAddon={<LinkIcon weight="regular" />}
+                    className="rounded-xl"
+                  />
+                </div>
+
+                {/* Required Files */}
+                <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
+                  <div className="flex items-center gap-3">
+                    <span className="flex-1 text-body leading-6 text-foreground">
+                      Required Files
+                    </span>
+                    <Folder
+                      weight="regular"
+                      className="h-6 w-6 text-[var(--primitive-neutral-600)]"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <SwitchWithLabel
+                      label="Resume"
+                      labelPosition="right"
+                      checked={requireResume}
+                      onCheckedChange={setRequireResume}
+                    />
+                    <SwitchWithLabel
+                      label="Cover Letter"
+                      labelPosition="right"
+                      checked={requireCoverLetter}
+                      onCheckedChange={setRequireCoverLetter}
+                    />
+                    <SwitchWithLabel
+                      label="Portfolio"
+                      labelPosition="right"
+                      checked={requirePortfolio}
+                      onCheckedChange={setRequirePortfolio}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Role Template Card */}
+              <RoleTemplateCard
+                onSaveTemplate={handleSaveTemplate}
+                isSaved={templateSaved}
+                loading={savingTemplate}
+              />
+            </div>
           </div>
-        </main>
-      </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-12 text-center">
+          <p className="text-caption">
+            <span className="text-foreground-brand">Make an </span>
+            <span className="font-semibold text-foreground-brand">Impact.</span>
+          </p>
+        </div>
+      </main>
     </div>
   );
+}
+
+// ============================================
+// HELPER: Format relative time for application dates
+// ============================================
+function formatRelativeTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return `${Math.floor(diffDays / 30)} months ago`;
+}
+
+// ============================================
+// HELPER: Get badge variant for match score
+// ============================================
+function getMatchScoreBadgeVariant(score: number | null): "success" | "warning" | "neutral" {
+  if (score === null) return "neutral";
+  if (score >= 80) return "success";
+  if (score >= 50) return "warning";
+  return "neutral";
+}
+
+// ============================================
+// HELPER: Get badge variant for application stage
+// ============================================
+function getStageBadgeVariant(stage: string): "neutral" | "info" | "success" | "warning" | "error" {
+  switch (stage) {
+    case "applied":
+      return "info";
+    case "screening":
+      return "info";
+    case "interview":
+      return "warning";
+    case "offer":
+      return "success";
+    case "hired":
+      return "success";
+    case "rejected":
+      return "error";
+    default:
+      return "neutral";
+  }
+}
+
+// ============================================
+// HELPER: Format stage name for display
+// ============================================
+function formatStageName(stage: string): string {
+  return stage.charAt(0).toUpperCase() + stage.slice(1);
+}
+
+// ============================================
+// HELPER: Format years of experience
+// ============================================
+function formatExperience(years: number | null): string {
+  if (years === null) return "—";
+  if (years < 3) return "0-2 years";
+  if (years < 6) return "3-5 years";
+  if (years < 11) return "5-10 years";
+  return "10+ years";
 }
