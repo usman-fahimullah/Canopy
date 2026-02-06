@@ -1,0 +1,103 @@
+import * as React from "react";
+
+// ============================================
+// SHARED TYPES — Role Edit Page
+// ============================================
+
+export interface FieldConfig {
+  visible: boolean;
+  required: boolean;
+}
+
+export interface PersonalDetailsConfig {
+  name: FieldConfig;
+  email: FieldConfig;
+  dateOfBirth: FieldConfig;
+  pronouns: FieldConfig;
+  location: FieldConfig;
+}
+
+export interface CareerDetailsConfig {
+  currentRole: FieldConfig;
+  currentCompany: FieldConfig;
+  yearsExperience: FieldConfig;
+  linkedIn: FieldConfig;
+  portfolio: FieldConfig;
+}
+
+export interface FormQuestion {
+  id: string;
+  type: "text" | "yes-no" | "multiple-choice" | "file-upload";
+  title: string;
+  required: boolean;
+  description?: string;
+  options?: string[];
+}
+
+export interface ApplicationData {
+  id: string;
+  stage: string;
+  stageOrder: number;
+  matchScore: number | null;
+  matchReasons: string | null;
+  source: string | null;
+  coverLetter: string | null;
+  formResponses: string | null;
+  knockoutPassed: boolean;
+  rejectedAt: string | null;
+  hiredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  seeker: {
+    id: string;
+    headline: string | null;
+    resumeUrl: string | null;
+    skills: string[];
+    greenSkills: string[];
+    certifications: string[];
+    yearsExperience: number | null;
+    account: {
+      id: string;
+      name: string | null;
+      email: string;
+      avatar: string | null;
+    };
+  };
+}
+
+export interface JobData {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  location: string | null;
+  locationType: string;
+  employmentType: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string;
+  climateCategory: string | null;
+  impactDescription: string | null;
+  requiredCerts: string[];
+  greenSkills: string[];
+  status: string;
+  publishedAt: string | null;
+  closesAt: string | null;
+  stages: { id: string; name: string }[];
+  formConfig: {
+    personalDetails: Record<string, { visible: boolean; required: boolean }>;
+    careerDetails: Record<string, { visible: boolean; required: boolean }>;
+    requiredFiles: { resume: boolean; coverLetter: boolean; portfolio: boolean };
+  } | null;
+  formQuestions: FormQuestion[] | null;
+  syndicationEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SortableQuestionItemProps {
+  question: FormQuestion;
+  onEdit: (id: string, type: string) => void;
+  onDelete: (id: string) => void;
+  getIconWithBg: (type: string) => React.ReactNode;
+}

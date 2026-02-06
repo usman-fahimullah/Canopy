@@ -1,0 +1,553 @@
+"use client";
+
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { logger, formatError } from "@/lib/logger";
+import type {
+  JobData,
+  ApplicationData,
+  PersonalDetailsConfig,
+  CareerDetailsConfig,
+  FormQuestion,
+} from "./types";
+import {
+  employmentTypeToForm,
+  formToEmploymentType,
+  locationTypeToForm,
+  formToLocationType,
+  usStates,
+  countries,
+} from "./constants";
+
+// ============================================
+// RETURN TYPE
+// ============================================
+
+export interface JobPostState {
+  roleTitle: string;
+  setRoleTitle: (v: string) => void;
+  jobCategory: string;
+  setJobCategory: (v: string) => void;
+  positionType: string;
+  setPositionType: (v: string) => void;
+  experienceLevel: string;
+  setExperienceLevel: (v: string) => void;
+  description: string;
+  setDescription: (v: string) => void;
+  responsibilities: string;
+  setResponsibilities: (v: string) => void;
+  requiredQuals: string;
+  setRequiredQuals: (v: string) => void;
+  desiredQuals: string;
+  setDesiredQuals: (v: string) => void;
+  educationLevel: string;
+  setEducationLevel: (v: string) => void;
+  educationDetails: string;
+  setEducationDetails: (v: string) => void;
+  workplaceType: string;
+  setWorkplaceType: (v: string) => void;
+  city: string;
+  setCity: (v: string) => void;
+  state: string;
+  setState: (v: string) => void;
+  country: string;
+  setCountry: (v: string) => void;
+  payType: string;
+  setPayType: (v: string) => void;
+  minPay: string;
+  setMinPay: (v: string) => void;
+  maxPay: string;
+  setMaxPay: (v: string) => void;
+  payFrequency: string;
+  setPayFrequency: (v: string) => void;
+  useCompanyBenefits: boolean;
+  setUseCompanyBenefits: (v: boolean) => void;
+  selectedBenefits: string[];
+  setSelectedBenefits: (v: string[]) => void;
+  compensationDetails: string;
+  setCompensationDetails: (v: string) => void;
+  showRecruiter: boolean;
+  setShowRecruiter: (v: boolean) => void;
+  closingDate: Date | undefined;
+  setClosingDate: (v: Date | undefined) => void;
+  externalLink: string;
+  setExternalLink: (v: string) => void;
+  requireResume: boolean;
+  setRequireResume: (v: boolean) => void;
+  requireCoverLetter: boolean;
+  setRequireCoverLetter: (v: boolean) => void;
+  requirePortfolio: boolean;
+  setRequirePortfolio: (v: boolean) => void;
+  templateSaved: boolean;
+  savingTemplate: boolean;
+  handleSaveTemplate: () => Promise<void>;
+}
+
+export interface ApplyFormState {
+  personalDetails: PersonalDetailsConfig;
+  setPersonalDetails: React.Dispatch<React.SetStateAction<PersonalDetailsConfig>>;
+  careerDetails: CareerDetailsConfig;
+  setCareerDetails: React.Dispatch<React.SetStateAction<CareerDetailsConfig>>;
+  questionsEnabled: boolean;
+  setQuestionsEnabled: (v: boolean) => void;
+  questions: FormQuestion[];
+  setQuestions: React.Dispatch<React.SetStateAction<FormQuestion[]>>;
+}
+
+export interface UseRoleFormReturn {
+  // Lifecycle
+  loading: boolean;
+  saving: boolean;
+  fetchError: string | null;
+  saveError: string | null;
+  setSaveError: (error: string | null) => void;
+
+  // Raw data
+  jobData: JobData | null;
+  setJobData: React.Dispatch<React.SetStateAction<JobData | null>>;
+  applications: ApplicationData[];
+  setApplications: React.Dispatch<React.SetStateAction<ApplicationData[]>>;
+  stageCounts: Record<string, number>;
+  totalApplications: number;
+
+  // Grouped state
+  jobPostState: JobPostState;
+  applyFormState: ApplyFormState;
+
+  // Actions
+  handleSaveRole: () => Promise<boolean>;
+  handleReviewRole: () => Promise<void>;
+  handleCandidateAdded: (app: ApplicationData) => void;
+}
+
+// ============================================
+// HOOK IMPLEMENTATION
+// ============================================
+
+export function useRoleForm(roleId: string): UseRoleFormReturn {
+  const router = useRouter();
+
+  // ---- Data Fetching State ----
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
+  const [fetchError, setFetchError] = React.useState<string | null>(null);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+
+  // ---- Raw API Data ----
+  const [jobData, setJobData] = React.useState<JobData | null>(null);
+  const [applications, setApplications] = React.useState<ApplicationData[]>([]);
+  const [stageCounts, setStageCounts] = React.useState<Record<string, number>>({});
+  const [totalApplications, setTotalApplications] = React.useState(0);
+
+  // ---- Job Post Form State ----
+  const [roleTitle, setRoleTitle] = React.useState("");
+  const [jobCategory, setJobCategory] = React.useState("");
+  const [positionType, setPositionType] = React.useState("");
+  const [experienceLevel, setExperienceLevel] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [responsibilities, setResponsibilities] = React.useState("");
+  const [requiredQuals, setRequiredQuals] = React.useState("");
+  const [desiredQuals, setDesiredQuals] = React.useState("");
+  const [educationLevel, setEducationLevel] = React.useState("");
+  const [educationDetails, setEducationDetails] = React.useState("");
+  const [workplaceType, setWorkplaceType] = React.useState("onsite");
+  const [city, setCity] = React.useState("");
+  const [state, setState] = React.useState("");
+  const [country, setCountry] = React.useState("");
+  const [payType, setPayType] = React.useState("salary");
+  const [minPay, setMinPay] = React.useState("");
+  const [maxPay, setMaxPay] = React.useState("");
+  const [payFrequency, setPayFrequency] = React.useState("weekly");
+  const [useCompanyBenefits, setUseCompanyBenefits] = React.useState(true);
+  const [selectedBenefits, setSelectedBenefits] = React.useState<string[]>([]);
+  const [compensationDetails, setCompensationDetails] = React.useState("");
+  const [showRecruiter, setShowRecruiter] = React.useState(false);
+  const [closingDate, setClosingDate] = React.useState<Date | undefined>();
+  const [externalLink, setExternalLink] = React.useState("");
+  const [requireResume, setRequireResume] = React.useState(true);
+  const [requireCoverLetter, setRequireCoverLetter] = React.useState(true);
+  const [requirePortfolio, setRequirePortfolio] = React.useState(false);
+  const [templateSaved, setTemplateSaved] = React.useState(false);
+  const [savingTemplate, setSavingTemplate] = React.useState(false);
+
+  // ---- Apply Form State ----
+  const [personalDetails, setPersonalDetails] = React.useState<PersonalDetailsConfig>({
+    name: { visible: true, required: true },
+    email: { visible: true, required: true },
+    dateOfBirth: { visible: true, required: false },
+    pronouns: { visible: true, required: false },
+    location: { visible: true, required: false },
+  });
+
+  const [careerDetails, setCareerDetails] = React.useState<CareerDetailsConfig>({
+    currentRole: { visible: true, required: false },
+    currentCompany: { visible: true, required: false },
+    yearsExperience: { visible: true, required: false },
+    linkedIn: { visible: true, required: false },
+    portfolio: { visible: true, required: false },
+  });
+
+  const [questionsEnabled, setQuestionsEnabled] = React.useState(true);
+  const [questions, setQuestions] = React.useState<FormQuestion[]>([
+    { id: "q1", type: "text", title: "Why are you interested in this role?", required: true },
+    {
+      id: "q2",
+      type: "yes-no",
+      title: "Do you have experience with renewable energy projects?",
+      required: false,
+    },
+    {
+      id: "q3",
+      type: "multiple-choice",
+      title: "What is your preferred work style?",
+      required: false,
+      options: ["Remote", "Hybrid", "On-site"],
+    },
+  ]);
+
+  // ---- Template Handler ----
+  const handleSaveTemplate = React.useCallback(async () => {
+    setSavingTemplate(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setTemplateSaved(true);
+    setSavingTemplate(false);
+  }, []);
+
+  // ---- Add Candidate — optimistic update ----
+  const handleCandidateAdded = React.useCallback((newApplication: ApplicationData) => {
+    setApplications((prev) => [...prev, newApplication]);
+    setTotalApplications((prev) => prev + 1);
+    setStageCounts((prev) => ({
+      ...prev,
+      [newApplication.stage]: (prev[newApplication.stage] || 0) + 1,
+    }));
+  }, []);
+
+  // ---- Fetch Role from API ----
+  const fetchRole = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setFetchError(null);
+
+      const res = await fetch(`/api/canopy/roles/${roleId}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          setFetchError("Role not found");
+        } else {
+          setFetchError("Failed to load role details");
+        }
+        return;
+      }
+
+      const data = await res.json();
+      const job = data.job as JobData;
+
+      // Store raw API data
+      setJobData(job);
+      setApplications(data.applications || []);
+      setStageCounts(data.stageCounts || {});
+      setTotalApplications(data.totalApplications || 0);
+
+      // Map DB values → form state
+      if (job.title) setRoleTitle(job.title);
+      if (job.climateCategory) setJobCategory(job.climateCategory);
+      if (job.employmentType) {
+        setPositionType(employmentTypeToForm[job.employmentType] || "");
+      }
+      if (job.description) setDescription(job.description);
+      if (job.location) {
+        const parts = job.location.split(", ");
+        if (parts[0]) setCity(parts[0]);
+        if (parts[1]) {
+          const stateMatch = usStates.find(
+            (s) =>
+              s.label.toLowerCase() === parts[1].toLowerCase() || s.value === parts[1].toLowerCase()
+          );
+          if (stateMatch) setState(stateMatch.value);
+        }
+        if (parts[2]) {
+          const countryMatch = countries.find(
+            (c) =>
+              c.label.toLowerCase() === parts[2].toLowerCase() || c.value === parts[2].toLowerCase()
+          );
+          if (countryMatch) setCountry(countryMatch.value);
+        }
+      }
+      if (job.locationType) {
+        setWorkplaceType(locationTypeToForm[job.locationType] || "onsite");
+      }
+      if (job.salaryMin) setMinPay(String(job.salaryMin));
+      if (job.salaryMax) setMaxPay(String(job.salaryMax));
+      if (job.closesAt) setClosingDate(new Date(job.closesAt));
+
+      // Initialize apply form config from DB
+      if (job.formConfig) {
+        const fc = job.formConfig;
+        if (fc.personalDetails) {
+          setPersonalDetails((prev) => ({
+            ...prev,
+            ...Object.fromEntries(
+              Object.entries(fc.personalDetails).map(([k, v]) => [
+                k,
+                { visible: v.visible, required: v.required },
+              ])
+            ),
+          }));
+        }
+        if (fc.careerDetails) {
+          setCareerDetails((prev) => ({
+            ...prev,
+            ...Object.fromEntries(
+              Object.entries(fc.careerDetails).map(([k, v]) => [
+                k,
+                { visible: v.visible, required: v.required },
+              ])
+            ),
+          }));
+        }
+      }
+      if (job.formQuestions && Array.isArray(job.formQuestions) && job.formQuestions.length > 0) {
+        setQuestions(job.formQuestions);
+      }
+    } catch (err) {
+      logger.error("Error fetching role detail", { error: formatError(err) });
+      setFetchError("Failed to load role details");
+    } finally {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roleId]);
+
+  React.useEffect(() => {
+    fetchRole();
+  }, [fetchRole]);
+
+  // ---- Save Handler — PATCH role to API ----
+  const handleSaveRole = React.useCallback(async (): Promise<boolean> => {
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      // Build location string from parts
+      const locationParts = [city, state, country].filter(Boolean);
+      const locationString = locationParts.length > 0 ? locationParts.join(", ") : null;
+
+      const payload: Record<string, unknown> = {
+        title: roleTitle || undefined,
+        description: description || undefined,
+        location: locationString,
+        locationType: formToLocationType[workplaceType] || "ONSITE",
+        employmentType: formToEmploymentType[positionType] || undefined,
+        climateCategory: jobCategory || null,
+        salaryMin: minPay ? Number(minPay) : null,
+        salaryMax: maxPay ? Number(maxPay) : null,
+        salaryCurrency: "USD",
+        closesAt: closingDate ? closingDate.toISOString() : null,
+        formConfig: {
+          personalDetails,
+          careerDetails,
+          requiredFiles: { resume: true, coverLetter: false, portfolio: false },
+        },
+        formQuestions: questionsEnabled ? questions : [],
+      };
+
+      // Remove undefined values
+      Object.keys(payload).forEach((key) => {
+        if (payload[key] === undefined) delete payload[key];
+      });
+
+      const res = await fetch(`/api/canopy/roles/${roleId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save role");
+      }
+
+      // Update local jobData to reflect changes
+      if (jobData) {
+        setJobData({
+          ...jobData,
+          title: roleTitle || jobData.title,
+          description: description || jobData.description,
+          location: locationString,
+          locationType: formToLocationType[workplaceType] || jobData.locationType,
+          employmentType: formToEmploymentType[positionType] || jobData.employmentType,
+          climateCategory: jobCategory || null,
+          salaryMin: minPay ? Number(minPay) : null,
+          salaryMax: maxPay ? Number(maxPay) : null,
+          closesAt: closingDate ? closingDate.toISOString() : null,
+        });
+      }
+
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save role";
+      logger.error("Error saving role", { error: formatError(err) });
+      setSaveError(message);
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    roleId,
+    roleTitle,
+    description,
+    city,
+    state,
+    country,
+    workplaceType,
+    positionType,
+    jobCategory,
+    minPay,
+    maxPay,
+    closingDate,
+    personalDetails,
+    careerDetails,
+    questionsEnabled,
+    questions,
+    jobData,
+  ]);
+
+  // ---- Review Role — Save draft then navigate ----
+  const handleReviewRole = React.useCallback(async () => {
+    const saved = await handleSaveRole();
+    if (saved) {
+      router.push(`/canopy/roles/${roleId}/review`);
+    }
+  }, [handleSaveRole, router, roleId]);
+
+  // ---- Build grouped state objects ----
+  const jobPostState: JobPostState = React.useMemo(
+    () => ({
+      roleTitle,
+      setRoleTitle,
+      jobCategory,
+      setJobCategory,
+      positionType,
+      setPositionType,
+      experienceLevel,
+      setExperienceLevel,
+      description,
+      setDescription,
+      responsibilities,
+      setResponsibilities,
+      requiredQuals,
+      setRequiredQuals,
+      desiredQuals,
+      setDesiredQuals,
+      educationLevel,
+      setEducationLevel,
+      educationDetails,
+      setEducationDetails,
+      workplaceType,
+      setWorkplaceType,
+      city,
+      setCity,
+      state,
+      setState,
+      country,
+      setCountry,
+      payType,
+      setPayType,
+      minPay,
+      setMinPay,
+      maxPay,
+      setMaxPay,
+      payFrequency,
+      setPayFrequency,
+      useCompanyBenefits,
+      setUseCompanyBenefits,
+      selectedBenefits,
+      setSelectedBenefits,
+      compensationDetails,
+      setCompensationDetails,
+      showRecruiter,
+      setShowRecruiter,
+      closingDate,
+      setClosingDate,
+      externalLink,
+      setExternalLink,
+      requireResume,
+      setRequireResume,
+      requireCoverLetter,
+      setRequireCoverLetter,
+      requirePortfolio,
+      setRequirePortfolio,
+      templateSaved,
+      savingTemplate,
+      handleSaveTemplate,
+    }),
+    // We intentionally include all values so downstream components re-render on changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      roleTitle,
+      jobCategory,
+      positionType,
+      experienceLevel,
+      description,
+      responsibilities,
+      requiredQuals,
+      desiredQuals,
+      educationLevel,
+      educationDetails,
+      workplaceType,
+      city,
+      state,
+      country,
+      payType,
+      minPay,
+      maxPay,
+      payFrequency,
+      useCompanyBenefits,
+      selectedBenefits,
+      compensationDetails,
+      showRecruiter,
+      closingDate,
+      externalLink,
+      requireResume,
+      requireCoverLetter,
+      requirePortfolio,
+      templateSaved,
+      savingTemplate,
+      handleSaveTemplate,
+    ]
+  );
+
+  const applyFormState: ApplyFormState = React.useMemo(
+    () => ({
+      personalDetails,
+      setPersonalDetails,
+      careerDetails,
+      setCareerDetails,
+      questionsEnabled,
+      setQuestionsEnabled,
+      questions,
+      setQuestions,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [personalDetails, careerDetails, questionsEnabled, questions]
+  );
+
+  return {
+    loading,
+    saving,
+    fetchError,
+    saveError,
+    setSaveError,
+    jobData,
+    setJobData,
+    applications,
+    setApplications,
+    stageCounts,
+    totalApplications,
+    jobPostState,
+    applyFormState,
+    handleSaveRole,
+    handleReviewRole,
+    handleCandidateAdded,
+  };
+}
