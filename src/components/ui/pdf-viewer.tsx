@@ -5,13 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { Input } from "./input";
 import { Skeleton } from "./skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./dropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./dropdown";
 import {
   MagnifyingGlassPlus,
   MagnifyingGlassMinus,
@@ -121,13 +115,12 @@ const PdfToolbar: React.FC<PdfToolbarProps> = ({
   const zoomPresets = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   return (
-    <div className="flex items-center justify-between px-3 py-2 border-b border-border-muted bg-background-subtle">
+    <div className="flex items-center justify-between border-b border-border-muted bg-background-subtle px-3 py-2">
       {/* Left: Title */}
-      <div className="flex items-center gap-2 min-w-0">
-        <FilePdf className="h-5 w-5 text-foreground-error flex-shrink-0" />
-        {title && (
-          <span className="text-sm font-medium truncate">{title}</span>
-        )}
+      <div className="flex min-w-0 items-center gap-2">
+        {/* PDF brand color — not an error indicator */}
+        <FilePdf className="h-5 w-5 flex-shrink-0 text-[var(--primitive-red-500)]" />
+        {title && <span className="truncate text-caption-strong">{title}</span>}
       </div>
 
       {/* Center: Navigation & Zoom */}
@@ -148,9 +141,9 @@ const PdfToolbar: React.FC<PdfToolbarProps> = ({
             <Input
               value={pageInput}
               onChange={(e) => setPageInput(e.target.value)}
-              className="w-12 h-8 text-center text-sm p-1"
+              className="h-8 w-12 p-1 text-center text-caption"
             />
-            <span className="text-sm text-foreground-muted">/ {totalPages}</span>
+            <span className="text-caption text-foreground-muted">/ {totalPages}</span>
           </form>
 
           <Button
@@ -165,7 +158,7 @@ const PdfToolbar: React.FC<PdfToolbarProps> = ({
         </div>
 
         {/* Divider */}
-        <div className="h-5 w-px bg-border-default" />
+        <div className="bg-border-default h-5 w-px" />
 
         {/* Zoom controls */}
         <div className="flex items-center gap-1">
@@ -179,10 +172,7 @@ const PdfToolbar: React.FC<PdfToolbarProps> = ({
             <MagnifyingGlassMinus className="h-4 w-4" />
           </Button>
 
-          <Select
-            value={String(zoom)}
-            onValueChange={(value) => onZoomChange(parseFloat(value))}
-          >
+          <Select value={String(zoom)} onValueChange={(value) => onZoomChange(parseFloat(value))}>
             <SelectTrigger className="h-8 w-[80px]">
               <SelectValue />
             </SelectTrigger>
@@ -221,11 +211,7 @@ const PdfToolbar: React.FC<PdfToolbarProps> = ({
         )}
         {onFullscreen && (
           <Button variant="ghost" size="sm" onClick={onFullscreen} className="h-8 w-8 p-0">
-            {isFullscreen ? (
-              <ArrowsIn className="h-4 w-4" />
-            ) : (
-              <ArrowsOut className="h-4 w-4" />
-            )}
+            {isFullscreen ? <ArrowsIn className="h-4 w-4" /> : <ArrowsOut className="h-4 w-4" />}
           </Button>
         )}
       </div>
@@ -330,7 +316,7 @@ const PdfViewer = React.forwardRef<HTMLDivElement, PdfViewerProps>(
       <div
         ref={containerRef}
         className={cn(
-          "flex flex-col rounded-lg border border-border-muted bg-surface-default overflow-hidden",
+          "flex flex-col overflow-hidden rounded-lg border border-border-muted bg-card-bg",
           isFullscreen && "fixed inset-0 z-50 rounded-none",
           className
         )}
@@ -353,37 +339,35 @@ const PdfViewer = React.forwardRef<HTMLDivElement, PdfViewerProps>(
         )}
 
         {/* Content */}
-        <div className="flex-1 relative overflow-auto bg-background-emphasized">
+        <div className="relative flex-1 overflow-auto bg-background-emphasized">
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background-default animate-fade-in">
+            <div className="bg-background-default absolute inset-0 flex animate-fade-in items-center justify-center">
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-background-brand-subtle flex items-center justify-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background-brand-subtle">
                     <FilePdf className="h-8 w-8 text-foreground-brand" />
                   </div>
                   <div className="absolute -inset-1 flex items-center justify-center">
-                    <CircleNotch className="h-[72px] w-[72px] text-foreground-brand/30 animate-spin" />
+                    <CircleNotch className="text-foreground-brand/30 h-[4.5rem] w-[4.5rem] animate-spin" />
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-foreground-default">Loading PDF</p>
-                  <p className="text-xs text-foreground-muted mt-0.5">Please wait...</p>
+                  <p className="text-foreground-default text-caption-strong">Loading PDF</p>
+                  <p className="mt-0.5 text-caption-sm text-foreground-muted">Please wait...</p>
                 </div>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background-default animate-fade-in">
-              <div className="flex flex-col items-center gap-4 text-center max-w-sm px-4">
-                <div className="w-16 h-16 rounded-full bg-background-error/20 flex items-center justify-center">
+            <div className="bg-background-default absolute inset-0 flex animate-fade-in items-center justify-center">
+              <div className="flex max-w-sm flex-col items-center gap-4 px-4 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background-error">
                   <Warning className="h-8 w-8 text-foreground-error" />
                 </div>
                 <div className="text-center">
-                  <p className="font-medium text-foreground-default">
-                    Unable to load PDF
-                  </p>
-                  <p className="text-sm text-foreground-muted mt-1">{error.message}</p>
+                  <p className="text-foreground-default text-caption-strong">Unable to load PDF</p>
+                  <p className="mt-1 text-caption text-foreground-muted">{error.message}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -394,7 +378,7 @@ const PdfViewer = React.forwardRef<HTMLDivElement, PdfViewerProps>(
                   }}
                   className="mt-2"
                 >
-                  <ArrowCounterClockwise className="h-4 w-4 mr-2" />
+                  <ArrowCounterClockwise className="mr-2 h-4 w-4" />
                   Try again
                 </Button>
               </div>
@@ -405,10 +389,7 @@ const PdfViewer = React.forwardRef<HTMLDivElement, PdfViewerProps>(
           <iframe
             src={`${pdfUrl}#page=${currentPage}&zoom=${zoom * 100}`}
             title={title || "PDF Viewer"}
-            className={cn(
-              "w-full h-full border-0",
-              (loading || error) && "invisible"
-            )}
+            className={cn("h-full w-full border-0", (loading || error) && "invisible")}
             onLoad={handleIframeLoad}
             onError={handleIframeError}
           />
@@ -423,17 +404,7 @@ PdfViewer.displayName = "PdfViewer";
    Resume Viewer (ATS-specific)
    ============================================ */
 const ResumeViewer = React.forwardRef<HTMLDivElement, ResumeViewerProps>(
-  (
-    {
-      src,
-      candidateName,
-      uploadedAt,
-      fileSize,
-      showParsingHighlights = false,
-      ...props
-    },
-    ref
-  ) => {
+  ({ src, candidateName, uploadedAt, fileSize, showParsingHighlights = false, ...props }, ref) => {
     const formatFileSize = (bytes: number): string => {
       if (bytes < 1024) return `${bytes} B`;
       if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -444,14 +415,15 @@ const ResumeViewer = React.forwardRef<HTMLDivElement, ResumeViewerProps>(
       <div ref={ref} className="space-y-3">
         {/* Resume metadata */}
         {(candidateName || uploadedAt || fileSize) && (
-          <div className="flex items-center justify-between px-3 py-2 bg-background-subtle rounded-lg">
+          <div className="flex items-center justify-between rounded-lg bg-background-subtle px-3 py-2">
             <div className="flex items-center gap-3">
-              <FilePdf className="h-8 w-8 text-foreground-error" />
+              {/* PDF brand color — not an error indicator */}
+              <FilePdf className="h-8 w-8 text-[var(--primitive-red-500)]" />
               <div>
-                <p className="text-sm font-medium">
+                <p className="text-caption-strong">
                   {candidateName ? `${candidateName}'s Resume` : "Resume"}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-foreground-muted">
+                <div className="flex items-center gap-2 text-caption-sm text-foreground-muted">
                   {uploadedAt && (
                     <span>
                       Uploaded{" "}
@@ -470,7 +442,7 @@ const ResumeViewer = React.forwardRef<HTMLDivElement, ResumeViewerProps>(
 
             {showParsingHighlights && (
               <Button variant="outline" size="sm">
-                <MagnifyingGlass className="h-4 w-4 mr-1" />
+                <MagnifyingGlass className="mr-1 h-4 w-4" />
                 Show parsed data
               </Button>
             )}
@@ -524,21 +496,22 @@ const DocumentPreviewCard: React.FC<DocumentPreviewCardProps> = ({
   return (
     <div
       className={cn(
-        "group flex items-center gap-3 p-3 rounded-lg border border-border-muted",
-        "bg-surface-default hover:bg-card-background-hover hover:shadow-sm hover:border-border-default",
+        "group flex items-center gap-3 rounded-lg border border-border-muted p-3",
+        "hover:border-border-default bg-card-bg hover:bg-card-bg-hover hover:shadow-[var(--shadow-card-hover)]",
         "transition-all duration-fast",
         className
       )}
     >
       {/* Icon */}
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-background-error/10 flex items-center justify-center transition-transform duration-fast group-hover:scale-105">
-        <FilePdf className="h-5 w-5 text-foreground-error" />
+      {/* PDF brand color — not an error indicator */}
+      <div className="bg-[var(--primitive-red-100)]/15 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg transition-transform duration-fast group-hover:scale-105">
+        <FilePdf className="h-5 w-5 text-[var(--primitive-red-500)]" />
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{title}</p>
-        <div className="flex items-center gap-2 text-xs text-foreground-muted">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-caption-strong">{title}</p>
+        <div className="flex items-center gap-2 text-caption-sm text-foreground-muted">
           {uploadedAt && (
             <span>
               {uploadedAt.toLocaleDateString("en-US", {
@@ -552,14 +525,24 @@ const DocumentPreviewCard: React.FC<DocumentPreviewCardProps> = ({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-fast">
+      <div className="flex items-center gap-1 opacity-0 transition-opacity duration-fast group-hover:opacity-100">
         {onView && (
-          <Button variant="ghost" size="sm" onClick={onView} className="h-8 w-8 p-0 transition-all duration-fast hover:scale-110 active:scale-95">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onView}
+            className="h-8 w-8 p-0 transition-all duration-fast hover:scale-110 active:scale-95"
+          >
             <ArrowsOut className="h-4 w-4" />
           </Button>
         )}
         {onDownload && (
-          <Button variant="ghost" size="sm" onClick={onDownload} className="h-8 w-8 p-0 transition-all duration-fast hover:scale-110 active:scale-95">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onDownload}
+            className="h-8 w-8 p-0 transition-all duration-fast hover:scale-110 active:scale-95"
+          >
             <DownloadSimple className="h-4 w-4" />
           </Button>
         )}
@@ -568,7 +551,7 @@ const DocumentPreviewCard: React.FC<DocumentPreviewCardProps> = ({
             variant="ghost"
             size="sm"
             onClick={onDelete}
-            className="h-8 w-8 p-0 text-foreground-error hover:bg-background-error/20 transition-all duration-fast hover:scale-110 active:scale-95"
+            className="h-8 w-8 p-0 text-foreground-error transition-all duration-fast hover:scale-110 hover:bg-background-error active:scale-95"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -581,9 +564,4 @@ const DocumentPreviewCard: React.FC<DocumentPreviewCardProps> = ({
 /* ============================================
    Exports
    ============================================ */
-export {
-  PdfViewer,
-  PdfToolbar,
-  ResumeViewer,
-  DocumentPreviewCard,
-};
+export { PdfViewer, PdfToolbar, ResumeViewer, DocumentPreviewCard };

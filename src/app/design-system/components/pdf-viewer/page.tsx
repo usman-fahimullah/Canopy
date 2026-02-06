@@ -214,7 +214,7 @@ export default function PdfViewerPage() {
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
             <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
-            <ul className="space-y-1 text-sm text-foreground-muted">
+            <ul className="space-y-1 text-caption text-foreground-muted">
               <li>Reviewing candidate resumes</li>
               <li>Viewing cover letters and portfolios</li>
               <li>Displaying offer letters and contracts</li>
@@ -223,7 +223,7 @@ export default function PdfViewerPage() {
           </div>
           <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
             <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
-            <ul className="space-y-1 text-sm text-foreground-muted">
+            <ul className="space-y-1 text-caption text-foreground-muted">
               <li>Image galleries (use Image component)</li>
               <li>Document editing (use rich text editor)</li>
               <li>Video content (use video player)</li>
@@ -274,7 +274,7 @@ export default function PdfViewerPage() {
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MagnifyingGlassMinus className="h-4 w-4" />
                 </Button>
-                <span className="px-2 text-sm">100%</span>
+                <span className="px-2 text-caption">100%</span>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MagnifyingGlassPlus className="h-4 w-4" />
                 </Button>
@@ -283,7 +283,7 @@ export default function PdfViewerPage() {
             </div>
             <div className="flex flex-col items-center gap-2 rounded-lg border border-border-muted p-4">
               <div className="flex items-center gap-2">
-                <span className="text-sm">1 / 5</span>
+                <span className="text-caption">1 / 5</span>
               </div>
               <span className="text-caption text-foreground-muted">Page Navigation</span>
             </div>
@@ -330,7 +330,7 @@ export default function PdfViewerPage() {
               </Button>
             ))}
           </div>
-          <p className="text-sm text-foreground-muted">
+          <p className="text-caption text-foreground-muted">
             Current zoom: <span className="font-medium">{Math.round(zoom * 100)}%</span>
           </p>
         </CodePreview>
@@ -471,7 +471,7 @@ export default function PdfViewerPage() {
       {/* Loading State */}
       <ComponentCard id="loading" title="Loading State" description="Shows spinner while PDF loads">
         <div className="space-y-4">
-          <p className="text-sm text-foreground-muted">
+          <p className="text-caption text-foreground-muted">
             The PDF viewer shows a loading spinner with the PDF icon while the document loads. This
             provides visual feedback during file download and rendering.
           </p>
@@ -482,8 +482,8 @@ export default function PdfViewerPage() {
               </div>
               <div className="border-foreground-brand/30 absolute -inset-1 animate-spin rounded-full border-2 border-t-foreground-brand" />
             </div>
-            <p className="mt-4 text-sm font-medium text-foreground">Loading PDF</p>
-            <p className="text-xs text-foreground-muted">Please wait...</p>
+            <p className="mt-4 text-caption-strong text-foreground">Loading PDF</p>
+            <p className="text-caption-sm text-foreground-muted">Please wait...</p>
           </div>
         </div>
       </ComponentCard>
@@ -504,11 +504,13 @@ export default function PdfViewerPage() {
 />`}
         >
           <div className="flex flex-col items-center justify-center rounded-lg border border-border-muted bg-background-subtle p-8">
-            <div className="bg-background-error/20 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-background-error">
               <FilePdf className="h-8 w-8 text-foreground-error" />
             </div>
-            <p className="font-medium text-foreground">Unable to load PDF</p>
-            <p className="mb-4 mt-1 text-sm text-foreground-muted">The file could not be loaded</p>
+            <p className="text-caption-strong text-foreground">Unable to load PDF</p>
+            <p className="mb-4 mt-1 text-caption text-foreground-muted">
+              The file could not be loaded
+            </p>
             <Button variant="outline" size="sm">
               Try again
             </Button>
