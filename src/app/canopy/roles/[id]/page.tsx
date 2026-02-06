@@ -445,6 +445,25 @@ export default function RoleEditPage() {
   const [yesNoQuestionModalOpen, setYesNoQuestionModalOpen] = React.useState(false);
   const [multipleChoiceModalOpen, setMultipleChoiceModalOpen] = React.useState(false);
   const [fileUploadModalOpen, setFileUploadModalOpen] = React.useState(false);
+  const [addCandidateModalOpen, setAddCandidateModalOpen] = React.useState(false);
+
+  // Add Candidate form state
+  const defaultCandidateForm = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    city: "",
+    country: "",
+    pronouns: "",
+    linkedinUrl: "",
+    websiteUrl: "",
+    headline: "",
+    source: "",
+  };
+  const [candidateForm, setCandidateForm] = React.useState(defaultCandidateForm);
+  const [candidateFormErrors, setCandidateFormErrors] = React.useState<Record<string, string>>({});
+  const [isAddingCandidate, setIsAddingCandidate] = React.useState(false);
 
   // Temporary state for modal edits
   const [tempPersonalDetails, setTempPersonalDetails] = React.useState(personalDetails);
@@ -766,6 +785,94 @@ export default function RoleEditPage() {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setTemplateSaved(true);
     setSavingTemplate(false);
+  };
+
+  // ============================================
+  // ADD CANDIDATE MODAL HANDLERS
+  // ============================================
+
+  const handleOpenAddCandidateModal = () => {
+    setCandidateForm(defaultCandidateForm);
+    setCandidateFormErrors({});
+    setAddCandidateModalOpen(true);
+  };
+
+  const updateCandidateField = (field: keyof typeof defaultCandidateForm, value: string) => {
+    setCandidateForm((prev) => ({ ...prev, [field]: value }));
+    if (candidateFormErrors[field]) {
+      setCandidateFormErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+  };
+
+  const validateCandidateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!candidateForm.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidateForm.email)) {
+      errors.email = "Invalid email format";
+    }
+
+    if (!candidateForm.firstName.trim() && !candidateForm.lastName.trim()) {
+      errors.firstName = "Name is required";
+    }
+
+    setCandidateFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSaveCandidate = async () => {
+    if (!validateCandidateForm()) return;
+
+    setIsAddingCandidate(true);
+    try {
+      const res = await fetch(`/api/canopy/roles/${roleId}/applications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(candidateForm),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 409) {
+          setCandidateFormErrors({ email: "This candidate has already been added to this role" });
+          return;
+        }
+        if (res.status === 422 && errorData.details?.fieldErrors?.email) {
+          setCandidateFormErrors({ email: errorData.details.fieldErrors.email[0] });
+          return;
+        }
+        logger.error("Failed to add candidate", { status: res.status, error: errorData.error });
+        setCandidateFormErrors({ email: errorData.error || "Failed to add candidate" });
+        return;
+      }
+
+      // Close modal
+      setAddCandidateModalOpen(false);
+
+      // Refresh applications data
+      const refreshRes = await fetch(`/api/canopy/roles/${roleId}`);
+      if (refreshRes.ok) {
+        const data = await refreshRes.json();
+        setApplications(data.applications || []);
+        setStageCounts(data.stageCounts || {});
+        setTotalApplications(data.totalApplications || 0);
+      }
+    } catch (err) {
+      logger.error("Error adding candidate", { error: formatError(err) });
+      setCandidateFormErrors({ email: "Something went wrong. Please try again." });
+    } finally {
+      setIsAddingCandidate(false);
+    }
+  };
+
+  const handleDiscardCandidate = () => {
+    setAddCandidateModalOpen(false);
+    setCandidateFormErrors({});
   };
 
   // ============================================
@@ -2330,6 +2437,250 @@ export default function RoleEditPage() {
         </Modal>
 
         {/* ============================================
+              ADD CANDIDATE MODAL
+              ============================================ */}
+        <Modal open={addCandidateModalOpen} onOpenChange={setAddCandidateModalOpen}>
+          <ModalContent size="lg">
+            <ModalHeader
+              icon={<User weight="regular" className="h-6 w-6 text-[var(--primitive-green-700)]" />}
+              iconBg="bg-[var(--primitive-green-100)]"
+            >
+              <ModalTitle>Add Candidate</ModalTitle>
+            </ModalHeader>
+
+            <ModalBody>
+              <div className="flex flex-col gap-6">
+                {/* Section 1: Profile Information */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-body-strong text-foreground">Profile Information</h3>
+
+                  {/* Avatar preview */}
+                  <div className="flex items-center gap-4">
+                    <Avatar
+                      name={
+                        `${candidateForm.firstName} ${candidateForm.lastName}`.trim() || undefined
+                      }
+                      email={candidateForm.email || undefined}
+                      size="xl"
+                      color="green"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-body font-medium text-foreground">
+                        {candidateForm.firstName || candidateForm.lastName
+                          ? `${candidateForm.firstName} ${candidateForm.lastName}`.trim()
+                          : "New Candidate"}
+                      </span>
+                      {candidateForm.email && (
+                        <span className="text-caption text-foreground-muted">
+                          {candidateForm.email}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* First Name + Last Name */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="candidate-firstName">First Name*</Label>
+                      <Input
+                        id="candidate-firstName"
+                        value={candidateForm.firstName}
+                        onChange={(e) => updateCandidateField("firstName", e.target.value)}
+                        placeholder="Jane"
+                        error={!!candidateFormErrors.firstName}
+                      />
+                      {candidateFormErrors.firstName && (
+                        <span className="text-caption text-[var(--foreground-error)]">
+                          {candidateFormErrors.firstName}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="candidate-lastName">Last Name</Label>
+                      <Input
+                        id="candidate-lastName"
+                        value={candidateForm.lastName}
+                        onChange={(e) => updateCandidateField("lastName", e.target.value)}
+                        placeholder="Doe"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="candidate-email">Email*</Label>
+                    <Input
+                      id="candidate-email"
+                      type="email"
+                      value={candidateForm.email}
+                      onChange={(e) => updateCandidateField("email", e.target.value)}
+                      placeholder="jane@example.com"
+                      error={!!candidateFormErrors.email}
+                    />
+                    {candidateFormErrors.email && (
+                      <span className="text-caption text-[var(--foreground-error)]">
+                        {candidateFormErrors.email}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Phone */}
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="candidate-phone">Phone Number</Label>
+                    <Input
+                      id="candidate-phone"
+                      type="tel"
+                      value={candidateForm.phone}
+                      onChange={(e) => updateCandidateField("phone", e.target.value)}
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
+
+                  {/* City + Country */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="candidate-city">City</Label>
+                      <Input
+                        id="candidate-city"
+                        value={candidateForm.city}
+                        onChange={(e) => updateCandidateField("city", e.target.value)}
+                        placeholder="San Francisco"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="candidate-country">Country</Label>
+                      <Input
+                        id="candidate-country"
+                        value={candidateForm.country}
+                        onChange={(e) => updateCandidateField("country", e.target.value)}
+                        placeholder="United States"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Pronouns */}
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="candidate-pronouns">Pronouns</Label>
+                    <Select
+                      value={candidateForm.pronouns}
+                      onValueChange={(value) => updateCandidateField("pronouns", value)}
+                    >
+                      <SelectTrigger id="candidate-pronouns">
+                        <SelectValue placeholder="Select pronouns" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="he/him">He/Him</SelectItem>
+                        <SelectItem value="she/her">She/Her</SelectItem>
+                        <SelectItem value="they/them">They/Them</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-[var(--primitive-neutral-300)]" />
+
+                {/* Section 2: Contact & Links */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-body-strong text-foreground">Contact & Links</h3>
+
+                  {/* LinkedIn */}
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="candidate-linkedin">LinkedIn</Label>
+                    <Input
+                      id="candidate-linkedin"
+                      type="url"
+                      value={candidateForm.linkedinUrl}
+                      onChange={(e) => updateCandidateField("linkedinUrl", e.target.value)}
+                      placeholder="linkedin.com/in/janedoe"
+                      leftAddon={<LinkIcon weight="regular" />}
+                    />
+                  </div>
+
+                  {/* Website / Portfolio */}
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="candidate-website">Website / Portfolio</Label>
+                    <Input
+                      id="candidate-website"
+                      type="url"
+                      value={candidateForm.websiteUrl}
+                      onChange={(e) => updateCandidateField("websiteUrl", e.target.value)}
+                      placeholder="https://janedoe.com"
+                      leftAddon={<LinkIcon weight="regular" />}
+                    />
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-[var(--primitive-neutral-300)]" />
+
+                {/* Section 3: Professional */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-body-strong text-foreground">Professional</h3>
+
+                  {/* Headline */}
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="candidate-headline">Headline</Label>
+                    <Input
+                      id="candidate-headline"
+                      value={candidateForm.headline}
+                      onChange={(e) => updateCandidateField("headline", e.target.value)}
+                      placeholder="e.g., Solar Engineer with 5 years in renewable energy"
+                    />
+                  </div>
+
+                  {/* Source */}
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="candidate-source">Source</Label>
+                    <Select
+                      value={candidateForm.source}
+                      onValueChange={(value) => updateCandidateField("source", value)}
+                    >
+                      <SelectTrigger id="candidate-source">
+                        <SelectValue placeholder="How did this candidate come in?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="green-jobs-board">Green Jobs Board</SelectItem>
+                        <SelectItem value="linkedin">LinkedIn</SelectItem>
+                        <SelectItem value="referral">Referral</SelectItem>
+                        <SelectItem value="career-fair">Career Fair</SelectItem>
+                        <SelectItem value="company-website">Company Website</SelectItem>
+                        <SelectItem value="direct-outreach">Direct Outreach</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <Button
+                type="button"
+                variant="tertiary"
+                size="lg"
+                onClick={handleDiscardCandidate}
+                disabled={isAddingCandidate}
+              >
+                Discard
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                onClick={handleSaveCandidate}
+                loading={isAddingCandidate}
+                disabled={isAddingCandidate}
+              >
+                Add Candidate
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* ============================================
               CANDIDATES TAB — Kanban Pipeline View
               Figma: toolbar + column headers + cards or empty state
               ============================================ */}
@@ -2348,7 +2699,7 @@ export default function RoleEditPage() {
                   <Funnel weight="bold" className="mr-2 h-4 w-4" />
                   Filter
                 </Button>
-                <Button variant="tertiary" size="default">
+                <Button variant="tertiary" size="default" onClick={handleOpenAddCandidateModal}>
                   <Plus weight="bold" className="mr-2 h-4 w-4" />
                   Add Candidates
                 </Button>
@@ -2429,7 +2780,7 @@ export default function RoleEditPage() {
                             This is where candidates will be once they apply for the role! Sit back,
                             and relax while you wait.
                           </p>
-                          <Button variant="primary" size="lg">
+                          <Button variant="primary" size="lg" onClick={handleOpenAddCandidateModal}>
                             <Plus weight="bold" className="mr-2 h-6 w-6" />
                             Add Candidates
                           </Button>
