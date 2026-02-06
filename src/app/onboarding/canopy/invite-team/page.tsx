@@ -16,7 +16,7 @@ import {
   DropdownItem,
 } from "@/components/ui";
 import { Plus, Trash } from "@phosphor-icons/react";
-import { InlineMessage } from "@/components/ui/inline-message";
+import { Alert } from "@/components/ui/alert";
 import { EMPLOYER_STEPS } from "@/lib/onboarding/types";
 
 const roleOptions = [
@@ -95,7 +95,14 @@ export default function EmployerInviteTeamPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "We couldn\u2019t complete your setup. Please try again.");
+        let message = data.error || "We couldn\u2019t complete your setup. Please try again.";
+        if (data.details && Array.isArray(data.details)) {
+          const fieldErrors = data.details
+            .map((d: { path: string; message: string }) => `${d.path}: ${d.message}`)
+            .join(", ");
+          message += ` (${fieldErrors})`;
+        }
+        setError(message);
         return;
       }
 
@@ -236,7 +243,15 @@ export default function EmployerInviteTeamPage() {
           </div>
         )}
 
-        {error && <InlineMessage variant="critical">{error}</InlineMessage>}
+        {error && (
+          <Alert
+            variant="critical"
+            title="Setup couldn't be completed"
+            onDismiss={() => setError(null)}
+          >
+            {error}
+          </Alert>
+        )}
       </div>
     </OnboardingShell>
   );
