@@ -1,19 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalTitle,
-  ModalBody,
-  ModalFooter,
-} from "@/components/ui/modal";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CategoryTag } from "@/components/ui/category-tag";
-import { SwitchWithLabel } from "@/components/ui/switch";
+import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Stack, ArrowLeft } from "@phosphor-icons/react";
@@ -114,6 +107,38 @@ function formatDate(dateString: string | null) {
   });
 }
 
+/** Extract a human-readable preview value for a field from the job detail */
+function getFieldValue(job: JobDetail, fieldKey: string): string | null {
+  switch (fieldKey) {
+    case "title":
+      return job.title || null;
+    case "climateCategory":
+      return job.pathway?.name || job.climateCategory || null;
+    case "employmentType":
+      return job.employmentType
+        ? job.employmentType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+        : null;
+    case "experienceLevel":
+      return job.experienceLevel
+        ? job.experienceLevel.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+        : null;
+    case "description":
+      return job.description || null;
+    case "responsibilities":
+      return job.description || null; // MVP: same source
+    case "qualifications": {
+      const parts = [...job.requiredCerts, ...job.greenSkills];
+      return parts.length > 0 ? parts.join(", ") : null;
+    }
+    case "educationLevel":
+      return job.requiredCerts.length > 0 ? job.requiredCerts.join(", ") : null;
+    case "specialEducation":
+      return job.requiredCerts.length > 0 ? job.requiredCerts.join(", ") : null;
+    default:
+      return null;
+  }
+}
+
 /* -------------------------------------------------------------------
    Step 1: Select a Role
    ------------------------------------------------------------------- */
@@ -128,21 +153,21 @@ function StepSelectRole({
   loadingJobId: string | null;
 }) {
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full flex-1 flex-col gap-6 px-8 py-4">
       <div className="flex flex-col gap-2">
         <h2 className="text-heading-sm text-[var(--foreground-default)]">
           Select a role to convert to a Job Template
         </h2>
-        <p className="text-body text-[var(--foreground-muted)]">
-          Choose an existing role to use as the foundation for your template. We&apos;ll help you
-          pick which information to keep.
+        <p className="text-body text-[var(--foreground-default)]">
+          Job Templates let you reuse role requirements, responsibilities, and qualifications—saving
+          time when creating new job postings.
         </p>
       </div>
 
-      <ScrollArea className="max-h-[400px]">
+      <ScrollArea className="flex-1">
         <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)]">
           {jobs.length === 0 ? (
-            <div className="px-6 py-8 text-center text-body text-[var(--foreground-muted)]">
+            <div className="p-6 text-center text-body text-[var(--foreground-muted)]">
               No roles available. Create a role first to use as a template.
             </div>
           ) : (
@@ -150,28 +175,36 @@ function StepSelectRole({
               <div
                 key={job.id}
                 className={cn(
-                  "flex items-center justify-between gap-4 px-6 py-4",
+                  "flex items-center justify-between p-6",
                   index < jobs.length - 1 && "border-b border-[var(--border-muted)]"
                 )}
               >
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  {(job.pathway?.name || job.climateCategory) && (
-                    <CategoryTag variant="truncate" maxWidth={120}>
-                      {job.pathway?.name || job.climateCategory}
-                    </CategoryTag>
+                {/* Left side: stacked tags row above title */}
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  {/* Tags row */}
+                  {(job.pathway?.name || job.climateCategory || job.closesAt) && (
+                    <div className="flex items-start gap-3">
+                      {(job.pathway?.name || job.climateCategory) && (
+                        <CategoryTag variant="truncate" maxWidth={120}>
+                          {job.pathway?.name || job.climateCategory}
+                        </CategoryTag>
+                      )}
+                      {job.closesAt && (
+                        <Badge variant="info" size="sm">
+                          {formatDate(job.closesAt)}
+                        </Badge>
+                      )}
+                    </div>
                   )}
-                  {job.closesAt && (
-                    <Badge variant="info" size="sm">
-                      {formatDate(job.closesAt)}
-                    </Badge>
-                  )}
-                  <span className="truncate text-body text-[var(--foreground-default)]">
-                    {job.title}
-                  </span>
+                  {/* Job title */}
+                  <span className="text-body text-[var(--foreground-default)]">{job.title}</span>
                 </div>
+
+                {/* Select button */}
                 <Button
                   variant="secondary"
                   size="sm"
+                  className="shrink-0"
                   onClick={() => onSelect(job.id)}
                   disabled={loadingJobId !== null}
                 >
@@ -195,70 +228,84 @@ function FieldToggleSection({
   fields,
   toggles,
   onToggle,
+  job,
 }: {
   title: string;
   fields: FieldConfig[];
   toggles: Record<string, boolean>;
   onToggle: (key: string, checked: boolean) => void;
+  job: JobDetail;
 }) {
   return (
     <div className="flex flex-col gap-3">
       <span className="text-body text-[var(--foreground-default)]">{title}</span>
-      <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)]">
-        {fields.map((field, index) => (
-          <div
-            key={field.key}
-            className={cn(
-              "flex items-center justify-between px-6 py-4",
-              index < fields.length - 1 && "border-b border-[var(--border-muted)]"
-            )}
-          >
-            <SwitchWithLabel
-              label={field.label}
-              labelPosition="left"
-              checked={toggles[field.key] ?? true}
-              onCheckedChange={(checked) => onToggle(field.key, checked as boolean)}
-            />
-          </div>
-        ))}
+      <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--background-subtle)]">
+        {fields.map((field, index) => {
+          const value = getFieldValue(job, field.key);
+          const switchId = `toggle-${field.key}`;
+          return (
+            <div
+              key={field.key}
+              className={cn(
+                "flex items-center gap-2 px-6 py-4",
+                index < fields.length - 1 && "border-b border-[var(--border-muted)]"
+              )}
+            >
+              {/* Label + value column */}
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <label
+                  htmlFor={switchId}
+                  className="cursor-pointer text-body text-[var(--foreground-brand-emphasis)]"
+                >
+                  {field.label}
+                </label>
+                {value && (
+                  <p className="truncate text-body text-[var(--foreground-default)]">{value}</p>
+                )}
+              </div>
+              {/* Switch */}
+              <Switch
+                id={switchId}
+                size="default"
+                checked={toggles[field.key] ?? true}
+                onCheckedChange={(checked) => onToggle(field.key, checked as boolean)}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
 function StepToggleFields({
-  jobTitle,
+  job,
   toggles,
   onToggle,
 }: {
-  jobTitle: string;
+  job: JobDetail;
   toggles: Record<string, boolean>;
   onToggle: (key: string, checked: boolean) => void;
 }) {
   return (
-    <div className="flex w-full flex-col gap-6">
-      <p className="text-heading-sm text-[var(--foreground-default)]">
-        Turn on/off which information you would like to keep from{" "}
-        <span className="text-[var(--foreground-link)]">{jobTitle}</span>
-      </p>
-
-      <ScrollArea className="max-h-[420px]">
-        <div className="flex flex-col gap-6">
-          <FieldToggleSection
-            title="Main Information"
-            fields={MAIN_INFO_FIELDS}
-            toggles={toggles}
-            onToggle={onToggle}
-          />
-          <FieldToggleSection
-            title="Role Information"
-            fields={ROLE_INFO_FIELDS}
-            toggles={toggles}
-            onToggle={onToggle}
-          />
-        </div>
-      </ScrollArea>
-    </div>
+    <ScrollArea className="flex-1">
+      <div className="flex flex-col gap-6 px-8 py-6">
+        <FieldToggleSection
+          title="Main Information"
+          fields={MAIN_INFO_FIELDS}
+          toggles={toggles}
+          onToggle={onToggle}
+          job={job}
+        />
+        <FieldToggleSection
+          title="Role Information"
+          fields={ROLE_INFO_FIELDS}
+          toggles={toggles}
+          onToggle={onToggle}
+          job={job}
+        />
+      </div>
+    </ScrollArea>
   );
 }
 
@@ -276,7 +323,7 @@ function StepNameTemplate({
   error: string | null;
 }) {
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full flex-col gap-6 px-8 py-4">
       <div className="flex flex-col gap-2">
         <h2 className="text-heading-sm text-[var(--foreground-default)]">Name your Job Template</h2>
         <p className="text-body text-[var(--foreground-muted)]">
@@ -440,7 +487,7 @@ export function CreateTemplateModal({
         }
       }}
     >
-      <ModalContent size="md">
+      <ModalContent size="md" className="max-h-[90vh]">
         {/* Header — shared across all steps */}
         <ModalHeader
           icon={<Stack size={24} weight="regular" />}
@@ -449,54 +496,62 @@ export function CreateTemplateModal({
           <ModalTitle>Create Job Template</ModalTitle>
         </ModalHeader>
 
+        {/* Step 2 sub-header: fixed between header and scrollable content */}
+        {state.step === 2 && state.selectedJob && (
+          <div className="border-b border-[var(--border-muted)] px-8 py-4">
+            <p className="text-heading-sm text-[var(--foreground-brand-emphasis)]">
+              Turn on/off which information you would like to keep from{" "}
+              <span className="text-[var(--foreground-link)]">{state.selectedJob.title}</span>
+            </p>
+          </div>
+        )}
+
         {/* Body — step-specific content */}
-        <ModalBody>
-          {state.step === 1 && (
-            <StepSelectRole
-              jobs={jobs}
-              onSelect={handleSelectRole}
-              loadingJobId={state.loadingJobId}
-            />
-          )}
+        {state.step === 1 && (
+          <StepSelectRole
+            jobs={jobs}
+            onSelect={handleSelectRole}
+            loadingJobId={state.loadingJobId}
+          />
+        )}
 
-          {state.step === 2 && state.selectedJob && (
-            <StepToggleFields
-              jobTitle={state.selectedJob.title}
-              toggles={state.fieldToggles}
-              onToggle={handleToggle}
-            />
-          )}
+        {state.step === 2 && state.selectedJob && (
+          <StepToggleFields
+            job={state.selectedJob}
+            toggles={state.fieldToggles}
+            onToggle={handleToggle}
+          />
+        )}
 
-          {state.step === 3 && (
-            <StepNameTemplate
-              name={state.templateName}
-              onNameChange={(name) => setState((prev) => ({ ...prev, templateName: name }))}
-              error={state.error}
-            />
-          )}
+        {state.step === 3 && (
+          <StepNameTemplate
+            name={state.templateName}
+            onNameChange={(name) => setState((prev) => ({ ...prev, templateName: name }))}
+            error={state.error}
+          />
+        )}
 
-          {/* Error display for steps 1 and 2 (step 3 shows error via StepNameTemplate) */}
-          {state.step < 3 && state.error && (
-            <p className="text-caption text-[var(--foreground-error)]">{state.error}</p>
-          )}
-        </ModalBody>
+        {/* Error display for steps 1 and 2 (step 3 shows error via StepNameTemplate) */}
+        {state.step < 3 && state.error && (
+          <p className="px-8 pb-4 text-caption text-[var(--foreground-error)]">{state.error}</p>
+        )}
 
         {/* Footer — steps 2 & 3 only */}
         {state.step > 1 && (
-          <ModalFooter className="justify-between">
+          <ModalFooter>
             <Button
               variant="ghost"
               size="icon"
-              className="bg-[var(--background-info)] hover:bg-[var(--background-interactive-hover)]"
+              className="rounded-[var(--radius-2xl)] bg-[var(--background-info)] p-3 hover:bg-[var(--background-interactive-hover)]"
               onClick={handleGoBack}
               aria-label="Go back"
             >
-              <ArrowLeft size={20} weight="bold" />
+              <ArrowLeft size={24} weight="bold" />
             </Button>
 
             {state.step === 2 && (
               <Button onClick={handleAdvanceToNaming} disabled={!hasActiveFields}>
-                Continue
+                Create Template
               </Button>
             )}
 
