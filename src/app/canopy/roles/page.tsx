@@ -26,6 +26,8 @@ import {
   FolderOpen,
   ArrowClockwise,
   WarningCircle,
+  Copy,
+  CirclesThreePlus,
 } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
 import {
@@ -98,7 +100,7 @@ function RolesEmptyState({
     <div className="flex min-h-[500px] flex-col items-center gap-8 px-8 py-12 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
       {/* Left: copy + CTA */}
       <div className="flex max-w-lg flex-col gap-6 lg:flex-1">
-        <h2 className="text-heading-md font-bold text-[var(--foreground-default)] lg:text-heading-lg">
+        <h2 className="text-heading-md text-[var(--foreground-default)] lg:text-heading-lg">
           Go ahead, kickstart your talent search
         </h2>
         <p className="text-body text-[var(--foreground-muted)]">
@@ -124,32 +126,30 @@ function RolesEmptyState({
 /** Template promo banner when no templates have been created yet */
 function TemplatePromoBanner() {
   return (
-    <div className="overflow-hidden rounded-xl bg-[var(--primitive-blue-100)]">
-      <div className="flex flex-col items-center gap-8 p-8 lg:flex-row lg:gap-12 lg:p-10">
-        {/* Left: copy + CTA */}
-        <div className="flex max-w-lg flex-col gap-4 lg:flex-1">
-          <h3 className="text-heading-sm font-bold text-[var(--foreground-default)] lg:text-heading-md">
-            Create role templates that spark your talent search
-          </h3>
-          <p className="text-body-sm text-[var(--foreground-muted)]">
+    <div className="flex h-[380px] overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--primitive-blue-100)]">
+      {/* Left: copy + CTA */}
+      <div className="flex flex-1 flex-col justify-between px-12 py-12">
+        <div className="flex flex-col gap-3 text-[var(--primitive-green-800)]">
+          <h3 className="text-heading-md">Create role templates that spark your talent search</h3>
+          <p className="text-body">
             Standardize your roles once, then spin up polished job posts in minutes. With Green Jobs
             Board&apos;s reusable templates, you&apos;ll move faster, stay consistent, and attract
             the right candidates from the very first post.
           </p>
-          <div>
-            <Link href="/canopy/roles/templates/new">
-              <Button variant="outline">
-                <ListPlus size={18} weight="bold" />
-                Create a template
-              </Button>
-            </Link>
-          </div>
         </div>
+        <div>
+          <Link href="/canopy/roles/templates/new">
+            <Button variant="inverse">
+              <CirclesThreePlus size={18} weight="fill" />
+              Create a template
+            </Button>
+          </Link>
+        </div>
+      </div>
 
-        {/* Right: illustration */}
-        <div className="flex-1 lg:max-w-[340px]">
-          <RolesTemplatePromoIllustration className="h-auto w-full" />
-        </div>
+      {/* Right: illustration */}
+      <div className="hidden flex-1 overflow-hidden lg:block">
+        <RolesTemplatePromoIllustration className="h-full w-full object-cover" />
       </div>
     </div>
   );
@@ -174,9 +174,7 @@ function RoleTemplateCard({ template }: { template: RoleTemplate }) {
         </div>
 
         {/* Template name */}
-        <h4 className="text-body-strong font-semibold text-[var(--foreground-default)]">
-          {template.name}
-        </h4>
+        <h4 className="text-body-strong text-[var(--foreground-default)]">{template.name}</h4>
       </div>
 
       {/* Actions */}
@@ -207,7 +205,7 @@ function CreateTemplateCard() {
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background-emphasized)]">
           <ListPlus size={20} weight="bold" className="text-[var(--foreground-muted)]" />
         </div>
-        <span className="text-body-sm font-medium text-[var(--foreground-muted)]">
+        <span className="text-caption-strong text-[var(--foreground-muted)]">
           Create Another Role Template
         </span>
       </Card>
@@ -219,7 +217,7 @@ function CreateTemplateCard() {
 function TemplatesSection({ templates }: { templates: RoleTemplate[] }) {
   return (
     <section className="space-y-4">
-      <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">Templates</h2>
+      <h2 className="text-heading-sm text-[var(--foreground-default)]">Templates</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {templates.map((template) => (
           <RoleTemplateCard key={template.id} template={template} />
@@ -235,9 +233,9 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
   const openJobs = jobs.filter((j) => j.status === "PUBLISHED" || j.status === "DRAFT");
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center gap-3">
-        <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">Open Roles</h2>
+    <section className="space-y-6">
+      <div className="flex items-center gap-2">
+        <h2 className="text-heading-sm text-[var(--foreground-default)]">Open Roles</h2>
         <Badge variant="neutral" size="sm">
           {openJobs.length}
         </Badge>
@@ -250,7 +248,7 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
             <TableHead colSpan={5}>
               <div className="flex items-center gap-2 py-1">
                 <FolderOpen size={20} weight="fill" className="text-[var(--foreground-muted)]" />
-                <span className="text-body-sm font-semibold text-[var(--foreground-default)]">
+                <span className="text-body-strong text-[var(--foreground-default)]">
                   Open Roles
                 </span>
               </div>
@@ -258,7 +256,7 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
           </TableRow>
           <TableRow>
             <TableHead sortable>Job Title</TableHead>
-            <TableHead sortable>Job Category</TableHead>
+            <TableHead sortable>Pathway</TableHead>
             <TableHead sortable>Department</TableHead>
             <TableHead sortable>Closing Date</TableHead>
             <TableHead sortable># of Applications</TableHead>
@@ -305,7 +303,7 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
                   </TableCell>
                   <TableCell>
                     {job.closesAt ? (
-                      <Badge variant="warning" size="sm">
+                      <Badge variant="info" size="sm">
                         {formatDate(job.closesAt)}
                       </Badge>
                     ) : (
@@ -337,9 +335,7 @@ function RolesErrorState({ onRetry }: { onRetry: () => void }) {
         <WarningCircle size={32} weight="fill" className="text-[var(--foreground-error)]" />
       </div>
       <div className="max-w-sm space-y-1.5">
-        <h3 className="text-body font-medium text-[var(--foreground-default)]">
-          Unable to load roles
-        </h3>
+        <h3 className="text-body-strong text-[var(--foreground-default)]">Unable to load roles</h3>
         <p className="text-caption text-[var(--foreground-muted)]">
           Something went wrong while fetching your roles. Please try again.
         </p>
@@ -422,7 +418,7 @@ export default function RolesPage() {
       <PageHeader
         title="Roles"
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Primary CTA always visible */}
             <Button onClick={handleCreateRole} disabled={creating}>
               {creating ? <Spinner size="sm" /> : <Plus size={18} weight="bold" />}
@@ -431,52 +427,70 @@ export default function RolesPage() {
 
             {/* Secondary actions only when content exists */}
             {hasJobs && (
-              <Link href="/canopy/roles/templates/new">
-                <Button variant="outline">
-                  <ListPlus size={18} weight="bold" />
-                  Create Template
+              <>
+                <Link href="/canopy/roles/templates/new">
+                  <Button variant="tertiary">
+                    <CirclesThreePlus size={18} weight="fill" />
+                    Create a template
+                  </Button>
+                </Link>
+                <Button variant="tertiary">
+                  <Copy size={18} weight="fill" />
+                  Make a copy
                 </Button>
-              </Link>
+              </>
             )}
           </div>
         }
       />
 
       {/* Content */}
-      <div className="px-8 py-6 lg:px-12">
+      <div>
         {/* Loading */}
         {loading && (
-          <div className="flex items-center justify-center py-24">
+          <div className="flex items-center justify-center px-12 py-24">
             <Spinner size="lg" />
           </div>
         )}
 
         {/* Error */}
-        {!loading && error && <RolesErrorState onRetry={fetchData} />}
+        {!loading && error && (
+          <div className="px-12 py-6">
+            <RolesErrorState onRetry={fetchData} />
+          </div>
+        )}
 
         {/* State 1: First-time UX — no jobs, no templates */}
         {!loading && !error && isEmpty && (
-          <RolesEmptyState onCreateRole={handleCreateRole} creating={creating} />
+          <div className="px-12 py-6">
+            <RolesEmptyState onCreateRole={handleCreateRole} creating={creating} />
+          </div>
         )}
 
         {/* State 2 & 3: Has content */}
         {!loading && !error && !isEmpty && (
-          <div className="space-y-10">
-            {/* Role Templates or Promo */}
-            {hasTemplates ? (
-              <TemplatesSection templates={templates} />
-            ) : (
-              <section className="space-y-4">
-                <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">
-                  Role Templates
-                </h2>
-                <TemplatePromoBanner />
-              </section>
-            )}
+          <>
+            {/* Role Templates section — white background */}
+            <div className="px-12 py-6">
+              {hasTemplates ? (
+                <TemplatesSection templates={templates} />
+              ) : (
+                <section className="space-y-3">
+                  <h2 className="text-heading-sm text-[var(--foreground-default)]">
+                    Role Templates
+                  </h2>
+                  <TemplatePromoBanner />
+                </section>
+              )}
+            </div>
 
-            {/* Open Roles Table */}
-            {hasJobs && <OpenRolesSection jobs={jobs} />}
-          </div>
+            {/* Open Roles section — subtle background per Figma */}
+            {hasJobs && (
+              <div className="bg-[var(--background-subtle)] px-12 py-6">
+                <OpenRolesSection jobs={jobs} />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
