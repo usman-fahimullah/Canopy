@@ -1,32 +1,39 @@
 "use client";
 
-import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/components/ui";
+import { useState } from "react";
+import { SegmentedController } from "@/components/ui";
 import { NotesEditor } from "./NotesEditor";
 import type { JobDetail } from "./types";
 
 interface SidebarTabsProps {
   job: JobDetail;
-  /** The sidebar cards to render under "Job Details" tab */
+  /** The sidebar sections to render under "Job Details" tab */
   children: React.ReactNode;
 }
 
+const TAB_OPTIONS = [
+  { value: "details", label: "Job Details" },
+  { value: "notes", label: "Your Notes" },
+];
+
 export function SidebarTabs({ job, children }: SidebarTabsProps) {
+  const [activeTab, setActiveTab] = useState("details");
+
   return (
-    <Tabs defaultValue="details">
-      <TabsListUnderline className="w-full">
-        <TabsTriggerUnderline value="details" className="flex-1">
-          Job Details
-        </TabsTriggerUnderline>
-        <TabsTriggerUnderline value="notes" className="flex-1">
-          Your Notes
-        </TabsTriggerUnderline>
-      </TabsListUnderline>
-      <TabsContent value="details" className="mt-6 space-y-6">
-        {children}
-      </TabsContent>
-      <TabsContent value="notes" className="mt-6">
+    <div className="space-y-6">
+      <SegmentedController
+        options={TAB_OPTIONS}
+        value={activeTab}
+        onValueChange={setActiveTab}
+        fullWidth
+        aria-label="Sidebar navigation"
+      />
+
+      {activeTab === "details" ? (
+        <div className="space-y-6">{children}</div>
+      ) : (
         <NotesEditor jobId={job.id} initialNotes={job.savedNotes} isSaved={job.isSaved} />
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   );
 }
