@@ -24,13 +24,7 @@ export type CoachOnboardingStep =
   | "preview";
 
 /** Steps in the employer onboarding */
-export type EmployerOnboardingStep =
-  | "company"
-  | "size-industry"
-  | "your-role"
-  | "hiring-goals"
-  | "first-role"
-  | "invite-team";
+export type EmployerOnboardingStep = "company" | "your-role" | "invite-team";
 
 /** Union of all possible onboarding steps */
 export type OnboardingStep = TalentOnboardingStep | CoachOnboardingStep | EmployerOnboardingStep;
@@ -131,38 +125,21 @@ export const EMPLOYER_STEPS: StepConfig[] = [
   {
     id: "company",
     path: "company",
-    title: "Your company",
-    subtitle: "Tell us about your organization",
-  },
-  {
-    id: "size-industry",
-    path: "size-industry",
-    title: "Size & industry",
-    subtitle: "Help talent find your company",
+    title: "Build your company workspace",
+    subtitle: "Fill in some details about your company workspace",
   },
   {
     id: "your-role",
     path: "your-role",
-    title: "Your role",
-    subtitle: "What are you hiring for?",
-  },
-  {
-    id: "hiring-goals",
-    path: "hiring-goals",
-    title: "Hiring goals",
-    subtitle: "What brings you to Canopy?",
-  },
-  {
-    id: "first-role",
-    path: "first-role",
-    title: "Post your first role",
-    subtitle: "Get in front of climate talent right away",
+    title: "What do you do at {companyName}",
+    subtitle: "Set up your profile for this workspace.",
   },
   {
     id: "invite-team",
     path: "invite-team",
-    title: "Invite your team",
-    subtitle: "Collaborate on hiring with your colleagues",
+    title: "Build Your Team",
+    subtitle:
+      "Work together to create roles, manage your candidate funnel, and hire new people to your company.",
   },
 ];
 

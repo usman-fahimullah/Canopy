@@ -65,8 +65,8 @@ describe("STEPS_BY_SHELL", () => {
   it("has 6 coach steps", () => {
     expect(STEPS_BY_SHELL.coach).toHaveLength(6);
   });
-  it("has 6 employer steps", () => {
-    expect(STEPS_BY_SHELL.employer).toHaveLength(6);
+  it("has 3 employer steps", () => {
+    expect(STEPS_BY_SHELL.employer).toHaveLength(3);
   });
 });
 

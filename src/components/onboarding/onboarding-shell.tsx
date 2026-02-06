@@ -29,6 +29,8 @@ interface OnboardingShellProps {
   totalSteps?: number;
   /** First name for subtitle interpolation (replaces {firstName} in subtitle template) */
   firstName?: string;
+  /** Company name for title interpolation (replaces {companyName} in title template) */
+  companyName?: string;
 }
 
 export function OnboardingShell({
@@ -40,6 +42,7 @@ export function OnboardingShell({
   currentStepIndex,
   totalSteps,
   firstName,
+  companyName,
 }: OnboardingShellProps) {
   const hasProgress = currentStepIndex !== undefined && totalSteps !== undefined && totalSteps > 0;
   const progressPercent = hasProgress ? ((currentStepIndex + 1) / totalSteps) * 100 : 0;
@@ -175,10 +178,14 @@ export function OnboardingShell({
             {step && (
               <div className="mb-6">
                 <h1 className="text-heading-md font-medium text-[var(--primitive-green-800)]">
-                  {step.title}
+                  {step.title
+                    .replace(/\{firstName\}/g, firstName || "there")
+                    .replace(/\{companyName\}/g, companyName || "your company")}
                 </h1>
                 <p className="mt-2 text-body leading-6 text-[var(--primitive-neutral-700)]">
-                  {step.subtitle.replace(/\{firstName\}/g, firstName || "there")}
+                  {step.subtitle
+                    .replace(/\{firstName\}/g, firstName || "there")
+                    .replace(/\{companyName\}/g, companyName || "your company")}
                 </p>
               </div>
             )}
@@ -190,7 +197,7 @@ export function OnboardingShell({
 
         {/* Right panel — fixed illustration area, hidden on mobile */}
         {rightPanel !== undefined && (
-          <div className="hidden w-[640px] shrink-0 items-center justify-center bg-[var(--primitive-neutral-100)] lg:flex">
+          <div className="hidden w-[560px] shrink-0 items-end justify-center overflow-hidden bg-[var(--background-default)] lg:flex">
             {rightPanel}
           </div>
         )}

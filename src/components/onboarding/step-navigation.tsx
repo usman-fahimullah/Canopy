@@ -28,7 +28,7 @@ export function StepNavigation({
   onBack,
   canContinue = true,
   loading = false,
-  continueLabel = "Next Step",
+  continueLabel = "Continue",
   onSkip,
   skipLabel = "Skip for now",
   className,
@@ -40,38 +40,39 @@ export function StepNavigation({
         className
       )}
     >
-      <div className="flex items-center justify-end gap-3">
-        {onBack && (
+      <div className="flex items-center justify-between">
+        {/* Left side: Back button */}
+        <div>
+          {onBack && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="icon"
+              onClick={onBack}
+              aria-label="Go back"
+            >
+              <ArrowLeft size={24} weight="bold" />
+            </Button>
+          )}
+        </div>
+
+        {/* Right side: Skip + Continue */}
+        <div className="flex items-center gap-3">
+          {onSkip && (
+            <Button type="button" variant="outline" onClick={onSkip} disabled={loading}>
+              {skipLabel}
+            </Button>
+          )}
+
           <Button
             type="button"
-            variant="secondary"
-            size="icon"
-            onClick={onBack}
-            aria-label="Go back"
+            onClick={onContinue}
+            disabled={!canContinue || loading}
+            loading={loading}
           >
-            <ArrowLeft size={24} weight="bold" />
+            {continueLabel}
           </Button>
-        )}
-
-        {onSkip && (
-          <Button
-            type="button"
-            variant="tertiary"
-            onClick={onSkip}
-            disabled={loading}
-          >
-            {skipLabel}
-          </Button>
-        )}
-
-        <Button
-          type="button"
-          onClick={onContinue}
-          disabled={!canContinue || loading}
-          loading={loading}
-        >
-          {continueLabel}
-        </Button>
+        </div>
       </div>
     </footer>
   );

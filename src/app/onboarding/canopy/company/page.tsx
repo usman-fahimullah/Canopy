@@ -2,26 +2,64 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
 import { useOnboardingForm } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { InlineMessage } from "@/components/ui/inline-message";
-import { FormCard, FormField, FormRow } from "@/components/ui/form-section";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownValue,
+  DropdownContent,
+  DropdownItem,
+} from "@/components/ui";
+import { Camera, GlobeSimple, MapPin } from "@phosphor-icons/react";
 import { EMPLOYER_STEPS } from "@/lib/onboarding/types";
+
+const MAX_DESCRIPTION_LENGTH = 250;
+
+const companySizeOptions = [
+  { value: "1-10", label: "1–10 employees" },
+  { value: "11-50", label: "11–50 employees" },
+  { value: "51-200", label: "51–200 employees" },
+  { value: "201-1000", label: "201–1,000 employees" },
+  { value: "1000+", label: "1,000+ employees" },
+];
+
+const pathwayOptions = [
+  { value: "renewable-energy", label: "Renewable Energy" },
+  { value: "clean-transportation", label: "Clean Transportation" },
+  { value: "sustainable-agriculture", label: "Sustainable Agriculture" },
+  { value: "circular-economy", label: "Circular Economy" },
+  { value: "climate-tech", label: "Climate Tech" },
+  { value: "environmental-consulting", label: "Environmental Consulting" },
+  { value: "green-building", label: "Green Building" },
+  { value: "water-management", label: "Water Management" },
+  { value: "biodiversity", label: "Biodiversity & Conservation" },
+  { value: "esg-finance", label: "ESG & Sustainable Finance" },
+];
 
 export default function EmployerCompanyPage() {
   const router = useRouter();
-  const { employerData, setEmployerData, baseProfile, setBaseProfile } = useOnboardingForm();
+  const { employerData, setEmployerData } = useOnboardingForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const step = EMPLOYER_STEPS[0]; // company
-  const canContinue =
-    baseProfile.firstName.trim().length > 0 &&
-    baseProfile.lastName.trim().length > 0 &&
-    employerData.companyName.trim().length > 0;
+  const canContinue = employerData.companyName.trim().length > 0;
+
+  const descriptionLength = employerData.companyDescription.length;
+
+  function handleDescriptionChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const value = e.target.value;
+    if (value.length <= MAX_DESCRIPTION_LENGTH) {
+      setEmployerData({ companyDescription: value });
+    }
+  }
 
   async function handleContinue() {
     if (!canContinue) return;
@@ -29,30 +67,7 @@ export default function EmployerCompanyPage() {
     setError(null);
 
     try {
-      const res = await fetch("/api/onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "complete-profile",
-          firstName: baseProfile.firstName,
-          lastName: baseProfile.lastName,
-          linkedinUrl: baseProfile.linkedinUrl || undefined,
-          bio: baseProfile.bio || undefined,
-        }),
-      });
-
-      if (res.status === 401) {
-        router.push("/auth/redirect");
-        return;
-      }
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "We couldn\u2019t save your company details. Please try again.");
-        return;
-      }
-
-      router.push("/onboarding/canopy/size-industry");
+      router.push("/onboarding/canopy/your-role");
     } catch {
       setError(
         "Could not connect to the server. Please check your internet connection and try again."
@@ -68,102 +83,135 @@ export default function EmployerCompanyPage() {
       step={step}
       currentStepIndex={0}
       totalSteps={EMPLOYER_STEPS.length}
-      footer={
-        <StepNavigation
-          onBack={() => router.push("/onboarding")}
-          onContinue={handleContinue}
-          canContinue={canContinue}
-          loading={loading}
+      rightPanel={
+        <Image
+          src="/illustrations/employer-onboarding-companyworkspace.png"
+          alt="Build your company workspace"
+          width={560}
+          height={560}
+          className="h-auto w-full object-contain"
+          priority
         />
+      }
+      footer={
+        <StepNavigation onContinue={handleContinue} canContinue={canContinue} loading={loading} />
       }
     >
       <div className="space-y-6">
-        {/* About you */}
-        <FormCard>
-          <FormRow>
-            <FormField label="First name" required>
+        {/* Company Name + Upload Logo */}
+        <div>
+          <label className="mb-3 block text-caption font-bold text-[var(--primitive-green-800)]">
+            Company Name
+          </label>
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
               <Input
-                placeholder="Jane"
-                value={baseProfile.firstName}
-                onChange={(e) => setBaseProfile({ firstName: e.target.value })}
-                autoComplete="given-name"
+                placeholder="Enter the name of your company"
+                value={employerData.companyName}
+                onChange={(e) => setEmployerData({ companyName: e.target.value })}
                 autoFocus
               />
-            </FormField>
-            <FormField label="Last name" required>
-              <Input
-                placeholder="Doe"
-                value={baseProfile.lastName}
-                onChange={(e) => setBaseProfile({ lastName: e.target.value })}
-                autoComplete="family-name"
-              />
-            </FormField>
-          </FormRow>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="shrink-0 gap-2"
+              leftIcon={<Camera size={18} weight="fill" />}
+            >
+              Upload company logo
+            </Button>
+          </div>
+        </div>
 
-          <FormField
-            label="LinkedIn URL"
-            helpText="Optional, but helps us personalize your experience"
-          >
-            <Input
-              placeholder="https://linkedin.com/in/your-profile"
-              value={baseProfile.linkedinUrl}
-              onChange={(e) => setBaseProfile({ linkedinUrl: e.target.value })}
-              autoComplete="url"
-            />
-          </FormField>
-
-          <FormField label="Bio" helpText="A short intro about yourself">
+        {/* Company Description with character counter */}
+        <div>
+          <label className="mb-3 block text-caption font-bold text-[var(--primitive-green-800)]">
+            Company description
+          </label>
+          <div className="relative">
             <Textarea
-              placeholder="Tell us a bit about your background and what you're passionate about..."
-              value={baseProfile.bio}
-              onChange={(e) => setBaseProfile({ bio: e.target.value })}
-              rows={3}
-            />
-          </FormField>
-        </FormCard>
-
-        {/* Company info */}
-        <FormCard>
-          <FormField label="Company name" required>
-            <Input
-              placeholder="e.g. Solaris Energy Co."
-              value={employerData.companyName}
-              onChange={(e) => setEmployerData({ companyName: e.target.value })}
-            />
-          </FormField>
-
-          <FormField
-            label="About your company"
-            helpText="A brief description of what your organization does"
-          >
-            <Textarea
-              placeholder="Tell candidates about your mission, impact, and what makes your company a great place to work..."
+              placeholder="Write a brief company description"
               value={employerData.companyDescription}
-              onChange={(e) => setEmployerData({ companyDescription: e.target.value })}
+              onChange={handleDescriptionChange}
               rows={4}
+              className="resize-none"
             />
-          </FormField>
-        </FormCard>
+            <span className="absolute bottom-3 right-4 text-caption-sm text-[var(--foreground-subtle)]">
+              {descriptionLength}/{MAX_DESCRIPTION_LENGTH}
+            </span>
+          </div>
+        </div>
 
-        <FormCard>
-          <FormRow>
-            <FormField label="Website">
-              <Input
-                placeholder="https://your-company.com"
-                value={employerData.companyWebsite}
-                onChange={(e) => setEmployerData({ companyWebsite: e.target.value })}
-                type="url"
-              />
-            </FormField>
-            <FormField label="Location">
-              <Input
-                placeholder="e.g. San Francisco, CA"
-                value={employerData.companyLocation}
-                onChange={(e) => setEmployerData({ companyLocation: e.target.value })}
-              />
-            </FormField>
-          </FormRow>
-        </FormCard>
+        {/* Company Website + Company Location */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="mb-3 block text-caption font-bold text-[var(--primitive-green-800)]">
+              Company website
+            </label>
+            <Input
+              placeholder="Company URL"
+              value={employerData.companyWebsite}
+              onChange={(e) => setEmployerData({ companyWebsite: e.target.value })}
+              type="url"
+              leftAddon={<GlobeSimple size={20} weight="regular" />}
+            />
+          </div>
+          <div>
+            <label className="mb-3 block text-caption font-bold text-[var(--primitive-green-800)]">
+              Company Location
+            </label>
+            <Input
+              placeholder="Enter your location"
+              value={employerData.companyLocation}
+              onChange={(e) => setEmployerData({ companyLocation: e.target.value })}
+              leftAddon={<MapPin size={20} weight="regular" />}
+            />
+          </div>
+        </div>
+
+        {/* Company Size */}
+        <div>
+          <label className="mb-3 block text-caption font-bold text-[var(--primitive-green-800)]">
+            Company Size
+          </label>
+          <Dropdown
+            value={employerData.companySize ?? undefined}
+            onValueChange={(val: string) => setEmployerData({ companySize: val })}
+          >
+            <DropdownTrigger className="w-full">
+              <DropdownValue placeholder="How big is your company" />
+            </DropdownTrigger>
+            <DropdownContent>
+              {companySizeOptions.map((opt) => (
+                <DropdownItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </DropdownItem>
+              ))}
+            </DropdownContent>
+          </Dropdown>
+        </div>
+
+        {/* Company Pathway */}
+        <div>
+          <label className="mb-3 block text-caption font-bold text-[var(--primitive-green-800)]">
+            Company Pathway
+          </label>
+          <Dropdown
+            value={employerData.industries[0] ?? undefined}
+            onValueChange={(val: string) => setEmployerData({ industries: [val] })}
+          >
+            <DropdownTrigger className="w-full">
+              <DropdownValue placeholder="Select a pathway" />
+            </DropdownTrigger>
+            <DropdownContent>
+              {pathwayOptions.map((opt) => (
+                <DropdownItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </DropdownItem>
+              ))}
+            </DropdownContent>
+          </Dropdown>
+        </div>
 
         {error && <InlineMessage variant="critical">{error}</InlineMessage>}
       </div>
