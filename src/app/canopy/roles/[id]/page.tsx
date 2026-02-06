@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -107,7 +107,13 @@ import {
 } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
 import { SearchInput } from "@/components/ui/search-input";
-import { KanbanEmpty } from "@/components/ui/kanban";
+import {
+  KanbanBoard,
+  KanbanColumn,
+  KanbanCard,
+  KanbanEmpty,
+  type KanbanStageType,
+} from "@/components/ui/kanban";
 import {
   CandidateCard,
   CandidateKanbanHeader,
@@ -256,6 +262,7 @@ function SortableQuestionItem({
 
 export default function RoleEditPage() {
   const params = useParams();
+  const router = useRouter();
   const roleId = params.id as string;
 
   // ============================================
@@ -886,7 +893,7 @@ export default function RoleEditPage() {
   // ============================================
   // SAVE HANDLER — PATCH role to API
   // ============================================
-  const handleSaveRole = async () => {
+  const handleSaveRole = async (): Promise<boolean> => {
     setSaving(true);
     setSaveError(null);
 
@@ -939,12 +946,25 @@ export default function RoleEditPage() {
           closesAt: closingDate ? closingDate.toISOString() : null,
         });
       }
+
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save role";
       logger.error("Error saving role", { error: formatError(err) });
       setSaveError(message);
+      return false;
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ============================================
+  // REVIEW ROLE — Save draft then navigate to preview
+  // ============================================
+  const handleReviewRole = async () => {
+    const saved = await handleSaveRole();
+    if (saved) {
+      router.push(`/canopy/roles/${roleId}/review`);
     }
   };
 
@@ -1058,7 +1078,7 @@ export default function RoleEditPage() {
           <div className="flex items-center gap-[6px]">
             <Button
               variant="primary"
-              onClick={handleSaveRole}
+              onClick={handleReviewRole}
               disabled={saving}
               className="rounded-[var(--radius-2xl)] px-4 py-[14px]"
             >
@@ -2357,7 +2377,7 @@ export default function RoleEditPage() {
         {activeTab === "candidates" && (
           <div className="flex flex-1 flex-col">
             {/* Toolbar — Search + Filter + Add + View Toggle */}
-            <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] px-6 py-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-muted)] bg-[var(--background-default)] px-6 py-4">
               <div className="flex items-center gap-3">
                 <SearchInput
                   placeholder="Search candidates"
@@ -2419,81 +2439,88 @@ export default function RoleEditPage() {
 
               const hasAnyApplications = applications.length > 0;
 
+              // Map stage IDs to KanbanStageType for semantic icons
+              const mapStageToKanbanType = (stageId: string): KanbanStageType => {
+                const mapping: Record<string, KanbanStageType> = {
+                  applied: "applied",
+                  qualified: "qualified",
+                  screening: "qualified",
+                  interview: "interview",
+                  offer: "offer",
+                  hired: "hired",
+                  rejected: "rejected",
+                };
+                return mapping[stageId] || "applied";
+              };
+
               return (
                 <>
-                  {/* Column headers — unified for both empty and populated states */}
-                  <div className="flex border-b border-[var(--primitive-neutral-300)]">
-                    {stages.map((stage, index) => (
-                      <div
-                        key={stage.id}
-                        className={`flex flex-1 items-center gap-2 px-4 py-3${
-                          index < stages.length - 1
-                            ? "border-r border-[var(--primitive-neutral-300)]"
-                            : ""
-                        }`}
-                      >
-                        <span className="text-body font-bold text-[var(--primitive-green-800)]">
-                          {stage.name}
-                        </span>
-                        <span className="min-w-[20px] rounded-[4px] bg-[var(--primitive-neutral-200)] px-1.5 py-0.5 text-center text-caption font-bold tabular-nums text-[var(--primitive-green-800)]">
-                          {(applicationsByStage[stage.id] || []).length}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
                   {!hasAnyApplications ? (
                     /* Empty state — Figma: reading-a-book illustration */
-                    <div className="flex flex-1 items-stretch bg-[var(--primitive-neutral-100)]">
-                      <div className="flex flex-1 items-center px-12 py-6">
-                        <div className="max-w-md space-y-6">
-                          <h2 className="text-heading-lg font-medium text-[var(--primitive-green-800)]">
-                            No candidates Yet.{"\n"}Let&apos;s attract some!
-                          </h2>
-                          <p className="text-body text-[var(--primitive-green-800)]">
-                            This is where candidates will be once they apply for the role! Sit back,
-                            and relax while you wait.
-                          </p>
-                          <Button
-                            variant="primary"
-                            size="lg"
-                            onClick={() => setAddCandidateModalOpen(true)}
+                    <>
+                      {/* Column headers for empty state */}
+                      <KanbanBoard className="flex-none rounded-none border-b border-[var(--border-muted)] pb-0">
+                        {stages.map((stage) => (
+                          <KanbanColumn
+                            key={stage.id}
+                            title={stage.name}
+                            count={(applicationsByStage[stage.id] || []).length}
+                            stage={mapStageToKanbanType(stage.id)}
+                            className="min-h-0 w-auto flex-1 [&>div:last-child]:hidden"
                           >
-                            <Plus weight="bold" className="mr-2 h-6 w-6" />
-                            Add Candidates
-                          </Button>
+                            <></>
+                          </KanbanColumn>
+                        ))}
+                      </KanbanBoard>
+                      <div className="flex flex-1 items-stretch bg-[var(--background-subtle)]">
+                        <div className="flex flex-1 items-center px-12 py-6">
+                          <div className="max-w-md space-y-6">
+                            <h2 className="text-heading-lg font-medium text-[var(--foreground-brand-emphasis)]">
+                              No candidates Yet.{"\n"}Let&apos;s attract some!
+                            </h2>
+                            <p className="text-body text-[var(--foreground-brand-emphasis)]">
+                              This is where candidates will be once they apply for the role! Sit
+                              back, and relax while you wait.
+                            </p>
+                            <Button
+                              variant="primary"
+                              size="lg"
+                              onClick={() => setAddCandidateModalOpen(true)}
+                            >
+                              <Plus weight="bold" className="mr-2 h-6 w-6" />
+                              Add Candidates
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="hidden flex-shrink-0 items-center justify-center lg:flex">
+                          <img
+                            src="/illustrations/reading-a-book.svg"
+                            alt="Reading a book illustration"
+                            className="h-full w-auto object-contain"
+                          />
                         </div>
                       </div>
-                      <div className="hidden flex-shrink-0 items-center justify-center lg:flex">
-                        <img
-                          src="/illustrations/reading-a-book.svg"
-                          alt="Reading a book illustration"
-                          className="h-full w-auto object-contain"
-                        />
-                      </div>
-                    </div>
+                    </>
                   ) : (
-                    /* Populated kanban view */
-                    <div className="flex flex-1 overflow-hidden">
-                      {stages.map((stage, index) => {
+                    /* Populated kanban view — using design system components */
+                    <KanbanBoard className="flex-1 rounded-none pb-0">
+                      {stages.map((stage) => {
                         const stageApps = applicationsByStage[stage.id] || [];
 
                         return (
-                          <div
+                          <KanbanColumn
                             key={stage.id}
-                            className={`flex flex-1 flex-col${
-                              index < stages.length - 1
-                                ? "border-r border-[var(--primitive-neutral-300)]"
-                                : ""
-                            }`}
+                            title={stage.name}
+                            count={stageApps.length}
+                            stage={mapStageToKanbanType(stage.id)}
+                            className="w-auto flex-1"
                           >
-                            {/* Cards area */}
-                            <div className="flex-1 space-y-2.5 overflow-y-auto bg-[var(--primitive-neutral-100)] p-3">
-                              {stageApps.length === 0 ? (
-                                <KanbanEmpty message="No candidates" />
-                              ) : (
-                                stageApps.map((app) => (
-                                  <CandidateCard key={app.id} variant="compact">
+                            {stageApps.length === 0 ? (
+                              <KanbanEmpty message="No candidates" />
+                            ) : (
+                              stageApps.map((app) => (
+                                <KanbanCard key={app.id}>
+                                  <CandidateCard variant="compact">
                                     <CandidateKanbanHeader
                                       name={app.seeker.account.name || "Unknown"}
                                       avatarUrl={app.seeker.account.avatar || undefined}
@@ -2512,13 +2539,13 @@ export default function RoleEditPage() {
                                       expanded
                                     />
                                   </CandidateCard>
-                                ))
-                              )}
-                            </div>
-                          </div>
+                                </KanbanCard>
+                              ))
+                            )}
+                          </KanbanColumn>
                         );
                       })}
-                    </div>
+                    </KanbanBoard>
                   )}
                 </>
               );
