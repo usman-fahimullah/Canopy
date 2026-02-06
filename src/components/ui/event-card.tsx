@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { User } from "@phosphor-icons/react";
 import { format, parseISO } from "date-fns";
 import type { SchedulerEvent, InterviewType } from "@/lib/scheduling";
-import { getInterviewIcon, defaultEventColors } from "./scheduler";
+import { getInterviewIcon, defaultEventColors } from "@/lib/scheduling";
 
 /* ============================================
    Event Card Component

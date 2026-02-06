@@ -298,7 +298,7 @@ export const componentsNav: NavItem[] = [
         href: "/design-system/components/activity-feed",
       },
       { id: "pdf-viewer", label: "PDF Viewer", href: "/design-system/components/pdf-viewer" },
-      { id: "scheduler", label: "Scheduler", href: "/design-system/components/scheduler" },
+      { id: "scheduler", label: "Recruiter Calendar", href: "/design-system/components/scheduler" },
       { id: "calendar", label: "Calendar", href: "/design-system/components/calendar" },
       {
         id: "interview-scheduling-modal",
@@ -1076,10 +1076,19 @@ export const searchIndex: SearchItem[] = [
   },
   {
     id: "scheduler",
-    title: "Scheduler",
+    title: "Recruiter Calendar",
     category: "ATS",
     href: "/design-system/components/scheduler",
-    keywords: ["calendar", "booking", "interview"],
+    keywords: [
+      "calendar",
+      "booking",
+      "interview",
+      "scheduler",
+      "recruiter",
+      "week",
+      "day",
+      "month",
+    ],
   },
   {
     id: "calendar",

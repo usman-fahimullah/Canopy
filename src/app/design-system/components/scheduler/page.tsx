@@ -2,18 +2,15 @@
 
 import React from "react";
 import {
-  Scheduler,
-  WeekView,
-  DayView,
-  MonthView,
+  RecruiterCalendarView,
   EventCard,
-  InterviewScheduler,
   UpcomingInterviews,
   TimeSlotPicker,
   TimezoneSelector,
   BookingLink,
-} from "@/components/ui/scheduler";
-import type { SchedulerEvent, InterviewType } from "@/components/ui/scheduler";
+} from "@/components/ui";
+import type { CalendarEvent, RecruiterCalendarViewProps } from "@/lib/scheduling";
+import type { SchedulerEvent, InterviewType } from "@/lib/scheduling";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,17 +24,18 @@ import { CodePreview } from "@/components/design-system/CodeBlock";
 import { PropsTable } from "@/components/design-system/PropsTable";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
 import { VideoCamera, Phone, MapPin, CalendarPlus } from "@phosphor-icons/react";
-import { addDays, addHours, setHours, setMinutes } from "date-fns";
+import { addDays, setHours, setMinutes } from "date-fns";
 
-// Sample events for demonstration
+// Sample events for RecruiterCalendarView demos
 const today = new Date();
-const sampleEvents: SchedulerEvent[] = [
+const sampleCalendarEvents: CalendarEvent[] = [
   {
     id: "1",
     title: "Interview - Sarah Chen",
     start: setMinutes(setHours(today, 10), 0),
     end: setMinutes(setHours(today, 11), 0),
-    type: "video",
+    type: "interview-video",
+    status: "confirmed",
     candidateId: "c1",
     candidateName: "Sarah Chen",
     jobTitle: "Senior Frontend Engineer",
@@ -49,17 +47,27 @@ const sampleEvents: SchedulerEvent[] = [
     title: "Phone Screen - Michael Park",
     start: setMinutes(setHours(today, 14), 0),
     end: setMinutes(setHours(today, 14), 30),
-    type: "phone",
+    type: "interview-phone",
+    status: "confirmed",
     candidateId: "c2",
     candidateName: "Michael Park",
     jobTitle: "Product Manager",
   },
   {
     id: "3",
+    title: "Team Standup",
+    start: setMinutes(setHours(today, 9), 0),
+    end: setMinutes(setHours(today, 9), 30),
+    type: "meeting",
+    status: "confirmed",
+  },
+  {
+    id: "4",
     title: "Onsite - Emily Davis",
     start: setMinutes(setHours(addDays(today, 1), 9), 0),
     end: setMinutes(setHours(addDays(today, 1), 12), 0),
-    type: "onsite",
+    type: "interview-onsite",
+    status: "confirmed",
     candidateId: "c3",
     candidateName: "Emily Davis",
     jobTitle: "Climate Data Scientist",
@@ -70,56 +78,87 @@ const sampleEvents: SchedulerEvent[] = [
     ],
   },
   {
-    id: "4",
-    title: "Technical Interview - David Kim",
-    start: setMinutes(setHours(addDays(today, 2), 11), 0),
-    end: setMinutes(setHours(addDays(today, 2), 12), 30),
-    type: "video",
-    candidateId: "c4",
-    candidateName: "David Kim",
-    jobTitle: "Backend Engineer",
-    meetingLink: "https://zoom.us/j/123456789",
+    id: "5",
+    title: "Focus Time",
+    start: setMinutes(setHours(addDays(today, 2), 13), 0),
+    end: setMinutes(setHours(addDays(today, 2), 15), 0),
+    type: "block",
+    status: "confirmed",
   },
   {
-    id: "5",
+    id: "6",
     title: "Final Round - Jennifer Lee",
     start: setMinutes(setHours(addDays(today, 3), 15), 0),
     end: setMinutes(setHours(addDays(today, 3), 16), 0),
-    type: "video",
+    type: "interview-video",
+    status: "tentative",
     candidateId: "c5",
     candidateName: "Jennifer Lee",
     jobTitle: "Sustainability Lead",
   },
 ];
 
-// Props documentation
-const schedulerProps = [
+// Sample events for EventCard/UpcomingInterviews (uses SchedulerEvent type)
+const sampleSchedulerEvents: SchedulerEvent[] = [
   {
-    name: "events",
-    type: "SchedulerEvent[]",
-    required: true,
-    description: "Array of events to display on the calendar",
+    id: "1",
+    title: "Interview - Sarah Chen",
+    start: setMinutes(setHours(addDays(today, 1), 10), 0),
+    end: setMinutes(setHours(addDays(today, 1), 11), 0),
+    type: "video",
+    candidateId: "c1",
+    candidateName: "Sarah Chen",
+    jobTitle: "Senior Frontend Engineer",
   },
   {
-    name: "view",
-    type: '"week" | "day" | "month"',
+    id: "2",
+    title: "Phone Screen - Michael Park",
+    start: setMinutes(setHours(addDays(today, 2), 14), 0),
+    end: setMinutes(setHours(addDays(today, 2), 14), 30),
+    type: "phone",
+    candidateId: "c2",
+    candidateName: "Michael Park",
+    jobTitle: "Product Manager",
+  },
+  {
+    id: "3",
+    title: "Onsite - Emily Davis",
+    start: setMinutes(setHours(addDays(today, 3), 9), 0),
+    end: setMinutes(setHours(addDays(today, 3), 12), 0),
+    type: "onsite",
+    candidateId: "c3",
+    candidateName: "Emily Davis",
+    jobTitle: "Climate Data Scientist",
+  },
+];
+
+// Props documentation
+const recruiterCalendarProps = [
+  {
+    name: "events",
+    type: "CalendarEvent[]",
+    description: "Array of calendar events to display",
+  },
+  {
+    name: "calendars",
+    type: "CalendarConfig[]",
+    description: "Array of calendar sources with visibility toggles",
+  },
+  {
+    name: "initialView",
+    type: '"day" | "week" | "month"',
     default: '"week"',
     description: "Initial calendar view mode",
   },
   {
-    name: "selectedDate",
+    name: "initialDate",
     type: "Date",
     default: "new Date()",
-    description: "Currently selected/focused date",
-  },
-  {
-    name: "onDateChange",
-    type: "(date: Date) => void",
-    description: "Callback when selected date changes",
+    description: "Initial focused date",
   },
   {
     name: "onEventClick",
-    type: "(event: SchedulerEvent) => void",
+    type: "(event: CalendarEvent) => void",
     description: "Callback when an event is clicked",
   },
   {
@@ -128,43 +167,14 @@ const schedulerProps = [
     description: "Callback when an empty slot is clicked",
   },
   {
-    name: "onEventCreate",
-    type: "(event: Partial<SchedulerEvent>) => void",
-    description: "Callback when creating a new event",
-  },
-  {
-    name: "onEventUpdate",
-    type: "(event: SchedulerEvent) => void",
-    description: "Callback when updating an existing event",
-  },
-  {
-    name: "startHour",
-    type: "number",
-    default: "8",
-    description: "Start hour of day (0-23)",
-  },
-  {
-    name: "endHour",
-    type: "number",
-    default: "18",
-    description: "End hour of day (0-23)",
-  },
-  {
-    name: "slotDuration",
-    type: "number",
-    default: "30",
-    description: "Slot duration in minutes",
+    name: "onCreateEvent",
+    type: "() => void",
+    description: "Callback when create event button is clicked",
   },
   {
     name: "timezone",
     type: "string",
     description: "Timezone for display (IANA format)",
-  },
-  {
-    name: "showTimezoneSelector",
-    type: "boolean",
-    default: "false",
-    description: "Show timezone selector",
   },
   {
     name: "className",
@@ -173,7 +183,7 @@ const schedulerProps = [
   },
 ];
 
-const eventProps = [
+const calendarEventProps = [
   {
     name: "id",
     type: "string",
@@ -200,28 +210,18 @@ const eventProps = [
   },
   {
     name: "type",
-    type: '"video" | "phone" | "onsite"',
-    description: "Interview type for icon and styling",
+    type: '"interview" | "meeting" | "block" | "interview-video" | "interview-phone" | "interview-onsite"',
+    description: "Event type for icon and color styling",
   },
   {
-    name: "candidateId",
-    type: "string",
-    description: "ID of the related candidate",
+    name: "status",
+    type: '"confirmed" | "tentative" | "cancelled"',
+    description: "Event confirmation status",
   },
   {
     name: "candidateName",
     type: "string",
     description: "Name of the related candidate",
-  },
-  {
-    name: "candidateAvatar",
-    type: "string",
-    description: "Avatar URL for the candidate",
-  },
-  {
-    name: "jobId",
-    type: "string",
-    description: "ID of the related job",
   },
   {
     name: "jobTitle",
@@ -230,7 +230,7 @@ const eventProps = [
   },
   {
     name: "interviewers",
-    type: "{ id: string; name: string; avatar?: string }[]",
+    type: "{ id: string; name: string; avatar?: string; role?: string }[]",
     description: "Array of interviewers",
   },
   {
@@ -244,14 +244,9 @@ const eventProps = [
     description: "Video meeting link",
   },
   {
-    name: "notes",
-    type: "string",
-    description: "Additional notes",
-  },
-  {
-    name: "color",
-    type: "string",
-    description: "Custom color override",
+    name: "isAllDay",
+    type: "boolean",
+    description: "Whether the event spans the entire day",
   },
 ];
 
@@ -386,7 +381,7 @@ const bookingLinkProps = [
   },
 ];
 
-// Interview types for display
+// Interview types for EventCard display
 const interviewTypes: { type: InterviewType; label: string; icon: React.ReactNode }[] = [
   { type: "video", label: "Video", icon: <VideoCamera className="h-4 w-4" /> },
   { type: "phone", label: "Phone", icon: <Phone className="h-4 w-4" /> },
@@ -404,12 +399,12 @@ export default function SchedulerPage() {
       {/* Overview */}
       <div>
         <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
-          Scheduler
+          Recruiter Calendar
         </h1>
         <p className="mb-4 max-w-2xl text-body text-foreground-muted">
-          Calendar and interview booking UI for scheduling interviews, viewing availability, and
-          managing appointments. Supports week, day, and month views with drag-and-drop capabilities
-          and timezone support.
+          Full-featured calendar for managing interviews, meetings, and availability. Includes
+          day/week/month views, sidebar with mini calendar and filters, keyboard shortcuts, and
+          companion components for self-service booking and interview lists.
         </p>
 
         {/* When to Use / When Not to Use */}
@@ -417,10 +412,10 @@ export default function SchedulerPage() {
           <div className="bg-background-success/10 rounded-lg border border-border-success p-4">
             <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
             <ul className="space-y-1 text-sm text-foreground-muted">
+              <li>Full calendar view for recruiters and hiring managers</li>
               <li>Interview scheduling and management</li>
-              <li>Viewing team availability</li>
+              <li>Viewing team availability across calendars</li>
               <li>Self-service booking pages (Calendly-style)</li>
-              <li>Managing candidate appointments</li>
             </ul>
           </div>
           <div className="bg-background-error/10 rounded-lg border border-border-error p-4">
@@ -434,51 +429,46 @@ export default function SchedulerPage() {
         </div>
       </div>
 
-      {/* Basic Usage */}
+      {/* Recruiter Calendar */}
       <ComponentCard
         id="basic-usage"
-        title="Basic Usage"
-        description="Full scheduler with week/day/month view switching"
+        title="Recruiter Calendar"
+        description="Full calendar with sidebar, filters, and day/week/month views"
       >
         <CodePreview
-          code={`import { Scheduler } from "@/components/ui/scheduler";
-import type { SchedulerEvent } from "@/components/ui/scheduler";
+          code={`import { RecruiterCalendarView } from "@/components/ui";
+import type { CalendarEvent } from "@/lib/scheduling";
 
-const events: SchedulerEvent[] = [
+const events: CalendarEvent[] = [
   {
     id: "1",
     title: "Interview - Sarah Chen",
     start: new Date(),
     end: new Date(Date.now() + 60 * 60 * 1000),
-    type: "video",
+    type: "interview-video",
+    status: "confirmed",
     candidateName: "Sarah Chen",
   },
 ];
 
-<Scheduler
+<RecruiterCalendarView
   events={events}
-  view="week"
+  initialView="week"
   onEventClick={(event) => console.log("Event clicked:", event)}
   onSlotClick={(start, end) => console.log("Slot clicked:", start, end)}
 />`}
         >
-          <div className="h-[500px]">
-            <Scheduler
-              events={sampleEvents}
-              selectedDate={selectedDate}
-              onDateChange={setSelectedDate}
-              onEventClick={setSelectedEvent}
-              onSlotClick={(start, end) => setSelectedSlot({ start, end })}
-            />
+          <div className="h-[600px]">
+            <RecruiterCalendarView events={sampleCalendarEvents} initialView="week" />
           </div>
         </CodePreview>
       </ComponentCard>
 
-      {/* Interview Types */}
+      {/* Interview Types (EventCard) */}
       <ComponentCard
         id="interview-types"
         title="Interview Types"
-        description="Events are styled based on interview type"
+        description="EventCard styles based on interview type"
       >
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {interviewTypes.map(({ type, label, icon }) => (
@@ -505,58 +495,14 @@ const events: SchedulerEvent[] = [
         </div>
       </ComponentCard>
 
-      {/* View Modes */}
-      <ComponentCard id="views" title="View Modes" description="Week, day, and month view options">
-        <div className="space-y-8">
-          {/* Week View */}
-          <div>
-            <h4 className="mb-4 text-body-strong">Week View</h4>
-            <div className="h-[400px] overflow-hidden rounded-lg border border-border-muted">
-              <WeekView
-                events={sampleEvents}
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
-                onEventClick={setSelectedEvent}
-              />
-            </div>
-          </div>
-
-          {/* Day View */}
-          <div>
-            <h4 className="mb-4 text-body-strong">Day View</h4>
-            <div className="h-[400px] overflow-hidden rounded-lg border border-border-muted">
-              <DayView
-                events={sampleEvents}
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
-                onEventClick={setSelectedEvent}
-              />
-            </div>
-          </div>
-
-          {/* Month View */}
-          <div>
-            <h4 className="mb-4 text-body-strong">Month View</h4>
-            <div className="h-[500px] overflow-hidden rounded-lg border border-border-muted">
-              <MonthView
-                events={sampleEvents}
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
-                onEventClick={setSelectedEvent}
-              />
-            </div>
-          </div>
-        </div>
-      </ComponentCard>
-
       {/* Time Slot Picker (Calendly-style) */}
       <ComponentCard
         id="time-slot-picker"
         title="Time Slot Picker"
-        description="Calendly-style interface for self-service booking"
+        description="Calendly-style interface for candidate self-service booking"
       >
         <CodePreview
-          code={`import { TimeSlotPicker } from "@/components/ui/scheduler";
+          code={`import { TimeSlotPicker } from "@/components/ui";
 
 <TimeSlotPicker
   selectedDate={selectedDate}
@@ -593,7 +539,7 @@ const events: SchedulerEvent[] = [
         description="Compact list view of upcoming scheduled interviews"
       >
         <CodePreview
-          code={`import { UpcomingInterviews } from "@/components/ui/scheduler";
+          code={`import { UpcomingInterviews } from "@/components/ui";
 
 <UpcomingInterviews
   interviews={interviews}
@@ -609,11 +555,9 @@ const events: SchedulerEvent[] = [
               </CardHeader>
               <CardContent>
                 <UpcomingInterviews
-                  interviews={sampleEvents}
+                  interviews={sampleSchedulerEvents}
                   maxItems={3}
                   onInterviewClick={setSelectedEvent}
-                  // eslint-disable-next-line no-console
-                  onViewAll={() => console.log("View all")}
                 />
               </CardContent>
             </Card>
@@ -628,7 +572,7 @@ const events: SchedulerEvent[] = [
         description="Shareable booking link component for self-service scheduling"
       >
         <CodePreview
-          code={`import { BookingLink } from "@/components/ui/scheduler";
+          code={`import { BookingLink } from "@/components/ui";
 
 <BookingLink
   link="https://canopy.app/book/sarah-chen-interview"
@@ -645,10 +589,6 @@ const events: SchedulerEvent[] = [
               title="Technical Interview"
               duration={45}
               isActive={true}
-              // eslint-disable-next-line no-console
-              onCopy={() => console.log("Copied!")}
-              // eslint-disable-next-line no-console
-              onToggleStatus={(active) => console.log("Status:", active)}
             />
           </div>
         </CodePreview>
@@ -661,7 +601,7 @@ const events: SchedulerEvent[] = [
         description="Built-in timezone selector for global teams"
       >
         <CodePreview
-          code={`import { TimezoneSelector } from "@/components/ui/scheduler";
+          code={`import { TimezoneSelector } from "@/components/ui";
 
 <TimezoneSelector
   value={timezone}
@@ -682,61 +622,6 @@ const events: SchedulerEvent[] = [
         description="Common usage patterns in ATS workflows"
       >
         <div className="space-y-8">
-          {/* Interview Scheduling Dashboard */}
-          <div>
-            <h4 className="mb-4 text-body-strong">Interview Scheduling Dashboard</h4>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <div className="h-[400px] overflow-hidden rounded-lg border border-border-muted">
-                  <Scheduler
-                    events={sampleEvents}
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    onEventClick={setSelectedEvent}
-                  />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-body-strong">
-                      <CalendarPlus className="h-4 w-4" />
-                      Quick Schedule
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Button className="mb-3 w-full">Schedule Interview</Button>
-                    <div className="text-sm text-foreground-muted">
-                      {selectedSlot ? (
-                        <p>
-                          Selected: {selectedSlot.start.toLocaleTimeString()} -{" "}
-                          {selectedSlot.end.toLocaleTimeString()}
-                        </p>
-                      ) : (
-                        <p>Click a time slot to schedule</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-body-strong">Today&apos;s Interviews</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <UpcomingInterviews
-                      interviews={sampleEvents.filter((e) => {
-                        const start = typeof e.start === "string" ? new Date(e.start) : e.start;
-                        return start.toDateString() === new Date().toDateString();
-                      })}
-                      maxItems={3}
-                      onInterviewClick={setSelectedEvent}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-
           {/* Candidate Self-Booking Page */}
           <div>
             <h4 className="mb-4 text-body-strong">Candidate Self-Booking Page</h4>
@@ -754,7 +639,6 @@ const events: SchedulerEvent[] = [
                 title="Select a Time"
                 subtitle="45-minute interview"
                 slotDuration={45}
-                events={sampleEvents}
               />
             </div>
           </div>
@@ -766,13 +650,13 @@ const events: SchedulerEvent[] = [
         <ComponentCard id="props" title="Props">
           <div className="space-y-8">
             <div>
-              <h4 className="mb-3 text-body-strong">Scheduler</h4>
-              <PropsTable props={schedulerProps} />
+              <h4 className="mb-3 text-body-strong">RecruiterCalendarView</h4>
+              <PropsTable props={recruiterCalendarProps} />
             </div>
 
             <div>
-              <h4 className="mb-3 text-body-strong">SchedulerEvent Object</h4>
-              <PropsTable props={eventProps} />
+              <h4 className="mb-3 text-body-strong">CalendarEvent Object</h4>
+              <PropsTable props={calendarEventProps} />
             </div>
 
             <div>
@@ -829,7 +713,7 @@ const events: SchedulerEvent[] = [
       <ComponentCard
         id="related"
         title="Related Components"
-        description="Components commonly used with Scheduler"
+        description="Components commonly used with the Recruiter Calendar"
       >
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <a
@@ -840,11 +724,11 @@ const events: SchedulerEvent[] = [
             <p className="text-caption text-foreground-muted">Date selection</p>
           </a>
           <a
-            href="/design-system/components/time-picker"
+            href="/design-system/components/interview-scheduling-modal"
             className="rounded-lg border border-border-muted p-4 transition-colors hover:border-border-brand"
           >
-            <p className="font-medium">Time Picker</p>
-            <p className="text-caption text-foreground-muted">Time selection</p>
+            <p className="font-medium">Interview Scheduling Modal</p>
+            <p className="text-caption text-foreground-muted">Full scheduling flow</p>
           </a>
           <a
             href="/design-system/components/modal"

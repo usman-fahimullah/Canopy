@@ -13,7 +13,7 @@ import {
 import { Calendar as CalendarIcon, DotsThree } from "@phosphor-icons/react";
 import { format, parseISO } from "date-fns";
 import type { SchedulerEvent } from "@/lib/scheduling";
-import { getInterviewIcon } from "./scheduler";
+import { getInterviewIcon } from "@/lib/scheduling";
 
 /* ============================================
    Upcoming Interviews Component

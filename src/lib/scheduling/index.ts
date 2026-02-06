@@ -33,6 +33,9 @@ export {
   getEventPosition,
 } from "./utils";
 
+// Interview helpers (icons, colors)
+export { getInterviewIcon, defaultEventColors } from "./interview-helpers";
+
 // Constants
 export {
   COMMON_TIMEZONES,
