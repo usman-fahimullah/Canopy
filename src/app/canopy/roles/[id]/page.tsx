@@ -92,7 +92,6 @@ import {
   Upload,
   X,
   Eye,
-  CaretDown,
   Circle,
   Check,
   ChatCenteredText,
@@ -1000,16 +999,15 @@ export default function RoleEditPage() {
         </div>
       )}
 
-      {/* Page Header */}
-      <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-8 py-6 lg:px-12">
+      {/* Page Header — sticky */}
+      <div className="sticky top-0 z-[var(--z-sticky)] border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-8 py-4 lg:px-12">
         <div className="relative flex items-center justify-between">
-          {/* Left: Back + Title + Badge */}
-          <div className="flex min-w-0 max-w-[320px] items-center gap-3">
-            <Link href="/canopy/roles">
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                <ArrowLeft size={18} weight="bold" />
-              </Button>
-            </Link>
+          {/* Left: Icon + Title + Badge */}
+          <div className="flex min-w-0 max-w-[280px] items-center gap-3">
+            <CircleDashed
+              weight="regular"
+              className="h-5 w-5 shrink-0 text-[var(--primitive-neutral-400)]"
+            />
             <div className="flex min-w-0 flex-col gap-0.5">
               <h1 className="truncate text-heading-sm text-foreground">
                 {roleTitle || "Untitled Role"}
@@ -1040,21 +1038,13 @@ export default function RoleEditPage() {
             />
           </div>
 
-          {/* Right: Save + Settings */}
+          {/* Right: Review Role + Settings */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleSaveRole} disabled={saving}>
-              {saving ? <Spinner size="sm" /> : null}
-              {saving ? "Saving..." : "Save Draft"}
+            <Button variant="primary" onClick={handleSaveRole} disabled={saving}>
+              {saving ? "Saving..." : "Review Role"}
             </Button>
-            <Button
-              variant="primary"
-              size="lg"
-              rightIcon={<CaretDown weight="bold" className="h-4 w-4" />}
-            >
-              Review Role
-            </Button>
-            <Button variant="tertiary" size="icon" className="h-12 w-12 rounded-full">
-              <Nut weight="regular" className="h-6 w-6" />
+            <Button variant="tertiary" size="icon" className="h-10 w-10 rounded-full">
+              <Nut weight="regular" className="h-5 w-5" />
             </Button>
           </div>
         </div>
