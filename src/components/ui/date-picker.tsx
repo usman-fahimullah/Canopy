@@ -87,6 +87,10 @@ export interface DatePickerEnhancedProps {
   dueDates?: Date[];
   /** Cell size: 44px (large) or 40px (default) */
   size?: "40" | "44";
+  /** Popover alignment relative to trigger */
+  popoverAlign?: "start" | "center" | "end";
+  /** Popover side relative to trigger */
+  popoverSide?: "top" | "right" | "bottom" | "left";
   /** Additional class names */
   className?: string;
 }
@@ -769,6 +773,8 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
       blockedDates,
       dueDates,
       size = "44",
+      popoverAlign = "start",
+      popoverSide,
       className,
     },
     ref
@@ -881,7 +887,8 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
 
         <PopoverContent
           className="w-auto rounded-2xl border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-0)] p-0 shadow-xl"
-          align="start"
+          align={popoverAlign}
+          side={popoverSide}
           sideOffset={8}
         >
           <div className="flex">

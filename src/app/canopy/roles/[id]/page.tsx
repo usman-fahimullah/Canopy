@@ -102,6 +102,7 @@ import {
   ArrowLeft,
   WarningCircle,
 } from "@phosphor-icons/react";
+import { ProfileIcon } from "@/components/Icons/profile-icon";
 import { logger, formatError } from "@/lib/logger";
 
 /**
@@ -955,33 +956,18 @@ export default function RoleEditPage() {
   }
 
   // Determine status badge variant
+  // Figma: px-8 py-4, rounded-48, 14px bold
   const statusBadge = () => {
     const status = jobData?.status || "DRAFT";
     switch (status) {
       case "PUBLISHED":
-        return (
-          <Badge variant="success" size="sm">
-            Published
-          </Badge>
-        );
+        return <Badge variant="success">Published</Badge>;
       case "PAUSED":
-        return (
-          <Badge variant="warning" size="sm">
-            Paused
-          </Badge>
-        );
+        return <Badge variant="warning">Paused</Badge>;
       case "CLOSED":
-        return (
-          <Badge variant="neutral" size="sm">
-            Closed
-          </Badge>
-        );
+        return <Badge variant="neutral">Closed</Badge>;
       default:
-        return (
-          <Badge variant="feature" size="sm">
-            Draft
-          </Badge>
-        );
+        return <Badge variant="feature">Draft</Badge>;
     }
   };
 
@@ -999,38 +985,40 @@ export default function RoleEditPage() {
         </div>
       )}
 
-      {/* Page Header — sticky */}
-      <div className="sticky top-0 z-[var(--z-sticky)] border-b border-[var(--primitive-neutral-200)] bg-[var(--background-default)] px-8 py-4 lg:px-12">
+      {/* Page Header — sticky
+          Figma: 188:6074 — px-48 py-24, white bg, border-b neutral-300 */}
+      <div className="sticky top-0 z-[var(--z-sticky)] border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] px-12 py-6">
         <div className="relative flex items-center justify-between">
           {/* Left: Icon + Title + Badge */}
-          <div className="flex min-w-0 max-w-[280px] items-center gap-3">
+          <div className="flex items-center gap-3">
             <CircleDashed
-              weight="regular"
-              className="h-5 w-5 shrink-0 text-[var(--primitive-neutral-400)]"
+              weight="bold"
+              className="h-8 w-8 shrink-0 text-[var(--primitive-neutral-500)]"
             />
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <h1 className="truncate text-heading-sm text-foreground">
+            <div className="flex flex-col gap-[var(--space-0-5)]">
+              <h1 className="text-heading-sm font-medium leading-[2rem] text-[var(--primitive-neutral-900)]">
                 {roleTitle || "Untitled Role"}
               </h1>
               {statusBadge()}
             </div>
           </div>
 
-          {/* Center: Segmented Controller - absolutely centered */}
+          {/* Center: Segmented Controller — absolutely centered
+              Figma: 420px wide, p-1, rounded-16 */}
           <div className="absolute left-1/2 -translate-x-1/2">
             <SegmentedController
               options={[
                 {
                   value: "job-post",
                   label: "Job Post",
-                  icon: <PencilSimpleLine weight="regular" />,
+                  icon: <PencilSimpleLine weight="fill" />,
                 },
                 {
                   value: "apply-form",
                   label: "Apply Form",
-                  icon: <ListChecks weight="regular" />,
+                  icon: <ListChecks weight="bold" />,
                 },
-                { value: "candidates", label: "Candidates", icon: <User weight="regular" /> },
+                { value: "candidates", label: "Candidates", icon: <ProfileIcon size={16} /> },
               ]}
               value={activeTab}
               onValueChange={setActiveTab}
@@ -1038,13 +1026,24 @@ export default function RoleEditPage() {
             />
           </div>
 
-          {/* Right: Review Role + Settings */}
-          <div className="flex items-center gap-2">
-            <Button variant="primary" onClick={handleSaveRole} disabled={saving}>
+          {/* Right: Review Role + Settings icon
+              Figma: gap 6px between buttons */}
+          <div className="flex items-center gap-[6px]">
+            <Button
+              variant="primary"
+              onClick={handleSaveRole}
+              disabled={saving}
+              className="rounded-[var(--radius-2xl)] px-4 py-[14px]"
+            >
               {saving ? "Saving..." : "Review Role"}
             </Button>
-            <Button variant="tertiary" size="icon" className="h-10 w-10 rounded-full">
-              <Nut weight="regular" className="h-5 w-5" />
+            <Button
+              variant="tertiary"
+              size="icon"
+              className="rounded-[var(--radius-2xl)] p-3"
+              aria-label="Role settings"
+            >
+              <Nut weight="fill" className="h-6 w-6 text-[var(--primitive-green-800)]" />
             </Button>
           </div>
         </div>
@@ -2758,29 +2757,36 @@ export default function RoleEditPage() {
 
             {/* Right Column - Sidebar */}
             <div className="sticky top-6 flex w-[480px] flex-col gap-4 self-start">
-              {/* Role Settings Card - Figma 188:6269 */}
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
-                {/* Header */}
+              {/* Role Settings Card — Figma 188:6269
+                  border: neutral-300, rounded-16, white bg */}
+              <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]">
+                {/* Header — icon 24px bold + title bold 18px, gap-8, p-24, border-b neutral-200 */}
                 <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-200)] p-6">
                   <SlidersHorizontal
-                    weight="regular"
-                    className="h-6 w-6 text-[var(--primitive-neutral-600)]"
+                    weight="bold"
+                    className="h-6 w-6 shrink-0 text-[var(--foreground-default)]"
                   />
-                  <h2 className="flex-1 text-body-strong text-foreground">Role Settings</h2>
+                  <h2 className="flex-1 text-body-strong text-[var(--primitive-neutral-900)]">
+                    Role Settings
+                  </h2>
                 </div>
 
-                {/* Show Recruiter */}
+                {/* Show Recruiter — label 18px regular, gap-12, p-24, border-b */}
                 <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                  <span className="text-body leading-6 text-foreground">Show Recruiter</span>
+                  <span className="text-body leading-6 text-[var(--primitive-neutral-900)]">
+                    Show Recruiter
+                  </span>
                   <div className="flex items-center gap-2">
                     <Avatar
                       name="Soobin Han"
                       size="sm"
-                      className="border border-[var(--primitive-neutral-300)]"
+                      className="border border-[var(--primitive-neutral-200)]"
                     />
                     <div className="flex flex-1 flex-col">
-                      <span className="text-body leading-6 text-foreground">Soobin Han</span>
-                      <span className="text-caption leading-4 text-foreground-subtle">
+                      <span className="text-body leading-6 text-[var(--primitive-neutral-900)]">
+                        Soobin Han
+                      </span>
+                      <span className="text-caption leading-5 text-[var(--primitive-neutral-600)]">
                         Sr. Technical Recruiter
                       </span>
                     </div>
@@ -2788,40 +2794,43 @@ export default function RoleEditPage() {
                   </div>
                 </div>
 
-                {/* Closing Date */}
+                {/* Closing Date — label 18px regular, DatePicker rounded-8, p-24, border-b */}
                 <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                  <label className="text-body leading-6 text-foreground">Closing Date</label>
+                  <label className="text-body leading-6 text-[var(--primitive-neutral-900)]">
+                    Closing Date
+                  </label>
                   <DatePicker
                     value={closingDate}
                     onChange={setClosingDate}
-                    placeholder="Select closing date"
-                    className="rounded-xl"
+                    placeholder="Closing Date"
+                    popoverAlign="end"
                   />
                 </div>
 
-                {/* External Link */}
+                {/* External Link — label 18px regular, Input with LinkSimple bold icon, p-24, border-b */}
                 <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
-                  <label className="text-body leading-6 text-foreground">External Link</label>
+                  <label className="text-body leading-6 text-[var(--primitive-neutral-900)]">
+                    External Link
+                  </label>
                   <Input
                     value={externalLink}
                     onChange={(e) => setExternalLink(e.target.value)}
-                    placeholder="https://example.com/apply"
+                    placeholder="Field label"
                     inputSize="lg"
-                    leftAddon={<LinkIcon weight="regular" />}
-                    className="rounded-xl"
+                    leftAddon={<LinkIcon weight="bold" />}
                   />
                 </div>
 
-                {/* Required Files */}
+                {/* Required Files — icon left + label, gap-12, SwitchWithLabel items, p-24, border-b */}
                 <div className="flex flex-col gap-3 border-b border-[var(--primitive-neutral-200)] p-6">
                   <div className="flex items-center gap-3">
-                    <span className="flex-1 text-body leading-6 text-foreground">
+                    <Folder
+                      weight="fill"
+                      className="h-6 w-6 shrink-0 text-[var(--foreground-default)]"
+                    />
+                    <span className="flex-1 text-body leading-6 text-[var(--primitive-neutral-900)]">
                       Required Files
                     </span>
-                    <Folder
-                      weight="regular"
-                      className="h-6 w-6 text-[var(--primitive-neutral-600)]"
-                    />
                   </div>
                   <div className="flex flex-col gap-3">
                     <SwitchWithLabel

@@ -35,14 +35,12 @@ const FormCard = React.forwardRef<HTMLDivElement, FormCardProps>(
       ref={ref}
       className={cn(
         // Figma: white bg, 1px border #e5dfd8, 16px radius, 24px padding
-        "bg-[var(--card-background)] border border-[var(--primitive-neutral-200)] rounded-2xl p-6",
+        "rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6",
         className
       )}
       {...props}
     >
-      <div className="flex flex-col gap-6">
-        {children}
-      </div>
+      <div className="flex flex-col gap-6">{children}</div>
     </div>
   )
 );
@@ -61,20 +59,14 @@ export interface FormSectionProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const FormSection = React.forwardRef<HTMLDivElement, FormSectionProps>(
   ({ className, title, description, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("flex flex-col gap-6", className)}
-      {...props}
-    >
+    <div ref={ref} className={cn("flex flex-col gap-6", className)} {...props}>
       {title && (
-        <h2 className="text-lg font-medium text-[var(--foreground-default)] py-2">
+        <h2 className="py-2 text-heading-sm font-medium text-[var(--foreground-default)]">
           {title}
         </h2>
       )}
       {description && (
-        <p className="text-sm text-[var(--primitive-neutral-500)] -mt-4">
-          {description}
-        </p>
+        <p className="-mt-4 text-sm text-[var(--primitive-neutral-500)]">{description}</p>
       )}
       {children}
     </div>
@@ -99,30 +91,20 @@ export interface FormFieldProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
   ({ className, label, required, helpText, error, children, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("flex flex-col gap-3", className)}
-      {...props}
-    >
+    <div ref={ref} className={cn("flex flex-col gap-3", className)} {...props}>
       <div className="flex flex-col gap-1">
         {/* Figma: 18px font, black text, 24px line height */}
-        <label className="text-lg text-[var(--foreground-default)] leading-6">
+        <label className="text-lg leading-6 text-[var(--foreground-default)]">
           {label}
           {required && "*"}
         </label>
         {helpText && (
           // Figma: 14px font, #7a7671 text
-          <p className="text-sm text-[var(--primitive-neutral-500)]">
-            {helpText}
-          </p>
+          <p className="text-sm text-[var(--primitive-neutral-500)]">{helpText}</p>
         )}
       </div>
       {children}
-      {error && (
-        <p className="text-sm text-[var(--primitive-red-600)]">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-sm text-[var(--primitive-red-600)]">{error}</p>}
     </div>
   )
 );
@@ -131,7 +113,10 @@ FormField.displayName = "FormField";
 // ============================================
 // FormTitleInput - Dashed underline title input
 // ============================================
-export interface FormTitleInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface FormTitleInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "size"
+> {
   /** Placeholder text */
   placeholder?: string;
   /** Whether the field is required */
@@ -167,12 +152,12 @@ const FormTitleInput = React.forwardRef<HTMLInputElement, FormTitleInputProps>(
             "text-2xl font-semibold leading-8",
             // Text color: filled = black, placeholder = neutral-400
             "text-[var(--primitive-green-900)]",
-            "placeholder:text-[var(--primitive-neutral-400)] placeholder:font-medium"
+            "placeholder:font-medium placeholder:text-[var(--primitive-neutral-400)]"
           )}
           {...props}
         />
         {required && (
-          <span className="text-[var(--primitive-red-500)] text-2xl font-semibold">*</span>
+          <span className="text-2xl font-semibold text-[var(--primitive-red-500)]">*</span>
         )}
       </div>
     </div>
@@ -207,10 +192,4 @@ const FormRow = React.forwardRef<HTMLDivElement, FormRowProps>(
 );
 FormRow.displayName = "FormRow";
 
-export {
-  FormCard,
-  FormSection,
-  FormField,
-  FormTitleInput,
-  FormRow,
-};
+export { FormCard, FormSection, FormField, FormTitleInput, FormRow };
