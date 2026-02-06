@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shell/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
@@ -86,7 +87,13 @@ function formatDate(dateString: string | null) {
    ------------------------------------------------------------------- */
 
 /** First-time UX: empty state hero with rocket illustration */
-function RolesEmptyState() {
+function RolesEmptyState({
+  onCreateRole,
+  creating,
+}: {
+  onCreateRole: () => void;
+  creating: boolean;
+}) {
   return (
     <div className="flex min-h-[500px] flex-col items-center gap-8 px-8 py-12 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
       {/* Left: copy + CTA */}
@@ -99,12 +106,10 @@ function RolesEmptyState() {
           right candidate fast and easy.
         </p>
         <div>
-          <Link href="/canopy/roles/new">
-            <Button>
-              <Plus size={18} weight="bold" />
-              Create a role
-            </Button>
-          </Link>
+          <Button onClick={onCreateRole} disabled={creating}>
+            {creating ? <Spinner size="sm" /> : <Plus size={18} weight="bold" />}
+            {creating ? "Creating..." : "Create a role"}
+          </Button>
         </div>
       </div>
 
@@ -348,10 +353,39 @@ function RolesErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 export default function RolesPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [templates, setTemplates] = useState<RoleTemplate[]>([]);
+
+  /** Create a blank draft role and redirect to the full role editor */
+  const handleCreateRole = async () => {
+    setCreating(true);
+    try {
+      const res = await fetch("/api/canopy/roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: "Untitled Role",
+          description: "",
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to create role");
+      }
+
+      const data = await res.json();
+      router.push(`/canopy/roles/${data.job.id}`);
+    } catch (err) {
+      logger.error("Error creating role", { error: formatError(err) });
+      setError(err instanceof Error ? err.message : "Failed to create role");
+      setCreating(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -390,12 +424,10 @@ export default function RolesPage() {
         actions={
           <div className="flex items-center gap-3">
             {/* Primary CTA always visible */}
-            <Link href="/canopy/roles/new">
-              <Button>
-                <Plus size={18} weight="bold" />
-                Create a role
-              </Button>
-            </Link>
+            <Button onClick={handleCreateRole} disabled={creating}>
+              {creating ? <Spinner size="sm" /> : <Plus size={18} weight="bold" />}
+              {creating ? "Creating..." : "Create a role"}
+            </Button>
 
             {/* Secondary actions only when content exists */}
             {hasJobs && (
@@ -423,7 +455,9 @@ export default function RolesPage() {
         {!loading && error && <RolesErrorState onRetry={fetchData} />}
 
         {/* State 1: First-time UX — no jobs, no templates */}
-        {!loading && !error && isEmpty && <RolesEmptyState />}
+        {!loading && !error && isEmpty && (
+          <RolesEmptyState onCreateRole={handleCreateRole} creating={creating} />
+        )}
 
         {/* State 2 & 3: Has content */}
         {!loading && !error && !isEmpty && (
