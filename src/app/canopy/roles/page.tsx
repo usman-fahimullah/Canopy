@@ -23,6 +23,8 @@ import {
   ListPlus,
   Megaphone,
   FolderOpen,
+  ArrowClockwise,
+  WarningCircle,
 } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
 import {
@@ -322,28 +324,56 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
    Page
    ------------------------------------------------------------------- */
 
+/** Error state component */
+function RolesErrorState({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--background-error)]">
+        <WarningCircle size={32} weight="fill" className="text-[var(--foreground-error)]" />
+      </div>
+      <div className="max-w-sm space-y-1.5">
+        <h3 className="text-body font-medium text-[var(--foreground-default)]">
+          Unable to load roles
+        </h3>
+        <p className="text-caption text-[var(--foreground-muted)]">
+          Something went wrong while fetching your roles. Please try again.
+        </p>
+      </div>
+      <Button variant="outline" onClick={onRetry}>
+        <ArrowClockwise size={16} weight="bold" />
+        Try again
+      </Button>
+    </div>
+  );
+}
+
 export default function RolesPage() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [templates, setTemplates] = useState<RoleTemplate[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/jobs");
-        if (res.ok) {
-          const data = await res.json();
-          setJobs(data.jobs || []);
-        }
-      } catch (error) {
-        logger.error("Error fetching roles", { error: formatError(error) });
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/canopy/roles");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch roles (${res.status})`);
       }
-    };
+      const data = await res.json();
+      setJobs(data.jobs || []);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      logger.error("Error fetching roles", { error: formatError(err) });
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
-
     // TODO: Fetch role templates when API is available
     // For now templates stay empty — will show promo banner
   }, []);
@@ -389,11 +419,14 @@ export default function RolesPage() {
           </div>
         )}
 
+        {/* Error */}
+        {!loading && error && <RolesErrorState onRetry={fetchData} />}
+
         {/* State 1: First-time UX — no jobs, no templates */}
-        {!loading && isEmpty && <RolesEmptyState />}
+        {!loading && !error && isEmpty && <RolesEmptyState />}
 
         {/* State 2 & 3: Has content */}
-        {!loading && !isEmpty && (
+        {!loading && !error && !isEmpty && (
           <div className="space-y-10">
             {/* Role Templates or Promo */}
             {hasTemplates ? (
