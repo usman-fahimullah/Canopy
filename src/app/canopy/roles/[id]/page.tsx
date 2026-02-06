@@ -855,8 +855,8 @@ export default function RoleEditPage() {
         id: app.id,
         columnId: app.stage,
         content: (
-          <div
-            className="cursor-pointer"
+          <CandidateCard
+            variant="compact"
             onClick={() => router.push(`/canopy/candidates/${app.seeker.id}`)}
           >
             <CandidateKanbanHeader
@@ -865,7 +865,7 @@ export default function RoleEditPage() {
               matchScore={app.matchScore ?? undefined}
               appliedDate={app.createdAt}
             />
-          </div>
+          </CandidateCard>
         ),
         data: app,
       })),

@@ -403,7 +403,6 @@ export {
 export {
   KanbanBoard,
   KanbanColumn,
-  KanbanCard,
   KanbanEmpty,
   KanbanDropPlaceholder,
   KanbanAddCard,

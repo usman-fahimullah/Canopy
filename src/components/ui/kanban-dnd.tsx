@@ -31,7 +31,6 @@ import { cn } from "@/lib/utils";
 import {
   KanbanBoard,
   KanbanColumn,
-  KanbanCard,
   KanbanEmpty,
   KanbanDropPlaceholder,
   type KanbanStageType,
@@ -139,11 +138,21 @@ const SortableCard = ({ id, children, disabled = false }: SortableCardProps) => 
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Render a transparent DnD wrapper. The visual card styling is provided
+  // by the consumer's content (e.g. CandidateCard) to avoid double card nesting.
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <KanbanCard isDragging={isDragging} isDropTarget={isOver}>
-        {children}
-      </KanbanCard>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "cursor-grab active:cursor-grabbing",
+        isDragging && "z-50",
+        isOver && "rounded-xl ring-2 ring-[var(--border-brand)] ring-offset-2"
+      )}
+      {...attributes}
+      {...listeners}
+    >
+      {children}
     </div>
   );
 };
@@ -397,9 +406,7 @@ export const DndKanbanBoard = ({
       >
         {activeItem && (
           <div className="rotate-3 scale-105 opacity-90">
-            <KanbanCard isDragging>
-              {renderDragOverlay ? renderDragOverlay(activeItem) : activeItem.content}
-            </KanbanCard>
+            {renderDragOverlay ? renderDragOverlay(activeItem) : activeItem.content}
           </div>
         )}
       </DragOverlay>

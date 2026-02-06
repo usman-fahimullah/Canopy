@@ -337,6 +337,8 @@ interface CandidateCardProps extends React.HTMLAttributes<HTMLDivElement> {
   selectable?: boolean;
   /** Selection callback */
   onSelectionChange?: (selected: boolean) => void;
+  /** Show drag handle indicator (for kanban/sortable contexts) */
+  showDragHandle?: boolean;
 }
 
 const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
@@ -349,6 +351,7 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
       selected = false,
       selectable = false,
       onSelectionChange,
+      showDragHandle = false,
       ...props
     },
     ref
@@ -412,6 +415,20 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
               aria-label="Select candidate"
               onClick={(e) => e.stopPropagation()}
             />
+          </div>
+        )}
+        {/* Drag handle indicator — visible on hover in kanban/sortable contexts */}
+        {showDragHandle && (
+          <div
+            aria-hidden="true"
+            className="absolute right-3 top-3 text-[var(--foreground-subtle)] opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-100"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <circle cx="3" cy="3" r="1.5" />
+              <circle cx="9" cy="3" r="1.5" />
+              <circle cx="3" cy="9" r="1.5" />
+              <circle cx="9" cy="9" r="1.5" />
+            </svg>
           </div>
         )}
         {children}

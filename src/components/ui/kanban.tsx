@@ -82,7 +82,7 @@ const KanbanColumnSkeleton = ({ index = 0 }: KanbanColumnSkeletonProps) => (
 );
 
 /**
- * Skeleton loading state for KanbanCard with shimmer effect
+ * Skeleton loading state for kanban column cards with shimmer effect
  */
 interface KanbanCardSkeletonProps {
   index?: number;
@@ -281,73 +281,6 @@ const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
 );
 KanbanColumn.displayName = "KanbanColumn";
 
-interface KanbanCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
-  /** Whether the card is being dragged */
-  isDragging?: boolean;
-  /** Whether the card is the drop target */
-  isDropTarget?: boolean;
-  /** Whether the card is selected */
-  isSelected?: boolean;
-}
-
-const KanbanCard = React.forwardRef<HTMLDivElement, KanbanCardProps>(
-  ({ className, children, isDragging, isDropTarget, isSelected, onKeyDown, ...props }, ref) => {
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-      // Allow parent to override
-      onKeyDown?.(e);
-
-      // Only handle if not already handled
-      if (e.defaultPrevented) return;
-
-      // Support basic keyboard navigation
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        (e.target as HTMLElement).click();
-      }
-    };
-
-    return (
-      <div
-        ref={ref}
-        role="button"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        className={cn(
-          "group relative cursor-grab rounded-lg bg-surface p-3 shadow-card",
-          "transition-all duration-fast ease-out",
-          "hover:-translate-y-0.5 hover:border-border-emphasis hover:shadow-md",
-          "active:scale-[0.98] active:cursor-grabbing",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
-          isDragging && "z-50 rotate-[3deg] scale-105 opacity-75 shadow-elevated",
-          isDropTarget && "bg-primary-50/50 scale-[1.02] ring-2 ring-primary-500 ring-offset-2",
-          isSelected && "bg-primary-50/30 ring-2 ring-primary-600",
-          className
-        )}
-        {...props}
-      >
-        {/* Drag handle indicator */}
-        <div
-          className={cn(
-            "absolute right-2 top-2 opacity-0 transition-opacity duration-fast group-hover:opacity-100",
-            "text-foreground-muted",
-            isDragging && "opacity-100"
-          )}
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-            <circle cx="3" cy="3" r="1.5" />
-            <circle cx="9" cy="3" r="1.5" />
-            <circle cx="3" cy="9" r="1.5" />
-            <circle cx="9" cy="9" r="1.5" />
-          </svg>
-        </div>
-        {children}
-      </div>
-    );
-  }
-);
-KanbanCard.displayName = "KanbanCard";
-
 /**
  * Empty state for Kanban columns
  */
@@ -435,7 +368,6 @@ export {
   KanbanBoard,
   KanbanColumn,
   KanbanColumnSkeleton,
-  KanbanCard,
   KanbanCardSkeleton,
   KanbanEmpty,
   KanbanDropPlaceholder,
