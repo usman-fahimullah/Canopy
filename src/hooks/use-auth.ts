@@ -25,11 +25,16 @@ export function useAuth(): UseAuthReturn {
     // Get initial session
     const getSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
       } catch (error) {
-        logger.error("Error getting session", { error: formatError(error), endpoint: "hooks/use-auth" });
+        logger.error("Error getting session", {
+          error: formatError(error),
+          endpoint: "hooks/use-auth",
+        });
       } finally {
         setLoading(false);
       }
@@ -38,23 +43,29 @@ export function useAuth(): UseAuthReturn {
     getSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
 
-        // Refresh server-side data when auth state changes
-        if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
-          router.refresh();
-        }
+      // Refresh server-side data only on meaningful auth changes.
+      // TOKEN_REFRESHED fires periodically and must NOT trigger a full
+      // page re-render — it causes visible loading-spinner flashes and
+      // re-fetches all data across every mounted component.
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        router.refresh();
       }
-    );
+    });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase, router]);
+    // supabase client and router are stable across the component lifecycle.
+    // Listing them causes the effect to re-run on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const signOut = useCallback(async () => {
     try {
@@ -68,11 +79,16 @@ export function useAuth(): UseAuthReturn {
 
   const refreshSession = useCallback(async () => {
     try {
-      const { data: { session } } = await supabase.auth.refreshSession();
+      const {
+        data: { session },
+      } = await supabase.auth.refreshSession();
       setSession(session);
       setUser(session?.user ?? null);
     } catch (error) {
-      logger.error("Error refreshing session", { error: formatError(error), endpoint: "hooks/use-auth" });
+      logger.error("Error refreshing session", {
+        error: formatError(error),
+        endpoint: "hooks/use-auth",
+      });
     }
   }, [supabase]);
 
@@ -84,4 +100,3 @@ export function useAuth(): UseAuthReturn {
     refreshSession,
   };
 }
-

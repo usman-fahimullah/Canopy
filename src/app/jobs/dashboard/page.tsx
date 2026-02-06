@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/shell/page-header";
 import { DashboardChecklist } from "@/components/shell/dashboard-checklist";
 import { Spinner } from "@/components/ui/spinner";
@@ -19,7 +19,6 @@ import {
   MapPin,
   Buildings,
 } from "@phosphor-icons/react";
-import { logger, formatError } from "@/lib/logger";
 
 interface JobMatch {
   id: string;
@@ -66,53 +65,43 @@ function getGreeting() {
   return "Good evening";
 }
 
+async function fetchTalentDashboard(): Promise<DashboardData> {
+  const [matchesRes, applicationsRes, savedRes] = await Promise.all([
+    fetch("/api/jobs/matches"),
+    fetch("/api/applications"),
+    fetch("/api/jobs/saved"),
+  ]);
+
+  const matchesData = matchesRes.ok ? await matchesRes.json() : { jobs: [], total: 0 };
+  const applicationsData = applicationsRes.ok ? await applicationsRes.json() : { applications: [] };
+  const savedData = savedRes.ok ? await savedRes.json() : { jobs: [] };
+
+  const allMatches = matchesData.jobs || [];
+  const allApplications = applicationsData.applications || [];
+  const allSaved = savedData.jobs || [];
+
+  return {
+    jobMatchCount: matchesData.total || allMatches.length,
+    topMatches: allMatches.slice(0, 5),
+    applicationCount: allApplications.length,
+    recentApplications: allApplications
+      .sort(
+        (a: Application, b: Application) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 5),
+    savedJobCount: allSaved.length,
+    profileCompletion: 0,
+  };
+}
+
 export default function TalentDashboardPage() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<DashboardData>(initialData);
+  const { data = initialData, isLoading } = useQuery<DashboardData>({
+    queryKey: ["talent-dashboard"],
+    queryFn: fetchTalentDashboard,
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [matchesRes, applicationsRes, savedRes] = await Promise.all([
-          fetch("/api/jobs/matches"),
-          fetch("/api/applications"),
-          fetch("/api/jobs/saved"),
-        ]);
-
-        const matchesData = matchesRes.ok ? await matchesRes.json() : { jobs: [], total: 0 };
-        const applicationsData = applicationsRes.ok
-          ? await applicationsRes.json()
-          : { applications: [] };
-        const savedData = savedRes.ok ? await savedRes.json() : { jobs: [] };
-
-        const allMatches = matchesData.jobs || [];
-        const allApplications = applicationsData.applications || [];
-        const allSaved = savedData.jobs || [];
-
-        setData({
-          jobMatchCount: matchesData.total || allMatches.length,
-          topMatches: allMatches.slice(0, 5),
-          applicationCount: allApplications.length,
-          recentApplications: allApplications
-            .sort(
-              (a: Application, b: Application) =>
-                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            )
-            .slice(0, 5),
-          savedJobCount: allSaved.length,
-          profileCompletion: 0,
-        });
-      } catch (error) {
-        logger.error("Error fetching dashboard data", { error: formatError(error) });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />

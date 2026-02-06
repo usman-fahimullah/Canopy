@@ -130,18 +130,28 @@ export function ApplyFormModals({
     requireAnswer: false,
   });
 
-  // Sync temp state when parent data changes (e.g., on modal open)
+  // Sync temp state ONLY when the modal opens (not on every parent re-render).
+  // Including the data objects in the dep array caused the effect to fire on
+  // every parent render since the objects are recreated each time.
+  const prevPersonalOpen = React.useRef(false);
   React.useEffect(() => {
-    if (personalDetailsModalOpen) {
+    if (personalDetailsModalOpen && !prevPersonalOpen.current) {
       setTempPersonalDetails({ ...personalDetails });
     }
-  }, [personalDetailsModalOpen, personalDetails]);
+    prevPersonalOpen.current = personalDetailsModalOpen;
+    // personalDetails intentionally excluded — we only snapshot on open
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personalDetailsModalOpen]);
 
+  const prevCareerOpen = React.useRef(false);
   React.useEffect(() => {
-    if (careerDetailsModalOpen) {
+    if (careerDetailsModalOpen && !prevCareerOpen.current) {
       setTempCareerDetails({ ...careerDetails });
     }
-  }, [careerDetailsModalOpen, careerDetails]);
+    prevCareerOpen.current = careerDetailsModalOpen;
+    // careerDetails intentionally excluded — we only snapshot on open
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [careerDetailsModalOpen]);
 
   // ============================================
   // PERSONAL DETAILS HANDLERS

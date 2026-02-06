@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ProgressMeterSteps } from "@/components/ui/progress-meter";
@@ -38,8 +38,9 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
     CHECKLIST_ITEMS[shell].map((item) => ({ ...item, completed: false }))
   );
 
-  const storageKeyCollapsed = `${shell}-checklist-collapsed`;
-  const storageKeyCompleted = `${shell}-checklist-completed`;
+  // Memoize storage keys so they don't trigger useEffect re-runs on every render
+  const storageKeyCollapsed = useMemo(() => `${shell}-checklist-collapsed`, [shell]);
+  const storageKeyCompleted = useMemo(() => `${shell}-checklist-completed`, [shell]);
 
   useEffect(() => {
     // Restore collapsed state

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/shell/page-header";
 import { DashboardChecklist } from "@/components/shell/dashboard-checklist";
 import { Spinner } from "@/components/ui/spinner";
@@ -18,7 +18,6 @@ import {
   Plus,
   WarningCircle,
 } from "@phosphor-icons/react";
-import { logger, formatError } from "@/lib/logger";
 
 interface DashboardRole {
   id: string;
@@ -89,36 +88,27 @@ function statusBadgeVariant(status: string) {
 
 const PIPELINE_STAGES = ["Applied", "Screening", "Interview", "Offer", "Hired"];
 
-export default function EmployerDashboardPage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<DashboardData>(initialData);
-
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  async function fetchDashboard() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/canopy/dashboard");
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || `Failed to load dashboard (${res.status})`);
-      }
-      const dashboardData: DashboardData = await res.json();
-      setData(dashboardData);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load dashboard";
-      logger.error("Error fetching dashboard data", { error: formatError(err) });
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
+async function fetchDashboardData(): Promise<DashboardData> {
+  const res = await fetch("/api/canopy/dashboard");
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Failed to load dashboard (${res.status})`);
   }
+  return res.json();
+}
 
-  if (loading) {
+export default function EmployerDashboardPage() {
+  const {
+    data = initialData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<DashboardData>({
+    queryKey: ["canopy-dashboard"],
+    queryFn: fetchDashboardData,
+  });
+
+  if (isLoading) {
     return (
       <div>
         <PageHeader title="Home" />
@@ -135,9 +125,11 @@ export default function EmployerDashboardPage() {
         <PageHeader title="Home" />
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-8">
           <WarningCircle size={48} weight="duotone" className="text-[var(--foreground-error)]" />
-          <p className="text-body text-[var(--foreground-muted)]">{error}</p>
+          <p className="text-body text-[var(--foreground-muted)]">
+            {error instanceof Error ? error.message : "Failed to load dashboard"}
+          </p>
           <button
-            onClick={fetchDashboard}
+            onClick={() => refetch()}
             className={cn(
               buttonVariants({ variant: "tertiary" }),
               "rounded-[var(--radius-button)]"
