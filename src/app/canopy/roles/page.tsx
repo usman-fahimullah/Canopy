@@ -34,6 +34,8 @@ import {
   RolesEmptyHeroIllustration,
   RolesTemplatePromoIllustration,
 } from "@/components/illustrations/roles-illustrations";
+import { CreateTemplateModal } from "@/components/canopy/create-template-modal";
+import type { RoleTemplate } from "@/types/canopy";
 
 /* -------------------------------------------------------------------
    Types
@@ -60,14 +62,6 @@ interface Job {
   pathway?: Pathway | null;
   climateCategory?: string | null;
   _count?: { applications: number };
-}
-
-interface RoleTemplate {
-  id: string;
-  name: string;
-  category: string;
-  categoryIcon?: string;
-  isNew?: boolean;
 }
 
 /* -------------------------------------------------------------------
@@ -124,7 +118,7 @@ function RolesEmptyState({
 }
 
 /** Template promo banner when no templates have been created yet */
-function TemplatePromoBanner() {
+function TemplatePromoBanner({ onCreateTemplate }: { onCreateTemplate: () => void }) {
   return (
     <div className="flex h-[380px] overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--primitive-blue-100)]">
       {/* Left: copy + CTA */}
@@ -138,12 +132,10 @@ function TemplatePromoBanner() {
           </p>
         </div>
         <div>
-          <Link href="/canopy/roles/templates/new">
-            <Button variant="inverse">
-              <CirclesThreePlus size={18} weight="fill" />
-              Create a template
-            </Button>
-          </Link>
+          <Button variant="inverse" onClick={onCreateTemplate}>
+            <CirclesThreePlus size={18} weight="fill" />
+            Create a template
+          </Button>
         </div>
       </div>
 
@@ -157,15 +149,17 @@ function TemplatePromoBanner() {
 
 /** Template card for existing role templates */
 function RoleTemplateCard({ template }: { template: RoleTemplate }) {
+  // Check if template was created in the last 7 days
+  const isNew =
+    new Date().getTime() - new Date(template.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
+
   return (
     <Card variant="outlined" className="flex min-h-[180px] flex-col justify-between p-5">
       <div className="flex flex-col gap-3">
         {/* Top row: category tag + "New" badge */}
         <div className="flex items-center gap-2">
-          <CategoryTag icon={<Megaphone size={18} weight="fill" />}>
-            {template.category}
-          </CategoryTag>
-          {template.isNew && (
+          <CategoryTag icon={<Megaphone size={18} weight="fill" />}>Template</CategoryTag>
+          {isNew && (
             <Badge variant="success" size="sm">
               <Sparkle size={12} weight="fill" />
               New
@@ -195,9 +189,9 @@ function RoleTemplateCard({ template }: { template: RoleTemplate }) {
 }
 
 /** "Create Another" placeholder card */
-function CreateTemplateCard() {
+function CreateTemplateCard({ onCreateTemplate }: { onCreateTemplate: () => void }) {
   return (
-    <Link href="/canopy/roles/templates/new">
+    <button type="button" onClick={onCreateTemplate} className="text-left">
       <Card
         variant="flat"
         className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 border border-dashed border-[var(--border-muted)] bg-[var(--background-muted)] transition-colors hover:border-[var(--border-default)] hover:bg-[var(--background-subtle)]"
@@ -209,12 +203,18 @@ function CreateTemplateCard() {
           Create Another Role Template
         </span>
       </Card>
-    </Link>
+    </button>
   );
 }
 
 /** Templates section: cards grid */
-function TemplatesSection({ templates }: { templates: RoleTemplate[] }) {
+function TemplatesSection({
+  templates,
+  onCreateTemplate,
+}: {
+  templates: RoleTemplate[];
+  onCreateTemplate: () => void;
+}) {
   return (
     <section className="space-y-4">
       <h2 className="text-heading-sm text-[var(--foreground-default)]">Templates</h2>
@@ -222,7 +222,7 @@ function TemplatesSection({ templates }: { templates: RoleTemplate[] }) {
         {templates.map((template) => (
           <RoleTemplateCard key={template.id} template={template} />
         ))}
-        <CreateTemplateCard />
+        <CreateTemplateCard onCreateTemplate={onCreateTemplate} />
       </div>
     </section>
   );
@@ -355,6 +355,7 @@ export default function RolesPage() {
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [templates, setTemplates] = useState<RoleTemplate[]>([]);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
   /** Create a blank draft role and redirect to the full role editor */
   const handleCreateRole = async () => {
@@ -387,12 +388,21 @@ export default function RolesPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/canopy/roles");
-      if (!res.ok) {
-        throw new Error(`Failed to fetch roles (${res.status})`);
+      const [rolesRes, templatesRes] = await Promise.all([
+        fetch("/api/canopy/roles"),
+        fetch("/api/canopy/templates"),
+      ]);
+
+      if (!rolesRes.ok) {
+        throw new Error(`Failed to fetch roles (${rolesRes.status})`);
       }
-      const data = await res.json();
-      setJobs(data.jobs || []);
+      const rolesData = await rolesRes.json();
+      setJobs(rolesData.jobs || []);
+
+      if (templatesRes.ok) {
+        const templatesData = await templatesRes.json();
+        setTemplates(templatesData.templates || []);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       logger.error("Error fetching roles", { error: formatError(err) });
@@ -404,8 +414,6 @@ export default function RolesPage() {
 
   useEffect(() => {
     fetchData();
-    // TODO: Fetch role templates when API is available
-    // For now templates stay empty — will show promo banner
   }, []);
 
   const hasJobs = jobs.length > 0;
@@ -428,12 +436,10 @@ export default function RolesPage() {
             {/* Secondary actions only when content exists */}
             {hasJobs && (
               <>
-                <Link href="/canopy/roles/templates/new">
-                  <Button variant="tertiary">
-                    <CirclesThreePlus size={18} weight="fill" />
-                    Create a template
-                  </Button>
-                </Link>
+                <Button variant="tertiary" onClick={() => setTemplateModalOpen(true)}>
+                  <CirclesThreePlus size={18} weight="fill" />
+                  Create a template
+                </Button>
                 <Button variant="tertiary">
                   <Copy size={18} weight="fill" />
                   Make a copy
@@ -473,13 +479,16 @@ export default function RolesPage() {
             {/* Role Templates section — white background */}
             <div className="px-12 py-6">
               {hasTemplates ? (
-                <TemplatesSection templates={templates} />
+                <TemplatesSection
+                  templates={templates}
+                  onCreateTemplate={() => setTemplateModalOpen(true)}
+                />
               ) : (
                 <section className="space-y-3">
                   <h2 className="text-heading-sm text-[var(--foreground-default)]">
                     Role Templates
                   </h2>
-                  <TemplatePromoBanner />
+                  <TemplatePromoBanner onCreateTemplate={() => setTemplateModalOpen(true)} />
                 </section>
               )}
             </div>
@@ -493,6 +502,16 @@ export default function RolesPage() {
           </>
         )}
       </div>
+
+      {/* Create Template Modal */}
+      <CreateTemplateModal
+        open={templateModalOpen}
+        onOpenChange={setTemplateModalOpen}
+        jobs={jobs}
+        onTemplateCreated={(template) => {
+          setTemplates((prev) => [template, ...prev]);
+        }}
+      />
     </div>
   );
 }

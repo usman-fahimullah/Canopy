@@ -116,6 +116,9 @@ model Organization {
   // Team invites
   teamInvites    TeamInvite[]
 
+  // Job templates (Canopy ATS)
+  jobTemplates   JobTemplate[]
+
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -722,6 +725,25 @@ model Job {
   updatedAt       DateTime       @updatedAt
 
   @@unique([organizationId, slug])
+}
+
+// =================================================================
+// JOB TEMPLATE — Reusable template created from an existing role.
+// Stores a subset of job fields (toggled on by the employer) as JSON.
+// =================================================================
+
+model JobTemplate {
+  id              String   @id @default(cuid())
+  name            String
+  sourceJobId     String?
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fieldData       String   @db.Text   // JSON: { title: "...", climateCategory: "...", ... }
+  activeFields    String   @db.Text   // JSON: ["title", "climateCategory", ...]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 enum ExperienceLevel {
