@@ -20,7 +20,10 @@ export async function POST(request: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err) {
-    logger.error("Webhook signature verification failed", { error: formatError(err), endpoint: "/api/stripe/webhook" });
+    logger.error("Webhook signature verification failed", {
+      error: formatError(err),
+      endpoint: "/api/stripe/webhook",
+    });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -57,12 +60,18 @@ export async function POST(request: NextRequest) {
       }
 
       default:
-        logger.warn("Unhandled Stripe event type", { endpoint: "/api/stripe/webhook", eventType: event.type });
+        logger.warn("Unhandled Stripe event type", {
+          endpoint: "/api/stripe/webhook",
+          eventType: event.type,
+        });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    logger.error("Webhook handler error", { error: formatError(error), endpoint: "/api/stripe/webhook" });
+    logger.error("Webhook handler error", {
+      error: formatError(error),
+      endpoint: "/api/stripe/webhook",
+    });
     return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 }
@@ -82,10 +91,45 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const coachPayout = parseInt(metadata.coachPayout || "0");
   const platformFee = parseInt(metadata.platformFee || "0");
 
-  // Get coach for video link
-  const coach = await prisma.coachProfile.findUnique({
-    where: { id: coachId },
-  });
+  // Verify both coach and mentee exist before creating any records
+  const [coach, mentee] = await Promise.all([
+    prisma.coachProfile.findUnique({
+      where: { id: coachId },
+      select: { id: true, videoLink: true, status: true },
+    }),
+    prisma.seekerProfile.findUnique({
+      where: { id: menteeId },
+      select: { id: true },
+    }),
+  ]);
+
+  if (!coach) {
+    logger.error("Webhook: coach not found for checkout", {
+      coachId,
+      checkoutSessionId: session.id,
+      endpoint: "/api/stripe/webhook",
+    });
+    return;
+  }
+
+  if (!mentee) {
+    logger.error("Webhook: mentee not found for checkout", {
+      menteeId,
+      checkoutSessionId: session.id,
+      endpoint: "/api/stripe/webhook",
+    });
+    return;
+  }
+
+  if (coach.status !== "ACTIVE" && coach.status !== "APPROVED") {
+    logger.error("Webhook: coach is not active", {
+      coachId,
+      coachStatus: coach.status,
+      checkoutSessionId: session.id,
+      endpoint: "/api/stripe/webhook",
+    });
+    return;
+  }
 
   // Wrap all DB writes in a transaction for consistency
   const coachingSession = await prisma.$transaction(async (tx) => {
@@ -96,7 +140,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         scheduledAt: sessionDate,
         duration: sessionDuration,
         status: "SCHEDULED",
-        videoLink: coach?.videoLink,
+        videoLink: coach.videoLink,
       },
     });
 

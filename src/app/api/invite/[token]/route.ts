@@ -2,17 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { standardLimiter } from "@/lib/rate-limit";
 
 interface RouteContext {
   params: Promise<{ token: string }>;
 }
 
 // GET — Validate invite token and return invite details
-export async function GET(
-  _request: NextRequest,
-  context: RouteContext
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
+    // Rate limit: 5 token lookups per minute per IP to prevent enumeration
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(5, `invite-token:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const { token } = await context.params;
 
     const invite = await prisma.teamInvite.findUnique({
@@ -28,10 +36,7 @@ export async function GET(
     });
 
     if (!invite) {
-      return NextResponse.json(
-        { error: "Invitation not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Invitation not found" }, { status: 404 });
     }
 
     if (invite.status !== "PENDING") {
@@ -47,10 +52,7 @@ export async function GET(
         where: { id: invite.id },
         data: { status: "EXPIRED" },
       });
-      return NextResponse.json(
-        { error: "Invitation has expired" },
-        { status: 410 }
-      );
+      return NextResponse.json({ error: "Invitation has expired" }, { status: 410 });
     }
 
     return NextResponse.json({
@@ -70,18 +72,12 @@ export async function GET(
       error: formatError(error),
       endpoint: "/api/invite/[token]",
     });
-    return NextResponse.json(
-      { error: "Failed to validate invitation" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to validate invitation" }, { status: 500 });
   }
 }
 
 // POST — Accept invite (requires authentication)
-export async function POST(
-  _request: NextRequest,
-  context: RouteContext
-) {
+export async function POST(_request: NextRequest, context: RouteContext) {
   try {
     const { token } = await context.params;
 
@@ -103,10 +99,7 @@ export async function POST(
     });
 
     if (!account) {
-      return NextResponse.json(
-        { error: "Account not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
     const invite = await prisma.teamInvite.findUnique({
@@ -117,10 +110,7 @@ export async function POST(
     });
 
     if (!invite) {
-      return NextResponse.json(
-        { error: "Invitation not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Invitation not found" }, { status: 404 });
     }
 
     if (invite.status !== "PENDING") {
@@ -135,10 +125,7 @@ export async function POST(
         where: { id: invite.id },
         data: { status: "EXPIRED" },
       });
-      return NextResponse.json(
-        { error: "Invitation has expired" },
-        { status: 410 }
-      );
+      return NextResponse.json({ error: "Invitation has expired" }, { status: 410 });
     }
 
     // Check if user is already a member of this organization
@@ -196,9 +183,6 @@ export async function POST(
       error: formatError(error),
       endpoint: "/api/invite/[token]",
     });
-    return NextResponse.json(
-      { error: "Failed to accept invitation" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to accept invitation" }, { status: 500 });
   }
 }
