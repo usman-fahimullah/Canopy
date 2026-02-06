@@ -48,19 +48,33 @@ export function useKanbanState<T extends KanbanItem>({
   const [isMoving, setIsMoving] = React.useState(false);
   const [error, setError] = React.useState<Error | null>(null);
 
-  // Keep items in sync with initialItems
+  // Keep items in sync with initialItems — compare by item IDs and column
+  // assignments to avoid infinite re-renders when the array reference changes
+  // but the data is the same.
+  const initialItemsRef = React.useRef(initialItems);
   React.useEffect(() => {
-    setItems(initialItems);
+    const prev = initialItemsRef.current;
+    const next = initialItems;
+
+    // Quick reference check
+    if (prev === next) return;
+
+    // Shallow compare: same length, same ids in same columns
+    const changed =
+      prev.length !== next.length ||
+      next.some((item, i) => item.id !== prev[i]?.id || item.columnId !== prev[i]?.columnId);
+
+    if (changed) {
+      initialItemsRef.current = next;
+      setItems(next);
+    }
   }, [initialItems]);
 
-  const handleItemsChange = React.useCallback(
-    async (newItems: KanbanItem[]) => {
-      // Optimistic update
-      setItems(newItems as T[]);
-      setError(null);
-    },
-    []
-  );
+  const handleItemsChange = React.useCallback(async (newItems: KanbanItem[]) => {
+    // Optimistic update
+    setItems(newItems as T[]);
+    setError(null);
+  }, []);
 
   const handleDragEnd = React.useCallback(
     async (event: {
@@ -75,15 +89,15 @@ export function useKanbanState<T extends KanbanItem>({
         try {
           await onMoveItem(event.itemId, event.fromColumnId, event.toColumnId);
         } catch (err) {
-          // Revert on error
-          setItems(initialItems);
+          // Revert on error — use ref to avoid stale closure
+          setItems(initialItemsRef.current);
           setError(err instanceof Error ? err : new Error("Failed to move item"));
         } finally {
           setIsMoving(false);
         }
       }
     },
-    [onMoveItem, initialItems]
+    [onMoveItem]
   );
 
   return {

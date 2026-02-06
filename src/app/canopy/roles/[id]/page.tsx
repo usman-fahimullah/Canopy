@@ -847,26 +847,32 @@ export default function RoleEditPage() {
     : applications;
 
   // Convert applications to KanbanItem[] for DndKanbanBoard
-  const kanbanItems: KanbanItem[] = filteredApplications.map((app) => ({
-    id: app.id,
-    columnId: app.stage,
-    content: (
-      <div
-        className="cursor-pointer"
-        onClick={() => router.push(`/canopy/candidates/${app.seeker.id}`)}
-      >
-        <CandidateCard variant="compact">
-          <CandidateKanbanHeader
-            name={app.seeker.account.name || "Unknown"}
-            avatarUrl={app.seeker.account.avatar || undefined}
-            rating={app.matchScore ? app.matchScore / 20 : undefined}
-            appliedDate={app.createdAt}
-          />
-        </CandidateCard>
-      </div>
-    ),
-    data: app,
-  }));
+  // Memoize to avoid creating new array references every render which would
+  // trigger an infinite re-render loop in useKanbanState's sync effect.
+  const kanbanItems: KanbanItem[] = React.useMemo(
+    () =>
+      filteredApplications.map((app) => ({
+        id: app.id,
+        columnId: app.stage,
+        content: (
+          <div
+            className="cursor-pointer"
+            onClick={() => router.push(`/canopy/candidates/${app.seeker.id}`)}
+          >
+            <CandidateCard variant="compact">
+              <CandidateKanbanHeader
+                name={app.seeker.account.name || "Unknown"}
+                avatarUrl={app.seeker.account.avatar || undefined}
+                rating={app.matchScore ? app.matchScore / 20 : undefined}
+                appliedDate={app.createdAt}
+              />
+            </CandidateCard>
+          </div>
+        ),
+        data: app,
+      })),
+    [filteredApplications, router]
+  );
 
   // useKanbanState manages optimistic updates + error rollback
   const {
