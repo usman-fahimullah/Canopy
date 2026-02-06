@@ -3,11 +3,11 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { BookmarkSimple } from "@phosphor-icons/react";
 import { Avatar } from "./avatar";
 import { InfoTag } from "./info-tag";
 import { PathwayTag, type PathwayType } from "./pathway-tag";
 import { Button } from "./button";
+import { SaveButton } from "./save-button";
 
 /**
  * JobPostCard component based on Trails Design System
@@ -222,17 +222,14 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
             )}
             aria-hidden={!isHovered}
           >
-            <Button
-              variant="secondary"
+            <SaveButton
+              saved={saved}
               onClick={(e) => {
                 e.stopPropagation();
                 onSave?.();
               }}
               aria-label={saved ? "Remove from saved" : "Save job"}
-            >
-              <BookmarkSimple size={20} weight={saved ? "fill" : "regular"} />
-              {saved ? "Saved" : "Save It"}
-            </Button>
+            />
 
             <Button
               variant="tertiary"

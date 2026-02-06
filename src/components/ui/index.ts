@@ -10,6 +10,7 @@
 
 // Form Controls
 export { Button, buttonVariants, type ButtonProps } from "./button";
+export { SaveButton, saveButtonVariants, type SaveButtonProps } from "./save-button";
 export {
   Input,
   inputVariants,

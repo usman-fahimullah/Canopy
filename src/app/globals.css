@@ -541,6 +541,17 @@
     --button-disabled-background: var(--primitive-neutral-200);
     --button-disabled-foreground: var(--primitive-neutral-500);
 
+    /* --- SAVE BUTTON --- */
+    /* Figma: https://figma.com/design/q1985VWRuwMkSc1hIqu5X9?node-id=3560-13050 */
+    /* Unsaved: bg blue-100, hover blue-200, text green-800 */
+    --save-button-background: var(--primitive-blue-100);
+    --save-button-background-hover: var(--primitive-blue-200);
+    --save-button-foreground: var(--primitive-green-800);
+    /* Saved: bg green-200, hover green-300, text green-700 */
+    --save-button-saved-background: var(--primitive-green-200);
+    --save-button-saved-background-hover: var(--primitive-green-300);
+    --save-button-saved-foreground: var(--primitive-green-700);
+
     /* --- INPUT / TEXTAREA / SEARCH --- */
     --input-background: var(--primitive-neutral-100);
     --input-background-hover: var(--primitive-neutral-200);
@@ -578,7 +589,7 @@
     --select-item-checkmark: var(--primitive-blue-500);
 
     /* --- SELECTION --- */
-    --selection-background: var(--primitive-blue-200);
+    --selection-background: var(--primitive-blue-100);
     --selection-foreground: var(--primitive-green-800);
 
     /* --- CARD --- */
@@ -1931,6 +1942,14 @@
 
     --button-disabled-background: var(--primitive-neutral-300);
     --button-disabled-foreground: var(--primitive-neutral-500);
+
+    /* Save Button */
+    --save-button-background: var(--primitive-blue-200);
+    --save-button-background-hover: var(--primitive-blue-300);
+    --save-button-foreground: var(--primitive-blue-100);
+    --save-button-saved-background: var(--primitive-green-200);
+    --save-button-saved-background-hover: var(--primitive-green-300);
+    --save-button-saved-foreground: var(--primitive-green-100);
 
     /* Input Components */
     --input-background: var(--primitive-neutral-200);

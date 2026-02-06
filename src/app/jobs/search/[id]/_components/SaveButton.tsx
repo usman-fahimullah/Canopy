@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Button } from "@/components/ui";
-import { BookmarkSimple, CheckCircle } from "@phosphor-icons/react";
+import { SaveButton as SaveButtonUI } from "@/components/ui/save-button";
 
 interface SaveButtonProps {
   jobId: string;
   initialSaved: boolean;
+  /** Button size */
+  size?: "default" | "lg";
+  /** Show only the icon without label text */
+  iconOnly?: boolean;
 }
 
-export function SaveButton({ jobId, initialSaved }: SaveButtonProps) {
+export function SaveButton({
+  jobId,
+  initialSaved,
+  size = "lg",
+  iconOnly = false,
+}: SaveButtonProps) {
   const [isSaved, setIsSaved] = useState(initialSaved);
   const [savingInProgress, setSavingInProgress] = useState(false);
 
@@ -37,29 +45,13 @@ export function SaveButton({ jobId, initialSaved }: SaveButtonProps) {
   }, [jobId, isSaved, savingInProgress]);
 
   return (
-    <Button
-      variant={isSaved ? "secondary" : "inverse"}
-      size="lg"
+    <SaveButtonUI
+      size={size}
+      saved={isSaved}
+      iconOnly={iconOnly}
       onClick={toggleSave}
       aria-pressed={isSaved}
       disabled={savingInProgress}
-      className={
-        isSaved
-          ? "bg-[var(--primitive-green-200)] text-[var(--primitive-green-700)] hover:bg-[var(--primitive-green-300)]"
-          : ""
-      }
-    >
-      {isSaved ? (
-        <>
-          <CheckCircle size={20} weight="fill" />
-          Saved
-        </>
-      ) : (
-        <>
-          <BookmarkSimple size={20} />
-          Save It
-        </>
-      )}
-    </Button>
+    />
   );
 }

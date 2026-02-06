@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button, Label, Card, CardContent } from "@/components/ui";
+import { Button, SaveButton, Label, Card, CardContent } from "@/components/ui";
 import {
   ComponentCard,
   UsageGuide,
@@ -24,6 +24,8 @@ import {
   PencilSimple,
   Users,
   Briefcase,
+  BookmarkSimple,
+  CheckCircle,
 } from "@/components/Icons";
 
 // ============================================
@@ -71,6 +73,39 @@ const buttonProps = [
     default: "false",
     description:
       "When true, renders the button as a Slot, allowing you to pass a custom element (e.g., Link).",
+  },
+  {
+    name: "className",
+    type: "string",
+    description: "Additional CSS classes to apply to the button.",
+  },
+];
+
+const saveButtonProps = [
+  {
+    name: "saved",
+    type: "boolean",
+    default: "false",
+    description: "Whether the item is currently saved. Controls background color and icon.",
+  },
+  {
+    name: "size",
+    type: '"default" | "lg"',
+    default: '"default"',
+    description:
+      "Size of the button. Default uses 14px font and 20px icons. Large uses 18px font and 24px icons.",
+  },
+  {
+    name: "iconOnly",
+    type: "boolean",
+    default: "false",
+    description: "Show only the icon without label text. Uses compact padding.",
+  },
+  {
+    name: "disabled",
+    type: "boolean",
+    default: "false",
+    description: "Disables the button and applies reduced opacity styling.",
   },
   {
     name: "className",
@@ -811,6 +846,270 @@ const handleClick = async () => {
             </div>
           </div>
         </RealWorldExample>
+      </div>
+
+      {/* ============================================ */}
+      {/* 14. SAVE BUTTON */}
+      {/* ============================================ */}
+      <div id="save-button" className="space-y-8">
+        <div>
+          <h2 className="mb-2 text-heading-sm text-foreground">Save Button</h2>
+          <p className="max-w-3xl text-body text-foreground-muted">
+            A specialized button for save/bookmark actions with two visual states. Uses distinct
+            color tokens separate from the standard Button variants.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="rounded-full bg-background-info px-3 py-1 text-caption font-medium text-foreground-info">
+              Dedicated Component
+            </span>
+            <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
+              2 States
+            </span>
+            <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
+              2 Sizes
+            </span>
+          </div>
+        </div>
+
+        {/* Save Button — Basic Usage */}
+        <ComponentCard
+          id="save-button-usage"
+          title="Basic Usage"
+          description="The SaveButton toggles between unsaved (blue) and saved (green) states"
+        >
+          <CodePreview
+            code={`import { SaveButton } from "@/components/ui";
+
+<SaveButton />
+<SaveButton saved />`}
+          >
+            <div className="flex flex-wrap items-center gap-4">
+              <SaveButton />
+              <SaveButton saved />
+            </div>
+          </CodePreview>
+        </ComponentCard>
+
+        {/* Save Button — Sizes */}
+        <ComponentCard
+          id="save-button-sizes"
+          title="Sizes"
+          description="Default (14px font, 20px icon) and Large (18px font, 24px icon)"
+        >
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Label>Default Size</Label>
+              <div className="flex flex-wrap items-center gap-4">
+                <SaveButton />
+                <SaveButton saved />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label>Large Size</Label>
+              <div className="flex flex-wrap items-center gap-4">
+                <SaveButton size="lg" />
+                <SaveButton size="lg" saved />
+              </div>
+            </div>
+          </div>
+        </ComponentCard>
+
+        {/* Save Button — Icon Only */}
+        <ComponentCard
+          id="save-button-icon-only"
+          title="Icon Only"
+          description="Compact icon-only variant for tight spaces like cards"
+        >
+          <CodePreview
+            code={`<SaveButton iconOnly />
+<SaveButton iconOnly saved />
+<SaveButton iconOnly size="lg" />
+<SaveButton iconOnly size="lg" saved />`}
+          >
+            <div className="flex flex-wrap items-center gap-4">
+              <SaveButton iconOnly />
+              <SaveButton iconOnly saved />
+              <SaveButton iconOnly size="lg" />
+              <SaveButton iconOnly size="lg" saved />
+            </div>
+          </CodePreview>
+        </ComponentCard>
+
+        {/* Save Button — States */}
+        <ComponentCard
+          id="save-button-states"
+          title="States"
+          description="Visual states for interaction scenarios"
+        >
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="space-y-2">
+              <Label>Unsaved (Default)</Label>
+              <SaveButton />
+              <p className="text-caption text-foreground-muted">
+                Blue background with BookmarkSimple icon
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Unsaved (Hover)</Label>
+              <SaveButton className="bg-[var(--save-button-background-hover)]" />
+              <p className="text-caption text-foreground-muted">Darker blue on hover</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Saved</Label>
+              <SaveButton saved />
+              <p className="text-caption text-foreground-muted">
+                Green background with CheckCircle icon
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Saved (Hover)</Label>
+              <SaveButton saved className="bg-[var(--save-button-saved-background-hover)]" />
+              <p className="text-caption text-foreground-muted">Darker green on hover</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Disabled</Label>
+              <SaveButton disabled />
+              <p className="text-caption text-foreground-muted">Reduced opacity, no interaction</p>
+            </div>
+          </div>
+        </ComponentCard>
+
+        {/* Save Button — Color Tokens */}
+        <ComponentCard
+          id="save-button-tokens"
+          title="Color Tokens"
+          description="SaveButton uses dedicated component tokens, not standard Button variants"
+        >
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border-muted text-left">
+                    <th className="pb-2 pr-4 font-semibold text-foreground">Token</th>
+                    <th className="pb-2 pr-4 font-semibold text-foreground">Light</th>
+                    <th className="pb-2 font-semibold text-foreground">Usage</th>
+                  </tr>
+                </thead>
+                <tbody className="text-foreground-muted">
+                  <tr className="border-b border-border-muted">
+                    <td className="py-2 pr-4">
+                      <code className="rounded bg-background-muted px-1 text-xs">
+                        --save-button-background
+                      </code>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="inline-block h-4 w-4 rounded border border-border-muted bg-[var(--primitive-blue-100)]" />
+                        blue-100
+                      </span>
+                    </td>
+                    <td className="py-2">Unsaved default background</td>
+                  </tr>
+                  <tr className="border-b border-border-muted">
+                    <td className="py-2 pr-4">
+                      <code className="rounded bg-background-muted px-1 text-xs">
+                        --save-button-background-hover
+                      </code>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="inline-block h-4 w-4 rounded border border-border-muted bg-[var(--primitive-blue-200)]" />
+                        blue-200
+                      </span>
+                    </td>
+                    <td className="py-2">Unsaved hover background</td>
+                  </tr>
+                  <tr className="border-b border-border-muted">
+                    <td className="py-2 pr-4">
+                      <code className="rounded bg-background-muted px-1 text-xs">
+                        --save-button-foreground
+                      </code>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="inline-block h-4 w-4 rounded border border-border-muted bg-[var(--primitive-green-800)]" />
+                        green-800
+                      </span>
+                    </td>
+                    <td className="py-2">Unsaved text + icon color</td>
+                  </tr>
+                  <tr className="border-b border-border-muted">
+                    <td className="py-2 pr-4">
+                      <code className="rounded bg-background-muted px-1 text-xs">
+                        --save-button-saved-background
+                      </code>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="inline-block h-4 w-4 rounded border border-border-muted bg-[var(--primitive-green-200)]" />
+                        green-200
+                      </span>
+                    </td>
+                    <td className="py-2">Saved default background</td>
+                  </tr>
+                  <tr className="border-b border-border-muted">
+                    <td className="py-2 pr-4">
+                      <code className="rounded bg-background-muted px-1 text-xs">
+                        --save-button-saved-background-hover
+                      </code>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="inline-block h-4 w-4 rounded border border-border-muted bg-[var(--primitive-green-300)]" />
+                        green-300
+                      </span>
+                    </td>
+                    <td className="py-2">Saved hover background</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 pr-4">
+                      <code className="rounded bg-background-muted px-1 text-xs">
+                        --save-button-saved-foreground
+                      </code>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="inline-block h-4 w-4 rounded border border-border-muted bg-[var(--primitive-green-700)]" />
+                        green-700
+                      </span>
+                    </td>
+                    <td className="py-2">Saved text + icon color</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ComponentCard>
+
+        {/* Save Button — Real-World Example */}
+        <RealWorldExample
+          title="Job Detail Page"
+          description="SaveButton in a job listing header alongside the Apply button"
+        >
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-body-strong text-foreground">Solar Installation Lead</h3>
+                  <p className="text-caption text-foreground-muted">
+                    San Francisco, CA · Full-time · $95k–$120k
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <SaveButton size="lg" />
+                  <Button variant="primary" size="lg">
+                    Apply Now
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </RealWorldExample>
+
+        {/* Save Button — Props Table */}
+        <ComponentCard id="save-button-props" title="SaveButton Props">
+          <PropsTable props={saveButtonProps} />
+        </ComponentCard>
       </div>
 
       {/* Page Navigation */}
