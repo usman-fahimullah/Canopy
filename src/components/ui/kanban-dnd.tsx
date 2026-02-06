@@ -9,6 +9,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   type DragStartEvent,
   type DragEndEvent,
   type DragOverEvent,
@@ -168,16 +169,23 @@ const DroppableColumn = ({
 }: DroppableColumnProps) => {
   const itemIds = items.map((item) => item.id);
 
+  // Register column itself as a droppable zone so items can be
+  // dragged into empty columns and cross-column drops are detected.
+  const { setNodeRef, isOver } = useDroppable({
+    id: column.id,
+  });
+
   return (
     <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
       <KanbanColumn
+        ref={setNodeRef}
         title={column.title}
         count={items.length}
         stage={column.stage}
         color={column.color}
         icon={column.icon}
         headerActions={headerActions}
-        className={className}
+        className={cn(className, isOver && "bg-[var(--background-interactive-hover)]")}
         data-column-id={column.id}
       >
         {items.length === 0 ? (
@@ -211,6 +219,10 @@ export const DndKanbanBoard = ({
   columnHeaderActions,
 }: DndKanbanBoardProps) => {
   const [activeId, setActiveId] = React.useState<UniqueIdentifier | null>(null);
+  // Track which column the item was originally in before the drag started.
+  // handleDragOver updates the item's columnId mid-drag, so we need this
+  // to report the correct fromColumnId in the onDragEnd callback.
+  const [originColumnId, setOriginColumnId] = React.useState<UniqueIdentifier | null>(null);
   const [isMounted, setIsMounted] = React.useState(false);
 
   // Ensure we only render DnD context on client
@@ -246,7 +258,9 @@ export const DndKanbanBoard = ({
 
   // Handle drag start
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id);
+    const id = event.active.id;
+    setActiveId(id);
+    setOriginColumnId(findColumnForItem(id) ?? null);
   };
 
   // Handle drag over (for moving between columns)
@@ -284,13 +298,17 @@ export const DndKanbanBoard = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
+    const dragOriginColumn = originColumnId;
     setActiveId(null);
+    setOriginColumnId(null);
 
     if (!over) return;
 
     const activeId = active.id;
     const overId = over.id;
 
+    // The item may have already been moved to a new column by handleDragOver,
+    // so activeColumn reflects the CURRENT column (possibly the target).
     const activeColumn = findColumnForItem(activeId);
 
     // Check if we're over a column or an item
@@ -306,7 +324,11 @@ export const DndKanbanBoard = ({
       ? columnItems.length // Add to end if dropping on column
       : columnItems.findIndex((item) => item.id === overId);
 
-    if (oldIndex !== newIndex || activeColumn !== overColumn) {
+    // Use the original column (before drag started) for the callback
+    const originalFromColumn = dragOriginColumn ?? activeColumn;
+    const columnChanged = originalFromColumn !== overColumn;
+
+    if (oldIndex !== newIndex || columnChanged) {
       // Reorder within the same column or after moving to new column
       const reorderedColumnItems = arrayMove(
         columnItems,
@@ -321,14 +343,14 @@ export const DndKanbanBoard = ({
 
       onItemsChange(newItems);
 
-      // Fire callback
+      // Fire callback with the ORIGINAL column as fromColumnId
       if (onDragEnd) {
         const fromIndex = items.findIndex((item) => item.id === activeId);
         const toIndex = newItems.findIndex((item) => item.id === activeId);
 
         onDragEnd({
           itemId: activeId,
-          fromColumnId: activeColumn,
+          fromColumnId: originalFromColumn,
           toColumnId: overColumn,
           fromIndex,
           toIndex,
