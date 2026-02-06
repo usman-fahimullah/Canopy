@@ -125,13 +125,6 @@ const FEATURED_PATHWAYS: PathwayType[] = [
 function DiscoveryPageSkeleton() {
   return (
     <div className="space-y-8">
-      {/* Search bar skeleton */}
-      <div className="flex gap-4">
-        <Skeleton className="h-14 flex-1 rounded-2xl" />
-        <Skeleton className="h-14 w-48 rounded-2xl" />
-        <Skeleton className="h-14 w-24 rounded-2xl" />
-      </div>
-
       {/* Collections skeleton */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -176,13 +169,6 @@ function DiscoveryPageSkeleton() {
 function SearchResultsSkeleton() {
   return (
     <div className="space-y-6">
-      {/* Search bar skeleton */}
-      <div className="flex gap-4">
-        <Skeleton className="h-14 flex-1 rounded-2xl" />
-        <Skeleton className="h-14 w-48 rounded-2xl" />
-        <Skeleton className="h-14 w-24 rounded-2xl" />
-      </div>
-
       {/* Filter chips skeleton */}
       <div className="flex gap-3">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -500,7 +486,13 @@ export default function JobsPage() {
   if (loading) {
     return (
       <div>
-        <PageHeader title="Jobs" />
+        <PageHeader sticky showNotificationBell={false}>
+          <div className="flex flex-1 gap-4">
+            <Skeleton className="h-14 flex-1 rounded-2xl" />
+            <Skeleton className="h-14 w-48 rounded-2xl" />
+            <Skeleton className="h-14 w-24 rounded-2xl" />
+          </div>
+        </PageHeader>
         <div className="px-8 py-6 lg:px-12">
           {hasSearched ? <SearchResultsSkeleton /> : <DiscoveryPageSkeleton />}
         </div>
@@ -512,10 +504,7 @@ export default function JobsPage() {
   if (hasSearched) {
     return (
       <div>
-        <PageHeader title="Jobs" />
-
-        <div className="space-y-6 px-8 py-6 lg:px-12">
-          {/* Search Bar */}
+        <PageHeader sticky showNotificationBell={false}>
           <SearchBar
             searchPlaceholder="Search by title, company name, etc."
             locationPlaceholder="City, state, or zip..."
@@ -526,8 +515,11 @@ export default function JobsPage() {
             onSearchChange={setSearchQuery}
             locationValue={locationQuery}
             onLocationChange={setLocationQuery}
+            className="flex-1"
           />
+        </PageHeader>
 
+        <div className="space-y-6 px-8 py-6 lg:px-12">
           {/* Filter Chips Row */}
           <div className="flex flex-wrap gap-3">
             <FilterChip
@@ -640,10 +632,7 @@ export default function JobsPage() {
   /* ---- Discovery View (Home) ------------------------------------- */
   return (
     <div>
-      <PageHeader title="Jobs" />
-
-      <div className="space-y-10 px-8 py-6 lg:px-12">
-        {/* Search Bar */}
+      <PageHeader sticky showNotificationBell={false}>
         <SearchBar
           searchPlaceholder="Search by title, skill, or keywords"
           locationPlaceholder="City, state, or zip code"
@@ -654,8 +643,11 @@ export default function JobsPage() {
           onSearchChange={setSearchQuery}
           locationValue={locationQuery}
           onLocationChange={setLocationQuery}
+          className="flex-1"
         />
+      </PageHeader>
 
+      <div className="space-y-10 px-8 py-6 lg:px-12">
         {/* Featured Collections */}
         {collections.length > 0 && (
           <section>

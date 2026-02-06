@@ -27,7 +27,7 @@ import { Button } from "./button";
  *
  * Motion:
  * - Card: translateY(-2px) lift + shadow transition on hover
- * - Tags row: slide down/out on hover (200ms, ease-out)
+ * - Tags row: slide up/out on hover (200ms, ease-out)
  * - Buttons row: slide up/in on hover (200ms, ease-out)
  * - Both rows always in DOM for smooth CSS transitions
  */
@@ -138,10 +138,9 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
         ref={ref}
         className={cn(
           jobPostCardVariants({ size }),
-          // Shadow tokens
-          "shadow-[var(--shadow-card)]",
-          // Hover: lift + elevated shadow
-          isHovered && "-translate-y-0.5 shadow-[var(--shadow-card-hover)]",
+          // Shadow + hover lift
+          "shadow-card",
+          isHovered && "-translate-y-0.5 shadow-card-hover",
           // Cursor
           (onClick || onViewJob) && "cursor-pointer",
           className
@@ -163,6 +162,7 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
                 src={companyLogo}
                 name={companyName}
                 alt={`${companyName} logo`}
+                badge={saved ? "success" : undefined}
                 className="shrink-0"
               />
               <span className="truncate text-sm text-[var(--foreground-default)]">
@@ -194,13 +194,13 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
             Both rows are always in the DOM. We use a clipping container
             and translateY to slide them in/out. */}
         <div className="relative h-12 overflow-hidden">
-          {/* Tags row — slides down and fades out on hover */}
+          {/* Tags row — slides up and fades out on hover */}
           <div
             className={cn(
               "absolute inset-x-0 top-0 flex items-center gap-2",
               "transition-[transform,opacity] duration-[var(--duration-moderate)] ease-[var(--ease-out)]",
               isHovered
-                ? "pointer-events-none translate-y-3 opacity-0"
+                ? "pointer-events-none -translate-y-3 opacity-0"
                 : "translate-y-0 opacity-100"
             )}
             aria-hidden={isHovered}
@@ -218,7 +218,7 @@ const JobPostCard = React.forwardRef<HTMLDivElement, JobPostCardProps>(
               "transition-[transform,opacity] duration-[var(--duration-moderate)] ease-[var(--ease-out)]",
               isHovered
                 ? "translate-y-0 opacity-100"
-                : "pointer-events-none -translate-y-3 opacity-0"
+                : "pointer-events-none translate-y-3 opacity-0"
             )}
             aria-hidden={!isHovered}
           >

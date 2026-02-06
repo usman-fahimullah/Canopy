@@ -4,7 +4,7 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn, getInitials } from "@/lib/utils";
-import { CheckCircle, Clock, Warning, Star, User, BookmarkSimple } from "@phosphor-icons/react";
+import { CheckCircle, Clock, Warning, Star, Heart, BookmarkSimple } from "@phosphor-icons/react";
 import { SimpleTooltip } from "./tooltip";
 
 /* ============================================
@@ -248,12 +248,14 @@ const statusConfig: Record<AvatarStatus, { color: string; label: string; pulseCo
 };
 
 const statusSizeMap: Record<AvatarSize, { size: string; border: string; position: string }> = {
-  xs: { size: "w-1.5 h-1.5", border: "border", position: "bottom-0 right-0" },
-  sm: { size: "w-2 h-2", border: "border", position: "bottom-0 right-0" },
-  default: { size: "w-2.5 h-2.5", border: "border-2", position: "bottom-0 right-0" },
-  lg: { size: "w-3 h-3", border: "border-2", position: "bottom-0.5 right-0.5" },
-  xl: { size: "w-4 h-4", border: "border-2", position: "bottom-1 right-1" },
-  "2xl": { size: "w-5 h-5", border: "border-2", position: "bottom-1.5 right-1.5" },
+  // Status dots are ~33% of avatar size (smaller than badge indicators at 50%)
+  // with proportional borders (~10% of dot size)
+  xs: { size: "size-2", border: "border", position: "bottom-0 right-0" }, // 8px on 24px avatar
+  sm: { size: "size-2.5", border: "border", position: "bottom-0 right-0" }, // 10px on 32px avatar
+  default: { size: "size-4", border: "border-[1.5px]", position: "bottom-0 right-0" }, // 16px on 48px avatar
+  lg: { size: "size-5", border: "border-2", position: "bottom-0.5 right-0.5" }, // 20px on 64px avatar
+  xl: { size: "size-8", border: "border-[3px]", position: "bottom-1 right-1" }, // 32px on 96px avatar
+  "2xl": { size: "size-10", border: "border-4", position: "bottom-1.5 right-1.5" }, // 40px on 128px avatar
 };
 
 // ============================================
@@ -286,15 +288,15 @@ const badgeConfig: Record<
   },
   favorite: {
     bg: "bg-[var(--primitive-yellow-100)]",
-    iconColor: "text-[var(--primitive-yellow-500)]",
+    iconColor: "text-[var(--primitive-yellow-400)]",
     label: "Favorite",
     icon: Star,
   },
   bipoc: {
     bg: "bg-[var(--primitive-purple-200)]",
-    iconColor: "text-[var(--primitive-purple-700)]",
+    iconColor: "text-[var(--primitive-purple-600)]",
     label: "BIPOC Owned",
-    icon: User,
+    icon: Heart,
   },
   bookmark: {
     bg: "bg-[var(--primitive-blue-100)]",
@@ -304,13 +306,48 @@ const badgeConfig: Record<
   },
 };
 
-const badgeSizeMap: Record<AvatarSize, { container: string; icon: string; offset: string }> = {
-  xs: { container: "w-3.5 h-3.5", icon: "w-2 h-2", offset: "bottom-[-2px] right-[-2px]" },
-  sm: { container: "w-4 h-4", icon: "w-2.5 h-2.5", offset: "bottom-[-3px] right-[-3px]" },
-  default: { container: "w-5 h-5", icon: "w-3.5 h-3.5", offset: "bottom-[-4px] right-[-4px]" },
-  lg: { container: "w-5 h-5", icon: "w-3.5 h-3.5", offset: "bottom-[-4px] right-[-4px]" },
-  xl: { container: "w-6 h-6", icon: "w-4 h-4", offset: "bottom-[-4px] right-[-4px]" },
-  "2xl": { container: "w-7 h-7", icon: "w-5 h-5", offset: "bottom-[-4px] right-[-4px]" },
+const badgeSizeMap: Record<
+  AvatarSize,
+  { container: string; icon: string; offset: string; border: string }
+> = {
+  // 50% proportional sizing: badge = half of avatar diameter
+  // Matches ListStatus sizing system
+  xs: {
+    container: "size-4", // 16px — matches ListStatus sm
+    icon: "size-2.5", // 10px
+    offset: "bottom-[-2px] right-[-2px]",
+    border: "border-[1.5px]", // ~10% proportional
+  },
+  sm: {
+    container: "size-4", // 16px — matches ListStatus sm
+    icon: "size-2.5", // 10px
+    offset: "bottom-[-3px] right-[-3px]",
+    border: "border-[1.5px]", // ~10% proportional
+  },
+  default: {
+    container: "size-6", // 24px — matches ListStatus lg
+    icon: "size-4", // 16px
+    offset: "bottom-[-4px] right-[-4px]",
+    border: "border-[2.5px]", // ~10% proportional
+  },
+  lg: {
+    container: "size-8", // 32px — matches ListStatus xl
+    icon: "size-5", // 20px
+    offset: "bottom-[-4px] right-[-4px]",
+    border: "border-[3px]", // ~10% proportional
+  },
+  xl: {
+    container: "size-12", // 48px — matches ListStatus 2xl
+    icon: "size-8", // 32px
+    offset: "bottom-[-4px] right-[-4px]",
+    border: "border-4", // ~10% proportional
+  },
+  "2xl": {
+    container: "size-16", // 64px — matches ListStatus 3xl
+    icon: "size-10", // 40px
+    offset: "bottom-[-4px] right-[-4px]",
+    border: "border-[5px]", // ~10% proportional
+  },
 };
 
 // Icon size mapping for icon fallback
@@ -563,7 +600,7 @@ const Avatar = React.forwardRef<React.ElementRef<typeof AvatarPrimitive.Root>, A
           </AvatarPrimitive.Fallback>
         </AvatarPrimitive.Root>
 
-        {/* Simple status indicator dot with enhanced visibility */}
+        {/* Simple status indicator dot */}
         {status && !badge && (
           <span
             role="status"
@@ -575,7 +612,6 @@ const Avatar = React.forwardRef<React.ElementRef<typeof AvatarPrimitive.Root>, A
               statusSizeMap[size || "default"].border,
               statusSizeMap[size || "default"].position,
               statusConfig[status].color,
-              "shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
               // Pulse animation for online status (respects reduced motion) (#27)
               status === "online" && "motion-safe:animate-avatar-status-pulse"
             )}
@@ -596,8 +632,8 @@ const Avatar = React.forwardRef<React.ElementRef<typeof AvatarPrimitive.Root>, A
             role="status"
             aria-label={badgeData.label}
             className={cn(
-              "absolute flex items-center justify-center rounded-full border-2 border-white",
-              "shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
+              "absolute flex items-center justify-center rounded-full border-white",
+              badgeSize.border,
               badgeSize.offset,
               badgeSize.container,
               badgeData.bg
@@ -1011,7 +1047,6 @@ const AvatarStatusIndicator = ({
       statusSizeMap[size].border,
       statusSizeMap[size].position,
       statusConfig[status].color,
-      "shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
       status === "online" && "motion-safe:animate-avatar-status-pulse",
       className
     )}
@@ -1048,8 +1083,8 @@ const AvatarBadgeIndicator = ({
       role="status"
       aria-label={badgeData.label}
       className={cn(
-        "absolute flex items-center justify-center rounded-full border-2 border-white",
-        "shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
+        "absolute flex items-center justify-center rounded-full border-white",
+        badgeSize.border,
         badgeSize.offset,
         badgeSize.container,
         badgeData.bg,

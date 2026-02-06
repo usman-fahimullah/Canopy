@@ -81,6 +81,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "isomorphic-dompurify": "^2.35.0",
     "next": "14.2.0",
     "prisma": "5.22.0",
     "react": "^18.3.0",
@@ -90,6 +91,7 @@
     "resend": "^6.9.1",
     "stripe": "^17.3.1",
     "tailwind-merge": "^2.3.0",
+    "use-debounce": "^10.1.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
