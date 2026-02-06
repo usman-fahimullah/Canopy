@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch, SwitchWithLabel } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar } from "@/components/ui/avatar";
@@ -101,7 +102,10 @@ import {
   DotsSixVertical,
   Copy,
   Link as LinkChain,
+  ArrowLeft,
+  WarningCircle,
 } from "@phosphor-icons/react";
+import { logger, formatError } from "@/lib/logger";
 
 /**
  * Job Post / Role Edit Page
@@ -243,6 +247,14 @@ function SortableQuestionItem({
 
 export default function RoleEditPage() {
   const params = useParams();
+  const roleId = params.id as string;
+
+  // ============================================
+  // DATA FETCHING STATE
+  // ============================================
+  const [loading, setLoading] = React.useState(true);
+  const [fetchError, setFetchError] = React.useState<string | null>(null);
+  const [dataLoaded, setDataLoaded] = React.useState(false);
 
   // Form state
   const [roleTitle, setRoleTitle] = React.useState("");
@@ -682,6 +694,98 @@ export default function RoleEditPage() {
     setTemplateSaved(true);
     setSavingTemplate(false);
   };
+
+  // ============================================
+  // DATA FETCHING — Load role from API
+  // ============================================
+  React.useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        setLoading(true);
+        setFetchError(null);
+
+        const res = await fetch(`/api/canopy/roles/${roleId}`);
+        if (!res.ok) {
+          if (res.status === 404) {
+            setFetchError("Role not found");
+          } else {
+            setFetchError("Failed to load role details");
+          }
+          return;
+        }
+
+        const data = await res.json();
+        const job = data.job;
+
+        // Populate form state from API response
+        if (job.title) setRoleTitle(job.title);
+        if (job.climateCategory) setJobCategory(job.climateCategory);
+        if (job.employmentType) {
+          const typeMap: Record<string, string> = {
+            FULL_TIME: "full-time",
+            PART_TIME: "part-time",
+            CONTRACT: "contract",
+            INTERNSHIP: "internship",
+          };
+          setPositionType(typeMap[job.employmentType] || "");
+        }
+        if (job.description) setDescription(job.description);
+        if (job.location) {
+          const parts = job.location.split(", ");
+          if (parts[0]) setCity(parts[0]);
+          if (parts[1]) setState(parts[1].toLowerCase());
+          if (parts[2]) setCountry(parts[2].toLowerCase());
+        }
+        if (job.locationType) setWorkplaceType(job.locationType.toLowerCase());
+        if (job.salaryMin) setMinPay(String(job.salaryMin));
+        if (job.salaryMax) setMaxPay(String(job.salaryMax));
+        if (job.closesAt) setClosingDate(new Date(job.closesAt));
+
+        setDataLoaded(true);
+      } catch (err) {
+        logger.error("Error fetching role detail", { error: formatError(err) });
+        setFetchError("Failed to load role details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRole();
+  }, [roleId]);
+
+  // ============================================
+  // LOADING & ERROR STATES
+  // ============================================
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--primitive-neutral-100)]">
+        <div className="flex flex-col items-center gap-4">
+          <Spinner size="lg" />
+          <p className="text-body text-[var(--foreground-muted)]">Loading role...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--primitive-neutral-100)]">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <WarningCircle size={48} weight="regular" className="text-[var(--foreground-error)]" />
+          <h2 className="text-heading-sm text-foreground">{fetchError}</h2>
+          <p className="text-body text-[var(--foreground-muted)]">
+            The role you&apos;re looking for may have been removed or you don&apos;t have access.
+          </p>
+          <Link href="/canopy/roles">
+            <Button variant="primary">
+              <ArrowLeft size={18} weight="bold" />
+              Back to Roles
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--primitive-neutral-100)]">
