@@ -986,7 +986,7 @@ export default function RoleEditPage() {
   };
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       {/* Save Error Banner */}
       {saveError && (
         <div className="px-8 pt-4">
@@ -1064,7 +1064,7 @@ export default function RoleEditPage() {
       </div>
 
       {/* Main Content */}
-      <main className="bg-[var(--primitive-neutral-100)] px-12 py-6">
+      <main className="min-w-0 bg-[var(--primitive-neutral-100)] px-12 py-6">
         {/* ============================================
               APPLY FORM TAB
               ============================================ */}
@@ -2419,9 +2419,9 @@ export default function RoleEditPage() {
 
                   {!hasAnyApplications ? (
                     /* Empty state — Figma: reading-a-book illustration */
-                    <div className="flex flex-1 items-center justify-center bg-[var(--primitive-neutral-100)] px-12 py-6">
-                      <div className="flex max-w-3xl items-center gap-12">
-                        <div className="flex-1 space-y-6">
+                    <div className="flex flex-1 items-stretch bg-[var(--primitive-neutral-100)]">
+                      <div className="flex flex-1 items-center px-12 py-6">
+                        <div className="max-w-md space-y-6">
                           <h2 className="text-heading-lg font-medium text-[var(--primitive-green-800)]">
                             No candidates Yet.{"\n"}Let&apos;s attract some!
                           </h2>
@@ -2434,13 +2434,13 @@ export default function RoleEditPage() {
                             Add Candidates
                           </Button>
                         </div>
-                        <div className="hidden flex-shrink-0 lg:block">
-                          <img
-                            src="/illustrations/reading-a-book.svg"
-                            alt="Reading a book illustration"
-                            className="h-80 w-80 object-contain"
-                          />
-                        </div>
+                      </div>
+                      <div className="hidden flex-shrink-0 items-center justify-center lg:flex">
+                        <img
+                          src="/illustrations/reading-a-book.svg"
+                          alt="Reading a book illustration"
+                          className="h-full w-auto object-contain"
+                        />
                       </div>
                     </div>
                   ) : (
@@ -2503,7 +2503,7 @@ export default function RoleEditPage() {
         {activeTab === "job-post" && (
           <div className="flex gap-4">
             {/* Left Column - Form */}
-            <div className="flex flex-1 flex-col gap-4">
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
               {/* Basic Info Card */}
               <FormCard>
                 <FormTitleInput
@@ -2808,7 +2808,7 @@ export default function RoleEditPage() {
             </div>
 
             {/* Right Column - Sidebar */}
-            <div className="sticky top-6 flex w-[480px] flex-col gap-4 self-start">
+            <div className="sticky top-6 flex w-[360px] shrink-0 flex-col gap-4 self-start">
               {/* Role Settings Card — Figma 188:6269
                   border: neutral-300, rounded-16, white bg */}
               <div className="overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]">
