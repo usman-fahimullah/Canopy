@@ -29,13 +29,13 @@ interface ShellLogoProps {
 }
 
 /** Symbol size when sidebar is collapsed (px) */
-const SYMBOL_SIZE = 28;
+const SYMBOL_SIZE = 36;
 
 /** Wordmark width when sidebar is expanded (px) */
 const WORDMARK_WIDTHS: Record<Shell, number> = {
-  talent: 140,
-  coach: 100,
-  employer: 100,
+  talent: 180,
+  coach: 130,
+  employer: 130,
 };
 
 export function ShellLogo({ shell, collapsed = false, className }: ShellLogoProps) {
