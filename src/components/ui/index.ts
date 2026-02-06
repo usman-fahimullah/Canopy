@@ -650,20 +650,9 @@ export { TimeSlotPicker, type TimeSlotPickerProps } from "./time-slot-picker";
 export { UpcomingInterviews, type UpcomingInterviewsProps } from "./upcoming-interviews";
 export { BookingLink, type BookingLinkProps } from "./booking-link";
 
-// Scheduler / Calendar — remaining in scheduler.tsx
-export {
-  Scheduler,
-  WeekView,
-  DayView,
-  MonthView,
-  InterviewScheduler,
-  getEventPosition,
-  getInterviewIcon,
-  defaultEventColors,
-  type SchedulerEvent,
-  type SchedulerProps,
-  type InterviewType,
-} from "./scheduler";
+// Scheduling utilities — re-exported from @/lib/scheduling
+export { getInterviewIcon, defaultEventColors } from "@/lib/scheduling";
+export type { SchedulerEvent, InterviewType } from "@/lib/scheduling";
 
 // Email Composer
 export {
@@ -692,6 +681,7 @@ export {
 
 // Calendar
 export { Calendar, type CalendarProps } from "./calendar";
+export { MonthYearSelector, type MonthYearSelectorProps } from "./calendar-month-year-selector";
 
 // Character Counter
 export {
@@ -1002,8 +992,6 @@ export {
   getEventPosition as getCalendarEventPosition,
   getEventTypeIcon,
   getEventColorClass,
-  getUserTimezone as getCalendarTimezone,
-  getTimezoneAbbr as getCalendarTimezoneAbbr,
   DEFAULT_FILTERS as CALENDAR_DEFAULT_FILTERS,
   KEYBOARD_SHORTCUTS as CALENDAR_KEYBOARD_SHORTCUTS,
   type CalendarEvent,

@@ -935,6 +935,17 @@
     /* Header */
     --calendar-header-foreground: var(--foreground-default);
     --calendar-weekday-foreground: var(--primitive-neutral-800);
+    /* Due date indicators */
+    --calendar-due-background: var(--primitive-blue-200);
+    --calendar-due-foreground: var(--primitive-blue-800);
+    --calendar-due-badge-background: var(--primitive-blue-100);
+    --calendar-due-badge-border: var(--primitive-neutral-0);
+    --calendar-due-badge-icon: var(--primitive-blue-500);
+    /* Availability & blocked indicators */
+    --calendar-availability-indicator: var(--primitive-green-500);
+    --calendar-blocked-strikethrough: var(--primitive-neutral-500);
+    /* Range hover preview */
+    --calendar-range-hover-background: var(--primitive-blue-200);
 
     /* --- CALENDAR ATTENDEE COLOR PALETTE --- */
     /* Muted, harmonious colors for multi-person scheduling views */
@@ -2232,6 +2243,17 @@
     --calendar-nav-foreground: var(--foreground-default);
     --calendar-header-foreground: var(--foreground-default);
     --calendar-weekday-foreground: var(--primitive-neutral-700);
+    /* Due date indicators */
+    --calendar-due-background: var(--primitive-blue-300);
+    --calendar-due-foreground: var(--primitive-blue-100);
+    --calendar-due-badge-background: var(--primitive-blue-200);
+    --calendar-due-badge-border: var(--primitive-neutral-800);
+    --calendar-due-badge-icon: var(--primitive-blue-400);
+    /* Availability & blocked indicators */
+    --calendar-availability-indicator: var(--primitive-green-400);
+    --calendar-blocked-strikethrough: var(--primitive-neutral-600);
+    /* Range hover preview */
+    --calendar-range-hover-background: var(--primitive-blue-300);
 
     /* Calendar Attendee Color Palette (Dark mode) */
     /* Sage */

@@ -8,7 +8,12 @@ import { SearchInput } from "@/components/ui/search-input";
 import { KanbanBoard, KanbanColumn, type KanbanStageType } from "@/components/ui/kanban";
 import { DndKanbanBoard, type KanbanColumnData } from "@/components/ui/kanban-dnd";
 import { useKanbanState, type KanbanItem } from "@/components/ui/kanban-state";
-import { CandidateCard, CandidateKanbanHeader } from "@/components/ui/candidate-card";
+import {
+  CandidateCard,
+  CandidateKanbanHeader,
+  CandidateTags,
+  DaysInStage,
+} from "@/components/ui/candidate-card";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { Plus, Funnel, GridFour, ListBullets } from "@phosphor-icons/react";
 import type { JobData, ApplicationData } from "../_lib/types";
@@ -64,29 +69,56 @@ export function CandidatesTab({
       )
     : applications;
 
+  // Stable navigation callback — router reference changes every render in Next.js,
+  // so we must NOT include it in useMemo/useCallback dependency arrays.
+  const navigateToCandidate = React.useCallback(
+    (seekerId: string) => {
+      router.push(`/canopy/candidates/${seekerId}`);
+    },
+    // router is stable for the lifetime of the component in practice
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   // Convert applications to KanbanItem[]
   const kanbanItems: KanbanItem[] = React.useMemo(
     () =>
       filteredApplications.map((app) => ({
         id: app.id,
         columnId: app.stage,
-        content: (
-          <CandidateCard
-            variant="compact"
-            showDragHandle
-            onClick={() => router.push(`/canopy/candidates/${app.seeker.id}`)}
-          >
-            <CandidateKanbanHeader
-              name={app.seeker.account.name || "Unknown"}
-              avatarUrl={app.seeker.account.avatar || undefined}
-              rating={app.matchScore ? app.matchScore / 20 : undefined}
-              appliedDate={app.createdAt}
-            />
-          </CandidateCard>
-        ),
+        content: (() => {
+          // Build tags from skills, greenSkills, and certifications
+          const tags = [
+            ...app.seeker.greenSkills.map((s) => ({ label: s, variant: "green" as const })),
+            ...app.seeker.certifications.map((c) => ({ label: c, variant: "blue" as const })),
+            ...app.seeker.skills.map((s) => ({ label: s, variant: "default" as const })),
+          ];
+
+          // Calculate days in current stage
+          const daysInStage = Math.floor(
+            (Date.now() - new Date(app.updatedAt).getTime()) / 86400000
+          );
+
+          return (
+            <CandidateCard
+              variant="compact"
+              showDragHandle
+              onClick={() => navigateToCandidate(app.seeker.id)}
+            >
+              <CandidateKanbanHeader
+                name={app.seeker.account.name || "Unknown"}
+                avatarUrl={app.seeker.account.avatar || undefined}
+                matchScore={app.matchScore ?? undefined}
+                appliedDate={app.createdAt}
+              />
+              {tags.length > 0 && <CandidateTags tags={tags} maxVisible={2} className="mt-2" />}
+              <DaysInStage days={daysInStage} compact className="mt-2" />
+            </CandidateCard>
+          );
+        })(),
         data: app,
       })),
-    [filteredApplications, router]
+    [filteredApplications, navigateToCandidate]
   );
 
   // useKanbanState manages optimistic updates + error rollback

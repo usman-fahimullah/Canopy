@@ -361,7 +361,7 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
         <div
           ref={ref}
           className={cn(
-            "animate-pulse rounded-xl border border-[var(--card-border)] bg-[var(--card-background)]",
+            "animate-pulse rounded-xl bg-[var(--card-background)] shadow-[var(--shadow-card)]",
             variant === "compact" ? "p-4" : "p-5",
             className
           )}
@@ -380,11 +380,13 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
         aria-selected={selectable ? selected : undefined}
         className={cn(
           // Base
-          "group relative rounded-xl border bg-[var(--card-background)] text-[var(--card-foreground)]",
+          "group relative rounded-xl bg-[var(--card-background)] text-[var(--card-foreground)]",
+          // Shadow instead of border
+          "shadow-[var(--shadow-card)]",
           // Transitions
           "transition-all duration-200 ease-[var(--ease-default)]",
-          // Hover — subtle lift + shadow
-          "hover:-translate-y-px hover:border-[var(--card-border-hover)] hover:shadow-[var(--shadow-card-hover)]",
+          // Hover — subtle lift + stronger shadow
+          "hover:-translate-y-px hover:shadow-[var(--shadow-card-hover)]",
           // Focus
           "focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none",
           // Active
@@ -393,10 +395,8 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
           "cursor-pointer",
           // Variant sizing
           variant === "compact" ? "p-4" : "p-5",
-          // Default vs selected border
-          selected
-            ? "border-[var(--border-brand)] bg-[var(--card-background-selected)]"
-            : "border-[var(--card-border)]",
+          // Selected state — use ring for selection indicator (no border)
+          selected && "bg-[var(--card-background-selected)] ring-2 ring-[var(--border-brand)]",
           className
         )}
         {...props}
