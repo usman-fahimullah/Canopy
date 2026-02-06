@@ -102,7 +102,7 @@ function RolesEmptyState() {
           <Link href="/canopy/roles/new">
             <Button>
               <Plus size={18} weight="bold" />
-              Submit a role
+              Create a role
             </Button>
           </Link>
         </div>
@@ -393,7 +393,7 @@ export default function RolesPage() {
             <Link href="/canopy/roles/new">
               <Button>
                 <Plus size={18} weight="bold" />
-                Submit Role
+                Create a role
               </Button>
             </Link>
 
