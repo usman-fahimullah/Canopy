@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, InfoTag, CategoryTag } from "@/components/ui";
+import { InfoTag, CategoryTag } from "@/components/ui";
 import type { JobCategoryType } from "@/components/ui";
 import { Briefcase } from "@phosphor-icons/react";
 import { getExperienceLevelLabel } from "./helpers";
@@ -13,12 +13,12 @@ interface RoleOverviewCardProps {
 
 export function RoleOverviewCard({ job }: RoleOverviewCardProps) {
   return (
-    <Card className="rounded-2xl border-[var(--border-muted)]">
+    <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)]">
       <div className="flex items-center gap-2 px-6 py-4">
         <Briefcase size={24} weight="duotone" className="text-[var(--foreground-brand)]" />
         <span className="text-body font-bold text-[var(--foreground-default)]">Role Overview</span>
       </div>
-      <CardContent className="space-y-2 px-6 pb-4 pt-0">
+      <div className="space-y-2 px-6 pb-4">
         {/* Job Type */}
         {job.climateCategory && (
           <div className="flex items-center justify-between border-b border-[var(--border-muted)] pb-3">
@@ -58,7 +58,7 @@ export function RoleOverviewCard({ job }: RoleOverviewCardProps) {
           <span className="text-sm text-[var(--foreground-default)]">Workplace</span>
           <InfoTag>{getLocationTypeLabel(job.locationType)}</InfoTag>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

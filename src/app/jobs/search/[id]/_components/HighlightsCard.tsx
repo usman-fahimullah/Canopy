@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, InfoTag } from "@/components/ui";
+import { InfoTag } from "@/components/ui";
 import { CalendarStar } from "@phosphor-icons/react";
 import { formatSalary } from "./helpers";
 import type { JobDetail } from "./types";
@@ -13,12 +13,12 @@ export function HighlightsCard({ job }: HighlightsCardProps) {
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency);
 
   return (
-    <Card className="rounded-2xl border-[var(--border-muted)]">
+    <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)]">
       <div className="flex items-center gap-2 px-6 py-4">
         <CalendarStar size={24} weight="duotone" className="text-[var(--foreground-brand)]" />
         <span className="text-body font-bold text-[var(--foreground-default)]">Highlights</span>
       </div>
-      <CardContent className="space-y-2 px-6 pb-4 pt-0">
+      <div className="space-y-2 px-6 pb-4">
         {/* Compensation */}
         <div className="space-y-2 border-b border-[var(--border-muted)] pb-3">
           <div className="flex items-center justify-between">
@@ -50,7 +50,7 @@ export function HighlightsCard({ job }: HighlightsCardProps) {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

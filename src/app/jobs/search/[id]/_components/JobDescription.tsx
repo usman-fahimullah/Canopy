@@ -1,7 +1,6 @@
 "use client";
 
 import DOMPurify from "isomorphic-dompurify";
-import { Card, CardContent } from "@/components/ui";
 import { formatDescription } from "./helpers";
 
 interface JobDescriptionProps {
@@ -35,13 +34,11 @@ export function JobDescription({ description }: JobDescriptionProps) {
   });
 
   return (
-    <Card className="flex-1 rounded-2xl border-[var(--border-muted)]">
-      <CardContent className="p-8">
-        <div
-          className="prose prose-lg max-w-none text-[var(--foreground-default)] [&_a]:text-[var(--foreground-link)] [&_a]:underline hover:[&_a]:text-[var(--foreground-link-hover)] [&_h1]:mb-4 [&_h1]:text-heading-sm [&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-heading-sm [&_h2]:font-bold [&_h2]:tracking-tight [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-body-strong [&_h3]:font-bold [&_h3]:uppercase [&_h3]:tracking-wide [&_li]:text-body [&_li]:leading-relaxed [&_ol]:mb-4 [&_ol]:space-y-1 [&_ol]:pl-5 [&_p]:mb-4 [&_p]:text-body [&_p]:leading-relaxed [&_ul]:mb-4 [&_ul]:space-y-1 [&_ul]:pl-5"
-          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-        />
-      </CardContent>
-    </Card>
+    <div className="flex-1 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-8">
+      <div
+        className="prose prose-lg max-w-none text-[var(--foreground-default)] [&_a]:text-[var(--foreground-link)] [&_a]:underline hover:[&_a]:text-[var(--foreground-link-hover)] [&_h1]:mb-4 [&_h1]:text-heading-sm [&_h1]:font-bold [&_h1]:tracking-tight [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-heading-sm [&_h2]:font-bold [&_h2]:tracking-tight [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-body-strong [&_h3]:font-bold [&_h3]:uppercase [&_h3]:tracking-wide [&_li]:text-body [&_li]:leading-relaxed [&_ol]:mb-4 [&_ol]:space-y-1 [&_ol]:pl-5 [&_p]:mb-4 [&_p]:text-body [&_p]:leading-relaxed [&_ul]:mb-4 [&_ul]:space-y-1 [&_ul]:pl-5"
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+      />
+    </div>
   );
 }
