@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Avatar, Badge, Button } from "@/components/ui";
 import { Heart } from "@phosphor-icons/react";
 import { SaveButton } from "./SaveButton";
@@ -10,6 +11,7 @@ interface JobHeaderProps {
 }
 
 export function JobHeader({ job }: JobHeaderProps) {
+  const router = useRouter();
   const showBipocBadge = job.organization.isBipocOwned;
 
   return (
@@ -46,13 +48,7 @@ export function JobHeader({ job }: JobHeaderProps) {
 
         {/* Right: Action buttons — hidden on mobile (shown in sticky CTA) */}
         <div className="hidden items-center gap-3 sm:flex">
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => {
-              // Apply Now - in a real implementation, link to application
-            }}
-          >
+          <Button variant="primary" size="lg" onClick={() => router.push(`/apply/${job.id}`)}>
             Apply Now
           </Button>
           <SaveButton jobId={job.id} initialSaved={job.isSaved} />

@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Handshake,
   Gear,
+  Globe,
 } from "@phosphor-icons/react";
 import { TreehouseIcon } from "@/components/Icons/treehouse-icon";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
@@ -242,6 +243,14 @@ export const employerNavConfig: ShellNavConfig = {
           href: "/canopy/team",
           label: "Team",
           icon: UsersFour,
+          iconWeight: "bold",
+          requiredRoles: ["ADMIN"],
+        },
+        {
+          id: "career-page",
+          href: "/canopy/career-page",
+          label: "Career Page",
+          icon: Globe,
           iconWeight: "bold",
           requiredRoles: ["ADMIN"],
         },

@@ -57,7 +57,7 @@ export function JobDetailView({ job, similarJobs }: JobDetailViewProps) {
       </div>
 
       {/* Mobile Sticky CTA */}
-      <MobileCTA jobId={job.id} isSaved={job.isSaved} applyUrl={null} />
+      <MobileCTA jobId={job.id} isSaved={job.isSaved} />
     </div>
   );
 }

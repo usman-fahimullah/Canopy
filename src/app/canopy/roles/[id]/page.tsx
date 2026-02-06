@@ -108,6 +108,7 @@ import {
   MagnifyingGlass,
   Funnel,
   GridFour,
+  ShareNetwork,
 } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
 import { SearchInput } from "@/components/ui/search-input";
@@ -115,6 +116,7 @@ import { KanbanBoard, KanbanColumn, type KanbanStageType } from "@/components/ui
 import { CandidateCard, CandidateKanbanHeader } from "@/components/ui/candidate-card";
 import { logger, formatError } from "@/lib/logger";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
+import { SyndicationPanel } from "@/components/canopy/roles/SyndicationPanel";
 
 /**
  * Job Post / Role Edit Page
@@ -318,6 +320,22 @@ export default function RoleEditPage() {
     publishedAt: string | null;
     closesAt: string | null;
     stages: { id: string; name: string }[];
+    formConfig: {
+      personalDetails: Record<string, { visible: boolean; required: boolean }>;
+      careerDetails: Record<string, { visible: boolean; required: boolean }>;
+      requiredFiles: { resume: boolean; coverLetter: boolean; portfolio: boolean };
+    } | null;
+    formQuestions:
+      | {
+          id: string;
+          type: "text" | "yes-no" | "multiple-choice" | "file-upload";
+          title: string;
+          required: boolean;
+          description?: string;
+          options?: string[];
+        }[]
+      | null;
+    syndicationEnabled: boolean;
     createdAt: string;
     updatedAt: string;
   }
@@ -960,6 +978,36 @@ export default function RoleEditPage() {
       if (job.salaryMin) setMinPay(String(job.salaryMin));
       if (job.salaryMax) setMaxPay(String(job.salaryMax));
       if (job.closesAt) setClosingDate(new Date(job.closesAt));
+
+      // Initialize apply form config from DB (if saved previously)
+      if (job.formConfig) {
+        const fc = job.formConfig;
+        if (fc.personalDetails) {
+          setPersonalDetails((prev) => ({
+            ...prev,
+            ...Object.fromEntries(
+              Object.entries(fc.personalDetails).map(([k, v]) => [
+                k,
+                { visible: v.visible, required: v.required },
+              ])
+            ),
+          }));
+        }
+        if (fc.careerDetails) {
+          setCareerDetails((prev) => ({
+            ...prev,
+            ...Object.fromEntries(
+              Object.entries(fc.careerDetails).map(([k, v]) => [
+                k,
+                { visible: v.visible, required: v.required },
+              ])
+            ),
+          }));
+        }
+      }
+      if (job.formQuestions && Array.isArray(job.formQuestions) && job.formQuestions.length > 0) {
+        setQuestions(job.formQuestions);
+      }
     } catch (err) {
       logger.error("Error fetching role detail", { error: formatError(err) });
       setFetchError("Failed to load role details");
@@ -996,6 +1044,12 @@ export default function RoleEditPage() {
         salaryMax: maxPay ? Number(maxPay) : null,
         salaryCurrency: "USD",
         closesAt: closingDate ? closingDate.toISOString() : null,
+        formConfig: {
+          personalDetails,
+          careerDetails,
+          requiredFiles: { resume: true, coverLetter: false, portfolio: false },
+        },
+        formQuestions: questionsEnabled ? questions : [],
       };
 
       // Remove undefined values
@@ -1149,10 +1203,15 @@ export default function RoleEditPage() {
                   icon: <ListChecks weight="bold" />,
                 },
                 { value: "candidates", label: "Candidates", icon: <ProfileIcon size={16} /> },
+                {
+                  value: "syndication",
+                  label: "Syndication",
+                  icon: <ShareNetwork size={16} weight="regular" />,
+                },
               ]}
               value={activeTab}
               onValueChange={setActiveTab}
-              className="w-[420px]"
+              className="w-[540px]"
             />
           </div>
 
@@ -2970,6 +3029,31 @@ export default function RoleEditPage() {
               />
             </div>
           </div>
+        )}
+
+        {/* ============================================
+              SYNDICATION TAB
+              ============================================ */}
+        {activeTab === "syndication" && jobData && (
+          <SyndicationPanel
+            jobId={jobData.id}
+            syndicationEnabled={jobData.syndicationEnabled}
+            jobStatus={jobData.status}
+            onToggleSyndication={async (enabled) => {
+              try {
+                const res = await fetch(`/api/canopy/roles/${jobData.id}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ syndicationEnabled: enabled }),
+                });
+                if (res.ok) {
+                  setJobData((prev) => (prev ? { ...prev, syndicationEnabled: enabled } : prev));
+                }
+              } catch (error) {
+                logger.error("Failed to toggle syndication", { error: formatError(error) });
+              }
+            }}
+          />
         )}
 
         {/* Footer */}

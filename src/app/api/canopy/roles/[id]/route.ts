@@ -3,6 +3,9 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { enqueueSyndication } from "@/lib/syndication/service";
+import type { SyndicationPlatform } from "@/lib/syndication/types";
+import { getAvailablePlatforms } from "@/lib/syndication/platforms";
 
 /**
  * GET /api/canopy/roles/[id]
@@ -65,6 +68,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         publishedAt: true,
         closesAt: true,
         stages: true,
+        formConfig: true,
+        formQuestions: true,
+        syndicationEnabled: true,
         createdAt: true,
         updatedAt: true,
         applications: {
@@ -194,6 +200,46 @@ const UpdateJobSchema = z.object({
 
   // Dates
   closesAt: z.string().datetime().optional().nullable(),
+
+  // Syndication
+  syndicationEnabled: z.boolean().optional(),
+
+  // Application form configuration
+  formConfig: z
+    .object({
+      personalDetails: z.record(
+        z.string(),
+        z.object({
+          visible: z.boolean(),
+          required: z.boolean(),
+        })
+      ),
+      careerDetails: z.record(
+        z.string(),
+        z.object({
+          visible: z.boolean(),
+          required: z.boolean(),
+        })
+      ),
+      requiredFiles: z.object({
+        resume: z.boolean(),
+        coverLetter: z.boolean(),
+        portfolio: z.boolean(),
+      }),
+    })
+    .optional(),
+  formQuestions: z
+    .array(
+      z.object({
+        id: z.string(),
+        type: z.enum(["text", "yes-no", "multiple-choice", "file-upload"]),
+        title: z.string().min(1).max(500),
+        required: z.boolean(),
+        description: z.string().max(1000).optional(),
+        options: z.array(z.string().max(200)).optional(),
+      })
+    )
+    .optional(),
 });
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -272,6 +318,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       updateData.closesAt = data.closesAt ? new Date(data.closesAt) : null;
     }
 
+    // Application form config
+    if (data.formConfig !== undefined) updateData.formConfig = data.formConfig;
+    if (data.formQuestions !== undefined) updateData.formQuestions = data.formQuestions;
+
+    // Syndication
+    if (data.syndicationEnabled !== undefined)
+      updateData.syndicationEnabled = data.syndicationEnabled;
+
     // Don't allow empty updates
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: "No fields to update" }, { status: 400 });
@@ -287,6 +341,64 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (updated.count === 0) {
       return NextResponse.json({ error: "Role not found" }, { status: 404 });
+    }
+
+    // Trigger syndication when job is published with syndication enabled
+    if (data.status === "PUBLISHED") {
+      const job = await prisma.job.findUnique({
+        where: { id },
+        select: { syndicationEnabled: true },
+      });
+
+      if (job?.syndicationEnabled) {
+        const platforms = getAvailablePlatforms();
+        enqueueSyndication(id, platforms, "post").catch((err) => {
+          logger.error("Failed to enqueue syndication on publish", {
+            error: formatError(err),
+            jobId: id,
+          });
+        });
+      }
+    }
+
+    // Trigger syndication removal when job is paused/closed
+    if (data.status === "PAUSED" || data.status === "CLOSED") {
+      const platforms = getAvailablePlatforms();
+      enqueueSyndication(id, platforms, "remove").catch((err) => {
+        logger.error("Failed to enqueue syndication removal", {
+          error: formatError(err),
+          jobId: id,
+        });
+      });
+    }
+
+    // Trigger syndication when syndicationEnabled is toggled on for a published job
+    if (data.syndicationEnabled === true && data.status === undefined) {
+      const job = await prisma.job.findUnique({
+        where: { id },
+        select: { status: true },
+      });
+
+      if (job?.status === "PUBLISHED") {
+        const platforms = getAvailablePlatforms();
+        enqueueSyndication(id, platforms, "post").catch((err) => {
+          logger.error("Failed to enqueue syndication on toggle", {
+            error: formatError(err),
+            jobId: id,
+          });
+        });
+      }
+    }
+
+    // Trigger syndication removal when syndicationEnabled is toggled off
+    if (data.syndicationEnabled === false) {
+      const platforms = getAvailablePlatforms();
+      enqueueSyndication(id, platforms, "remove").catch((err) => {
+        logger.error("Failed to enqueue syndication removal on toggle", {
+          error: formatError(err),
+          jobId: id,
+        });
+      });
     }
 
     return NextResponse.json({ success: true });

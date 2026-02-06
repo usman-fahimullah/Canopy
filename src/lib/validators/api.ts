@@ -322,21 +322,8 @@ export const UpdateSavedJobNotesSchema = z.object({
 });
 
 // --- Applications ---
-
-export const SubmitApplicationSchema = z.object({
-  jobId: z.string().min(1),
-  name: z.string().min(1).max(200),
-  email: z.string().email(),
-  dateOfBirth: z.string().max(50).optional(),
-  pronouns: z.string().max(50).optional(),
-  location: z.string().max(200).optional(),
-  currentRole: z.string().max(200).optional(),
-  currentCompany: z.string().max(200).optional(),
-  yearsExperience: z.string().max(50).optional(),
-  linkedIn: z.string().url().max(500).optional().or(z.literal("")),
-  portfolio: z.string().url().max(500).optional().or(z.literal("")),
-  questionAnswers: z.record(z.string(), z.string().max(5000)).optional(),
-});
+// Schema moved to @/lib/validators/application.ts (includes file URL fields)
+export { SubmitApplicationSchema } from "./application";
 
 // --- Checklist ---
 

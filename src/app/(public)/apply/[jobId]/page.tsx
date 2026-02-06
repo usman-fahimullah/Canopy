@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Banner } from "@/components/ui/banner";
 import { SegmentedController } from "@/components/ui/segmented-controller";
+import { Spinner } from "@/components/ui/spinner";
 
 // Icons
 import {
@@ -31,9 +32,58 @@ import {
   FloppyDisk,
   Eye,
   Pencil,
+  WarningCircle,
 } from "@phosphor-icons/react";
 
+// Storage
+import { uploadResume, uploadCoverLetter } from "@/lib/storage";
+import { createClient } from "@/lib/supabase/client";
+
 // Types
+interface FormFieldConfig {
+  visible: boolean;
+  required: boolean;
+}
+
+interface CustomQuestion {
+  id: string;
+  type: "text" | "yes-no" | "multiple-choice";
+  title: string;
+  required: boolean;
+  description?: string;
+  options?: string[];
+}
+
+interface JobApplyConfig {
+  id: string;
+  title: string;
+  company: string;
+  companyLogo: string | null;
+  location: string | null;
+  locationType: string;
+  employmentType: string;
+  personalDetails: {
+    name: FormFieldConfig;
+    email: FormFieldConfig;
+    dateOfBirth: FormFieldConfig;
+    pronouns: FormFieldConfig;
+    location: FormFieldConfig;
+  };
+  careerDetails: {
+    currentRole: FormFieldConfig;
+    currentCompany: FormFieldConfig;
+    yearsExperience: FormFieldConfig;
+    linkedIn: FormFieldConfig;
+    portfolio: FormFieldConfig;
+  };
+  requiredFiles: {
+    resume: boolean;
+    coverLetter: boolean;
+    portfolio: boolean;
+  };
+  questions: CustomQuestion[];
+}
+
 type FormData = {
   name: string;
   email: string;
@@ -51,62 +101,21 @@ type FormData = {
   questionAnswers: Record<string, string>;
 };
 
-// Mock data - in real app, fetch from API
-const MOCK_JOB_DATA = {
-  id: "1",
-  title: "Senior Renewable Energy Engineer",
-  company: "Solaris Energy Co.",
-  location: "San Francisco, CA",
-  locationType: "Hybrid",
-  employmentType: "Full-time",
-  department: "Engineering",
-  postedDate: "2 days ago",
-  estimatedTime: "5 minutes",
-
-  personalDetails: {
-    name: { visible: true, required: true },
-    email: { visible: true, required: true },
-    dateOfBirth: { visible: true, required: false },
-    pronouns: { visible: true, required: false },
-    location: { visible: true, required: true },
-  },
-
-  careerDetails: {
-    currentRole: { visible: true, required: false },
-    currentCompany: { visible: true, required: false },
-    yearsExperience: { visible: true, required: true },
-    linkedIn: { visible: true, required: false },
-    portfolio: { visible: true, required: false },
-  },
-
-  requiredFiles: {
-    resume: true,
-    coverLetter: true,
-    portfolio: false,
-  },
-
-  questions: [
-    {
-      id: "q1",
-      type: "text" as const,
-      title: "Why are you interested in this role?",
-      required: true,
-      description: "Tell us what excites you about this opportunity",
-    },
-    {
-      id: "q2",
-      type: "yes-no" as const,
-      title: "Do you have experience with renewable energy projects?",
-      required: true,
-    },
-    {
-      id: "q3",
-      type: "multiple-choice" as const,
-      title: "What is your preferred work style?",
-      required: false,
-      options: ["Remote", "Hybrid", "On-site"],
-    },
-  ],
+const INITIAL_FORM_DATA: FormData = {
+  name: "",
+  email: "",
+  dateOfBirth: undefined,
+  pronouns: "",
+  location: "",
+  currentRole: "",
+  currentCompany: "",
+  yearsExperience: "",
+  linkedIn: "",
+  portfolio: "",
+  resumeFile: null,
+  coverLetterFile: null,
+  portfolioFile: null,
+  questionAnswers: {},
 };
 
 export default function ApplyPage() {
@@ -121,70 +130,99 @@ export default function ApplyPage() {
     isPreviewMode ? "employer" : "candidate"
   );
 
-  // Load from localStorage on mount
-  const getInitialFormData = (): FormData => {
-    if (typeof window === "undefined") {
-      return {
-        name: "",
-        email: "",
-        dateOfBirth: undefined,
-        pronouns: "",
-        location: "",
-        currentRole: "",
-        currentCompany: "",
-        yearsExperience: "",
-        linkedIn: "",
-        portfolio: "",
-        resumeFile: null,
-        coverLetterFile: null,
-        portfolioFile: null,
-        questionAnswers: {},
-      };
-    }
+  // Data loading state
+  const [jobConfig, setJobConfig] = React.useState<JobApplyConfig | null>(null);
+  const [isLoadingConfig, setIsLoadingConfig] = React.useState(true);
+  const [configError, setConfigError] = React.useState<string | null>(null);
+  const [seekerId, setSeekerId] = React.useState<string | null>(null);
 
-    const saved = localStorage.getItem(`application-draft-${jobId}`);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return {
-        ...parsed,
-        resumeFile: null, // Files can't be saved to localStorage
-        coverLetterFile: null,
-        portfolioFile: null,
-        dateOfBirth: parsed.dateOfBirth ? new Date(parsed.dateOfBirth) : undefined,
-      };
-    }
-
-    return {
-      name: "",
-      email: "",
-      dateOfBirth: undefined,
-      pronouns: "",
-      location: "",
-      currentRole: "",
-      currentCompany: "",
-      yearsExperience: "",
-      linkedIn: "",
-      portfolio: "",
-      resumeFile: null,
-      coverLetterFile: null,
-      portfolioFile: null,
-      questionAnswers: {},
-    };
-  };
-
-  const [formData, setFormData] = React.useState<FormData>(getInitialFormData);
+  // Form state
+  const [formData, setFormData] = React.useState<FormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [progress, setProgress] = React.useState(0);
   const [lastSaved, setLastSaved] = React.useState<Date | null>(null);
 
+  // Fetch job config and seeker profile on mount
+  React.useEffect(() => {
+    async function loadData() {
+      try {
+        // Fetch job apply config
+        const configRes = await fetch(`/api/jobs/${jobId}/apply-config`);
+        if (!configRes.ok) {
+          if (configRes.status === 404) {
+            setConfigError("This job is no longer accepting applications.");
+          } else {
+            setConfigError("Failed to load application form.");
+          }
+          setIsLoadingConfig(false);
+          return;
+        }
+        const { data: config } = await configRes.json();
+        setJobConfig(config);
+
+        // Try to load seeker profile for pre-fill (if logged in)
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          try {
+            const profileRes = await fetch("/api/profile");
+            if (profileRes.ok) {
+              const profileData = await profileRes.json();
+              const account = profileData.data || profileData;
+              setSeekerId(account.seekerProfile?.id ?? null);
+
+              // Pre-fill form with profile data
+              setFormData((prev) => ({
+                ...prev,
+                name: account.name || prev.name,
+                email: account.email || prev.email,
+                pronouns: account.pronouns || prev.pronouns,
+                location: account.location || prev.location,
+                linkedIn: account.linkedinUrl || prev.linkedIn,
+                portfolio: account.websiteUrl || prev.portfolio,
+              }));
+            }
+          } catch {
+            // Profile fetch is optional — continue without pre-fill
+          }
+        }
+
+        // Restore draft from localStorage
+        const savedDraft = localStorage.getItem(`application-draft-${jobId}`);
+        if (savedDraft) {
+          const parsed = JSON.parse(savedDraft);
+          setFormData((prev) => ({
+            ...prev,
+            ...parsed,
+            resumeFile: null,
+            coverLetterFile: null,
+            portfolioFile: null,
+            dateOfBirth: parsed.dateOfBirth ? new Date(parsed.dateOfBirth) : undefined,
+          }));
+        }
+      } catch {
+        setConfigError("Failed to load application form. Please try again.");
+      } finally {
+        setIsLoadingConfig(false);
+      }
+    }
+
+    loadData();
+  }, [jobId]);
+
   // Auto-save to localStorage
   React.useEffect(() => {
+    if (!jobConfig) return;
     const timer = setTimeout(() => {
       const dataToSave = {
         ...formData,
-        resumeFile: null, // Don't save files
+        resumeFile: null,
         coverLetterFile: null,
         portfolioFile: null,
       };
@@ -193,41 +231,46 @@ export default function ApplyPage() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [formData, jobId]);
+  }, [formData, jobId, jobConfig]);
 
   // Calculate progress
   React.useEffect(() => {
+    if (!jobConfig) return;
     let completed = 0;
     let total = 0;
 
     // Personal info
-    total += 2; // name, email always required
-    if (formData.name) completed++;
-    if (formData.email) completed++;
-
-    if (MOCK_JOB_DATA.personalDetails.location.required) {
+    if (jobConfig.personalDetails.name.required) {
+      total++;
+      if (formData.name) completed++;
+    }
+    if (jobConfig.personalDetails.email.required) {
+      total++;
+      if (formData.email) completed++;
+    }
+    if (jobConfig.personalDetails.location.required) {
       total++;
       if (formData.location) completed++;
     }
 
     // Career details
-    if (MOCK_JOB_DATA.careerDetails.yearsExperience.required) {
+    if (jobConfig.careerDetails.yearsExperience.required) {
       total++;
       if (formData.yearsExperience) completed++;
     }
 
     // Required files
-    if (MOCK_JOB_DATA.requiredFiles.resume) {
+    if (jobConfig.requiredFiles.resume) {
       total++;
       if (formData.resumeFile) completed++;
     }
-    if (MOCK_JOB_DATA.requiredFiles.coverLetter) {
+    if (jobConfig.requiredFiles.coverLetter) {
       total++;
       if (formData.coverLetterFile) completed++;
     }
 
     // Required questions
-    MOCK_JOB_DATA.questions.forEach((q) => {
+    jobConfig.questions.forEach((q) => {
       if (q.required) {
         total++;
         if (formData.questionAnswers[q.id]) completed++;
@@ -235,7 +278,7 @@ export default function ApplyPage() {
     });
 
     setProgress(total > 0 ? Math.round((completed / total) * 100) : 0);
-  }, [formData]);
+  }, [formData, jobConfig]);
 
   // File upload handlers
   const handleFileUpload =
@@ -249,28 +292,36 @@ export default function ApplyPage() {
 
   // Validation
   const validateForm = () => {
+    if (!jobConfig) return false;
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    if (!/^\S+@\S+\.\S+$/.test(formData.email)) newErrors.email = "Invalid email format";
+    if (jobConfig.personalDetails.name.required && !formData.name.trim())
+      newErrors.name = "Name is required";
+    if (jobConfig.personalDetails.email.required && !formData.email.trim())
+      newErrors.email = "Email is required";
+    if (
+      jobConfig.personalDetails.email.required &&
+      formData.email &&
+      !/^\S+@\S+\.\S+$/.test(formData.email)
+    )
+      newErrors.email = "Invalid email format";
 
-    if (MOCK_JOB_DATA.personalDetails.location.required && !formData.location.trim()) {
+    if (jobConfig.personalDetails.location.required && !formData.location.trim()) {
       newErrors.location = "Location is required";
     }
 
-    if (MOCK_JOB_DATA.careerDetails.yearsExperience.required && !formData.yearsExperience) {
+    if (jobConfig.careerDetails.yearsExperience.required && !formData.yearsExperience) {
       newErrors.yearsExperience = "Years of experience is required";
     }
 
-    if (MOCK_JOB_DATA.requiredFiles.resume && !formData.resumeFile) {
+    if (jobConfig.requiredFiles.resume && !formData.resumeFile) {
       newErrors.resumeFile = "Resume is required";
     }
-    if (MOCK_JOB_DATA.requiredFiles.coverLetter && !formData.coverLetterFile) {
+    if (jobConfig.requiredFiles.coverLetter && !formData.coverLetterFile) {
       newErrors.coverLetterFile = "Cover letter is required";
     }
 
-    MOCK_JOB_DATA.questions.forEach((q) => {
+    jobConfig.questions.forEach((q) => {
       if (q.required && !formData.questionAnswers[q.id]) {
         newErrors[`question_${q.id}`] = "This question is required";
       }
@@ -283,6 +334,7 @@ export default function ApplyPage() {
   // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
 
     if (!validateForm()) {
       const firstError = document.querySelector('[data-error="true"]');
@@ -292,15 +344,83 @@ export default function ApplyPage() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Upload files to Supabase Storage
+      let resumeUrl: string | undefined;
+      let coverLetterUrl: string | undefined;
 
-    // Clear draft from localStorage
-    localStorage.removeItem(`application-draft-${jobId}`);
+      // Use seekerId for file path, or a temp ID if not authenticated
+      const fileOwnerId = seekerId || `anon-${jobId}`;
 
-    setIsSubmitting(false);
-    setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+      if (formData.resumeFile) {
+        const result = await uploadResume(formData.resumeFile, fileOwnerId);
+        if (result.error) {
+          setSubmitError("Failed to upload resume. Please try again.");
+          setIsSubmitting(false);
+          return;
+        }
+        resumeUrl = result.url;
+      }
+
+      if (formData.coverLetterFile) {
+        const result = await uploadCoverLetter(formData.coverLetterFile, fileOwnerId);
+        if (result.error) {
+          setSubmitError("Failed to upload cover letter. Please try again.");
+          setIsSubmitting(false);
+          return;
+        }
+        coverLetterUrl = result.url;
+      }
+
+      // Submit application
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId,
+          name: formData.name,
+          email: formData.email,
+          phone: undefined,
+          dateOfBirth: formData.dateOfBirth?.toISOString(),
+          pronouns: formData.pronouns || undefined,
+          location: formData.location || undefined,
+          currentRole: formData.currentRole || undefined,
+          currentCompany: formData.currentCompany || undefined,
+          yearsExperience: formData.yearsExperience || undefined,
+          linkedIn: formData.linkedIn || undefined,
+          portfolio: formData.portfolio || undefined,
+          resumeUrl,
+          resumeFileName: formData.resumeFile?.name,
+          coverLetterUrl,
+          coverLetterFileName: formData.coverLetterFile?.name,
+          questionAnswers:
+            Object.keys(formData.questionAnswers).length > 0 ? formData.questionAnswers : undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 409) {
+          setSubmitError("You have already applied to this job.");
+        } else if (res.status === 401) {
+          setSubmitError("Please sign in to submit your application.");
+        } else {
+          setSubmitError(errorData.error || "Failed to submit application. Please try again.");
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Clear draft from localStorage
+      localStorage.removeItem(`application-draft-${jobId}`);
+
+      setIsSubmitting(false);
+      setSubmitted(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch {
+      setSubmitError("An unexpected error occurred. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   // Save draft handler
@@ -313,8 +433,42 @@ export default function ApplyPage() {
     };
     localStorage.setItem(`application-draft-${jobId}`, JSON.stringify(dataToSave));
     setLastSaved(new Date());
-    alert("Draft saved! You can return to complete your application later.");
   };
+
+  // Loading state
+  if (isLoadingConfig) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--primitive-neutral-100)]">
+        <div className="text-center">
+          <Spinner size="lg" />
+          <p className="mt-4 text-body text-foreground-muted">Loading application form...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (configError || !jobConfig) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--primitive-neutral-100)]">
+        <div className="max-w-md rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-12 text-center">
+          <WarningCircle
+            weight="regular"
+            className="mx-auto mb-4 h-12 w-12 text-[var(--foreground-error)]"
+          />
+          <h1 className="mb-2 text-heading-sm text-foreground">
+            {configError || "Application unavailable"}
+          </h1>
+          <p className="mb-6 text-body text-foreground-muted">
+            This job may no longer be accepting applications.
+          </p>
+          <Button variant="primary" onClick={() => router.push("/jobs/search")}>
+            Browse Jobs
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Success state
   if (submitted) {
@@ -329,9 +483,8 @@ export default function ApplyPage() {
             <h1 className="mb-3 text-heading-md text-foreground">Application Submitted!</h1>
 
             <p className="mb-8 text-body text-foreground-muted">
-              Thank you for applying to <span className="font-semibold">{MOCK_JOB_DATA.title}</span>{" "}
-              at {MOCK_JOB_DATA.company}. We&apos;ve received your application and will review it
-              shortly.
+              Thank you for applying to <span className="font-semibold">{jobConfig.title}</span> at{" "}
+              {jobConfig.company}. We&apos;ve received your application and will review it shortly.
             </p>
 
             <div className="mb-8 rounded-xl bg-[var(--primitive-neutral-100)] p-6 text-left">
@@ -357,34 +510,12 @@ export default function ApplyPage() {
                 variant="tertiary"
                 size="lg"
                 leftIcon={<ArrowLeft weight="regular" className="h-5 w-5" />}
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/jobs/search")}
               >
-                Back to Jobs
+                Browse Jobs
               </Button>
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => {
-                  setSubmitted(false);
-                  setFormData({
-                    name: "",
-                    email: "",
-                    dateOfBirth: undefined,
-                    pronouns: "",
-                    location: "",
-                    currentRole: "",
-                    currentCompany: "",
-                    yearsExperience: "",
-                    linkedIn: "",
-                    portfolio: "",
-                    resumeFile: null,
-                    coverLetterFile: null,
-                    portfolioFile: null,
-                    questionAnswers: {},
-                  });
-                }}
-              >
-                Apply to Another Role
+              <Button variant="primary" size="lg" onClick={() => router.push("/jobs/applications")}>
+                View My Applications
               </Button>
             </div>
           </div>
@@ -400,25 +531,29 @@ export default function ApplyPage() {
         <div className="mx-auto max-w-4xl px-4 py-6">
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h1 className="mb-2 text-heading-sm text-foreground">{MOCK_JOB_DATA.title}</h1>
+              <h1 className="mb-2 text-heading-sm text-foreground">{jobConfig.title}</h1>
               <div className="flex flex-wrap items-center gap-3 text-body-sm text-foreground-muted">
                 <div className="flex items-center gap-1">
                   <Buildings weight="regular" className="h-4 w-4" />
-                  <span>{MOCK_JOB_DATA.company}</span>
+                  <span>{jobConfig.company}</span>
                 </div>
+                {jobConfig.location && (
+                  <>
+                    <span>•</span>
+                    <div className="flex items-center gap-1">
+                      <MapPin weight="regular" className="h-4 w-4" />
+                      <span>{jobConfig.location}</span>
+                    </div>
+                  </>
+                )}
                 <span>•</span>
-                <div className="flex items-center gap-1">
-                  <MapPin weight="regular" className="h-4 w-4" />
-                  <span>{MOCK_JOB_DATA.location}</span>
-                </div>
-                <span>•</span>
-                <span>{MOCK_JOB_DATA.locationType}</span>
+                <span>{jobConfig.locationType}</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-1">
               <div className="flex items-center gap-2 text-caption text-foreground-muted">
                 <Clock weight="regular" className="h-4 w-4" />
-                <span>~{MOCK_JOB_DATA.estimatedTime}</span>
+                <span>~5 minutes</span>
               </div>
               {lastSaved && (
                 <span className="text-caption text-foreground-subtle">
@@ -499,6 +634,20 @@ export default function ApplyPage() {
           </div>
         )}
 
+        {/* Submit error */}
+        {submitError && (
+          <div className="mb-6">
+            <Banner
+              type="critical"
+              dismissible
+              onDismiss={() => setSubmitError(null)}
+              title="Submission failed"
+              description={submitError}
+              className="rounded-xl"
+            />
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Info Section */}
           <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
@@ -509,55 +658,65 @@ export default function ApplyPage() {
 
             <div className="space-y-4 p-6">
               {/* Name */}
-              <div className="space-y-2" data-error={!!errors.name}>
-                <Label>
-                  Name <span className="text-[var(--primitive-red-600)]">*</span>
-                </Label>
-                <Input
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => {
-                    setFormData({ ...formData, name: e.target.value });
-                    if (errors.name) setErrors({ ...errors, name: "" });
-                  }}
-                  inputSize="lg"
-                  className="rounded-xl"
-                  error={!!errors.name}
-                />
-                {errors.name && (
-                  <p className="text-caption text-[var(--primitive-red-600)]">{errors.name}</p>
-                )}
-              </div>
+              {jobConfig.personalDetails.name.visible && (
+                <div className="space-y-2" data-error={!!errors.name}>
+                  <Label>
+                    Name{" "}
+                    {jobConfig.personalDetails.name.required && (
+                      <span className="text-[var(--primitive-red-600)]">*</span>
+                    )}
+                  </Label>
+                  <Input
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      if (errors.name) setErrors({ ...errors, name: "" });
+                    }}
+                    inputSize="lg"
+                    className="rounded-xl"
+                    error={!!errors.name}
+                  />
+                  {errors.name && (
+                    <p className="text-caption text-[var(--primitive-red-600)]">{errors.name}</p>
+                  )}
+                </div>
+              )}
 
               {/* Email */}
-              <div className="space-y-2" data-error={!!errors.email}>
-                <Label>
-                  Email <span className="text-[var(--primitive-red-600)]">*</span>
-                </Label>
-                <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) => {
-                    setFormData({ ...formData, email: e.target.value });
-                    if (errors.email) setErrors({ ...errors, email: "" });
-                  }}
-                  inputSize="lg"
-                  className="rounded-xl"
-                  error={!!errors.email}
-                />
-                {errors.email && (
-                  <p className="text-caption text-[var(--primitive-red-600)]">{errors.email}</p>
-                )}
-              </div>
+              {jobConfig.personalDetails.email.visible && (
+                <div className="space-y-2" data-error={!!errors.email}>
+                  <Label>
+                    Email{" "}
+                    {jobConfig.personalDetails.email.required && (
+                      <span className="text-[var(--primitive-red-600)]">*</span>
+                    )}
+                  </Label>
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      if (errors.email) setErrors({ ...errors, email: "" });
+                    }}
+                    inputSize="lg"
+                    className="rounded-xl"
+                    error={!!errors.email}
+                  />
+                  {errors.email && (
+                    <p className="text-caption text-[var(--primitive-red-600)]">{errors.email}</p>
+                  )}
+                </div>
+              )}
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Date of Birth */}
-                {MOCK_JOB_DATA.personalDetails.dateOfBirth.visible && (
+                {jobConfig.personalDetails.dateOfBirth.visible && (
                   <div className="space-y-2">
                     <Label>
                       Date of Birth
-                      {MOCK_JOB_DATA.personalDetails.dateOfBirth.required && (
+                      {jobConfig.personalDetails.dateOfBirth.required && (
                         <span className="text-[var(--primitive-red-600)]"> *</span>
                       )}
                     </Label>
@@ -571,11 +730,11 @@ export default function ApplyPage() {
                 )}
 
                 {/* Pronouns */}
-                {MOCK_JOB_DATA.personalDetails.pronouns.visible && (
+                {jobConfig.personalDetails.pronouns.visible && (
                   <div className="space-y-2">
                     <Label>
                       Pronouns
-                      {MOCK_JOB_DATA.personalDetails.pronouns.required && (
+                      {jobConfig.personalDetails.pronouns.required && (
                         <span className="text-[var(--primitive-red-600)]"> *</span>
                       )}
                     </Label>
@@ -599,11 +758,11 @@ export default function ApplyPage() {
               </div>
 
               {/* Location */}
-              {MOCK_JOB_DATA.personalDetails.location.visible && (
+              {jobConfig.personalDetails.location.visible && (
                 <div className="space-y-2" data-error={!!errors.location}>
                   <Label>
                     Location
-                    {MOCK_JOB_DATA.personalDetails.location.required && (
+                    {jobConfig.personalDetails.location.required && (
                       <span className="text-[var(--primitive-red-600)]"> *</span>
                     )}
                   </Label>
@@ -640,11 +799,11 @@ export default function ApplyPage() {
             <div className="space-y-4 p-6">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Current Role */}
-                {MOCK_JOB_DATA.careerDetails.currentRole.visible && (
+                {jobConfig.careerDetails.currentRole.visible && (
                   <div className="space-y-2">
                     <Label>
                       Current Role
-                      {MOCK_JOB_DATA.careerDetails.currentRole.required && (
+                      {jobConfig.careerDetails.currentRole.required && (
                         <span className="text-[var(--primitive-red-600)]"> *</span>
                       )}
                     </Label>
@@ -659,16 +818,16 @@ export default function ApplyPage() {
                 )}
 
                 {/* Current Company */}
-                {MOCK_JOB_DATA.careerDetails.currentCompany.visible && (
+                {jobConfig.careerDetails.currentCompany.visible && (
                   <div className="space-y-2">
                     <Label>
                       Current Company
-                      {MOCK_JOB_DATA.careerDetails.currentCompany.required && (
+                      {jobConfig.careerDetails.currentCompany.required && (
                         <span className="text-[var(--primitive-red-600)]"> *</span>
                       )}
                     </Label>
                     <Input
-                      placeholder="e.g., Acme Inc."
+                      placeholder="e.g., Solaris Energy Co."
                       value={formData.currentCompany}
                       onChange={(e) => setFormData({ ...formData, currentCompany: e.target.value })}
                       inputSize="lg"
@@ -678,11 +837,11 @@ export default function ApplyPage() {
                 )}
 
                 {/* Years Experience */}
-                {MOCK_JOB_DATA.careerDetails.yearsExperience.visible && (
+                {jobConfig.careerDetails.yearsExperience.visible && (
                   <div className="space-y-2" data-error={!!errors.yearsExperience}>
                     <Label>
                       Years of Experience
-                      {MOCK_JOB_DATA.careerDetails.yearsExperience.required && (
+                      {jobConfig.careerDetails.yearsExperience.required && (
                         <span className="text-[var(--primitive-red-600)]"> *</span>
                       )}
                     </Label>
@@ -713,11 +872,11 @@ export default function ApplyPage() {
                 )}
 
                 {/* LinkedIn */}
-                {MOCK_JOB_DATA.careerDetails.linkedIn.visible && (
+                {jobConfig.careerDetails.linkedIn.visible && (
                   <div className="space-y-2">
                     <Label>
                       LinkedIn Profile
-                      {MOCK_JOB_DATA.careerDetails.linkedIn.required && (
+                      {jobConfig.careerDetails.linkedIn.required && (
                         <span className="text-[var(--primitive-red-600)]"> *</span>
                       )}
                     </Label>
@@ -733,11 +892,11 @@ export default function ApplyPage() {
               </div>
 
               {/* Portfolio */}
-              {MOCK_JOB_DATA.careerDetails.portfolio.visible && (
+              {jobConfig.careerDetails.portfolio.visible && (
                 <div className="space-y-2">
                   <Label>
                     Portfolio
-                    {MOCK_JOB_DATA.careerDetails.portfolio.required && (
+                    {jobConfig.careerDetails.portfolio.required && (
                       <span className="text-[var(--primitive-red-600)]"> *</span>
                     )}
                   </Label>
@@ -754,9 +913,9 @@ export default function ApplyPage() {
           </section>
 
           {/* Required Files Section */}
-          {(MOCK_JOB_DATA.requiredFiles.resume ||
-            MOCK_JOB_DATA.requiredFiles.coverLetter ||
-            MOCK_JOB_DATA.requiredFiles.portfolio) && (
+          {(jobConfig.requiredFiles.resume ||
+            jobConfig.requiredFiles.coverLetter ||
+            jobConfig.requiredFiles.portfolio) && (
             <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
               <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                 <h2 className="mb-1 text-body-strong text-foreground">Required Files</h2>
@@ -765,7 +924,7 @@ export default function ApplyPage() {
 
               <div className="space-y-4 p-6">
                 {/* Resume */}
-                {MOCK_JOB_DATA.requiredFiles.resume && (
+                {jobConfig.requiredFiles.resume && (
                   <div className="space-y-2" data-error={!!errors.resumeFile}>
                     <Label>
                       Resume <span className="text-[var(--primitive-red-600)]">*</span>
@@ -822,7 +981,7 @@ export default function ApplyPage() {
                 )}
 
                 {/* Cover Letter */}
-                {MOCK_JOB_DATA.requiredFiles.coverLetter && (
+                {jobConfig.requiredFiles.coverLetter && (
                   <div className="space-y-2" data-error={!!errors.coverLetterFile}>
                     <Label>
                       Cover Letter <span className="text-[var(--primitive-red-600)]">*</span>
@@ -882,7 +1041,7 @@ export default function ApplyPage() {
           )}
 
           {/* Additional Questions Section */}
-          {MOCK_JOB_DATA.questions.length > 0 && (
+          {jobConfig.questions.length > 0 && (
             <section className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
               <div className="border-b border-[var(--primitive-neutral-200)] p-6">
                 <h2 className="mb-1 text-body-strong text-foreground">Additional Questions</h2>
@@ -890,7 +1049,7 @@ export default function ApplyPage() {
               </div>
 
               <div className="space-y-6 p-6">
-                {MOCK_JOB_DATA.questions.map((question, index) => (
+                {jobConfig.questions.map((question, index) => (
                   <div
                     key={question.id}
                     className="space-y-2"
