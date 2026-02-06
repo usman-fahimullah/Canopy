@@ -101,8 +101,19 @@ import {
   Link as LinkChain,
   ArrowLeft,
   WarningCircle,
+  MagnifyingGlass,
+  Funnel,
+  SquaresFour,
+  ListDashes,
 } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
+import { SearchInput } from "@/components/ui/search-input";
+import { KanbanEmpty, stageIcons, type KanbanStageType } from "@/components/ui/kanban";
+import {
+  CandidateCard,
+  CandidateKanbanHeader,
+  CandidateReviewers,
+} from "@/components/ui/candidate-card";
 import { logger, formatError } from "@/lib/logger";
 
 /**
@@ -360,6 +371,10 @@ export default function RoleEditPage() {
 
   // Active tab
   const [activeTab, setActiveTab] = React.useState("job-post");
+
+  // Candidates view mode
+  const [candidatesViewMode, setCandidatesViewMode] = React.useState<"grid" | "list">("grid");
+  const [candidateSearch, setCandidateSearch] = React.useState("");
 
   // Shareable link
   const [linkCopied, setLinkCopied] = React.useState(false);
@@ -2316,132 +2331,219 @@ export default function RoleEditPage() {
         </Modal>
 
         {/* ============================================
-              CANDIDATES TAB
+              CANDIDATES TAB — Kanban Pipeline View
+              Figma: toolbar + column headers + cards or empty state
               ============================================ */}
         {activeTab === "candidates" && (
-          <div className="space-y-4">
-            {/* Header Card */}
-            <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="mb-1 text-heading-sm text-foreground">Applications</h2>
-                  <p className="text-body-sm text-foreground-muted">
-                    {totalApplications}{" "}
-                    {totalApplications === 1 ? "candidate has" : "candidates have"} applied for this
-                    role
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="tertiary" size="sm">
-                    Export CSV
-                  </Button>
-                  <Button variant="primary" size="sm">
-                    Filter
-                  </Button>
-                </div>
+          <div className="flex flex-1 flex-col">
+            {/* Toolbar — Search + Filter + Add + View Toggle */}
+            <div className="flex items-center justify-between px-6 py-4">
+              <div className="flex items-center gap-3">
+                <SearchInput
+                  placeholder="Search candidates"
+                  value={candidateSearch}
+                  onValueChange={setCandidateSearch}
+                  className="w-64"
+                />
+                <Button variant="tertiary" size="default">
+                  <Funnel weight="bold" className="mr-2 h-4 w-4" />
+                  Filter
+                </Button>
+                <Button variant="tertiary" size="default">
+                  <Plus weight="bold" className="mr-2 h-4 w-4" />
+                  Add Candidates
+                </Button>
               </div>
-
-              {/* Stats — dynamic from stageCounts */}
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <div className="rounded-xl bg-[var(--primitive-neutral-100)] p-4">
-                  <div className="mb-1 text-heading-md text-foreground">{totalApplications}</div>
-                  <div className="text-caption text-foreground-muted">Total Applications</div>
-                </div>
-                {(jobData?.stages || []).slice(0, 3).map((stage) => (
-                  <div key={stage.id} className="rounded-xl bg-[var(--primitive-blue-100)] p-4">
-                    <div className="mb-1 text-heading-md text-foreground">
-                      {stageCounts[stage.id] || 0}
-                    </div>
-                    <div className="text-caption text-foreground-muted">{stage.name}</div>
-                  </div>
-                ))}
+              <div className="flex items-center overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border-default)]">
+                <button
+                  type="button"
+                  onClick={() => setCandidatesViewMode("grid")}
+                  className={`flex items-center gap-2 px-4 py-2 text-caption font-medium transition-colors ${
+                    candidatesViewMode === "grid"
+                      ? "bg-[var(--card-background)] text-foreground"
+                      : "bg-transparent text-foreground-muted hover:text-foreground"
+                  }`}
+                >
+                  <SquaresFour
+                    weight={candidatesViewMode === "grid" ? "fill" : "regular"}
+                    className="h-4 w-4"
+                  />
+                  Grid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCandidatesViewMode("list")}
+                  className={`flex items-center gap-2 border-l border-[var(--border-default)] px-4 py-2 text-caption font-medium transition-colors ${
+                    candidatesViewMode === "list"
+                      ? "bg-[var(--card-background)] text-foreground"
+                      : "bg-transparent text-foreground-muted hover:text-foreground"
+                  }`}
+                >
+                  <ListDashes
+                    weight={candidatesViewMode === "list" ? "fill" : "regular"}
+                    className="h-4 w-4"
+                  />
+                  List
+                </button>
               </div>
             </div>
 
-            {/* Applications List */}
-            {applications.length === 0 ? (
-              <div className="rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)] p-12 text-center">
-                <User
-                  weight="regular"
-                  className="mx-auto mb-3 h-12 w-12 text-[var(--primitive-neutral-400)]"
-                />
-                <h3 className="mb-1 text-body-strong text-foreground">No applications yet</h3>
-                <p className="text-body-sm text-foreground-muted">
-                  Applications will appear here once candidates start applying.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)] bg-[var(--card-background)]">
-                {/* Table Header */}
-                <div className="border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-6 py-3">
-                  <div className="grid grid-cols-12 gap-4 text-caption font-semibold text-foreground-muted">
-                    <div className="col-span-3">Candidate</div>
-                    <div className="col-span-2">Source</div>
-                    <div className="col-span-2">Experience</div>
-                    <div className="col-span-2">Applied</div>
-                    <div className="col-span-1">Match</div>
-                    <div className="col-span-1">Stage</div>
-                    <div className="col-span-1 text-right">Actions</div>
-                  </div>
-                </div>
+            {/* Pipeline Kanban Board */}
+            {(() => {
+              const defaultStages = [
+                { id: "applied", name: "Applied" },
+                { id: "qualified", name: "Qualified" },
+                { id: "interview", name: "Interviews" },
+                { id: "offer", name: "Offers" },
+              ];
+              const stages = jobData?.stages?.length ? jobData.stages : defaultStages;
 
-                {/* Application Rows — dynamic */}
-                <div className="divide-y divide-[var(--primitive-neutral-200)]">
-                  {applications.map((app) => (
-                    <div
-                      key={app.id}
-                      className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]"
-                    >
-                      <div className="grid grid-cols-12 items-center gap-4">
-                        <div className="col-span-3 flex items-center gap-3">
-                          <Avatar
-                            name={app.seeker.account.name || app.seeker.account.email}
-                            src={app.seeker.account.avatar || undefined}
-                            size="default"
-                          />
-                          <div>
-                            <div className="text-body-sm font-medium text-foreground">
-                              {app.seeker.account.name || "Unknown"}
-                            </div>
-                            <div className="text-caption text-foreground-muted">
-                              {app.seeker.account.email}
-                            </div>
-                          </div>
+              // Map stage IDs to KanbanStageType
+              const stageTypeMap: Record<string, KanbanStageType> = {
+                applied: "applied",
+                qualified: "qualified",
+                screening: "qualified",
+                interview: "interview",
+                offer: "offer",
+                hired: "hired",
+                rejected: "rejected",
+              };
+
+              // Filter applications by search
+              const filteredApplications = candidateSearch
+                ? applications.filter(
+                    (app) =>
+                      (app.seeker.account.name || "")
+                        .toLowerCase()
+                        .includes(candidateSearch.toLowerCase()) ||
+                      app.seeker.account.email.toLowerCase().includes(candidateSearch.toLowerCase())
+                  )
+                : applications;
+
+              // Group applications by stage
+              const applicationsByStage: Record<string, typeof applications> = {};
+              for (const stage of stages) {
+                applicationsByStage[stage.id] = filteredApplications.filter(
+                  (app) => app.stage === stage.id
+                );
+              }
+
+              const hasAnyApplications = applications.length > 0;
+
+              if (!hasAnyApplications) {
+                // Empty state — matches Figma
+                return (
+                  <>
+                    {/* Column headers — always visible */}
+                    <div className="flex border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-900)]">
+                      {stages.map((stage) => (
+                        <div key={stage.id} className="flex flex-1 items-center gap-2 px-4 py-3">
+                          <span className="text-body-sm font-semibold text-[var(--primitive-neutral-0)]">
+                            {stage.name}
+                          </span>
+                          <span className="rounded-full bg-[var(--primitive-neutral-700)] px-2 py-0.5 text-caption tabular-nums text-[var(--primitive-neutral-300)]">
+                            {stageCounts[stage.id] || 0}
+                          </span>
                         </div>
-                        <div className="col-span-2 text-body-sm text-foreground-muted">
-                          {app.source || "Direct"}
-                        </div>
-                        <div className="col-span-2 text-body-sm text-foreground-muted">
-                          {formatExperience(app.seeker.yearsExperience)}
-                        </div>
-                        <div className="col-span-2 text-body-sm text-foreground-muted">
-                          {formatRelativeTime(app.createdAt)}
-                        </div>
-                        <div className="col-span-1">
-                          {app.matchScore !== null ? (
-                            <Badge variant={getMatchScoreBadgeVariant(app.matchScore)} size="sm">
-                              {Math.round(app.matchScore)}%
-                            </Badge>
-                          ) : (
-                            <span className="text-caption text-foreground-muted">—</span>
-                          )}
-                        </div>
-                        <div className="col-span-1">
-                          <Badge variant={getStageBadgeVariant(app.stage)} size="sm">
-                            {formatStageName(app.stage)}
-                          </Badge>
-                        </div>
-                        <div className="col-span-1 flex justify-end">
-                          <Button variant="tertiary" size="sm">
-                            View
+                      ))}
+                    </div>
+
+                    {/* Empty state illustration */}
+                    <div className="flex flex-1 items-center justify-center bg-[var(--background-subtle)] px-12 py-16">
+                      <div className="flex max-w-3xl items-center gap-12">
+                        <div className="flex-1 space-y-6">
+                          <h2 className="text-heading-lg font-bold text-foreground">
+                            No candidates Yet.{"\n"}Let&apos;s attract some!
+                          </h2>
+                          <p className="text-body text-foreground-muted">
+                            This is where candidates will be once they apply for the role! Sit back,
+                            and relax while you wait.
+                          </p>
+                          <Button variant="primary" size="lg">
+                            <Plus weight="bold" className="mr-2 h-5 w-5" />
+                            Add Candidates
                           </Button>
+                        </div>
+                        <div className="hidden flex-shrink-0 lg:block">
+                          {/* Placeholder for illustration — matches Figma empty state visual */}
+                          <div className="flex h-80 w-80 items-center justify-center rounded-2xl bg-[var(--background-brand-subtle)]">
+                            <User
+                              weight="thin"
+                              className="h-32 w-32 text-[var(--primitive-green-400)]"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </>
+                );
+              }
+
+              // Populated kanban view
+              return (
+                <div className="flex flex-1 overflow-hidden">
+                  {stages.map((stage, index) => {
+                    const stageApps = applicationsByStage[stage.id] || [];
+                    const stageType = stageTypeMap[stage.id] || "applied";
+
+                    return (
+                      <div
+                        key={stage.id}
+                        className={`flex flex-1 flex-col ${
+                          index < stages.length - 1
+                            ? "border-r border-[var(--primitive-neutral-200)]"
+                            : ""
+                        }`}
+                      >
+                        {/* Column header */}
+                        <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-200)] px-4 py-3">
+                          {stageIcons[stageType] && (
+                            <span className={stageIcons[stageType].colorClass}>
+                              {stageIcons[stageType].icon}
+                            </span>
+                          )}
+                          <span className="text-body-sm font-semibold text-foreground">
+                            {stage.name}
+                          </span>
+                          <span className="rounded-full bg-[var(--background-emphasized)] px-2 py-0.5 text-caption tabular-nums text-foreground-subtle">
+                            {stageApps.length}
+                          </span>
+                        </div>
+
+                        {/* Cards area */}
+                        <div className="flex-1 space-y-2.5 overflow-y-auto bg-[var(--background-subtle)] p-3">
+                          {stageApps.length === 0 ? (
+                            <KanbanEmpty message="No candidates" />
+                          ) : (
+                            stageApps.map((app) => (
+                              <CandidateCard key={app.id} variant="compact">
+                                <CandidateKanbanHeader
+                                  name={app.seeker.account.name || "Unknown"}
+                                  avatarUrl={app.seeker.account.avatar || undefined}
+                                  rating={app.matchScore ? app.matchScore / 20 : undefined}
+                                  appliedDate={app.createdAt}
+                                />
+                                {/* Placeholder reviewer data — will be wired to real data */}
+                                <CandidateReviewers
+                                  reviewers={[
+                                    {
+                                      name: "Reviewer",
+                                      status: "in_review" as const,
+                                      color: "blue" as const,
+                                    },
+                                  ]}
+                                  expanded
+                                />
+                              </CandidateCard>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         )}
 
