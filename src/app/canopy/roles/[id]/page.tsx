@@ -859,14 +859,12 @@ export default function RoleEditPage() {
             className="cursor-pointer"
             onClick={() => router.push(`/canopy/candidates/${app.seeker.id}`)}
           >
-            <CandidateCard variant="compact">
-              <CandidateKanbanHeader
-                name={app.seeker.account.name || "Unknown"}
-                avatarUrl={app.seeker.account.avatar || undefined}
-                rating={app.matchScore ? app.matchScore / 20 : undefined}
-                appliedDate={app.createdAt}
-              />
-            </CandidateCard>
+            <CandidateKanbanHeader
+              name={app.seeker.account.name || "Unknown"}
+              avatarUrl={app.seeker.account.avatar || undefined}
+              matchScore={app.matchScore ?? undefined}
+              appliedDate={app.createdAt}
+            />
           </div>
         ),
         data: app,
