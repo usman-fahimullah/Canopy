@@ -578,7 +578,7 @@
     --select-item-checkmark: var(--primitive-blue-500);
 
     /* --- SELECTION --- */
-    --selection-background: var(--primitive-green-200);
+    --selection-background: var(--primitive-blue-200);
     --selection-foreground: var(--primitive-green-800);
 
     /* --- CARD --- */
@@ -1966,7 +1966,7 @@
     --select-item-checkmark: var(--primitive-blue-500);
 
     /* Selection */
-    --selection-background: var(--primitive-green-300);
+    --selection-background: var(--primitive-blue-300);
     --selection-foreground: var(--primitive-green-800);
 
     /* Card Components */

@@ -2,17 +2,45 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shell/page-header";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Plus, BriefcaseMetal, MapPin, Users, CalendarBlank } from "@phosphor-icons/react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { CategoryTag } from "@/components/ui/category-tag";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/data-table";
+import {
+  Plus,
+  Sparkle,
+  PencilSimple,
+  ListPlus,
+  Megaphone,
+  FolderOpen,
+} from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import {
+  RolesEmptyHeroIllustration,
+  RolesTemplatePromoIllustration,
+} from "@/components/illustrations/roles-illustrations";
 
 /* -------------------------------------------------------------------
    Types
    ------------------------------------------------------------------- */
+
+interface Pathway {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  color: string | null;
+}
 
 interface Job {
   id: string;
@@ -24,39 +52,270 @@ interface Job {
   publishedAt: string | null;
   closesAt: string | null;
   applicationCount?: number;
+  pathway?: Pathway | null;
+  climateCategory?: string | null;
   _count?: { applications: number };
+}
+
+interface RoleTemplate {
+  id: string;
+  name: string;
+  category: string;
+  categoryIcon?: string;
+  isNew?: boolean;
 }
 
 /* -------------------------------------------------------------------
    Helpers
    ------------------------------------------------------------------- */
 
-function statusBadgeVariant(status: string) {
-  switch (status.toUpperCase()) {
-    case "PUBLISHED":
-      return "success" as const;
-    case "DRAFT":
-      return "neutral" as const;
-    case "PAUSED":
-      return "warning" as const;
-    case "CLOSED":
-      return "error" as const;
-    default:
-      return "neutral" as const;
-  }
-}
-
-function formatStatus(status: string) {
-  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-}
-
 function formatDate(dateString: string | null) {
   if (!dateString) return "--";
-  return new Date(dateString).toLocaleDateString("en-US", {
-    month: "short",
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "long",
     day: "numeric",
     year: "numeric",
   });
+}
+
+/* -------------------------------------------------------------------
+   Sub-components
+   ------------------------------------------------------------------- */
+
+/** First-time UX: empty state hero with rocket illustration */
+function RolesEmptyState() {
+  return (
+    <div className="flex min-h-[500px] flex-col items-center gap-8 px-8 py-12 lg:flex-row lg:items-center lg:gap-16 lg:px-12 lg:py-16">
+      {/* Left: copy + CTA */}
+      <div className="flex max-w-lg flex-col gap-6 lg:flex-1">
+        <h2 className="text-heading-md font-bold text-[var(--foreground-default)] lg:text-heading-lg">
+          Go ahead, kickstart your talent search
+        </h2>
+        <p className="text-body text-[var(--foreground-muted)]">
+          Post your first job on Green Jobs Board, its easy and fast! We&apos;ll help you find the
+          right candidate fast and easy.
+        </p>
+        <div>
+          <Link href="/canopy/roles/new">
+            <Button>
+              <Plus size={18} weight="bold" />
+              Submit a role
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Right: illustration */}
+      <div className="flex-1 lg:max-w-[500px]">
+        <RolesEmptyHeroIllustration className="h-auto w-full" />
+      </div>
+    </div>
+  );
+}
+
+/** Template promo banner when no templates have been created yet */
+function TemplatePromoBanner() {
+  return (
+    <div className="overflow-hidden rounded-xl bg-[var(--primitive-blue-100)]">
+      <div className="flex flex-col items-center gap-8 p-8 lg:flex-row lg:gap-12 lg:p-10">
+        {/* Left: copy + CTA */}
+        <div className="flex max-w-lg flex-col gap-4 lg:flex-1">
+          <h3 className="text-heading-sm font-bold text-[var(--foreground-default)] lg:text-heading-md">
+            Create role templates that spark your talent search
+          </h3>
+          <p className="text-body-sm text-[var(--foreground-muted)]">
+            Standardize your roles once, then spin up polished job posts in minutes. With Green Jobs
+            Board&apos;s reusable templates, you&apos;ll move faster, stay consistent, and attract
+            the right candidates from the very first post.
+          </p>
+          <div>
+            <Link href="/canopy/roles/templates/new">
+              <Button variant="outline">
+                <ListPlus size={18} weight="bold" />
+                Create a template
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Right: illustration */}
+        <div className="flex-1 lg:max-w-[340px]">
+          <RolesTemplatePromoIllustration className="h-auto w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Template card for existing role templates */
+function RoleTemplateCard({ template }: { template: RoleTemplate }) {
+  return (
+    <Card variant="outlined" className="flex min-h-[180px] flex-col justify-between p-5">
+      <div className="flex flex-col gap-3">
+        {/* Top row: category tag + "New" badge */}
+        <div className="flex items-center gap-2">
+          <CategoryTag icon={<Megaphone size={18} weight="fill" />}>
+            {template.category}
+          </CategoryTag>
+          {template.isNew && (
+            <Badge variant="success" size="sm">
+              <Sparkle size={12} weight="fill" />
+              New
+            </Badge>
+          )}
+        </div>
+
+        {/* Template name */}
+        <h4 className="text-body-strong font-semibold text-[var(--foreground-default)]">
+          {template.name}
+        </h4>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 pt-4">
+        <Link href={`/canopy/roles/new?template=${template.id}`}>
+          <Button variant="tertiary" size="sm">
+            Use Template
+          </Button>
+        </Link>
+        <Link href={`/canopy/roles/templates/${template.id}/edit`}>
+          <Button variant="ghost" size="icon-sm">
+            <PencilSimple size={18} weight="bold" />
+          </Button>
+        </Link>
+      </div>
+    </Card>
+  );
+}
+
+/** "Create Another" placeholder card */
+function CreateTemplateCard() {
+  return (
+    <Link href="/canopy/roles/templates/new">
+      <Card
+        variant="flat"
+        className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 border border-dashed border-[var(--border-muted)] bg-[var(--background-muted)] transition-colors hover:border-[var(--border-default)] hover:bg-[var(--background-subtle)]"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background-emphasized)]">
+          <ListPlus size={20} weight="bold" className="text-[var(--foreground-muted)]" />
+        </div>
+        <span className="text-body-sm font-medium text-[var(--foreground-muted)]">
+          Create Another Role Template
+        </span>
+      </Card>
+    </Link>
+  );
+}
+
+/** Templates section: cards grid */
+function TemplatesSection({ templates }: { templates: RoleTemplate[] }) {
+  return (
+    <section className="space-y-4">
+      <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">Templates</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {templates.map((template) => (
+          <RoleTemplateCard key={template.id} template={template} />
+        ))}
+        <CreateTemplateCard />
+      </div>
+    </section>
+  );
+}
+
+/** Open Roles table section */
+function OpenRolesSection({ jobs }: { jobs: Job[] }) {
+  const openJobs = jobs.filter((j) => j.status === "PUBLISHED" || j.status === "DRAFT");
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center gap-3">
+        <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">Open Roles</h2>
+        <Badge variant="neutral" size="sm">
+          {openJobs.length}
+        </Badge>
+      </div>
+
+      <Table hoverable>
+        {/* Table title row */}
+        <TableHeader>
+          <TableRow>
+            <TableHead colSpan={5}>
+              <div className="flex items-center gap-2 py-1">
+                <FolderOpen size={20} weight="fill" className="text-[var(--foreground-muted)]" />
+                <span className="text-body-sm font-semibold text-[var(--foreground-default)]">
+                  Open Roles
+                </span>
+              </div>
+            </TableHead>
+          </TableRow>
+          <TableRow>
+            <TableHead sortable>Job Title</TableHead>
+            <TableHead sortable>Job Category</TableHead>
+            <TableHead sortable>Department</TableHead>
+            <TableHead sortable>Closing Date</TableHead>
+            <TableHead sortable># of Applications</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {openJobs.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5}>
+                <div className="py-8 text-center text-body-sm text-[var(--foreground-muted)]">
+                  No open roles yet. Submit your first role to get started.
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : (
+            openJobs.map((job) => {
+              const appCount = job.applicationCount ?? job._count?.applications ?? 0;
+
+              return (
+                <TableRow key={job.id}>
+                  <TableCell>
+                    <Link
+                      href={`/canopy/roles/${job.id}`}
+                      className="font-medium text-[var(--foreground-default)] hover:underline"
+                    >
+                      <span className="line-clamp-1">{job.title}</span>
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    {job.pathway ? (
+                      <CategoryTag variant="truncate" maxWidth={140}>
+                        {job.pathway.name}
+                      </CategoryTag>
+                    ) : job.climateCategory ? (
+                      <CategoryTag variant="truncate" maxWidth={140}>
+                        {job.climateCategory}
+                      </CategoryTag>
+                    ) : (
+                      <span className="text-[var(--foreground-subtle)]">--</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-[var(--foreground-muted)]">{job.location || "--"}</span>
+                  </TableCell>
+                  <TableCell>
+                    {job.closesAt ? (
+                      <Badge variant="warning" size="sm">
+                        {formatDate(job.closesAt)}
+                      </Badge>
+                    ) : (
+                      <span className="text-[var(--foreground-subtle)]">--</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-[var(--foreground-default)]">{appCount} Applied</span>
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
+    </section>
+  );
 }
 
 /* -------------------------------------------------------------------
@@ -66,9 +325,10 @@ function formatDate(dateString: string | null) {
 export default function RolesPage() {
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [templates, setTemplates] = useState<RoleTemplate[]>([]);
 
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchData = async () => {
       try {
         const res = await fetch("/api/jobs");
         if (res.ok) {
@@ -76,30 +336,51 @@ export default function RolesPage() {
           setJobs(data.jobs || []);
         }
       } catch (error) {
-        logger.error("Error fetching jobs", { error: formatError(error) });
+        logger.error("Error fetching roles", { error: formatError(error) });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchJobs();
+    fetchData();
+
+    // TODO: Fetch role templates when API is available
+    // For now templates stay empty — will show promo banner
   }, []);
+
+  const hasJobs = jobs.length > 0;
+  const hasTemplates = templates.length > 0;
+  const isEmpty = !hasJobs && !hasTemplates;
 
   return (
     <div>
+      {/* Header */}
       <PageHeader
         title="Roles"
         actions={
-          <Link
-            href="/canopy/roles/new"
-            className={cn(buttonVariants({ variant: "primary" }), "rounded-[16px]")}
-          >
-            <Plus size={18} weight="bold" />
-            Create Role
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* Primary CTA always visible */}
+            <Link href="/canopy/roles/new">
+              <Button>
+                <Plus size={18} weight="bold" />
+                Submit Role
+              </Button>
+            </Link>
+
+            {/* Secondary actions only when content exists */}
+            {hasJobs && (
+              <Link href="/canopy/roles/templates/new">
+                <Button variant="outline">
+                  <ListPlus size={18} weight="bold" />
+                  Create Template
+                </Button>
+              </Link>
+            )}
+          </div>
         }
       />
 
+      {/* Content */}
       <div className="px-8 py-6 lg:px-12">
         {/* Loading */}
         {loading && (
@@ -108,100 +389,26 @@ export default function RolesPage() {
           </div>
         )}
 
-        {/* Empty State */}
-        {!loading && jobs.length === 0 && (
-          <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-12 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--primitive-blue-100)]">
-              <BriefcaseMetal
-                size={28}
-                weight="fill"
-                className="text-[var(--primitive-blue-600)]"
-              />
-            </div>
-            <p className="text-foreground-default mb-1 text-body font-medium">
-              No roles posted yet
-            </p>
-            <p className="text-caption text-foreground-muted">
-              Create your first role to start hiring.
-            </p>
-          </div>
-        )}
+        {/* State 1: First-time UX — no jobs, no templates */}
+        {!loading && isEmpty && <RolesEmptyState />}
 
-        {/* Roles List */}
-        {!loading && jobs.length > 0 && (
-          <div className="space-y-3">
-            {/* Table Header */}
-            <div className="hidden gap-4 px-6 py-2 lg:grid lg:grid-cols-12">
-              <span className="col-span-4 text-caption font-medium text-foreground-muted">
-                Role
-              </span>
-              <span className="col-span-2 text-caption font-medium text-foreground-muted">
-                Location
-              </span>
-              <span className="col-span-2 text-caption font-medium text-foreground-muted">
-                Status
-              </span>
-              <span className="col-span-2 text-caption font-medium text-foreground-muted">
-                Applications
-              </span>
-              <span className="col-span-2 text-caption font-medium text-foreground-muted">
-                Posted
-              </span>
-            </div>
+        {/* State 2 & 3: Has content */}
+        {!loading && !isEmpty && (
+          <div className="space-y-10">
+            {/* Role Templates or Promo */}
+            {hasTemplates ? (
+              <TemplatesSection templates={templates} />
+            ) : (
+              <section className="space-y-4">
+                <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">
+                  Role Templates
+                </h2>
+                <TemplatePromoBanner />
+              </section>
+            )}
 
-            {/* Job Cards */}
-            {jobs.map((job) => {
-              const appCount = job.applicationCount ?? job._count?.applications ?? 0;
-
-              return (
-                <Link
-                  key={job.id}
-                  href={`/canopy/roles/${job.id}`}
-                  className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card lg:grid lg:grid-cols-12 lg:items-center lg:gap-4 lg:py-4"
-                >
-                  {/* Title */}
-                  <div className="col-span-4 flex min-w-0 items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
-                      <BriefcaseMetal
-                        size={20}
-                        weight="fill"
-                        className="text-[var(--primitive-blue-600)]"
-                      />
-                    </div>
-                    <p className="text-foreground-default truncate text-body font-medium">
-                      {job.title}
-                    </p>
-                  </div>
-
-                  {/* Location */}
-                  <div className="col-span-2 flex items-center gap-1.5 text-caption text-foreground-muted">
-                    <MapPin size={14} weight="bold" className="shrink-0" />
-                    <span className="truncate">{job.location || job.locationType || "Remote"}</span>
-                  </div>
-
-                  {/* Status */}
-                  <div className="col-span-2">
-                    <Badge variant={statusBadgeVariant(job.status)} size="sm">
-                      {formatStatus(job.status)}
-                    </Badge>
-                  </div>
-
-                  {/* Applications Count */}
-                  <div className="col-span-2 flex items-center gap-1.5 text-caption text-foreground-muted">
-                    <Users size={14} weight="bold" className="shrink-0" />
-                    <span>
-                      {appCount} application{appCount !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  {/* Posted Date */}
-                  <div className="col-span-2 flex items-center gap-1.5 text-caption text-foreground-muted">
-                    <CalendarBlank size={14} weight="bold" className="shrink-0" />
-                    <span>{formatDate(job.publishedAt)}</span>
-                  </div>
-                </Link>
-              );
-            })}
+            {/* Open Roles Table */}
+            {hasJobs && <OpenRolesSection jobs={jobs} />}
           </div>
         )}
       </div>
