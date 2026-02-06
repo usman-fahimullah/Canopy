@@ -1,7 +1,16 @@
 "use client";
 
 import { Star, Users } from "@phosphor-icons/react";
-import { Avatar, Badge } from "@/components/ui";
+import {
+  Avatar,
+  Badge,
+  ListItem,
+  ListItemLeading,
+  ListItemContent,
+  ListItemTitle,
+  ListItemDescription,
+  ListItemTrailing,
+} from "@/components/ui";
 import type { Mentor, MatchQuality } from "@/lib/coaching";
 import { cn } from "@/lib/utils";
 
@@ -37,26 +46,25 @@ export function MentorListItem({
   className,
 }: MentorListItemProps) {
   return (
-    <button
-      type="button"
-      onClick={() => onClick?.(mentor)}
+    <ListItem
+      interactive
+      selected={selected}
+      size="sm"
       className={cn(
-        "flex w-full items-start gap-3 rounded-[var(--radius-card)] px-4 py-3 text-left transition-colors",
-        "hover:bg-[var(--background-interactive-hover)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-2",
-        selected &&
-          "border-l-2 border-l-[var(--border-brand-emphasis)] bg-[var(--background-interactive-selected)]",
+        "rounded-[var(--radius-card)]",
+        selected && "border-l-2 border-l-[var(--border-brand-emphasis)]",
         !selected && "border-l-2 border-l-transparent",
         className
       )}
+      onClick={() => onClick?.(mentor)}
     >
-      <Avatar size="default" src={mentor.avatar ?? undefined} fallback={mentor.name.charAt(0)} />
+      <ListItemLeading size="md">
+        <Avatar size="default" src={mentor.avatar ?? undefined} fallback={mentor.name.charAt(0)} />
+      </ListItemLeading>
 
-      <div className="min-w-0 flex-1">
+      <ListItemContent>
         <div className="flex items-center gap-2">
-          <span className="truncate text-body-sm font-semibold text-[var(--foreground-default)]">
-            {mentor.name}
-          </span>
+          <ListItemTitle className="text-body-sm font-semibold">{mentor.name}</ListItemTitle>
           {mentor.matchQuality && (
             <Badge variant={MATCH_QUALITY_CONFIG[mentor.matchQuality].variant} size="sm">
               {MATCH_QUALITY_CONFIG[mentor.matchQuality].label}
@@ -65,10 +73,10 @@ export function MentorListItem({
         </div>
 
         {mentor.role && (
-          <p className="mt-0.5 truncate text-caption text-[var(--foreground-muted)]">
+          <ListItemDescription>
             {mentor.role}
             {mentor.company ? ` at ${mentor.company}` : ""}
-          </p>
+          </ListItemDescription>
         )}
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-caption text-[var(--foreground-subtle)]">
@@ -96,18 +104,20 @@ export function MentorListItem({
             <span className="text-caption-sm">+{(mentor.specialties?.length ?? 0) - 2}</span>
           )}
         </div>
-      </div>
+      </ListItemContent>
 
       {mentor.matchScore != null && mentor.matchScore > 0 && (
-        <Badge
-          variant={
-            mentor.matchScore >= 80 ? "success" : mentor.matchScore >= 50 ? "warning" : "neutral"
-          }
-          size="sm"
-        >
-          {mentor.matchScore}%
-        </Badge>
+        <ListItemTrailing>
+          <Badge
+            variant={
+              mentor.matchScore >= 80 ? "success" : mentor.matchScore >= 50 ? "warning" : "neutral"
+            }
+            size="sm"
+          >
+            {mentor.matchScore}%
+          </Badge>
+        </ListItemTrailing>
       )}
-    </button>
+    </ListItem>
   );
 }

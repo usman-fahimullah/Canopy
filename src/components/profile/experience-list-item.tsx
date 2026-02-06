@@ -1,6 +1,15 @@
 "use client";
 
-import { Avatar } from "@/components/ui/avatar";
+import {
+  Avatar,
+  ListItem,
+  ListItemLeading,
+  ListItemContent,
+  ListItemTitle,
+  ListItemDescription,
+  ListItemTrailing,
+  ListItemTrailingText,
+} from "@/components/ui";
 
 interface ExperienceListItemProps {
   companyName: string;
@@ -30,25 +39,27 @@ export function ExperienceListItem({
   companyLogo,
 }: ExperienceListItemProps) {
   return (
-    <div className="flex items-center gap-4 border-b border-[var(--border-muted)] py-4 last:border-0">
+    <ListItem size="md" className="border-b border-[var(--border-muted)] last:border-0">
       {/* Company logo */}
-      <Avatar src={companyLogo ?? undefined} name={companyName} shape="square" size="default" />
+      <ListItemLeading size="md">
+        <Avatar src={companyLogo ?? undefined} name={companyName} shape="square" size="default" />
+      </ListItemLeading>
 
       {/* Title + company */}
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-body font-medium text-[var(--foreground-default)]">
-          {jobTitle}
-        </p>
-        <p className="text-caption text-[var(--foreground-muted)]">
+      <ListItemContent>
+        <ListItemTitle>{jobTitle}</ListItemTitle>
+        <ListItemDescription>
           {companyName}
           {employmentType && ` · ${employmentType}`}
-        </p>
-      </div>
+        </ListItemDescription>
+      </ListItemContent>
 
       {/* Date range */}
-      <p className="shrink-0 text-caption text-[var(--foreground-muted)]">
-        {formatDateRange(startDate, endDate, isCurrent)}
-      </p>
-    </div>
+      <ListItemTrailing>
+        <ListItemTrailingText>
+          {formatDateRange(startDate, endDate, isCurrent)}
+        </ListItemTrailingText>
+      </ListItemTrailing>
+    </ListItem>
   );
 }

@@ -1,6 +1,14 @@
 "use client";
 
-import { Button, Badge } from "@/components/ui";
+import {
+  Button,
+  Badge,
+  ListItem,
+  ListItemLeading,
+  ListItemContent,
+  ListItemTitle,
+  ListItemTrailing,
+} from "@/components/ui";
 import { getGoalCategory } from "@/lib/profile/goal-categories";
 import { cn } from "@/lib/utils";
 import { CalendarBlank, Warning } from "@phosphor-icons/react";
@@ -75,18 +83,18 @@ export function GoalListItem({
   const dueDateInfo = targetDate ? formatDueDate(targetDate) : null;
 
   return (
-    <div className="flex items-center gap-4 border-b border-[var(--border-muted)] py-4 last:border-0">
+    <ListItem size="md" className="border-b border-[var(--border-muted)] last:border-0">
       {/* Category icon circle */}
-      <div
-        className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", cat.bg)}
-      >
-        <IconComponent size={20} weight="fill" className={cat.text} />
-      </div>
+      <ListItemLeading size="md">
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", cat.bg)}>
+          <IconComponent size={20} weight="fill" className={cat.text} />
+        </div>
+      </ListItemLeading>
 
       {/* Title + progress + due date */}
-      <div className="min-w-0 flex-1">
+      <ListItemContent>
         <div className="flex items-center gap-2">
-          <p className="truncate text-body font-medium text-[var(--foreground-default)]">{title}</p>
+          <ListItemTitle>{title}</ListItemTitle>
           {/* Overdue badge */}
           {dueDateInfo?.isOverdue && (
             <Badge variant="error" size="sm">
@@ -112,12 +120,14 @@ export function GoalListItem({
             </span>
           )}
         </div>
-      </div>
+      </ListItemContent>
 
       {/* View button */}
-      <Button variant="outline" size="sm" onClick={() => onView(id)}>
-        View Goal
-      </Button>
-    </div>
+      <ListItemTrailing>
+        <Button variant="outline" size="sm" onClick={() => onView(id)}>
+          View Goal
+        </Button>
+      </ListItemTrailing>
+    </ListItem>
   );
 }

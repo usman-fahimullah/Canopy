@@ -72,7 +72,7 @@ const listItemVariants = cva("relative flex items-center gap-3 transition-colors
       lg: "px-6 py-4",
     },
     interactive: {
-      true: "cursor-pointer hover:bg-[var(--background-interactive-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-inset",
+      true: "cursor-pointer hover:bg-[var(--background-interactive-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-inset",
       false: "",
     },
     selected: {
@@ -80,7 +80,7 @@ const listItemVariants = cva("relative flex items-center gap-3 transition-colors
       false: "",
     },
     disabled: {
-      true: "opacity-50 pointer-events-none",
+      true: "opacity-50 cursor-not-allowed pointer-events-none",
       false: "",
     },
   },
@@ -185,10 +185,7 @@ const ListItemTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTML
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        "truncate text-body font-bold leading-6 text-[var(--foreground-default)]",
-        className
-      )}
+      className={cn("truncate text-body font-bold text-[var(--foreground-default)]", className)}
       {...props}
     />
   )
