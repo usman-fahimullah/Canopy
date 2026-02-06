@@ -103,12 +103,11 @@ import {
   WarningCircle,
   MagnifyingGlass,
   Funnel,
-  SquaresFour,
-  ListDashes,
+  GridFour,
 } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
 import { SearchInput } from "@/components/ui/search-input";
-import { KanbanEmpty, stageIcons, type KanbanStageType } from "@/components/ui/kanban";
+import { KanbanEmpty } from "@/components/ui/kanban";
 import {
   CandidateCard,
   CandidateKanbanHeader,
@@ -2337,7 +2336,7 @@ export default function RoleEditPage() {
         {activeTab === "candidates" && (
           <div className="flex flex-1 flex-col">
             {/* Toolbar — Search + Filter + Add + View Toggle */}
-            <div className="flex items-center justify-between px-6 py-4">
+            <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] px-6 py-4">
               <div className="flex items-center gap-3">
                 <SearchInput
                   placeholder="Search candidates"
@@ -2354,38 +2353,14 @@ export default function RoleEditPage() {
                   Add Candidates
                 </Button>
               </div>
-              <div className="flex items-center overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border-default)]">
-                <button
-                  type="button"
-                  onClick={() => setCandidatesViewMode("grid")}
-                  className={`flex items-center gap-2 px-4 py-2 text-caption font-medium transition-colors ${
-                    candidatesViewMode === "grid"
-                      ? "bg-[var(--card-background)] text-foreground"
-                      : "bg-transparent text-foreground-muted hover:text-foreground"
-                  }`}
-                >
-                  <SquaresFour
-                    weight={candidatesViewMode === "grid" ? "fill" : "regular"}
-                    className="h-4 w-4"
-                  />
-                  Grid
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCandidatesViewMode("list")}
-                  className={`flex items-center gap-2 border-l border-[var(--border-default)] px-4 py-2 text-caption font-medium transition-colors ${
-                    candidatesViewMode === "list"
-                      ? "bg-[var(--card-background)] text-foreground"
-                      : "bg-transparent text-foreground-muted hover:text-foreground"
-                  }`}
-                >
-                  <ListDashes
-                    weight={candidatesViewMode === "list" ? "fill" : "regular"}
-                    className="h-4 w-4"
-                  />
-                  List
-                </button>
-              </div>
+              <SegmentedController
+                options={[
+                  { value: "grid", label: "Grid", icon: <GridFour size={16} /> },
+                  { value: "list", label: "List", icon: <ListBullets size={16} /> },
+                ]}
+                value={candidatesViewMode}
+                onValueChange={(v) => setCandidatesViewMode(v as "grid" | "list")}
+              />
             </div>
 
             {/* Pipeline Kanban Board */}
@@ -2393,21 +2368,10 @@ export default function RoleEditPage() {
               const defaultStages = [
                 { id: "applied", name: "Applied" },
                 { id: "qualified", name: "Qualified" },
-                { id: "interview", name: "Interviews" },
-                { id: "offer", name: "Offers" },
+                { id: "interview", name: "Interview" },
+                { id: "offer", name: "Offer" },
               ];
               const stages = jobData?.stages?.length ? jobData.stages : defaultStages;
-
-              // Map stage IDs to KanbanStageType
-              const stageTypeMap: Record<string, KanbanStageType> = {
-                applied: "applied",
-                qualified: "qualified",
-                screening: "qualified",
-                interview: "interview",
-                offer: "offer",
-                hired: "hired",
-                rejected: "rejected",
-              };
 
               // Filter applications by search
               const filteredApplications = candidateSearch
@@ -2430,118 +2394,104 @@ export default function RoleEditPage() {
 
               const hasAnyApplications = applications.length > 0;
 
-              if (!hasAnyApplications) {
-                // Empty state — matches Figma
-                return (
-                  <>
-                    {/* Column headers — always visible */}
-                    <div className="flex border-b border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-900)]">
-                      {stages.map((stage) => (
-                        <div key={stage.id} className="flex flex-1 items-center gap-2 px-4 py-3">
-                          <span className="text-body-sm font-semibold text-[var(--primitive-neutral-0)]">
-                            {stage.name}
-                          </span>
-                          <span className="rounded-full bg-[var(--primitive-neutral-700)] px-2 py-0.5 text-caption tabular-nums text-[var(--primitive-neutral-300)]">
-                            {stageCounts[stage.id] || 0}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+              return (
+                <>
+                  {/* Column headers — unified for both empty and populated states */}
+                  <div className="flex border-b border-[var(--primitive-neutral-300)]">
+                    {stages.map((stage, index) => (
+                      <div
+                        key={stage.id}
+                        className={`flex flex-1 items-center gap-2 px-4 py-3${
+                          index < stages.length - 1
+                            ? "border-r border-[var(--primitive-neutral-300)]"
+                            : ""
+                        }`}
+                      >
+                        <span className="text-body font-bold text-[var(--primitive-green-800)]">
+                          {stage.name}
+                        </span>
+                        <span className="min-w-[20px] rounded-[4px] bg-[var(--primitive-neutral-200)] px-1.5 py-0.5 text-center text-caption font-bold tabular-nums text-[var(--primitive-green-800)]">
+                          {(applicationsByStage[stage.id] || []).length}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
 
-                    {/* Empty state illustration */}
-                    <div className="flex flex-1 items-center justify-center bg-[var(--background-subtle)] px-12 py-16">
+                  {!hasAnyApplications ? (
+                    /* Empty state — Figma: reading-a-book illustration */
+                    <div className="flex flex-1 items-center justify-center bg-[var(--primitive-neutral-100)] px-12 py-6">
                       <div className="flex max-w-3xl items-center gap-12">
                         <div className="flex-1 space-y-6">
-                          <h2 className="text-heading-lg font-bold text-foreground">
+                          <h2 className="text-heading-lg font-medium text-[var(--primitive-green-800)]">
                             No candidates Yet.{"\n"}Let&apos;s attract some!
                           </h2>
-                          <p className="text-body text-foreground-muted">
+                          <p className="text-body text-[var(--primitive-green-800)]">
                             This is where candidates will be once they apply for the role! Sit back,
                             and relax while you wait.
                           </p>
                           <Button variant="primary" size="lg">
-                            <Plus weight="bold" className="mr-2 h-5 w-5" />
+                            <Plus weight="bold" className="mr-2 h-6 w-6" />
                             Add Candidates
                           </Button>
                         </div>
                         <div className="hidden flex-shrink-0 lg:block">
-                          {/* Placeholder for illustration — matches Figma empty state visual */}
-                          <div className="flex h-80 w-80 items-center justify-center rounded-2xl bg-[var(--background-brand-subtle)]">
-                            <User
-                              weight="thin"
-                              className="h-32 w-32 text-[var(--primitive-green-400)]"
-                            />
-                          </div>
+                          <img
+                            src="/illustrations/reading-a-book.svg"
+                            alt="Reading a book illustration"
+                            className="h-80 w-80 object-contain"
+                          />
                         </div>
                       </div>
                     </div>
-                  </>
-                );
-              }
+                  ) : (
+                    /* Populated kanban view */
+                    <div className="flex flex-1 overflow-hidden">
+                      {stages.map((stage, index) => {
+                        const stageApps = applicationsByStage[stage.id] || [];
 
-              // Populated kanban view
-              return (
-                <div className="flex flex-1 overflow-hidden">
-                  {stages.map((stage, index) => {
-                    const stageApps = applicationsByStage[stage.id] || [];
-                    const stageType = stageTypeMap[stage.id] || "applied";
-
-                    return (
-                      <div
-                        key={stage.id}
-                        className={`flex flex-1 flex-col ${
-                          index < stages.length - 1
-                            ? "border-r border-[var(--primitive-neutral-200)]"
-                            : ""
-                        }`}
-                      >
-                        {/* Column header */}
-                        <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-200)] px-4 py-3">
-                          {stageIcons[stageType] && (
-                            <span className={stageIcons[stageType].colorClass}>
-                              {stageIcons[stageType].icon}
-                            </span>
-                          )}
-                          <span className="text-body-sm font-semibold text-foreground">
-                            {stage.name}
-                          </span>
-                          <span className="rounded-full bg-[var(--background-emphasized)] px-2 py-0.5 text-caption tabular-nums text-foreground-subtle">
-                            {stageApps.length}
-                          </span>
-                        </div>
-
-                        {/* Cards area */}
-                        <div className="flex-1 space-y-2.5 overflow-y-auto bg-[var(--background-subtle)] p-3">
-                          {stageApps.length === 0 ? (
-                            <KanbanEmpty message="No candidates" />
-                          ) : (
-                            stageApps.map((app) => (
-                              <CandidateCard key={app.id} variant="compact">
-                                <CandidateKanbanHeader
-                                  name={app.seeker.account.name || "Unknown"}
-                                  avatarUrl={app.seeker.account.avatar || undefined}
-                                  rating={app.matchScore ? app.matchScore / 20 : undefined}
-                                  appliedDate={app.createdAt}
-                                />
-                                {/* Placeholder reviewer data — will be wired to real data */}
-                                <CandidateReviewers
-                                  reviewers={[
-                                    {
-                                      name: "Reviewer",
-                                      status: "in_review" as const,
-                                      color: "blue" as const,
-                                    },
-                                  ]}
-                                  expanded
-                                />
-                              </CandidateCard>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                        return (
+                          <div
+                            key={stage.id}
+                            className={`flex flex-1 flex-col${
+                              index < stages.length - 1
+                                ? "border-r border-[var(--primitive-neutral-300)]"
+                                : ""
+                            }`}
+                          >
+                            {/* Cards area */}
+                            <div className="flex-1 space-y-2.5 overflow-y-auto bg-[var(--primitive-neutral-100)] p-3">
+                              {stageApps.length === 0 ? (
+                                <KanbanEmpty message="No candidates" />
+                              ) : (
+                                stageApps.map((app) => (
+                                  <CandidateCard key={app.id} variant="compact">
+                                    <CandidateKanbanHeader
+                                      name={app.seeker.account.name || "Unknown"}
+                                      avatarUrl={app.seeker.account.avatar || undefined}
+                                      rating={app.matchScore ? app.matchScore / 20 : undefined}
+                                      appliedDate={app.createdAt}
+                                    />
+                                    {/* Placeholder reviewer data — will be wired to real data */}
+                                    <CandidateReviewers
+                                      reviewers={[
+                                        {
+                                          name: "Reviewer",
+                                          status: "in_review" as const,
+                                          color: "blue" as const,
+                                        },
+                                      ]}
+                                      expanded
+                                    />
+                                  </CandidateCard>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
               );
             })()}
           </div>
