@@ -82,6 +82,8 @@ export interface DndKanbanBoardProps {
   emptyMessage?: string;
   /** Custom class for the board container */
   className?: string;
+  /** Custom class applied to each column */
+  columnClassName?: string;
   /** Header actions slot for columns */
   columnHeaderActions?: (columnId: UniqueIdentifier) => React.ReactNode;
 }
@@ -124,18 +126,11 @@ interface SortableCardProps {
 }
 
 const SortableCard = ({ id, children, disabled = false }: SortableCardProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-    isOver,
-  } = useSortable({
-    id,
-    disabled,
-  });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } =
+    useSortable({
+      id,
+      disabled,
+    });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -161,6 +156,7 @@ interface DroppableColumnProps {
   items: KanbanItem[];
   headerActions?: React.ReactNode;
   emptyMessage?: string;
+  className?: string;
 }
 
 const DroppableColumn = ({
@@ -168,6 +164,7 @@ const DroppableColumn = ({
   items,
   headerActions,
   emptyMessage = "No candidates",
+  className,
 }: DroppableColumnProps) => {
   const itemIds = items.map((item) => item.id);
 
@@ -180,6 +177,7 @@ const DroppableColumn = ({
         color={column.color}
         icon={column.icon}
         headerActions={headerActions}
+        className={className}
         data-column-id={column.id}
       >
         {items.length === 0 ? (
@@ -209,6 +207,7 @@ export const DndKanbanBoard = ({
   loading = false,
   emptyMessage,
   className,
+  columnClassName,
   columnHeaderActions,
 }: DndKanbanBoardProps) => {
   const [activeId, setActiveId] = React.useState<UniqueIdentifier | null>(null);
@@ -264,9 +263,7 @@ export const DndKanbanBoard = ({
 
     // Check if we're over a column or an item
     const isOverColumn = columns.some((col) => col.id === overId);
-    const overColumn = isOverColumn
-      ? overId
-      : findColumnForItem(overId);
+    const overColumn = isOverColumn ? overId : findColumnForItem(overId);
 
     if (!activeColumn || !overColumn || activeColumn === overColumn) {
       return;
@@ -298,9 +295,7 @@ export const DndKanbanBoard = ({
 
     // Check if we're over a column or an item
     const isOverColumn = columns.some((col) => col.id === overId);
-    const overColumn = isOverColumn
-      ? overId
-      : findColumnForItem(overId);
+    const overColumn = isOverColumn ? overId : findColumnForItem(overId);
 
     if (!activeColumn || !overColumn) return;
 
@@ -320,14 +315,9 @@ export const DndKanbanBoard = ({
       );
 
       // Rebuild the full items array with the new order
-      const otherItems = items.filter(
-        (item) => item.columnId !== overColumn
-      );
+      const otherItems = items.filter((item) => item.columnId !== overColumn);
 
-      const newItems = [
-        ...otherItems,
-        ...reorderedColumnItems,
-      ];
+      const newItems = [...otherItems, ...reorderedColumnItems];
 
       onItemsChange(newItems);
 
@@ -371,21 +361,22 @@ export const DndKanbanBoard = ({
             items={getColumnItems(column.id)}
             headerActions={columnHeaderActions?.(column.id)}
             emptyMessage={emptyMessage}
+            className={columnClassName}
           />
         ))}
       </KanbanBoard>
 
       {/* Drag Overlay - Shows a preview while dragging */}
-      <DragOverlay dropAnimation={{
-        duration: 200,
-        easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
-      }}>
+      <DragOverlay
+        dropAnimation={{
+          duration: 200,
+          easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+        }}
+      >
         {activeItem && (
-          <div className="opacity-90 rotate-3 scale-105">
+          <div className="rotate-3 scale-105 opacity-90">
             <KanbanCard isDragging>
-              {renderDragOverlay
-                ? renderDragOverlay(activeItem)
-                : activeItem.content}
+              {renderDragOverlay ? renderDragOverlay(activeItem) : activeItem.content}
             </KanbanCard>
           </div>
         )}
@@ -406,7 +397,4 @@ export { useKanbanState, type UseKanbanStateOptions } from "./kanban-state";
 // EXPORTS
 // ============================================
 
-export {
-  SortableCard,
-  DroppableColumn,
-};
+export { SortableCard, DroppableColumn };

@@ -51,7 +51,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-// Drag and Drop
+// Drag and Drop — for Apply Form sortable questions
 import {
   DndContext,
   closestCenter,
@@ -69,6 +69,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+// Drag and Drop Kanban — for Candidates pipeline
+import { DndKanbanBoard, type KanbanColumnData } from "@/components/ui/kanban-dnd";
+import { useKanbanState, type KanbanItem } from "@/components/ui/kanban-state";
 
 // Icons
 import {
@@ -107,18 +111,8 @@ import {
 } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
 import { SearchInput } from "@/components/ui/search-input";
-import {
-  KanbanBoard,
-  KanbanColumn,
-  KanbanCard,
-  KanbanEmpty,
-  type KanbanStageType,
-} from "@/components/ui/kanban";
-import {
-  CandidateCard,
-  CandidateKanbanHeader,
-  CandidateReviewers,
-} from "@/components/ui/candidate-card";
+import { KanbanBoard, KanbanColumn, type KanbanStageType } from "@/components/ui/kanban";
+import { CandidateCard, CandidateKanbanHeader } from "@/components/ui/candidate-card";
 import { logger, formatError } from "@/lib/logger";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 
@@ -789,6 +783,95 @@ export default function RoleEditPage() {
       [newApplication.stage]: (prev[newApplication.stage] || 0) + 1,
     }));
   }, []);
+
+  // ============================================
+  // KANBAN PIPELINE — DnD state + API sync
+  // ============================================
+
+  const defaultStages = [
+    { id: "applied", name: "Applied" },
+    { id: "screening", name: "Screening" },
+    { id: "interview", name: "Interview" },
+    { id: "offer", name: "Offer" },
+    { id: "hired", name: "Hired" },
+  ];
+
+  const pipelineStages = jobData?.stages?.length ? jobData.stages : defaultStages;
+
+  // Map stage IDs to KanbanStageType for semantic icons
+  const mapStageToKanbanType = (stageId: string): KanbanStageType => {
+    const mapping: Record<string, KanbanStageType> = {
+      applied: "applied",
+      screening: "screening",
+      qualified: "qualified",
+      interview: "interview",
+      offer: "offer",
+      hired: "hired",
+      rejected: "rejected",
+    };
+    return mapping[stageId] || "applied";
+  };
+
+  // Build DndKanbanBoard column definitions
+  const kanbanColumns: KanbanColumnData[] = pipelineStages.map((stage) => ({
+    id: stage.id,
+    title: stage.name,
+    stage: mapStageToKanbanType(stage.id),
+  }));
+
+  // Filter applications by search
+  const filteredApplications = candidateSearch
+    ? applications.filter(
+        (app) =>
+          (app.seeker.account.name || "").toLowerCase().includes(candidateSearch.toLowerCase()) ||
+          app.seeker.account.email.toLowerCase().includes(candidateSearch.toLowerCase())
+      )
+    : applications;
+
+  // Convert applications to KanbanItem[] for DndKanbanBoard
+  const kanbanItems: KanbanItem[] = filteredApplications.map((app) => ({
+    id: app.id,
+    columnId: app.stage,
+    content: (
+      <div
+        className="cursor-pointer"
+        onClick={() => router.push(`/canopy/candidates/${app.seeker.id}`)}
+      >
+        <CandidateCard variant="compact">
+          <CandidateKanbanHeader
+            name={app.seeker.account.name || "Unknown"}
+            avatarUrl={app.seeker.account.avatar || undefined}
+            rating={app.matchScore ? app.matchScore / 20 : undefined}
+            appliedDate={app.createdAt}
+          />
+        </CandidateCard>
+      </div>
+    ),
+    data: app,
+  }));
+
+  // useKanbanState manages optimistic updates + error rollback
+  const {
+    items: kanbanStateItems,
+    handleItemsChange: handleKanbanItemsChange,
+    handleDragEnd: handleKanbanDragEnd,
+  } = useKanbanState({
+    initialItems: kanbanItems,
+    onMoveItem: async (itemId, _fromColumnId, toColumnId) => {
+      const res = await fetch(`/api/canopy/roles/${roleId}/applications/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: toColumnId, stageOrder: 0 }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to move candidate");
+      }
+      // Update local applications state to stay in sync
+      setApplications((prev) =>
+        prev.map((app) => (app.id === itemId ? { ...app, stage: String(toColumnId) } : app))
+      );
+    },
+  });
 
   // ============================================
   // DATA FETCHING — Load role from API
@@ -2372,7 +2455,7 @@ export default function RoleEditPage() {
 
         {/* ============================================
               CANDIDATES TAB — Kanban Pipeline View
-              Figma: toolbar + column headers + cards or empty state
+              DndKanbanBoard with drag-and-drop + API sync
               ============================================ */}
         {activeTab === "candidates" && (
           <div className="flex flex-1 flex-col">
@@ -2409,147 +2492,63 @@ export default function RoleEditPage() {
             </div>
 
             {/* Pipeline Kanban Board */}
-            {(() => {
-              const defaultStages = [
-                { id: "applied", name: "Applied" },
-                { id: "qualified", name: "Qualified" },
-                { id: "interview", name: "Interview" },
-                { id: "offer", name: "Offer" },
-              ];
-              const stages = jobData?.stages?.length ? jobData.stages : defaultStages;
-
-              // Filter applications by search
-              const filteredApplications = candidateSearch
-                ? applications.filter(
-                    (app) =>
-                      (app.seeker.account.name || "")
-                        .toLowerCase()
-                        .includes(candidateSearch.toLowerCase()) ||
-                      app.seeker.account.email.toLowerCase().includes(candidateSearch.toLowerCase())
-                  )
-                : applications;
-
-              // Group applications by stage
-              const applicationsByStage: Record<string, typeof applications> = {};
-              for (const stage of stages) {
-                applicationsByStage[stage.id] = filteredApplications.filter(
-                  (app) => app.stage === stage.id
-                );
-              }
-
-              const hasAnyApplications = applications.length > 0;
-
-              // Map stage IDs to KanbanStageType for semantic icons
-              const mapStageToKanbanType = (stageId: string): KanbanStageType => {
-                const mapping: Record<string, KanbanStageType> = {
-                  applied: "applied",
-                  qualified: "qualified",
-                  screening: "qualified",
-                  interview: "interview",
-                  offer: "offer",
-                  hired: "hired",
-                  rejected: "rejected",
-                };
-                return mapping[stageId] || "applied";
-              };
-
-              return (
-                <>
-                  {!hasAnyApplications ? (
-                    /* Empty state — Figma: reading-a-book illustration */
-                    <>
-                      {/* Column headers for empty state */}
-                      <KanbanBoard className="flex-none rounded-none border-b border-[var(--border-muted)] pb-0">
-                        {stages.map((stage) => (
-                          <KanbanColumn
-                            key={stage.id}
-                            title={stage.name}
-                            count={(applicationsByStage[stage.id] || []).length}
-                            stage={mapStageToKanbanType(stage.id)}
-                            className="min-h-0 w-auto flex-1 [&>div:last-child]:hidden"
-                          >
-                            <></>
-                          </KanbanColumn>
-                        ))}
-                      </KanbanBoard>
-                      <div className="flex flex-1 items-stretch bg-[var(--background-subtle)]">
-                        <div className="flex flex-1 items-center px-12 py-6">
-                          <div className="max-w-md space-y-6">
-                            <h2 className="text-heading-lg font-medium text-[var(--foreground-brand-emphasis)]">
-                              No candidates Yet.{"\n"}Let&apos;s attract some!
-                            </h2>
-                            <p className="text-body text-[var(--foreground-brand-emphasis)]">
-                              This is where candidates will be once they apply for the role! Sit
-                              back, and relax while you wait.
-                            </p>
-                            <Button
-                              variant="primary"
-                              size="lg"
-                              onClick={() => setAddCandidateModalOpen(true)}
-                            >
-                              <Plus weight="bold" className="mr-2 h-6 w-6" />
-                              Add Candidates
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="hidden flex-shrink-0 items-center justify-center lg:flex">
-                          <img
-                            src="/illustrations/reading-a-book.svg"
-                            alt="Reading a book illustration"
-                            className="h-full w-auto object-contain"
-                          />
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    /* Populated kanban view — using design system components */
-                    <KanbanBoard className="flex-1 rounded-none pb-0">
-                      {stages.map((stage) => {
-                        const stageApps = applicationsByStage[stage.id] || [];
-
-                        return (
-                          <KanbanColumn
-                            key={stage.id}
-                            title={stage.name}
-                            count={stageApps.length}
-                            stage={mapStageToKanbanType(stage.id)}
-                            className="w-auto flex-1"
-                          >
-                            {stageApps.length === 0 ? (
-                              <KanbanEmpty message="No candidates" />
-                            ) : (
-                              stageApps.map((app) => (
-                                <KanbanCard key={app.id}>
-                                  <CandidateCard variant="compact">
-                                    <CandidateKanbanHeader
-                                      name={app.seeker.account.name || "Unknown"}
-                                      avatarUrl={app.seeker.account.avatar || undefined}
-                                      rating={app.matchScore ? app.matchScore / 20 : undefined}
-                                      appliedDate={app.createdAt}
-                                    />
-                                    {/* Placeholder reviewer data — will be wired to real data */}
-                                    <CandidateReviewers
-                                      reviewers={[
-                                        {
-                                          name: "Reviewer",
-                                          status: "in_review" as const,
-                                          color: "blue" as const,
-                                        },
-                                      ]}
-                                      expanded
-                                    />
-                                  </CandidateCard>
-                                </KanbanCard>
-                              ))
-                            )}
-                          </KanbanColumn>
-                        );
-                      })}
-                    </KanbanBoard>
-                  )}
-                </>
-              );
-            })()}
+            {applications.length === 0 ? (
+              /* Empty state — column headers + illustration */
+              <>
+                <KanbanBoard className="flex-none rounded-none border-b border-[var(--border-muted)] pb-0">
+                  {pipelineStages.map((stage) => (
+                    <KanbanColumn
+                      key={stage.id}
+                      title={stage.name}
+                      count={0}
+                      stage={mapStageToKanbanType(stage.id)}
+                      className="min-h-0 w-auto flex-1 [&>div:last-child]:hidden"
+                    >
+                      <></>
+                    </KanbanColumn>
+                  ))}
+                </KanbanBoard>
+                <div className="flex flex-1 items-stretch bg-[var(--background-subtle)]">
+                  <div className="flex flex-1 items-center px-12 py-6">
+                    <div className="max-w-md space-y-6">
+                      <h2 className="text-heading-lg font-medium text-[var(--foreground-brand-emphasis)]">
+                        No candidates Yet.{"\n"}Let&apos;s attract some!
+                      </h2>
+                      <p className="text-body text-[var(--foreground-brand-emphasis)]">
+                        This is where candidates will be once they apply for the role! Sit back, and
+                        relax while you wait.
+                      </p>
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        onClick={() => setAddCandidateModalOpen(true)}
+                      >
+                        <Plus weight="bold" className="mr-2 h-6 w-6" />
+                        Add Candidates
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="hidden flex-shrink-0 items-center justify-center lg:flex">
+                    <img
+                      src="/illustrations/reading-a-book.svg"
+                      alt="Reading a book illustration"
+                      className="h-full w-auto object-contain"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Populated kanban view — drag-and-drop enabled */
+              <DndKanbanBoard
+                columns={kanbanColumns}
+                items={kanbanStateItems}
+                onItemsChange={handleKanbanItemsChange}
+                onDragEnd={handleKanbanDragEnd}
+                emptyMessage="No candidates"
+                className="flex-1 rounded-none pb-0"
+                columnClassName="w-auto flex-1"
+              />
+            )}
           </div>
         )}
 
