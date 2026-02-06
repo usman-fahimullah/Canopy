@@ -71,19 +71,18 @@ export function CandidatesTab({
         id: app.id,
         columnId: app.stage,
         content: (
-          <div
-            className="cursor-pointer"
+          <CandidateCard
+            variant="compact"
+            showDragHandle
             onClick={() => router.push(`/canopy/candidates/${app.seeker.id}`)}
           >
-            <CandidateCard variant="compact">
-              <CandidateKanbanHeader
-                name={app.seeker.account.name || "Unknown"}
-                avatarUrl={app.seeker.account.avatar || undefined}
-                rating={app.matchScore ? app.matchScore / 20 : undefined}
-                appliedDate={app.createdAt}
-              />
-            </CandidateCard>
-          </div>
+            <CandidateKanbanHeader
+              name={app.seeker.account.name || "Unknown"}
+              avatarUrl={app.seeker.account.avatar || undefined}
+              rating={app.matchScore ? app.matchScore / 20 : undefined}
+              appliedDate={app.createdAt}
+            />
+          </CandidateCard>
         ),
         data: app,
       })),
