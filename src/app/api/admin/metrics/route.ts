@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAuthenticatedAccount, isAdminAccount, unauthorizedResponse, forbiddenResponse } from "@/lib/auth-helpers";
+import {
+  getAuthenticatedAccount,
+  isAdminAccount,
+  unauthorizedResponse,
+  forbiddenResponse,
+} from "@/lib/auth-helpers";
 import { logger, formatError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
@@ -10,35 +15,30 @@ export async function GET(request: NextRequest) {
     if (!isAdminAccount(account)) return forbiddenResponse();
 
     // Get metrics in parallel using SQL aggregates instead of in-memory calculations
-    const [
-      pendingApplications,
-      activeCoaches,
-      totalSessions,
-      revenueAgg,
-      reviewAgg,
-    ] = await Promise.all([
-      prisma.coachProfile.count({
-        where: { status: "PENDING" },
-      }),
-      prisma.coachProfile.count({
-        where: { status: "ACTIVE" },
-      }),
-      prisma.session.count({
-        where: { status: "COMPLETED" },
-      }),
-      // Use Prisma aggregate for revenue instead of loading all bookings
-      prisma.booking.aggregate({
-        where: { status: "PAID" },
-        _sum: { platformFee: true },
-        _count: { _all: true },
-      }),
-      // Use Prisma aggregate for ratings instead of loading all reviews
-      prisma.review.aggregate({
-        where: { isVisible: true },
-        _avg: { rating: true },
-        _count: { _all: true },
-      }),
-    ]);
+    const [pendingApplications, activeCoaches, totalSessions, revenueAgg, reviewAgg] =
+      await Promise.all([
+        prisma.coachProfile.count({
+          where: { status: "PENDING" },
+        }),
+        prisma.coachProfile.count({
+          where: { status: "ACTIVE" },
+        }),
+        prisma.session.count({
+          where: { status: "COMPLETED" },
+        }),
+        // Use Prisma aggregate for revenue instead of loading all bookings
+        prisma.booking.aggregate({
+          where: { status: "PAID" },
+          _sum: { platformFee: true },
+          _count: { _all: true },
+        }),
+        // Use Prisma aggregate for ratings instead of loading all reviews
+        prisma.review.aggregate({
+          where: { isVisible: true },
+          _avg: { rating: true },
+          _count: { _all: true },
+        }),
+      ]);
 
     const totalRevenue = revenueAgg._sum.platformFee ?? 0;
     const avgRating = reviewAgg._avg.rating ?? 0;
@@ -80,7 +80,10 @@ export async function GET(request: NextRequest) {
       ]);
 
       // Group sessions by month
-      const sessionsByMonth: Record<string, { total: number; completed: number; cancelled: number }> = {};
+      const sessionsByMonth: Record<
+        string,
+        { total: number; completed: number; cancelled: number }
+      > = {};
       for (const s of recentSessions) {
         const key = `${s.scheduledAt.getFullYear()}-${String(s.scheduledAt.getMonth() + 1).padStart(2, "0")}`;
         if (!sessionsByMonth[key]) sessionsByMonth[key] = { total: 0, completed: 0, cancelled: 0 };
@@ -138,10 +141,10 @@ export async function GET(request: NextRequest) {
       ...analytics,
     });
   } catch (error) {
-    logger.error("Fetch metrics error", { error: formatError(error), endpoint: "/api/admin/metrics" });
-    return NextResponse.json(
-      { error: "Failed to fetch metrics" },
-      { status: 500 }
-    );
+    logger.error("Fetch metrics error", {
+      error: formatError(error),
+      endpoint: "/api/admin/metrics",
+    });
+    return NextResponse.json({ error: "Failed to fetch metrics" }, { status: 500 });
   }
 }

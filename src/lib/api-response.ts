@@ -16,10 +16,7 @@ import type { ZodError } from "zod";
  *   return apiSuccess({ goals });
  *   return apiSuccess({ goal }, 201);
  */
-export function apiSuccess<T extends Record<string, unknown>>(
-  data: T,
-  status = 200
-): NextResponse {
+export function apiSuccess<T extends Record<string, unknown>>(data: T, status = 200): NextResponse {
   return NextResponse.json(data, { status });
 }
 
@@ -30,11 +27,7 @@ export function apiSuccess<T extends Record<string, unknown>>(
  *   return apiError("Coach not found", 404);
  *   return apiError("Validation failed", 422, result.error.flatten());
  */
-export function apiError(
-  message: string,
-  status: number,
-  details?: unknown
-): NextResponse {
+export function apiError(message: string, status: number, details?: unknown): NextResponse {
   const body: Record<string, unknown> = { error: message };
   if (details !== undefined) {
     body.details = details;
@@ -64,10 +57,7 @@ export function apiValidationError(zodError: ZodError): NextResponse {
  *   return apiNotFound(); // "Resource not found"
  */
 export function apiNotFound(entity = "Resource"): NextResponse {
-  return NextResponse.json(
-    { error: `${entity} not found` },
-    { status: 404 }
-  );
+  return NextResponse.json({ error: `${entity} not found` }, { status: 404 });
 }
 
 /**

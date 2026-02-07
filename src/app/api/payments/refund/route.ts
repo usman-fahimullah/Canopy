@@ -20,13 +20,12 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -38,7 +37,6 @@ export async function POST(request: NextRequest) {
       );
     }
     const { bookingId, reason } = result.data;
-
 
     // Get booking with session
     const booking = await prisma.booking.findUnique({
@@ -55,10 +53,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { error: "Booking not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
     // Check if user is the mentee or coach
@@ -66,21 +61,16 @@ export async function POST(request: NextRequest) {
     const isCoach = booking.coach.account.supabaseId === user.id;
 
     if (!isMentee && !isCoach) {
-      return NextResponse.json(
-        { error: "Not authorized to refund this booking" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Not authorized to refund this booking" }, { status: 403 });
     }
 
     if (booking.status !== "PAID") {
-      return NextResponse.json(
-        { error: "Booking is not in a refundable state" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Booking is not in a refundable state" }, { status: 400 });
     }
 
     // Calculate refund amount based on cancellation policy
-    const hoursUntilSession = (booking.session.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
+    const hoursUntilSession =
+      (booking.session.scheduledAt.getTime() - Date.now()) / (1000 * 60 * 60);
     let refundPercent = 100;
     let refundReason = reason || "Cancellation";
 
@@ -161,7 +151,10 @@ export async function POST(request: NextRequest) {
       entityId: booking.id,
       userId: account?.id,
       changes: {
-        status: { from: booking.status, to: refundPercent === 100 ? "REFUNDED" : "PARTIALLY_REFUNDED" },
+        status: {
+          from: booking.status,
+          to: refundPercent === 100 ? "REFUNDED" : "PARTIALLY_REFUNDED",
+        },
         refundAmount: { from: 0, to: refundAmount },
       },
       metadata: {
@@ -182,9 +175,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logger.error("Refund error", { error: formatError(error), endpoint: "/api/payments/refund" });
-    return NextResponse.json(
-      { error: "Failed to process refund" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to process refund" }, { status: 500 });
   }
 }

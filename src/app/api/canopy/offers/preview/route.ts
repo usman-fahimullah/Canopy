@@ -12,7 +12,9 @@ import { safeJsonParse } from "@/lib/safe-json";
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -71,10 +73,11 @@ export async function POST(request: NextRequest) {
 
     const org = application.job.organization;
     const candidate = application.seeker.account;
-    const template = safeJsonParse<{ opening?: string; closing?: string; signingInstructions?: string }>(
-      org.offerTemplate,
-      {}
-    );
+    const template = safeJsonParse<{
+      opening?: string;
+      closing?: string;
+      signingInstructions?: string;
+    }>(org.offerTemplate, {});
 
     // Generate letter content
     const salaryFormatted = data.salary
@@ -118,7 +121,10 @@ export async function POST(request: NextRequest) {
 </div>
     `.trim();
 
-    return NextResponse.json({ letterContent, organization: { name: org.name, logo: org.logo, primaryColor: org.primaryColor } });
+    return NextResponse.json({
+      letterContent,
+      organization: { name: org.name, logo: org.logo, primaryColor: org.primaryColor },
+    });
   } catch (error) {
     logger.error("Error generating offer preview", {
       error: formatError(error),

@@ -7,14 +7,13 @@ import { logger, formatError } from "@/lib/logger";
  * POST /api/jobs/offers/[id]/view
  * Record that the candidate viewed the offer. Updates viewedAt and status.
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -79,7 +78,9 @@ export async function POST(
               type: "OFFER_VIEWED" as const,
               title: "Candidate viewed your offer",
               body: `The candidate has viewed the offer letter.`,
-              data: JSON.stringify({ link: `/canopy/roles/${offer.application.jobId}/applications/${offer.applicationId}` }),
+              data: JSON.stringify({
+                link: `/canopy/roles/${offer.application.jobId}/applications/${offer.applicationId}`,
+              }),
             })),
           });
         }

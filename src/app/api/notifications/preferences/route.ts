@@ -15,7 +15,9 @@ const DEFAULT_PREFS = {
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -47,7 +49,9 @@ export async function GET() {
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -72,7 +76,8 @@ export async function PATCH(request: NextRequest) {
     const updateData: Record<string, unknown> = {};
     if (result.data.inAppPrefs !== undefined) updateData.inAppPrefs = result.data.inAppPrefs;
     if (result.data.emailPrefs !== undefined) updateData.emailPrefs = result.data.emailPrefs;
-    if (result.data.emailFrequency !== undefined) updateData.emailFrequency = result.data.emailFrequency;
+    if (result.data.emailFrequency !== undefined)
+      updateData.emailFrequency = result.data.emailFrequency;
 
     const prefs = await (prisma as any).notificationPreference.upsert({
       where: { accountId: account.id },

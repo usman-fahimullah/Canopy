@@ -17,7 +17,9 @@ import { z } from "zod";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -176,7 +178,9 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -235,7 +239,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!interviewer || interviewer.organizationId !== application.job.organizationId) {
-      return NextResponse.json({ error: "Interviewer not found in this organization" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Interviewer not found in this organization" },
+        { status: 404 }
+      );
     }
 
     // Create interview

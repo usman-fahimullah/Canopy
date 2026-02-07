@@ -66,11 +66,9 @@ export function ApprovalBanner() {
   }
 
   return (
-    <Alert className="border-border-warning bg-background-warning/10">
+    <Alert className="bg-background-warning/10 border-border-warning">
       <Warning className="h-4 w-4 text-foreground-warning" />
-      <AlertTitle className="text-foreground-warning font-semibold">
-        Pending Approvals
-      </AlertTitle>
+      <AlertTitle className="font-semibold text-foreground-warning">Pending Approvals</AlertTitle>
       <AlertDescription className="mt-1 text-foreground-warning">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -84,7 +82,7 @@ export function ApprovalBanner() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-foreground-warning hover:text-foreground-warning/80"
+              className="hover:text-foreground-warning/80 text-foreground-warning"
             >
               Review
             </Button>

@@ -108,9 +108,7 @@ export default function NotificationPreferencesPage() {
   const handleToggle = useCallback(
     (type: NotificationType, channel: "inApp" | "email", value: boolean) => {
       setPreferences((prev) =>
-        prev.map((pref) =>
-          pref.type === type ? { ...pref, [channel]: value } : pref
-        )
+        prev.map((pref) => (pref.type === type ? { ...pref, [channel]: value } : pref))
       );
     },
     []
@@ -146,9 +144,7 @@ export default function NotificationPreferencesPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Page Header */}
-      <PageHeader
-        title="Notification Preferences"
-      />
+      <PageHeader title="Notification Preferences" />
 
       <div className="px-8 py-2 lg:px-12">
         <p className="text-body text-[var(--foreground-muted)]">
@@ -169,7 +165,9 @@ export default function NotificationPreferencesPage() {
           <div className="flex gap-4 p-6">
             <WarningCircle size={24} className="shrink-0 text-[var(--foreground-error)]" />
             <div>
-              <p className="font-medium text-[var(--foreground-error)]">Failed to load preferences</p>
+              <p className="font-medium text-[var(--foreground-error)]">
+                Failed to load preferences
+              </p>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">{error}</p>
               <Button variant="secondary" size="sm" className="mt-3" onClick={fetchPreferences}>
                 Try Again
@@ -195,13 +193,13 @@ export default function NotificationPreferencesPage() {
           <div className="overflow-hidden rounded-lg border border-[var(--border-muted)]">
             <div className="bg-[var(--background-subtle)] px-6 py-4">
               <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-4 text-caption-strong font-semibold text-[var(--foreground-subtle)] uppercase">
+                <div className="col-span-4 text-caption-strong font-semibold uppercase text-[var(--foreground-subtle)]">
                   Notification Type
                 </div>
-                <div className="col-span-4 flex justify-end text-caption-strong font-semibold text-[var(--foreground-subtle)] uppercase">
+                <div className="col-span-4 flex justify-end text-caption-strong font-semibold uppercase text-[var(--foreground-subtle)]">
                   In-App
                 </div>
-                <div className="col-span-4 flex justify-end text-caption-strong font-semibold text-[var(--foreground-subtle)] uppercase">
+                <div className="col-span-4 flex justify-end text-caption-strong font-semibold uppercase text-[var(--foreground-subtle)]">
                   Email
                 </div>
               </div>
@@ -228,9 +226,7 @@ export default function NotificationPreferencesPage() {
                         labelPosition="left"
                         labelClassName="sr-only"
                         checked={pref.inApp}
-                        onCheckedChange={(value) =>
-                          handleToggle(pref.type, "inApp", value)
-                        }
+                        onCheckedChange={(value) => handleToggle(pref.type, "inApp", value)}
                       />
                     </div>
 
@@ -241,9 +237,7 @@ export default function NotificationPreferencesPage() {
                         labelPosition="left"
                         labelClassName="sr-only"
                         checked={pref.email}
-                        onCheckedChange={(value) =>
-                          handleToggle(pref.type, "email", value)
-                        }
+                        onCheckedChange={(value) => handleToggle(pref.type, "email", value)}
                       />
                     </div>
                   </div>
@@ -255,8 +249,9 @@ export default function NotificationPreferencesPage() {
           {/* Info Box */}
           <Card className="bg-[var(--background-info)] p-6">
             <p className="text-body text-[var(--foreground-default)]">
-              <strong>In-App Notifications</strong> appear in your notification panel and via the badge count.{" "}
-              <strong>Email Notifications</strong> are sent to your registered email address.
+              <strong>In-App Notifications</strong> appear in your notification panel and via the
+              badge count. <strong>Email Notifications</strong> are sent to your registered email
+              address.
             </p>
           </Card>
 

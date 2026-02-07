@@ -450,34 +450,29 @@ export default function ChartsPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Charts
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          Charts provide visual representations of hiring analytics and metrics.
-          Built specifically for ATS dashboards, these components help recruiters
-          and hiring managers understand pipeline health, candidate flow, and
-          source effectiveness at a glance.
+        <h1 className="mb-2 text-heading-lg text-foreground">Charts</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          Charts provide visual representations of hiring analytics and metrics. Built specifically
+          for ATS dashboards, these components help recruiters and hiring managers understand
+          pipeline health, candidate flow, and source effectiveness at a glance.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Analytics
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             7 Chart Types
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             Responsive
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>* Pipeline funnel visualization</li>
               <li>* Hiring trends over time</li>
               <li>* Source effectiveness comparison</li>
@@ -485,11 +480,9 @@ export default function ChartsPage() {
               <li>* Dashboard metric cards with sparklines</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>* Simple counts (use StatCard instead)</li>
               <li>* Real-time data that changes rapidly</li>
               <li>* Data tables with precise values</li>
@@ -567,11 +560,7 @@ const data = [
 />`}
         >
           <div className="max-w-3xl">
-            <PipelineFunnel
-              data={pipelineData}
-              title="Pipeline Overview"
-              showPercentage
-            />
+            <PipelineFunnel data={pipelineData} title="Pipeline Overview" showPercentage />
           </div>
         </CodePreview>
       </ComponentCard>
@@ -640,11 +629,8 @@ const data = [
 />`}
         >
           <div className="max-w-xl">
-            <ScoreDistribution
-              data={scoreDistributionData}
-              title="AI Match Score Distribution"
-            />
-            <p className="text-caption text-foreground-muted mt-4">
+            <ScoreDistribution data={scoreDistributionData} title="AI Match Score Distribution" />
+            <p className="mt-4 text-caption text-foreground-muted">
               Colors indicate score quality: red (poor), yellow (average), green (good/excellent).
             </p>
           </div>
@@ -731,11 +717,7 @@ const data = [
 />`}
         >
           <div className="max-w-2xl">
-            <SourceEffectiveness
-              data={sourceData}
-              title="Source Performance"
-              showHires
-            />
+            <SourceEffectiveness data={sourceData} title="Source Performance" showHires />
           </div>
         </CodePreview>
       </ComponentCard>
@@ -850,24 +832,11 @@ const data = [
 </ChartCard>`}
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <ChartCard
-              title="Pipeline Overview"
-              description="Current candidate distribution"
-            >
-              <StageDistribution
-                data={stageDistributionData}
-                showLegend={false}
-              />
+            <ChartCard title="Pipeline Overview" description="Current candidate distribution">
+              <StageDistribution data={stageDistributionData} showLegend={false} />
             </ChartCard>
-            <ChartCard
-              title="Applications Trend"
-              description="Last 7 months"
-            >
-              <TrendChart
-                data={trendData}
-                color={chartColors.primary.main}
-                showArea
-              />
+            <ChartCard title="Applications Trend" description="Last 7 months">
+              <TrendChart data={trendData} color={chartColors.primary.main} showArea />
             </ChartCard>
           </div>
         </CodePreview>
@@ -883,12 +852,12 @@ const data = [
       >
         <div className="space-y-6">
           <div>
-            <h4 className="text-body-strong mb-3">Primary Colors</h4>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+            <h4 className="mb-3 text-body-strong">Primary Colors</h4>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {Object.entries(chartColors.primary).map(([name, color]) => (
                 <div key={name} className="flex items-center gap-3">
                   <div
-                    className="w-8 h-8 rounded-md border border-border-muted"
+                    className="h-8 w-8 rounded-md border border-border-muted"
                     style={{ backgroundColor: color }}
                   />
                   <div>
@@ -900,12 +869,12 @@ const data = [
             </div>
           </div>
           <div>
-            <h4 className="text-body-strong mb-3">Secondary Colors</h4>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+            <h4 className="mb-3 text-body-strong">Secondary Colors</h4>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {Object.entries(chartColors.secondary).map(([name, color]) => (
                 <div key={name} className="flex items-center gap-3">
                   <div
-                    className="w-8 h-8 rounded-md border border-border-muted"
+                    className="h-8 w-8 rounded-md border border-border-muted"
                     style={{ backgroundColor: color }}
                   />
                   <div>
@@ -917,12 +886,12 @@ const data = [
             </div>
           </div>
           <div>
-            <h4 className="text-body-strong mb-3">Pipeline Stage Colors</h4>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-5">
+            <h4 className="mb-3 text-body-strong">Pipeline Stage Colors</h4>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
               {chartColors.pipeline.map((color, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <div
-                    className="w-8 h-8 rounded-md border border-border-muted"
+                    className="h-8 w-8 rounded-md border border-border-muted"
                     style={{ backgroundColor: color }}
                   />
                   <div>
@@ -934,16 +903,16 @@ const data = [
             </div>
           </div>
           <div>
-            <h4 className="text-body-strong mb-3">Score Colors</h4>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+            <h4 className="mb-3 text-body-strong">Score Colors</h4>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {Object.entries(chartColors.score).map(([name, color]) => (
                 <div key={name} className="flex items-center gap-3">
                   <div
-                    className="w-8 h-8 rounded-md border border-border-muted"
+                    className="h-8 w-8 rounded-md border border-border-muted"
                     style={{ backgroundColor: color }}
                   />
                   <div>
-                    <p className="text-sm font-medium text-foreground capitalize">{name}</p>
+                    <p className="text-sm font-medium capitalize text-foreground">{name}</p>
                     <p className="text-caption text-foreground-muted">{color}</p>
                   </div>
                 </div>
@@ -951,8 +920,9 @@ const data = [
             </div>
           </div>
         </div>
-        <p className="text-caption text-foreground-muted mt-4">
-          Import from <code className="bg-background-muted px-1 rounded">chartColors</code> for consistent coloring across charts.
+        <p className="mt-4 text-caption text-foreground-muted">
+          Import from <code className="rounded bg-background-muted px-1">chartColors</code> for
+          consistent coloring across charts.
         </p>
       </ComponentCard>
 
@@ -962,35 +932,35 @@ const data = [
       <ComponentCard id="props" title="Props Reference">
         <div className="space-y-8">
           <div>
-            <h4 className="text-body-strong mb-4">ChartCard Props</h4>
+            <h4 className="mb-4 text-body-strong">ChartCard Props</h4>
             <PropsTable props={chartCardProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">PipelineFunnel Props</h4>
+            <h4 className="mb-4 text-body-strong">PipelineFunnel Props</h4>
             <PropsTable props={pipelineFunnelProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">StageDistribution Props</h4>
+            <h4 className="mb-4 text-body-strong">StageDistribution Props</h4>
             <PropsTable props={stageDistributionProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">ScoreDistribution Props</h4>
+            <h4 className="mb-4 text-body-strong">ScoreDistribution Props</h4>
             <PropsTable props={scoreDistributionProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">TrendChart Props</h4>
+            <h4 className="mb-4 text-body-strong">TrendChart Props</h4>
             <PropsTable props={trendChartProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">SourceEffectiveness Props</h4>
+            <h4 className="mb-4 text-body-strong">SourceEffectiveness Props</h4>
             <PropsTable props={sourceEffectivenessProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">ComparisonChart Props</h4>
+            <h4 className="mb-4 text-body-strong">ComparisonChart Props</h4>
             <PropsTable props={comparisonChartProps} />
           </div>
           <div>
-            <h4 className="text-body-strong mb-4">MetricSparkline Props</h4>
+            <h4 className="mb-4 text-body-strong">MetricSparkline Props</h4>
             <PropsTable props={metricSparklineProps} />
           </div>
         </div>
@@ -1000,9 +970,7 @@ const data = [
       {/* 13. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use PipelineFunnel for recruiting pipeline visualization",
@@ -1085,9 +1053,7 @@ const data = [
       {/* 16. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Hiring Dashboard Overview"
@@ -1160,11 +1126,8 @@ const data = [
           description="Understanding AI match score distribution"
         >
           <div className="space-y-4">
-            <ScoreDistribution
-              data={scoreDistributionData}
-              title="AI Match Score Distribution"
-            />
-            <div className="p-4 bg-background-subtle rounded-lg">
+            <ScoreDistribution data={scoreDistributionData} title="AI Match Score Distribution" />
+            <div className="rounded-lg bg-background-subtle p-4">
               <p className="text-caption text-foreground-muted">
                 <strong>Insight:</strong> 19 candidates (13%) have excellent match scores (81-100%).
                 Consider prioritizing these for immediate screening.

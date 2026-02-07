@@ -12,14 +12,13 @@ import { UpdateEmailTemplateSchema } from "@/lib/validators/email-templates";
  * Get a single email template by ID.
  * Auth: org member.
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return apiError("Unauthorized", 401);
@@ -76,14 +75,13 @@ export async function GET(
  * Auth: org member with ADMIN/RECRUITER role.
  * Cannot update default templates.
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return apiError("Unauthorized", 401);
@@ -184,7 +182,9 @@ export async function DELETE(
   const { id } = await params;
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return apiError("Unauthorized", 401);

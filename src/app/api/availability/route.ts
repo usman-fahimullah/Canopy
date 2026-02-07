@@ -9,7 +9,9 @@ import { safeJsonParse } from "@/lib/safe-json";
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,7 +36,10 @@ export async function GET() {
       videoLink: coach.videoLink,
     });
   } catch (error) {
-    logger.error("Fetch availability error", { error: formatError(error), endpoint: "/api/availability" });
+    logger.error("Fetch availability error", {
+      error: formatError(error),
+      endpoint: "/api/availability",
+    });
     return NextResponse.json({ error: "Failed to fetch availability" }, { status: 500 });
   }
 }
@@ -43,7 +48,9 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,7 +73,8 @@ export async function PUT(request: NextRequest) {
         { status: 422 }
       );
     }
-    const { availability, sessionDuration, bufferTime, maxSessionsPerWeek, videoLink } = result.data;
+    const { availability, sessionDuration, bufferTime, maxSessionsPerWeek, videoLink } =
+      result.data;
 
     const updateData: Record<string, unknown> = {};
 
@@ -100,7 +108,10 @@ export async function PUT(request: NextRequest) {
       videoLink: updated.videoLink,
     });
   } catch (error) {
-    logger.error("Update availability error", { error: formatError(error), endpoint: "/api/availability" });
+    logger.error("Update availability error", {
+      error: formatError(error),
+      endpoint: "/api/availability",
+    });
     return NextResponse.json({ error: "Failed to update availability" }, { status: 500 });
   }
 }

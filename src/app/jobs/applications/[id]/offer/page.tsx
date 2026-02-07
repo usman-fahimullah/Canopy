@@ -141,15 +141,13 @@ export default function CandidateOfferPage() {
 
         {/* Next Steps */}
         <div className="mx-auto mt-8 max-w-2xl rounded-xl border border-[var(--border-default)] bg-white p-8">
-          <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">
-            Next Steps
-          </h2>
+          <h2 className="text-heading-sm font-bold text-[var(--foreground-default)]">Next Steps</h2>
 
           {offer.signingMethod === "SIGNING_LINK" && offer.signingLink && (
             <div className="mt-4 space-y-3">
               <p className="text-body-sm text-[var(--foreground-muted)]">
-                Your employer has provided a signing link. Click below to review and sign the
-                formal offer document.
+                Your employer has provided a signing link. Click below to review and sign the formal
+                offer document.
               </p>
               <a
                 href={offer.signingLink}
@@ -163,8 +161,8 @@ export default function CandidateOfferPage() {
                 </Button>
               </a>
               <p className="text-caption text-[var(--foreground-muted)]">
-                You&apos;ll be taken to an external signing tool to review and sign the formal
-                offer document.
+                You&apos;ll be taken to an external signing tool to review and sign the formal offer
+                document.
               </p>
             </div>
           )}

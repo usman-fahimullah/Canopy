@@ -4,6 +4,10 @@ import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
 import { safeJsonParse } from "@/lib/safe-json";
+import {
+  createStageChangedNotification,
+  createApplicationRejectedNotification,
+} from "@/lib/notifications/hiring";
 
 /**
  * PATCH /api/canopy/roles/[id]/applications/[appId]
@@ -167,6 +171,65 @@ export async function PATCH(
       newStage: stage,
       endpoint: "/api/canopy/roles/[id]/applications/[appId]",
     });
+
+    // --- Fire-and-forget: notify the candidate of the stage change ---
+    (async () => {
+      try {
+        // Fetch candidate and job info for the notification
+        const appData = await prisma.application.findUnique({
+          where: { id: appId },
+          select: {
+            stage: true,
+            seeker: {
+              select: {
+                account: { select: { email: true, name: true } },
+              },
+            },
+            job: {
+              select: {
+                title: true,
+                organization: { select: { name: true } },
+              },
+            },
+          },
+        });
+
+        if (!appData?.seeker?.account?.email) return;
+
+        const candidateEmail = appData.seeker.account.email;
+        const candidateName = appData.seeker.account.name ?? "Candidate";
+        const jobTitle = appData.job.title;
+        const companyName = appData.job.organization?.name ?? "the company";
+
+        if (stage === "rejected") {
+          await createApplicationRejectedNotification({
+            applicationId: appId,
+            candidateEmail,
+            candidateName,
+            jobTitle,
+            companyName,
+          });
+        } else {
+          // Notify for all forward-moving stages (screening, interview, offer, hired)
+          const stageName = validStages.find((s) => s.id === stage)?.name ?? stage;
+          await createStageChangedNotification({
+            applicationId: appId,
+            candidateEmail,
+            candidateName,
+            jobTitle,
+            companyName,
+            previousStage: "previous", // We don't track the old stage in this endpoint
+            newStage: stageName,
+          });
+        }
+      } catch (notifErr) {
+        logger.error("Failed to send stage change notification (non-blocking)", {
+          error: formatError(notifErr),
+          applicationId: appId,
+          newStage: stage,
+        });
+      }
+    })();
 
     return NextResponse.json({ success: true, stage, stageOrder });
   } catch (error) {

@@ -34,9 +34,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 403 });
     }
 
-    const isAdmin = account.orgMemberships.some(
-      (m) => m.role === "OWNER" || m.role === "ADMIN"
-    );
+    const isAdmin = account.orgMemberships.some((m) => m.role === "OWNER" || m.role === "ADMIN");
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });

@@ -157,6 +157,7 @@ const SegmentedController = React.forwardRef<HTMLDivElement, SegmentedController
         aria-label={ariaLabel}
         className={cn(
           segmentedControllerVariants({ fullWidth }),
+          "surface-level-2",
           disabled && "cursor-not-allowed opacity-50",
           className
         )}
@@ -198,6 +199,7 @@ const SegmentedController = React.forwardRef<HTMLDivElement, SegmentedController
                 isSelected
                   ? "text-[var(--primitive-green-800)]"
                   : "text-[var(--primitive-neutral-700)]",
+                !isSelected && !isDisabled && "hover:bg-[var(--surface-hover)]",
                 isDisabled && "cursor-not-allowed"
               )}
               onClick={() => handleSelect(option.value, option.disabled)}

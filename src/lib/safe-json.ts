@@ -15,10 +15,7 @@
  *   safeJsonParse(milestone.resources, null)
  *   safeJsonParse(job.stages, [])
  */
-export function safeJsonParse<T = unknown>(
-  value: string | null | undefined,
-  fallback: T
-): T {
+export function safeJsonParse<T = unknown>(value: string | null | undefined, fallback: T): T {
   if (value === null || value === undefined || value === "") {
     return fallback;
   }

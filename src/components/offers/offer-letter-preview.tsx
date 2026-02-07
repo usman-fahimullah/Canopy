@@ -33,10 +33,7 @@ export function OfferLetterPreview({
             className="h-8 w-8 rounded object-contain"
           />
         )}
-        <span
-          className="text-body-sm font-semibold"
-          style={{ color: organization.primaryColor }}
-        >
+        <span className="text-body-sm font-semibold" style={{ color: organization.primaryColor }}>
           {organization.name}
         </span>
       </div>

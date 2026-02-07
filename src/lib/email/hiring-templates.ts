@@ -477,7 +477,9 @@ export function approvalResponseEmail(data: ApprovalResponseData) {
             ${
               isApproved
                 ? "Your approval is complete. Proceed with publishing or sharing as needed."
-                : "If you have questions about the feedback, please reach out to " + data.approverName + "."
+                : "If you have questions about the feedback, please reach out to " +
+                  data.approverName +
+                  "."
             }
           </p>
         </div>

@@ -13,7 +13,10 @@ export function AboutBlock({ section }: AboutBlockProps) {
         </h2>
         <div className="flex flex-col gap-8 md:flex-row md:items-center">
           <div className="flex-1">
-            <div className="prose prose-sm max-w-none text-[var(--foreground-muted)]" dangerouslySetInnerHTML={{ __html: section.content }} />
+            <div
+              className="prose prose-sm max-w-none text-[var(--foreground-muted)]"
+              dangerouslySetInnerHTML={{ __html: section.content }}
+            />
           </div>
           {section.image && (
             <div className="w-full shrink-0 md:w-80">

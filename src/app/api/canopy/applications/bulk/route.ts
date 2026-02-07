@@ -3,6 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { z } from "zod";
+import {
+  createStageChangedNotification,
+  createApplicationRejectedNotification,
+} from "@/lib/notifications/hiring";
 
 /**
  * PATCH /api/canopy/applications/bulk
@@ -105,6 +109,56 @@ export async function PATCH(request: NextRequest) {
       applicationIds: ids,
     });
 
+    // --- Fire-and-forget: notify all affected candidates ---
+    (async () => {
+      try {
+        const affectedApps = await prisma.application.findMany({
+          where: { id: { in: ids } },
+          select: {
+            id: true,
+            seeker: {
+              select: {
+                account: { select: { email: true, name: true } },
+              },
+            },
+            job: {
+              select: {
+                title: true,
+                organization: { select: { name: true } },
+              },
+            },
+          },
+        });
+
+        for (const app of affectedApps) {
+          if (!app.seeker?.account?.email) continue;
+
+          const notifParams = {
+            applicationId: app.id,
+            candidateEmail: app.seeker.account.email,
+            candidateName: app.seeker.account.name ?? "Candidate",
+            jobTitle: app.job.title,
+            companyName: app.job.organization?.name ?? "the company",
+          };
+
+          if (action === "REJECT") {
+            await createApplicationRejectedNotification(notifParams);
+          } else if (stage) {
+            await createStageChangedNotification({
+              ...notifParams,
+              previousStage: "previous",
+              newStage: stage,
+            });
+          }
+        }
+      } catch (notifErr) {
+        logger.error("Failed to send bulk stage change notifications (non-blocking)", {
+          error: formatError(notifErr),
+          applicationIds: ids,
+        });
+      }
+    })();
+
     return NextResponse.json({
       success: true,
       updated: updated.count,
@@ -115,10 +169,7 @@ export async function PATCH(request: NextRequest) {
       error: formatError(error),
       endpoint: "/api/canopy/applications/bulk",
     });
-    return NextResponse.json(
-      { error: "Failed to update applications" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update applications" }, { status: 500 });
   }
 }
 
@@ -217,9 +268,6 @@ export async function POST(request: NextRequest) {
       error: formatError(error),
       endpoint: "/api/canopy/applications/bulk/email",
     });
-    return NextResponse.json(
-      { error: "Failed to send bulk emails" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to send bulk emails" }, { status: 500 });
   }
 }

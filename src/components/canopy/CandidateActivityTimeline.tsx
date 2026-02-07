@@ -5,14 +5,7 @@ import { logger } from "@/lib/logger";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  PaperPlaneTilt,
-  Note,
-  Star,
-  CalendarCheck,
-  Gift,
-  ArrowRight,
-} from "@phosphor-icons/react";
+import { PaperPlaneTilt, Note, Star, CalendarCheck, Gift, ArrowRight } from "@phosphor-icons/react";
 
 type ActivityEventType = "applied" | "note" | "score" | "stage_change" | "interview" | "offer";
 
@@ -176,8 +169,8 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
   // Empty state
   if (!isLoading && events.length === 0 && !error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-body text-foreground-muted mb-4">No activity yet</p>
+      <div className="py-12 text-center">
+        <p className="mb-4 text-body text-foreground-muted">No activity yet</p>
         <p className="text-caption text-foreground-subtle">
           Activity will appear here as the candidate progresses through the pipeline
         </p>
@@ -188,9 +181,9 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
   // Error state
   if (error) {
     return (
-      <div className="text-center py-12 bg-background-error/5 rounded-lg border border-border-error p-6">
-        <p className="text-body text-foreground-error mb-4">Failed to load activity</p>
-        <p className="text-caption text-foreground-muted mb-6">{error}</p>
+      <div className="bg-background-error/5 rounded-lg border border-border-error p-6 py-12 text-center">
+        <p className="mb-4 text-body text-foreground-error">Failed to load activity</p>
+        <p className="mb-6 text-caption text-foreground-muted">{error}</p>
         <Button variant="secondary" size="sm" onClick={() => fetchActivity()}>
           Try again
         </Button>
@@ -203,7 +196,7 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
       {/* Timeline */}
       <div className="relative">
         {/* Vertical line */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border-muted" />
+        <div className="absolute bottom-0 left-6 top-0 w-0.5 bg-border-muted" />
 
         {/* Events */}
         <div className="space-y-4">
@@ -211,7 +204,7 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
             <div key={event.id} className="relative pl-16">
               {/* Icon circle */}
               <div
-                className={`absolute left-0 top-1 flex h-12 w-12 items-center justify-center rounded-full border-2 border-background-default bg-background-subtle`}
+                className={`border-background-default absolute left-0 top-1 flex h-12 w-12 items-center justify-center rounded-full border-2 bg-background-subtle`}
               >
                 <span className="text-foreground-brand">{getEventIcon(event.type)}</span>
               </div>
@@ -221,20 +214,20 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
                 className={`rounded-lg border-l-4 border-background-subtle bg-background-subtle p-4 transition-colors hover:bg-background-emphasized ${getEventBorderColor(event.type)}`}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-caption-strong text-foreground-default font-semibold">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex items-center gap-2">
+                      <h3 className="text-foreground-default text-caption-strong font-semibold">
                         {event.title}
                       </h3>
                       <Badge variant={getEventBadgeVariant(event.type)} className="text-xs">
                         {event.type.replace("_", " ")}
                       </Badge>
                     </div>
-                    <p className="text-caption text-foreground-muted line-clamp-2">
+                    <p className="line-clamp-2 text-caption text-foreground-muted">
                       {event.description}
                     </p>
                   </div>
-                  <div className="text-caption text-foreground-subtle whitespace-nowrap ml-2">
+                  <div className="ml-2 whitespace-nowrap text-caption text-foreground-subtle">
                     {formatRelativeTime(event.timestamp)}
                   </div>
                 </div>

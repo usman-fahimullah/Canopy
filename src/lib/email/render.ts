@@ -3,10 +3,7 @@
  * Interpolates {{variable}} placeholders in template strings
  */
 
-export function renderTemplate(
-  template: string,
-  variables: Record<string, string>
-): string {
+export function renderTemplate(template: string, variables: Record<string, string>): string {
   let result = template;
 
   // Replace all {{variable}} placeholders with actual values

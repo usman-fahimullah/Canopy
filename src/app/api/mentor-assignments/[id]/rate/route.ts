@@ -5,10 +5,7 @@ import { logger, formatError } from "@/lib/logger";
 import { RateMentorSchema } from "@/lib/validators/api";
 
 // POST — rate a mentor for a specific assignment
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createClient();
     const {
@@ -25,10 +22,7 @@ export async function POST(
     });
 
     if (!account || !account.seekerProfile) {
-      return NextResponse.json(
-        { error: "Seeker profile required" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Seeker profile required" }, { status: 403 });
     }
 
     const { id: assignmentId } = await params;
@@ -38,18 +32,12 @@ export async function POST(
     });
 
     if (!assignment) {
-      return NextResponse.json(
-        { error: "Assignment not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Assignment not found" }, { status: 404 });
     }
 
     // Only the mentee can rate their mentor
     if (assignment.menteeId !== account.seekerProfile.id) {
-      return NextResponse.json(
-        { error: "Only the mentee can rate this mentor" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Only the mentee can rate this mentor" }, { status: 403 });
     }
 
     const body = await request.json();
@@ -61,7 +49,6 @@ export async function POST(
       );
     }
     const { rating, comment } = result.data;
-
 
     // Capture for use inside transaction closure (TypeScript narrowing doesn't carry into async callbacks)
     const seekerProfileId = account.seekerProfile.id;
@@ -108,10 +95,10 @@ export async function POST(
 
     return NextResponse.json({ review }, { status: 201 });
   } catch (error) {
-    logger.error("Error rating mentor", { error: formatError(error), endpoint: "/api/mentor-assignments/rate" });
-    return NextResponse.json(
-      { error: "Failed to submit rating" },
-      { status: 500 }
-    );
+    logger.error("Error rating mentor", {
+      error: formatError(error),
+      endpoint: "/api/mentor-assignments/rate",
+    });
+    return NextResponse.json({ error: "Failed to submit rating" }, { status: 500 });
   }
 }

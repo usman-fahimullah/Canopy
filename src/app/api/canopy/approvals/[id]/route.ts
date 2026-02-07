@@ -19,10 +19,7 @@ import { createAuditLog } from "@/lib/audit";
  *   reason?: string;
  * }
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Authorization
     const user = await getServerUser();
@@ -96,10 +93,7 @@ export async function PATCH(
 
     // Verify user is the approver
     if (approval.approverId !== member.id) {
-      return apiError(
-        "Only the assigned approver can respond to this request",
-        403
-      );
+      return apiError("Only the assigned approver can respond to this request", 403);
     }
 
     // Verify approval is still pending
@@ -171,11 +165,7 @@ export async function PATCH(
 
     // If approved, trigger the original action
     if (status === "APPROVED") {
-      await handleApprovalAction(
-        approval.type,
-        approval.entityId,
-        organization.id
-      );
+      await handleApprovalAction(approval.type, approval.entityId, organization.id);
     }
 
     logger.info("Approval request responded", {
@@ -234,4 +224,3 @@ async function handleApprovalAction(
     // Don't throw - approval response was successful, just log the error
   }
 }
-

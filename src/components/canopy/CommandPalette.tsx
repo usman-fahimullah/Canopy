@@ -208,9 +208,7 @@ export function CommandPalette() {
       />
 
       <CommandList>
-        <CommandEmpty>
-          {isSearching ? "Searching..." : "No results found."}
-        </CommandEmpty>
+        <CommandEmpty>{isSearching ? "Searching..." : "No results found."}</CommandEmpty>
 
         {/* Navigation Section */}
         <CommandGroup heading="Navigation">
@@ -265,9 +263,7 @@ export function CommandPalette() {
                   <div className="flex flex-1 flex-col">
                     <span className="text-body-sm">{result.title}</span>
                     {result.subtitle && (
-                      <span className="text-caption text-foreground-muted">
-                        {result.subtitle}
-                      </span>
+                      <span className="text-caption text-foreground-muted">{result.subtitle}</span>
                     )}
                   </div>
                   <span className="text-caption-sm text-foreground-muted">
@@ -283,7 +279,8 @@ export function CommandPalette() {
       {/* Footer with keyboard shortcut hint */}
       <div className="border-border-default border-t px-3 py-2">
         <p className="text-caption-sm text-foreground-muted">
-          Press <kbd className="rounded bg-background-muted px-1.5 py-0.5 font-mono">Esc</kbd> to close
+          Press <kbd className="rounded bg-background-muted px-1.5 py-0.5 font-mono">Esc</kbd> to
+          close
         </p>
       </div>
     </CommandDialog>

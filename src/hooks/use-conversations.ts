@@ -39,7 +39,10 @@ export function useConversations() {
       setConversations(data.conversations || []);
       setError(null);
     } catch (err) {
-      logger.error("useConversations fetch failed", { error: formatError(err), endpoint: "hooks/use-conversations" });
+      logger.error("useConversations fetch failed", {
+        error: formatError(err),
+        endpoint: "hooks/use-conversations",
+      });
       setError("Failed to load conversations");
     } finally {
       setLoading(false);
@@ -66,9 +69,7 @@ export function useConversations() {
 
     // Build a scoped filter if we have conversations, otherwise listen broadly
     const filterConfig =
-      convIds.length > 0
-        ? { filter: `conversationId=in.(${convIds.join(",")})` }
-        : {};
+      convIds.length > 0 ? { filter: `conversationId=in.(${convIds.join(",")})` } : {};
 
     const channel = supabase
       .channel("conversations-updates")
@@ -147,7 +148,10 @@ export function useConversations() {
         await fetchConversations();
         return data.conversation;
       } catch (err) {
-        logger.error("createConversation failed", { error: formatError(err), endpoint: "hooks/use-conversations" });
+        logger.error("createConversation failed", {
+          error: formatError(err),
+          endpoint: "hooks/use-conversations",
+        });
         throw err;
       }
     },

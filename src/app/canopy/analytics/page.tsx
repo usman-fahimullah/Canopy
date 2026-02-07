@@ -134,14 +134,8 @@ export default function AnalyticsPage() {
         <PageHeader title="Analytics" />
         <div className="space-y-4 px-8 py-12 lg:px-12">
           <div className="rounded-[16px] border border-[var(--primitive-red-200)] bg-[var(--background-error)] p-6">
-            <p className="text-body font-medium text-[var(--foreground-error)]">
-              {error}
-            </p>
-            <Button
-              variant="secondary"
-              className="mt-4"
-              onClick={() => window.location.reload()}
-            >
+            <p className="text-body font-medium text-[var(--foreground-error)]">{error}</p>
+            <Button variant="secondary" className="mt-4" onClick={() => window.location.reload()}>
               Retry
             </Button>
           </div>
@@ -291,11 +285,7 @@ export default function AnalyticsPage() {
 
             {/* Funnel conversion */}
             <div className="mt-6 flex items-center gap-2 border-t border-[var(--primitive-neutral-200)] pt-4">
-              <ArrowDown
-                size={14}
-                weight="bold"
-                className="text-[var(--primitive-blue-600)]"
-              />
+              <ArrowDown size={14} weight="bold" className="text-[var(--primitive-blue-600)]" />
               <span className="text-caption text-foreground-muted">
                 Overall conversion:{" "}
                 <span className="text-foreground-default font-semibold">{conversionRate}%</span>{" "}
@@ -401,9 +391,7 @@ export default function AnalyticsPage() {
         {/* Top Jobs */}
         {data.topJobs.length > 0 && (
           <section>
-            <h2 className="text-foreground-default mb-4 text-heading-sm font-medium">
-              Top Jobs
-            </h2>
+            <h2 className="text-foreground-default mb-4 text-heading-sm font-medium">Top Jobs</h2>
             <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
               <div className="space-y-3">
                 {data.topJobs.map((job) => {
@@ -415,7 +403,7 @@ export default function AnalyticsPage() {
                       className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] py-3 last:border-b-0"
                     >
                       <div className="flex-1">
-                        <p className="text-caption font-medium text-foreground-default">
+                        <p className="text-foreground-default text-caption font-medium">
                           {job.title}
                         </p>
                         <p className="text-caption-sm text-foreground-muted">
@@ -424,13 +412,13 @@ export default function AnalyticsPage() {
                       </div>
                       <div className="ml-4 flex items-center gap-6 text-right">
                         <div>
-                          <p className="text-caption font-semibold text-foreground-default">
+                          <p className="text-foreground-default text-caption font-semibold">
                             {job.hired}
                           </p>
                           <p className="text-caption-sm text-foreground-muted">Hired</p>
                         </div>
                         <div className="w-16">
-                          <p className="text-caption font-semibold text-foreground-default">
+                          <p className="text-foreground-default text-caption font-semibold">
                             {conversionRate}%
                           </p>
                           <p className="text-caption-sm text-foreground-muted">Rate</p>

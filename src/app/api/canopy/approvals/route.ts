@@ -4,10 +4,7 @@ import { apiError, apiSuccess, apiValidationError } from "@/lib/api-response";
 import { logger } from "@/lib/logger";
 import { getServerUser } from "@/lib/supabase/get-server-user";
 import { getCurrentOrganization } from "@/lib/auth-helpers";
-import {
-  CreateApprovalSchema,
-  ApprovalQuerySchema,
-} from "@/lib/validators/approvals";
+import { CreateApprovalSchema, ApprovalQuerySchema } from "@/lib/validators/approvals";
 import { createAuditLog } from "@/lib/audit";
 
 /**
@@ -73,8 +70,8 @@ export async function GET(request: NextRequest) {
     const where: any = {
       organizationId: organization.id,
       OR: [
-        { requesterId: member.id },    // User requested approval
-        { approverId: member.id },     // User is the approver
+        { requesterId: member.id }, // User requested approval
+        { approverId: member.id }, // User is the approver
       ],
     };
 
@@ -201,10 +198,7 @@ export async function POST(request: NextRequest) {
 
     // Check authorization: must be RECRUITER, ADMIN, or OWNER
     if (!["RECRUITER", "ADMIN", "OWNER"].includes(requester.role)) {
-      return apiError(
-        "Insufficient permissions to create approvals",
-        403
-      );
+      return apiError("Insufficient permissions to create approvals", 403);
     }
 
     // Parse and validate body

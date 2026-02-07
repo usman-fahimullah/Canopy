@@ -61,8 +61,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { skip, take, stage, matchScoreMin, matchScoreMax, source, dateFrom, dateTo, experienceLevel, search } =
-      params.data;
+    const {
+      skip,
+      take,
+      stage,
+      matchScoreMin,
+      matchScoreMax,
+      source,
+      dateFrom,
+      dateTo,
+      experienceLevel,
+      search,
+    } = params.data;
 
     // Build where clause for applications
     const applicationWhere: any = {

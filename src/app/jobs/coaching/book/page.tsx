@@ -76,7 +76,9 @@ export default function BookSessionPage() {
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
-      throw new Error(error.message || error.error || "Failed to create checkout session. Please try again.");
+      throw new Error(
+        error.message || error.error || "Failed to create checkout session. Please try again."
+      );
     }
 
     const data = await res.json();

@@ -114,8 +114,12 @@ export default function CandidatesPage() {
   const skip = parseInt(searchParams.get("skip") || "0");
   const take = parseInt(searchParams.get("take") || "20");
   const stage = searchParams.get("stage") || undefined;
-  const matchScoreMin = searchParams.get("matchScoreMin") ? parseInt(searchParams.get("matchScoreMin")!) : undefined;
-  const matchScoreMax = searchParams.get("matchScoreMax") ? parseInt(searchParams.get("matchScoreMax")!) : undefined;
+  const matchScoreMin = searchParams.get("matchScoreMin")
+    ? parseInt(searchParams.get("matchScoreMin")!)
+    : undefined;
+  const matchScoreMax = searchParams.get("matchScoreMax")
+    ? parseInt(searchParams.get("matchScoreMax")!)
+    : undefined;
   const source = searchParams.get("source") || undefined;
   const search = searchParams.get("search") || undefined;
 
@@ -287,7 +291,13 @@ export default function CandidatesPage() {
 
   const currentPage = Math.floor(skip / take) + 1;
   const totalPages = Math.ceil(total / take);
-  const hasActiveFilters = !!(stage || matchScoreMin !== undefined || matchScoreMax !== undefined || source || search);
+  const hasActiveFilters = !!(
+    stage ||
+    matchScoreMin !== undefined ||
+    matchScoreMax !== undefined ||
+    source ||
+    search
+  );
 
   return (
     <div>
@@ -314,11 +324,7 @@ export default function CandidatesPage() {
                   All Stages
                 </DropdownItem>
                 {["Applied", "Screening", "Interview", "Offer", "Hired"].map((s) => (
-                  <DropdownItem
-                    key={s}
-                    value={s}
-                    onClick={() => updateParams({ stage: s })}
-                  >
+                  <DropdownItem key={s} value={s} onClick={() => updateParams({ stage: s })}>
                     {s}
                   </DropdownItem>
                 ))}
@@ -392,7 +398,9 @@ export default function CandidatesPage() {
               {hasActiveFilters ? "No candidates match your filters" : "No candidates yet"}
             </p>
             <p className="text-caption text-foreground-muted">
-              {hasActiveFilters ? "Try adjusting your search criteria." : "Post a role to start receiving applications."}
+              {hasActiveFilters
+                ? "Try adjusting your search criteria."
+                : "Post a role to start receiving applications."}
             </p>
           </div>
         )}
@@ -511,11 +519,7 @@ export default function CandidatesPage() {
                     </DropdownTrigger>
                     <DropdownContent>
                       {["Applied", "Screening", "Interview", "Offer", "Hired"].map((s) => (
-                        <DropdownItem
-                          key={s}
-                          value={s}
-                          onClick={() => handleBulkStageMove(s)}
-                        >
+                        <DropdownItem key={s} value={s} onClick={() => handleBulkStageMove(s)}>
                           {s}
                         </DropdownItem>
                       ))}

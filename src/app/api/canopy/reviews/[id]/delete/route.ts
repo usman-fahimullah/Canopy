@@ -4,10 +4,7 @@ import { prisma } from "@/lib/db";
 import { softDelete } from "@/lib/soft-delete";
 import { logger, formatError } from "@/lib/logger";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createClient();

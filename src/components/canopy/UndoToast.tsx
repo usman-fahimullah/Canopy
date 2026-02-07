@@ -82,7 +82,7 @@ export function UndoToast({ message, onUndo, duration = 8000 }: UndoToastProps) 
         <div className="flex-1">
           <p className="text-body-sm">{message}</p>
           {/* Progress bar */}
-          <div className="mt-2 h-1 w-full bg-foreground-muted/20 rounded-full overflow-hidden">
+          <div className="bg-foreground-muted/20 mt-2 h-1 w-full overflow-hidden rounded-full">
             <div
               className="h-full bg-foreground-muted transition-all"
               style={{ width: `${progressPercent}%` }}

@@ -4,10 +4,7 @@ import { prisma } from "@/lib/db";
 import { softDelete } from "@/lib/soft-delete";
 import { logger, formatError } from "@/lib/logger";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createClient();
@@ -43,8 +40,7 @@ export async function POST(
     }
 
     const isParticipant =
-      session.coach.accountId === account.id ||
-      session.mentee.accountId === account.id;
+      session.coach.accountId === account.id || session.mentee.accountId === account.id;
 
     if (!isParticipant) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });

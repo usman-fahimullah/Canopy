@@ -72,7 +72,9 @@ const getInterviewTypeLabel = (type: "PHONE" | "VIDEO" | "ONSITE") => {
   }
 };
 
-const getInterviewTypeBadgeVariant = (type: "PHONE" | "VIDEO" | "ONSITE"): "info" | "outline-primary" | "warning" => {
+const getInterviewTypeBadgeVariant = (
+  type: "PHONE" | "VIDEO" | "ONSITE"
+): "info" | "outline-primary" | "warning" => {
   switch (type) {
     case "PHONE":
       return "info";
@@ -150,9 +152,7 @@ export function UpcomingInterviewsWidget() {
           </h3>
         </div>
         <div className="rounded-lg border border-[var(--border-error)] bg-[var(--background-error)] p-3">
-          <p className="text-caption text-[var(--foreground-error)]">
-            Failed to load interviews
-          </p>
+          <p className="text-caption text-[var(--foreground-error)]">Failed to load interviews</p>
         </div>
       </Card>
     );
@@ -167,7 +167,7 @@ export function UpcomingInterviewsWidget() {
             Upcoming Interviews
           </h3>
         </div>
-        <div className="text-center py-6">
+        <div className="py-6 text-center">
           <Calendar size={32} className="mx-auto mb-2 text-[var(--foreground-muted)]" />
           <p className="text-caption text-[var(--foreground-muted)]">
             No upcoming interviews scheduled
@@ -215,9 +215,9 @@ export function UpcomingInterviewsWidget() {
               )}
 
               {/* Interview Details */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="text-caption-strong text-[var(--foreground-default)] truncate">
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-start justify-between gap-2">
+                  <p className="truncate text-caption-strong text-[var(--foreground-default)]">
                     {interview.candidateName}
                   </p>
                   <Badge variant={getInterviewTypeBadgeVariant(interview.type)} size="sm">
@@ -225,14 +225,12 @@ export function UpcomingInterviewsWidget() {
                   </Badge>
                 </div>
 
-                <p className="text-caption text-[var(--foreground-muted)] mb-1">
+                <p className="mb-1 text-caption text-[var(--foreground-muted)]">
                   {interview.application.job.title}
                 </p>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-caption text-[var(--foreground-muted)]">
-                    {timeStr}
-                  </span>
+                  <span className="text-caption text-[var(--foreground-muted)]">{timeStr}</span>
                   <span className="text-caption text-[var(--foreground-muted)]">
                     {interview.duration}m
                   </span>
@@ -241,7 +239,7 @@ export function UpcomingInterviewsWidget() {
                       href={interview.meetingLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-caption text-[var(--foreground-link)] hover:text-[var(--foreground-link-hover)] font-medium"
+                      className="inline-flex items-center gap-1 text-caption font-medium text-[var(--foreground-link)] hover:text-[var(--foreground-link-hover)]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       Join

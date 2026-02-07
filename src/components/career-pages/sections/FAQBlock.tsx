@@ -33,9 +33,7 @@ export function FAQBlock({ title, items, theme }: FAQBlockProps) {
               <CaretDown
                 size={18}
                 weight="bold"
-                className={`shrink-0 transition-transform ${
-                  openIndex === i ? "rotate-180" : ""
-                }`}
+                className={`shrink-0 transition-transform ${openIndex === i ? "rotate-180" : ""}`}
                 style={{ color: theme?.primaryColor || "var(--foreground-muted)" }}
               />
             </button>

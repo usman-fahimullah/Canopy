@@ -9,27 +9,27 @@ import { PageNavigation } from "@/components/design-system/PageNavigation";
 const alphaScale = [
   {
     name: "--border-alpha-1",
-    opacity: "5%",
+    opacity: "3%",
     description: "Barely visible — muted separators, disabled borders",
   },
   {
     name: "--border-alpha-2",
-    opacity: "9%",
+    opacity: "6%",
     description: "Default — cards, inputs, dividers",
   },
   {
     name: "--border-alpha-3",
-    opacity: "14%",
+    opacity: "10%",
     description: "Emphasis — hover states, selected containers",
   },
   {
     name: "--border-alpha-4",
-    opacity: "20%",
+    opacity: "14%",
     description: "Strong — high-contrast outlines, active states",
   },
   {
     name: "--border-alpha-5",
-    opacity: "28%",
+    opacity: "20%",
     description: "Strongest — maximum definition borders",
   },
 ];
@@ -40,25 +40,25 @@ const defaultBorders = [
   {
     name: "--border-default",
     token: "border-default",
-    value: "alpha-2 (9%)",
+    value: "alpha-2 (6%)",
     description: "Standard element borders — cards, inputs, dividers",
   },
   {
     name: "--border-muted",
     token: "border-muted",
-    value: "alpha-1 (5%)",
+    value: "alpha-1 (3%)",
     description: "Subtle borders — table rows, secondary separators",
   },
   {
     name: "--border-emphasis",
     token: "border-emphasis",
-    value: "alpha-3 (14%)",
+    value: "alpha-3 (10%)",
     description: "Stronger borders — selected containers, emphasis",
   },
   {
     name: "--border-strong",
     token: "border-strong",
-    value: "alpha-4 (20%)",
+    value: "alpha-4 (14%)",
     description: "Strongest borders — high-contrast outlines",
   },
   {
@@ -70,7 +70,7 @@ const defaultBorders = [
   {
     name: "--border-disabled",
     token: "border-disabled",
-    value: "alpha-1 (5%)",
+    value: "alpha-1 (3%)",
     description: "Disabled element borders — reduced visibility",
   },
 ];
@@ -94,13 +94,13 @@ const interactiveBorders = [
   {
     name: "--border-interactive-default",
     token: "border-interactive-default",
-    value: "alpha-2 (9%)",
+    value: "alpha-2 (6%)",
     description: "Resting state of interactive elements",
   },
   {
     name: "--border-interactive-hover",
     token: "border-interactive-hover",
-    value: "alpha-3 (14%)",
+    value: "alpha-3 (10%)",
     description: "Hover state — increases opacity to indicate interactivity",
   },
   {

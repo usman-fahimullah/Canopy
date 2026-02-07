@@ -107,9 +107,7 @@ export async function GET() {
     const pipelineStats: Record<string, number> = {};
     const stages = ["Applied", "Screening", "Interview", "Offer", "Hired"];
     stages.forEach((stage) => {
-      const match = pipelineGroupBy.find(
-        (g) => g.stage.toLowerCase() === stage.toLowerCase()
-      );
+      const match = pipelineGroupBy.find((g) => g.stage.toLowerCase() === stage.toLowerCase());
       pipelineStats[stage] = match?._count._all ?? 0;
     });
 

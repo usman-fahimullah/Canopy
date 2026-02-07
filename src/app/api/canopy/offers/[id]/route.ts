@@ -8,14 +8,13 @@ import { UpdateOfferSchema } from "@/lib/validators/offer";
 /**
  * GET /api/canopy/offers/[id]
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -88,14 +87,13 @@ export async function GET(
  * PATCH /api/canopy/offers/[id]
  * Update offer details (only while in DRAFT status).
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -119,10 +117,7 @@ export async function PATCH(
     }
 
     if (offer.status !== "DRAFT") {
-      return NextResponse.json(
-        { error: "Only draft offers can be edited" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Only draft offers can be edited" }, { status: 400 });
     }
 
     // Verify org membership

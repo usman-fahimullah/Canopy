@@ -24,9 +24,7 @@ interface ApplicationReceivedParams {
 /**
  * Notify candidate that their application was received
  */
-export async function createApplicationReceivedNotification(
-  params: ApplicationReceivedParams
-) {
+export async function createApplicationReceivedNotification(params: ApplicationReceivedParams) {
   try {
     const account = await prisma.account.findUnique({
       where: { email: params.candidateEmail },
@@ -154,9 +152,7 @@ interface InterviewScheduledParams {
 /**
  * Notify candidate that an interview has been scheduled
  */
-export async function createInterviewScheduledNotification(
-  params: InterviewScheduledParams
-) {
+export async function createInterviewScheduledNotification(params: InterviewScheduledParams) {
   try {
     const account = await prisma.account.findUnique({
       where: { email: params.candidateEmail },
@@ -222,9 +218,7 @@ interface ApplicationRejectedParams {
 /**
  * Notify candidate that their application was rejected
  */
-export async function createApplicationRejectedNotification(
-  params: ApplicationRejectedParams
-) {
+export async function createApplicationRejectedNotification(params: ApplicationRejectedParams) {
   try {
     const account = await prisma.account.findUnique({
       where: { email: params.candidateEmail },
@@ -288,9 +282,7 @@ interface ApprovalRequestParams {
 /**
  * Notify approver that a new approval request is pending
  */
-export async function createApprovalRequestNotification(
-  params: ApprovalRequestParams
-) {
+export async function createApprovalRequestNotification(params: ApprovalRequestParams) {
   try {
     const account = await prisma.account.findUnique({
       where: { email: params.approverEmail },
@@ -361,9 +353,7 @@ interface ApprovalResponseParams {
 /**
  * Notify requester of approval decision (approved or rejected)
  */
-export async function createApprovalResponseNotification(
-  params: ApprovalResponseParams
-) {
+export async function createApprovalResponseNotification(params: ApprovalResponseParams) {
   try {
     const account = await prisma.account.findUnique({
       where: { email: params.requesterEmail },

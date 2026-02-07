@@ -51,7 +51,10 @@ export function isAdminAccount(
   // Check platform admin email list (env var takes priority)
   const envEmails = process.env.PLATFORM_ADMIN_EMAILS;
   const adminEmails = envEmails
-    ? envEmails.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean)
+    ? envEmails
+        .split(",")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean)
     : PLATFORM_ADMIN_EMAILS.map((e) => e.toLowerCase());
 
   if (adminEmails.length === 0) {

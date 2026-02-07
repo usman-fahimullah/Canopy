@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Label,
-  Button,
-  Card,
-  CardContent,
-  Badge,
-} from "@/components/ui";
+import { Label, Button, Card, CardContent, Badge } from "@/components/ui";
 // Rich text editor imported directly to avoid pulling Tiptap into barrel bundle
 import {
   RichTextEditor,
@@ -137,34 +131,29 @@ export default function RichTextEditorPage() {
       {/* 1. OVERVIEW */}
       {/* ============================================ */}
       <div id="overview">
-        <h1 className="text-heading-lg text-foreground mb-2">
-          Rich Text Editor
-        </h1>
-        <p className="text-body text-foreground-muted max-w-3xl">
-          A WYSIWYG (What You See Is What You Get) text editor built on TipTap,
-          providing rich text formatting capabilities including bold, italic,
-          headings, lists, links, and more. Ideal for job descriptions, email
-          templates, and any content that needs formatting.
+        <h1 className="mb-2 text-heading-lg text-foreground">Rich Text Editor</h1>
+        <p className="max-w-3xl text-body text-foreground-muted">
+          A WYSIWYG (What You See Is What You Get) text editor built on TipTap, providing rich text
+          formatting capabilities including bold, italic, headings, lists, links, and more. Ideal
+          for job descriptions, email templates, and any content that needs formatting.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="px-3 py-1 bg-background-brand-subtle text-foreground-brand rounded-full text-caption font-medium">
+          <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
             Form Control
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             TipTap
           </span>
-          <span className="px-3 py-1 bg-background-subtle text-foreground-muted rounded-full text-caption">
+          <span className="rounded-full bg-background-subtle px-3 py-1 text-caption text-foreground-muted">
             HTML Output
           </span>
         </div>
 
         {/* When to Use / When Not to Use */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div className="p-4 bg-background-success rounded-lg border border-border-success">
-            <h3 className="font-semibold text-foreground-success mb-2">
-              When to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg border border-border-success bg-background-success p-4">
+            <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Job descriptions and role requirements</li>
               <li>Email templates with formatting</li>
               <li>Notes and comments that need rich formatting</li>
@@ -172,11 +161,9 @@ export default function RichTextEditorPage() {
               <li>Documents requiring headings, lists, and links</li>
             </ul>
           </div>
-          <div className="p-4 bg-background-error rounded-lg border border-border-error">
-            <h3 className="font-semibold text-foreground-error mb-2">
-              When not to use
-            </h3>
-            <ul className="text-sm space-y-1 text-foreground-muted">
+          <div className="rounded-lg border border-border-error bg-background-error p-4">
+            <h3 className="mb-2 font-semibold text-foreground-error">When not to use</h3>
+            <ul className="space-y-1 text-sm text-foreground-muted">
               <li>Simple single-line text (use Input)</li>
               <li>Plain text without formatting (use Textarea)</li>
               <li>Structured data entry (use form fields)</li>
@@ -200,19 +187,16 @@ export default function RichTextEditorPage() {
           },
           {
             name: "Toolbar",
-            description:
-              "Optional formatting toolbar with grouped buttons for text styling",
+            description: "Optional formatting toolbar with grouped buttons for text styling",
           },
           {
             name: "Content Area",
-            description:
-              "The editable prose area with proper typography styling",
+            description: "The editable prose area with proper typography styling",
             required: true,
           },
           {
             name: "Placeholder",
-            description:
-              "Ghost text shown when editor is empty (neutral-500 color)",
+            description: "Ghost text shown when editor is empty (neutral-500 color)",
           },
         ]}
       />
@@ -238,7 +222,7 @@ const [content, setContent] = React.useState("");
   <RichTextToolbar />
 </RichTextEditor>`}
         >
-          <div className="space-y-4 max-w-2xl">
+          <div className="max-w-2xl space-y-4">
             <Label>Job Description</Label>
             <RichTextEditor
               content={basicContent}
@@ -266,9 +250,8 @@ const [content, setContent] = React.useState("");
           {/* Standard Toolbar */}
           <div className="space-y-2">
             <Label className="font-semibold">Standard Toolbar</Label>
-            <p className="text-caption text-foreground-muted mb-2">
-              Basic formatting: bold, italic, text decoration, alignment, lists,
-              and history
+            <p className="mb-2 text-caption text-foreground-muted">
+              Basic formatting: bold, italic, text decoration, alignment, lists, and history
             </p>
             <RichTextEditor
               placeholder="Standard toolbar with essential formatting..."
@@ -281,9 +264,8 @@ const [content, setContent] = React.useState("");
           {/* Extended Toolbar */}
           <div className="space-y-2">
             <Label className="font-semibold">Extended Toolbar</Label>
-            <p className="text-caption text-foreground-muted mb-2">
-              Full formatting: headings, block elements, links, code blocks, and
-              more
+            <p className="mb-2 text-caption text-foreground-muted">
+              Full formatting: headings, block elements, links, code blocks, and more
             </p>
             <RichTextEditor
               content={extendedContent}
@@ -298,9 +280,8 @@ const [content, setContent] = React.useState("");
           {/* No Toolbar */}
           <div className="space-y-2">
             <Label className="font-semibold">No Toolbar (Minimal)</Label>
-            <p className="text-caption text-foreground-muted mb-2">
-              Clean editor without toolbar - formatting via keyboard shortcuts
-              only
+            <p className="mb-2 text-caption text-foreground-muted">
+              Clean editor without toolbar - formatting via keyboard shortcuts only
             </p>
             <RichTextEditor
               placeholder="Type here... Use keyboard shortcuts for formatting (Cmd+B for bold, etc.)"
@@ -321,20 +302,14 @@ const [content, setContent] = React.useState("");
         <div className="space-y-6">
           <div className="space-y-2">
             <Label>Compact (minHeight: 100px)</Label>
-            <RichTextEditor
-              placeholder="Compact editor for short content..."
-              minHeight="100px"
-            >
+            <RichTextEditor placeholder="Compact editor for short content..." minHeight="100px">
               <RichTextToolbar />
             </RichTextEditor>
           </div>
 
           <div className="space-y-2">
             <Label>Default (minHeight: 200px)</Label>
-            <RichTextEditor
-              placeholder="Default sized editor..."
-              minHeight="200px"
-            >
+            <RichTextEditor placeholder="Default sized editor..." minHeight="200px">
               <RichTextToolbar />
             </RichTextEditor>
           </div>
@@ -363,10 +338,7 @@ const [content, setContent] = React.useState("");
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-2">
             <Label>Default</Label>
-            <RichTextEditor
-              placeholder="Default editable state..."
-              minHeight="120px"
-            >
+            <RichTextEditor placeholder="Default editable state..." minHeight="120px">
               <RichTextToolbar />
             </RichTextEditor>
           </div>
@@ -395,10 +367,7 @@ const [content, setContent] = React.useState("");
             <p className="text-caption text-foreground-muted">
               Green border (green-500) appears when focused
             </p>
-            <RichTextEditor
-              placeholder="Click to see focus state..."
-              minHeight="120px"
-            >
+            <RichTextEditor placeholder="Click to see focus state..." minHeight="120px">
               <RichTextToolbar />
             </RichTextEditor>
           </div>
@@ -428,7 +397,7 @@ const [content, setContent] = React.useState("");
 
 // Access HTML: content contains the HTML string`}
         >
-          <div className="space-y-4 max-w-2xl">
+          <div className="max-w-2xl space-y-4">
             <Label>Job Description (Controlled)</Label>
             <RichTextEditor
               content={jobDescription}
@@ -438,11 +407,11 @@ const [content, setContent] = React.useState("");
             >
               <RichTextExtendedToolbar />
             </RichTextEditor>
-            <div className="p-3 bg-background-muted rounded-lg">
-              <Label className="text-caption text-foreground-muted mb-1 block">
+            <div className="rounded-lg bg-background-muted p-3">
+              <Label className="mb-1 block text-caption text-foreground-muted">
                 HTML Output Preview:
               </Label>
-              <code className="text-xs break-all">
+              <code className="break-all text-xs">
                 {jobDescription.substring(0, 200)}
                 {jobDescription.length > 200 ? "..." : ""}
               </code>
@@ -471,7 +440,7 @@ const [content, setContent] = React.useState("");
               <Eye className="h-4 w-4 text-foreground-muted" />
               <Label>Rendered Content</Label>
             </div>
-            <div className="p-4 border border-border-muted rounded-lg bg-background-subtle">
+            <div className="rounded-lg border border-border-muted bg-background-subtle p-4">
               <RichTextRenderer
                 content={`
                   <h2>About This Role</h2>
@@ -499,38 +468,36 @@ const [content, setContent] = React.useState("");
         description="All available formatting options and their keyboard shortcuts"
       >
         <div className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             {/* Standard Toolbar Features */}
             <div>
-              <h4 className="font-semibold text-foreground mb-3">
-                Standard Toolbar
-              </h4>
+              <h4 className="mb-3 font-semibold text-foreground">Standard Toolbar</h4>
               <div className="space-y-2">
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Bold</span>
                   <Badge variant="secondary">Cmd+B</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Italic</span>
                   <Badge variant="secondary">Cmd+I</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Underline</span>
                   <Badge variant="secondary">Cmd+U</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Strikethrough</span>
                   <Badge variant="secondary">Cmd+Shift+S</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Bullet List</span>
                   <Badge variant="secondary">-</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Numbered List</span>
                   <Badge variant="secondary">1.</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Undo / Redo</span>
                   <Badge variant="secondary">Cmd+Z / Cmd+Shift+Z</Badge>
                 </div>
@@ -539,35 +506,33 @@ const [content, setContent] = React.useState("");
 
             {/* Extended Toolbar Features */}
             <div>
-              <h4 className="font-semibold text-foreground mb-3">
-                Extended Toolbar (Additional)
-              </h4>
+              <h4 className="mb-3 font-semibold text-foreground">Extended Toolbar (Additional)</h4>
               <div className="space-y-2">
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Heading 1</span>
                   <Badge variant="secondary">H1</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Heading 2</span>
                   <Badge variant="secondary">H2</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Heading 3</span>
                   <Badge variant="secondary">H3</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Blockquote</span>
                   <Badge variant="secondary">&gt;</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Code Block</span>
                   <Badge variant="secondary">```</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Horizontal Rule</span>
                   <Badge variant="secondary">---</Badge>
                 </div>
-                <div className="flex justify-between text-sm p-2 bg-background-subtle rounded">
+                <div className="flex justify-between rounded bg-background-subtle p-2 text-sm">
                   <span>Link</span>
                   <Badge variant="secondary">Cmd+K</Badge>
                 </div>
@@ -581,9 +546,7 @@ const [content, setContent] = React.useState("");
       {/* 10. PROPS TABLES */}
       {/* ============================================ */}
       <div id="props" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Props Reference
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Props Reference</h2>
 
         <ComponentCard title="RichTextEditor Props">
           <PropsTable props={richTextEditorProps} />
@@ -606,9 +569,7 @@ const [content, setContent] = React.useState("");
       {/* 11. USAGE GUIDELINES */}
       {/* ============================================ */}
       <div id="guidelines">
-        <h2 className="text-heading-sm text-foreground mb-4">
-          Usage Guidelines
-        </h2>
+        <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
             "Use for content that needs HTML formatting (job descriptions, emails)",
@@ -679,9 +640,7 @@ const [content, setContent] = React.useState("");
       {/* 14. REAL-WORLD EXAMPLES */}
       {/* ============================================ */}
       <div id="examples" className="space-y-6">
-        <h2 className="text-heading-sm text-foreground">
-          Real-World Examples
-        </h2>
+        <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
         <RealWorldExample
           title="Job Description Editor"
@@ -690,11 +649,9 @@ const [content, setContent] = React.useState("");
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-foreground-brand" />
-                  <h3 className="text-body-strong text-foreground">
-                    Job Description
-                  </h3>
+                  <h3 className="text-body-strong text-foreground">Job Description</h3>
                   <Badge variant="secondary">Required</Badge>
                 </div>
                 <RichTextEditor
@@ -716,7 +673,7 @@ const [content, setContent] = React.useState("");
                 >
                   <RichTextExtendedToolbar />
                 </RichTextEditor>
-                <div className="flex justify-end gap-3 pt-4 border-t border-border-muted">
+                <div className="flex justify-end gap-3 border-t border-border-muted pt-4">
                   <Button variant="tertiary">Save Draft</Button>
                   <Button variant="primary">Continue</Button>
                 </div>
@@ -735,16 +692,11 @@ const [content, setContent] = React.useState("");
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Article className="h-5 w-5 text-foreground-brand" />
-                    <h3 className="text-body-strong text-foreground">
-                      Interview Notes
-                    </h3>
+                    <h3 className="text-body-strong text-foreground">Interview Notes</h3>
                   </div>
                   <Badge>Technical Screen</Badge>
                 </div>
-                <RichTextEditor
-                  placeholder="Add your interview notes here..."
-                  minHeight="150px"
-                >
+                <RichTextEditor placeholder="Add your interview notes here..." minHeight="150px">
                   <RichTextToolbar />
                 </RichTextEditor>
                 <Button variant="primary" className="w-full">
@@ -762,7 +714,7 @@ const [content, setContent] = React.useState("");
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="mb-2 flex items-center gap-2">
                   <Clipboard className="h-5 w-5 text-foreground-brand" />
                   <h3 className="text-body-strong text-foreground">
                     Template: Interview Confirmation
@@ -783,10 +735,9 @@ const [content, setContent] = React.useState("");
                 >
                   <RichTextToolbar />
                 </RichTextEditor>
-                <div className="flex items-center justify-between pt-4 border-t border-border-muted">
+                <div className="flex items-center justify-between border-t border-border-muted pt-4">
                   <p className="text-caption text-foreground-muted">
-                    Variables like {"{{candidate_name}}"} will be replaced when
-                    sending
+                    Variables like {"{{candidate_name}}"} will be replaced when sending
                   </p>
                   <Button variant="primary">Save Template</Button>
                 </div>

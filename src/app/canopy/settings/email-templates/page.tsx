@@ -133,8 +133,15 @@ export default function EmailTemplatesPage() {
 
                 {typeTemplates.length === 0 ? (
                   <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-8 text-center">
-                    <p className="text-body text-[var(--foreground-muted)]">No {label} templates yet</p>
-                    <Button variant="secondary" size="sm" className="mt-4" leftIcon={<Plus size={16} />}>
+                    <p className="text-body text-[var(--foreground-muted)]">
+                      No {label} templates yet
+                    </p>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="mt-4"
+                      leftIcon={<Plus size={16} />}
+                    >
                       Create Template
                     </Button>
                   </div>
@@ -147,7 +154,7 @@ export default function EmailTemplatesPage() {
                       >
                         <div className="flex flex-col gap-3 p-6">
                           <div className="flex items-start justify-between gap-2">
-                            <h3 className="text-body-strong font-semibold text-[var(--foreground-default)] line-clamp-2 group-hover:text-[var(--foreground-brand)]">
+                            <h3 className="line-clamp-2 text-body-strong font-semibold text-[var(--foreground-default)] group-hover:text-[var(--foreground-brand)]">
                               {template.name}
                             </h3>
                             <Badge variant={color as any} className="shrink-0">
@@ -156,10 +163,10 @@ export default function EmailTemplatesPage() {
                           </div>
 
                           <div>
-                            <p className="text-caption font-medium text-[var(--foreground-subtle)] uppercase">
+                            <p className="text-caption font-medium uppercase text-[var(--foreground-subtle)]">
                               Subject
                             </p>
-                            <p className="mt-1 text-caption text-[var(--foreground-muted)] line-clamp-2">
+                            <p className="mt-1 line-clamp-2 text-caption text-[var(--foreground-muted)]">
                               {template.subject}
                             </p>
                           </div>

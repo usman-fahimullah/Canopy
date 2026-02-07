@@ -39,9 +39,7 @@ export async function getPipelineFunnel(
 /**
  * Hiring stats: time to hire, apps per role, offer rate, pipeline velocity.
  */
-export async function getHiringStats(
-  organizationId: string
-): Promise<{
+export async function getHiringStats(organizationId: string): Promise<{
   timeToHire: number | null;
   appsPerRole: number | null;
   offerRate: number | null;
@@ -62,8 +60,7 @@ export async function getHiringStats(
     hiredApps.length > 0
       ? Math.round(
           hiredApps.reduce((sum, app) => {
-            const days =
-              (app.hiredAt!.getTime() - app.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+            const days = (app.hiredAt!.getTime() - app.createdAt.getTime()) / (1000 * 60 * 60 * 24);
             return sum + days;
           }, 0) / hiredApps.length
         )

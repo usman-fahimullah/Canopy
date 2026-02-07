@@ -27,7 +27,10 @@ interface DuplicateIndicatorProps {
 }
 
 // Simple cache to avoid repeated API calls
-const duplicateCache = new Map<string, { data: DuplicateCheckResponse["data"]; timestamp: number }>();
+const duplicateCache = new Map<
+  string,
+  { data: DuplicateCheckResponse["data"]; timestamp: number }
+>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export function DuplicateIndicator({ candidateEmail }: DuplicateIndicatorProps) {
@@ -93,7 +96,10 @@ export function DuplicateIndicator({ candidateEmail }: DuplicateIndicatorProps) 
     <Popover>
       <PopoverTrigger asChild>
         <button className="inline-block">
-          <Badge variant="warning" className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity">
+          <Badge
+            variant="warning"
+            className="flex cursor-pointer items-center gap-1 transition-opacity hover:opacity-80"
+          >
             <Warning size={14} weight="fill" />
             <span>Possible duplicate</span>
           </Badge>
@@ -101,30 +107,27 @@ export function DuplicateIndicator({ candidateEmail }: DuplicateIndicatorProps) 
       </PopoverTrigger>
       <PopoverContent className="w-80" align="start">
         <div className="space-y-4">
-          <h4 className="text-caption-strong font-semibold text-foreground-default">
+          <h4 className="text-foreground-default text-caption-strong font-semibold">
             Duplicate candidates found
           </h4>
           <p className="text-caption text-foreground-muted">
             {duplicates.length} candidate(s) with the same email address:
           </p>
 
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="max-h-64 space-y-3 overflow-y-auto">
             {duplicates.map((dup) => (
-              <div key={dup.seekerId} className="rounded-lg border border-border-muted bg-background-subtle p-3">
+              <div
+                key={dup.seekerId}
+                className="rounded-lg border border-border-muted bg-background-subtle p-3"
+              >
                 <div className="flex items-start gap-3">
-                  <Avatar
-                    name={dup.name}
-                    size="sm"
-                    className="flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-caption-strong text-foreground-default font-semibold">
+                  <Avatar name={dup.name} size="sm" className="flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-foreground-default text-caption-strong font-semibold">
                       {dup.name}
                     </p>
-                    <p className="text-caption text-foreground-muted break-all">
-                      {dup.email}
-                    </p>
-                    <p className="text-caption text-foreground-subtle mt-1">
+                    <p className="break-all text-caption text-foreground-muted">{dup.email}</p>
+                    <p className="mt-1 text-caption text-foreground-subtle">
                       {dup.applicationCount} application{dup.applicationCount !== 1 ? "s" : ""}
                     </p>
                     {dup.jobs.length > 0 && (

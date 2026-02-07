@@ -72,7 +72,10 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
         setNextCursor(data.nextCursor);
         setError(null);
       } catch (err) {
-        logger.error("useMessages fetch failed", { error: formatError(err), endpoint: "hooks/use-messages" });
+        logger.error("useMessages fetch failed", {
+          error: formatError(err),
+          endpoint: "hooks/use-messages",
+        });
         setError("Failed to load messages");
       } finally {
         setLoading(false);
@@ -196,7 +199,10 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
 
         return data.message;
       } catch (err) {
-        logger.error("sendMessage failed", { error: formatError(err), endpoint: "hooks/use-messages" });
+        logger.error("sendMessage failed", {
+          error: formatError(err),
+          endpoint: "hooks/use-messages",
+        });
         setError("Failed to send message");
         return null;
       } finally {
@@ -219,7 +225,10 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
         method: "PUT",
       });
     } catch (err) {
-      logger.error("markAsRead failed", { error: formatError(err), endpoint: "hooks/use-messages" });
+      logger.error("markAsRead failed", {
+        error: formatError(err),
+        endpoint: "hooks/use-messages",
+      });
     }
   }, [conversationId]);
 

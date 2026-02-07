@@ -128,12 +128,14 @@ export default function TalentSettingsPage() {
         if (res.ok) {
           const data = await res.json();
           setNotifPrefs({
-            inAppPrefs: typeof data.preferences.inAppPrefs === "string"
-              ? JSON.parse(data.preferences.inAppPrefs)
-              : (data.preferences.inAppPrefs || {}),
-            emailPrefs: typeof data.preferences.emailPrefs === "string"
-              ? JSON.parse(data.preferences.emailPrefs)
-              : (data.preferences.emailPrefs || {}),
+            inAppPrefs:
+              typeof data.preferences.inAppPrefs === "string"
+                ? JSON.parse(data.preferences.inAppPrefs)
+                : data.preferences.inAppPrefs || {},
+            emailPrefs:
+              typeof data.preferences.emailPrefs === "string"
+                ? JSON.parse(data.preferences.emailPrefs)
+                : data.preferences.emailPrefs || {},
             emailFrequency: data.preferences.emailFrequency || "immediate",
           });
         }
@@ -457,7 +459,7 @@ export default function TalentSettingsPage() {
                       <Label className="text-foreground-default font-medium">Email Frequency</Label>
                       <div className="space-y-2">
                         {["immediate", "daily", "weekly", "never"].map((freq) => (
-                          <label key={freq} className="flex items-center gap-3 cursor-pointer">
+                          <label key={freq} className="flex cursor-pointer items-center gap-3">
                             <input
                               type="radio"
                               name="email-frequency"
@@ -466,8 +468,10 @@ export default function TalentSettingsPage() {
                               onChange={(e) => handleFrequencyChange(e.target.value)}
                               className="h-4 w-4"
                             />
-                            <span className="text-body capitalize text-foreground-default">
-                              {freq === "immediate" ? "Immediate" : freq.charAt(0).toUpperCase() + freq.slice(1)}
+                            <span className="text-foreground-default text-body capitalize">
+                              {freq === "immediate"
+                                ? "Immediate"
+                                : freq.charAt(0).toUpperCase() + freq.slice(1)}
                             </span>
                           </label>
                         ))}
@@ -497,13 +501,17 @@ export default function TalentSettingsPage() {
                                     id={`inapp-${notification.type}`}
                                     checked={notifPrefs.inAppPrefs[notification.type] !== false}
                                     onChange={(e) =>
-                                      handleNotifToggle(notification.type, "inApp", e.target.checked)
+                                      handleNotifToggle(
+                                        notification.type,
+                                        "inApp",
+                                        e.target.checked
+                                      )
                                     }
                                     className="h-4 w-4 rounded"
                                   />
                                   <label
                                     htmlFor={`inapp-${notification.type}`}
-                                    className="text-caption text-foreground-muted cursor-pointer"
+                                    className="cursor-pointer text-caption text-foreground-muted"
                                   >
                                     In-app
                                   </label>
@@ -514,13 +522,17 @@ export default function TalentSettingsPage() {
                                     id={`email-${notification.type}`}
                                     checked={notifPrefs.emailPrefs[notification.type] !== false}
                                     onChange={(e) =>
-                                      handleNotifToggle(notification.type, "email", e.target.checked)
+                                      handleNotifToggle(
+                                        notification.type,
+                                        "email",
+                                        e.target.checked
+                                      )
                                     }
                                     className="h-4 w-4 rounded"
                                   />
                                   <label
                                     htmlFor={`email-${notification.type}`}
-                                    className="text-caption text-foreground-muted cursor-pointer"
+                                    className="cursor-pointer text-caption text-foreground-muted"
                                   >
                                     Email
                                   </label>

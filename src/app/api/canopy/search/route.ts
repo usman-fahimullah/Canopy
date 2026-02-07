@@ -54,9 +54,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate and parse search params
-    const params = SearchQuerySchema.safeParse(
-      Object.fromEntries(request.nextUrl.searchParams)
-    );
+    const params = SearchQuerySchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
 
     if (!params.success) {
       return apiValidationError(params.error);

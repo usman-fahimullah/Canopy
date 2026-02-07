@@ -34,10 +34,7 @@ type ActivityEvent = {
   metadata?: Record<string, unknown>;
 };
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: candidateId } = await params;
 
@@ -72,9 +69,7 @@ export async function GET(
     const orgId = membership.organizationId;
 
     // --- Parse query params ---
-    const queryParams = activityQuerySchema.parse(
-      Object.fromEntries(request.nextUrl.searchParams)
-    );
+    const queryParams = activityQuerySchema.parse(Object.fromEntries(request.nextUrl.searchParams));
 
     // --- Verify candidate exists and has applications in this org ---
     const candidate = await prisma.seekerProfile.findUnique({
@@ -308,10 +303,11 @@ export async function GET(
     });
 
     // --- Sort by timestamp descending and apply pagination ---
-    const sortedEvents = events.sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    const sortedEvents = events.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const paginatedEvents = sortedEvents.slice(
+      queryParams.skip,
+      queryParams.skip + queryParams.take
     );
-    const paginatedEvents = sortedEvents.slice(queryParams.skip, queryParams.skip + queryParams.take);
     const total = sortedEvents.length;
 
     logger.info("Activity feed fetched", {

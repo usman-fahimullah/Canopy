@@ -80,7 +80,10 @@ export async function GET() {
       },
     });
   } catch (error) {
-    logger.error("Fetch earnings error", { error: formatError(error), endpoint: "/api/candid/coach/earnings" });
+    logger.error("Fetch earnings error", {
+      error: formatError(error),
+      endpoint: "/api/candid/coach/earnings",
+    });
     return NextResponse.json({ error: "Failed to fetch earnings" }, { status: 500 });
   }
 }

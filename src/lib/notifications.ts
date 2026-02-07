@@ -49,22 +49,23 @@ async function getNotificationPreferences(accountId: string) {
   return prefs;
 }
 
-function isNotificationEnabled(
-  prefs: any,
-  type: string,
-  channel: "inApp" | "email"
-): boolean {
+function isNotificationEnabled(prefs: any, type: string, channel: "inApp" | "email"): boolean {
   if (!prefs) return true; // No prefs = all enabled (default)
 
-  const prefsMap = channel === "inApp"
-    ? safeJsonParse<Record<string, boolean>>(
-        typeof prefs.inAppPrefs === "string" ? prefs.inAppPrefs : JSON.stringify(prefs.inAppPrefs),
-        {}
-      )
-    : safeJsonParse<Record<string, boolean>>(
-        typeof prefs.emailPrefs === "string" ? prefs.emailPrefs : JSON.stringify(prefs.emailPrefs),
-        {}
-      );
+  const prefsMap =
+    channel === "inApp"
+      ? safeJsonParse<Record<string, boolean>>(
+          typeof prefs.inAppPrefs === "string"
+            ? prefs.inAppPrefs
+            : JSON.stringify(prefs.inAppPrefs),
+          {}
+        )
+      : safeJsonParse<Record<string, boolean>>(
+          typeof prefs.emailPrefs === "string"
+            ? prefs.emailPrefs
+            : JSON.stringify(prefs.emailPrefs),
+          {}
+        );
 
   // If the type is not in the map, default to enabled
   if (prefsMap[type] === undefined) return true;

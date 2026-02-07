@@ -22,12 +22,8 @@ export const RespondApprovalSchema = z.object({
 export type RespondApprovalInput = z.infer<typeof RespondApprovalSchema>;
 
 export const ApprovalQuerySchema = z.object({
-  status: z
-    .enum(["PENDING", "APPROVED", "REJECTED"])
-    .optional(),
-  type: z
-    .enum(["JOB_PUBLISH", "OFFER_SEND"])
-    .optional(),
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]).optional(),
+  type: z.enum(["JOB_PUBLISH", "OFFER_SEND"]).optional(),
   skip: z.coerce.number().min(0).default(0),
   take: z.coerce.number().min(1).max(100).default(25),
 });

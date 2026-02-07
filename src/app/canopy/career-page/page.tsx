@@ -8,12 +8,33 @@ import { Switch, SwitchWithLabel } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
 import { Banner } from "@/components/ui/banner";
 import { FormCard, FormSection, FormField } from "@/components/ui/form-section";
-import { Plus, Trash, DotsSixVertical, Eye, ArrowSquareOut, Globe, Quotes, Question } from "@phosphor-icons/react";
+import {
+  Plus,
+  Trash,
+  DotsSixVertical,
+  Eye,
+  ArrowSquareOut,
+  Globe,
+  Quotes,
+  Question,
+} from "@phosphor-icons/react";
 import type { CareerPageConfig, CareerPageSection } from "@/lib/career-pages/types";
 import { DEFAULT_CAREER_PAGE_CONFIG } from "@/lib/career-pages/default-template";
 import { logger, formatError } from "@/lib/logger";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { SimpleRichTextEditor } from "@/components/ui/rich-text-editor";
 
@@ -69,7 +90,7 @@ function SortableSectionItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-2 rounded-xl px-3 py-2.5 transition-colors cursor-pointer ${
+      className={`group flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 transition-colors ${
         isSelected
           ? "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand-emphasis)]"
           : "text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
@@ -79,14 +100,20 @@ function SortableSectionItem({
       <button {...attributes} {...listeners} className="cursor-grab touch-none">
         <DotsSixVertical size={16} weight="bold" />
       </button>
-      <span className="flex-1 text-sm font-medium truncate">
+      <span className="flex-1 truncate text-sm font-medium">
         {SECTION_LABELS[section.type] || section.type}
       </span>
       <button
-        onClick={(e) => { e.stopPropagation(); onDelete(); }}
-        className="opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        className="opacity-0 transition-opacity group-hover:opacity-100"
       >
-        <Trash size={14} className="text-[var(--foreground-muted)] hover:text-[var(--foreground-error)]" />
+        <Trash
+          size={14}
+          className="text-[var(--foreground-muted)] hover:text-[var(--foreground-error)]"
+        />
       </button>
     </div>
   );
@@ -472,7 +499,6 @@ function SectionEditor({
         title={SECTION_LABELS[section.type] || section.type}
         description={`Edit the content for this ${section.type} section`}
       >
-
         {section.type === "hero" && (
           <div className="space-y-4">
             <FormField label="Headline">
@@ -788,7 +814,10 @@ function SectionEditor({
               variant="secondary"
               size="sm"
               onClick={() => {
-                const items = [...section.items, { quote: "", author: "", role: "", photo: undefined }];
+                const items = [
+                  ...section.items,
+                  { quote: "", author: "", role: "", photo: undefined },
+                ];
                 onUpdate({ items });
               }}
             >
@@ -915,7 +944,12 @@ function createDefaultSection(type: CareerPageSection["type"]): CareerPageSectio
         type: "testimonials",
         title: "What Our Team Says",
         items: [
-          { quote: "Great company to work for", author: "Jane Doe", role: "Engineer", photo: undefined },
+          {
+            quote: "Great company to work for",
+            author: "Jane Doe",
+            role: "Engineer",
+            photo: undefined,
+          },
         ],
       };
     case "faq":
@@ -923,7 +957,11 @@ function createDefaultSection(type: CareerPageSection["type"]): CareerPageSectio
         type: "faq",
         title: "Frequently Asked Questions",
         items: [
-          { question: "What is the hiring process?", answer: "Our hiring process typically takes 2-3 weeks and includes initial screening, technical interviews, and a final round." },
+          {
+            question: "What is the hiring process?",
+            answer:
+              "Our hiring process typically takes 2-3 weeks and includes initial screening, technical interviews, and a final round.",
+          },
         ],
       };
   }

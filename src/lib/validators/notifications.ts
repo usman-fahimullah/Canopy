@@ -22,9 +22,7 @@ export const NOTIFICATION_CATEGORIES = [
   },
   {
     label: "Messages",
-    types: [
-      { type: "NEW_MESSAGE", label: "New messages" },
-    ],
+    types: [{ type: "NEW_MESSAGE", label: "New messages" }],
   },
   {
     label: "Jobs & Applications",

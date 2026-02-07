@@ -68,7 +68,10 @@ export async function GET() {
 
     return NextResponse.json(recentApplications);
   } catch (error) {
-    logger.error("Error fetching recent applications", { error: formatError(error), endpoint: "/api/jobs/recent-applications" });
+    logger.error("Error fetching recent applications", {
+      error: formatError(error),
+      endpoint: "/api/jobs/recent-applications",
+    });
     return NextResponse.json([], { status: 500 });
   }
 }
