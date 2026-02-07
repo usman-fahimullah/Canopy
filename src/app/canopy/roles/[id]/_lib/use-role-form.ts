@@ -15,6 +15,8 @@ import {
   formToEmploymentType,
   locationTypeToForm,
   formToLocationType,
+  experienceLevelToForm,
+  formToExperienceLevel,
   usStates,
   countries,
 } from "./constants";
@@ -254,7 +256,9 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       if (job.employmentType) {
         setPositionType(employmentTypeToForm[job.employmentType] || "");
       }
-      if (job.description) setDescription(job.description);
+      if (job.experienceLevel) {
+        setExperienceLevel(experienceLevelToForm[job.experienceLevel] || "");
+      }
       if (job.location) {
         const parts = job.location.split(", ");
         if (parts[0]) setCity(parts[0]);
@@ -282,30 +286,81 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
 
       // Initialize apply form config from DB
       if (job.formConfig) {
-        const fc = job.formConfig;
-        if (fc.personalDetails) {
+        const fc = job.formConfig as Record<string, unknown>;
+        const personalDeets = fc.personalDetails as
+          | Record<string, { visible: boolean; required: boolean }>
+          | undefined;
+        const careerDeets = fc.careerDetails as
+          | Record<string, { visible: boolean; required: boolean }>
+          | undefined;
+
+        if (personalDeets) {
           setPersonalDetails((prev) => ({
             ...prev,
             ...Object.fromEntries(
-              Object.entries(fc.personalDetails).map(([k, v]) => [
+              Object.entries(personalDeets).map(([k, v]) => [
                 k,
                 { visible: v.visible, required: v.required },
               ])
             ),
           }));
         }
-        if (fc.careerDetails) {
+        if (careerDeets) {
           setCareerDetails((prev) => ({
             ...prev,
             ...Object.fromEntries(
-              Object.entries(fc.careerDetails).map(([k, v]) => [
+              Object.entries(careerDeets).map(([k, v]) => [
                 k,
                 { visible: v.visible, required: v.required },
               ])
             ),
           }));
         }
+
+        // Restore structured description fields
+        const structured = fc.structuredDescription as
+          | {
+              description?: string;
+              responsibilities?: string;
+              requiredQuals?: string;
+              desiredQuals?: string;
+            }
+          | undefined;
+        if (structured) {
+          if (structured.description) setDescription(structured.description);
+          if (structured.responsibilities) setResponsibilities(structured.responsibilities);
+          if (structured.requiredQuals) setRequiredQuals(structured.requiredQuals);
+          if (structured.desiredQuals) setDesiredQuals(structured.desiredQuals);
+        } else if (job.description) {
+          // Fallback: if no structured data stored yet, put full description in the main field
+          setDescription(job.description);
+        }
+
+        // Restore additional form fields
+        const requiredFiles = fc.requiredFiles as
+          | { resume?: boolean; coverLetter?: boolean; portfolio?: boolean }
+          | undefined;
+        if (requiredFiles) {
+          if (requiredFiles.resume !== undefined) setRequireResume(requiredFiles.resume);
+          if (requiredFiles.coverLetter !== undefined)
+            setRequireCoverLetter(requiredFiles.coverLetter);
+          if (requiredFiles.portfolio !== undefined) setRequirePortfolio(requiredFiles.portfolio);
+        }
+        if (typeof fc.educationLevel === "string") setEducationLevel(fc.educationLevel);
+        if (typeof fc.educationDetails === "string") setEducationDetails(fc.educationDetails);
+        if (typeof fc.payType === "string") setPayType(fc.payType);
+        if (typeof fc.payFrequency === "string") setPayFrequency(fc.payFrequency);
+        if (Array.isArray(fc.selectedBenefits))
+          setSelectedBenefits(fc.selectedBenefits as string[]);
+        if (typeof fc.compensationDetails === "string")
+          setCompensationDetails(fc.compensationDetails);
+        if (typeof fc.showRecruiter === "boolean") setShowRecruiter(fc.showRecruiter);
+        if (typeof fc.externalLink === "string") setExternalLink(fc.externalLink);
+      } else if (job.description) {
+        // No formConfig at all — use the raw description
+        setDescription(job.description);
       }
+
       if (job.formQuestions && Array.isArray(job.formQuestions) && job.formQuestions.length > 0) {
         setQuestions(job.formQuestions);
       }
@@ -322,6 +377,29 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     fetchRole();
   }, [fetchRole]);
 
+  // ---- Compose full description from structured fields ----
+  const composeFullDescription = React.useCallback((): string => {
+    const sections: string[] = [];
+
+    if (description) {
+      sections.push(description);
+    }
+
+    if (responsibilities) {
+      sections.push(`<h3>Primary Responsibilities</h3>${responsibilities}`);
+    }
+
+    if (requiredQuals) {
+      sections.push(`<h3>Required Qualifications</h3>${requiredQuals}`);
+    }
+
+    if (desiredQuals) {
+      sections.push(`<h3>Desired Qualifications</h3>${desiredQuals}`);
+    }
+
+    return sections.join("\n") || "";
+  }, [description, responsibilities, requiredQuals, desiredQuals]);
+
   // ---- Save Handler — PATCH role to API ----
   const handleSaveRole = React.useCallback(async (): Promise<boolean> => {
     setSaving(true);
@@ -332,21 +410,46 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       const locationParts = [city, state, country].filter(Boolean);
       const locationString = locationParts.length > 0 ? locationParts.join(", ") : null;
 
+      // Compose the full description from structured fields
+      const fullDescription = composeFullDescription();
+
       const payload: Record<string, unknown> = {
         title: roleTitle || undefined,
-        description: description || undefined,
+        description: fullDescription || undefined,
         location: locationString,
         locationType: formToLocationType[workplaceType] || "ONSITE",
         employmentType: formToEmploymentType[positionType] || undefined,
         climateCategory: jobCategory || null,
+        experienceLevel: formToExperienceLevel[experienceLevel] || null,
         salaryMin: minPay ? Number(minPay) : null,
         salaryMax: maxPay ? Number(maxPay) : null,
         salaryCurrency: "USD",
+        requiredCerts: educationLevel && educationLevel !== "none" ? [educationLevel] : [],
         closesAt: closingDate ? closingDate.toISOString() : null,
         formConfig: {
           personalDetails,
           careerDetails,
-          requiredFiles: { resume: true, coverLetter: false, portfolio: false },
+          requiredFiles: {
+            resume: requireResume,
+            coverLetter: requireCoverLetter,
+            portfolio: requirePortfolio,
+          },
+          // Store structured description sections so we can decompose on load
+          structuredDescription: {
+            description,
+            responsibilities,
+            requiredQuals,
+            desiredQuals,
+          },
+          // Store additional form fields not in the DB schema
+          educationLevel,
+          educationDetails,
+          payType,
+          payFrequency,
+          selectedBenefits,
+          compensationDetails,
+          showRecruiter,
+          externalLink,
         },
         formQuestions: questionsEnabled ? questions : [],
       };
@@ -372,7 +475,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
         setJobData({
           ...jobData,
           title: roleTitle || jobData.title,
-          description: description || jobData.description,
+          description: fullDescription || jobData.description,
           location: locationString,
           locationType: formToLocationType[workplaceType] || jobData.locationType,
           employmentType: formToEmploymentType[positionType] || jobData.employmentType,
@@ -396,14 +499,30 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     roleId,
     roleTitle,
     description,
+    responsibilities,
+    requiredQuals,
+    desiredQuals,
+    composeFullDescription,
     city,
     state,
     country,
     workplaceType,
     positionType,
     jobCategory,
+    experienceLevel,
+    educationLevel,
+    educationDetails,
     minPay,
     maxPay,
+    payType,
+    payFrequency,
+    selectedBenefits,
+    compensationDetails,
+    showRecruiter,
+    externalLink,
+    requireResume,
+    requireCoverLetter,
+    requirePortfolio,
     closingDate,
     personalDetails,
     careerDetails,

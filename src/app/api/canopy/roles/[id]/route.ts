@@ -64,6 +64,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         impactDescription: true,
         requiredCerts: true,
         greenSkills: true,
+        experienceLevel: true,
         status: true,
         publishedAt: true,
         closesAt: true,
@@ -204,7 +205,8 @@ const UpdateJobSchema = z.object({
   // Syndication
   syndicationEnabled: z.boolean().optional(),
 
-  // Application form configuration
+  // Application form configuration (stored as JSON — includes structured description,
+  // education, compensation, and sidebar settings alongside apply-form config)
   formConfig: z
     .object({
       personalDetails: z.record(
@@ -226,6 +228,24 @@ const UpdateJobSchema = z.object({
         coverLetter: z.boolean(),
         portfolio: z.boolean(),
       }),
+      // Structured description sections (stored so we can decompose on load)
+      structuredDescription: z
+        .object({
+          description: z.string().optional(),
+          responsibilities: z.string().optional(),
+          requiredQuals: z.string().optional(),
+          desiredQuals: z.string().optional(),
+        })
+        .optional(),
+      // Additional form fields not in the Job schema
+      educationLevel: z.string().optional(),
+      educationDetails: z.string().optional(),
+      payType: z.string().optional(),
+      payFrequency: z.string().optional(),
+      selectedBenefits: z.array(z.string()).optional(),
+      compensationDetails: z.string().optional(),
+      showRecruiter: z.boolean().optional(),
+      externalLink: z.string().optional(),
     })
     .optional(),
   formQuestions: z

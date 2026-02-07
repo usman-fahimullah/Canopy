@@ -3,15 +3,21 @@
 // ============================================
 
 export const jobCategories = [
-  { value: "renewable-energy", label: "Renewable Energy" },
-  { value: "sustainability", label: "Sustainability" },
-  { value: "climate-tech", label: "Climate Tech" },
-  { value: "conservation", label: "Conservation" },
-  { value: "clean-transportation", label: "Clean Transportation" },
-  { value: "circular-economy", label: "Circular Economy" },
-  { value: "green-building", label: "Green Building" },
-  { value: "environmental-policy", label: "Environmental Policy" },
-  { value: "other", label: "Other" },
+  { value: "software-engineering", label: "Software Engineering" },
+  { value: "supply-chain", label: "Supply Chain" },
+  { value: "administration", label: "People, Administration, HR, & Recruitment" },
+  { value: "advocacy-policy", label: "Advocacy & Policy" },
+  { value: "climate-sustainability", label: "Climate & Sustainability" },
+  { value: "investment", label: "Investment" },
+  { value: "sales", label: "Sales & Account Management" },
+  { value: "content", label: "Content" },
+  { value: "marketing-design", label: "Marketing & Design" },
+  { value: "product", label: "Product" },
+  { value: "data", label: "Data" },
+  { value: "education", label: "Education" },
+  { value: "finance-compliance", label: "Finance, Legal, & Compliance" },
+  { value: "operations", label: "Operations, Program/Project Management & Strategy" },
+  { value: "science", label: "Science" },
 ];
 
 export const positionTypes = [
@@ -88,6 +94,23 @@ export const formToLocationType: Record<string, string> = {
   onsite: "ONSITE",
   remote: "REMOTE",
   hybrid: "HYBRID",
+};
+
+// Experience level mapping: DB enum → form value
+export const experienceLevelToForm: Record<string, string> = {
+  ENTRY: "entry",
+  INTERMEDIATE: "mid",
+  SENIOR: "senior",
+  EXECUTIVE: "executive",
+};
+
+// Experience level mapping: form value → DB enum
+export const formToExperienceLevel: Record<string, string> = {
+  entry: "ENTRY",
+  mid: "INTERMEDIATE",
+  senior: "SENIOR",
+  lead: "SENIOR",
+  executive: "EXECUTIVE",
 };
 
 export const defaultStages = [

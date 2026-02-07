@@ -80,15 +80,12 @@ export interface JobData {
   impactDescription: string | null;
   requiredCerts: string[];
   greenSkills: string[];
+  experienceLevel: string | null;
   status: string;
   publishedAt: string | null;
   closesAt: string | null;
   stages: { id: string; name: string }[];
-  formConfig: {
-    personalDetails: Record<string, { visible: boolean; required: boolean }>;
-    careerDetails: Record<string, { visible: boolean; required: boolean }>;
-    requiredFiles: { resume: boolean; coverLetter: boolean; portfolio: boolean };
-  } | null;
+  formConfig: Record<string, unknown> | null;
   formQuestions: FormQuestion[] | null;
   syndicationEnabled: boolean;
   createdAt: string;
