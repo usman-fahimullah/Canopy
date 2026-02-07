@@ -1,3 +1,5 @@
+"use client";
+
 import type {
   CareerPageSection,
   CareerPageTheme,
@@ -65,9 +67,18 @@ export function SectionRenderer({ sections, theme, orgSlug, jobs = [] }: Section
           case "cta":
             return <CTABlock key={index} section={section as CTASection} theme={theme} />;
           case "testimonials":
-            return <TestimonialsBlock key={index} title={section.title} items={section.items} theme={theme} />;
+            return (
+              <TestimonialsBlock
+                key={index}
+                title={section.title}
+                items={section.items}
+                theme={theme}
+              />
+            );
           case "faq":
-            return <FAQBlock key={index} title={section.title} items={section.items} theme={theme} />;
+            return (
+              <FAQBlock key={index} title={section.title} items={section.items} theme={theme} />
+            );
           default:
             return null;
         }
