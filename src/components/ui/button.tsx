@@ -56,12 +56,13 @@ const buttonVariants = cva(
         ghost:
           "bg-[var(--button-ghost-background)] hover:bg-[var(--button-ghost-background-hover)] text-[var(--button-ghost-foreground)]",
         // Outline - Border with transparent background; active keeps hover bg
+        // Matches SplitButton outline: border-default, hover neutral-100
         outline: [
           "bg-[var(--button-outline-background)] text-[var(--button-outline-foreground)]",
-          "border border-[var(--button-outline-border)]",
-          "hover:bg-[var(--button-outline-background-hover)]",
-          "active:bg-[var(--button-outline-background-hover)]",
-          "data-[selected=true]:bg-[var(--button-outline-background-hover)]",
+          "border border-[var(--border-default)]",
+          "hover:bg-[var(--primitive-neutral-100)]",
+          "active:bg-[var(--primitive-neutral-100)]",
+          "data-[selected=true]:bg-[var(--primitive-neutral-100)]",
         ],
         // Link style - transparent background with brand text
         link: "bg-transparent text-foreground-brand hover:bg-background-muted",
