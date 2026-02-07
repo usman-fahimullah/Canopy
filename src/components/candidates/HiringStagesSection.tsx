@@ -1,11 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/ui/scorecard";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { CaretDown, Circle, CheckCircle, ArrowRight } from "@phosphor-icons/react";
+import { CaretDown, CaretRight, ArrowCircleRight, Star, Clock } from "@phosphor-icons/react";
 import type { Recommendation } from "@prisma/client";
+import { formatDistanceToNow } from "date-fns";
+
+/**
+ * HiringStagesSection — Figma-aligned stage card with 3-column rows.
+ *
+ * @figma https://figma.com/design/niUFJMIpfrizs1Kjsu1O4S/Candid?node-id=890-1314
+ */
 
 interface ScoreData {
   id: string;
@@ -29,6 +36,12 @@ interface HiringStagesSectionProps {
   currentStage: string;
   scores: ScoreData[];
   averageScore: number | null;
+  /** Which stage's review panel is currently open */
+  selectedStageId?: string | null;
+  /** Called when user clicks CaretRight to open review panel for a stage */
+  onOpenReview?: (stageId: string) => void;
+  /** Application created date (for "Applied X ago") */
+  appliedAt?: Date;
 }
 
 export function HiringStagesSection({
@@ -36,6 +49,9 @@ export function HiringStagesSection({
   currentStage,
   scores,
   averageScore,
+  selectedStageId,
+  onOpenReview,
+  appliedAt,
 }: HiringStagesSectionProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -43,44 +59,76 @@ export function HiringStagesSection({
     (s) => s.id.toLowerCase() === currentStage.toLowerCase()
   );
 
+  const currentStageName =
+    stages.find((s) => s.id.toLowerCase() === currentStage.toLowerCase())?.name ?? currentStage;
+
+  const timeAgo = appliedAt ? formatDistanceToNow(new Date(appliedAt), { addSuffix: false }) : null;
+
+  const hasReviews = scores.length > 0 && averageScore !== null;
+
   return (
     <section>
-      <h3 className="mb-3 text-body font-semibold text-[var(--foreground-default)]">
-        Hiring stages
+      <h3 className="mb-3 text-heading-sm font-medium text-[var(--foreground-default)]">
+        Hiring Stages
       </h3>
 
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        {/* Primary stage row */}
-        <div className="rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)]">
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-blue-500)]">
-                <ArrowRight size={12} weight="bold" className="text-white" />
-              </div>
-              <span className="text-body-sm font-medium text-[var(--foreground-default)]">
-                {stages.find((s) => s.id.toLowerCase() === currentStage.toLowerCase())?.name ??
-                  currentStage}
+        <div
+          className="overflow-clip rounded-2xl border border-[var(--card-border)] bg-[var(--card-background)]"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          {/* Primary stage row */}
+          <button
+            type="button"
+            onClick={() => onOpenReview?.(currentStage)}
+            className={`flex w-full items-center px-4 py-2 pr-2 transition-colors hover:bg-[var(--background-interactive-hover)] ${
+              selectedStageId?.toLowerCase() === currentStage.toLowerCase()
+                ? "ring-2 ring-inset ring-[var(--border-brand)]"
+                : ""
+            }`}
+          >
+            {/* Col 1: Stage icon + name */}
+            <div className="flex flex-1 items-center gap-3">
+              <ArrowCircleRight
+                size={24}
+                weight="fill"
+                className="text-[var(--primitive-blue-500)]"
+              />
+              <span className="text-body font-medium text-[var(--foreground-default)]">
+                {currentStageName}
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
-              {/* Rating summary */}
-              {averageScore !== null ? (
-                <div className="flex items-center gap-2">
-                  <StarRating value={averageScore} readOnly size="sm" showValue />
-                  <span className="text-caption text-[var(--foreground-muted)]">
-                    ({scores.length} {scores.length === 1 ? "review" : "reviews"})
+            {/* Col 2: Score */}
+            <div className="flex flex-1 items-center gap-2">
+              {hasReviews ? (
+                <>
+                  <Star size={24} weight="fill" className="text-[var(--primitive-yellow-500)]" />
+                  <span className="text-body font-medium text-[var(--foreground-default)]">
+                    {averageScore.toFixed(1)}
                   </span>
-                </div>
+                  <span className="text-caption text-[var(--foreground-muted)]">
+                    ({scores.length} {scores.length === 1 ? "Review" : "Reviews"})
+                  </span>
+                </>
               ) : (
-                <span className="text-caption text-[var(--foreground-muted)]">No reviews</span>
+                <span className="text-caption text-[var(--foreground-muted)]">In Review</span>
               )}
-
-              <Badge variant="info" size="sm">
-                Review
-              </Badge>
             </div>
-          </div>
+
+            {/* Col 3: Time + CaretRight */}
+            <div className="flex flex-1 items-center justify-end gap-2">
+              {timeAgo && (
+                <>
+                  <Clock size={24} weight="regular" className="text-[var(--foreground-muted)]" />
+                  <span className="text-caption text-[var(--foreground-muted)]">
+                    Applied {timeAgo} ago
+                  </span>
+                </>
+              )}
+              <CaretRight size={20} weight="bold" className="text-[var(--foreground-muted)]" />
+            </div>
+          </button>
 
           {/* Expanded: all stages */}
           <CollapsibleContent>
@@ -88,34 +136,38 @@ export function HiringStagesSection({
               {stages.map((stage, idx) => {
                 const isCurrent = stage.id.toLowerCase() === currentStage.toLowerCase();
                 const isPast = idx < currentStageIdx;
+                const isSelected = selectedStageId?.toLowerCase() === stage.id.toLowerCase();
+
+                if (isCurrent) return null; // Already shown above
 
                 return (
-                  <div key={stage.id} className="flex items-center gap-3 py-2">
-                    {isPast ? (
-                      <CheckCircle
-                        size={18}
-                        weight="fill"
-                        className="text-[var(--primitive-green-500)]"
-                      />
-                    ) : isCurrent ? (
-                      <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-[var(--primitive-blue-500)]">
-                        <div className="h-2 w-2 rounded-full bg-[var(--primitive-blue-500)]" />
-                      </div>
-                    ) : (
-                      <Circle size={18} className="text-[var(--foreground-disabled)]" />
-                    )}
+                  <button
+                    key={stage.id}
+                    type="button"
+                    onClick={() => onOpenReview?.(stage.id)}
+                    className={`flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[var(--background-interactive-hover)] ${
+                      isSelected ? "bg-[var(--background-interactive-selected)]" : ""
+                    }`}
+                  >
+                    <ArrowCircleRight
+                      size={24}
+                      weight={isPast ? "fill" : "regular"}
+                      className={
+                        isPast
+                          ? "text-[var(--primitive-green-500)]"
+                          : "text-[var(--foreground-disabled)]"
+                      }
+                    />
                     <span
-                      className={`text-body-sm ${
-                        isCurrent
-                          ? "font-medium text-[var(--foreground-default)]"
-                          : isPast
-                            ? "text-[var(--foreground-muted)]"
-                            : "text-[var(--foreground-disabled)]"
+                      className={`text-body ${
+                        isPast
+                          ? "text-[var(--foreground-muted)]"
+                          : "text-[var(--foreground-disabled)]"
                       }`}
                     >
                       {stage.name}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -128,7 +180,7 @@ export function HiringStagesSection({
                 size={14}
                 className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               />
-              {isOpen ? "Show less" : "Show more"}
+              {isOpen ? "Show less" : "Show more stages"}
             </button>
           </CollapsibleTrigger>
         </div>

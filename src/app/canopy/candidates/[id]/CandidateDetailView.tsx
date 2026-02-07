@@ -6,19 +6,18 @@ import type { Recommendation } from "@prisma/client";
 
 // UI Components
 import { Banner } from "@/components/ui/banner";
-import { Button } from "@/components/ui/button";
-
-// Icons
-import { X, File } from "@phosphor-icons/react";
 
 // Sub-components
 import { CandidateDetailNavBar } from "@/components/candidates/CandidateDetailNavBar";
 import { CandidateProfileHeader } from "@/components/candidates/CandidateProfileHeader";
 import { HiringStagesSection } from "@/components/candidates/HiringStagesSection";
-import { ApplicationReviewPanel } from "@/components/candidates/ApplicationReviewPanel";
-import { ActivityPanel } from "@/components/candidates/ActivityPanel";
+import { DocumentsSection } from "@/components/candidates/DocumentsSection";
 import { ContactInfoSection } from "@/components/candidates/ContactInfoSection";
 import { AboutSection } from "@/components/candidates/AboutSection";
+import { ApplicationReviewPanel } from "@/components/candidates/ApplicationReviewPanel";
+import { CommentsPanel } from "@/components/candidates/CommentsPanel";
+import { TodoPanel } from "@/components/candidates/TodoPanel";
+import { HistoryPanel } from "@/components/candidates/HistoryPanel";
 
 /* -------------------------------------------------------------------
    Types
@@ -54,6 +53,7 @@ interface ApplicationData {
     id: string;
     title: string;
     stages: string;
+    climateCategory: string | null;
   };
   scores: ScoreData[];
 }
@@ -107,10 +107,10 @@ interface CandidateDetailViewProps {
 }
 
 /* -------------------------------------------------------------------
-   Right Panel Views
+   Panel Types
    ------------------------------------------------------------------- */
 
-type RightPanelView = "review" | "activity";
+type PanelType = "review" | "comments" | "todo" | "history" | null;
 
 /* -------------------------------------------------------------------
    Main Component
@@ -125,7 +125,10 @@ export function CandidateDetailView({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [activePanelView, setActivePanelView] = React.useState<RightPanelView>("review");
+  // Panel state: null = panel closed, full-width content
+  const [panelType, setPanelType] = React.useState<PanelType>(null);
+  // Track which stage's review is open
+  const [reviewStageId, setReviewStageId] = React.useState<string | null>(null);
 
   // Find the active application
   const activeApp = React.useMemo(
@@ -152,7 +155,10 @@ export function CandidateDetailView({
     return sum / activeApp.scores.length;
   }, [activeApp.scores]);
 
-  // Navigation handlers
+  // Candidate name for display
+  const candidateName = seeker.account.name ?? "Unknown";
+
+  // ── Navigation handlers ──
   const handleClose = () => {
     router.back();
   };
@@ -178,11 +184,18 @@ export function CandidateDetailView({
   // Keyboard shortcuts
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
+      if (e.key === "Escape") {
+        if (panelType) {
+          setPanelType(null);
+          setReviewStageId(null);
+        } else {
+          handleClose();
+        }
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [panelType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Stage action handlers ──
   const [isActionLoading, setIsActionLoading] = React.useState(false);
@@ -192,7 +205,6 @@ export function CandidateDetailView({
     message: string;
   } | null>(null);
 
-  // The displayed stage: optimistic override or actual
   const displayStage = optimisticStage ?? activeApp.stage;
 
   // Clear feedback after 4 seconds
@@ -229,7 +241,6 @@ export function CandidateDetailView({
           message: `Candidate moved to ${label}`,
         });
 
-        // Refresh the page data to get updated state from server
         router.refresh();
       } catch (err) {
         setOptimisticStage(null);
@@ -253,15 +264,65 @@ export function CandidateDetailView({
     () => moveToStage("qualified", "Qualified"),
     [moveToStage]
   );
+  const handleAdvanceStage = React.useCallback(
+    (stageId: string) => {
+      const stage = jobStages.find((s) => s.id === stageId);
+      moveToStage(stageId, stage?.name ?? stageId);
+    },
+    [moveToStage, jobStages]
+  );
 
-  // Panel tab buttons
-  const panelTabs: { key: RightPanelView; label: string }[] = [
-    { key: "review", label: "Application review" },
-    { key: "activity", label: "Activity" },
-  ];
+  // ── Panel toggle handlers ──
+  const togglePanel = (type: Exclude<PanelType, null>) => {
+    if (panelType === type) {
+      setPanelType(null);
+      if (type === "review") setReviewStageId(null);
+    } else {
+      setPanelType(type);
+      if (type !== "review") setReviewStageId(null);
+    }
+  };
+
+  const handleOpenReview = (stageId: string) => {
+    setReviewStageId(stageId);
+    setPanelType("review");
+  };
+
+  const handleClosePanel = () => {
+    setPanelType(null);
+    setReviewStageId(null);
+  };
+
+  // Build documents list from resume URL
+  const documentFiles = React.useMemo(() => {
+    const files: Array<{
+      name: string;
+      url: string;
+      type: "pdf" | "doc" | "other";
+    }> = [];
+    if (seeker.resumeUrl) {
+      try {
+        const pathname = new URL(seeker.resumeUrl).pathname;
+        const parts = pathname.split("/");
+        const name = decodeURIComponent(parts[parts.length - 1] || "Resume");
+        files.push({
+          name,
+          url: seeker.resumeUrl,
+          type: name.toLowerCase().endsWith(".pdf") ? "pdf" : "doc",
+        });
+      } catch {
+        files.push({
+          name: "Resume",
+          url: seeker.resumeUrl,
+          type: "doc",
+        });
+      }
+    }
+    return files;
+  }, [seeker.resumeUrl]);
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--background-default)]">
+    <div className="flex h-[calc(100vh-0px)] flex-col bg-[var(--background-default)]">
       {/* ── Top Navigation Bar ── */}
       <CandidateDetailNavBar
         currentIndex={navContext.currentIndex}
@@ -270,9 +331,15 @@ export function CandidateDetailView({
         hasNext={!!navContext.nextId}
         currentStage={displayStage}
         isActionLoading={isActionLoading}
+        activePanel={panelType}
+        stages={jobStages}
         onClose={handleClose}
         onPrevious={handlePrevious}
         onNext={handleNext}
+        onToggleComments={() => togglePanel("comments")}
+        onToggleTodo={() => togglePanel("todo")}
+        onToggleHistory={() => togglePanel("history")}
+        onAdvanceStage={handleAdvanceStage}
         onReject={handleReject}
         onSaveToTalentPool={handleSaveToTalentPool}
       />
@@ -294,132 +361,90 @@ export function CandidateDetailView({
         />
       )}
 
-      {/* ── Two-panel content ── */}
+      {/* ── Content area ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left: Main scrollable content ── */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-8 py-8">
-            {/* Profile header */}
-            <CandidateProfileHeader
-              name={seeker.account.name ?? "Unknown"}
-              email={seeker.account.email}
-              avatar={seeker.account.avatar}
-              jobTitle={activeApp.job.title}
+        <main className="flex-1 overflow-y-auto bg-[var(--background-subtle)]">
+          {/* Header area on default (white) background */}
+          <div className="bg-[var(--background-default)] px-8 pb-6 pt-8">
+            <div className="mx-auto max-w-3xl">
+              <CandidateProfileHeader
+                name={candidateName}
+                email={seeker.account.email}
+                avatar={seeker.account.avatar}
+                jobTitle={activeApp.job.title}
+                appliedAt={activeApp.createdAt}
+                pronouns={seeker.account.pronouns}
+              />
+            </div>
+          </div>
+
+          {/* Content sections on subtle background */}
+          <div className="mx-auto max-w-3xl space-y-8 px-8 py-8">
+            {/* Hiring stages */}
+            <HiringStagesSection
+              stages={jobStages}
+              currentStage={displayStage}
+              scores={activeApp.scores}
+              averageScore={averageScore}
+              selectedStageId={reviewStageId}
+              onOpenReview={handleOpenReview}
               appliedAt={activeApp.createdAt}
-              pronouns={seeker.account.pronouns}
             />
 
-            {/* Warning banner (placeholder for data retention) */}
-            <div className="mt-6">
-              <Banner
-                type="warning"
-                subtle
-                title="No data retention period set"
-                actionLabel="Edit"
-                onAction={() => {}}
-                dismissible={false}
-              />
-            </div>
-
-            {/* Hiring stages */}
-            <div className="mt-8">
-              <HiringStagesSection
-                stages={jobStages}
-                currentStage={displayStage}
-                scores={activeApp.scores}
-                averageScore={averageScore}
-              />
-            </div>
-
-            {/* Resume */}
-            {seeker.resumeUrl && (
-              <section className="mt-8">
-                <h3 className="mb-3 text-body font-semibold text-[var(--foreground-default)]">
-                  Resume
-                </h3>
-                <a
-                  href={seeker.resumeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 rounded-lg border border-[var(--border-muted)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]"
-                >
-                  <File size={20} weight="regular" className="text-[var(--foreground-muted)]" />
-                  <span className="text-body-sm text-[var(--foreground-default)]">Resume</span>
-                </a>
-              </section>
-            )}
+            {/* Documents */}
+            {documentFiles.length > 0 && <DocumentsSection files={documentFiles} />}
 
             {/* Contact info */}
-            <div className="mt-8">
-              <ContactInfoSection
-                name={seeker.account.name}
-                email={seeker.account.email}
-                phone={seeker.account.phone}
-                pronouns={seeker.account.pronouns}
-                location={seeker.account.location}
-                linkedinUrl={seeker.account.linkedinUrl}
-              />
-            </div>
+            <ContactInfoSection
+              name={seeker.account.name}
+              email={seeker.account.email}
+              phone={seeker.account.phone}
+              pronouns={seeker.account.pronouns}
+              location={seeker.account.location}
+              linkedinUrl={seeker.account.linkedinUrl}
+              onEditContactInfo={() => {
+                /* TODO: Open contact info edit modal */
+              }}
+            />
 
             {/* About */}
-            <div className="mt-8">
-              <AboutSection
-                createdAt={activeApp.createdAt}
-                source={activeApp.source}
-                skills={seeker.skills}
-                certifications={seeker.certifications}
-              />
-            </div>
+            <AboutSection
+              createdAt={activeApp.createdAt}
+              source={activeApp.source}
+              jobCategory={activeApp.job.climateCategory}
+            />
           </div>
         </main>
 
-        {/* ── Right: Side panel ── */}
-        <aside className="flex w-[380px] shrink-0 flex-col border-l border-[var(--border-muted)]">
-          {/* Panel tab header */}
-          <div className="flex items-center justify-between border-b border-[var(--border-muted)] px-4">
-            <div className="flex">
-              {panelTabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActivePanelView(tab.key)}
-                  className={`relative px-4 py-3 text-caption font-medium transition-colors ${
-                    activePanelView === tab.key
-                      ? "text-[var(--foreground-default)]"
-                      : "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
-                  }`}
-                >
-                  {tab.label}
-                  {activePanelView === tab.key && (
-                    <span className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-[var(--foreground-brand)]" />
-                  )}
-                </button>
-              ))}
-            </div>
-            <Button variant="ghost" size="icon-sm" onClick={() => {}} aria-label="Close panel">
-              <X size={16} />
-            </Button>
-          </div>
-
-          {/* Panel content */}
-          <div className="flex-1 overflow-y-auto">
-            {activePanelView === "review" && (
+        {/* ── Right: Side panel (conditional — only shows when panelType is set) ── */}
+        {panelType && (
+          <aside className="flex w-[380px] shrink-0 flex-col border-l border-[var(--border-muted)] bg-[var(--background-default)]">
+            {panelType === "review" && (
               <ApplicationReviewPanel
                 applicationId={activeApp.id}
+                seekerId={seeker.id}
                 scores={activeApp.scores}
                 averageScore={averageScore}
                 orgMemberId={orgMemberId}
+                candidateName={candidateName}
                 currentStage={displayStage}
+                jobId={activeApp.job.id}
                 isActionLoading={isActionLoading}
                 onQualify={handleQualify}
                 onDisqualify={handleReject}
-                onSaveToTalentPool={handleSaveToTalentPool}
+                onClose={handleClosePanel}
               />
             )}
-            {activePanelView === "activity" && (
-              <ActivityPanel seekerId={seeker.id} applicationId={activeApp.id} />
+            {panelType === "comments" && (
+              <CommentsPanel seekerId={seeker.id} notes={seeker.notes} onClose={handleClosePanel} />
             )}
-          </div>
-        </aside>
+            {panelType === "todo" && <TodoPanel onClose={handleClosePanel} />}
+            {panelType === "history" && (
+              <HistoryPanel seekerId={seeker.id} onClose={handleClosePanel} />
+            )}
+          </aside>
+        )}
       </div>
     </div>
   );

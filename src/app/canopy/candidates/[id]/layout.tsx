@@ -1,8 +1,9 @@
 /**
- * Full-screen layout for the candidate detail view.
- * Overrides the parent canopy ShellLayout to provide
- * a borderless viewport for the detail experience.
+ * Passthrough layout for the candidate detail view.
+ * The page renders within the shell layout (sidenav stays visible).
+ *
+ * @figma https://figma.com/design/niUFJMIpfrizs1Kjsu1O4S/Candid?node-id=890-1245
  */
 export default function CandidateDetailLayout({ children }: { children: React.ReactNode }) {
-  return <div className="fixed inset-0 z-50 bg-[var(--background-default)]">{children}</div>;
+  return <>{children}</>;
 }

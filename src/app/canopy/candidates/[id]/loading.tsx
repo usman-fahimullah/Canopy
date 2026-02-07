@@ -2,74 +2,75 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CandidateDetailLoading() {
   return (
-    <div className="flex h-screen flex-col bg-[var(--background-default)]">
+    <div className="flex h-[calc(100vh-0px)] flex-col bg-[var(--background-default)]">
       {/* Top nav skeleton */}
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-4">
         <div className="flex items-center gap-3">
           <Skeleton className="h-8 w-8 rounded-lg" />
-          <Skeleton className="h-8 w-8 rounded-lg" />
-          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-16 rounded-lg" />
           <Skeleton className="h-5 w-16 rounded" />
         </div>
         <div className="flex items-center gap-2">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-8 rounded-lg" />
           ))}
         </div>
       </div>
 
-      {/* Two-panel skeleton */}
+      {/* Main content (no right panel by default) */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left panel */}
-        <div className="flex-1 space-y-6 overflow-y-auto p-8">
-          {/* Profile header */}
-          <div className="flex items-start gap-5">
-            <Skeleton className="h-24 w-24 rounded-full" />
-            <div className="space-y-3">
-              <Skeleton className="h-8 w-48 rounded" />
-              <Skeleton className="h-5 w-64 rounded" />
-              <Skeleton className="h-10 w-32 rounded-lg" />
+        <main className="flex-1 overflow-y-auto">
+          {/* Header area */}
+          <div className="bg-[var(--background-default)] px-8 pb-6 pt-8">
+            <div className="mx-auto max-w-3xl">
+              {/* Profile header — large square avatar + heading + subtitle */}
+              <div className="flex items-start gap-5">
+                <Skeleton className="h-24 w-24 rounded-xl" />
+                <div className="flex-1 space-y-3">
+                  <Skeleton className="h-10 w-64 rounded" />
+                  <Skeleton className="h-5 w-80 rounded" />
+                  <Skeleton className="mt-2 h-10 w-40 rounded-lg" />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Banner */}
-          <Skeleton className="h-12 w-full rounded-lg" />
+          {/* Content sections on subtle background */}
+          <div className="mx-auto max-w-3xl space-y-8 bg-[var(--background-subtle)] px-8 py-8">
+            {/* Hiring stages card */}
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-32 rounded" />
+              <Skeleton className="h-16 w-full rounded-2xl" />
+            </div>
 
-          {/* Hiring stages */}
-          <div className="space-y-3">
-            <Skeleton className="h-6 w-32 rounded" />
-            <Skeleton className="h-14 w-full rounded-lg" />
-          </div>
+            {/* Documents card */}
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-28 rounded" />
+              <Skeleton className="h-16 w-full rounded-2xl" />
+            </div>
 
-          {/* Resume */}
-          <div className="space-y-3">
-            <Skeleton className="h-6 w-24 rounded" />
-            <Skeleton className="h-14 w-64 rounded-lg" />
-          </div>
+            {/* Contact info rows */}
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-28 rounded" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-full rounded" />
+                <Skeleton className="h-5 w-full rounded" />
+                <Skeleton className="h-5 w-full rounded" />
+                <Skeleton className="h-5 w-3/4 rounded" />
+              </div>
+            </div>
 
-          {/* Contact info */}
-          <div className="space-y-3">
-            <Skeleton className="h-6 w-28 rounded" />
-            <Skeleton className="h-5 w-full rounded" />
-            <Skeleton className="h-5 w-full rounded" />
-            <Skeleton className="h-5 w-full rounded" />
+            {/* About rows */}
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-16 rounded" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-full rounded" />
+                <Skeleton className="h-5 w-full rounded" />
+                <Skeleton className="h-5 w-full rounded" />
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Right panel */}
-        <div className="w-[380px] shrink-0 space-y-6 border-l border-[var(--border-muted)] p-6">
-          <Skeleton className="h-6 w-40 rounded" />
-          <div className="flex justify-center gap-1">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-8 w-8 rounded" />
-            ))}
-          </div>
-          <Skeleton className="h-24 w-full rounded-lg" />
-          <div className="flex gap-3">
-            <Skeleton className="h-10 flex-1 rounded-lg" />
-            <Skeleton className="h-10 flex-1 rounded-lg" />
-          </div>
-        </div>
+        </main>
       </div>
     </div>
   );

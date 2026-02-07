@@ -81,6 +81,7 @@ export default async function CandidateDetailPage({
               id: true,
               title: true,
               stages: true,
+              climateCategory: true,
             },
           },
           scores: {
