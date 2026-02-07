@@ -11,3 +11,4 @@ export { useFocusTrap } from "./use-focus-trap";
 export { useClickOutside, useClickOutsideRef } from "./use-click-outside";
 export { useDisclosure, useDisclosureGroup } from "./use-disclosure";
 export { useAuth } from "./use-auth";
+export { useAsyncData } from "./use-async-data";

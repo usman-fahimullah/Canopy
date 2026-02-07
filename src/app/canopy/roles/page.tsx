@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shell/page-header";
 import { Spinner } from "@/components/ui/spinner";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CategoryTag } from "@/components/ui/category-tag";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import {
   Table,
   TableHeader,
@@ -49,6 +51,12 @@ interface Pathway {
   color: string | null;
 }
 
+interface JobAssignee {
+  id: string;
+  name: string;
+  avatar: string | null;
+}
+
 interface Job {
   id: string;
   title: string;
@@ -62,6 +70,9 @@ interface Job {
   pathway?: Pathway | null;
   climateCategory?: string | null;
   _count?: { applications: number };
+  recruiter?: JobAssignee | null;
+  hiringManager?: JobAssignee | null;
+  reviewerCount?: number;
 }
 
 /* -------------------------------------------------------------------
@@ -245,7 +256,7 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
         {/* Table title row */}
         <TableHeader>
           <TableRow>
-            <TableHead colSpan={5}>
+            <TableHead colSpan={6}>
               <div className="flex items-center gap-2 py-1">
                 <FolderOpen size={20} weight="fill" className="text-[var(--foreground-muted)]" />
                 <span className="text-body-strong text-[var(--foreground-default)]">
@@ -257,7 +268,7 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
           <TableRow>
             <TableHead sortable>Job Title</TableHead>
             <TableHead sortable>Pathway</TableHead>
-            <TableHead sortable>Department</TableHead>
+            <TableHead>Team</TableHead>
             <TableHead sortable>Closing Date</TableHead>
             <TableHead sortable># of Applications</TableHead>
           </TableRow>
@@ -265,7 +276,7 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
         <TableBody>
           {openJobs.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5}>
+              <TableCell colSpan={6}>
                 <div className="py-8 text-center text-body-sm text-[var(--foreground-muted)]">
                   No open roles yet. Submit your first role to get started.
                 </div>
@@ -274,6 +285,16 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
           ) : (
             openJobs.map((job) => {
               const appCount = job.applicationCount ?? job._count?.applications ?? 0;
+              const assignees: { name: string; avatar: string | null; label: string }[] = [];
+              if (job.recruiter) {
+                assignees.push({ ...job.recruiter, label: `${job.recruiter.name} (Recruiter)` });
+              }
+              if (job.hiringManager) {
+                assignees.push({
+                  ...job.hiringManager,
+                  label: `${job.hiringManager.name} (Hiring Manager)`,
+                });
+              }
 
               return (
                 <TableRow key={job.id}>
@@ -299,7 +320,27 @@ function OpenRolesSection({ jobs }: { jobs: Job[] }) {
                     )}
                   </TableCell>
                   <TableCell>
-                    <span className="text-[var(--foreground-muted)]">{job.location || "--"}</span>
+                    {assignees.length > 0 ? (
+                      <div className="flex items-center -space-x-1.5">
+                        {assignees.map((a) => (
+                          <SimpleTooltip key={a.label} content={a.label}>
+                            <Avatar
+                              name={a.name}
+                              src={a.avatar ?? undefined}
+                              size="xs"
+                              className="ring-2 ring-[var(--background-default)]"
+                            />
+                          </SimpleTooltip>
+                        ))}
+                        {(job.reviewerCount ?? 0) > 0 && (
+                          <span className="ml-2 text-caption text-[var(--foreground-muted)]">
+                            +{job.reviewerCount}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[var(--foreground-subtle)]">--</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     {job.closesAt ? (

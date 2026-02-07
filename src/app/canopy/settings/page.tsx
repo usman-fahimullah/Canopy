@@ -28,13 +28,14 @@ import {
   Warning,
   Export,
   Trash,
+  Globe,
 } from "@phosphor-icons/react";
 
 /* -------------------------------------------------------------------
    Types
    ------------------------------------------------------------------- */
 
-type SettingSection = "company" | "team" | "notifications" | "privacy";
+type SettingSection = "company" | "team" | "notifications" | "privacy" | "career-page";
 
 interface TeamMember {
   id: string;
@@ -87,6 +88,12 @@ const SETTING_SECTIONS = [
     label: "Privacy & Account",
     description: "Privacy and account settings",
     icon: ShieldCheck,
+  },
+  {
+    id: "career-page" as const,
+    label: "Career Page",
+    description: "Public career page settings",
+    icon: Globe,
   },
 ];
 
@@ -216,7 +223,7 @@ function CompanyProfileSection({
           </div>
         </div>
 
-        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
+        <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-8">
           <div className="max-w-xl space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="company-name">Company name</Label>
@@ -284,7 +291,7 @@ function CompanyProfileSection({
         </Button>
       </div>
 
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
+      <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-8">
         <dl className="max-w-xl space-y-5">
           <div>
             <dt className="mb-1 text-caption font-medium text-foreground-muted">Company name</dt>
@@ -352,7 +359,7 @@ function TeamPermissionsSection() {
         </SimpleTooltip>
       </div>
 
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
+      <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-6">
         <p className="mb-4 text-caption text-foreground-muted">
           {MOCK_TEAM.length} member{MOCK_TEAM.length !== 1 ? "s" : ""}
         </p>
@@ -361,7 +368,7 @@ function TeamPermissionsSection() {
           {MOCK_TEAM.map((member) => (
             <div
               key={member.id}
-              className="flex items-center gap-4 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3"
+              className="flex items-center gap-4 rounded-xl border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3"
             >
               <Avatar name={member.name} color={member.avatarColor} size="sm" />
 
@@ -380,12 +387,12 @@ function TeamPermissionsSection() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-[var(--primitive-blue-200)] bg-[var(--primitive-blue-100)] px-5 py-4">
-        <p className="text-body-sm text-[var(--primitive-green-800)]">
+      <div className="rounded-xl border border-[var(--border-info)] bg-[var(--background-info)] px-5 py-4">
+        <p className="text-body-sm text-[var(--foreground-default)]">
           Manage detailed team settings on the{" "}
           <Link
             href="/canopy/team"
-            className="font-medium underline underline-offset-2 transition-colors hover:text-[var(--primitive-blue-600)]"
+            className="font-medium underline underline-offset-2 transition-colors hover:text-[var(--foreground-link-hover)]"
           >
             Team page
           </Link>
@@ -407,7 +414,7 @@ function NotificationsSection({
     <div className="space-y-6">
       <h2 className="text-foreground-default text-heading-sm font-medium">Notifications</h2>
 
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
+      <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-8">
         <div className="max-w-xl space-y-6">
           <SwitchWithLabel
             label="New applications"
@@ -416,7 +423,7 @@ function NotificationsSection({
             onCheckedChange={() => onToggle("newApplications")}
           />
 
-          <div className="border-t border-[var(--primitive-neutral-200)]" />
+          <div className="border-t border-[var(--border-default)]" />
 
           <SwitchWithLabel
             label="Messages"
@@ -425,7 +432,7 @@ function NotificationsSection({
             onCheckedChange={() => onToggle("messages")}
           />
 
-          <div className="border-t border-[var(--primitive-neutral-200)]" />
+          <div className="border-t border-[var(--border-default)]" />
 
           <SwitchWithLabel
             label="Job expiring"
@@ -434,7 +441,7 @@ function NotificationsSection({
             onCheckedChange={() => onToggle("jobExpiring")}
           />
 
-          <div className="border-t border-[var(--primitive-neutral-200)]" />
+          <div className="border-t border-[var(--border-default)]" />
 
           <SwitchWithLabel
             label="Team activity"
@@ -454,7 +461,7 @@ function PrivacyAccountSection({ onSignOut }: { onSignOut: () => void }) {
       <h2 className="text-foreground-default text-heading-sm font-medium">Privacy & Account</h2>
 
       {/* Export data */}
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
+      <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-8">
         <h3 className="text-foreground-default mb-1 text-body font-medium">Export company data</h3>
         <p className="mb-4 text-caption text-foreground-muted">
           Download a copy of all your organization data including jobs, candidates, and team
@@ -471,7 +478,7 @@ function PrivacyAccountSection({ onSignOut }: { onSignOut: () => void }) {
       </div>
 
       {/* Sign out */}
-      <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-8">
+      <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-8">
         <h3 className="text-foreground-default mb-1 text-body font-medium">Sign out</h3>
         <p className="mb-4 text-caption text-foreground-muted">
           Sign out of your Canopy employer account on this device.
@@ -483,17 +490,17 @@ function PrivacyAccountSection({ onSignOut }: { onSignOut: () => void }) {
       </div>
 
       {/* Delete organization */}
-      <div className="rounded-[16px] border border-[var(--primitive-red-200)] bg-[var(--primitive-red-100)] p-8">
-        <h3 className="mb-1 text-body font-medium text-[var(--primitive-red-700)]">
+      <div className="rounded-[16px] border border-[var(--border-error)] bg-[var(--background-error)] p-8">
+        <h3 className="mb-1 text-body font-medium text-[var(--foreground-error)]">
           Delete organization
         </h3>
         <div className="mb-4 flex items-start gap-2">
           <Warning
             size={16}
             weight="fill"
-            className="mt-0.5 shrink-0 text-[var(--primitive-red-600)]"
+            className="mt-0.5 shrink-0 text-[var(--foreground-error)]"
           />
-          <p className="text-caption text-[var(--primitive-red-700)]">
+          <p className="text-caption text-[var(--foreground-error)]">
             This will permanently delete your organization and all associated data. This action
             cannot be undone.
           </p>
@@ -503,6 +510,139 @@ function PrivacyAccountSection({ onSignOut }: { onSignOut: () => void }) {
           Delete organization
         </Button>
       </div>
+    </div>
+  );
+}
+
+function CareerPageSettingsSection() {
+  const router = useRouter();
+  const [slug, setSlug] = useState("");
+  const [initialSlug, setInitialSlug] = useState("");
+  const [enabled, setEnabled] = useState(false);
+  const [initialEnabled, setInitialEnabled] = useState(false);
+  const [loadingConfig, setLoadingConfig] = useState(true);
+  const [savingConfig, setSavingConfig] = useState(false);
+
+  useEffect(() => {
+    async function fetchConfig() {
+      try {
+        const res = await fetch("/api/canopy/career-page");
+        if (res.ok) {
+          const json = await res.json();
+          const pageData = json.data;
+          const loadedSlug = pageData?.slug || pageData?.orgSlug || "";
+          const loadedEnabled = pageData?.enabled ?? false;
+          setSlug(loadedSlug);
+          setInitialSlug(loadedSlug);
+          setEnabled(loadedEnabled);
+          setInitialEnabled(loadedEnabled);
+        }
+      } catch {
+        // API not available
+      } finally {
+        setLoadingConfig(false);
+      }
+    }
+    fetchConfig();
+  }, []);
+
+  const isDirty = slug !== initialSlug || enabled !== initialEnabled;
+
+  const handleSave = useCallback(async () => {
+    setSavingConfig(true);
+    try {
+      const res = await fetch("/api/canopy/career-page", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug, enabled }),
+      });
+      if (res.ok) {
+        setInitialSlug(slug);
+        setInitialEnabled(enabled);
+      }
+    } catch {
+      // Save failed silently — user can retry
+    } finally {
+      setSavingConfig(false);
+    }
+  }, [slug, enabled]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-foreground-default text-heading-sm font-medium">Career Page</h2>
+        <div className="flex items-center gap-2">
+          {isDirty && (
+            <Button variant="primary" size="sm" onClick={handleSave} loading={savingConfig}>
+              <FloppyDisk size={16} weight="bold" />
+              Save
+            </Button>
+          )}
+          <Button variant="tertiary" size="sm" onClick={() => router.push("/canopy/career-page")}>
+            <PencilSimple size={16} weight="bold" />
+            Open Visual Editor
+          </Button>
+        </div>
+      </div>
+
+      {loadingConfig ? (
+        <div className="flex items-center justify-center py-12">
+          <Spinner size="md" />
+        </div>
+      ) : (
+        <>
+          {/* Publish toggle */}
+          <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-8">
+            <SwitchWithLabel
+              label="Published"
+              helperText="When enabled, your career page is publicly visible to candidates"
+              checked={enabled}
+              onCheckedChange={(checked) => setEnabled(checked)}
+            />
+          </div>
+
+          {/* URL slug */}
+          <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-8">
+            <div className="max-w-xl space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="career-slug">Career page URL</Label>
+                <Input
+                  id="career-slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                  placeholder="your-company"
+                />
+                {slug && (
+                  <p className="text-caption text-foreground-muted">
+                    Public URL:{" "}
+                    <span className="text-foreground-default font-medium">
+                      {typeof window !== "undefined" ? window.location.origin : ""}/careers/{slug}
+                    </span>
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick links */}
+          {enabled && slug && (
+            <div className="rounded-xl border border-[var(--border-info)] bg-[var(--background-info)] px-5 py-4">
+              <p className="text-body-sm text-[var(--foreground-default)]">
+                Your career page is live.{" "}
+                <a
+                  href={`/careers/${slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 font-medium underline underline-offset-2 transition-colors hover:text-[var(--foreground-link-hover)]"
+                >
+                  View career page
+                  <ArrowSquareOut size={14} weight="bold" />
+                </a>
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -686,6 +826,8 @@ export default function EmployerSettingsPage() {
         );
       case "privacy":
         return <PrivacyAccountSection onSignOut={handleSignOut} />;
+      case "career-page":
+        return <CareerPageSettingsSection />;
       default:
         return null;
     }
@@ -713,7 +855,7 @@ export default function EmployerSettingsPage() {
                   }}
                   className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors ${
                     isActive
-                      ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-green-800)]"
+                      ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-default)]"
                       : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
                   }`}
                 >
@@ -726,7 +868,7 @@ export default function EmployerSettingsPage() {
             {/* Sign out button */}
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[var(--primitive-red-600)] transition-colors hover:bg-[var(--primitive-red-100)]"
+              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-[var(--foreground-error)] transition-colors hover:bg-[var(--background-error)]"
             >
               <SignOut size={20} weight="regular" />
               <span className="text-body-sm font-medium">Sign out</span>

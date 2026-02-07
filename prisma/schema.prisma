@@ -28,6 +28,9 @@ model Account {
   timezone   String?
   bio        String? @db.Text
 
+  // Activity tracking
+  lastActiveAt DateTime? // Updated by API routes (debounced, max once per 5 min)
+
   // Onboarding fields (shared across roles)
   pronouns  String? // e.g., "he/him", "she/her", "they/them"
   ethnicity String? // For diversity reporting
@@ -166,6 +169,11 @@ model OrganizationMember {
   approvalRequests    ApprovalRequest[] @relation("ApprovalRequester")
   approvalAssignments ApprovalRequest[] @relation("ApprovalApprover")
 
+  // Job assignments (Phase B: scoped access)
+  recruitedJobs  Job[]             @relation("JobRecruiter")
+  managedJobs    Job[]             @relation("JobHiringManager")
+  jobAssignments JobAssignment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -178,6 +186,7 @@ enum OrgMemberRole {
   OWNER
   ADMIN
   RECRUITER
+  HIRING_MANAGER
   MEMBER
   VIEWER
 }
@@ -811,6 +820,15 @@ model Job {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
+  // Team assignment — who's responsible for this role
+  recruiterId     String?
+  recruiter       OrganizationMember? @relation("JobRecruiter", fields: [recruiterId], references: [id], onDelete: SetNull)
+  hiringManagerId String?
+  hiringManager   OrganizationMember? @relation("JobHiringManager", fields: [hiringManagerId], references: [id], onDelete: SetNull)
+
+  // Reviewer assignments (many-to-many via junction table)
+  reviewerAssignments JobAssignment[]
+
   applications    Application[]
   syndicationLogs SyndicationLog[]
 
@@ -826,6 +844,30 @@ model Job {
   @@index([status])
   @@index([pathwayId])
   @@index([publishedAt])
+  @@index([recruiterId])
+  @@index([hiringManagerId])
+}
+
+// =================================================================
+// JOB ASSIGNMENT — Assigns team members (reviewers) to specific jobs.
+// Hiring Manager and Recruiter use 1:1 FK on Job; this table handles
+// many-to-many reviewer assignments for scoped access control.
+// =================================================================
+
+model JobAssignment {
+  id String @id @default(cuid())
+
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  memberId String
+  member   OrganizationMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime @default(now())
+
+  @@unique([jobId, memberId])
+  @@index([memberId])
+  @@index([jobId])
 }
 
 // =================================================================

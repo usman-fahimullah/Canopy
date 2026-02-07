@@ -12,7 +12,7 @@ const inviteSchema = z.object({
     .array(
       z.object({
         email: z.string().email("Invalid email address"),
-        role: z.enum(["RECRUITER", "MEMBER"]),
+        role: z.enum(["ADMIN", "RECRUITER", "HIRING_MANAGER", "MEMBER", "VIEWER"]),
       })
     )
     .min(1, "At least one invite is required")

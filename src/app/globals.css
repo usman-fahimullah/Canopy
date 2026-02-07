@@ -918,7 +918,7 @@
     --switch-background-checked-hover: var(--primitive-blue-400);
     --switch-background-disabled: var(--primitive-neutral-300);
     --switch-thumb: var(--primitive-neutral-0);
-    --switch-thumb-border: var(--border-alpha-4);
+    --switch-thumb-border: var(--primitive-neutral-400);
     --switch-thumb-border-checked: var(--primitive-blue-500);
     --switch-thumb-disabled: var(--primitive-neutral-400);
 
@@ -1210,7 +1210,7 @@
 
     /* Info Tags (cream background with dismissible option) */
     --tag-info-background: var(--primitive-neutral-200);
-    --tag-info-foreground: var(--primitive-neutral-700);
+    --tag-info-foreground: var(--primitive-neutral-800);
     --tag-info-dismiss-background: var(--primitive-neutral-600);
     --tag-info-dismiss-foreground: var(--primitive-neutral-0);
     --tag-info-dismiss-background-hover: var(--primitive-neutral-700);
@@ -2262,7 +2262,7 @@
     --switch-background-checked-hover: var(--primitive-blue-400);
     --switch-background-disabled: var(--primitive-neutral-300);
     --switch-thumb: var(--primitive-neutral-0);
-    --switch-thumb-border: var(--border-alpha-4);
+    --switch-thumb-border: var(--primitive-neutral-500);
     --switch-thumb-border-checked: var(--primitive-blue-500);
     --switch-thumb-disabled: var(--primitive-neutral-600);
 
@@ -2878,20 +2878,13 @@
   }
 }
 
-/* Radio dot scale animation - staggered (waits for outer circle to change first) */
+/* Radio dot animation - contracts inward from border edge to center dot */
 @keyframes radio-dot-in {
   0% {
-    transform: scale(0);
+    transform: scale(1.8);
     opacity: 0;
   }
-  /* Hold at 0 for first 30% (creates the stagger delay) */
-  30% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  /* Then pop in with slight overshoot */
-  70% {
-    transform: scale(1.15);
+  40% {
     opacity: 1;
   }
   100% {

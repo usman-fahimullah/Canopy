@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { Textarea, Card, CardContent } from "@/components/ui";
-import { CheckCircle, SpinnerGap } from "@phosphor-icons/react";
+import { CheckCircle } from "@phosphor-icons/react";
+import { Spinner } from "@/components/ui/spinner";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -81,7 +82,7 @@ export function NotesEditor({ jobId, initialNotes, isSaved }: NotesEditorProps) 
         <span className="text-caption-sm text-[var(--foreground-subtle)]">{notes.length}/2000</span>
         {status === "saving" && (
           <span className="flex items-center gap-1 text-caption-sm text-[var(--foreground-muted)]">
-            <SpinnerGap size={14} className="animate-spin" />
+            <Spinner size="xs" variant="current" label="Saving" />
             Saving...
           </span>
         )}

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { z } from "zod";
+import { getAuthContext, scopedApplicationWhere } from "@/lib/access-control";
+import type { Prisma } from "@prisma/client";
 
 /**
  * GET /api/canopy/candidates
@@ -26,31 +27,10 @@ const GetCandidatesSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Auth check
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    // Get organization
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      include: {
-        orgMemberships: {
-          select: { organizationId: true },
-        },
-      },
-    });
-
-    if (!account || account.orgMemberships.length === 0) {
-      return NextResponse.json({ error: "No organization found" }, { status: 403 });
-    }
-
-    const organizationId = account.orgMemberships[0].organizationId;
 
     // Parse and validate query params
     const params = GetCandidatesSchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
@@ -74,11 +54,10 @@ export async function GET(request: NextRequest) {
       search,
     } = params.data;
 
-    // Build where clause for applications
-    const applicationWhere: any = {
-      job: {
-        organizationId,
-      },
+    // Build where clause — scoped by role-based access
+    const baseWhere = scopedApplicationWhere(ctx);
+    const applicationWhere: Prisma.ApplicationWhereInput = {
+      ...baseWhere,
     };
 
     // Add filters
@@ -86,31 +65,23 @@ export async function GET(request: NextRequest) {
       applicationWhere.stage = stage;
     }
     if (matchScoreMin !== undefined || matchScoreMax !== undefined) {
-      applicationWhere.matchScore = {};
-      if (matchScoreMin !== undefined) {
-        applicationWhere.matchScore.gte = matchScoreMin;
-      }
-      if (matchScoreMax !== undefined) {
-        applicationWhere.matchScore.lte = matchScoreMax;
-      }
+      const matchFilter: Prisma.FloatNullableFilter = {};
+      if (matchScoreMin !== undefined) matchFilter.gte = matchScoreMin;
+      if (matchScoreMax !== undefined) matchFilter.lte = matchScoreMax;
+      applicationWhere.matchScore = matchFilter;
     }
     if (source) {
       applicationWhere.source = source;
     }
     if (dateFrom || dateTo) {
-      applicationWhere.createdAt = {};
-      if (dateFrom) {
-        applicationWhere.createdAt.gte = new Date(dateFrom);
-      }
-      if (dateTo) {
-        applicationWhere.createdAt.lte = new Date(dateTo);
-      }
+      const dateFilter: Prisma.DateTimeFilter = {};
+      if (dateFrom) dateFilter.gte = new Date(dateFrom);
+      if (dateTo) dateFilter.lte = new Date(dateTo);
+      applicationWhere.createdAt = dateFilter;
     }
     if (experienceLevel) {
-      applicationWhere.job = {
-        ...applicationWhere.job,
-        experienceLevel,
-      };
+      const existingJobFilter = (applicationWhere.job ?? {}) as Prisma.JobWhereInput;
+      applicationWhere.job = { ...existingJobFilter, experienceLevel };
     }
 
     // Handle search (name/email in candidate)
@@ -149,8 +120,10 @@ export async function GET(request: NextRequest) {
           source: true,
           matchScore: true,
           createdAt: true,
+          seekerId: true,
           seeker: {
             select: {
+              id: true,
               account: {
                 select: {
                   id: true,
@@ -178,6 +151,7 @@ export async function GET(request: NextRequest) {
     // Format response
     const formattedApplications = applications.map((app) => ({
       id: app.id,
+      seekerId: app.seekerId,
       stage: app.stage,
       source: app.source,
       matchScore: app.matchScore,
@@ -198,6 +172,7 @@ export async function GET(request: NextRequest) {
         take,
         hasMore: skip + take < total,
       },
+      userRole: ctx.role,
     });
   } catch (error) {
     logger.error("Error fetching candidates", {

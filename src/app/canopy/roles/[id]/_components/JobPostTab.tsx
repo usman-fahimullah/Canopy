@@ -97,6 +97,8 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
     hiringManagerId,
     setHiringManagerId,
     orgMembers,
+    reviewerIds,
+    setReviewerIds,
     closingDate,
     setClosingDate,
     externalLink,
@@ -427,6 +429,8 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
         setShowHiringManager={setShowHiringManager}
         hiringManagerId={hiringManagerId}
         setHiringManagerId={setHiringManagerId}
+        reviewerIds={reviewerIds}
+        setReviewerIds={setReviewerIds}
         orgMembers={orgMembers}
         closingDate={closingDate}
         setClosingDate={setClosingDate}

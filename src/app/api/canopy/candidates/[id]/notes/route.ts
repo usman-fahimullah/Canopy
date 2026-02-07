@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { getAuthContext, canLeaveNotes, scopedApplicationWhere } from "@/lib/access-control";
 
 /**
  * POST /api/canopy/candidates/[id]/notes
@@ -18,32 +18,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const { id: seekerId } = await params;
 
-    // --- Auth ---
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      select: { id: true },
-    });
-
-    if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
-    }
-
-    const membership = await prisma.organizationMember.findFirst({
-      where: { accountId: account.id },
-      select: { id: true, organizationId: true },
-    });
-
-    if (!membership) {
-      return NextResponse.json({ error: "Organization membership required" }, { status: 403 });
+    if (!canLeaveNotes(ctx)) {
+      return NextResponse.json({ error: "Viewers cannot leave notes" }, { status: 403 });
     }
 
     // --- Validate body ---
@@ -59,11 +40,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const { content, mentions } = parsed.data;
 
-    // --- Verify the seeker has applications in this org ---
+    // --- Verify the seeker has applications in accessible jobs ---
     const applicationCount = await prisma.application.count({
       where: {
+        ...scopedApplicationWhere(ctx),
         seekerId,
-        job: { organizationId: membership.organizationId },
       },
     });
 
@@ -78,7 +59,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const note = await prisma.note.create({
       data: {
         seekerId,
-        orgMemberAuthorId: membership.id,
+        orgMemberAuthorId: ctx.memberId,
         content,
         mentions,
       },

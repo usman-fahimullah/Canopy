@@ -1,16 +1,33 @@
 import { prisma } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 
 /**
  * Analytics calculations for the Canopy employer portal.
  * All functions require organizationId to scope queries to a single tenant.
+ * Optional jobIds filter for role-based scoped access (HIRING_MANAGER/MEMBER).
  */
+
+/** Build a job where clause, optionally scoped to specific job IDs. */
+function jobFilter(organizationId: string, jobIds?: string[]): Prisma.JobWhereInput {
+  const filter: Prisma.JobWhereInput = { organizationId };
+  if (jobIds) {
+    filter.id = { in: jobIds };
+  }
+  return filter;
+}
+
+/** Build an application where clause via nested job filter. */
+function appFilter(organizationId: string, jobIds?: string[]): Prisma.ApplicationWhereInput {
+  return { job: jobFilter(organizationId, jobIds), deletedAt: null };
+}
 
 /**
  * Pipeline funnel: count applications by stage.
  * Returns counts grouped by the standard stages (Applied, Screening, Interview, Offer, Hired).
  */
 export async function getPipelineFunnel(
-  organizationId: string
+  organizationId: string,
+  jobIds?: string[]
 ): Promise<Array<{ stage: string; count: number }>> {
   const stages = [
     { id: "applied", name: "Applied" },
@@ -24,9 +41,8 @@ export async function getPipelineFunnel(
     stages.map(async (stage) => {
       const count = await prisma.application.count({
         where: {
-          job: { organizationId },
+          ...appFilter(organizationId, jobIds),
           stage: stage.id,
-          deletedAt: null,
         },
       });
       return { stage: stage.name, count };
@@ -39,7 +55,10 @@ export async function getPipelineFunnel(
 /**
  * Hiring stats: time to hire, apps per role, offer rate, pipeline velocity.
  */
-export async function getHiringStats(organizationId: string): Promise<{
+export async function getHiringStats(
+  organizationId: string,
+  jobIds?: string[]
+): Promise<{
   timeToHire: number | null;
   appsPerRole: number | null;
   offerRate: number | null;
@@ -49,9 +68,8 @@ export async function getHiringStats(organizationId: string): Promise<{
   // Only count applications that have been hired
   const hiredApps = await prisma.application.findMany({
     where: {
-      job: { organizationId },
+      ...appFilter(organizationId, jobIds),
       hiredAt: { not: null },
-      deletedAt: null,
     },
     select: { createdAt: true, hiredAt: true },
   });
@@ -69,16 +87,10 @@ export async function getHiringStats(organizationId: string): Promise<{
   // Apps per role: total applications / count of published roles
   const [totalApps, publishedRoles] = await Promise.all([
     prisma.application.count({
-      where: {
-        job: { organizationId },
-        deletedAt: null,
-      },
+      where: appFilter(organizationId, jobIds),
     }),
     prisma.job.count({
-      where: {
-        organizationId,
-        status: "PUBLISHED",
-      },
+      where: { ...jobFilter(organizationId, jobIds), status: "PUBLISHED" },
     }),
   ]);
 
@@ -90,16 +102,14 @@ export async function getHiringStats(organizationId: string): Promise<{
   const [offerCount, interviewApps] = await Promise.all([
     prisma.application.count({
       where: {
-        job: { organizationId },
+        ...appFilter(organizationId, jobIds),
         offeredAt: { not: null },
-        deletedAt: null,
       },
     }),
     prisma.application.findMany({
       where: {
-        job: { organizationId },
+        ...appFilter(organizationId, jobIds),
         interviews: { some: {} },
-        deletedAt: null,
       },
       select: { id: true },
     }),
@@ -110,9 +120,8 @@ export async function getHiringStats(organizationId: string): Promise<{
   // Pipeline velocity: average days from applied to decision (hired or rejected)
   const decidedApps = await prisma.application.findMany({
     where: {
-      job: { organizationId },
+      ...appFilter(organizationId, jobIds),
       OR: [{ hiredAt: { not: null } }, { rejectedAt: { not: null } }],
-      deletedAt: null,
     },
     select: { createdAt: true, hiredAt: true, rejectedAt: true },
   });
@@ -141,7 +150,8 @@ export async function getHiringStats(organizationId: string): Promise<{
  * Returns ISO date strings for the start of each week bucket.
  */
 export async function getApplicationsOverTime(
-  organizationId: string
+  organizationId: string,
+  jobIds?: string[]
 ): Promise<Array<{ week: string; count: number }>> {
   // Get all applications from the last 12 weeks
   const now = new Date();
@@ -149,9 +159,8 @@ export async function getApplicationsOverTime(
 
   const applications = await prisma.application.findMany({
     where: {
-      job: { organizationId },
+      ...appFilter(organizationId, jobIds),
       createdAt: { gte: twelveWeeksAgo },
-      deletedAt: null,
     },
     select: { createdAt: true },
   });
@@ -200,7 +209,8 @@ export async function getApplicationsOverTime(
  */
 export async function getTopJobs(
   organizationId: string,
-  limit: number = 5
+  limit: number = 5,
+  jobIds?: string[]
 ): Promise<
   Array<{
     id: string;
@@ -210,7 +220,7 @@ export async function getTopJobs(
   }>
 > {
   const jobs = await prisma.job.findMany({
-    where: { organizationId },
+    where: jobFilter(organizationId, jobIds),
     select: { id: true, title: true },
     take: limit * 2, // Fetch more to ensure we have enough after filtering
   });
@@ -255,13 +265,11 @@ export async function getTopJobs(
  * null source is mapped to "Direct".
  */
 export async function getSourceBreakdown(
-  organizationId: string
+  organizationId: string,
+  jobIds?: string[]
 ): Promise<Array<{ source: string; count: number }>> {
   const applications = await prisma.application.findMany({
-    where: {
-      job: { organizationId },
-      deletedAt: null,
-    },
+    where: appFilter(organizationId, jobIds),
     select: { source: true },
   });
 

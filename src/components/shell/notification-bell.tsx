@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Bell, CheckCircle } from "@phosphor-icons/react";
 import { useNotifications, type NotificationItem } from "@/hooks/use-notifications";
 import { NotificationBadge } from "@/components/ui/notification-badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
 import type { Shell } from "@/lib/onboarding/types";
@@ -62,10 +63,12 @@ export function ShellNotificationBell({ shell }: ShellNotificationBellProps) {
   return (
     <div className="relative">
       {/* Bell Button */}
-      <button
+      <Button
         ref={buttonRef}
+        variant="tertiary"
+        size="icon-sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="hover:text-foreground-default relative rounded-full p-2 text-foreground-muted transition-colors duration-200 hover:bg-[var(--shell-nav-item-hover)]"
+        className="hover:text-foreground-default relative text-foreground-muted"
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
       >
         <Bell size={18} weight={isOpen ? "fill" : "regular"} />
@@ -74,7 +77,7 @@ export function ShellNotificationBell({ shell }: ShellNotificationBellProps) {
             <NotificationBadge count={unreadCount} variant="alert" size="sm" max={9} />
           </span>
         )}
-      </button>
+      </Button>
 
       {/* Dropdown Panel */}
       {isOpen && (
@@ -86,13 +89,15 @@ export function ShellNotificationBell({ shell }: ShellNotificationBellProps) {
           <div className="flex items-center justify-between border-b border-[var(--border-default)] px-4 py-3">
             <h3 className="text-foreground-default text-body-sm font-semibold">Notifications</h3>
             {unreadCount > 0 && (
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => markAllAsRead()}
-                className="flex items-center gap-1 text-caption text-[var(--shell-nav-accent)] hover:underline"
+                className="gap-1 text-caption text-[var(--shell-nav-accent)]"
+                leftIcon={<CheckCircle size={14} />}
               >
-                <CheckCircle size={14} />
                 Mark all as read
-              </button>
+              </Button>
             )}
           </div>
 

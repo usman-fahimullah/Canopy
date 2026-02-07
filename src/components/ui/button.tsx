@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { SpinnerGap } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 /**
  * Button component based on Trails Design System
@@ -128,8 +128,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading ? (
           <>
-            <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" aria-hidden="true" />
-            <span className="sr-only">Loading...</span>
+            <Spinner size="sm" variant="current" label="Loading" />
             {children}
           </>
         ) : (

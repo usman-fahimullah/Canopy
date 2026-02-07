@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
 import { enqueueSyndication } from "@/lib/syndication/service";
-import type { SyndicationPlatform } from "@/lib/syndication/types";
 import { getAvailablePlatforms } from "@/lib/syndication/platforms";
+import { getAuthContext, canAccessJob } from "@/lib/access-control";
 
 /**
  * GET /api/canopy/roles/[id]
@@ -17,37 +16,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-    });
-
-    if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
-    }
-
-    // Get the user's org membership
-    const membership = await prisma.organizationMember.findFirst({
-      where: { accountId: account.id },
-    });
-
-    if (!membership) {
-      return NextResponse.json({ error: "Organization membership required" }, { status: 403 });
+    // Scoped access check
+    if (!canAccessJob(ctx, id)) {
+      return NextResponse.json({ error: "Role not found" }, { status: 404 });
     }
 
     // Fetch job scoped to org
     const job = await prisma.job.findFirst({
       where: {
         id,
-        organizationId: membership.organizationId,
+        organizationId: ctx.organizationId,
       },
       select: {
         id: true,
@@ -72,6 +55,34 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         formConfig: true,
         formQuestions: true,
         syndicationEnabled: true,
+        recruiterId: true,
+        hiringManagerId: true,
+        recruiter: {
+          select: {
+            id: true,
+            title: true,
+            account: { select: { name: true, avatar: true } },
+          },
+        },
+        hiringManager: {
+          select: {
+            id: true,
+            title: true,
+            account: { select: { name: true, avatar: true } },
+          },
+        },
+        reviewerAssignments: {
+          select: {
+            id: true,
+            member: {
+              select: {
+                id: true,
+                title: true,
+                account: { select: { name: true, avatar: true } },
+              },
+            },
+          },
+        },
         createdAt: true,
         updatedAt: true,
         applications: {
@@ -158,6 +169,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       applications: job.applications,
       stageCounts,
       totalApplications: job._count.applications,
+      userRole: ctx.role,
     });
   } catch (error) {
     logger.error("Error fetching role detail", {
@@ -204,6 +216,10 @@ const UpdateJobSchema = z.object({
 
   // Syndication
   syndicationEnabled: z.boolean().optional(),
+
+  // Team assignment — proper DB columns (not in formConfig)
+  recruiterId: z.string().optional().nullable(),
+  hiringManagerId: z.string().optional().nullable(),
 
   // Application form configuration (stored as JSON — includes structured description,
   // education, compensation, and sidebar settings alongside apply-form config)
@@ -269,29 +285,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   try {
     const { id } = await params;
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-    });
-
-    if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
-    }
-
-    const membership = await prisma.organizationMember.findFirst({
-      where: { accountId: account.id },
-    });
-
-    if (!membership) {
-      return NextResponse.json({ error: "Organization membership required" }, { status: 403 });
+    // Scoped access check
+    if (!canAccessJob(ctx, id)) {
+      return NextResponse.json({ error: "Role not found" }, { status: 404 });
     }
 
     const body = await request.json();
@@ -341,6 +342,36 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       updateData.closesAt = data.closesAt ? new Date(data.closesAt) : null;
     }
 
+    // Team assignment — persist as proper FK columns
+    if (data.recruiterId !== undefined) {
+      if (data.recruiterId) {
+        const member = await prisma.organizationMember.findFirst({
+          where: { id: data.recruiterId, organizationId: ctx.organizationId },
+        });
+        if (!member) {
+          return NextResponse.json(
+            { error: "Recruiter not found in organization" },
+            { status: 422 }
+          );
+        }
+      }
+      updateData.recruiterId = data.recruiterId;
+    }
+    if (data.hiringManagerId !== undefined) {
+      if (data.hiringManagerId) {
+        const member = await prisma.organizationMember.findFirst({
+          where: { id: data.hiringManagerId, organizationId: ctx.organizationId },
+        });
+        if (!member) {
+          return NextResponse.json(
+            { error: "Hiring manager not found in organization" },
+            { status: 422 }
+          );
+        }
+      }
+      updateData.hiringManagerId = data.hiringManagerId;
+    }
+
     // Application form config
     if (data.formConfig !== undefined) updateData.formConfig = data.formConfig;
     if (data.formQuestions !== undefined) updateData.formQuestions = data.formQuestions;
@@ -357,7 +388,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const updated = await prisma.job.updateMany({
       where: {
         id,
-        organizationId: membership.organizationId,
+        organizationId: ctx.organizationId,
       },
       data: updateData,
     });

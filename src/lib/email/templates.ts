@@ -338,7 +338,45 @@ interface TeamInviteData {
 }
 
 export function teamInviteEmail(data: TeamInviteData) {
-  const roleName = data.role === "RECRUITER" ? "Recruiter" : "Hiring Team";
+  const roleNames: Record<string, string> = {
+    ADMIN: "Admin",
+    RECRUITER: "Recruiter",
+    HIRING_MANAGER: "Hiring Manager",
+    MEMBER: "Reviewer",
+    VIEWER: "Viewer",
+  };
+  const roleName = roleNames[data.role] || data.role;
+
+  const roleDescriptions: Record<string, string> = {
+    ADMIN: `
+            <ul style="margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 8px;">Full access to all ATS features</li>
+              <li style="margin-bottom: 8px;">Manage team members and settings</li>
+              <li style="margin-bottom: 8px;">View hiring analytics</li>
+            </ul>`,
+    RECRUITER: `
+            <ul style="margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 8px;">Post and manage job roles</li>
+              <li style="margin-bottom: 8px;">Review and manage candidates</li>
+              <li style="margin-bottom: 8px;">View hiring analytics</li>
+            </ul>`,
+    HIRING_MANAGER: `
+            <ul style="margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 8px;">Review candidates for your assigned roles</li>
+              <li style="margin-bottom: 8px;">Approve or reject candidates at each stage</li>
+              <li style="margin-bottom: 8px;">Leave feedback and evaluations</li>
+            </ul>`,
+    MEMBER: `
+            <ul style="margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 8px;">Review assigned candidates</li>
+              <li style="margin-bottom: 8px;">Submit scorecards and feedback</li>
+            </ul>`,
+    VIEWER: `
+            <ul style="margin: 0; padding-left: 20px; color: #333;">
+              <li style="margin-bottom: 8px;">View job postings and candidates</li>
+              <li style="margin-bottom: 8px;">Access hiring dashboards and reports</li>
+            </ul>`,
+  };
 
   return {
     to: data.recipientEmail,
@@ -356,22 +394,7 @@ export function teamInviteEmail(data: TeamInviteData) {
 
           <div style="background-color: #F3F7F6; border-radius: 8px; padding: 24px; margin: 24px 0;">
             <h3 style="margin: 0 0 16px 0; color: #0A3D2C;">What you'll be able to do</h3>
-            ${
-              data.role === "RECRUITER"
-                ? `
-            <ul style="margin: 0; padding-left: 20px; color: #333;">
-              <li style="margin-bottom: 8px;">Post and manage job roles</li>
-              <li style="margin-bottom: 8px;">Review and manage candidates</li>
-              <li style="margin-bottom: 8px;">View hiring analytics</li>
-            </ul>
-            `
-                : `
-            <ul style="margin: 0; padding-left: 20px; color: #333;">
-              <li style="margin-bottom: 8px;">View candidates for your assigned roles</li>
-              <li style="margin-bottom: 8px;">Leave feedback and evaluations</li>
-            </ul>
-            `
-            }
+            ${roleDescriptions[data.role] || roleDescriptions.VIEWER}
           </div>
 
           <div style="text-align: center; margin: 24px 0;">

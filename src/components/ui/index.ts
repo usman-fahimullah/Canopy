@@ -805,6 +805,9 @@ export {
 // Spinner
 export { Spinner, LoadingOverlay, LoadingInline, type SpinnerProps } from "./spinner";
 
+// Data View
+export { DataView } from "./data-view";
+
 // Stat Card
 export { StatCard, StatCardGroup, MiniStat, type StatCardProps } from "./stat-card";
 

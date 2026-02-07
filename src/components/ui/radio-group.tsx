@@ -118,7 +118,7 @@ const RadioGroupItem = React.forwardRef<
         <div
           className={cn(
             "rounded-full bg-[var(--radio-dot)]",
-            "animate-[radio-dot-in_250ms_cubic-bezier(0.34,1.56,0.64,1)_forwards]",
+            "animate-[radio-dot-in_200ms_cubic-bezier(0.25,0.1,0.25,1)_forwards]",
             dotSize
           )}
         />

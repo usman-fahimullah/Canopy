@@ -1,17 +1,33 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shell/page-header";
-import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SimplePagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/search-input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from "@/components/ui/dropdown";
-import { Users, Star, CalendarBlank, BriefcaseMetal, Download, Trash } from "@phosphor-icons/react";
+import {
+  EmptyStateNoCandidates,
+  EmptyStateNoResults,
+  EmptyStateError,
+} from "@/components/ui/empty-state";
+import {
+  Users,
+  Star,
+  CalendarBlank,
+  BriefcaseMetal,
+  Download,
+  Info,
+  Trash,
+  Plus,
+} from "@phosphor-icons/react";
+import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
+import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { logger, formatError } from "@/lib/logger";
 
 /* -------------------------------------------------------------------
@@ -20,6 +36,7 @@ import { logger, formatError } from "@/lib/logger";
 
 interface Application {
   id: string;
+  seekerId?: string;
   name?: string;
   email?: string;
   stage?: string;
@@ -109,17 +126,20 @@ export default function CandidatesPage() {
   const [total, setTotal] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [previewSeekerId, setPreviewSeekerId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
+  const [fetchVersion, setFetchVersion] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   // Parse URL params
   const skip = parseInt(searchParams.get("skip") || "0");
   const take = parseInt(searchParams.get("take") || "20");
   const stage = searchParams.get("stage") || undefined;
-  const matchScoreMin = searchParams.get("matchScoreMin")
-    ? parseInt(searchParams.get("matchScoreMin")!)
-    : undefined;
-  const matchScoreMax = searchParams.get("matchScoreMax")
-    ? parseInt(searchParams.get("matchScoreMax")!)
-    : undefined;
+  const matchScoreMinParam = searchParams.get("matchScoreMin");
+  const matchScoreMin = matchScoreMinParam ? parseInt(matchScoreMinParam) : undefined;
+  const matchScoreMaxParam = searchParams.get("matchScoreMax");
+  const matchScoreMax = matchScoreMaxParam ? parseInt(matchScoreMaxParam) : undefined;
   const source = searchParams.get("source") || undefined;
   const search = searchParams.get("search") || undefined;
 
@@ -128,6 +148,7 @@ export default function CandidatesPage() {
     const fetchApplications = async () => {
       try {
         setLoading(true);
+        setError(null);
         const params = new URLSearchParams();
         params.set("skip", skip.toString());
         params.set("take", take.toString());
@@ -138,13 +159,17 @@ export default function CandidatesPage() {
         if (search) params.set("search", search);
 
         const res = await fetch(`/api/canopy/candidates?${params.toString()}`);
-        if (res.ok) {
-          const data = await res.json();
-          setApplications(data.applications || []);
-          setTotal(data.meta.total || 0);
+        if (!res.ok) {
+          throw new Error("Failed to load candidates");
         }
-      } catch (error) {
-        logger.error("Error fetching applications", { error: formatError(error) });
+        const data = await res.json();
+        setApplications(data.applications || []);
+        setTotal(data.meta.total || 0);
+        if (data.userRole) setUserRole(data.userRole);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "An unexpected error occurred";
+        setError(message);
+        logger.error("Error fetching applications", { error: formatError(err) });
       } finally {
         setLoading(false);
       }
@@ -152,7 +177,8 @@ export default function CandidatesPage() {
 
     fetchApplications();
     setSelectedIds(new Set()); // Clear selections on filter change
-  }, [skip, take, stage, matchScoreMin, matchScoreMax, source, search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [skip, take, stage, matchScoreMin, matchScoreMax, source, search, fetchVersion]);
 
   // Handle filter updates
   const updateParams = useCallback(
@@ -301,7 +327,26 @@ export default function CandidatesPage() {
 
   return (
     <div>
-      <PageHeader title="Candidates" />
+      <PageHeader
+        title="Candidates"
+        actions={
+          <Button onClick={() => setAddCandidateModalOpen(true)}>
+            <Plus weight="bold" className="mr-2 h-4 w-4" />
+            Add Candidate
+          </Button>
+        }
+      />
+
+      {/* Scoped-access banner for HIRING_MANAGER / MEMBER */}
+      {(userRole === "HIRING_MANAGER" || userRole === "MEMBER") && (
+        <div className="mx-8 mt-6 flex items-start gap-3 rounded-[var(--radius-lg)] border border-[var(--border-info)] bg-[var(--background-info)] px-4 py-3 lg:mx-12">
+          <Info size={18} weight="fill" className="mt-0.5 shrink-0 text-[var(--foreground-info)]" />
+          <p className="text-caption text-[var(--foreground-info)]">
+            Showing candidates for your assigned roles only. Contact an admin to adjust your role
+            assignments.
+          </p>
+        </div>
+      )}
 
       <div className="px-8 py-6 lg:px-12">
         {/* Filter Section */}
@@ -381,32 +426,74 @@ export default function CandidatesPage() {
           )}
         </div>
 
-        {/* Loading */}
+        {/* Loading Skeletons */}
         {loading && (
-          <div className="flex items-center justify-center py-24">
-            <Spinner size="lg" />
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 rounded-[var(--radius-card)] border border-[var(--border-default)] bg-[var(--card-background)] px-6 py-5"
+              >
+                <Skeleton className="h-5 w-5 rounded" />
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-64" />
+                </div>
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+            ))}
           </div>
+        )}
+
+        {/* Error State */}
+        {!loading && error && (
+          <EmptyStateError
+            size="lg"
+            action={{
+              label: "Retry",
+              onClick: () => setFetchVersion((v) => v + 1),
+            }}
+          />
         )}
 
         {/* Empty State */}
-        {!loading && applications.length === 0 && (
-          <div className="rounded-[16px] border border-[var(--border-default)] bg-[var(--card-background)] p-12 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--background-subtle)]">
-              <Users size={28} weight="fill" className="text-[var(--foreground-muted)]" />
-            </div>
-            <p className="text-foreground-default mb-1 text-body font-medium">
-              {hasActiveFilters ? "No candidates match your filters" : "No candidates yet"}
-            </p>
-            <p className="text-caption text-foreground-muted">
-              {hasActiveFilters
-                ? "Try adjusting your search criteria."
-                : "Post a role to start receiving applications."}
-            </p>
-          </div>
-        )}
+        {!loading &&
+          !error &&
+          applications.length === 0 &&
+          (hasActiveFilters ? (
+            <EmptyStateNoResults
+              size="lg"
+              action={{
+                label: "Clear Filters",
+                onClick: () =>
+                  updateParams({
+                    stage: undefined,
+                    matchScoreMin: undefined,
+                    matchScoreMax: undefined,
+                    source: undefined,
+                    search: undefined,
+                  }),
+              }}
+            />
+          ) : (
+            <EmptyStateNoCandidates
+              size="lg"
+              branded
+              description="Add candidates manually or post a role to start receiving applications."
+              action={{
+                label: "Add Candidate",
+                onClick: () => setAddCandidateModalOpen(true),
+              }}
+              secondaryAction={{
+                label: "Post a Role",
+                onClick: () => router.push("/canopy/roles"),
+              }}
+            />
+          ))}
 
         {/* Candidate Cards */}
-        {!loading && applications.length > 0 && (
+        {!loading && !error && applications.length > 0 && (
           <>
             <div className="space-y-3">
               {applications.map((app) => {
@@ -434,61 +521,69 @@ export default function CandidatesPage() {
                       />
                     </div>
 
-                    {/* Avatar Initials */}
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primitive-blue-200)] text-caption font-bold text-[var(--primitive-blue-700)]">
-                      {candidateName
-                        .split(" ")
-                        .map((n) => n.charAt(0))
-                        .join("")
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </div>
-
-                    {/* Info */}
-                    <div className="min-w-0 flex-1">
-                      <p className="text-foreground-default truncate text-body font-medium">
-                        {candidateName}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-foreground-muted">
-                        <span className="flex items-center gap-1">
-                          <BriefcaseMetal size={12} weight="bold" />
-                          {getJobTitle(app)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CalendarBlank size={12} weight="bold" />
-                          {formatDate(appliedDate)}
-                        </span>
+                    {/* Clickable area — opens candidate preview sheet */}
+                    <button
+                      type="button"
+                      className="flex min-w-0 flex-1 items-center gap-4 py-5 text-left transition-colors hover:opacity-80"
+                      onClick={() => app.seekerId && setPreviewSeekerId(app.seekerId)}
+                      aria-label={`Preview ${candidateName}`}
+                    >
+                      {/* Avatar Initials */}
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--primitive-blue-200)] text-caption font-bold text-[var(--primitive-blue-700)]">
+                        {candidateName
+                          .split(" ")
+                          .map((n) => n.charAt(0))
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()}
                       </div>
-                    </div>
 
-                    {/* Match Score */}
-                    {app.matchScore != null && (
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <Star
-                          size={14}
-                          weight="fill"
-                          className={cn(
-                            app.matchScore >= 80
-                              ? "text-[var(--primitive-green-600)]"
-                              : app.matchScore >= 50
-                                ? "text-[var(--primitive-yellow-500)]"
-                                : "text-[var(--primitive-orange-500)]"
-                          )}
-                        />
-                        <span
-                          className={cn(
-                            "text-caption font-medium",
-                            app.matchScore >= 80
-                              ? "text-[var(--primitive-green-700)]"
-                              : app.matchScore >= 50
-                                ? "text-[var(--primitive-yellow-700)]"
-                                : "text-[var(--primitive-orange-700)]"
-                          )}
-                        >
-                          {app.matchScore}%
-                        </span>
+                      {/* Info */}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-foreground-default truncate text-body font-medium">
+                          {candidateName}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-foreground-muted">
+                          <span className="flex items-center gap-1">
+                            <BriefcaseMetal size={12} weight="bold" />
+                            {getJobTitle(app)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CalendarBlank size={12} weight="bold" />
+                            {formatDate(appliedDate)}
+                          </span>
+                        </div>
                       </div>
-                    )}
+
+                      {/* Match Score */}
+                      {app.matchScore != null && (
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <Star
+                            size={14}
+                            weight="fill"
+                            className={cn(
+                              app.matchScore >= 80
+                                ? "text-[var(--primitive-green-600)]"
+                                : app.matchScore >= 50
+                                  ? "text-[var(--primitive-yellow-500)]"
+                                  : "text-[var(--primitive-orange-500)]"
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              "text-caption font-medium",
+                              app.matchScore >= 80
+                                ? "text-[var(--primitive-green-700)]"
+                                : app.matchScore >= 50
+                                  ? "text-[var(--primitive-yellow-700)]"
+                                  : "text-[var(--primitive-orange-700)]"
+                            )}
+                          >
+                            {app.matchScore}%
+                          </span>
+                        </div>
+                      )}
+                    </button>
 
                     {/* Stage Badge */}
                     <div className="px-6 py-5">
@@ -573,6 +668,35 @@ export default function CandidatesPage() {
           </>
         )}
       </div>
+
+      {/* Candidate Preview Sheet */}
+      <CandidatePreviewSheet
+        seekerId={previewSeekerId}
+        onClose={() => setPreviewSeekerId(null)}
+        navigation={(() => {
+          if (!previewSeekerId) return undefined;
+          const seekerIds = applications
+            .map((app) => app.seekerId)
+            .filter((id): id is string => !!id);
+          const currentIdx = seekerIds.indexOf(previewSeekerId);
+          if (currentIdx === -1) return undefined;
+          return {
+            hasPrevious: currentIdx > 0,
+            hasNext: currentIdx < seekerIds.length - 1,
+            onPrevious: () => setPreviewSeekerId(seekerIds[currentIdx - 1]),
+            onNext: () => setPreviewSeekerId(seekerIds[currentIdx + 1]),
+            currentIndex: currentIdx,
+            totalCount: seekerIds.length,
+          };
+        })()}
+      />
+
+      {/* Add Candidate Modal (global — no roleId pre-selected) */}
+      <AddCandidateModal
+        open={addCandidateModalOpen}
+        onOpenChange={setAddCandidateModalOpen}
+        onSuccess={() => setFetchVersion((v) => v + 1)}
+      />
     </div>
   );
 }

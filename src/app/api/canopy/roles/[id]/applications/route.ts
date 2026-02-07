@@ -23,6 +23,7 @@ const CreateCandidateSchema = z.object({
   websiteUrl: z.string().optional().default(""),
   headline: z.string().optional().default(""),
   source: z.string().optional().default("employer_added"),
+  resumeUrl: z.string().url().optional(),
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -135,11 +136,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       });
 
       if (seekerProfile) {
-        // Update headline if provided and not already set
-        if (data.headline && !seekerProfile.headline) {
+        // Update headline and resumeUrl if provided and not already set
+        const seekerUpdates: Record<string, string> = {};
+        if (data.headline && !seekerProfile.headline) seekerUpdates.headline = data.headline;
+        if (data.resumeUrl && !seekerProfile.resumeUrl) seekerUpdates.resumeUrl = data.resumeUrl;
+
+        if (Object.keys(seekerUpdates).length > 0) {
           seekerProfile = await tx.seekerProfile.update({
             where: { id: seekerProfile.id },
-            data: { headline: data.headline },
+            data: seekerUpdates,
           });
         }
       } else {
@@ -147,6 +152,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           data: {
             accountId: candidateAccount.id,
             headline: data.headline || undefined,
+            resumeUrl: data.resumeUrl || undefined,
           },
         });
       }

@@ -160,7 +160,14 @@ export function CandidateDetailView({
 
   // ── Navigation handlers ──
   const handleClose = () => {
-    router.back();
+    // Use the "from" param to navigate back to the correct origin page.
+    // Falls back to the candidates list if no origin is specified.
+    const from = searchParams.get("from");
+    if (from) {
+      router.push(from);
+    } else {
+      router.push("/canopy/candidates");
+    }
   };
 
   const handlePrevious = () => {

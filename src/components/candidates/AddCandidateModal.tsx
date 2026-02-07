@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
+import { FileUpload } from "@/components/ui/file-upload";
 import {
   Select,
   SelectContent,
@@ -24,8 +26,11 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 
+// Hooks
+import { useAsyncData } from "@/hooks/use-async-data";
+
 // Icons
-import { User, Link as LinkIcon } from "@phosphor-icons/react";
+import { User, Link as LinkIcon, Paperclip } from "@phosphor-icons/react";
 
 // Logger
 import { logger, formatError } from "@/lib/logger";
@@ -65,10 +70,18 @@ interface ApplicationData {
   };
 }
 
+interface RoleOption {
+  id: string;
+  title: string;
+  location: string | null;
+  locationType: string;
+}
+
 interface AddCandidateModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  roleId: string;
+  /** When provided, the role selector is hidden and this role is used. When omitted, user must select a role. */
+  roleId?: string;
   /** Called after a candidate is successfully added, with the new application data for optimistic update */
   onSuccess: (newApplication: ApplicationData) => void;
 }
@@ -104,16 +117,40 @@ export function AddCandidateModal({
   onSuccess,
 }: AddCandidateModalProps) {
   const [form, setForm] = React.useState(defaultCandidateForm);
+  const [selectedRoleId, setSelectedRoleId] = React.useState(roleId ?? "");
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [resumeFile, setResumeFile] = React.useState<File | null>(null);
+
+  // Fetch published roles when no roleId is provided
+  const { data: rolesData, isLoading: rolesLoading } = useAsyncData(
+    async () => {
+      const res = await fetch("/api/canopy/roles?status=PUBLISHED&take=100");
+      if (!res.ok) throw new Error("Failed to load roles");
+      return res.json();
+    },
+    [open],
+    { enabled: open && !roleId }
+  );
+
+  const roleOptions: ComboboxOption[] = React.useMemo(() => {
+    if (!rolesData?.jobs) return [];
+    return rolesData.jobs.map((job: RoleOption) => ({
+      value: job.id,
+      label: job.title,
+      description: [job.location, job.locationType].filter(Boolean).join(" · "),
+    }));
+  }, [rolesData]);
 
   // Reset form when modal opens
   React.useEffect(() => {
     if (open) {
       setForm(defaultCandidateForm);
+      setSelectedRoleId(roleId ?? "");
       setErrors({});
+      setResumeFile(null);
     }
-  }, [open]);
+  }, [open, roleId]);
 
   // ============================================
   // HANDLERS
@@ -130,8 +167,14 @@ export function AddCandidateModal({
     }
   };
 
+  const effectiveRoleId = roleId ?? selectedRoleId;
+
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
+
+    if (!effectiveRoleId) {
+      newErrors.role = "Please select a role";
+    }
 
     if (!form.email.trim()) {
       newErrors.email = "Email is required";
@@ -152,10 +195,37 @@ export function AddCandidateModal({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/canopy/roles/${roleId}/applications`, {
+      // Step 1: Upload resume if attached
+      let resumeUrl: string | undefined;
+      if (resumeFile) {
+        const formData = new FormData();
+        formData.append("file", resumeFile);
+
+        const uploadRes = await fetch("/api/canopy/resume-upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          resumeUrl = uploadData.url;
+        } else {
+          // Resume upload failed — warn but continue without it
+          toast.error("Resume upload failed. Candidate will be added without a resume.");
+          logger.error("Resume upload failed during add candidate", {
+            status: uploadRes.status,
+          });
+        }
+      }
+
+      // Step 2: Create the candidate application
+      const res = await fetch(`/api/canopy/roles/${effectiveRoleId}/applications`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          ...(resumeUrl ? { resumeUrl } : {}),
+        }),
       });
 
       if (!res.ok) {
@@ -202,6 +272,10 @@ export function AddCandidateModal({
     onOpenChange(false);
   };
 
+  const handleResumeChange = (files: File[]) => {
+    setResumeFile(files[0] || null);
+  };
+
   // ============================================
   // DERIVED
   // ============================================
@@ -224,6 +298,47 @@ export function AddCandidateModal({
 
         <ModalBody>
           <div className="flex flex-col gap-5">
+            {/* Role Selection — only shown when roleId is not pre-set */}
+            {!roleId && (
+              <>
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-caption-strong uppercase tracking-wide text-foreground-muted">
+                    Role
+                  </h3>
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="candidate-role">Select Role*</Label>
+                    <Combobox
+                      options={roleOptions}
+                      value={selectedRoleId}
+                      onValueChange={(value) => {
+                        setSelectedRoleId(value);
+                        if (errors.role) {
+                          setErrors((prev) => {
+                            const updated = { ...prev };
+                            delete updated.role;
+                            return updated;
+                          });
+                        }
+                      }}
+                      placeholder="Search roles..."
+                      searchPlaceholder="Search by title..."
+                      emptyMessage="No published roles found."
+                      loading={rolesLoading}
+                      error={!!errors.role}
+                    />
+                    {errors.role && (
+                      <span className="text-caption-sm text-[var(--foreground-error)]">
+                        {errors.role}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-[var(--border-muted)]" />
+              </>
+            )}
+
             {/* Section 1: Profile Information */}
             <div className="flex flex-col gap-3">
               <h3 className="text-caption-strong uppercase tracking-wide text-foreground-muted">
@@ -387,7 +502,7 @@ export function AddCandidateModal({
             {/* Divider */}
             <div className="border-t border-[var(--border-muted)]" />
 
-            {/* Section 3: Professional — side by side */}
+            {/* Section 3: Professional */}
             <div className="flex flex-col gap-3">
               <h3 className="text-caption-strong uppercase tracking-wide text-foreground-muted">
                 Professional
@@ -420,6 +535,59 @@ export function AddCandidateModal({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-[var(--border-muted)]" />
+
+            {/* Section 4: Resume Upload */}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-caption-strong uppercase tracking-wide text-foreground-muted">
+                <span className="flex items-center gap-1.5">
+                  <Paperclip size={14} weight="bold" />
+                  Resume
+                  <span className="font-normal normal-case">(optional)</span>
+                </span>
+              </h3>
+
+              {resumeFile ? (
+                <div className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3">
+                  <Paperclip size={18} className="shrink-0 text-[var(--foreground-muted)]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-caption font-medium text-[var(--foreground-default)]">
+                      {resumeFile.name}
+                    </p>
+                    <p className="text-caption-sm text-[var(--foreground-muted)]">
+                      {(resumeFile.size / 1024).toFixed(0)} KB
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setResumeFile(null)}
+                    aria-label="Remove resume"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <FileUpload
+                  accept=".pdf,.doc,.docx"
+                  maxSize={5 * 1024 * 1024}
+                  multiple={false}
+                  size="sm"
+                  onChange={handleResumeChange}
+                >
+                  <div className="text-center">
+                    <p className="text-caption font-medium text-[var(--foreground-default)]">
+                      Drop resume here or click to upload
+                    </p>
+                    <p className="mt-0.5 text-caption-sm text-[var(--foreground-muted)]">
+                      PDF, DOC, or DOCX up to 5MB
+                    </p>
+                  </div>
+                </FileUpload>
+              )}
             </div>
           </div>
         </ModalBody>

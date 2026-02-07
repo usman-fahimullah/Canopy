@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { z } from "zod";
@@ -7,6 +6,7 @@ import {
   createStageChangedNotification,
   createApplicationRejectedNotification,
 } from "@/lib/notifications/hiring";
+import { getAuthContext, canManagePipeline } from "@/lib/access-control";
 
 /**
  * PATCH /api/canopy/applications/bulk
@@ -23,31 +23,17 @@ const BulkUpdateSchema = z.object({
 
 export async function PATCH(request: NextRequest) {
   try {
-    // Auth check
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get organization
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      include: {
-        orgMemberships: {
-          select: { organizationId: true },
-        },
-      },
-    });
-
-    if (!account || account.orgMemberships.length === 0) {
-      return NextResponse.json({ error: "No organization found" }, { status: 403 });
+    if (!canManagePipeline(ctx)) {
+      return NextResponse.json(
+        { error: "You do not have permission to move candidates" },
+        { status: 403 }
+      );
     }
-
-    const organizationId = account.orgMemberships[0].organizationId;
 
     // Parse and validate body
     const body = await request.json();
@@ -71,39 +57,45 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verify all application IDs belong to organization's jobs
+    // For scoped roles, also verify the jobs are accessible
     const applications = await prisma.application.findMany({
       where: {
         id: { in: ids },
-        job: { organizationId },
+        job: {
+          organizationId: ctx.organizationId,
+          ...(!ctx.hasFullAccess && ctx.assignedJobIds.length > 0
+            ? { id: { in: ctx.assignedJobIds } }
+            : {}),
+        },
       },
       select: { id: true },
     });
 
     if (applications.length !== ids.length) {
       return NextResponse.json(
-        { error: "Some applications do not belong to your organization" },
+        { error: "Some applications do not belong to your organization or accessible jobs" },
         { status: 403 }
       );
     }
 
     // Perform bulk update
-    let updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (action === "MOVE_STAGE") {
-      updateData = { stage };
+      updateData.stage = stage;
     } else if (action === "REJECT") {
-      updateData = { stage: "REJECTED" };
+      updateData.stage = "REJECTED";
     }
 
     const updated = await prisma.application.updateMany({
       where: {
         id: { in: ids },
-        job: { organizationId },
+        job: { organizationId: ctx.organizationId },
       },
       data: updateData,
     });
 
     logger.info("Bulk applications updated", {
-      organizationId,
+      organizationId: ctx.organizationId,
       action,
       count: updated.count,
       applicationIds: ids,
@@ -188,31 +180,17 @@ const BulkEmailSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Auth check
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get organization
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      include: {
-        orgMemberships: {
-          select: { organizationId: true },
-        },
-      },
-    });
-
-    if (!account || account.orgMemberships.length === 0) {
-      return NextResponse.json({ error: "No organization found" }, { status: 403 });
+    if (!canManagePipeline(ctx)) {
+      return NextResponse.json(
+        { error: "You do not have permission to send bulk emails" },
+        { status: 403 }
+      );
     }
-
-    const organizationId = account.orgMemberships[0].organizationId;
 
     // Parse and validate body
     const body = await request.json();
@@ -227,11 +205,16 @@ export async function POST(request: NextRequest) {
 
     const { ids, templateId, customMessage } = result.data;
 
-    // Verify all application IDs belong to organization's jobs
+    // Verify all application IDs belong to organization's accessible jobs
     const applications = await prisma.application.findMany({
       where: {
         id: { in: ids },
-        job: { organizationId },
+        job: {
+          organizationId: ctx.organizationId,
+          ...(!ctx.hasFullAccess && ctx.assignedJobIds.length > 0
+            ? { id: { in: ctx.assignedJobIds } }
+            : {}),
+        },
       },
       select: {
         id: true,
@@ -245,7 +228,7 @@ export async function POST(request: NextRequest) {
 
     if (applications.length !== ids.length) {
       return NextResponse.json(
-        { error: "Some applications do not belong to your organization" },
+        { error: "Some applications do not belong to your organization or accessible jobs" },
         { status: 403 }
       );
     }
@@ -253,16 +236,19 @@ export async function POST(request: NextRequest) {
     // TODO: Implement email sending logic
     // This is a placeholder for future implementation
     logger.info("Bulk email requested", {
-      organizationId,
+      organizationId: ctx.organizationId,
       templateId,
       count: applications.length,
     });
 
-    return NextResponse.json({
-      success: true,
-      sent: applications.length,
-      message: `Prepared to send ${applications.length} emails`,
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        sent: 0,
+        message: "Bulk email sending is not yet implemented",
+      },
+      { status: 501 }
+    );
   } catch (error) {
     logger.error("Error in bulk email", {
       error: formatError(error),

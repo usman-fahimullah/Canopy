@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { z } from "zod";
+import { getAuthContext, scopedJobWhere } from "@/lib/access-control";
 
 /**
  * GET /api/canopy/roles
@@ -20,29 +21,10 @@ const GetRolesSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      include: {
-        orgMemberships: {
-          select: { organizationId: true },
-        },
-      },
-    });
-
-    if (!account || account.orgMemberships.length === 0) {
-      return NextResponse.json({ error: "No organization found" }, { status: 403 });
-    }
-
-    const organizationId = account.orgMemberships[0].organizationId;
 
     // Parse and validate query params
     const params = GetRolesSchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
@@ -55,9 +37,9 @@ export async function GET(request: NextRequest) {
 
     const { skip, take, status, employmentType, locationType } = params.data;
 
-    // Build where clause with filters
+    // Build where clause — scoped by role-based access
     const where = {
-      organizationId,
+      ...scopedJobWhere(ctx),
       ...(status ? { status } : {}),
       ...(employmentType ? { employmentType } : {}),
       ...(locationType ? { locationType } : {}),
@@ -86,7 +68,19 @@ export async function GET(request: NextRequest) {
               color: true,
             },
           },
-          _count: { select: { applications: true } },
+          recruiter: {
+            select: {
+              id: true,
+              account: { select: { name: true, avatar: true } },
+            },
+          },
+          hiringManager: {
+            select: {
+              id: true,
+              account: { select: { name: true, avatar: true } },
+            },
+          },
+          _count: { select: { applications: true, reviewerAssignments: true } },
         },
         orderBy: { createdAt: "desc" },
         skip,
@@ -106,11 +100,27 @@ export async function GET(request: NextRequest) {
       closesAt: job.closesAt?.toISOString() ?? null,
       climateCategory: job.climateCategory,
       pathway: job.pathway,
+      recruiter: job.recruiter
+        ? {
+            id: job.recruiter.id,
+            name: job.recruiter.account.name,
+            avatar: job.recruiter.account.avatar,
+          }
+        : null,
+      hiringManager: job.hiringManager
+        ? {
+            id: job.hiringManager.id,
+            name: job.hiringManager.account.name,
+            avatar: job.hiringManager.account.avatar,
+          }
+        : null,
       applicationCount: job._count.applications,
+      reviewerCount: job._count.reviewerAssignments,
     }));
 
     return NextResponse.json({
       jobs: formattedJobs,
+      userRole: ctx.role,
       meta: {
         total,
         skip,

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { UpcomingInterviewsWidget } from "@/components/canopy/UpcomingInterviewsWidget";
 import {
   BriefcaseMetal,
+  Info,
   Users,
   Table,
   UsersFour,
@@ -48,6 +49,7 @@ interface DashboardApplication {
 interface DashboardData {
   activeRolesCount: number;
   recentRoles: DashboardRole[];
+  userRole?: string;
   candidateCount: number;
   newApplicationCount: number;
   hiredCount: number;
@@ -148,6 +150,17 @@ export default function EmployerDashboardPage() {
   return (
     <div>
       <PageHeader title="Home" />
+
+      {/* Scoped-access banner for HIRING_MANAGER / MEMBER */}
+      {(data.userRole === "HIRING_MANAGER" || data.userRole === "MEMBER") && (
+        <div className="mx-8 mt-6 flex items-start gap-3 rounded-[var(--radius-lg)] border border-[var(--border-info)] bg-[var(--background-info)] px-4 py-3 lg:mx-12">
+          <Info size={18} weight="fill" className="mt-0.5 shrink-0 text-[var(--foreground-info)]" />
+          <p className="text-caption text-[var(--foreground-info)]">
+            You&apos;re viewing data for your assigned roles only. Contact an admin to adjust your
+            role assignments.
+          </p>
+        </div>
+      )}
 
       {/* Greeting + Quick Actions */}
       <div className="flex flex-col gap-6 px-8 py-6 lg:px-12">

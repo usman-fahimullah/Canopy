@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SegmentedController } from "@/components/ui/segmented-controller";
 import { SearchInput } from "@/components/ui/search-input";
@@ -15,6 +14,7 @@ import {
   DaysInStage,
 } from "@/components/ui/candidate-card";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
+import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
 import { Badge } from "@/components/ui/badge";
 import {
   Plus,
@@ -51,12 +51,13 @@ export function CandidatesTab({
   setApplications,
   onCandidateAdded,
 }: CandidatesTabProps) {
-  const router = useRouter();
-
   // Local state
   const [candidatesViewMode, setCandidatesViewMode] = React.useState<"grid" | "list">("grid");
   const [candidateSearch, setCandidateSearch] = React.useState("");
   const [addCandidateModalOpen, setAddCandidateModalOpen] = React.useState(false);
+
+  // Candidate preview sheet state
+  const [previewSeekerId, setPreviewSeekerId] = React.useState<string | null>(null);
 
   // Pipeline stages
   const pipelineStages = jobData?.stages?.length ? jobData.stages : defaultStages;
@@ -93,16 +94,10 @@ export function CandidatesTab({
   const rejectedCount = applications.filter((a) => a.stage === "rejected").length;
   const talentPoolCount = applications.filter((a) => a.stage === "talent-pool").length;
 
-  // Stable navigation callback — router reference changes every render in Next.js,
-  // so we must NOT include it in useMemo/useCallback dependency arrays.
-  const navigateToCandidate = React.useCallback(
-    (seekerId: string) => {
-      router.push(`/canopy/candidates/${seekerId}`);
-    },
-    // router is stable for the lifetime of the component in practice
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  // Open the candidate preview sheet instead of navigating away
+  const openCandidatePreview = React.useCallback((seekerId: string) => {
+    setPreviewSeekerId(seekerId);
+  }, []);
 
   // Convert pipeline applications to KanbanItem[] (excludes rejected/talent-pool)
   const kanbanItems: KanbanItem[] = React.useMemo(
@@ -127,7 +122,7 @@ export function CandidatesTab({
             <CandidateCard
               variant="compact"
               showDragHandle
-              onClick={() => navigateToCandidate(app.seeker.id)}
+              onClick={() => openCandidatePreview(app.seeker.id)}
             >
               <CandidateKanbanHeader
                 name={app.seeker.account.name || "Unknown"}
@@ -142,7 +137,7 @@ export function CandidatesTab({
         })(),
         data: app,
       })),
-    [kanbanApplications, navigateToCandidate]
+    [kanbanApplications, openCandidatePreview]
   );
 
   // useKanbanState manages optimistic updates + error rollback
@@ -294,6 +289,33 @@ export function CandidatesTab({
         onOpenChange={setAddCandidateModalOpen}
         roleId={roleId}
         onSuccess={onCandidateAdded}
+      />
+
+      {/* Candidate Preview Sheet */}
+      <CandidatePreviewSheet
+        seekerId={previewSeekerId}
+        jobId={roleId}
+        onClose={() => setPreviewSeekerId(null)}
+        onStageChanged={() => {
+          // Refresh applications from API to keep kanban in sync
+          // The parent component handles re-fetching
+          setPreviewSeekerId(null);
+        }}
+        navigation={(() => {
+          if (!previewSeekerId) return undefined;
+          // Build ordered list of seekerIds from the kanban
+          const seekerIds = kanbanApplications.map((app) => app.seeker.id);
+          const currentIdx = seekerIds.indexOf(previewSeekerId);
+          if (currentIdx === -1) return undefined;
+          return {
+            hasPrevious: currentIdx > 0,
+            hasNext: currentIdx < seekerIds.length - 1,
+            onPrevious: () => setPreviewSeekerId(seekerIds[currentIdx - 1]),
+            onNext: () => setPreviewSeekerId(seekerIds[currentIdx + 1]),
+            currentIndex: currentIdx,
+            totalCount: seekerIds.length,
+          };
+        })()}
       />
     </>
   );

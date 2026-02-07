@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { getAuthContext, canSubmitScorecard, canAccessJob } from "@/lib/access-control";
 
 /**
  * POST /api/canopy/candidates/[id]/scores
@@ -20,32 +20,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const { id: seekerId } = await params;
 
-    // --- Auth ---
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      select: { id: true },
-    });
-
-    if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
-    }
-
-    const membership = await prisma.organizationMember.findFirst({
-      where: { accountId: account.id },
-      select: { id: true, organizationId: true },
-    });
-
-    if (!membership) {
-      return NextResponse.json({ error: "Organization membership required" }, { status: 403 });
+    if (!canSubmitScorecard(ctx)) {
+      return NextResponse.json({ error: "Viewers cannot submit scores" }, { status: 403 });
     }
 
     // --- Validate body ---
@@ -61,17 +42,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const { applicationId, overallRating, recommendation, comments } = parsed.data;
 
-    // --- Verify application belongs to this seeker + org ---
+    // --- Verify application belongs to this seeker + accessible job ---
     const application = await prisma.application.findFirst({
       where: {
         id: applicationId,
         seekerId,
-        job: { organizationId: membership.organizationId },
+        job: { organizationId: ctx.organizationId },
       },
-      select: { id: true },
+      select: { id: true, jobId: true },
     });
 
     if (!application) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+
+    // Scoped access: verify user can access this job
+    if (!canAccessJob(ctx, application.jobId)) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
@@ -79,7 +65,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const score = await prisma.score.create({
       data: {
         applicationId,
-        scorerId: membership.id,
+        scorerId: ctx.memberId,
         overallRating,
         recommendation,
         comments: comments ?? null,

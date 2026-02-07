@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
 import { safeJsonParse } from "@/lib/safe-json";
 import {
   createStageChangedNotification,
   createApplicationRejectedNotification,
 } from "@/lib/notifications/hiring";
+import { getAuthContext, canAccessJob, canManagePipeline } from "@/lib/access-control";
 
 /**
  * PATCH /api/canopy/roles/[id]/applications/[appId]
@@ -27,36 +27,29 @@ export async function PATCH(
   try {
     const { id: jobId, appId } = await params;
 
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-    });
-
-    if (!account) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    // Only OWNER/ADMIN/RECRUITER/HIRING_MANAGER can move pipeline stages
+    if (!canManagePipeline(ctx)) {
+      return NextResponse.json(
+        { error: "You do not have permission to move candidates" },
+        { status: 403 }
+      );
     }
 
-    const membership = await prisma.organizationMember.findFirst({
-      where: { accountId: account.id },
-    });
-
-    if (!membership) {
-      return NextResponse.json({ error: "Organization membership required" }, { status: 403 });
+    // Verify the job is accessible to this user (scoped roles only see assigned jobs)
+    if (!canAccessJob(ctx, jobId)) {
+      return NextResponse.json({ error: "Role not found" }, { status: 404 });
     }
 
     // Verify the job belongs to the user's org
     const job = await prisma.job.findFirst({
       where: {
         id: jobId,
-        organizationId: membership.organizationId,
+        organizationId: ctx.organizationId,
       },
       select: { id: true, stages: true },
     });

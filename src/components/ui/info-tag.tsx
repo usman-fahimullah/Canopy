@@ -67,17 +67,13 @@ const InfoTag = React.forwardRef<HTMLDivElement, InfoTagProps>(
           // Figma: p-2 (8px) with button, px-2 py-1 (8px/4px) without
           removable ? "p-2" : "px-2 py-1",
           // Background variants
-          transparent
-            ? "bg-white/50 backdrop-blur-[6px]"
-            : "bg-[var(--tag-info-background)]",
+          transparent ? "bg-white/50 backdrop-blur-[12px]" : "bg-[var(--tag-info-background)]",
           // Text color
-          transparent
-            ? "text-[var(--primitive-neutral-900)]"
-            : "text-[var(--tag-info-foreground)]",
+          transparent ? "text-[var(--primitive-neutral-900)]" : "text-[var(--tag-info-foreground)]",
           // Figma: 14px font, 20px line-height
           "text-sm leading-5",
-          "font-normal select-none",
-          disabled && "opacity-50 cursor-not-allowed",
+          "select-none font-normal",
+          disabled && "cursor-not-allowed opacity-50",
           className
         )}
         {...props}
@@ -90,11 +86,11 @@ const InfoTag = React.forwardRef<HTMLDivElement, InfoTagProps>(
             disabled={disabled}
             className={cn(
               // Figma: 20px close icon
-              "shrink-0 w-5 h-5",
+              "h-5 w-5 shrink-0",
               "flex items-center justify-center",
               "transition-colors duration-150",
               "hover:opacity-70",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--border-emphasis)]",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-emphasis)] focus-visible:ring-offset-1",
               disabled && "cursor-not-allowed"
             )}
             aria-label={`Remove ${typeof children === "string" ? children : "tag"}`}

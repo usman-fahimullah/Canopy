@@ -59,7 +59,6 @@ const thumbVariants = cva(
   [
     "pointer-events-none absolute rounded-full",
     "bg-[var(--switch-thumb)]",
-    "shadow-sm",
     "transition-[left,border-color] duration-200 ease-[cubic-bezier(0.34,1.2,0.64,1)]",
     "flex items-center justify-center",
   ],

@@ -1,33 +1,18 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
+import { getAuthContext, scopedJobWhere, scopedApplicationWhere } from "@/lib/access-control";
+import type { Prisma } from "@prisma/client";
 
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      include: {
-        orgMemberships: {
-          select: { organizationId: true },
-        },
-      },
-    });
-
-    if (!account || account.orgMemberships.length === 0) {
-      return NextResponse.json({ error: "No organization found" }, { status: 403 });
-    }
-
-    const organizationId = account.orgMemberships[0].organizationId;
+    const jobWhere: Prisma.JobWhereInput = scopedJobWhere(ctx);
+    const appWhere: Prisma.ApplicationWhereInput = scopedApplicationWhere(ctx);
 
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -44,7 +29,7 @@ export async function GET() {
     ] = await Promise.all([
       // Recent jobs for display
       prisma.job.findMany({
-        where: { organizationId },
+        where: jobWhere,
         select: {
           id: true,
           title: true,
@@ -59,23 +44,23 @@ export async function GET() {
       }),
       // Active roles count via SQL
       prisma.job.count({
-        where: { organizationId, status: "PUBLISHED" },
+        where: { ...jobWhere, status: "PUBLISHED" },
       }),
       // Total unique candidates
       prisma.application.count({
-        where: { job: { organizationId } },
+        where: appWhere,
       }),
       // New applications in last 7 days via SQL
       prisma.application.count({
-        where: { job: { organizationId }, createdAt: { gte: sevenDaysAgo } },
+        where: { ...appWhere, createdAt: { gte: sevenDaysAgo } },
       }),
       // Hired count via SQL
       prisma.application.count({
-        where: { job: { organizationId }, stage: { equals: "hired", mode: "insensitive" } },
+        where: { ...appWhere, stage: { equals: "hired", mode: "insensitive" } },
       }),
       // Recent applications for display (only 5 needed)
       prisma.application.findMany({
-        where: { job: { organizationId } },
+        where: appWhere,
         select: {
           id: true,
           stage: true,
@@ -98,7 +83,7 @@ export async function GET() {
       // Pipeline stage counts via SQL groupBy
       prisma.application.groupBy({
         by: ["stage"],
-        where: { job: { organizationId } },
+        where: appWhere,
         _count: { _all: true },
       }),
     ]);
@@ -146,6 +131,7 @@ export async function GET() {
       hiredCount,
       recentApplications: mappedApplications,
       pipelineStats,
+      userRole: ctx.role,
     });
   } catch (error) {
     logger.error("Error fetching dashboard data", {

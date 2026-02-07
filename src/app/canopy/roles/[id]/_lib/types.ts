@@ -90,6 +90,15 @@ export interface JobData {
   syndicationEnabled: boolean;
   createdAt: string;
   updatedAt: string;
+  // Assignment fields (from proper FK columns)
+  recruiterId?: string | null;
+  hiringManagerId?: string | null;
+  recruiter?: { id: string; account: { name: string | null; avatar: string | null } } | null;
+  hiringManager?: { id: string; account: { name: string | null; avatar: string | null } } | null;
+  reviewerAssignments?: Array<{
+    id: string;
+    member: { id: string; account: { name: string | null; avatar: string | null } };
+  }>;
 }
 
 export interface SortableQuestionItemProps {

@@ -90,6 +90,8 @@ export interface JobPostState {
   hiringManagerId: string | null;
   setHiringManagerId: (v: string | null) => void;
   orgMembers: OrgMemberOption[];
+  reviewerIds: string[];
+  setReviewerIds: (v: string[]) => void;
   closingDate: Date | undefined;
   setClosingDate: (v: Date | undefined) => void;
   externalLink: string;
@@ -188,6 +190,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
   const [showHiringManager, setShowHiringManager] = React.useState(false);
   const [hiringManagerId, setHiringManagerId] = React.useState<string | null>(null);
   const [orgMembers, setOrgMembers] = React.useState<OrgMemberOption[]>([]);
+  const [reviewerIds, setReviewerIds] = React.useState<string[]>([]);
   const [closingDate, setClosingDate] = React.useState<Date | undefined>();
   const [externalLink, setExternalLink] = React.useState("");
   const [requireResume, setRequireResume] = React.useState(true);
@@ -379,13 +382,32 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
         if (typeof fc.compensationDetails === "string")
           setCompensationDetails(fc.compensationDetails);
         if (typeof fc.showRecruiter === "boolean") setShowRecruiter(fc.showRecruiter);
-        if (typeof fc.recruiterId === "string") setRecruiterId(fc.recruiterId);
         if (typeof fc.showHiringManager === "boolean") setShowHiringManager(fc.showHiringManager);
-        if (typeof fc.hiringManagerId === "string") setHiringManagerId(fc.hiringManagerId);
         if (typeof fc.externalLink === "string") setExternalLink(fc.externalLink);
       } else if (job.description) {
         // No formConfig at all — use the raw description
         setDescription(job.description);
+      }
+
+      // Read team assignment from top-level job fields (proper FK columns)
+      // Falls back to formConfig for backward compat with un-migrated data
+      if (job.recruiterId) {
+        setRecruiterId(job.recruiterId);
+      } else if (job.formConfig) {
+        const fc = job.formConfig as Record<string, unknown>;
+        if (typeof fc.recruiterId === "string") setRecruiterId(fc.recruiterId);
+      }
+
+      if (job.hiringManagerId) {
+        setHiringManagerId(job.hiringManagerId);
+      } else if (job.formConfig) {
+        const fc = job.formConfig as Record<string, unknown>;
+        if (typeof fc.hiringManagerId === "string") setHiringManagerId(fc.hiringManagerId);
+      }
+
+      // Load reviewer assignments from the assignments endpoint
+      if (job.reviewerAssignments && Array.isArray(job.reviewerAssignments)) {
+        setReviewerIds(job.reviewerAssignments.map((a: { member: { id: string } }) => a.member.id));
       }
 
       if (job.formQuestions && Array.isArray(job.formQuestions) && job.formQuestions.length > 0) {
@@ -461,6 +483,9 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
         salaryCurrency: "USD",
         requiredCerts: educationLevel && educationLevel !== "none" ? [educationLevel] : [],
         closesAt: closingDate ? closingDate.toISOString() : null,
+        // Team assignment — top-level fields (proper FK columns)
+        recruiterId: recruiterId || null,
+        hiringManagerId: hiringManagerId || null,
         formConfig: {
           personalDetails,
           careerDetails,
@@ -484,9 +509,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
           selectedBenefits,
           compensationDetails,
           showRecruiter,
-          recruiterId,
           showHiringManager,
-          hiringManagerId,
           externalLink,
         },
         formQuestions: questionsEnabled ? questions : [],
@@ -506,6 +529,16 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to save role");
+      }
+
+      // Sync reviewer assignments via separate endpoint
+      const assignRes = await fetch(`/api/canopy/roles/${roleId}/assignments`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewerIds }),
+      });
+      if (!assignRes.ok) {
+        logger.warn("Failed to sync reviewer assignments", { roleId });
       }
 
       // Update local jobData to reflect changes
@@ -557,6 +590,10 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     selectedBenefits,
     compensationDetails,
     showRecruiter,
+    recruiterId,
+    showHiringManager,
+    hiringManagerId,
+    reviewerIds,
     externalLink,
     requireResume,
     requireCoverLetter,
@@ -631,6 +668,8 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       hiringManagerId,
       setHiringManagerId,
       orgMembers,
+      reviewerIds,
+      setReviewerIds,
       closingDate,
       setClosingDate,
       externalLink,
@@ -674,6 +713,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       showHiringManager,
       hiringManagerId,
       orgMembers,
+      reviewerIds,
       closingDate,
       externalLink,
       requireResume,

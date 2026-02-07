@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/db";
+import { NextRequest } from "next/server";
 import { logger, formatError } from "@/lib/logger";
 import { readLimiter } from "@/lib/rate-limit";
 import { apiError, apiSuccess, apiRateLimited } from "@/lib/api-response";
+import { getAuthContext } from "@/lib/access-control";
 import {
   getPipelineFunnel,
   getHiringStats,
@@ -45,40 +44,27 @@ export async function GET(request: NextRequest) {
     }
 
     // --- Auth ---
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    const ctx = await getAuthContext();
+    if (!ctx) {
       return apiError("Unauthorized", 401);
     }
 
-    // Get account and org membership
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      include: { orgMemberships: { select: { organizationId: true } } },
-    });
-
-    if (!account || account.orgMemberships.length === 0) {
-      return apiError("No organization found", 403);
-    }
-
-    const organizationId = account.orgMemberships[0].organizationId;
+    // For scoped roles, pass their assigned job IDs to filter analytics
+    const jobIds = ctx.hasFullAccess ? undefined : ctx.assignedJobIds;
 
     // --- Fetch all analytics data in parallel ---
     const [pipeline, stats, applicationsOverTime, topJobs, sourceBreakdown] = await Promise.all([
-      getPipelineFunnel(organizationId),
-      getHiringStats(organizationId),
-      getApplicationsOverTime(organizationId),
-      getTopJobs(organizationId, 5),
-      getSourceBreakdown(organizationId),
+      getPipelineFunnel(ctx.organizationId, jobIds),
+      getHiringStats(ctx.organizationId, jobIds),
+      getApplicationsOverTime(ctx.organizationId, jobIds),
+      getTopJobs(ctx.organizationId, 5, jobIds),
+      getSourceBreakdown(ctx.organizationId, jobIds),
     ]);
 
     logger.info("Analytics data fetched successfully", {
-      organizationId,
+      organizationId: ctx.organizationId,
       endpoint: "/api/canopy/analytics",
-      userId: account.id,
+      userId: ctx.accountId,
     });
 
     return apiSuccess({

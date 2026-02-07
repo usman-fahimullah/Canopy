@@ -607,17 +607,10 @@ const ActivityFeed = React.forwardRef<HTMLDivElement, ActivityFeedProps>(
                 variant="ghost"
                 size="sm"
                 onClick={onLoadMore}
-                disabled={loading}
+                loading={loading}
                 className="transition-all duration-fast hover:scale-105 active:scale-95"
               >
-                {loading ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-foreground-muted border-t-transparent" />
-                    Loading...
-                  </>
-                ) : (
-                  "Load more"
-                )}
+                Load more
               </Button>
             </div>
           )}
