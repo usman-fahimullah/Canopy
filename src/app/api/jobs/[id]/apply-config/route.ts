@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 
 interface FormFieldConfig {
   visible: boolean;
@@ -54,10 +55,14 @@ const DEFAULT_FORM_CONFIG: DefaultFormConfig = {
  * GET /api/jobs/[id]/apply-config
  *
  * Returns the job's application form configuration plus basic job info.
- * Public endpoint — no auth required (anyone can view a published job's apply form).
+ *
+ * - Public for PUBLISHED jobs (anyone can view the apply form).
+ * - For DRAFT/PAUSED jobs, requires ?preview=true AND the requester
+ *   must be an authenticated org member who owns the job.
  */
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  const { id: jobId } = params;
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: jobId } = await params;
+  const isPreview = request.nextUrl.searchParams.get("preview") === "true";
 
   const job = await prisma.job.findUnique({
     where: { id: jobId },
@@ -70,6 +75,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       employmentType: true,
       formConfig: true,
       formQuestions: true,
+      organizationId: true,
       organization: {
         select: {
           name: true,
@@ -79,8 +85,45 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     },
   });
 
-  if (!job || job.status !== "PUBLISHED") {
+  if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });
+  }
+
+  // Published jobs are publicly accessible
+  // Non-published jobs require preview mode + org membership
+  if (job.status !== "PUBLISHED") {
+    if (!isPreview) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    // Verify the requester is an org member who owns this job
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const account = await prisma.account.findUnique({
+      where: { supabaseId: user.id },
+    });
+
+    if (!account) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const membership = await prisma.organizationMember.findFirst({
+      where: {
+        accountId: account.id,
+        organizationId: job.organizationId,
+      },
+    });
+
+    if (!membership) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
 
   // Use stored config or fall back to defaults

@@ -41,6 +41,7 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
     setApplications,
     jobPostState,
     applyFormState,
+    handleSaveRole,
     handleReviewRole,
     handleCandidateAdded,
   } = useRoleForm(roleId);
@@ -119,7 +120,13 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
 
         {/* Apply Form Tab */}
         {activeTab === "apply-form" && (
-          <ApplyFormTab roleId={roleId} applyFormState={applyFormState} />
+          <ApplyFormTab
+            roleId={roleId}
+            applyFormState={applyFormState}
+            jobStatus={jobData?.status ?? "DRAFT"}
+            saving={saving}
+            onSave={handleSaveRole}
+          />
         )}
 
         {/* Candidates Tab */}

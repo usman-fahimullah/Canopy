@@ -149,8 +149,11 @@ export default function ApplyPage() {
   React.useEffect(() => {
     async function loadData() {
       try {
-        // Fetch job apply config
-        const configRes = await fetch(`/api/jobs/${jobId}/apply-config`);
+        // Fetch job apply config (pass preview flag so draft jobs load for employers)
+        const configUrl = isPreviewMode
+          ? `/api/jobs/${jobId}/apply-config?preview=true`
+          : `/api/jobs/${jobId}/apply-config`;
+        const configRes = await fetch(configUrl);
         if (!configRes.ok) {
           if (configRes.status === 404) {
             setConfigError("This job is no longer accepting applications.");
