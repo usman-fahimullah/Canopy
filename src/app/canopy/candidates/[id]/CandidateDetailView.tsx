@@ -322,7 +322,7 @@ export function CandidateDetailView({
   }, [seeker.resumeUrl]);
 
   return (
-    <div className="flex h-[calc(100vh-0px)] flex-col bg-[var(--background-default)]">
+    <div className="flex h-full flex-col bg-[var(--background-default)]">
       {/* ── Top Navigation Bar ── */}
       <CandidateDetailNavBar
         currentIndex={navContext.currentIndex}
@@ -364,23 +364,18 @@ export function CandidateDetailView({
       {/* ── Content area ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left: Main scrollable content ── */}
-        <main className="flex-1 overflow-y-auto bg-[var(--background-subtle)]">
-          {/* Header area on default (white) background */}
-          <div className="bg-[var(--background-default)] px-8 pb-6 pt-8">
-            <div className="mx-auto max-w-3xl">
-              <CandidateProfileHeader
-                name={candidateName}
-                email={seeker.account.email}
-                avatar={seeker.account.avatar}
-                jobTitle={activeApp.job.title}
-                appliedAt={activeApp.createdAt}
-                pronouns={seeker.account.pronouns}
-              />
-            </div>
-          </div>
+        <main className="flex-1 overflow-y-auto bg-[var(--background-default)]">
+          <div className="flex flex-col gap-12 p-12">
+            {/* Profile header */}
+            <CandidateProfileHeader
+              name={candidateName}
+              email={seeker.account.email}
+              avatar={seeker.account.avatar}
+              jobTitle={activeApp.job.title}
+              appliedAt={activeApp.createdAt}
+              pronouns={seeker.account.pronouns}
+            />
 
-          {/* Content sections on subtle background */}
-          <div className="mx-auto max-w-3xl space-y-8 px-8 py-8">
             {/* Hiring stages */}
             <HiringStagesSection
               stages={jobStages}
