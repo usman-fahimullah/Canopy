@@ -79,7 +79,7 @@ export function CandidateDetailNavBar({
     currentStage === "rejected" || currentStage === "talent-pool" || currentStage === "hired";
 
   return (
-    <nav className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-4">
+    <nav className="flex h-[108px] shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-8">
       {/* ---- Left side: Close + Up/Down navigation + counter ---- */}
       <div className="flex items-center gap-2">
         <SimpleTooltip content="Close">
