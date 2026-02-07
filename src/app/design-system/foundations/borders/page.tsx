@@ -4,116 +4,600 @@ import React from "react";
 import { ComponentCard } from "@/components/design-system/ComponentSection";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
 
+/* ─── Border Color Token Data ─── */
+
+const defaultBorders = [
+  {
+    name: "--border-default",
+    token: "border-default",
+    value: "neutral-400",
+    description: "Standard element borders — cards, inputs, dividers",
+  },
+  {
+    name: "--border-muted",
+    token: "border-muted",
+    value: "neutral-300",
+    description: "Subtle borders — table rows, secondary separators",
+  },
+  {
+    name: "--border-emphasis",
+    token: "border-emphasis",
+    value: "neutral-500",
+    description: "Stronger borders — selected containers, emphasis",
+  },
+  {
+    name: "--border-strong",
+    token: "border-strong",
+    value: "neutral-600",
+    description: "Strongest borders — high-contrast outlines",
+  },
+  {
+    name: "--border-inverse",
+    token: "border-inverse",
+    value: "neutral-0 / neutral-800",
+    description: "Borders on dark or inverse backgrounds",
+  },
+  {
+    name: "--border-disabled",
+    token: "border-disabled",
+    value: "neutral-300",
+    description: "Disabled element borders — reduced visibility",
+  },
+];
+
+const brandBorders = [
+  {
+    name: "--border-brand",
+    token: "border-brand",
+    value: "green-400",
+    description: "Brand-colored borders — selected tabs, active sections",
+  },
+  {
+    name: "--border-brand-emphasis",
+    token: "border-brand-emphasis",
+    value: "green-500",
+    description: "Stronger brand borders — focused brand elements",
+  },
+];
+
+const interactiveBorders = [
+  {
+    name: "--border-interactive-default",
+    token: "border-interactive-default",
+    value: "neutral-400",
+    description: "Resting state of interactive elements",
+  },
+  {
+    name: "--border-interactive-hover",
+    token: "border-interactive-hover",
+    value: "neutral-500",
+    description: "Hover state — darkens to indicate interactivity",
+  },
+  {
+    name: "--border-interactive-focus",
+    token: "border-interactive-focus",
+    value: "green-500",
+    description: "Focus state — branded color for keyboard navigation",
+  },
+  {
+    name: "--border-interactive-active",
+    token: "border-interactive-active",
+    value: "green-600",
+    description: "Active/pressed state — deeper brand accent",
+  },
+];
+
+const statusBorders = [
+  {
+    name: "--border-success",
+    token: "border-success",
+    value: "green-400",
+    color: "var(--border-success)",
+    description: "Success states — valid inputs, confirmed actions",
+  },
+  {
+    name: "--border-warning",
+    token: "border-warning",
+    value: "orange-400",
+    color: "var(--border-warning)",
+    description: "Warning states — caution indicators",
+  },
+  {
+    name: "--border-error",
+    token: "border-error",
+    value: "red-400",
+    color: "var(--border-error)",
+    description: "Error states — invalid inputs, failures",
+  },
+  {
+    name: "--border-info",
+    token: "border-info",
+    value: "blue-400",
+    color: "var(--border-info)",
+    description: "Informational states — tips, notices",
+  },
+];
+
+/* ─── Border Radius Data ─── */
+
+const baseRadiusScale = [
+  { name: "rounded-none", value: "0px", css: "--radius-none" },
+  { name: "rounded-xs", value: "2px", css: "--radius-xs" },
+  { name: "rounded-sm", value: "4px", css: "--radius-sm" },
+  { name: "rounded-md", value: "6px", css: "--radius-md" },
+  { name: "rounded-lg", value: "8px", css: "--radius-lg" },
+  { name: "rounded-xl", value: "12px", css: "--radius-xl" },
+  { name: "rounded-2xl", value: "16px", css: "--radius-2xl" },
+  { name: "rounded-3xl", value: "24px", css: "--radius-3xl" },
+  { name: "rounded-full", value: "9999px", css: "--radius-full" },
+];
+
+const semanticRadius = [
+  {
+    name: "rounded-card",
+    value: "12px (xl)",
+    css: "--radius-card",
+    description: "Card containers",
+  },
+  {
+    name: "rounded-button",
+    value: "8px (lg)",
+    css: "--radius-button",
+    description: "Buttons, CTAs",
+  },
+  {
+    name: "rounded-input",
+    value: "6px (md)",
+    css: "--radius-input",
+    description: "Form inputs, textareas",
+  },
+  {
+    name: "rounded-chip",
+    value: "8px (lg)",
+    css: "--radius-chip",
+    description: "Chips, tags",
+  },
+  {
+    name: "rounded-badge",
+    value: "9999px (full)",
+    css: "--radius-badge",
+    description: "Pill badges, status indicators",
+  },
+  {
+    name: "rounded-avatar",
+    value: "9999px (full)",
+    css: "--radius-avatar",
+    description: "User avatars",
+  },
+  {
+    name: "rounded-tooltip",
+    value: "6px (md)",
+    css: "--radius-tooltip",
+    description: "Tooltips, coach tips",
+  },
+  {
+    name: "rounded-popover",
+    value: "8px (lg)",
+    css: "--radius-popover",
+    description: "Popovers, dropdowns",
+  },
+  {
+    name: "rounded-modal",
+    value: "12px (xl)",
+    css: "--radius-modal",
+    description: "Modals, dialogs",
+  },
+];
+
+/* ─── Helpers ─── */
+
+function BorderSwatch({ token, className }: { token: string; className?: string }) {
+  return (
+    <div
+      className={`h-10 w-14 shrink-0 rounded-lg border-2 bg-[var(--background-default)] ${className ?? ""}`}
+      style={{ borderColor: `var(--${token})` }}
+    />
+  );
+}
+
+/* ─── Page ─── */
+
 export default function BordersPage() {
   return (
     <div className="space-y-12">
       {/* Header */}
       <div>
-        <h1 className="text-heading-lg text-foreground mb-2">Borders & Radius</h1>
-        <p className="text-body text-foreground-muted max-w-2xl">
-          Border radius tokens for consistent corner rounding across components.
+        <h1 className="mb-2 text-heading-lg text-foreground">Borders & Radius</h1>
+        <p className="max-w-2xl text-body text-foreground-muted">
+          Border tokens define the color, width, and radius of element boundaries. Using these
+          tokens ensures dark mode compatibility, visual consistency, and clear interactive feedback
+          across the entire product.
         </p>
       </div>
 
-      {/* Base Radius */}
-      <ComponentCard title="Base Radius Scale" description="Core border radius values.">
+      {/* ═══════════════════════════════════════
+          BORDER COLORS
+          ═══════════════════════════════════════ */}
+
+      {/* Default Border Colors */}
+      <ComponentCard
+        id="border-colors-default"
+        title="Default Border Colors"
+        description="Core border tokens for general UI elements. These auto-switch in dark mode."
+      >
+        <div className="space-y-4">
+          {defaultBorders.map(({ name, token, value, description }) => (
+            <div key={name} className="flex items-center gap-4">
+              <BorderSwatch token={token} />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <code className="font-mono text-caption font-semibold text-foreground">
+                    {name}
+                  </code>
+                  <span className="font-mono text-caption-sm text-foreground-subtle">{value}</span>
+                </div>
+                <p className="mt-0.5 text-caption-sm text-foreground-muted">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* Brand Border Colors */}
+      <ComponentCard
+        id="border-colors-brand"
+        title="Brand Border Colors"
+        description="Green-tinted borders for brand emphasis and active states."
+      >
+        <div className="space-y-4">
+          {brandBorders.map(({ name, token, value, description }) => (
+            <div key={name} className="flex items-center gap-4">
+              <BorderSwatch token={token} />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <code className="font-mono text-caption font-semibold text-foreground">
+                    {name}
+                  </code>
+                  <span className="font-mono text-caption-sm text-foreground-subtle">{value}</span>
+                </div>
+                <p className="mt-0.5 text-caption-sm text-foreground-muted">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* Interactive Border Colors */}
+      <ComponentCard
+        id="border-colors-interactive"
+        title="Interactive Border Colors"
+        description="Border tokens that respond to user interaction — hover, focus, and active states."
+      >
+        <div className="space-y-4">
+          {interactiveBorders.map(({ name, token, value, description }) => (
+            <div key={name} className="flex items-center gap-4">
+              <BorderSwatch token={token} />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <code className="font-mono text-caption font-semibold text-foreground">
+                    {name}
+                  </code>
+                  <span className="font-mono text-caption-sm text-foreground-subtle">{value}</span>
+                </div>
+                <p className="mt-0.5 text-caption-sm text-foreground-muted">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Interactive demo */}
+        <div className="mt-6 border-t border-[var(--border-muted)] pt-6">
+          <p className="mb-3 text-caption font-semibold text-foreground">Interactive demo</p>
+          <p className="mb-4 text-caption-sm text-foreground-muted">
+            Hover and focus the input below to see border transitions.
+          </p>
+          <input
+            type="text"
+            placeholder="Hover or focus me..."
+            className="w-full max-w-sm rounded-[var(--radius-input)] border border-[var(--border-interactive-default)] bg-[var(--input-background)] px-3 py-2 text-caption text-[var(--input-foreground)] transition-colors placeholder:text-[var(--input-foreground-placeholder)] hover:border-[var(--border-interactive-hover)] focus:border-[var(--border-interactive-focus)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+          />
+        </div>
+      </ComponentCard>
+
+      {/* Status Border Colors */}
+      <ComponentCard
+        id="border-colors-status"
+        title="Status Border Colors"
+        description="Semantic borders for success, warning, error, and informational states."
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          {statusBorders.map(({ name, token, value, description }) => (
+            <div
+              key={name}
+              className="flex items-center gap-4 rounded-xl border-2 p-4"
+              style={{ borderColor: `var(--${token})` }}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <code className="font-mono text-caption font-semibold text-foreground">
+                    {name}
+                  </code>
+                  <span className="font-mono text-caption-sm text-foreground-subtle">{value}</span>
+                </div>
+                <p className="mt-0.5 text-caption-sm text-foreground-muted">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* ═══════════════════════════════════════
+          BORDER WIDTH
+          ═══════════════════════════════════════ */}
+
+      <ComponentCard
+        id="border-width"
+        title="Border Width"
+        description="Standard border widths using Tailwind's built-in scale."
+      >
+        <div className="space-y-4">
+          {[
+            {
+              tw: "border",
+              value: "1px",
+              description: "Default — inputs, cards, dividers, table cells",
+            },
+            {
+              tw: "border-2",
+              value: "2px",
+              description: "Emphasis — selected states, focus rings, status indicators",
+            },
+            {
+              tw: "border-4",
+              value: "4px",
+              description: "Heavy — decorative accents, section borders",
+            },
+          ].map(({ tw, value, description }) => (
+            <div key={tw} className="flex items-center gap-4">
+              <div
+                className={`h-10 w-14 shrink-0 rounded-lg bg-[var(--background-default)] ${tw} border-[var(--border-default)]`}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <code className="font-mono text-caption font-semibold text-foreground">{tw}</code>
+                  <span className="font-mono text-caption-sm text-foreground-subtle">{value}</span>
+                </div>
+                <p className="mt-0.5 text-caption-sm text-foreground-muted">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* ═══════════════════════════════════════
+          BORDER STYLE
+          ═══════════════════════════════════════ */}
+
+      <ComponentCard
+        id="border-style"
+        title="Border Style"
+        description="Available border styles. Solid is the default; use others sparingly."
+      >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-500 rounded-none" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-none</code>
-              <p className="text-caption-sm text-foreground-muted">0px</p>
+          {[
+            { style: "border-solid", label: "Solid", note: "Default" },
+            { style: "border-dashed", label: "Dashed", note: "Drop zones, placeholders" },
+            { style: "border-dotted", label: "Dotted", note: "Rarely used" },
+            { style: "border-none", label: "None", note: "Remove borders" },
+          ].map(({ style, label, note }) => (
+            <div key={style} className="flex flex-col items-center gap-2">
+              <div
+                className={`h-14 w-full rounded-lg border-2 border-[var(--border-default)] bg-[var(--background-default)] ${style}`}
+              />
+              <div className="text-center">
+                <code className="font-mono text-caption font-semibold text-foreground">
+                  {style}
+                </code>
+                <p className="text-caption-sm text-foreground-muted">
+                  {label} — {note}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-500 rounded-sm" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-sm</code>
-              <p className="text-caption-sm text-foreground-muted">4px</p>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* ═══════════════════════════════════════
+          BORDER RADIUS
+          ═══════════════════════════════════════ */}
+
+      {/* Base Radius Scale */}
+      <ComponentCard
+        id="radius-scale"
+        title="Base Radius Scale"
+        description="Core border radius values — from sharp corners to fully rounded."
+      >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {baseRadiusScale.map(({ name, value, css }) => (
+            <div key={name} className="flex items-center gap-3">
+              <div className="h-12 w-12 shrink-0 rounded-[var(${css})] bg-[var(--background-brand)]" />
+              <div>
+                <code className="font-mono text-caption font-semibold text-foreground">{name}</code>
+                <p className="text-caption-sm text-foreground-muted">{value}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-500 rounded-md" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-md</code>
-              <p className="text-caption-sm text-foreground-muted">8px</p>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* Side-by-side radius comparison */}
+      <ComponentCard
+        id="radius-comparison"
+        title="Radius Comparison"
+        description="All radius values compared at the same scale."
+      >
+        <div className="flex flex-wrap items-end gap-4 py-4">
+          {baseRadiusScale.map(({ name, value, css }) => (
+            <div key={name} className="flex flex-col items-center gap-3">
+              <div
+                className="h-16 w-16 bg-[var(--background-brand)]"
+                style={{ borderRadius: `var(${css})` }}
+              />
+              <div className="text-center">
+                <code className="block font-mono text-caption-sm text-foreground-muted">
+                  {name.replace("rounded-", "")}
+                </code>
+                <span className="text-caption-sm text-foreground-subtle">{value}</span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-500 rounded-lg" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-lg</code>
-              <p className="text-caption-sm text-foreground-muted">12px</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-500 rounded-xl" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-xl</code>
-              <p className="text-caption-sm text-foreground-muted">16px</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-500 rounded-2xl" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-2xl</code>
-              <p className="text-caption-sm text-foreground-muted">24px</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-primary-500 rounded-full" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-full</code>
-              <p className="text-caption-sm text-foreground-muted">9999px</p>
-            </div>
-          </div>
+          ))}
         </div>
       </ComponentCard>
 
       {/* Semantic Radius */}
       <ComponentCard
+        id="radius-semantic"
         title="Semantic Radius Aliases"
-        description="Purpose-specific border radius tokens."
+        description="Purpose-specific radius tokens mapped to component types. Use these instead of raw scale values."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="flex items-center gap-3 p-3 bg-background-muted rounded-lg">
-            <div className="w-10 h-10 bg-primary-500 rounded-card" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-card</code>
-              <p className="text-caption-sm text-foreground-muted">16px (xl)</p>
-              <p className="text-caption-sm text-foreground-subtle">Card containers</p>
+          {semanticRadius.map(({ name, value, css, description }) => (
+            <div
+              key={name}
+              className="flex items-center gap-3 rounded-lg bg-[var(--background-subtle)] p-3"
+            >
+              <div
+                className="h-10 w-10 shrink-0 bg-[var(--background-brand)]"
+                style={{ borderRadius: `var(${css})` }}
+              />
+              <div>
+                <code className="font-mono text-caption font-semibold text-foreground">{name}</code>
+                <p className="text-caption-sm text-foreground-muted">{value}</p>
+                <p className="text-caption-sm text-foreground-subtle">{description}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-background-muted rounded-lg">
-            <div className="w-10 h-10 bg-primary-500 rounded-button" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-button</code>
-              <p className="text-caption-sm text-foreground-muted">12px (lg)</p>
-              <p className="text-caption-sm text-foreground-subtle">Buttons, CTAs</p>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* ═══════════════════════════════════════
+          USAGE GUIDELINES
+          ═══════════════════════════════════════ */}
+
+      <ComponentCard
+        id="usage-guidelines"
+        title="Usage Guidelines"
+        description="When and how to use each border token tier."
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-[var(--border-muted)]">
+                <th className="pb-3 pr-4 text-caption font-semibold text-foreground">Context</th>
+                <th className="pb-3 pr-4 text-caption font-semibold text-foreground">Token</th>
+                <th className="pb-3 text-caption font-semibold text-foreground">Example</th>
+              </tr>
+            </thead>
+            <tbody className="text-caption text-foreground-muted">
+              <tr className="border-b border-[var(--border-muted)]">
+                <td className="py-3 pr-4">Card or panel edge</td>
+                <td className="py-3 pr-4">
+                  <code className="font-mono text-foreground">border-default</code>
+                </td>
+                <td className="py-3">
+                  <code className="font-mono text-foreground-subtle">
+                    border border-[var(--border-default)]
+                  </code>
+                </td>
+              </tr>
+              <tr className="border-b border-[var(--border-muted)]">
+                <td className="py-3 pr-4">Table row separator</td>
+                <td className="py-3 pr-4">
+                  <code className="font-mono text-foreground">border-muted</code>
+                </td>
+                <td className="py-3">
+                  <code className="font-mono text-foreground-subtle">
+                    border-b border-[var(--border-muted)]
+                  </code>
+                </td>
+              </tr>
+              <tr className="border-b border-[var(--border-muted)]">
+                <td className="py-3 pr-4">Input hover</td>
+                <td className="py-3 pr-4">
+                  <code className="font-mono text-foreground">border-interactive-hover</code>
+                </td>
+                <td className="py-3">
+                  <code className="font-mono text-foreground-subtle">
+                    hover:border-[var(--border-interactive-hover)]
+                  </code>
+                </td>
+              </tr>
+              <tr className="border-b border-[var(--border-muted)]">
+                <td className="py-3 pr-4">Input focus</td>
+                <td className="py-3 pr-4">
+                  <code className="font-mono text-foreground">border-interactive-focus</code>
+                </td>
+                <td className="py-3">
+                  <code className="font-mono text-foreground-subtle">
+                    focus:border-[var(--border-interactive-focus)]
+                  </code>
+                </td>
+              </tr>
+              <tr className="border-b border-[var(--border-muted)]">
+                <td className="py-3 pr-4">Error input</td>
+                <td className="py-3 pr-4">
+                  <code className="font-mono text-foreground">border-error</code>
+                </td>
+                <td className="py-3">
+                  <code className="font-mono text-foreground-subtle">
+                    border-[var(--border-error)]
+                  </code>
+                </td>
+              </tr>
+              <tr>
+                <td className="py-3 pr-4">Brand accent</td>
+                <td className="py-3 pr-4">
+                  <code className="font-mono text-foreground">border-brand</code>
+                </td>
+                <td className="py-3">
+                  <code className="font-mono text-foreground-subtle">
+                    border-[var(--border-brand)]
+                  </code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ComponentCard>
+
+      {/* ═══════════════════════════════════════
+          DARK MODE
+          ═══════════════════════════════════════ */}
+
+      <ComponentCard
+        id="dark-mode"
+        title="Dark Mode"
+        description="How border tokens behave in dark mode."
+      >
+        <div className="space-y-3 text-caption text-foreground-muted">
+          <p>
+            All border color tokens automatically update when the theme switches to dark mode. No
+            manual <code className="font-mono text-foreground">dark:</code> overrides are needed —
+            the CSS custom properties handle the mapping.
+          </p>
+          <p>
+            In dark mode, <code className="font-mono text-foreground">--border-inverse</code> flips
+            to neutral-800 (dark instead of white), ensuring borders remain visible on inverted
+            backgrounds.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-[var(--border-default)] bg-[var(--background-default)] p-4">
+              <code className="font-mono text-caption-sm text-foreground">border-default</code>
+              <p className="mt-1 text-caption-sm text-foreground-subtle">Current theme</p>
             </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-background-muted rounded-lg">
-            <div className="w-10 h-10 bg-primary-500 rounded-input" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-input</code>
-              <p className="text-caption-sm text-foreground-muted">8px (md)</p>
-              <p className="text-caption-sm text-foreground-subtle">Form inputs</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-background-muted rounded-lg">
-            <div className="w-10 h-10 bg-primary-500 rounded-chip" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-chip</code>
-              <p className="text-caption-sm text-foreground-muted">12px (lg)</p>
-              <p className="text-caption-sm text-foreground-subtle">Chips, tags</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-3 bg-background-muted rounded-lg">
-            <div className="w-10 h-10 bg-primary-500 rounded-badge" />
-            <div>
-              <code className="text-caption font-mono text-foreground-muted">rounded-badge</code>
-              <p className="text-caption-sm text-foreground-muted">9999px (full)</p>
-              <p className="text-caption-sm text-foreground-subtle">Pill badges</p>
+            <div className="rounded-xl border-2 border-[var(--border-brand)] bg-[var(--background-default)] p-4">
+              <code className="font-mono text-caption-sm text-foreground">border-brand</code>
+              <p className="mt-1 text-caption-sm text-foreground-subtle">Current theme</p>
             </div>
           </div>
         </div>
