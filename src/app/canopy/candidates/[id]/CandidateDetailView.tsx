@@ -184,6 +184,76 @@ export function CandidateDetailView({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Stage action handlers ──
+  const [isActionLoading, setIsActionLoading] = React.useState(false);
+  const [optimisticStage, setOptimisticStage] = React.useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = React.useState<{
+    type: "success" | "error" | "warning";
+    message: string;
+  } | null>(null);
+
+  // The displayed stage: optimistic override or actual
+  const displayStage = optimisticStage ?? activeApp.stage;
+
+  // Clear feedback after 4 seconds
+  React.useEffect(() => {
+    if (!actionFeedback) return;
+    const timer = setTimeout(() => setActionFeedback(null), 4000);
+    return () => clearTimeout(timer);
+  }, [actionFeedback]);
+
+  const moveToStage = React.useCallback(
+    async (newStage: string, label: string) => {
+      if (!activeApp) return;
+      setIsActionLoading(true);
+      setOptimisticStage(newStage);
+      setActionFeedback(null);
+
+      try {
+        const res = await fetch(
+          `/api/canopy/roles/${activeApp.job.id}/applications/${activeApp.id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ stage: newStage, stageOrder: 0 }),
+          }
+        );
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error ?? `Failed to move candidate to ${label}`);
+        }
+
+        setActionFeedback({
+          type: newStage === "rejected" ? "warning" : "success",
+          message: `Candidate moved to ${label}`,
+        });
+
+        // Refresh the page data to get updated state from server
+        router.refresh();
+      } catch (err) {
+        setOptimisticStage(null);
+        setActionFeedback({
+          type: "error",
+          message: err instanceof Error ? err.message : "Failed to move candidate",
+        });
+      } finally {
+        setIsActionLoading(false);
+      }
+    },
+    [activeApp, router]
+  );
+
+  const handleReject = React.useCallback(() => moveToStage("rejected", "Rejected"), [moveToStage]);
+  const handleSaveToTalentPool = React.useCallback(
+    () => moveToStage("talent-pool", "Talent Pool"),
+    [moveToStage]
+  );
+  const handleQualify = React.useCallback(
+    () => moveToStage("qualified", "Qualified"),
+    [moveToStage]
+  );
+
   // Panel tab buttons
   const panelTabs: { key: RightPanelView; label: string }[] = [
     { key: "review", label: "Application review" },
@@ -198,10 +268,31 @@ export function CandidateDetailView({
         totalCount={navContext.totalCount}
         hasPrevious={!!navContext.prevId}
         hasNext={!!navContext.nextId}
+        currentStage={displayStage}
+        isActionLoading={isActionLoading}
         onClose={handleClose}
         onPrevious={handlePrevious}
         onNext={handleNext}
+        onReject={handleReject}
+        onSaveToTalentPool={handleSaveToTalentPool}
       />
+
+      {/* ── Action feedback banner ── */}
+      {actionFeedback && (
+        <Banner
+          type={
+            actionFeedback.type === "error"
+              ? "critical"
+              : actionFeedback.type === "warning"
+                ? "warning"
+                : "success"
+          }
+          subtle
+          title={actionFeedback.message}
+          dismissible
+          onDismiss={() => setActionFeedback(null)}
+        />
+      )}
 
       {/* ── Two-panel content ── */}
       <div className="flex flex-1 overflow-hidden">
@@ -234,7 +325,7 @@ export function CandidateDetailView({
             <div className="mt-8">
               <HiringStagesSection
                 stages={jobStages}
-                currentStage={activeApp.stage}
+                currentStage={displayStage}
                 scores={activeApp.scores}
                 averageScore={averageScore}
               />
@@ -317,6 +408,11 @@ export function CandidateDetailView({
                 scores={activeApp.scores}
                 averageScore={averageScore}
                 orgMemberId={orgMemberId}
+                currentStage={displayStage}
+                isActionLoading={isActionLoading}
+                onQualify={handleQualify}
+                onDisqualify={handleReject}
+                onSaveToTalentPool={handleSaveToTalentPool}
               />
             )}
             {activePanelView === "activity" && (

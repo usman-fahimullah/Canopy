@@ -799,7 +799,7 @@ model Job {
   publishedAt DateTime?
   closesAt    DateTime?
 
-  stages String @default("[{\"id\":\"applied\",\"name\":\"Applied\"},{\"id\":\"screening\",\"name\":\"Screening\"},{\"id\":\"interview\",\"name\":\"Interview\"},{\"id\":\"offer\",\"name\":\"Offer\"},{\"id\":\"hired\",\"name\":\"Hired\"}]")
+  stages String @default("[{\"id\":\"applied\",\"name\":\"Applied\"},{\"id\":\"screening\",\"name\":\"Screening\"},{\"id\":\"qualified\",\"name\":\"Qualified\"},{\"id\":\"interview\",\"name\":\"Interview\"},{\"id\":\"offer\",\"name\":\"Offer\"},{\"id\":\"hired\",\"name\":\"Hired\"}]")
 
   // Application form configuration
   formConfig    Json? // { personalDetails: {...}, careerDetails: {...}, requiredFiles: {...} }

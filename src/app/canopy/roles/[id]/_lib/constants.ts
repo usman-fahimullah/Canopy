@@ -116,6 +116,7 @@ export const formToExperienceLevel: Record<string, string> = {
 export const defaultStages = [
   { id: "applied", name: "Applied" },
   { id: "screening", name: "Screening" },
+  { id: "qualified", name: "Qualified" },
   { id: "interview", name: "Interview" },
   { id: "offer", name: "Offer" },
   { id: "hired", name: "Hired" },

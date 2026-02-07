@@ -517,23 +517,23 @@
     --button-primary-background-active: var(--primitive-green-900);
     --button-primary-foreground: var(--primitive-blue-100);
 
-    /* Secondary Button - Figma: bg #cce4ff (blue-200), hover #99c9ff (blue-300), text #0A3D2C (green-800) */
+    /* Secondary Button - Figma: bg #cce4ff (blue-200), hover #99c9ff (blue-300), text #000000 (black) */
     --button-secondary-background: var(--primitive-blue-200);
     --button-secondary-background-hover: var(--primitive-blue-300);
     --button-secondary-background-active: var(--primitive-blue-400);
-    --button-secondary-foreground: var(--primitive-green-800);
+    --button-secondary-foreground: var(--primitive-neutral-900);
 
-    /* Tertiary Button - Figma: bg #f2ede9 (neutral-200), hover #e5dfd8 (neutral-300), text #0A3D2C (green-800) */
+    /* Tertiary Button - Figma: bg #f2ede9 (neutral-200), hover #e5dfd8 (neutral-300), text #000000 (black) */
     --button-tertiary-background: var(--primitive-neutral-200);
     --button-tertiary-background-hover: var(--primitive-neutral-300);
     --button-tertiary-background-active: var(--primitive-neutral-400);
-    --button-tertiary-foreground: var(--primitive-green-800);
+    --button-tertiary-foreground: var(--primitive-neutral-900);
 
-    /* Inverse Button - Figma: bg white, hover #eaffe0 (green-100), text #0A3D2C (green-800) */
+    /* Inverse Button - Figma: bg white, hover #faf9f7 (neutral-100), text #000000 (black) */
     --button-inverse-background: var(--primitive-neutral-0);
-    --button-inverse-background-hover: var(--primitive-green-100);
-    --button-inverse-background-active: var(--primitive-green-200);
-    --button-inverse-foreground: var(--primitive-green-800);
+    --button-inverse-background-hover: var(--primitive-neutral-100);
+    --button-inverse-background-active: var(--primitive-neutral-200);
+    --button-inverse-foreground: var(--primitive-neutral-900);
 
     --button-outline-background: transparent;
     --button-outline-background-hover: var(--primitive-neutral-200);
@@ -1065,6 +1065,10 @@
     --stage-screening-foreground: var(--primitive-green-700);
     --stage-screening-border: var(--primitive-green-300);
 
+    --stage-qualified-background: var(--primitive-blue-100);
+    --stage-qualified-foreground: var(--primitive-blue-700);
+    --stage-qualified-border: var(--primitive-blue-300);
+
     --stage-interview-background: var(--primitive-purple-100);
     --stage-interview-foreground: var(--primitive-purple-700);
     --stage-interview-border: var(--primitive-purple-300);
@@ -1084,6 +1088,10 @@
     --stage-withdrawn-background: var(--primitive-neutral-200);
     --stage-withdrawn-foreground: var(--primitive-neutral-600);
     --stage-withdrawn-border: var(--primitive-neutral-400);
+
+    --stage-talent-pool-background: var(--primitive-yellow-100);
+    --stage-talent-pool-foreground: var(--primitive-yellow-700);
+    --stage-talent-pool-border: var(--primitive-yellow-300);
 
     /* Match Scores */
     --match-high-background: var(--primitive-green-100);
@@ -2366,6 +2374,10 @@
     --stage-screening-foreground: var(--primitive-green-600);
     --stage-screening-border: var(--primitive-green-400);
 
+    --stage-qualified-background: var(--primitive-blue-200);
+    --stage-qualified-foreground: var(--primitive-blue-600);
+    --stage-qualified-border: var(--primitive-blue-400);
+
     --stage-interview-background: var(--primitive-purple-200);
     --stage-interview-foreground: var(--primitive-purple-600);
     --stage-interview-border: var(--primitive-purple-400);
@@ -2385,6 +2397,10 @@
     --stage-withdrawn-background: var(--primitive-neutral-300);
     --stage-withdrawn-foreground: var(--primitive-neutral-600);
     --stage-withdrawn-border: var(--primitive-neutral-500);
+
+    --stage-talent-pool-background: var(--primitive-yellow-200);
+    --stage-talent-pool-foreground: var(--primitive-yellow-600);
+    --stage-talent-pool-border: var(--primitive-yellow-400);
 
     /* Match Scores */
     --match-high-background: var(--primitive-green-200);

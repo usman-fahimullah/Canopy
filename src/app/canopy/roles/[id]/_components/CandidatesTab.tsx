@@ -15,7 +15,15 @@ import {
   DaysInStage,
 } from "@/components/ui/candidate-card";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
-import { Plus, Funnel, GridFour, ListBullets } from "@phosphor-icons/react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  Funnel,
+  GridFour,
+  ListBullets,
+  Prohibit,
+  UserCirclePlus,
+} from "@phosphor-icons/react";
 import type { JobData, ApplicationData } from "../_lib/types";
 import { defaultStages } from "../_lib/constants";
 import { mapStageToKanbanType } from "../_lib/helpers";
@@ -60,14 +68,30 @@ export function CandidatesTab({
     stage: mapStageToKanbanType(stage.id),
   }));
 
+  // Stages that are action-based (non-linear) — these candidates
+  // don't appear on the Kanban board but are visible in list view
+  const SPECIAL_ACTION_STAGES = ["rejected", "talent-pool"];
+
   // Filter applications by search
-  const filteredApplications = candidateSearch
+  const searchFilteredApplications = candidateSearch
     ? applications.filter(
         (app) =>
           (app.seeker.account.name || "").toLowerCase().includes(candidateSearch.toLowerCase()) ||
           app.seeker.account.email.toLowerCase().includes(candidateSearch.toLowerCase())
       )
     : applications;
+
+  // For the Kanban board, exclude candidates in special action stages
+  const kanbanApplications = searchFilteredApplications.filter(
+    (app) => !SPECIAL_ACTION_STAGES.includes(app.stage)
+  );
+
+  // For list view, show all (including rejected & talent pool)
+  const filteredApplications = searchFilteredApplications;
+
+  // Counts for special stages
+  const rejectedCount = applications.filter((a) => a.stage === "rejected").length;
+  const talentPoolCount = applications.filter((a) => a.stage === "talent-pool").length;
 
   // Stable navigation callback — router reference changes every render in Next.js,
   // so we must NOT include it in useMemo/useCallback dependency arrays.
@@ -80,10 +104,10 @@ export function CandidatesTab({
     []
   );
 
-  // Convert applications to KanbanItem[]
+  // Convert pipeline applications to KanbanItem[] (excludes rejected/talent-pool)
   const kanbanItems: KanbanItem[] = React.useMemo(
     () =>
-      filteredApplications.map((app) => ({
+      kanbanApplications.map((app) => ({
         id: app.id,
         columnId: app.stage,
         content: (() => {
@@ -118,7 +142,7 @@ export function CandidatesTab({
         })(),
         data: app,
       })),
-    [filteredApplications, navigateToCandidate]
+    [kanbanApplications, navigateToCandidate]
   );
 
   // useKanbanState manages optimistic updates + error rollback
@@ -236,6 +260,31 @@ export function CandidatesTab({
             className="flex-1 rounded-none pb-0"
             columnClassName="w-auto flex-1"
           />
+        )}
+
+        {/* Status bar for non-pipeline candidates */}
+        {(rejectedCount > 0 || talentPoolCount > 0) && (
+          <div className="flex items-center gap-4 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] px-6 py-2.5">
+            {rejectedCount > 0 && (
+              <div className="flex items-center gap-2">
+                <Prohibit size={14} className="text-[var(--foreground-error)]" />
+                <span className="text-caption text-[var(--foreground-muted)]">
+                  {rejectedCount} rejected
+                </span>
+              </div>
+            )}
+            {talentPoolCount > 0 && (
+              <div className="flex items-center gap-2">
+                <UserCirclePlus size={14} className="text-[var(--primitive-yellow-600)]" />
+                <span className="text-caption text-[var(--foreground-muted)]">
+                  {talentPoolCount} in talent pool
+                </span>
+              </div>
+            )}
+            <span className="text-caption text-[var(--foreground-disabled)]">
+              · Visible in list view
+            </span>
+          </div>
         )}
       </div>
 

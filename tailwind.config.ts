@@ -318,6 +318,9 @@ const config: Config = {
           "screening-bg": "var(--stage-screening-background)",
           "screening-fg": "var(--stage-screening-foreground)",
           "screening-border": "var(--stage-screening-border)",
+          "qualified-bg": "var(--stage-qualified-background)",
+          "qualified-fg": "var(--stage-qualified-foreground)",
+          "qualified-border": "var(--stage-qualified-border)",
           "interview-bg": "var(--stage-interview-background)",
           "interview-fg": "var(--stage-interview-foreground)",
           "interview-border": "var(--stage-interview-border)",
@@ -333,6 +336,9 @@ const config: Config = {
           "withdrawn-bg": "var(--stage-withdrawn-background)",
           "withdrawn-fg": "var(--stage-withdrawn-foreground)",
           "withdrawn-border": "var(--stage-withdrawn-border)",
+          "talent-pool-bg": "var(--stage-talent-pool-background)",
+          "talent-pool-fg": "var(--stage-talent-pool-foreground)",
+          "talent-pool-border": "var(--stage-talent-pool-border)",
         },
 
         // Match Scores

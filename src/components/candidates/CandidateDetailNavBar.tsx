@@ -12,6 +12,7 @@ import {
   Star,
   ArrowFatLineRight,
   Prohibit,
+  UserCirclePlus,
   DotsThreeVertical,
 } from "@phosphor-icons/react";
 
@@ -20,9 +21,15 @@ interface CandidateDetailNavBarProps {
   totalCount?: number;
   hasPrevious: boolean;
   hasNext: boolean;
+  /** Current application stage — used to show/hide actions contextually */
+  currentStage?: string;
+  /** Whether an action is currently in progress */
+  isActionLoading?: boolean;
   onClose: () => void;
   onPrevious: () => void;
   onNext: () => void;
+  onReject?: () => void;
+  onSaveToTalentPool?: () => void;
 }
 
 export function CandidateDetailNavBar({
@@ -30,10 +37,18 @@ export function CandidateDetailNavBar({
   totalCount,
   hasPrevious,
   hasNext,
+  currentStage,
+  isActionLoading,
   onClose,
   onPrevious,
   onNext,
+  onReject,
+  onSaveToTalentPool,
 }: CandidateDetailNavBarProps) {
+  // Hide reject/talent-pool actions if candidate is already in one of those stages
+  const isTerminalStage =
+    currentStage === "rejected" || currentStage === "talent-pool" || currentStage === "hired";
+
   return (
     <nav className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-4">
       {/* Left: Close + navigation */}
@@ -103,11 +118,35 @@ export function CandidateDetailNavBar({
           </Button>
         </SimpleTooltip>
 
-        <SimpleTooltip content="Reject">
-          <Button variant="ghost" size="icon-sm" aria-label="Reject candidate">
-            <Prohibit size={18} />
-          </Button>
-        </SimpleTooltip>
+        {!isTerminalStage && (
+          <>
+            <Separator orientation="vertical" className="mx-1 h-5" />
+
+            <SimpleTooltip content="Save to Talent Pool">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Save to talent pool"
+                onClick={onSaveToTalentPool}
+                disabled={isActionLoading}
+              >
+                <UserCirclePlus size={18} className="text-[var(--primitive-yellow-600)]" />
+              </Button>
+            </SimpleTooltip>
+
+            <SimpleTooltip content="Reject">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Reject candidate"
+                onClick={onReject}
+                disabled={isActionLoading}
+              >
+                <Prohibit size={18} className="text-[var(--foreground-error)]" />
+              </Button>
+            </SimpleTooltip>
+          </>
+        )}
 
         <SimpleTooltip content="More actions">
           <Button variant="ghost" size="icon-sm" aria-label="More actions">

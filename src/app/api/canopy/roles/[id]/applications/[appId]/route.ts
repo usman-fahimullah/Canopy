@@ -85,14 +85,22 @@ export async function PATCH(
 
     const { stage, stageOrder } = result.data;
 
-    const stageExists = validStages.some((s) => s.id === stage);
-    if (!stageExists) {
-      return NextResponse.json(
-        {
-          error: `Invalid stage "${stage}". Valid stages: ${validStages.map((s) => s.id).join(", ")}`,
-        },
-        { status: 422 }
-      );
+    // "rejected" and "talent-pool" are special action stages that can be
+    // applied from any point in the pipeline (via the candidate detail page).
+    // They are NOT part of the linear pipeline columns and bypass stage validation.
+    const SPECIAL_ACTION_STAGES = ["rejected", "talent-pool"];
+    const isSpecialStage = SPECIAL_ACTION_STAGES.includes(stage);
+
+    if (!isSpecialStage) {
+      const stageExists = validStages.some((s) => s.id === stage);
+      if (!stageExists) {
+        return NextResponse.json(
+          {
+            error: `Invalid stage "${stage}". Valid stages: ${validStages.map((s) => s.id).join(", ")}`,
+          },
+          { status: 422 }
+        );
+      }
     }
 
     // --- Offer stage: signal frontend to open the Offer Details Modal ---

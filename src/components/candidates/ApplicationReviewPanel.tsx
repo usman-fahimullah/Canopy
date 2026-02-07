@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/ui/scorecard";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Star, CheckCircle, XCircle } from "@phosphor-icons/react";
+import { Badge } from "@/components/ui/badge";
+import { Star, CheckCircle, XCircle, UserCirclePlus } from "@phosphor-icons/react";
 import { ReviewCard } from "./ReviewCard";
 import type { Recommendation } from "@prisma/client";
 
@@ -26,6 +27,16 @@ interface ApplicationReviewPanelProps {
   scores: ScoreData[];
   averageScore: number | null;
   orgMemberId: string;
+  /** Current stage of the application */
+  currentStage?: string;
+  /** Whether an action is in progress */
+  isActionLoading?: boolean;
+  /** Move candidate to "qualified" stage */
+  onQualify?: () => void;
+  /** Move candidate to "rejected" stage */
+  onDisqualify?: () => void;
+  /** Move candidate to "talent-pool" stage */
+  onSaveToTalentPool?: () => void;
 }
 
 export function ApplicationReviewPanel({
@@ -33,12 +44,19 @@ export function ApplicationReviewPanel({
   scores,
   averageScore,
   orgMemberId,
+  currentStage,
+  isActionLoading,
+  onQualify,
+  onDisqualify,
+  onSaveToTalentPool,
 }: ApplicationReviewPanelProps) {
   const [rating, setRating] = React.useState(0);
   const [note, setNote] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const hasScores = scores.length > 0;
+  const isTerminalStage =
+    currentStage === "rejected" || currentStage === "talent-pool" || currentStage === "hired";
 
   const handleSubmit = async () => {
     if (rating === 0) return;
@@ -54,6 +72,28 @@ export function ApplicationReviewPanel({
 
   return (
     <div className="p-6">
+      {/* Current status badge for terminal stages */}
+      {isTerminalStage && currentStage && (
+        <div className="mb-6">
+          <Badge
+            variant={
+              currentStage === "rejected"
+                ? "critical"
+                : currentStage === "talent-pool"
+                  ? "warning"
+                  : "success"
+            }
+            size="lg"
+          >
+            {currentStage === "rejected"
+              ? "Rejected"
+              : currentStage === "talent-pool"
+                ? "Talent Pool"
+                : "Hired"}
+          </Badge>
+        </div>
+      )}
+
       {/* Score summary (if reviews exist) */}
       {hasScores && averageScore !== null && (
         <div className="mb-6">
@@ -121,8 +161,8 @@ export function ApplicationReviewPanel({
         </div>
       )}
 
-      {/* Qualified / Disqualify actions */}
-      {hasScores && (
+      {/* Decision actions — only show when reviews exist and not in terminal stage */}
+      {hasScores && !isTerminalStage && (
         <>
           <Separator className="my-6" />
           <div className="space-y-3">
@@ -130,11 +170,35 @@ export function ApplicationReviewPanel({
               variant="primary"
               className="w-full bg-[var(--primitive-green-500)] hover:bg-[var(--primitive-green-600)]"
               size="lg"
+              onClick={onQualify}
+              disabled={isActionLoading}
             >
               <CheckCircle size={20} weight="fill" className="mr-2" />
               Qualified
             </Button>
-            <Button variant="destructive" className="w-full" size="lg">
+
+            <Button
+              variant="secondary"
+              className="w-full"
+              size="lg"
+              onClick={onSaveToTalentPool}
+              disabled={isActionLoading}
+            >
+              <UserCirclePlus
+                size={20}
+                weight="regular"
+                className="mr-2 text-[var(--primitive-yellow-600)]"
+              />
+              Save to Talent Pool
+            </Button>
+
+            <Button
+              variant="destructive"
+              className="w-full"
+              size="lg"
+              onClick={onDisqualify}
+              disabled={isActionLoading}
+            >
               <XCircle size={20} weight="fill" className="mr-2" />
               Disqualify
             </Button>

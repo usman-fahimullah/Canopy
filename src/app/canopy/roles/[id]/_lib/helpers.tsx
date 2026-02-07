@@ -55,6 +55,7 @@ export function mapStageToKanbanType(stageId: string): KanbanStageType {
     offer: "offer",
     hired: "hired",
     rejected: "rejected",
+    "talent-pool": "talent-pool",
   };
   return mapping[stageId] || "applied";
 }
@@ -90,6 +91,8 @@ export function getStageBadgeVariant(
       return "info";
     case "screening":
       return "info";
+    case "qualified":
+      return "info";
     case "interview":
       return "warning";
     case "offer":
@@ -98,6 +101,8 @@ export function getStageBadgeVariant(
       return "success";
     case "rejected":
       return "error";
+    case "talent-pool":
+      return "warning";
     default:
       return "neutral";
   }
