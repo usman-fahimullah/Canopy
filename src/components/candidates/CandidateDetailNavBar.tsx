@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
 import { SimpleTooltip } from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -81,7 +80,7 @@ export function CandidateDetailNavBar({
   return (
     <nav className="flex h-[108px] shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-8">
       {/* ---- Left side: Close + Up/Down navigation + counter ---- */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <SimpleTooltip content="Close">
           <Button variant="outline" size="icon" onClick={onClose} aria-label="Close">
             <X size={24} weight="bold" />
@@ -99,14 +98,14 @@ export function CandidateDetailNavBar({
         />
 
         {currentIndex !== undefined && totalCount !== undefined && (
-          <span className="ml-1 text-caption text-[var(--foreground-muted)]">
+          <span className="text-body text-[var(--foreground-subtle)]">
             {currentIndex + 1} of {totalCount}
           </span>
         )}
       </div>
 
       {/* ---- Right side: Panel toggles + stage actions ---- */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {/* History toggle */}
         <SimpleTooltip content="History">
           <Button
@@ -145,8 +144,6 @@ export function CandidateDetailNavBar({
             <ListChecks size={24} weight="bold" />
           </Button>
         </SimpleTooltip>
-
-        <Separator orientation="vertical" className="mx-1 h-6" />
 
         {/* Move to stage dropdown */}
         <DropdownMenu>

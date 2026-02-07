@@ -322,7 +322,7 @@ export function CandidateDetailView({
   }, [seeker.resumeUrl]);
 
   return (
-    <div className="flex h-full flex-col bg-[var(--background-default)]">
+    <div className="flex h-screen flex-col bg-[var(--background-default)]">
       {/* ── Top Navigation Bar ── */}
       <CandidateDetailNavBar
         currentIndex={navContext.currentIndex}
