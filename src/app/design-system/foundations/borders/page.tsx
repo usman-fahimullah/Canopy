@@ -4,31 +4,61 @@ import React from "react";
 import { ComponentCard } from "@/components/design-system/ComponentSection";
 import { PageNavigation } from "@/components/design-system/PageNavigation";
 
+/* ─── Alpha Primitive Data ─── */
+
+const alphaScale = [
+  {
+    name: "--border-alpha-1",
+    opacity: "5%",
+    description: "Barely visible — muted separators, disabled borders",
+  },
+  {
+    name: "--border-alpha-2",
+    opacity: "9%",
+    description: "Default — cards, inputs, dividers",
+  },
+  {
+    name: "--border-alpha-3",
+    opacity: "14%",
+    description: "Emphasis — hover states, selected containers",
+  },
+  {
+    name: "--border-alpha-4",
+    opacity: "20%",
+    description: "Strong — high-contrast outlines, active states",
+  },
+  {
+    name: "--border-alpha-5",
+    opacity: "28%",
+    description: "Strongest — maximum definition borders",
+  },
+];
+
 /* ─── Border Color Token Data ─── */
 
 const defaultBorders = [
   {
     name: "--border-default",
     token: "border-default",
-    value: "neutral-400",
+    value: "alpha-2 (9%)",
     description: "Standard element borders — cards, inputs, dividers",
   },
   {
     name: "--border-muted",
     token: "border-muted",
-    value: "neutral-300",
+    value: "alpha-1 (5%)",
     description: "Subtle borders — table rows, secondary separators",
   },
   {
     name: "--border-emphasis",
     token: "border-emphasis",
-    value: "neutral-500",
+    value: "alpha-3 (14%)",
     description: "Stronger borders — selected containers, emphasis",
   },
   {
     name: "--border-strong",
     token: "border-strong",
-    value: "neutral-600",
+    value: "alpha-4 (20%)",
     description: "Strongest borders — high-contrast outlines",
   },
   {
@@ -40,7 +70,7 @@ const defaultBorders = [
   {
     name: "--border-disabled",
     token: "border-disabled",
-    value: "neutral-300",
+    value: "alpha-1 (5%)",
     description: "Disabled element borders — reduced visibility",
   },
 ];
@@ -64,14 +94,14 @@ const interactiveBorders = [
   {
     name: "--border-interactive-default",
     token: "border-interactive-default",
-    value: "neutral-400",
+    value: "alpha-2 (9%)",
     description: "Resting state of interactive elements",
   },
   {
     name: "--border-interactive-hover",
     token: "border-interactive-hover",
-    value: "neutral-500",
-    description: "Hover state — darkens to indicate interactivity",
+    value: "alpha-3 (14%)",
+    description: "Hover state — increases opacity to indicate interactivity",
   },
   {
     name: "--border-interactive-focus",
@@ -191,12 +221,11 @@ const semanticRadius = [
 
 /* ─── Helpers ─── */
 
-function BorderSwatch({ token, className }: { token: string; className?: string }) {
+function BorderSwatch({ token }: { token: string }) {
   return (
-    <div
-      className={`h-10 w-14 shrink-0 rounded-lg border-2 bg-[var(--background-default)] ${className ?? ""}`}
-      style={{ borderColor: `var(--${token})` }}
-    />
+    <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg bg-[var(--background-subtle)]">
+      <div className="h-6 w-10 rounded-md" style={{ backgroundColor: `var(--${token})` }} />
+    </div>
   );
 }
 
@@ -209,11 +238,87 @@ export default function BordersPage() {
       <div>
         <h1 className="mb-2 text-heading-lg text-foreground">Borders & Radius</h1>
         <p className="max-w-2xl text-body text-foreground-muted">
-          Border tokens define the color, width, and radius of element boundaries. Using these
-          tokens ensures dark mode compatibility, visual consistency, and clear interactive feedback
-          across the entire product.
+          Border tokens use a warm-neutral alpha system that composites naturally against any
+          surface. Instead of fixed hex colors, neutral borders use opacity-based values that
+          automatically adapt to light and dark backgrounds.
         </p>
       </div>
+
+      {/* ═══════════════════════════════════════
+          ALPHA SYSTEM
+          ═══════════════════════════════════════ */}
+
+      <ComponentCard
+        id="alpha-system"
+        title="Alpha Border System"
+        description="The foundation of neutral borders — warm-tinted opacity values that composite against any surface."
+      >
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl bg-[var(--background-subtle)] p-4">
+            <p className="mb-2 text-caption font-semibold text-foreground">Light mode base</p>
+            <p className="text-caption-sm text-foreground-muted">
+              <code className="font-mono text-foreground">rgb(31 29 28 / opacity)</code>
+              <br />
+              Warm neutral-800 at varying opacities — blends softly against light surfaces.
+            </p>
+          </div>
+          <div className="rounded-xl bg-[var(--background-subtle)] p-4">
+            <p className="mb-2 text-caption font-semibold text-foreground">Dark mode base</p>
+            <p className="text-caption-sm text-foreground-muted">
+              <code className="font-mono text-foreground">rgb(250 249 247 / opacity)</code>
+              <br />
+              Warm neutral-100 at varying opacities — blends softly against dark surfaces.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {alphaScale.map(({ name, opacity, description }) => (
+            <div key={name} className="flex items-center gap-4">
+              <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg bg-[var(--background-subtle)]">
+                <div
+                  className="h-6 w-10 rounded-md"
+                  style={{ backgroundColor: `var(--${name.replace("--", "")})` }}
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-3">
+                  <code className="font-mono text-caption font-semibold text-foreground">
+                    {name}
+                  </code>
+                  <span className="font-mono text-caption-sm text-foreground-subtle">
+                    {opacity}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-caption-sm text-foreground-muted">{description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Surface demo */}
+        <div className="mt-6 border-t border-[var(--border-muted)] pt-6">
+          <p className="mb-3 text-caption font-semibold text-foreground">Surface compositing</p>
+          <p className="mb-4 text-caption-sm text-foreground-muted">
+            The same alpha border looks different on each background because it composites naturally
+            — no per-surface tokens needed.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              { label: "Default surface", bg: "var(--background-default)" },
+              { label: "Subtle surface", bg: "var(--background-subtle)" },
+              { label: "Brand surface", bg: "var(--background-brand-subtle)" },
+            ].map(({ label, bg }) => (
+              <div key={label} className="rounded-xl p-4" style={{ backgroundColor: bg }}>
+                <div className="rounded-lg border border-[var(--border-default)] p-3">
+                  <p className="text-caption-sm text-foreground">{label}</p>
+                  <p className="text-caption-sm text-foreground-muted">border-default</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </ComponentCard>
 
       {/* ═══════════════════════════════════════
           BORDER COLORS
@@ -223,7 +328,7 @@ export default function BordersPage() {
       <ComponentCard
         id="border-colors-default"
         title="Default Border Colors"
-        description="Core border tokens for general UI elements. These auto-switch in dark mode."
+        description="Core border tokens mapped to alpha primitives. These composite naturally against any surface and auto-switch in dark mode."
       >
         <div className="space-y-4">
           {defaultBorders.map(({ name, token, value, description }) => (
@@ -271,7 +376,7 @@ export default function BordersPage() {
       <ComponentCard
         id="border-colors-interactive"
         title="Interactive Border Colors"
-        description="Border tokens that respond to user interaction — hover, focus, and active states."
+        description="Border tokens that respond to user interaction. Default and hover use alpha primitives; focus and active use explicit brand colors."
       >
         <div className="space-y-4">
           {interactiveBorders.map(({ name, token, value, description }) => (
@@ -314,9 +419,9 @@ export default function BordersPage() {
           {statusBorders.map(({ name, token, value, description }) => (
             <div
               key={name}
-              className="flex items-center gap-4 rounded-xl border-2 p-4"
-              style={{ borderColor: `var(--${token})` }}
+              className="flex items-center gap-4 rounded-lg border border-[var(--border-muted)] bg-[var(--background-default)] p-4"
             >
+              <BorderSwatch token={token} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline gap-2">
                   <code className="font-mono text-caption font-semibold text-foreground">
@@ -340,28 +445,31 @@ export default function BordersPage() {
         title="Border Width"
         description="Standard border widths using Tailwind's built-in scale."
       >
-        <div className="space-y-4">
+        <div className="space-y-5">
           {[
             {
               tw: "border",
               value: "1px",
+              height: "h-px",
               description: "Default — inputs, cards, dividers, table cells",
             },
             {
               tw: "border-2",
               value: "2px",
+              height: "h-0.5",
               description: "Emphasis — selected states, focus rings, status indicators",
             },
             {
               tw: "border-4",
               value: "4px",
+              height: "h-1",
               description: "Heavy — decorative accents, section borders",
             },
-          ].map(({ tw, value, description }) => (
+          ].map(({ tw, value, height, description }) => (
             <div key={tw} className="flex items-center gap-4">
-              <div
-                className={`h-10 w-14 shrink-0 rounded-lg bg-[var(--background-default)] ${tw} border-[var(--border-default)]`}
-              />
+              <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg bg-[var(--background-subtle)]">
+                <div className={`w-10 rounded-full bg-[var(--border-default)] ${height}`} />
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-baseline gap-3">
                   <code className="font-mono text-caption font-semibold text-foreground">{tw}</code>
@@ -390,10 +498,10 @@ export default function BordersPage() {
             { style: "border-dotted", label: "Dotted", note: "Rarely used" },
             { style: "border-none", label: "None", note: "Remove borders" },
           ].map(({ style, label, note }) => (
-            <div key={style} className="flex flex-col items-center gap-2">
-              <div
-                className={`h-14 w-full rounded-lg border-2 border-[var(--border-default)] bg-[var(--background-default)] ${style}`}
-              />
+            <div key={style} className="flex flex-col items-center gap-3">
+              <div className="flex h-14 w-full items-center rounded-lg bg-[var(--background-subtle)] px-4">
+                <div className={`w-full border-t border-[var(--border-default)] ${style}`} />
+              </div>
               <div className="text-center">
                 <code className="font-mono text-caption font-semibold text-foreground">
                   {style}
@@ -577,27 +685,33 @@ export default function BordersPage() {
       <ComponentCard
         id="dark-mode"
         title="Dark Mode"
-        description="How border tokens behave in dark mode."
+        description="How the alpha border system adapts to dark mode."
       >
         <div className="space-y-3 text-caption text-foreground-muted">
           <p>
-            All border color tokens automatically update when the theme switches to dark mode. No
-            manual <code className="font-mono text-foreground">dark:</code> overrides are needed —
-            the CSS custom properties handle the mapping.
+            The alpha border system automatically switches its base color in dark mode. Light mode
+            uses warm <code className="font-mono text-foreground">neutral-800</code> (#1F1D1C) at
+            low opacities, while dark mode uses warm{" "}
+            <code className="font-mono text-foreground">neutral-100</code> (#FAF9F7). The semantic
+            tokens (<code className="font-mono text-foreground">border-default</code>,{" "}
+            <code className="font-mono text-foreground">border-muted</code>, etc.) stay the same —
+            only the underlying alpha primitives change.
           </p>
           <p>
-            In dark mode, <code className="font-mono text-foreground">--border-inverse</code> flips
-            to neutral-800 (dark instead of white), ensuring borders remain visible on inverted
-            backgrounds.
+            No manual <code className="font-mono text-foreground">dark:</code> overrides are needed.
+            Status borders (success, warning, error, info) and brand borders keep their explicit
+            colors in both themes.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-[var(--border-default)] bg-[var(--background-default)] p-4">
               <code className="font-mono text-caption-sm text-foreground">border-default</code>
-              <p className="mt-1 text-caption-sm text-foreground-subtle">Current theme</p>
+              <p className="mt-1 text-caption-sm text-foreground-subtle">alpha-2 — current theme</p>
             </div>
             <div className="rounded-xl border-2 border-[var(--border-brand)] bg-[var(--background-default)] p-4">
               <code className="font-mono text-caption-sm text-foreground">border-brand</code>
-              <p className="mt-1 text-caption-sm text-foreground-subtle">Current theme</p>
+              <p className="mt-1 text-caption-sm text-foreground-subtle">
+                Explicit color — both themes
+              </p>
             </div>
           </div>
         </div>

@@ -188,15 +188,18 @@ When building any new input or form control component:
 
 ## Token Reference (Quick Lookup)
 
-| Purpose            | Token                                        | Value                                    |
-| ------------------ | -------------------------------------------- | ---------------------------------------- |
-| Focus ring color   | `--ring-color`                               | blue-500                                 |
-| Focus ring error   | `--ring-color-error`                         | red-500                                  |
-| Input bg           | `--input-background`                         | neutral-100 (light) / neutral-200 (dark) |
-| Input border       | `--input-border`                             | neutral-200 (light) / neutral-300 (dark) |
-| Input border hover | `--input-border-hover`                       | neutral-300 (light) / neutral-400 (dark) |
-| Input border focus | `--input-border-focus`                       | blue-500                                 |
-| Input border error | `--input-border-error`                       | red-500                                  |
-| Input placeholder  | `--input-foreground-placeholder`             | neutral-500 (light) / neutral-600 (dark) |
-| Checked/selected   | `--checkbox/radio/switch-background-checked` | blue-500                                 |
-| Selected item text | `--select-item-foreground-selected`          | blue-500                                 |
+| Purpose             | Token                                        | Value                                            |
+| ------------------- | -------------------------------------------- | ------------------------------------------------ |
+| Focus ring color    | `--ring-color`                               | blue-500                                         |
+| Focus ring error    | `--ring-color-error`                         | red-500                                          |
+| Input bg            | `--input-background`                         | neutral-100 (light) / neutral-200 (dark)         |
+| Input border        | `--input-border`                             | alpha-2 (9% warm neutral, composites on surface) |
+| Input border hover  | `--input-border-hover`                       | alpha-3 (14% warm neutral)                       |
+| Input border focus  | `--input-border-focus`                       | blue-500                                         |
+| Input border error  | `--input-border-error`                       | red-500                                          |
+| Input placeholder   | `--input-foreground-placeholder`             | neutral-500 (light) / neutral-600 (dark)         |
+| Checked/selected    | `--checkbox/radio/switch-background-checked` | blue-500                                         |
+| Selected item text  | `--select-item-foreground-selected`          | blue-500                                         |
+| Checkbox border     | `--checkbox-border`                          | alpha-4 (20% warm neutral)                       |
+| Radio border        | `--radio-border`                             | alpha-4 (20% warm neutral)                       |
+| Switch thumb border | `--switch-thumb-border`                      | alpha-4 (20% warm neutral)                       |

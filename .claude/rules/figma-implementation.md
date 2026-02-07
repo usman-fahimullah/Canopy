@@ -106,26 +106,37 @@ TIER 1: PRIMITIVE    → --primitive-green-600 (last resort)
 
 ### Semantic Border Tokens
 
-```css
-/* Default Borders */
---border-default   /* neutral-400 */
---border-muted     /* neutral-300 */
---border-emphasis  /* neutral-500 */
---border-strong    /* neutral-600 */
---border-inverse   /* neutral-0 */
---border-disabled  /* neutral-300 */
+Neutral borders use a warm-alpha system (`--border-alpha-*`) that composites
+against any surface. Light mode uses `rgb(31 29 28 / opacity)`, dark mode uses
+`rgb(250 249 247 / opacity)`. Status and brand borders keep explicit colors.
 
-/* Brand Borders */
+```css
+/* Alpha Primitives (light: warm neutral-800, dark: warm neutral-100) */
+--border-alpha-1  /* 5% — barely visible */
+--border-alpha-2  /* 9% — default level */
+--border-alpha-3  /* 14% — emphasis */
+--border-alpha-4  /* 20% — strong */
+--border-alpha-5  /* 28% — strongest */
+
+/* Default Borders — mapped to alpha primitives */
+--border-default   /* alpha-2 (9%) */
+--border-muted     /* alpha-1 (5%) */
+--border-emphasis  /* alpha-3 (14%) */
+--border-strong    /* alpha-4 (20%) */
+--border-inverse   /* neutral-0 (light) / neutral-800 (dark) */
+--border-disabled  /* alpha-1 (5%) */
+
+/* Brand Borders — explicit colors */
 --border-brand          /* green-400 */
 --border-brand-emphasis /* green-500 */
 
-/* Interactive Borders */
---border-interactive-default /* neutral-400 */
---border-interactive-hover   /* neutral-500 */
+/* Interactive Borders — alpha for neutral, explicit for brand */
+--border-interactive-default /* alpha-2 (9%) */
+--border-interactive-hover   /* alpha-3 (14%) */
 --border-interactive-focus   /* green-500 */
 --border-interactive-active  /* green-600 */
 
-/* Status Borders */
+/* Status Borders — explicit colors */
 --border-success /* green-400 */
 --border-warning /* orange-400 */
 --border-error   /* red-400 */
@@ -173,7 +184,7 @@ TIER 1: PRIMITIVE    → --primitive-green-600 (last resort)
 --button-ghost-foreground        /* neutral-700 */
 
 --button-outline-background /* transparent */
---button-outline-border     /* neutral-400 */
+--button-outline-border     /* alpha-4 (20%) */
 --button-outline-foreground /* neutral-800 */
 
 /* Disabled */
@@ -190,9 +201,9 @@ TIER 1: PRIMITIVE    → --primitive-green-600 (last resort)
 --input-background-disabled    /* neutral-200 */
 --input-foreground             /* neutral-800 */
 --input-foreground-placeholder /* neutral-500 */
---input-border                 /* neutral-200 */
---input-border-hover           /* neutral-300 */
---input-border-focus           /* green-500 */
+--input-border                 /* alpha-2 (9%) */
+--input-border-hover           /* alpha-3 (14%) */
+--input-border-focus           /* blue-500 */
 --input-border-error           /* red-500 */
 --input-border-success         /* green-500 */
 ```
@@ -202,8 +213,8 @@ TIER 1: PRIMITIVE    → --primitive-green-600 (last resort)
 ```css
 --select-background              /* neutral-100 */
 --select-background-open         /* neutral-0 */
---select-border                  /* neutral-200 */
---select-border-focus            /* green-500 */
+--select-border                  /* alpha-2 (9%) */
+--select-border-focus            /* blue-500 */
 --select-foreground              /* green-800 */
 --select-foreground-placeholder  /* neutral-600 */
 --select-content-background      /* neutral-0 */
@@ -221,15 +232,15 @@ TIER 1: PRIMITIVE    → --primitive-green-600 (last resort)
 --card-background-feature  /* green-800 */
 --card-foreground          /* neutral-800 */
 --card-foreground-muted    /* neutral-700 */
---card-border              /* neutral-300 */
---card-border-hover        /* neutral-400 */
+--card-border              /* alpha-3 (14%) */
+--card-border-hover        /* alpha-4 (20%) */
 ```
 
 #### Badge Tokens
 
 ```css
 /* Each variant has: background, foreground, border */
---badge-neutral-*   /* neutral-200, neutral-700, neutral-400 */
+--badge-neutral-*   /* neutral-200, neutral-700, alpha-4 */
 --badge-primary-*   /* green-100, green-700, green-300 */
 --badge-success-*   /* green-100, green-700, green-300 */
 --badge-warning-*   /* orange-100, orange-700, orange-300 */
