@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { EmptyState } from "@/components/ui/empty-state";
 import { MentionTextarea, MentionHighlight } from "@/components/ui/mention-input";
 import type { MentionUser, MentionData } from "@/components/ui/mention-input";
-import { X, ChatCircleDots } from "@phosphor-icons/react";
+import { X } from "@phosphor-icons/react";
+import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 
 /**
@@ -176,14 +176,22 @@ export function CommentsPanel({ seekerId, notes, onClose }: CommentsPanelProps) 
       {/* Comments list - scrollable */}
       <div className="flex-1 overflow-y-auto p-4">
         {notes.length === 0 ? (
-          <EmptyState
-            icon={
-              <ChatCircleDots size={32} weight="light" className="text-[var(--foreground-muted)]" />
-            }
-            title="No Comments Yet"
-            description="Be the first to leave a comment on this candidate."
-            size="sm"
-          />
+          <div className="flex animate-fade-in flex-col items-center justify-center gap-3 py-8">
+            <Image
+              src="/illustrations/comments-empty.svg"
+              alt=""
+              width={120}
+              height={120}
+              className="opacity-80"
+              aria-hidden="true"
+            />
+            <div className="max-w-sm space-y-1.5 text-center">
+              <h3 className="text-foreground-default text-body-sm font-medium">No Comments Yet</h3>
+              <p className="text-caption-sm text-foreground-muted">
+                Be the first to leave a comment on this candidate.
+              </p>
+            </div>
+          </div>
         ) : (
           <div>
             {notes.map((note, index) => (
