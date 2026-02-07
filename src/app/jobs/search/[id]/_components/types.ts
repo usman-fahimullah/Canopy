@@ -51,6 +51,7 @@ export interface JobDetail {
   organization: Organization;
   pathway: Pathway | null;
   recruiter: Recruiter | null;
+  hiringManager: Recruiter | null;
   isSaved: boolean;
   savedNotes: string | null;
 }

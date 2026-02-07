@@ -59,82 +59,115 @@ async function getJobDetail(jobId: string): Promise<{
 
     if (!job || job.status !== "PUBLISHED") return null;
 
-    // Parallel fetches: recruiter, saved status, similar jobs
-    const [recruiterMember, account, candidateSimilarJobs] = await Promise.all([
-      // Recruiter
-      prisma.organizationMember.findFirst({
-        where: {
-          organizationId: job.organizationId,
-          role: { in: ["RECRUITER", "OWNER", "ADMIN"] },
-        },
-        orderBy: [{ role: "asc" }],
-        include: {
-          account: {
-            select: { name: true, email: true, avatar: true },
-          },
-        },
-      }),
-      // Saved status
-      prisma.account.findUnique({
-        where: { supabaseId: user.id },
-        include: {
-          seekerProfile: {
-            include: {
-              savedJobs: {
-                where: { jobId },
-                select: { seekerId: true, jobId: true, notes: true },
+    // Read formConfig for recruiter/hiring manager selection
+    const formConfig = job.formConfig as Record<string, unknown> | null;
+    const showRecruiter = formConfig?.showRecruiter !== false;
+    const selectedRecruiterId =
+      typeof formConfig?.recruiterId === "string" ? formConfig.recruiterId : null;
+    const showHiringManager = formConfig?.showHiringManager === true;
+    const selectedHiringManagerId =
+      typeof formConfig?.hiringManagerId === "string" ? formConfig.hiringManagerId : null;
+
+    // Parallel fetches: recruiter, hiring manager, saved status, similar jobs
+    const [recruiterMember, hiringManagerMember, account, candidateSimilarJobs] = await Promise.all(
+      [
+        // Recruiter: specific member if set, otherwise fallback
+        showRecruiter
+          ? prisma.organizationMember.findFirst({
+              where: selectedRecruiterId
+                ? { id: selectedRecruiterId, organizationId: job.organizationId }
+                : {
+                    organizationId: job.organizationId,
+                    role: { in: ["RECRUITER", "OWNER", "ADMIN"] },
+                  },
+              orderBy: selectedRecruiterId ? undefined : [{ role: "asc" }],
+              include: {
+                account: { select: { name: true, email: true, avatar: true } },
               },
-            },
-          },
-        },
-      }),
-      // Similar jobs candidates
-      (async () => {
-        const orConditions: Array<Record<string, unknown>> = [];
-        if (job.pathwayId) orConditions.push({ pathwayId: job.pathwayId });
-        if (job.climateCategory) orConditions.push({ climateCategory: job.climateCategory });
-        if (job.locationType) orConditions.push({ locationType: job.locationType });
-        if (job.experienceLevel) orConditions.push({ experienceLevel: job.experienceLevel });
-
-        if (orConditions.length === 0) return [];
-
-        return prisma.job.findMany({
-          where: {
-            id: { not: jobId },
-            status: "PUBLISHED",
-            OR: orConditions,
-          },
+            })
+          : Promise.resolve(null),
+        // Hiring Manager: only if enabled and selected
+        showHiringManager && selectedHiringManagerId
+          ? prisma.organizationMember.findFirst({
+              where: {
+                id: selectedHiringManagerId,
+                organizationId: job.organizationId,
+              },
+              include: {
+                account: { select: { name: true, email: true, avatar: true } },
+              },
+            })
+          : Promise.resolve(null),
+        // Saved status
+        prisma.account.findUnique({
+          where: { supabaseId: user.id },
           include: {
-            organization: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-                logo: true,
-                isBipocOwned: true,
-              },
-            },
-            pathway: {
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-                icon: true,
-                color: true,
+            seekerProfile: {
+              include: {
+                savedJobs: {
+                  where: { jobId },
+                  select: { seekerId: true, jobId: true, notes: true },
+                },
               },
             },
           },
-          take: 20,
-          orderBy: { publishedAt: "desc" },
-        });
-      })(),
-    ]);
+        }),
+        // Similar jobs candidates
+        (async () => {
+          const orConditions: Array<Record<string, unknown>> = [];
+          if (job.pathwayId) orConditions.push({ pathwayId: job.pathwayId });
+          if (job.climateCategory) orConditions.push({ climateCategory: job.climateCategory });
+          if (job.locationType) orConditions.push({ locationType: job.locationType });
+          if (job.experienceLevel) orConditions.push({ experienceLevel: job.experienceLevel });
+
+          if (orConditions.length === 0) return [];
+
+          return prisma.job.findMany({
+            where: {
+              id: { not: jobId },
+              status: "PUBLISHED",
+              OR: orConditions,
+            },
+            include: {
+              organization: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  logo: true,
+                  isBipocOwned: true,
+                },
+              },
+              pathway: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  icon: true,
+                  color: true,
+                },
+              },
+            },
+            take: 20,
+            orderBy: { publishedAt: "desc" },
+          });
+        })(),
+      ]
+    );
 
     const recruiter: Recruiter | null = recruiterMember
       ? {
           name: recruiterMember.account.name ?? recruiterMember.account.email,
           title: recruiterMember.title,
           avatar: recruiterMember.account.avatar,
+        }
+      : null;
+
+    const hiringManager: Recruiter | null = hiringManagerMember
+      ? {
+          name: hiringManagerMember.account.name ?? hiringManagerMember.account.email,
+          title: hiringManagerMember.title,
+          avatar: hiringManagerMember.account.avatar,
         }
       : null;
 
@@ -191,6 +224,7 @@ async function getJobDetail(jobId: string): Promise<{
         organization: job.organization,
         pathway: job.pathway,
         recruiter,
+        hiringManager,
         isSaved,
         savedNotes,
       },

@@ -41,6 +41,9 @@ export function JobDetailView({ job, similarJobs }: JobDetailViewProps) {
             {/* Recruiter */}
             <RecruiterCard recruiter={job.recruiter} />
 
+            {/* Hiring Manager */}
+            <RecruiterCard recruiter={job.hiringManager} label="Hiring Manager" />
+
             {/* Highlights */}
             <HighlightsCard job={job} />
 

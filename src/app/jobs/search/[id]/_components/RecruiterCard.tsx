@@ -5,9 +5,10 @@ import type { Recruiter } from "./types";
 
 interface RecruiterCardProps {
   recruiter: Recruiter | null;
+  label?: string;
 }
 
-export function RecruiterCard({ recruiter }: RecruiterCardProps) {
+export function RecruiterCard({ recruiter, label = "Recruiter" }: RecruiterCardProps) {
   if (!recruiter) return null;
 
   return (
@@ -26,7 +27,7 @@ export function RecruiterCard({ recruiter }: RecruiterCardProps) {
         </div>
       </div>
       <Button variant="tertiary" className="w-full">
-        Contact (Recruiter)
+        Contact ({label})
       </Button>
     </div>
   );
