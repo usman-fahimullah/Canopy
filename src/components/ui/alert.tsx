@@ -118,6 +118,19 @@ const iconColorClasses: Record<AlertType, string> = {
   info: "text-[var(--alert-info-icon)]",
 };
 
+// Themed action button classes mapped to variants
+const themedActionButtonClasses: Record<AlertType, string> = {
+  feature:
+    "bg-[var(--alert-feature-action-background)] hover:bg-[var(--alert-feature-action-background-hover)] text-[var(--alert-feature-action-foreground)]",
+  critical:
+    "bg-[var(--alert-critical-action-background)] hover:bg-[var(--alert-critical-action-background-hover)] text-[var(--alert-critical-action-foreground)]",
+  warning:
+    "bg-[var(--alert-warning-action-background)] hover:bg-[var(--alert-warning-action-background-hover)] text-[var(--alert-warning-action-foreground)]",
+  success:
+    "bg-[var(--alert-success-action-background)] hover:bg-[var(--alert-success-action-background-hover)] text-[var(--alert-success-action-foreground)]",
+  info: "bg-[var(--alert-info-action-background)] hover:bg-[var(--alert-info-action-background-hover)] text-[var(--alert-info-action-foreground)]",
+};
+
 export interface AlertProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">, VariantProps<typeof alertVariants> {
   /** The type/severity of the alert */
@@ -260,7 +273,16 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
           {(action || actionLabel) && (
             <>
               {action || (
-                <Button variant="ghost" size="sm" onClick={onAction} className="font-medium">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onAction}
+                  className={cn(
+                    "rounded-lg font-semibold shadow-sm hover:shadow",
+                    "transition-all duration-[var(--duration-fast)]",
+                    themedActionButtonClasses[variant]
+                  )}
+                >
                   {actionLabel}
                 </Button>
               )}

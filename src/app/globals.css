@@ -720,6 +720,27 @@
     --alert-info-border: var(--primitive-neutral-500);
     --alert-info-icon: var(--primitive-neutral-600);
 
+    /* Alert action buttons — themed per variant */
+    --alert-feature-action-background: var(--primitive-blue-500);
+    --alert-feature-action-background-hover: var(--primitive-blue-600);
+    --alert-feature-action-foreground: #ffffff;
+
+    --alert-critical-action-background: var(--primitive-red-500);
+    --alert-critical-action-background-hover: var(--primitive-red-600);
+    --alert-critical-action-foreground: #ffffff;
+
+    --alert-warning-action-background: var(--primitive-orange-500);
+    --alert-warning-action-background-hover: var(--primitive-orange-600);
+    --alert-warning-action-foreground: #ffffff;
+
+    --alert-success-action-background: var(--primitive-green-600);
+    --alert-success-action-background-hover: var(--primitive-green-700);
+    --alert-success-action-foreground: #ffffff;
+
+    --alert-info-action-background: var(--primitive-neutral-700);
+    --alert-info-action-background-hover: var(--primitive-neutral-800);
+    --alert-info-action-foreground: #ffffff;
+
     /* Alert dismiss button */
     --alert-dismiss-background: transparent;
     --alert-dismiss-background-hover: rgba(0, 0, 0, 0.06);
@@ -2137,6 +2158,27 @@
     --alert-info-foreground: var(--primitive-neutral-700);
     --alert-info-border: var(--primitive-neutral-500);
     --alert-info-icon: var(--primitive-neutral-600);
+
+    /* Alert action buttons (Dark Mode) */
+    --alert-feature-action-background: var(--primitive-blue-500);
+    --alert-feature-action-background-hover: var(--primitive-blue-400);
+    --alert-feature-action-foreground: #ffffff;
+
+    --alert-critical-action-background: var(--primitive-red-500);
+    --alert-critical-action-background-hover: var(--primitive-red-400);
+    --alert-critical-action-foreground: #ffffff;
+
+    --alert-warning-action-background: var(--primitive-orange-500);
+    --alert-warning-action-background-hover: var(--primitive-orange-400);
+    --alert-warning-action-foreground: #ffffff;
+
+    --alert-success-action-background: var(--primitive-green-500);
+    --alert-success-action-background-hover: var(--primitive-green-400);
+    --alert-success-action-foreground: #ffffff;
+
+    --alert-info-action-background: var(--primitive-neutral-600);
+    --alert-info-action-background-hover: var(--primitive-neutral-500);
+    --alert-info-action-foreground: #ffffff;
 
     --alert-dismiss-background: transparent;
     --alert-dismiss-background-hover: rgba(255, 255, 255, 0.1);
