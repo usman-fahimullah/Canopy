@@ -9,6 +9,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Link from "@tiptap/extension-link";
 import Highlight from "@tiptap/extension-highlight";
 import { cn } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/utils";
 import {
   Toolbar,
   ToolbarGroup,
@@ -44,6 +45,35 @@ import { Input } from "./input";
 import { Button } from "./button";
 
 /* ============================================
+   Shared prose classes (DRY)
+   ============================================ */
+const PROSE_CLASSES = cn(
+  "prose prose-sm max-w-none focus:outline-none",
+  "prose-headings:font-medium prose-headings:text-[var(--foreground-default)]",
+  "prose-p:text-[var(--foreground-default)] prose-p:leading-relaxed",
+  "prose-strong:font-semibold prose-strong:text-[var(--foreground-default)]",
+  "prose-a:text-[var(--foreground-link)] prose-a:underline hover:prose-a:text-[var(--foreground-link-hover)]",
+  "prose-ul:list-disc prose-ol:list-decimal",
+  "prose-li:text-[var(--foreground-default)] prose-li:marker:text-[var(--foreground-muted)]",
+  "prose-blockquote:border-l-4 prose-blockquote:border-[var(--border-brand)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--foreground-muted)]",
+  "prose-code:bg-[var(--background-muted)] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono",
+  "prose-hr:border-[var(--border-default)]"
+);
+
+const SELECTION_CLASSES = cn(
+  "[&_.ProseMirror_*::selection]:bg-[var(--primitive-blue-100)]",
+  "[&_.ProseMirror_::selection]:bg-[var(--primitive-blue-100)]"
+);
+
+const PLACEHOLDER_CLASSES = cn(
+  "[&_.is-editor-empty]:before:content-[attr(data-placeholder)]",
+  "[&_.is-editor-empty]:before:text-[var(--input-foreground-placeholder)]",
+  "[&_.is-editor-empty]:before:float-left",
+  "[&_.is-editor-empty]:before:h-0",
+  "[&_.is-editor-empty]:before:pointer-events-none"
+);
+
+/* ============================================
    Rich Text Editor Context
    ============================================ */
 interface RichTextEditorContextValue {
@@ -76,6 +106,10 @@ interface RichTextEditorProps {
   autofocus?: boolean;
   minHeight?: string;
   maxHeight?: string;
+  /** Show error styling (red border) */
+  error?: boolean;
+  /** Error message displayed below the editor */
+  errorMessage?: string;
 }
 
 const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
@@ -91,6 +125,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       autofocus = false,
       minHeight = "200px",
       maxHeight,
+      error = false,
+      errorMessage,
     },
     ref
   ) => {
@@ -113,7 +149,8 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         Link.configure({
           openOnClick: false,
           HTMLAttributes: {
-            class: "text-foreground-link underline cursor-pointer hover:text-foreground-link-hover",
+            class:
+              "text-[var(--foreground-link)] underline cursor-pointer hover:text-[var(--foreground-link-hover)]",
           },
         }),
         Highlight.configure({
@@ -129,54 +166,66 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       },
       editorProps: {
         attributes: {
-          class: cn(
-            "prose prose-sm max-w-none focus:outline-none",
-            "prose-headings:font-medium prose-headings:text-foreground-default",
-            "prose-p:text-foreground-default prose-p:leading-relaxed",
-            "prose-strong:font-semibold prose-strong:text-foreground-default",
-            "prose-a:text-foreground-link prose-a:underline hover:prose-a:text-foreground-link-hover",
-            "prose-ul:list-disc prose-ol:list-decimal",
-            "prose-li:text-foreground-default prose-li:marker:text-foreground-muted",
-            "prose-blockquote:border-l-4 prose-blockquote:border-border-brand prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-foreground-muted",
-            "prose-code:bg-background-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono",
-            "prose-hr:border-border-default"
-          ),
+          class: PROSE_CLASSES,
         },
       },
     });
+
+    // Sync content when prop changes externally (e.g. form reset, pre-fill)
+    const isInternalUpdate = React.useRef(false);
+    React.useEffect(() => {
+      if (!editor) return;
+      if (isInternalUpdate.current) {
+        isInternalUpdate.current = false;
+        return;
+      }
+      const currentHtml = editor.getHTML();
+      // Only update if the content actually differs (avoids cursor jump)
+      if (content !== currentHtml) {
+        editor.commands.setContent(content, { emitUpdate: false });
+      }
+    }, [content, editor]);
+
+    // Track internal updates to skip the sync effect
+    React.useEffect(() => {
+      if (!editor) return;
+      const handler = () => {
+        isInternalUpdate.current = true;
+      };
+      editor.on("update", handler);
+      return () => {
+        editor.off("update", handler);
+      };
+    }, [editor]);
 
     return (
       <RichTextEditorContext.Provider value={{ editor }}>
         <div
           ref={ref}
           className={cn(
-            // Figma: bg #faf9f7 (neutral-100), border #f2ede9 (neutral-200), 12px radius
-            "overflow-hidden rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)]",
-            "focus-within:border-[var(--primitive-green-500)]",
-            "transition-all duration-150",
+            "overflow-hidden rounded-xl border bg-[var(--input-background)] transition-all duration-150",
+            error
+              ? "border-[var(--input-border-error)]"
+              : "border-[var(--input-border)] focus-within:border-[var(--input-border-focus)]",
+            "focus-within:ring-2 focus-within:ring-offset-2",
+            error
+              ? "focus-within:ring-[var(--ring-color-error)]"
+              : "focus-within:ring-[var(--ring-color)]",
             className
           )}
         >
-          {/* Toolbar wrapper - Figma: pt-4 (16px) px-4 (16px) pb-2 (8px) */}
-          {children && <div className="px-4 pb-2 pt-4">{children}</div>}
+          {/* Toolbar wrapper */}
+          {children && <div className="px-3 pb-2 pt-3 md:px-4 md:pt-4">{children}</div>}
           <EditorContent
             editor={editor}
             className={cn(
-              // Figma: px-4 (16px) py-3 (12px) for text area
-              "px-4 py-3",
-              "[&_.ProseMirror]:min-h-[var(--min-height)]",
+              "px-3 py-3 md:px-4",
+              "[&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:md:min-h-[var(--min-height)]",
               maxHeight &&
                 "[&_.ProseMirror]:max-h-[var(--max-height)] [&_.ProseMirror]:overflow-y-auto",
-              // Figma: placeholder color #7a7671, font-size 18px, line-height 24px
-              "[&_.ProseMirror]:text-lg [&_.ProseMirror]:leading-6 [&_.ProseMirror]:text-foreground",
-              "[&_.is-editor-empty]:before:content-[attr(data-placeholder)]",
-              "[&_.is-editor-empty]:before:text-[var(--primitive-neutral-500)]",
-              "[&_.is-editor-empty]:before:float-left",
-              "[&_.is-editor-empty]:before:h-0",
-              "[&_.is-editor-empty]:before:pointer-events-none",
-              // Text selection color - blue-100
-              "[&_.ProseMirror_*::selection]:bg-[var(--primitive-blue-100)]",
-              "[&_.ProseMirror_::selection]:bg-[var(--primitive-blue-100)]"
+              "[&_.ProseMirror]:text-base [&_.ProseMirror]:leading-6 [&_.ProseMirror]:text-[var(--foreground-default)] [&_.ProseMirror]:md:text-lg",
+              PLACEHOLDER_CLASSES,
+              SELECTION_CLASSES
             )}
             style={
               {
@@ -186,6 +235,9 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
             }
           />
         </div>
+        {errorMessage && (
+          <p className="mt-1.5 text-caption text-[var(--foreground-error)]">{errorMessage}</p>
+        )}
       </RichTextEditorContext.Provider>
     );
   }
@@ -207,18 +259,18 @@ const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarProps>(
     if (!editor) {
       return (
         <Toolbar ref={ref} aria-label="Formatting toolbar" className={cn("w-full", className)}>
-          <div className="flex animate-pulse items-center gap-6">
+          <div className="flex animate-pulse items-center gap-2 sm:gap-4 md:gap-6">
             {/* Bold/Italic skeleton */}
             <div className="flex gap-2">
-              <div className="h-10 w-10 rounded-lg bg-neutral-200 dark:bg-neutral-700" />
-              <div className="h-10 w-10 rounded-lg bg-neutral-200 dark:bg-neutral-700" />
+              <div className="h-10 w-10 rounded-lg bg-[var(--background-muted)]" />
+              <div className="h-10 w-10 rounded-lg bg-[var(--background-muted)]" />
             </div>
             {/* Decoration skeleton */}
-            <div className="h-10 w-28 rounded-xl bg-neutral-200 dark:bg-neutral-700" />
+            <div className="hidden h-10 w-28 rounded-xl bg-[var(--background-muted)] sm:block" />
             {/* Alignment skeleton */}
-            <div className="h-10 w-28 rounded-xl bg-neutral-200 dark:bg-neutral-700" />
+            <div className="hidden h-10 w-28 rounded-xl bg-[var(--background-muted)] md:block" />
             {/* Lists skeleton */}
-            <div className="h-10 w-20 rounded-xl bg-neutral-200 dark:bg-neutral-700" />
+            <div className="h-10 w-20 rounded-xl bg-[var(--background-muted)]" />
           </div>
         </Toolbar>
       );
@@ -247,8 +299,6 @@ const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarProps>(
       }
     };
 
-    // Full-width toolbar with white background and shadow
-    // Figma: toolbar has gap-6 (24px) between groups, nested in RTE container with pt-4 px-4 pb-2
     return (
       <Toolbar ref={ref} aria-label="Formatting toolbar" className={cn("w-full", className)}>
         {/* Bold & Italic - standalone group with gap-2 (8px) */}
@@ -271,11 +321,12 @@ const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarProps>(
           </ToolbarButton>
         </ToolbarGroup>
 
-        {/* Decoration Toggle Group - none, underline, strikethrough */}
+        {/* Decoration Toggle Group - hidden on smallest screens */}
         <ToolbarToggleGroup
           value={getDecorationValue()}
           onValueChange={handleDecorationChange}
           aria-label="Text decoration"
+          className="hidden sm:flex"
         >
           <ToolbarToggleItem value="none" tooltip="No decoration">
             <Minus />
@@ -288,7 +339,7 @@ const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarProps>(
           </ToolbarToggleItem>
         </ToolbarToggleGroup>
 
-        {/* Text Alignment Group */}
+        {/* Text Alignment Group - hidden on small screens */}
         <ToolbarToggleGroup
           value={
             editor.isActive({ textAlign: "center" })
@@ -301,6 +352,7 @@ const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarProps>(
             editor.chain().focus().setTextAlign(value).run();
           }}
           aria-label="Text alignment"
+          className="hidden md:flex"
         >
           <ToolbarToggleItem value="left" tooltip="Align left">
             <TextAlignLeft />
@@ -335,7 +387,7 @@ const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarProps>(
 
         <ToolbarSpacer />
 
-        {/* Undo/Redo - grouped together */}
+        {/* Undo/Redo */}
         <ToolbarGroup variant="plain" aria-label="History">
           <ToolbarButton
             onClick={() => editor.chain().focus().undo().run()}
@@ -390,7 +442,7 @@ const RichTextExtendedToolbar = React.forwardRef<HTMLDivElement, RichTextExtende
       <Toolbar
         ref={ref}
         aria-label="Formatting toolbar"
-        className={cn("w-full flex-wrap px-4 py-3", className)}
+        className={cn("w-full px-3 py-2 md:px-4 md:py-3", className)}
       >
         {/* Headings */}
         <ToolbarGroup variant="grouped" aria-label="Headings">
@@ -459,7 +511,7 @@ const RichTextExtendedToolbar = React.forwardRef<HTMLDivElement, RichTextExtende
           </ToolbarButton>
         </ToolbarGroup>
 
-        {/* Text Alignment Group */}
+        {/* Text Alignment Group - hidden on small screens */}
         <ToolbarToggleGroup
           value={
             editor.isActive({ textAlign: "center" })
@@ -472,6 +524,7 @@ const RichTextExtendedToolbar = React.forwardRef<HTMLDivElement, RichTextExtende
             editor.chain().focus().setTextAlign(value).run();
           }}
           aria-label="Text alignment"
+          className="hidden md:flex"
         >
           <ToolbarToggleItem value="left" tooltip="Align left">
             <TextAlignLeft />
@@ -504,10 +557,10 @@ const RichTextExtendedToolbar = React.forwardRef<HTMLDivElement, RichTextExtende
           </ToolbarButton>
         </ToolbarGroup>
 
-        <ToolbarSeparator />
+        <ToolbarSeparator className="hidden sm:block" />
 
         {/* Block Elements */}
-        <ToolbarGroup aria-label="Block elements">
+        <ToolbarGroup aria-label="Block elements" className="hidden sm:flex">
           <ToolbarButton
             selected={editor.isActive("blockquote")}
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
@@ -543,7 +596,7 @@ const RichTextExtendedToolbar = React.forwardRef<HTMLDivElement, RichTextExtende
           <PopoverContent className="w-80 p-3" align="start">
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <label className="text-foreground-default text-sm font-medium">URL</label>
+                <label className="text-sm font-medium text-[var(--foreground-default)]">URL</label>
                 <Input
                   type="url"
                   placeholder="https://example.com"
@@ -607,7 +660,8 @@ const RichTextExtendedToolbar = React.forwardRef<HTMLDivElement, RichTextExtende
 RichTextExtendedToolbar.displayName = "RichTextExtendedToolbar";
 
 /* ============================================
-   Read-only Renderer
+   Read-only Renderer (lightweight, no Tiptap)
+   Uses sanitized HTML instead of a full editor instance
    ============================================ */
 interface RichTextRendererProps {
   content: string;
@@ -615,45 +669,24 @@ interface RichTextRendererProps {
 }
 
 const RichTextRenderer: React.FC<RichTextRendererProps> = ({ content, className }) => {
-  const editor = useEditor({
-    immediatelyRender: false, // Disable SSR to avoid hydration mismatches
-    extensions: [
-      StarterKit,
-      Underline,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
-      Link.configure({
-        openOnClick: true,
-        HTMLAttributes: {
-          class: "text-foreground-link underline cursor-pointer hover:text-foreground-link-hover",
-        },
-      }),
-      Highlight,
-    ],
-    content,
-    editable: false,
-  });
+  const sanitized = React.useMemo(() => sanitizeHtml(content), [content]);
 
   return (
-    <EditorContent
-      editor={editor}
+    <div
       className={cn(
         "prose prose-sm max-w-none",
-        "prose-headings:text-foreground-default prose-headings:font-medium",
-        "prose-p:text-foreground-default prose-p:leading-relaxed",
-        "prose-strong:text-foreground-default prose-strong:font-semibold",
-        "prose-a:text-foreground-link prose-a:underline hover:prose-a:text-foreground-link-hover",
+        "prose-headings:font-medium prose-headings:text-[var(--foreground-default)]",
+        "prose-p:leading-relaxed prose-p:text-[var(--foreground-default)]",
+        "prose-strong:font-semibold prose-strong:text-[var(--foreground-default)]",
+        "prose-a:text-[var(--foreground-link)] prose-a:underline hover:prose-a:text-[var(--foreground-link-hover)]",
         "prose-ol:list-decimal prose-ul:list-disc",
-        "prose-li:text-foreground-default prose-li:marker:text-foreground-muted",
-        "prose-blockquote:border-l-4 prose-blockquote:border-border-brand prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-foreground-muted",
-        "prose-code:rounded prose-code:bg-background-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm",
-        "prose-hr:border-border-default",
-        // Text selection color - blue-100
-        "[&_.ProseMirror_*::selection]:bg-[var(--primitive-blue-100)]",
-        "[&_.ProseMirror_::selection]:bg-[var(--primitive-blue-100)]",
+        "prose-li:text-[var(--foreground-default)] prose-li:marker:text-[var(--foreground-muted)]",
+        "prose-blockquote:border-l-4 prose-blockquote:border-[var(--border-brand)] prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-[var(--foreground-muted)]",
+        "prose-code:rounded prose-code:bg-[var(--background-muted)] prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm",
+        "prose-hr:border-[var(--border-default)]",
         className
       )}
+      dangerouslySetInnerHTML={{ __html: sanitized }}
     />
   );
 };
@@ -666,9 +699,19 @@ interface SimpleRichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  /** Show error styling (red border) */
+  error?: boolean;
+  /** Error message displayed below the editor */
+  errorMessage?: string;
 }
 
-function SimpleRichTextEditor({ value, onChange, placeholder }: SimpleRichTextEditorProps) {
+function SimpleRichTextEditor({
+  value,
+  onChange,
+  placeholder,
+  error = false,
+  errorMessage,
+}: SimpleRichTextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -683,7 +726,8 @@ function SimpleRichTextEditor({ value, onChange, placeholder }: SimpleRichTextEd
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-foreground-link underline cursor-pointer hover:text-foreground-link-hover",
+          class:
+            "text-[var(--foreground-link)] underline cursor-pointer hover:text-[var(--foreground-link-hover)]",
         },
       }),
     ],
@@ -693,14 +737,7 @@ function SimpleRichTextEditor({ value, onChange, placeholder }: SimpleRichTextEd
     },
     editorProps: {
       attributes: {
-        class: cn(
-          "prose prose-sm max-w-none focus:outline-none",
-          "prose-headings:font-medium prose-headings:text-foreground-default",
-          "prose-p:text-foreground-default prose-p:leading-relaxed",
-          "prose-strong:font-semibold",
-          "prose-ul:list-disc prose-ol:list-decimal",
-          "prose-li:text-foreground-default"
-        ),
+        class: PROSE_CLASSES,
       },
     },
   });
@@ -708,75 +745,65 @@ function SimpleRichTextEditor({ value, onChange, placeholder }: SimpleRichTextEd
   if (!editor) return null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] transition-all duration-150 focus-within:border-[var(--primitive-green-500)]">
-      {/* Simple toolbar */}
-      <div className="flex items-center gap-1 border-b border-[var(--primitive-neutral-200)] px-3 py-2">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={cn(
-            "rounded-md p-1.5 text-sm transition-colors",
-            editor.isActive("bold")
-              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
-              : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
-          )}
-          title="Bold"
-        >
-          <TextB size={16} weight={editor.isActive("bold") ? "bold" : "regular"} />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={cn(
-            "rounded-md p-1.5 text-sm transition-colors",
-            editor.isActive("italic")
-              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
-              : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
-          )}
-          title="Italic"
-        >
-          <TextItalic size={16} weight={editor.isActive("italic") ? "bold" : "regular"} />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={cn(
-            "rounded-md p-1.5 text-sm transition-colors",
-            editor.isActive("bulletList")
-              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
-              : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
-          )}
-          title="Bullet list"
-        >
-          <ListBullets size={16} weight={editor.isActive("bulletList") ? "bold" : "regular"} />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={cn(
-            "rounded-md p-1.5 text-sm transition-colors",
-            editor.isActive("orderedList")
-              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
-              : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
-          )}
-          title="Numbered list"
-        >
-          <ListNumbers size={16} weight={editor.isActive("orderedList") ? "bold" : "regular"} />
-        </button>
-      </div>
-      <EditorContent
-        editor={editor}
+    <div>
+      <div
         className={cn(
-          "px-4 py-3",
-          "[&_.ProseMirror]:min-h-[120px]",
-          "[&_.ProseMirror]:text-base [&_.ProseMirror]:leading-6 [&_.ProseMirror]:text-foreground",
-          "[&_.is-editor-empty]:before:content-[attr(data-placeholder)]",
-          "[&_.is-editor-empty]:before:text-[var(--primitive-neutral-500)]",
-          "[&_.is-editor-empty]:before:float-left",
-          "[&_.is-editor-empty]:before:h-0",
-          "[&_.is-editor-empty]:before:pointer-events-none"
+          "overflow-hidden rounded-xl border bg-[var(--input-background)] transition-all duration-150",
+          error
+            ? "border-[var(--input-border-error)]"
+            : "border-[var(--input-border)] focus-within:border-[var(--input-border-focus)]",
+          "focus-within:ring-2 focus-within:ring-offset-2",
+          error
+            ? "focus-within:ring-[var(--ring-color-error)]"
+            : "focus-within:ring-[var(--ring-color)]"
         )}
-      />
+      >
+        {/* Simple toolbar using ToolbarButton for consistency */}
+        <div className="flex flex-wrap items-center gap-1 border-b border-[var(--border-default)] px-2 py-1.5 sm:px-3 sm:py-2">
+          <ToolbarButton
+            selected={editor.isActive("bold")}
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            tooltip="Bold"
+            shortcut="⌘B"
+          >
+            <TextB weight={editor.isActive("bold") ? "bold" : "regular"} />
+          </ToolbarButton>
+          <ToolbarButton
+            selected={editor.isActive("italic")}
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            tooltip="Italic"
+            shortcut="⌘I"
+          >
+            <TextItalic weight={editor.isActive("italic") ? "bold" : "regular"} />
+          </ToolbarButton>
+          <ToolbarButton
+            selected={editor.isActive("bulletList")}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            tooltip="Bullet list"
+          >
+            <ListBullets weight={editor.isActive("bulletList") ? "bold" : "regular"} />
+          </ToolbarButton>
+          <ToolbarButton
+            selected={editor.isActive("orderedList")}
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            tooltip="Numbered list"
+          >
+            <ListNumbers weight={editor.isActive("orderedList") ? "bold" : "regular"} />
+          </ToolbarButton>
+        </div>
+        <EditorContent
+          editor={editor}
+          className={cn(
+            "px-3 py-3 md:px-4",
+            "[&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:sm:min-h-[120px]",
+            "[&_.ProseMirror]:text-base [&_.ProseMirror]:leading-6 [&_.ProseMirror]:text-[var(--foreground-default)]",
+            PLACEHOLDER_CLASSES
+          )}
+        />
+      </div>
+      {errorMessage && (
+        <p className="mt-1.5 text-caption text-[var(--foreground-error)]">{errorMessage}</p>
+      )}
     </div>
   );
 }

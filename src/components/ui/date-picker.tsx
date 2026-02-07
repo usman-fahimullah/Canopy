@@ -181,6 +181,7 @@ interface PresetsSidebarProps {
   presets: DatePreset[];
   selectedPreset?: string;
   onPresetClick: (preset: DatePreset) => void;
+  onCustomClick?: () => void;
   showCustomOption?: boolean;
   isCustomSelected?: boolean;
 }
@@ -189,6 +190,7 @@ function PresetsSidebar({
   presets,
   selectedPreset,
   onPresetClick,
+  onCustomClick,
   showCustomOption = true,
   isCustomSelected = false,
 }: PresetsSidebarProps) {
@@ -205,6 +207,8 @@ function PresetsSidebar({
               className={cn(
                 "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
                 "transition-colors duration-150",
+                "focus-visible:outline-none focus-visible:ring-2",
+                "focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                 isSelected
                   ? "bg-[var(--background-info)] text-[var(--foreground-info)]"
                   : "text-[var(--foreground-default)] hover:bg-[var(--background-interactive-hover)]"
@@ -233,9 +237,12 @@ function PresetsSidebar({
         {showCustomOption && (
           <button
             type="button"
+            onClick={onCustomClick}
             className={cn(
               "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
               "transition-colors duration-150",
+              "focus-visible:outline-none focus-visible:ring-2",
+              "focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
               isCustomSelected
                 ? "bg-[var(--background-info)] text-[var(--foreground-info)]"
                 : "text-[var(--foreground-default)] hover:bg-[var(--background-interactive-hover)]"
@@ -290,34 +297,26 @@ function ClearButton({
   onClick,
   label,
 }: {
-  onClick: (e: React.MouseEvent | React.KeyboardEvent) => void;
+  onClick: (e: React.MouseEvent) => void;
   label: string;
 }) {
   return (
-    <span
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick(e);
-        }
-      }}
       className={cn(
         "-mr-2 inline-flex shrink-0 items-center justify-center",
         "h-8 w-8 rounded-lg",
         "text-[var(--foreground-subtle)]",
         "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]",
         "transition-colors duration-150",
-        "cursor-pointer",
         "focus-visible:outline-none focus-visible:ring-2",
         "focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
       )}
       aria-label={label}
     >
       <X size={20} />
-    </span>
+    </button>
   );
 }
 
@@ -362,7 +361,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
       }
     };
 
-    const handleClear = (e: React.MouseEvent | React.KeyboardEvent) => {
+    const handleClear = (e: React.MouseEvent) => {
       e.stopPropagation();
       onChange?.(undefined);
       setSelectedPreset(undefined);
@@ -395,6 +394,8 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
             ref={ref}
             type="button"
             disabled={disabled}
+            aria-haspopup="dialog"
+            aria-expanded={open}
             className={cn(triggerClassName(error, success, disabled), className)}
           >
             <CalendarBlank size={24} className="shrink-0 text-[var(--foreground-subtle)]" />
@@ -411,6 +412,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
         </PopoverTrigger>
 
         <PopoverContent
+          aria-label="Choose a date"
           className="w-auto rounded-2xl border-[var(--border-muted)] bg-[var(--background-default)] p-0 shadow-[var(--shadow-dropdown)]"
           align={popoverAlign}
           side={popoverSide}
@@ -423,6 +425,7 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
                 presets={presets}
                 selectedPreset={selectedPreset}
                 onPresetClick={handlePresetClick}
+                onCustomClick={() => setSelectedPreset(undefined)}
                 isCustomSelected={isCustomSelected}
               />
             )}
@@ -443,6 +446,13 @@ const DatePickerEnhanced = React.forwardRef<HTMLButtonElement, DatePickerEnhance
                 showMonthYearDropdowns
                 className="p-4"
               />
+
+              {/* Footer */}
+              <div className="flex items-center justify-end border-t border-[var(--border-muted)] px-4 py-3">
+                <Button variant="tertiary" size="sm" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
         </PopoverContent>
@@ -501,7 +511,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
       // Don't close on select — user must click Apply
     };
 
-    const handleClear = (e: React.MouseEvent | React.KeyboardEvent) => {
+    const handleClear = (e: React.MouseEvent) => {
       e.stopPropagation();
       onChange?.(undefined);
       setInternalRange(undefined);
@@ -565,6 +575,8 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
             ref={ref}
             type="button"
             disabled={disabled}
+            aria-haspopup="dialog"
+            aria-expanded={open}
             className={cn(triggerClassName(error, success, disabled), className)}
           >
             <CalendarBlank size={24} className="shrink-0 text-[var(--foreground-subtle)]" />
@@ -583,6 +595,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
         </PopoverTrigger>
 
         <PopoverContent
+          aria-label="Choose a date range"
           className="w-auto rounded-2xl border-[var(--border-muted)] bg-[var(--background-default)] p-0 shadow-[var(--shadow-dropdown)]"
           align="start"
           sideOffset={8}
@@ -594,6 +607,7 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
                 presets={presets}
                 selectedPreset={selectedPreset}
                 onPresetClick={handlePresetClick}
+                onCustomClick={() => setSelectedPreset(undefined)}
                 isCustomSelected={isCustomSelected}
               />
             )}
@@ -626,7 +640,6 @@ const DateRangePickerEnhanced = React.forwardRef<HTMLButtonElement, DateRangePic
                   size="sm"
                   onClick={() => {
                     setInternalRange(undefined);
-                    onChange?.(undefined);
                     setSelectedPreset(undefined);
                   }}
                 >

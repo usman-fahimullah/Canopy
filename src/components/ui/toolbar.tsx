@@ -129,13 +129,13 @@ const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
             aria-disabled={disabled}
             onKeyDown={handleKeyDown}
             className={cn(
-              // Figma: white bg, rounded-2xl (16px), shadow 1px 3px 16px rgba(31,29,28,0.08), px-3 (12px) py-2 (8px)
-              "inline-flex items-center",
+              // Figma: white bg, rounded-2xl (16px), shadow, px-3 (12px) py-2 (8px)
+              "inline-flex flex-wrap items-center",
               "px-3 py-2",
               "rounded-2xl bg-[var(--background-default)]",
-              "shadow-[1px_3px_16px_0px_rgba(31,29,28,0.08)]",
-              // Figma: gap-6 (24px) between major sections
-              "gap-6",
+              "shadow-[var(--shadow-card)]",
+              // Figma: gap-6 (24px) between major sections, tighter on mobile
+              "gap-2 sm:gap-4 md:gap-6",
               disabled && "pointer-events-none opacity-50",
               className
             )}

@@ -18,9 +18,9 @@ import { cn } from "@/lib/utils";
  *
  * Variants:
  * - Primary: bg green-800 (#0A3D2C), hover green-700 (#0e5249), text blue-100 (#e5f1ff)
- * - Secondary: bg blue-200 (#cce4ff), hover blue-300 (#99c9ff), text green-800 (#0A3D2C)
- * - Tertiary: bg neutral-200 (#f2ede9), hover neutral-300 (#e5dfd8), text green-800 (#0A3D2C)
- * - Inverse: bg white, hover green-100 (#eaffe0), text green-800 (#0A3D2C)
+ * - Secondary: bg blue-200 (#cce4ff), hover blue-300 (#99c9ff), text black (#000000)
+ * - Tertiary: bg neutral-200 (#f2ede9), hover neutral-300 (#e5dfd8), text black (#000000)
+ * - Inverse: bg white, hover neutral-100 (#faf9f7), text black (#000000)
  * - Destructive: bg red-500 (#ff5c5c), hover red-600 (#e90000), text white
  */
 const buttonVariants = cva(
@@ -40,13 +40,13 @@ const buttonVariants = cva(
         // Primary - Figma: bg #0A3D2C, hover #0e5249, text #e5f1ff
         primary:
           "bg-[var(--button-primary-background)] hover:bg-[var(--button-primary-background-hover)] text-[var(--button-primary-foreground)]",
-        // Secondary - Figma: bg #cce4ff, hover #99c9ff, text #0A3D2C
+        // Secondary - Figma: bg #cce4ff, hover #99c9ff, text #000000
         secondary:
           "bg-[var(--button-secondary-background)] hover:bg-[var(--button-secondary-background-hover)] text-[var(--button-secondary-foreground)]",
-        // Tertiary - Figma: bg #f2ede9, hover #e5dfd8, text #0A3D2C
+        // Tertiary - Figma: bg #f2ede9, hover #e5dfd8, text #000000
         tertiary:
           "bg-[var(--button-tertiary-background)] hover:bg-[var(--button-tertiary-background-hover)] text-[var(--button-tertiary-foreground)]",
-        // Inverse - Figma: bg white, hover #eaffe0, text #0A3D2C
+        // Inverse - Figma: bg white, hover #faf9f7, text #000000
         inverse:
           "bg-[var(--button-inverse-background)] hover:bg-[var(--button-inverse-background-hover)] text-[var(--button-inverse-foreground)]",
         // Destructive - Figma: bg #ff5c5c, hover #e90000, text white
@@ -55,11 +55,13 @@ const buttonVariants = cva(
         // Ghost - transparent background with subtle hover
         ghost:
           "bg-[var(--button-ghost-background)] hover:bg-[var(--button-ghost-background-hover)] text-[var(--button-ghost-foreground)]",
-        // Outline - Border with transparent background
+        // Outline - Border with transparent background; active keeps hover bg
         outline: [
           "bg-[var(--button-outline-background)] text-[var(--button-outline-foreground)]",
           "border border-[var(--button-outline-border)]",
           "hover:bg-[var(--button-outline-background-hover)]",
+          "active:bg-[var(--button-outline-background-hover)]",
+          "data-[selected=true]:bg-[var(--button-outline-background-hover)]",
         ],
         // Link style - transparent background with brand text
         link: "bg-transparent text-foreground-brand hover:bg-background-muted",
@@ -73,8 +75,8 @@ const buttonVariants = cva(
         lg: "h-auto p-4 gap-2 text-lg leading-6",
         // Icon button - default: 12px padding, 24px icon
         icon: "p-3",
-        // Icon button - small: 10px padding, 20px icon
-        "icon-sm": "p-2.5",
+        // Icon button - small: 10px padding, 20px icon, 12px radius per Figma
+        "icon-sm": "p-2.5 rounded-xl",
       },
     },
     defaultVariants: {

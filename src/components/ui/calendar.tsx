@@ -6,6 +6,7 @@ import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import {
   DayPicker,
   getDefaultClassNames,
+  useDayPicker,
   type DayButtonProps as RdpDayButtonProps,
   type DayProps as RdpDayProps,
   type MonthCaptionProps as RdpMonthCaptionProps,
@@ -46,6 +47,20 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
   /** Show month/year dropdown selectors instead of text label */
   showMonthYearDropdowns?: boolean;
 };
+
+// ============================================
+// NAV BUTTON STYLES (shared)
+// ============================================
+
+const navButtonClassName = cn(
+  "inline-flex items-center justify-center",
+  "h-10 w-10 p-0 rounded-2xl",
+  "bg-[var(--calendar-nav-background)]",
+  "hover:bg-[var(--calendar-nav-background-hover)]",
+  "text-[var(--calendar-nav-foreground)]",
+  "transition-colors duration-150",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]"
+);
 
 // ============================================
 // CUSTOM DAY COMPONENT (td wrapper)
@@ -140,9 +155,9 @@ function createCustomDayButton({
           "transition-all duration-150",
           // Text style - 18px per Figma
           "text-lg font-normal leading-6",
-          // Focus ring
+          // Focus ring — no ring-offset for compact calendar cells (Fix 2)
           "focus-visible:outline-none focus-visible:ring-2",
-          "focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+          "focus-visible:ring-[var(--ring-color)]",
 
           // Border radius logic for connected pill shape
           !isInRange && "rounded-2xl",
@@ -274,31 +289,66 @@ function createCustomDayButton({
 }
 
 // ============================================
-// CUSTOM MONTH CAPTION
-// Renders MonthYearSelector dropdown when enabled,
-// default label otherwise
+// CUSTOM MONTH CAPTION (Fix 1)
+// Embeds nav buttons directly inside the caption
+// using useDayPicker() hook for nav state.
+// This fixes broken absolute positioning of nav
+// arrows that occurred when they were rendered
+// in a separate <Nav> component.
 // ============================================
 
 interface CustomMonthCaptionWrapperProps {
   showMonthYearDropdowns: boolean;
-  onCalendarMonthChange?: (date: Date) => void;
 }
 
-function createCustomMonthCaption({
-  showMonthYearDropdowns,
-  onCalendarMonthChange,
-}: CustomMonthCaptionWrapperProps) {
+function createCustomMonthCaption({ showMonthYearDropdowns }: CustomMonthCaptionWrapperProps) {
   function CustomMonthCaption({ calendarMonth, displayIndex, ...divProps }: RdpMonthCaptionProps) {
-    if (showMonthYearDropdowns && onCalendarMonthChange) {
-      return (
-        <div {...divProps}>
-          <MonthYearSelector month={calendarMonth.date} onMonthChange={onCalendarMonthChange} />
-        </div>
-      );
-    }
+    const { previousMonth, nextMonth, goToMonth, dayPickerProps } = useDayPicker();
+    const numberOfMonths = dayPickerProps.numberOfMonths ?? 1;
 
-    // Default caption: month and year text
-    return <div {...divProps} />;
+    const showPrev = displayIndex === 0;
+    const showNext = displayIndex === numberOfMonths - 1;
+
+    return (
+      <div {...divProps}>
+        {/* Previous month button */}
+        {showPrev && (
+          <button
+            type="button"
+            className={cn(navButtonClassName, "absolute left-1")}
+            tabIndex={previousMonth ? undefined : -1}
+            aria-disabled={previousMonth ? undefined : true}
+            aria-label="Go to previous month"
+            onClick={() => {
+              if (previousMonth) goToMonth(previousMonth);
+            }}
+          >
+            <CaretLeft size={24} weight="bold" />
+          </button>
+        )}
+
+        {/* Month/Year selector or default label */}
+        {showMonthYearDropdowns ? (
+          <MonthYearSelector month={calendarMonth.date} onMonthChange={goToMonth} />
+        ) : null}
+
+        {/* Next month button */}
+        {showNext && (
+          <button
+            type="button"
+            className={cn(navButtonClassName, "absolute right-1")}
+            tabIndex={nextMonth ? undefined : -1}
+            aria-disabled={nextMonth ? undefined : true}
+            aria-label="Go to next month"
+            onClick={() => {
+              if (nextMonth) goToMonth(nextMonth);
+            }}
+          >
+            <CaretRight size={24} weight="bold" />
+          </button>
+        )}
+      </div>
+    );
   }
 
   CustomMonthCaption.displayName = "CustomMonthCaption";
@@ -363,18 +413,20 @@ function Calendar({
     [size, dueDates, availableDates, blockedDates]
   );
 
+  // Fix 14: MonthCaption no longer depends on props.onMonthChange
+  // (nav uses useDayPicker().goToMonth internally)
   const CustomMonthCaption = React.useMemo(
     () =>
       createCustomMonthCaption({
         showMonthYearDropdowns,
-        onCalendarMonthChange: props.onMonthChange,
       }),
-    [showMonthYearDropdowns, props.onMonthChange]
+    [showMonthYearDropdowns]
   );
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      hideNavigation
       className={cn("p-3", className)}
       disabled={mergedDisabled.length > 0 ? mergedDisabled : undefined}
       modifiers={mergedModifiers}
@@ -384,7 +436,7 @@ function Calendar({
         months: cn(defaultClassNames.months, "flex flex-col sm:flex-row gap-4"),
         month: cn(defaultClassNames.month, "space-y-4"),
 
-        // Caption / Header
+        // Caption / Header — relative so embedded nav buttons position correctly
         month_caption: cn(
           defaultClassNames.month_caption,
           "flex justify-center pt-1 relative items-center px-10"
@@ -393,32 +445,6 @@ function Calendar({
           defaultClassNames.caption_label,
           "text-lg font-semibold text-[var(--calendar-header-foreground)]"
         ),
-
-        // Navigation
-        nav: cn(defaultClassNames.nav, "flex items-center gap-1"),
-        button_previous: cn(
-          defaultClassNames.button_previous,
-          "absolute left-1",
-          "inline-flex items-center justify-center",
-          "h-10 w-10 p-0 rounded-2xl",
-          "bg-[var(--calendar-nav-background)]",
-          "hover:bg-[var(--calendar-nav-background-hover)]",
-          "text-[var(--calendar-nav-foreground)]",
-          "transition-colors duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
-        ),
-        button_next: cn(
-          defaultClassNames.button_next,
-          "absolute right-1",
-          "inline-flex items-center justify-center",
-          "h-10 w-10 p-0 rounded-2xl",
-          "bg-[var(--calendar-nav-background)]",
-          "hover:bg-[var(--calendar-nav-background-hover)]",
-          "text-[var(--calendar-nav-foreground)]",
-          "transition-colors duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
-        ),
-        chevron: cn(defaultClassNames.chevron, "h-6 w-6"),
 
         // Table / Grid
         month_grid: cn(defaultClassNames.month_grid, "w-full border-collapse"),
@@ -457,12 +483,6 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation }) =>
-          orientation === "left" ? (
-            <CaretLeft size={24} weight="bold" />
-          ) : (
-            <CaretRight size={24} weight="bold" />
-          ),
         Day: CustomDay,
         DayButton: CustomDayButton,
         MonthCaption: CustomMonthCaption,
