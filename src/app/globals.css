@@ -43,11 +43,11 @@
 
     /* Border Alpha Scale — warm neutral-800 (#1F1D1C) at varying opacities
        Composites against any surface, no per-background tokens needed */
-    --border-alpha-1: rgb(31 29 28 / 0.05);
-    --border-alpha-2: rgb(31 29 28 / 0.09);
-    --border-alpha-3: rgb(31 29 28 / 0.14);
-    --border-alpha-4: rgb(31 29 28 / 0.2);
-    --border-alpha-5: rgb(31 29 28 / 0.28);
+    --border-alpha-1: rgb(31 29 28 / 0.03);
+    --border-alpha-2: rgb(31 29 28 / 0.06);
+    --border-alpha-3: rgb(31 29 28 / 0.1);
+    --border-alpha-4: rgb(31 29 28 / 0.14);
+    --border-alpha-5: rgb(31 29 28 / 0.2);
 
     /* Blue Scale (Info) */
     --primitive-blue-100: #e5f1ff;
@@ -1795,11 +1795,11 @@
 
     /* Border Alpha Scale — warm neutral-100 (#FAF9F7) at varying opacities (dark mode)
        Light base color composites against dark surfaces */
-    --border-alpha-1: rgb(250 249 247 / 0.06);
-    --border-alpha-2: rgb(250 249 247 / 0.1);
-    --border-alpha-3: rgb(250 249 247 / 0.16);
-    --border-alpha-4: rgb(250 249 247 / 0.24);
-    --border-alpha-5: rgb(250 249 247 / 0.32);
+    --border-alpha-1: rgb(250 249 247 / 0.04);
+    --border-alpha-2: rgb(250 249 247 / 0.07);
+    --border-alpha-3: rgb(250 249 247 / 0.12);
+    --border-alpha-4: rgb(250 249 247 / 0.18);
+    --border-alpha-5: rgb(250 249 247 / 0.24);
 
     /* Green Scale (Dark mode) */
     --primitive-green-100: #0d2920;
@@ -2512,6 +2512,8 @@
   --surface-bg: var(--primitive-neutral-0);
   --surface-hover: var(--primitive-neutral-100);
   --surface-active: var(--primitive-neutral-200);
+  --background-interactive-hover: var(--primitive-neutral-100);
+  --background-interactive-active: var(--primitive-neutral-200);
 }
 
 [data-surface="1"],
@@ -2519,6 +2521,8 @@
   --surface-bg: var(--primitive-neutral-100);
   --surface-hover: var(--primitive-neutral-200);
   --surface-active: var(--primitive-neutral-300);
+  --background-interactive-hover: var(--primitive-neutral-200);
+  --background-interactive-active: var(--primitive-neutral-300);
 }
 
 [data-surface="2"],
@@ -2526,6 +2530,8 @@
   --surface-bg: var(--primitive-neutral-200);
   --surface-hover: var(--primitive-neutral-300);
   --surface-active: var(--primitive-neutral-400);
+  --background-interactive-hover: var(--primitive-neutral-300);
+  --background-interactive-active: var(--primitive-neutral-400);
 }
 
 [data-surface="3"],
@@ -2533,6 +2539,8 @@
   --surface-bg: var(--primitive-neutral-300);
   --surface-hover: var(--primitive-neutral-400);
   --surface-active: var(--primitive-neutral-500);
+  --background-interactive-hover: var(--primitive-neutral-400);
+  --background-interactive-active: var(--primitive-neutral-500);
 }
 
 @layer base {
