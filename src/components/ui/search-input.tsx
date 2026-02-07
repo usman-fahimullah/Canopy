@@ -426,8 +426,8 @@ const RecentlySearchedItem = React.forwardRef<HTMLDivElement, RecentlySearchedIt
             "shrink-0 rounded-2xl p-2.5",
             "transition-colors duration-fast",
             isHovered
-              ? "bg-[var(--primitive-neutral-200)] hover:bg-[var(--primitive-neutral-300)]"
-              : "bg-[var(--primitive-neutral-0)] hover:bg-[var(--primitive-neutral-200)]"
+              ? "bg-[var(--background-muted)] hover:bg-[var(--background-emphasized)]"
+              : "bg-[var(--background-default)] hover:bg-[var(--background-interactive-hover)]"
           )}
           aria-label={`Remove "${text}" from recent searches`}
         >

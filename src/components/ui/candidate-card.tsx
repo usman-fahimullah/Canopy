@@ -998,7 +998,7 @@ const CandidateReviewers = React.forwardRef<HTMLDivElement, CandidateReviewersPr
           <button
             type="button"
             onClick={() => setIsExpanded(true)}
-            className="-mx-1 flex w-full items-center justify-between rounded-md px-1 py-1.5 transition-colors hover:bg-[var(--background-subtle)]"
+            className="-mx-1 flex w-full items-center justify-between rounded-md px-1 py-1.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
           >
             <div className="flex items-center gap-2">
               <AvatarGroup avatars={avatarData} size="xs" max={4} variant="ring" />

@@ -1,10 +1,9 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 const config: Config = {
   darkMode: "class",
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {
@@ -95,6 +94,10 @@ const config: Config = {
           sunken: "var(--surface-sunken)",
           inset: "var(--surface-inset)",
         },
+
+        // Surface Level System (context-aware hover)
+        "surface-hover": "var(--surface-hover)",
+        "surface-active": "var(--surface-active)",
 
         /* ============================================
            COMPONENT TOKENS
@@ -490,16 +493,43 @@ const config: Config = {
       },
 
       fontSize: {
-        display: ["var(--text-display)", { lineHeight: "var(--leading-display)", fontWeight: "500" }],
-        "heading-lg": ["var(--text-heading-lg)", { lineHeight: "var(--leading-heading-lg)", fontWeight: "500" }],
-        "heading-md": ["var(--text-heading-md)", { lineHeight: "var(--leading-heading-md)", fontWeight: "500" }],
-        "heading-sm": ["var(--text-heading-sm)", { lineHeight: "var(--leading-heading-sm)", fontWeight: "500" }],
-        "body-strong": ["var(--text-body-strong)", { lineHeight: "var(--leading-body-strong)", fontWeight: "700" }],
+        display: [
+          "var(--text-display)",
+          { lineHeight: "var(--leading-display)", fontWeight: "500" },
+        ],
+        "heading-lg": [
+          "var(--text-heading-lg)",
+          { lineHeight: "var(--leading-heading-lg)", fontWeight: "500" },
+        ],
+        "heading-md": [
+          "var(--text-heading-md)",
+          { lineHeight: "var(--leading-heading-md)", fontWeight: "500" },
+        ],
+        "heading-sm": [
+          "var(--text-heading-sm)",
+          { lineHeight: "var(--leading-heading-sm)", fontWeight: "500" },
+        ],
+        "body-strong": [
+          "var(--text-body-strong)",
+          { lineHeight: "var(--leading-body-strong)", fontWeight: "700" },
+        ],
         body: ["var(--text-body)", { lineHeight: "var(--leading-body)", fontWeight: "400" }],
-        "body-sm": ["var(--text-body-sm)", { lineHeight: "var(--leading-body-sm)", fontWeight: "400" }],
-        "caption-strong": ["var(--text-caption-strong)", { lineHeight: "var(--leading-caption-strong)", fontWeight: "700" }],
-        caption: ["var(--text-caption)", { lineHeight: "var(--leading-caption)", fontWeight: "400" }],
-        "caption-sm": ["var(--text-caption-sm)", { lineHeight: "var(--leading-caption-sm)", fontWeight: "400" }],
+        "body-sm": [
+          "var(--text-body-sm)",
+          { lineHeight: "var(--leading-body-sm)", fontWeight: "400" },
+        ],
+        "caption-strong": [
+          "var(--text-caption-strong)",
+          { lineHeight: "var(--leading-caption-strong)", fontWeight: "700" },
+        ],
+        caption: [
+          "var(--text-caption)",
+          { lineHeight: "var(--leading-caption)", fontWeight: "400" },
+        ],
+        "caption-sm": [
+          "var(--text-caption-sm)",
+          { lineHeight: "var(--leading-caption-sm)", fontWeight: "400" },
+        ],
       },
 
       fontWeight: {
@@ -861,9 +891,11 @@ const config: Config = {
 
       animation: {
         // Accordion / Collapsible
-        "accordion-down": "accordion-down var(--duration-moderate) var(--ease-emphasized-decelerate)",
+        "accordion-down":
+          "accordion-down var(--duration-moderate) var(--ease-emphasized-decelerate)",
         "accordion-up": "accordion-up var(--duration-normal) var(--ease-emphasized-accelerate)",
-        "collapsible-down": "collapsible-down var(--duration-moderate) var(--ease-emphasized-decelerate)",
+        "collapsible-down":
+          "collapsible-down var(--duration-moderate) var(--ease-emphasized-decelerate)",
         "collapsible-up": "collapsible-up var(--duration-normal) var(--ease-emphasized-accelerate)",
 
         // Fade
@@ -888,12 +920,18 @@ const config: Config = {
         "slide-out-to-right": "slide-out-to-right var(--duration-fast) var(--ease-in)",
 
         // Drawers
-        "drawer-in-from-right": "drawer-in-from-right var(--duration-slow) var(--ease-emphasized-decelerate)",
-        "drawer-out-to-right": "drawer-out-to-right var(--duration-moderate) var(--ease-emphasized-accelerate)",
-        "drawer-in-from-left": "drawer-in-from-left var(--duration-slow) var(--ease-emphasized-decelerate)",
-        "drawer-out-to-left": "drawer-out-to-left var(--duration-moderate) var(--ease-emphasized-accelerate)",
-        "drawer-in-from-bottom": "drawer-in-from-bottom var(--duration-slow) var(--ease-emphasized-decelerate)",
-        "drawer-out-to-bottom": "drawer-out-to-bottom var(--duration-moderate) var(--ease-emphasized-accelerate)",
+        "drawer-in-from-right":
+          "drawer-in-from-right var(--duration-slow) var(--ease-emphasized-decelerate)",
+        "drawer-out-to-right":
+          "drawer-out-to-right var(--duration-moderate) var(--ease-emphasized-accelerate)",
+        "drawer-in-from-left":
+          "drawer-in-from-left var(--duration-slow) var(--ease-emphasized-decelerate)",
+        "drawer-out-to-left":
+          "drawer-out-to-left var(--duration-moderate) var(--ease-emphasized-accelerate)",
+        "drawer-in-from-bottom":
+          "drawer-in-from-bottom var(--duration-slow) var(--ease-emphasized-decelerate)",
+        "drawer-out-to-bottom":
+          "drawer-out-to-bottom var(--duration-moderate) var(--ease-emphasized-accelerate)",
 
         // Loading states
         spin: "spin 1s var(--ease-linear) infinite",
@@ -934,6 +972,38 @@ const config: Config = {
   plugins: [
     require("@tailwindcss/forms")({ strategy: "class" }),
     require("@tailwindcss/typography"),
+
+    // Surface Level System plugin
+    // Generates .surface-level-{0,1,2,3} utilities that set
+    // background + --surface-hover/active for context-aware hover
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        ".surface-level-0": {
+          "background-color": "var(--primitive-neutral-0)",
+          "--surface-bg": "var(--primitive-neutral-0)",
+          "--surface-hover": "var(--primitive-neutral-100)",
+          "--surface-active": "var(--primitive-neutral-200)",
+        },
+        ".surface-level-1": {
+          "background-color": "var(--primitive-neutral-100)",
+          "--surface-bg": "var(--primitive-neutral-100)",
+          "--surface-hover": "var(--primitive-neutral-200)",
+          "--surface-active": "var(--primitive-neutral-300)",
+        },
+        ".surface-level-2": {
+          "background-color": "var(--primitive-neutral-200)",
+          "--surface-bg": "var(--primitive-neutral-200)",
+          "--surface-hover": "var(--primitive-neutral-300)",
+          "--surface-active": "var(--primitive-neutral-400)",
+        },
+        ".surface-level-3": {
+          "background-color": "var(--primitive-neutral-300)",
+          "--surface-bg": "var(--primitive-neutral-300)",
+          "--surface-hover": "var(--primitive-neutral-400)",
+          "--surface-active": "var(--primitive-neutral-500)",
+        },
+      });
+    }),
   ],
 };
 

@@ -247,7 +247,7 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({
       className={cn(
         "group relative flex items-center gap-3 rounded-xl px-3 py-2.5",
         "dark:bg-neutral-800/50 border border-border-muted bg-neutral-50",
-        "hover:border-border-default hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        "hover:border-border-default hover:bg-[var(--background-interactive-hover)]",
         "transition-all duration-150"
       )}
     >

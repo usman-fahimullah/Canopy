@@ -41,6 +41,14 @@
     --primitive-neutral-800: #1f1d1c;
     --primitive-neutral-900: #000000;
 
+    /* Border Alpha Scale — warm neutral-800 (#1F1D1C) at varying opacities
+       Composites against any surface, no per-background tokens needed */
+    --border-alpha-1: rgb(31 29 28 / 0.05);
+    --border-alpha-2: rgb(31 29 28 / 0.09);
+    --border-alpha-3: rgb(31 29 28 / 0.14);
+    --border-alpha-4: rgb(31 29 28 / 0.2);
+    --border-alpha-5: rgb(31 29 28 / 0.28);
+
     /* Blue Scale (Info) */
     --primitive-blue-100: #e5f1ff;
     --primitive-blue-200: #cce4ff;
@@ -418,8 +426,8 @@
 
     /* Interactive backgrounds */
     --background-interactive-default: var(--primitive-neutral-0);
-    --background-interactive-hover: var(--primitive-neutral-200);
-    --background-interactive-active: var(--primitive-neutral-300);
+    --background-interactive-hover: var(--surface-hover);
+    --background-interactive-active: var(--surface-active);
     --background-interactive-selected: var(--primitive-green-100);
     --background-interactive-disabled: var(--primitive-neutral-200);
 
@@ -460,25 +468,25 @@
 
     /* --- BORDERS --- */
 
-    /* Default borders */
-    --border-default: var(--primitive-neutral-400);
-    --border-muted: var(--primitive-neutral-300);
-    --border-emphasis: var(--primitive-neutral-500);
-    --border-strong: var(--primitive-neutral-600);
+    /* Default borders — warm-neutral alpha system */
+    --border-default: var(--border-alpha-2);
+    --border-muted: var(--border-alpha-1);
+    --border-emphasis: var(--border-alpha-3);
+    --border-strong: var(--border-alpha-4);
     --border-inverse: var(--primitive-neutral-0);
-    --border-disabled: var(--primitive-neutral-300);
+    --border-disabled: var(--border-alpha-1);
 
     /* Brand borders */
     --border-brand: var(--primitive-green-400);
     --border-brand-emphasis: var(--primitive-green-500);
 
-    /* Interactive borders */
-    --border-interactive-default: var(--primitive-neutral-400);
-    --border-interactive-hover: var(--primitive-neutral-500);
+    /* Interactive borders — alpha-based for surface awareness */
+    --border-interactive-default: var(--border-alpha-2);
+    --border-interactive-hover: var(--border-alpha-3);
     --border-interactive-focus: var(--primitive-green-500);
     --border-interactive-active: var(--primitive-green-600);
 
-    /* Status borders */
+    /* Status borders — explicit colors, not alpha */
     --border-success: var(--primitive-green-400);
     --border-warning: var(--primitive-orange-400);
     --border-error: var(--primitive-red-400);
@@ -490,6 +498,12 @@
     --surface-overlay: var(--primitive-neutral-0);
     --surface-sunken: var(--primitive-neutral-100);
     --surface-inset: var(--primitive-neutral-200);
+
+    /* --- SURFACE LEVEL SYSTEM (Context-aware hover) --- */
+    /* Containers set surface level; children inherit these for correct hover */
+    --surface-bg: var(--primitive-neutral-0);
+    --surface-hover: var(--primitive-neutral-100);
+    --surface-active: var(--primitive-neutral-200);
 
     /* ============================================
        TIER 3: COMPONENT TOKENS
@@ -525,7 +539,7 @@
     --button-outline-background-hover: var(--primitive-neutral-200);
     --button-outline-background-active: var(--primitive-neutral-300);
     --button-outline-foreground: var(--primitive-neutral-800);
-    --button-outline-border: var(--primitive-neutral-400);
+    --button-outline-border: var(--border-alpha-4);
 
     --button-ghost-background: transparent;
     --button-ghost-background-hover: var(--primitive-neutral-200);
@@ -559,8 +573,8 @@
     --input-background-disabled: var(--primitive-neutral-200);
     --input-foreground: var(--primitive-neutral-800);
     --input-foreground-placeholder: var(--primitive-neutral-500);
-    --input-border: var(--primitive-neutral-200);
-    --input-border-hover: var(--primitive-neutral-300);
+    --input-border: var(--border-alpha-2);
+    --input-border-hover: var(--border-alpha-3);
     --input-border-focus: var(--primitive-blue-500);
     --input-border-error: var(--primitive-red-500);
     --input-border-success: var(--primitive-green-500);
@@ -569,8 +583,8 @@
     /* Figma spec (33:15667): neutral-100 bg, neutral-200 border, 8px radius */
     --select-background: var(--primitive-neutral-100);
     --select-background-open: var(--primitive-neutral-0);
-    --select-border: var(--primitive-neutral-200);
-    --select-border-hover: var(--primitive-neutral-300);
+    --select-border: var(--border-alpha-2);
+    --select-border-hover: var(--border-alpha-3);
     --select-border-focus: var(--primitive-blue-500);
     --select-border-success: var(--primitive-green-500);
     --select-border-error: var(--primitive-red-500);
@@ -602,13 +616,13 @@
     --card-foreground-muted: var(--primitive-neutral-700);
     --card-foreground-feature: var(--primitive-neutral-0);
     --card-foreground-feature-muted: var(--primitive-neutral-400);
-    --card-border: var(--primitive-neutral-300);
-    --card-border-hover: var(--primitive-neutral-400);
+    --card-border: var(--border-alpha-3);
+    --card-border-hover: var(--border-alpha-4);
 
     /* --- BADGE --- */
     --badge-neutral-background: var(--primitive-neutral-200);
     --badge-neutral-foreground: var(--primitive-neutral-700);
-    --badge-neutral-border: var(--primitive-neutral-400);
+    --badge-neutral-border: var(--border-alpha-4);
 
     --badge-primary-background: var(--primitive-green-100);
     --badge-primary-foreground: var(--primitive-green-700);
@@ -651,8 +665,8 @@
     --table-background-row-stripe: var(--primitive-neutral-100);
     --table-foreground: var(--primitive-neutral-800);
     --table-foreground-header: var(--primitive-neutral-600);
-    --table-border: var(--primitive-neutral-200);
-    --table-border-header: var(--primitive-neutral-300);
+    --table-border: var(--border-alpha-2);
+    --table-border-header: var(--border-alpha-3);
 
     /* --- TOOLTIP --- */
     --tooltip-background: var(--primitive-neutral-800);
@@ -662,16 +676,16 @@
     /* --- POPOVER / DROPDOWN --- */
     --popover-background: var(--primitive-neutral-0);
     --popover-foreground: var(--primitive-neutral-800);
-    --popover-border: var(--primitive-neutral-300);
+    --popover-border: var(--border-alpha-3);
     --popover-item-background-hover: var(--primitive-neutral-200);
     --popover-item-background-active: var(--primitive-neutral-300);
     --popover-item-background-selected: var(--primitive-green-100);
-    --popover-separator: var(--primitive-neutral-300);
+    --popover-separator: var(--border-alpha-3);
 
     /* --- MODAL / DIALOG --- */
     --modal-background: var(--primitive-neutral-0);
     --modal-foreground: var(--primitive-neutral-800);
-    --modal-border: var(--primitive-neutral-300);
+    --modal-border: var(--border-alpha-3);
     --modal-header-background: var(--primitive-neutral-100);
     --modal-footer-background: var(--primitive-neutral-100);
 
@@ -871,7 +885,7 @@
     --tabs-background: transparent;
     --tabs-foreground: var(--primitive-neutral-700);
     --tabs-foreground-active: var(--primitive-neutral-800);
-    --tabs-border: var(--primitive-neutral-300);
+    --tabs-border: var(--border-alpha-3);
     --tabs-indicator: var(--primitive-green-600);
     --tabs-item-background-hover: var(--primitive-neutral-200);
 
@@ -883,7 +897,7 @@
     --switch-background-checked-hover: var(--primitive-blue-400);
     --switch-background-disabled: var(--primitive-neutral-300);
     --switch-thumb: var(--primitive-neutral-0);
-    --switch-thumb-border: var(--primitive-neutral-400);
+    --switch-thumb-border: var(--border-alpha-4);
     --switch-thumb-border-checked: var(--primitive-blue-500);
     --switch-thumb-disabled: var(--primitive-neutral-400);
 
@@ -894,8 +908,8 @@
     --checkbox-background-checked-hover: var(--primitive-blue-400);
     --checkbox-background-disabled: var(--primitive-neutral-200);
     --checkbox-background-error: var(--primitive-red-100);
-    --checkbox-border: var(--primitive-neutral-400);
-    --checkbox-border-hover: var(--primitive-neutral-500);
+    --checkbox-border: var(--border-alpha-4);
+    --checkbox-border-hover: var(--border-alpha-5);
     --checkbox-border-checked: var(--primitive-blue-500);
     --checkbox-border-error: var(--primitive-red-500);
     --checkbox-foreground: #ffffff;
@@ -908,8 +922,8 @@
     --radio-background-checked-hover: var(--primitive-blue-400);
     --radio-background-disabled: var(--primitive-neutral-200);
     --radio-background-error: var(--primitive-red-100);
-    --radio-border: var(--primitive-neutral-400);
-    --radio-border-hover: var(--primitive-neutral-500);
+    --radio-border: var(--border-alpha-4);
+    --radio-border-hover: var(--border-alpha-5);
     --radio-border-checked: var(--primitive-blue-500);
     --radio-border-error: var(--primitive-red-500);
     --radio-dot: #ffffff;
@@ -1091,11 +1105,11 @@
 
     /* Kanban Board */
     --kanban-column-background: var(--primitive-neutral-100);
-    --kanban-column-border: var(--primitive-neutral-300);
+    --kanban-column-border: var(--border-alpha-3);
     --kanban-card-background: var(--primitive-neutral-0);
     --kanban-card-background-hover: var(--primitive-neutral-100);
     --kanban-card-background-dragging: var(--primitive-neutral-0);
-    --kanban-card-border: var(--primitive-neutral-300);
+    --kanban-card-border: var(--border-alpha-3);
     --kanban-card-border-dragging: var(--primitive-green-400);
     --kanban-dropzone-background: var(--primitive-green-100);
     --kanban-dropzone-border: var(--primitive-green-300);
@@ -1148,14 +1162,14 @@
     --avatar-red-border: var(--primitive-red-500);
     --avatar-orange-border: var(--primitive-orange-500);
     --avatar-yellow-border: var(--primitive-yellow-500);
-    --avatar-neutral-border: var(--primitive-neutral-500);
+    --avatar-neutral-border: var(--border-alpha-5);
 
     /* Avatar high contrast variant - for accessibility */
     --avatar-high-contrast-background: var(--primitive-neutral-800);
     --avatar-high-contrast-foreground: var(--primitive-neutral-0);
 
     /* Avatar border and shadow */
-    --avatar-border: var(--primitive-neutral-200);
+    --avatar-border: var(--border-alpha-2);
     --avatar-ring: var(--primitive-green-500);
     --avatar-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --avatar-shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -1232,8 +1246,8 @@
     --chip-disabled-foreground: var(--primitive-neutral-500);
 
     /* Add chip button (dashed border) */
-    --chip-add-border: var(--primitive-neutral-400);
-    --chip-add-border-hover: var(--primitive-neutral-500);
+    --chip-add-border: var(--border-alpha-4);
+    --chip-add-border-hover: var(--border-alpha-5);
     --chip-add-foreground: var(--primitive-neutral-600);
     --chip-add-foreground-hover: var(--primitive-neutral-700);
     --chip-add-background-hover: var(--primitive-neutral-200);
@@ -1687,10 +1701,10 @@
 
     /* Candid sidebar-specific (Figma node 785:6083) */
     --candid-nav-sidebar-item-active: var(--primitive-blue-100);
-    --candid-nav-sidebar-border: var(--primitive-neutral-200);
+    --candid-nav-sidebar-border: var(--border-alpha-2);
 
     /* Candid schedule panel (Figma node 785:6238) */
-    --candid-schedule-border: var(--primitive-neutral-200);
+    --candid-schedule-border: var(--border-alpha-2);
     --candid-schedule-card-today-bg: var(--primitive-green-800);
     --candid-schedule-card-today-text: var(--primitive-blue-100);
     --candid-schedule-card-future-bg: var(--primitive-blue-200);
@@ -1703,7 +1717,7 @@
        ============================================ */
 
     --shell-nav-sidebar-bg: var(--background-subtle);
-    --shell-nav-sidebar-border: var(--primitive-neutral-200);
+    --shell-nav-sidebar-border: var(--border-alpha-2);
     --shell-nav-item-hover: var(--primitive-neutral-200);
     --shell-nav-item-active-bg: var(--primitive-green-100);
     --shell-nav-item-active-text: var(--primitive-green-800);
@@ -1715,7 +1729,7 @@
     --shell-nav-item-radius: var(--radius-lg);
     --shell-page-bg: var(--primitive-neutral-100);
     --shell-header-bg: var(--background-default);
-    --shell-header-border: var(--primitive-neutral-200);
+    --shell-header-border: var(--border-alpha-2);
   }
 
   /* ── Shell overrides: Green Jobs Board (talent) ────────── */
@@ -1778,6 +1792,14 @@
     --primitive-neutral-700: #95a39e;
     --primitive-neutral-800: #c5cec9;
     --primitive-neutral-900: #ffffff;
+
+    /* Border Alpha Scale — warm neutral-100 (#FAF9F7) at varying opacities (dark mode)
+       Light base color composites against dark surfaces */
+    --border-alpha-1: rgb(250 249 247 / 0.06);
+    --border-alpha-2: rgb(250 249 247 / 0.1);
+    --border-alpha-3: rgb(250 249 247 / 0.16);
+    --border-alpha-4: rgb(250 249 247 / 0.24);
+    --border-alpha-5: rgb(250 249 247 / 0.32);
 
     /* Green Scale (Dark mode) */
     --primitive-green-100: #0d2920;
@@ -1852,8 +1874,8 @@
     --background-brand-emphasis: var(--primitive-green-600);
 
     --background-interactive-default: var(--primitive-neutral-100);
-    --background-interactive-hover: var(--primitive-neutral-300);
-    --background-interactive-active: var(--primitive-neutral-400);
+    --background-interactive-hover: var(--surface-hover);
+    --background-interactive-active: var(--surface-active);
     --background-interactive-selected: var(--primitive-green-200);
     --background-interactive-disabled: var(--primitive-neutral-200);
 
@@ -1886,19 +1908,19 @@
     --foreground-link-hover: var(--primitive-blue-600);
     --foreground-link-visited: var(--primitive-purple-500);
 
-    /* Semantic Borders */
-    --border-default: var(--primitive-neutral-400);
-    --border-muted: var(--primitive-neutral-300);
-    --border-emphasis: var(--primitive-neutral-500);
-    --border-strong: var(--primitive-neutral-600);
+    /* Semantic Borders — warm-neutral alpha system (dark mode) */
+    --border-default: var(--border-alpha-2);
+    --border-muted: var(--border-alpha-1);
+    --border-emphasis: var(--border-alpha-3);
+    --border-strong: var(--border-alpha-4);
     --border-inverse: var(--primitive-neutral-800);
-    --border-disabled: var(--primitive-neutral-300);
+    --border-disabled: var(--border-alpha-1);
 
     --border-brand: var(--primitive-green-400);
     --border-brand-emphasis: var(--primitive-green-500);
 
-    --border-interactive-default: var(--primitive-neutral-400);
-    --border-interactive-hover: var(--primitive-neutral-500);
+    --border-interactive-default: var(--border-alpha-2);
+    --border-interactive-hover: var(--border-alpha-3);
     --border-interactive-focus: var(--primitive-green-500);
     --border-interactive-active: var(--primitive-green-600);
 
@@ -1939,7 +1961,7 @@
     --button-outline-background-hover: var(--primitive-neutral-300);
     --button-outline-background-active: var(--primitive-neutral-400);
     --button-outline-foreground: var(--primitive-neutral-800);
-    --button-outline-border: var(--primitive-neutral-500);
+    --button-outline-border: var(--border-alpha-4);
 
     --button-ghost-background: transparent;
     --button-ghost-background-hover: var(--primitive-neutral-300);
@@ -1969,8 +1991,8 @@
     --input-background-disabled: var(--primitive-neutral-300);
     --input-foreground: var(--primitive-neutral-800);
     --input-foreground-placeholder: var(--primitive-neutral-600);
-    --input-border: var(--primitive-neutral-300);
-    --input-border-hover: var(--primitive-neutral-400);
+    --input-border: var(--border-alpha-2);
+    --input-border-hover: var(--border-alpha-3);
     --input-border-focus: var(--primitive-blue-500);
     --input-border-error: var(--primitive-red-500);
     --input-border-success: var(--primitive-green-500);
@@ -1978,8 +2000,8 @@
     /* Select / Dropdown */
     --select-background: var(--primitive-neutral-200);
     --select-background-open: var(--primitive-neutral-100);
-    --select-border: var(--primitive-neutral-300);
-    --select-border-hover: var(--primitive-neutral-400);
+    --select-border: var(--border-alpha-2);
+    --select-border-hover: var(--border-alpha-3);
     --select-border-focus: var(--primitive-blue-500);
     --select-border-success: var(--primitive-green-500);
     --select-border-error: var(--primitive-red-500);
@@ -2009,13 +2031,13 @@
     --card-foreground-muted: var(--primitive-neutral-700);
     --card-foreground-feature: var(--primitive-neutral-800);
     --card-foreground-feature-muted: var(--primitive-neutral-700);
-    --card-border: var(--primitive-neutral-400);
-    --card-border-hover: var(--primitive-neutral-500);
+    --card-border: var(--border-alpha-3);
+    --card-border-hover: var(--border-alpha-4);
 
     /* Badge Components */
     --badge-neutral-background: var(--primitive-neutral-300);
     --badge-neutral-foreground: var(--primitive-neutral-700);
-    --badge-neutral-border: var(--primitive-neutral-500);
+    --badge-neutral-border: var(--border-alpha-4);
 
     --badge-primary-background: var(--primitive-green-200);
     --badge-primary-foreground: var(--primitive-green-600);
@@ -2048,7 +2070,7 @@
     --nav-item-background-hover: var(--primitive-neutral-300);
     --nav-item-background-active: var(--primitive-green-200);
     --nav-item-foreground-active: var(--primitive-green-600);
-    --nav-border: var(--primitive-neutral-400);
+    --nav-border: var(--border-alpha-3);
 
     /* Table */
     --table-background: var(--primitive-neutral-0);
@@ -2058,27 +2080,27 @@
     --table-background-row-stripe: var(--primitive-neutral-100);
     --table-foreground: var(--primitive-neutral-800);
     --table-foreground-header: var(--primitive-neutral-600);
-    --table-border: var(--primitive-neutral-300);
-    --table-border-header: var(--primitive-neutral-400);
+    --table-border: var(--border-alpha-2);
+    --table-border-header: var(--border-alpha-3);
 
     /* Tooltip */
     --tooltip-background: var(--primitive-neutral-300);
     --tooltip-foreground: var(--primitive-neutral-800);
-    --tooltip-border: var(--primitive-neutral-400);
+    --tooltip-border: var(--border-alpha-3);
 
     /* Popover / Dropdown */
     --popover-background: var(--primitive-neutral-100);
     --popover-foreground: var(--primitive-neutral-800);
-    --popover-border: var(--primitive-neutral-400);
+    --popover-border: var(--border-alpha-3);
     --popover-item-background-hover: var(--primitive-neutral-300);
     --popover-item-background-active: var(--primitive-neutral-400);
     --popover-item-background-selected: var(--primitive-green-200);
-    --popover-separator: var(--primitive-neutral-400);
+    --popover-separator: var(--border-alpha-3);
 
     /* Modal / Dialog */
     --modal-background: var(--primitive-neutral-100);
     --modal-foreground: var(--primitive-neutral-800);
-    --modal-border: var(--primitive-neutral-400);
+    --modal-border: var(--border-alpha-3);
     --modal-header-background: var(--primitive-neutral-200);
     --modal-footer-background: var(--primitive-neutral-200);
 
@@ -2179,7 +2201,7 @@
     --tabs-background: transparent;
     --tabs-foreground: var(--primitive-neutral-700);
     --tabs-foreground-active: var(--primitive-neutral-800);
-    --tabs-border: var(--primitive-neutral-400);
+    --tabs-border: var(--border-alpha-3);
     --tabs-indicator: var(--primitive-green-500);
     --tabs-item-background-hover: var(--primitive-neutral-300);
 
@@ -2190,7 +2212,7 @@
     --switch-background-checked-hover: var(--primitive-blue-400);
     --switch-background-disabled: var(--primitive-neutral-300);
     --switch-thumb: var(--primitive-neutral-0);
-    --switch-thumb-border: var(--primitive-neutral-500);
+    --switch-thumb-border: var(--border-alpha-4);
     --switch-thumb-border-checked: var(--primitive-blue-500);
     --switch-thumb-disabled: var(--primitive-neutral-600);
 
@@ -2201,8 +2223,8 @@
     --checkbox-background-checked-hover: var(--primitive-blue-400);
     --checkbox-background-disabled: var(--primitive-neutral-300);
     --checkbox-background-error: var(--primitive-red-200);
-    --checkbox-border: var(--primitive-neutral-500);
-    --checkbox-border-hover: var(--primitive-neutral-600);
+    --checkbox-border: var(--border-alpha-4);
+    --checkbox-border-hover: var(--border-alpha-5);
     --checkbox-border-checked: var(--primitive-blue-500);
     --checkbox-border-error: var(--primitive-red-500);
     --checkbox-foreground: #ffffff;
@@ -2215,8 +2237,8 @@
     --radio-background-checked-hover: var(--primitive-blue-400);
     --radio-background-disabled: var(--primitive-neutral-300);
     --radio-background-error: var(--primitive-red-200);
-    --radio-border: var(--primitive-neutral-500);
-    --radio-border-hover: var(--primitive-neutral-600);
+    --radio-border: var(--border-alpha-4);
+    --radio-border-hover: var(--border-alpha-5);
     --radio-border-checked: var(--primitive-blue-500);
     --radio-border-error: var(--primitive-red-500);
     --radio-dot: #ffffff;
@@ -2379,11 +2401,11 @@
 
     /* Kanban */
     --kanban-column-background: var(--primitive-neutral-100);
-    --kanban-column-border: var(--primitive-neutral-300);
+    --kanban-column-border: var(--border-alpha-3);
     --kanban-card-background: var(--primitive-neutral-200);
     --kanban-card-background-hover: var(--primitive-neutral-300);
     --kanban-card-background-dragging: var(--primitive-neutral-200);
-    --kanban-card-border: var(--primitive-neutral-400);
+    --kanban-card-border: var(--border-alpha-3);
     --kanban-card-border-dragging: var(--primitive-green-400);
     --kanban-dropzone-background: var(--primitive-green-200);
     --kanban-dropzone-border: var(--primitive-green-400);
@@ -2441,7 +2463,7 @@
       --background-muted: var(--primitive-neutral-200);
       --foreground-default: var(--primitive-neutral-800);
       --foreground-muted: var(--primitive-neutral-700);
-      --border-default: var(--primitive-neutral-400);
+      --border-default: var(--border-alpha-2);
       --surface-default: var(--primitive-neutral-100);
     }
   }
@@ -2470,6 +2492,47 @@
       scroll-behavior: auto !important;
     }
   }
+}
+
+/* ============================================
+   SURFACE LEVEL SYSTEM
+   Context-aware hover colors.
+   Containers set their surface level;
+   children inherit --surface-hover and --surface-active
+   for correct "one step darker" hover behavior.
+
+   Usage:
+     <div class="surface-level-1">
+       <button class="hover:bg-surface-hover">Hovers to neutral-200</button>
+     </div>
+   ============================================ */
+
+[data-surface="0"],
+.surface-level-0 {
+  --surface-bg: var(--primitive-neutral-0);
+  --surface-hover: var(--primitive-neutral-100);
+  --surface-active: var(--primitive-neutral-200);
+}
+
+[data-surface="1"],
+.surface-level-1 {
+  --surface-bg: var(--primitive-neutral-100);
+  --surface-hover: var(--primitive-neutral-200);
+  --surface-active: var(--primitive-neutral-300);
+}
+
+[data-surface="2"],
+.surface-level-2 {
+  --surface-bg: var(--primitive-neutral-200);
+  --surface-hover: var(--primitive-neutral-300);
+  --surface-active: var(--primitive-neutral-400);
+}
+
+[data-surface="3"],
+.surface-level-3 {
+  --surface-bg: var(--primitive-neutral-300);
+  --surface-hover: var(--primitive-neutral-400);
+  --surface-active: var(--primitive-neutral-500);
 }
 
 @layer base {

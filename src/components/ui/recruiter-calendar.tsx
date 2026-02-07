@@ -169,7 +169,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
       <div className="mb-3 flex items-center justify-between">
         <button
           onClick={() => setViewMonth(subMonths(viewMonth, 1))}
-          className="rounded p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
+          className="rounded p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)]"
         >
           <CaretLeft size={14} weight="bold" />
         </button>
@@ -178,7 +178,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
         </span>
         <button
           onClick={() => setViewMonth(addMonths(viewMonth, 1))}
-          className="rounded p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
+          className="rounded p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)]"
         >
           <CaretRight size={14} weight="bold" />
         </button>
@@ -210,7 +210,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
               onClick={() => onDateSelect(day)}
               className={cn(
                 "relative flex h-7 w-7 items-center justify-center rounded text-xs transition-all",
-                "hover:bg-[var(--primitive-neutral-200)]",
+                "hover:bg-[var(--background-interactive-hover)]",
                 isSelected &&
                   "bg-[var(--primitive-green-600)] text-white hover:bg-[var(--primitive-green-700)]",
                 !isSelected && isTodayDate && "font-bold text-[var(--primitive-green-700)]",
@@ -456,7 +456,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
               {calendars.map((cal) => (
                 <label
                   key={cal.id}
-                  className="flex cursor-pointer items-center gap-2 rounded p-1.5 transition-colors hover:bg-[var(--primitive-neutral-100)]"
+                  className="flex cursor-pointer items-center gap-2 rounded p-1.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
                 >
                   <input
                     type="checkbox"
@@ -493,7 +493,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
             {filters.map((filter) => (
               <label
                 key={filter.id}
-                className="flex cursor-pointer items-center gap-2 rounded p-1.5 transition-colors hover:bg-[var(--primitive-neutral-100)]"
+                className="flex cursor-pointer items-center gap-2 rounded p-1.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
               >
                 <input
                   type="checkbox"
@@ -606,14 +606,14 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={() => navigatePeriod("prev")}
-            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
             aria-label="Previous"
           >
             <CaretLeft size={16} weight="bold" />
           </button>
           <button
             onClick={() => navigatePeriod("next")}
-            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
             aria-label="Next"
           >
             <CaretRight size={16} weight="bold" />
@@ -647,7 +647,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         {/* Search */}
         <button
           onClick={onSearch}
-          className="rounded p-2 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
+          className="rounded p-2 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
           aria-label="Search"
         >
           <MagnifyingGlass size={18} />
@@ -1002,7 +1002,7 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
               onClick={() => onDayClick?.(day)}
               className={cn(
                 "min-h-24 border-b border-r border-[var(--primitive-neutral-200)] p-1",
-                "cursor-pointer transition-colors hover:bg-[var(--primitive-neutral-50)]",
+                "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]",
                 !isCurrentMonth && "bg-[var(--primitive-neutral-50)] opacity-60"
               )}
             >
@@ -1232,7 +1232,7 @@ const RecruiterCalendarView: React.FC<RecruiterCalendarViewProps> = ({
               <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
               <button
                 onClick={() => setShowShortcuts(false)}
-                className="rounded p-1 transition-colors hover:bg-[var(--primitive-neutral-200)]"
+                className="rounded p-1 transition-colors hover:bg-[var(--background-interactive-hover)]"
               >
                 <X size={18} />
               </button>

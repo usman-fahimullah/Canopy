@@ -143,7 +143,7 @@ function AdminCoachesContent() {
             className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               selectedStatus === tab.value
                 ? "bg-[var(--primitive-green-600)] text-white"
-                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-50)]"
+                : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)] text-[var(--primitive-neutral-700)] hover:bg-[var(--background-interactive-hover)]"
             }`}
           >
             {tab.label}

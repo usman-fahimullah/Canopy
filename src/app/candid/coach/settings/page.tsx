@@ -738,7 +738,7 @@ export default function CoachSettingsPage() {
                   className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors ${
                     isActive
                       ? "bg-[var(--primitive-yellow-100)] text-[var(--primitive-green-800)]"
-                      : "text-foreground-muted hover:bg-[var(--primitive-neutral-100)]"
+                      : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
                   }`}
                 >
                   <Icon size={20} weight={isActive ? "fill" : "regular"} />

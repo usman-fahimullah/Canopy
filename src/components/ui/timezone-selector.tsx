@@ -24,7 +24,7 @@ export const TimezoneSelector: React.FC<TimezoneSelectorProps> = ({
     <div className={cn("flex items-center gap-2", className)}>
       <GlobeHemisphereWest className="h-4 w-4 text-foreground-muted" />
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-8 w-auto border-0 bg-transparent px-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800">
+        <SelectTrigger className="h-8 w-auto border-0 bg-transparent px-2 text-sm hover:bg-[var(--background-interactive-hover)]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

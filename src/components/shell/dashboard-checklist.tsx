@@ -138,7 +138,7 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
         <button
           type="button"
           onClick={handleToggleCollapse}
-          className="shrink-0 rounded-[var(--radius-2xl)] bg-[var(--card-background)] p-2.5 transition-colors hover:bg-[var(--background-subtle)]"
+          className="shrink-0 rounded-[var(--radius-2xl)] bg-[var(--card-background)] p-2.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
           aria-label={isCollapsed ? "Expand checklist" : "Collapse checklist"}
         >
           <CaretIcon size={20} className="text-[var(--foreground-default)]" />
@@ -166,7 +166,7 @@ export function DashboardChecklist({ shell, className }: DashboardChecklistProps
               onClick={() => handleItemClick(item.id)}
               className={cn(
                 "flex items-center gap-3 border-b border-[var(--border-muted)] px-6 py-6 transition-colors",
-                !item.completed && "hover:bg-[var(--background-subtle)]"
+                !item.completed && "hover:bg-[var(--background-interactive-hover)]"
               )}
             >
               {/* Status icon */}

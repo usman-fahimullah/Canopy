@@ -323,7 +323,7 @@ export default function RecruiterCalendarDemoPage() {
                 </div>
                 <button
                   onClick={() => setShowEventModal(false)}
-                  className="rounded p-1 transition-colors hover:bg-[var(--primitive-neutral-200)]"
+                  className="rounded p-1 transition-colors hover:bg-[var(--background-interactive-hover)]"
                 >
                   <span className="sr-only">Close</span>×
                 </button>

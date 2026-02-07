@@ -210,7 +210,7 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="-ml-1 flex items-center justify-center rounded-lg p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--foreground-default)]"
+              className="-ml-1 flex items-center justify-center rounded-lg p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
               aria-label="Close modal"
             >
               <X size={20} weight="bold" />
@@ -442,7 +442,7 @@ export const InterviewSchedulingModal: React.FC<InterviewSchedulingModalProps> =
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="rounded-lg px-3 py-1.5 text-[13px] text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--foreground-default)]"
+                className="rounded-lg px-3 py-1.5 text-[13px] text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
               >
                 Cancel
               </button>

@@ -52,7 +52,7 @@ export function SigningMethodSelector({
             className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
               isSelected
                 ? "border-[var(--border-brand)] bg-[var(--background-brand-subtle)]"
-                : "border-[var(--border-default)] hover:bg-[var(--background-subtle)]"
+                : "border-[var(--border-default)] hover:bg-[var(--background-interactive-hover)]"
             }`}
           >
             <input
@@ -68,9 +68,7 @@ export function SigningMethodSelector({
               <p className="text-body-sm font-semibold text-[var(--foreground-default)]">
                 {option.label}
               </p>
-              <p className="text-caption text-[var(--foreground-muted)]">
-                {option.description}
-              </p>
+              <p className="text-caption text-[var(--foreground-muted)]">{option.description}</p>
             </div>
           </label>
         );
@@ -84,7 +82,9 @@ export function SigningMethodSelector({
             type="url"
             placeholder="https://docusign.com/..."
             value={signingLink || ""}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSigningLinkChange(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onSigningLinkChange(e.target.value)
+            }
           />
         </div>
       )}

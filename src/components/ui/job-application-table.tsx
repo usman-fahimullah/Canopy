@@ -295,7 +295,7 @@ function SectionHeader({ section, count, isOpen, onToggle }: SectionHeaderProps)
     <div className="flex items-center gap-3 bg-[var(--primitive-neutral-0)] px-3 pb-2 pt-3">
       <button
         onClick={onToggle}
-        className="flex items-center justify-center rounded-[var(--radius-md)] p-2.5 transition-colors hover:bg-[var(--primitive-neutral-200)]"
+        className="flex items-center justify-center rounded-[var(--radius-md)] p-2.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
         aria-expanded={isOpen}
         aria-label={isOpen ? "Collapse section" : "Expand section"}
       >
@@ -338,7 +338,7 @@ function TableHeaderRow({ onSort }: TableHeaderRowProps) {
         {isSortable && (
           <button
             onClick={() => onSort?.(column, "asc")}
-            className="rounded-full p-2 transition-colors hover:bg-[var(--primitive-neutral-200)]"
+            className="rounded-full p-2 transition-colors hover:bg-[var(--background-interactive-hover)]"
           >
             <CaretDown size={24} className="text-[var(--primitive-neutral-800)]" />
           </button>
@@ -461,7 +461,7 @@ function StagePill({ currentStage, onStageChange }: StagePillProps) {
                   itemState === "selected" && stageColorConfig.selectedBg,
                   itemState === "past" && "bg-[var(--primitive-neutral-100)]",
                   itemState === "default" &&
-                    "bg-[var(--primitive-neutral-0)] hover:bg-[var(--primitive-neutral-100)]"
+                    "bg-[var(--primitive-neutral-0)] hover:bg-[var(--background-interactive-hover)]"
                 )}
               >
                 {/* Icon box */}
@@ -522,7 +522,7 @@ function EmojiReactionButton({ reaction = "none", onReactionChange }: EmojiReact
         <button
           className={cn(
             "flex w-[100px] items-center justify-center gap-1 rounded-full border border-[var(--primitive-neutral-300)] px-2 py-1",
-            "cursor-pointer transition-colors hover:bg-[var(--primitive-neutral-100)]"
+            "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]"
           )}
         >
           {currentEmoji ? (

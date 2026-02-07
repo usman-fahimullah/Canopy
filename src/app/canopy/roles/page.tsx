@@ -194,7 +194,7 @@ function CreateTemplateCard({ onCreateTemplate }: { onCreateTemplate: () => void
     <button type="button" onClick={onCreateTemplate} className="text-left">
       <Card
         variant="flat"
-        className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 border border-dashed border-[var(--border-muted)] bg-[var(--background-muted)] transition-colors hover:border-[var(--border-default)] hover:bg-[var(--background-subtle)]"
+        className="flex min-h-[180px] cursor-pointer flex-col items-center justify-center gap-3 border border-dashed border-[var(--border-muted)] bg-[var(--background-muted)] transition-colors hover:border-[var(--border-default)] hover:bg-[var(--background-interactive-hover)]"
       >
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background-emphasized)]">
           <ListPlus size={20} weight="bold" className="text-[var(--foreground-muted)]" />

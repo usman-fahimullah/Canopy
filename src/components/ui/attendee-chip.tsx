@@ -49,7 +49,7 @@ const AttendeeChip: React.FC<AttendeeChipProps> = ({
         <button
           type="button"
           onClick={onRemove}
-          className="ml-0.5 flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-300)] hover:text-[var(--foreground-default)]"
+          className="ml-0.5 flex min-h-[24px] min-w-[24px] items-center justify-center rounded-full p-1 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
           aria-label={`Remove ${attendee.name}`}
         >
           <X size={12} weight="bold" />

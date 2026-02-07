@@ -188,7 +188,7 @@ export default function CalendarPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={previousWeek}
-              className="inline-flex items-center justify-center rounded-lg border border-[var(--border-muted)] p-2 hover:bg-[var(--background-muted)]"
+              className="inline-flex items-center justify-center rounded-lg border border-[var(--border-muted)] p-2 hover:bg-[var(--background-interactive-hover)]"
               aria-label="Previous week"
             >
               <CaretLeft size={20} />
@@ -202,7 +202,7 @@ export default function CalendarPage() {
 
             <button
               onClick={nextWeek}
-              className="inline-flex items-center justify-center rounded-lg border border-[var(--border-muted)] p-2 hover:bg-[var(--background-muted)]"
+              className="inline-flex items-center justify-center rounded-lg border border-[var(--border-muted)] p-2 hover:bg-[var(--background-interactive-hover)]"
               aria-label="Next week"
             >
               <CaretRight size={20} />
@@ -218,10 +218,7 @@ export default function CalendarPage() {
               </Button>
             </DropdownTrigger>
             <DropdownContent align="end">
-              <DropdownItem
-                value="all"
-                onSelect={() => setSelectedInterviewerId(null)}
-              >
+              <DropdownItem value="all" onSelect={() => setSelectedInterviewerId(null)}>
                 All Interviewers
               </DropdownItem>
               {interviewers.map((interviewer) => (
@@ -247,9 +244,7 @@ export default function CalendarPage() {
         {/* Error State */}
         {error && !isLoading && (
           <div className="rounded-lg border border-[var(--border-error)] bg-[var(--background-error)] p-4">
-            <p className="text-body text-[var(--foreground-error)]">
-              {error}. Please try again.
-            </p>
+            <p className="text-body text-[var(--foreground-error)]">{error}. Please try again.</p>
           </div>
         )}
 
@@ -274,7 +269,9 @@ export default function CalendarPage() {
                     <p className="text-caption-strong text-[var(--foreground-default)]">
                       {format(day, "EEE")}
                     </p>
-                    <p className={`text-caption ${isDayToday ? "text-[var(--foreground-brand-emphasis)] font-semibold" : "text-[var(--foreground-muted)]"}`}>
+                    <p
+                      className={`text-caption ${isDayToday ? "font-semibold text-[var(--foreground-brand-emphasis)]" : "text-[var(--foreground-muted)]"}`}
+                    >
                       {format(day, "d")}
                     </p>
                   </div>
@@ -286,14 +283,17 @@ export default function CalendarPage() {
                         return (
                           <Card
                             key={interview.id}
-                            className="p-2 cursor-pointer hover:shadow-[var(--shadow-card-hover)]"
+                            className="cursor-pointer p-2 hover:shadow-[var(--shadow-card-hover)]"
                           >
                             <div className="space-y-1.5">
                               <div className="flex items-start justify-between gap-2">
-                                <p className="flex-1 text-caption-strong text-[var(--foreground-default)] line-clamp-2">
+                                <p className="line-clamp-2 flex-1 text-caption-strong text-[var(--foreground-default)]">
                                   {interview.candidateName}
                                 </p>
-                                <Badge variant={getInterviewTypeBadgeVariant(interview.type)} className="flex-shrink-0">
+                                <Badge
+                                  variant={getInterviewTypeBadgeVariant(interview.type)}
+                                  className="flex-shrink-0"
+                                >
                                   {getInterviewTypeIcon(interview.type)}
                                 </Badge>
                               </div>

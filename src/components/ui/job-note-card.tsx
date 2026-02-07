@@ -32,10 +32,7 @@ export type JobNoteType =
   | "growth-mindset";
 
 /** Color configuration for each note type */
-const noteTypeConfig: Record<
-  JobNoteType,
-  { bg: string; tagBg: string; label: string }
-> = {
+const noteTypeConfig: Record<JobNoteType, { bg: string; tagBg: string; label: string }> = {
   "building-paths": {
     bg: "bg-[var(--primitive-green-200)]",
     tagBg: "bg-[var(--primitive-green-500)]",
@@ -69,11 +66,7 @@ const noteTypeConfig: Record<
 };
 
 const jobNoteCardVariants = cva(
-  [
-    "relative flex flex-col",
-    "rounded-[12px]",
-    "transition-all duration-200 ease-out",
-  ],
+  ["relative flex flex-col", "rounded-[12px]", "transition-all duration-200 ease-out"],
   {
     variants: {
       size: {
@@ -98,8 +91,7 @@ const jobNoteCardVariants = cva(
 );
 
 export interface JobNoteCardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof jobNoteCardVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof jobNoteCardVariants> {
   /** Type of note - determines background color */
   type: JobNoteType;
   /** Title/content of the note */
@@ -163,16 +155,16 @@ const JobNoteCard = React.forwardRef<HTMLDivElement, JobNoteCardProps>(
         {...props}
       >
         {/* Top Section: Tag + Title */}
-        <div className={cn("flex flex-col flex-1", isCompact ? "gap-2" : "gap-1")}>
+        <div className={cn("flex flex-1 flex-col", isCompact ? "gap-2" : "gap-1")}>
           {/* Note Type Tag */}
           <div
             className={cn(
-              "inline-flex self-start items-center",
-              "px-2 py-1 rounded-lg",
+              "inline-flex items-center self-start",
+              "rounded-lg px-2 py-1",
               config.tagBg
             )}
           >
-            <span className="text-sm font-bold text-white leading-5">
+            <span className="text-sm font-bold leading-5 text-white">
               {tagLabel || config.label}
             </span>
           </div>
@@ -191,10 +183,10 @@ const JobNoteCard = React.forwardRef<HTMLDivElement, JobNoteCardProps>(
         </div>
 
         {/* Bottom Section: Author + Action Button */}
-        <div className="flex items-end justify-between mt-auto">
+        <div className="mt-auto flex items-end justify-between">
           {/* Author */}
           {authorName && (
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               <Avatar
                 size="sm"
                 src={authorAvatar}
@@ -202,7 +194,7 @@ const JobNoteCard = React.forwardRef<HTMLDivElement, JobNoteCardProps>(
                 alt={authorName}
                 className="shrink-0 border-[var(--primitive-neutral-200)]"
               />
-              <span className="text-sm text-[var(--primitive-neutral-800)] truncate">
+              <span className="truncate text-sm text-[var(--primitive-neutral-800)]">
                 {authorName}
               </span>
             </div>
@@ -218,10 +210,10 @@ const JobNoteCard = React.forwardRef<HTMLDivElement, JobNoteCardProps>(
               }}
               className={cn(
                 "flex items-center justify-center",
-                "p-3 rounded-2xl",
+                "rounded-2xl p-3",
                 "bg-[var(--primitive-neutral-200)]",
                 "transition-colors duration-150",
-                "hover:bg-[var(--primitive-neutral-300)]",
+                "hover:bg-[var(--background-interactive-hover)]",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
                 // Move to end if no author
                 !authorName && "ml-auto"

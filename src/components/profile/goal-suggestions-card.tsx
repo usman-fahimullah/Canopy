@@ -91,7 +91,7 @@ function SuggestionItem({
       {/* Dismiss button */}
       <button
         onClick={onDismiss}
-        className="absolute right-2 top-2 rounded p-1 text-[var(--foreground-subtle)] hover:bg-[var(--background-muted)] hover:text-[var(--foreground-muted)]"
+        className="absolute right-2 top-2 rounded p-1 text-[var(--foreground-subtle)] hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-muted)]"
         aria-label="Dismiss suggestion"
       >
         <X size={14} />

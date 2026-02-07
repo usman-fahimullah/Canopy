@@ -336,7 +336,7 @@ export default function CoachApplicationPage() {
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                     formData.expertise.includes(option)
                       ? "bg-[var(--primitive-green-600)] text-white"
-                      : "bg-[var(--primitive-neutral-100)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-200)]"
+                      : "bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
                   }`}
                 >
                   {option}
@@ -358,7 +358,7 @@ export default function CoachApplicationPage() {
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                     formData.sectors.includes(option)
                       ? "bg-[var(--primitive-green-600)] text-white"
-                      : "bg-[var(--primitive-neutral-100)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-200)]"
+                      : "bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
                   }`}
                 >
                   {option}

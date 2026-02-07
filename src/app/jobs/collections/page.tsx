@@ -263,7 +263,7 @@ export default function CollectionsPage() {
                 <Link
                   key={pathway}
                   href={`/jobs/search?pathway=${pathway}`}
-                  className="flex shrink-0 flex-col items-center gap-2 rounded-xl p-3 transition-colors hover:bg-[var(--background-subtle)]"
+                  className="flex shrink-0 flex-col items-center gap-2 rounded-xl p-3 transition-colors hover:bg-[var(--background-interactive-hover)]"
                 >
                   <div className="rounded-xl bg-[var(--background-subtle)] p-3">
                     <PathwayIllustration pathway={pathway} size="lg" />

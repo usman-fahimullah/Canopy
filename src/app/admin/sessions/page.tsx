@@ -208,7 +208,7 @@ export default function AdminSessionsPage() {
                 {sessions.map((session) => (
                   <tr
                     key={session.id}
-                    className="border-b border-[var(--primitive-neutral-100)] transition-colors hover:bg-[var(--primitive-neutral-50)]"
+                    className="border-b border-[var(--primitive-neutral-100)] transition-colors hover:bg-[var(--background-interactive-hover)]"
                   >
                     <td className="px-4 py-3">
                       <div className="font-medium text-[var(--primitive-green-800)]">

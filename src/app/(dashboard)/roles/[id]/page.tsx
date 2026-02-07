@@ -204,7 +204,7 @@ function SortableQuestionItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]"
+      className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 transition-colors hover:bg-[var(--background-interactive-hover)]"
     >
       <div className="flex items-center gap-4">
         {/* Drag Handle */}
@@ -702,7 +702,7 @@ export default function RoleEditPage() {
           <div className="flex flex-1 items-center justify-center gap-3 px-1 py-6">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
+              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--background-interactive-hover)]"
             >
               <GridFour weight="regular" className="h-4 w-4" />
               <span>Dashboard</span>
@@ -716,14 +716,14 @@ export default function RoleEditPage() {
             </Link>
             <Link
               href="/organization"
-              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
+              className="flex items-center gap-1 rounded-2xl px-4 py-3 text-caption text-foreground transition-colors hover:bg-[var(--background-interactive-hover)]"
             >
               <Buildings weight="regular" className="h-4 w-4" />
               <span>Organization</span>
             </Link>
             <Link
               href="/profile"
-              className="flex items-center gap-1 rounded-xl px-4 py-2 text-caption text-foreground transition-colors hover:bg-[var(--primitive-neutral-100)]"
+              className="flex items-center gap-1 rounded-xl px-4 py-2 text-caption text-foreground transition-colors hover:bg-[var(--background-interactive-hover)]"
             >
               <div className="h-6 w-6 overflow-hidden rounded-2xl border border-[var(--primitive-neutral-200)]">
                 <Avatar name="Soobin Han" size="xs" />
@@ -896,7 +896,7 @@ export default function RoleEditPage() {
                 </div>
 
                 {/* Personal Details Row */}
-                <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-200)] p-6 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
                       <User weight="regular" className="h-5 w-5 text-[var(--primitive-blue-500)]" />
@@ -923,7 +923,7 @@ export default function RoleEditPage() {
                 </div>
 
                 {/* Career Details Row */}
-                <div className="flex items-center justify-between p-6 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                <div className="flex items-center justify-between p-6 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-green-100)]">
                       <ChatCenteredText
@@ -1979,7 +1979,7 @@ export default function RoleEditPage() {
                 <div className="flex flex-col gap-3">
                   <label className="text-body text-foreground">Accepted file types</label>
                   <div className="flex flex-wrap gap-3">
-                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                       <Checkbox
                         checked={tempFileUpload.acceptedTypes.pdf}
                         onCheckedChange={(checked) =>
@@ -1994,7 +1994,7 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body-sm">PDF</span>
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                       <Checkbox
                         checked={tempFileUpload.acceptedTypes.doc}
                         onCheckedChange={(checked) =>
@@ -2009,7 +2009,7 @@ export default function RoleEditPage() {
                       />
                       <span className="text-body-sm">DOC/DOCX</span>
                     </label>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                       <Checkbox
                         checked={tempFileUpload.acceptedTypes.images}
                         onCheckedChange={(checked) =>
@@ -2153,7 +2153,7 @@ export default function RoleEditPage() {
                 {/* Application Rows */}
                 <div className="divide-y divide-[var(--primitive-neutral-200)]">
                   {/* Application 1 */}
-                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--background-interactive-hover)]">
                     <div className="grid grid-cols-12 items-center gap-4">
                       <div className="col-span-3 flex items-center gap-3">
                         <Avatar name="Sarah Chen" size="default" />
@@ -2192,7 +2192,7 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* Application 2 */}
-                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--background-interactive-hover)]">
                     <div className="grid grid-cols-12 items-center gap-4">
                       <div className="col-span-3 flex items-center gap-3">
                         <Avatar name="Marcus Johnson" size="default" />
@@ -2231,7 +2231,7 @@ export default function RoleEditPage() {
                   </div>
 
                   {/* Application 3 */}
-                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--primitive-neutral-100)]">
+                  <div className="cursor-pointer px-6 py-4 transition-colors hover:bg-[var(--background-interactive-hover)]">
                     <div className="grid grid-cols-12 items-center gap-4">
                       <div className="col-span-3 flex items-center gap-3">
                         <Avatar name="Priya Patel" size="default" />

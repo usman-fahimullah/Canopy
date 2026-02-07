@@ -2,12 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
 /**
  * Toolbar component based on Trails Design System
@@ -81,9 +76,7 @@ const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
             'button:not([disabled]), [role="button"]:not([disabled])'
           )
         );
-        const currentIndex = buttons.findIndex(
-          (btn) => btn === document.activeElement
-        );
+        const currentIndex = buttons.findIndex((btn) => btn === document.activeElement);
 
         let nextIndex = currentIndex;
         const isHorizontal = orientation === "horizontal";
@@ -101,10 +94,7 @@ const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
             break;
           case "ArrowLeft":
           case "ArrowUp":
-            if (
-              (isHorizontal && e.key === "ArrowLeft") ||
-              (!isHorizontal && e.key === "ArrowUp")
-            ) {
+            if ((isHorizontal && e.key === "ArrowLeft") || (!isHorizontal && e.key === "ArrowUp")) {
               e.preventDefault();
               nextIndex = currentIndex > 0 ? currentIndex - 1 : buttons.length - 1;
             }
@@ -142,11 +132,11 @@ const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
               // Figma: white bg, rounded-2xl (16px), shadow 1px 3px 16px rgba(31,29,28,0.08), px-3 (12px) py-2 (8px)
               "inline-flex items-center",
               "px-3 py-2",
-              "bg-[var(--background-default)] rounded-2xl",
+              "rounded-2xl bg-[var(--background-default)]",
               "shadow-[1px_3px_16px_0px_rgba(31,29,28,0.08)]",
               // Figma: gap-6 (24px) between major sections
               "gap-6",
-              disabled && "opacity-50 pointer-events-none",
+              disabled && "pointer-events-none opacity-50",
               className
             )}
             {...props}
@@ -202,7 +192,7 @@ const ToolbarGroup = React.forwardRef<HTMLDivElement, ToolbarGroupProps>(
       className={cn(
         "flex items-center",
         // Figma: grouped = bg #faf9f7 (neutral-100), rounded-xl (12px), p-1 (4px)
-        variant === "grouped" && "p-1 bg-[var(--primitive-neutral-100)] rounded-xl",
+        variant === "grouped" && "rounded-xl bg-[var(--primitive-neutral-100)] p-1",
         // Figma: plain = gap-2 (8px) between standalone items (Bold/Italic)
         variant === "plain" && "gap-2",
         className
@@ -241,7 +231,20 @@ interface ToolbarButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
-  ({ className, children, selected = false, grouped = false, tooltip, shortcut, disabled, loading, ...props }, ref) => {
+  (
+    {
+      className,
+      children,
+      selected = false,
+      grouped = false,
+      tooltip,
+      shortcut,
+      disabled,
+      loading,
+      ...props
+    },
+    ref
+  ) => {
     const context = React.useContext(ToolbarContext);
     const isDisabled = disabled || context.disabled || loading;
 
@@ -252,38 +255,41 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
         aria-pressed={selected}
         disabled={isDisabled}
         className={cn(
-          "flex justify-center items-center",
+          "flex items-center justify-center",
           "rounded-lg",
           "transition-all duration-150",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-1",
-          "disabled:opacity-50 disabled:pointer-events-none",
+          "disabled:pointer-events-none disabled:opacity-50",
           // Figma: grouped = px-2 py-1 (total 40x32), standalone = p-2 (total 40x40)
           grouped ? "px-2 py-1" : "p-2",
           // Figma: Selected states differ based on grouped vs standalone
-          selected && grouped && [
-            // Grouped selected: white bg with shadow (inside toggle groups)
-            "bg-[var(--background-default)]",
-            "shadow-[1px_2px_16px_0px_rgba(31,29,28,0.08)]",
-            "text-[var(--primitive-green-900)]",
-          ],
-          selected && !grouped && [
-            // Standalone selected: neutral-200 bg, no shadow (Bold/Italic buttons)
-            "bg-[var(--primitive-neutral-200)]",
-            "text-[var(--primitive-green-900)]",
-          ],
+          selected &&
+            grouped && [
+              // Grouped selected: white bg with shadow (inside toggle groups)
+              "bg-[var(--background-default)]",
+              "shadow-[1px_2px_16px_0px_rgba(31,29,28,0.08)]",
+              "text-[var(--primitive-green-900)]",
+            ],
+          selected &&
+            !grouped && [
+              // Standalone selected: neutral-200 bg, no shadow (Bold/Italic buttons)
+              "bg-[var(--primitive-neutral-200)]",
+              "text-[var(--primitive-green-900)]",
+            ],
           // Figma: unselected = icon color #7a7671 (neutral-600)
-          !selected && !isDisabled && [
-            "text-[var(--primitive-neutral-600)]",
-            "hover:text-[var(--primitive-green-900)]",
-            grouped ? "hover:bg-white/50" : "hover:bg-[var(--primitive-neutral-100)]",
-            "active:bg-white/80",
-          ],
+          !selected &&
+            !isDisabled && [
+              "text-[var(--primitive-neutral-600)]",
+              "hover:text-[var(--primitive-green-900)]",
+              grouped ? "hover:bg-white/50" : "hover:bg-[var(--background-interactive-hover)]",
+              "active:bg-white/80",
+            ],
           className
         )}
         {...props}
       >
         {/* Figma: icon size 24px */}
-        <span className="w-6 h-6 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">
+        <span className="flex h-6 w-6 items-center justify-center [&>svg]:h-6 [&>svg]:w-6">
           {loading ? (
             <svg
               className="animate-spin"
@@ -318,9 +324,7 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
           <TooltipTrigger asChild>{button}</TooltipTrigger>
           <TooltipContent side="bottom" className="flex flex-col items-center gap-0.5">
             <span>{tooltip}</span>
-            {shortcut && (
-              <span className="text-foreground-subtle text-xs">{shortcut}</span>
-            )}
+            {shortcut && <span className="text-xs text-foreground-subtle">{shortcut}</span>}
           </TooltipContent>
         </Tooltip>
       );
@@ -356,8 +360,21 @@ const ToolbarToggleGroupContext = React.createContext<{
 }>({ type: "single" });
 
 const ToolbarToggleGroup = React.forwardRef<HTMLDivElement, ToolbarToggleGroupProps>(
-  ({ className, children, value, onValueChange, allowDeselect = false, "aria-label": ariaLabel, ...props }, ref) => (
-    <ToolbarToggleGroupContext.Provider value={{ value, onValueChange, allowDeselect, type: "single" }}>
+  (
+    {
+      className,
+      children,
+      value,
+      onValueChange,
+      allowDeselect = false,
+      "aria-label": ariaLabel,
+      ...props
+    },
+    ref
+  ) => (
+    <ToolbarToggleGroupContext.Provider
+      value={{ value, onValueChange, allowDeselect, type: "single" }}
+    >
       <div
         ref={ref}
         role="group"
@@ -365,7 +382,7 @@ const ToolbarToggleGroup = React.forwardRef<HTMLDivElement, ToolbarToggleGroupPr
         className={cn(
           // Figma: bg #faf9f7 (neutral-100), rounded-xl (12px), p-1
           "flex items-center",
-          "p-1 bg-[var(--primitive-neutral-100)] rounded-xl overflow-clip",
+          "overflow-clip rounded-xl bg-[var(--primitive-neutral-100)] p-1",
           className
         )}
         {...props}
@@ -391,7 +408,10 @@ interface ToolbarMultiToggleGroupProps extends React.HTMLAttributes<HTMLDivEleme
 }
 
 const ToolbarMultiToggleGroup = React.forwardRef<HTMLDivElement, ToolbarMultiToggleGroupProps>(
-  ({ className, children, values = [], onValuesChange, "aria-label": ariaLabel, ...props }, ref) => (
+  (
+    { className, children, values = [], onValuesChange, "aria-label": ariaLabel, ...props },
+    ref
+  ) => (
     <ToolbarToggleGroupContext.Provider value={{ values, onValuesChange, type: "multiple" }}>
       <div
         ref={ref}
@@ -400,7 +420,7 @@ const ToolbarMultiToggleGroup = React.forwardRef<HTMLDivElement, ToolbarMultiTog
         className={cn(
           // Same styling as single toggle group
           "flex items-center",
-          "p-1 bg-[var(--primitive-neutral-100)] rounded-xl overflow-clip",
+          "overflow-clip rounded-xl bg-[var(--primitive-neutral-100)] p-1",
           className
         )}
         {...props}
@@ -424,9 +444,10 @@ const ToolbarToggleItem = React.forwardRef<HTMLButtonElement, ToolbarToggleItemP
     const context = React.useContext(ToolbarToggleGroupContext);
 
     // Determine if selected based on group type
-    const isSelected = context.type === "multiple"
-      ? context.values?.includes(value) ?? false
-      : context.value === value;
+    const isSelected =
+      context.type === "multiple"
+        ? (context.values?.includes(value) ?? false)
+        : context.value === value;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (context.type === "multiple") {
@@ -448,13 +469,7 @@ const ToolbarToggleItem = React.forwardRef<HTMLButtonElement, ToolbarToggleItemP
     };
 
     return (
-      <ToolbarButton
-        ref={ref}
-        selected={isSelected}
-        grouped
-        onClick={handleClick}
-        {...props}
-      />
+      <ToolbarButton ref={ref} selected={isSelected} grouped onClick={handleClick} {...props} />
     );
   }
 );
@@ -468,7 +483,7 @@ const ToolbarSeparator = React.forwardRef<HTMLDivElement, React.HTMLAttributes<H
     <div
       ref={ref}
       role="separator"
-      className={cn("w-px h-6 bg-border mx-1", className)}
+      className={cn("mx-1 h-6 w-px bg-border", className)}
       {...props}
     />
   )
@@ -481,7 +496,7 @@ ToolbarSeparator.displayName = "ToolbarSeparator";
    ============================================ */
 const ToolbarSpacer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div ref={ref} className={cn("flex-1 min-w-0", className)} {...props} />
+    <div ref={ref} className={cn("min-w-0 flex-1", className)} {...props} />
   )
 );
 ToolbarSpacer.displayName = "ToolbarSpacer";
@@ -493,7 +508,7 @@ const ToolbarLabel = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTML
   ({ className, children, ...props }, ref) => (
     <span
       ref={ref}
-      className={cn("text-sm text-foreground-muted px-2 select-none", className)}
+      className={cn("select-none px-2 text-sm text-foreground-muted", className)}
       {...props}
     >
       {children}
@@ -516,7 +531,7 @@ const ToolbarActions = React.forwardRef<HTMLDivElement, ToolbarActionsProps>(
       ref={ref}
       className={cn(
         "flex items-center",
-        "p-1 bg-[var(--background-default)] rounded-lg overflow-clip",
+        "overflow-clip rounded-lg bg-[var(--background-default)] p-1",
         className
       )}
       {...props}
@@ -530,9 +545,7 @@ ToolbarActions.displayName = "ToolbarActions";
 /* ============================================
    Utility: Combine refs
    ============================================ */
-function useCombinedRefs<T>(
-  ...refs: (React.Ref<T> | undefined)[]
-): React.RefCallback<T> {
+function useCombinedRefs<T>(...refs: (React.Ref<T> | undefined)[]): React.RefCallback<T> {
   return React.useCallback(
     (element: T) => {
       refs.forEach((ref) => {

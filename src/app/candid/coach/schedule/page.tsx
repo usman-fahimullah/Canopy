@@ -241,7 +241,7 @@ export default function CoachSchedulePage() {
                           className={`h-10 w-full rounded-lg transition-all ${
                             isAvailable
                               ? "ring-[var(--primitive-green-500)]/30 bg-[var(--primitive-green-300)] ring-1 ring-inset hover:bg-[var(--primitive-green-400)]"
-                              : "bg-[var(--primitive-neutral-100)] hover:bg-[var(--primitive-neutral-200)]"
+                              : "bg-[var(--background-subtle)] hover:bg-[var(--background-interactive-hover)]"
                           }`}
                         >
                           {isAvailable && (

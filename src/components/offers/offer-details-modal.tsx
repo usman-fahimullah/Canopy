@@ -41,7 +41,9 @@ export function OfferDetailsModal({
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [department, setDepartment] = useState("");
   const [notes, setNotes] = useState("");
-  const [signingMethod, setSigningMethod] = useState<"SIGNING_LINK" | "DOCUMENT_UPLOAD" | "OFFLINE">("SIGNING_LINK");
+  const [signingMethod, setSigningMethod] = useState<
+    "SIGNING_LINK" | "DOCUMENT_UPLOAD" | "OFFLINE"
+  >("SIGNING_LINK");
   const [signingLink, setSigningLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
@@ -129,8 +131,8 @@ export function OfferDetailsModal({
   const renderDetailsStep = () => (
     <div className="space-y-4">
       <p className="text-body-sm text-[var(--foreground-muted)]">
-        Create an offer for <strong>{candidateName}</strong> for the{" "}
-        <strong>{jobTitle}</strong> position.
+        Create an offer for <strong>{candidateName}</strong> for the <strong>{jobTitle}</strong>{" "}
+        position.
       </p>
 
       <div className="space-y-2">
@@ -138,7 +140,9 @@ export function OfferDetailsModal({
         <Input
           id="salary"
           type="number"
-          placeholder={salaryMin ? `${salaryMin / 100} - ${(salaryMax || salaryMin) / 100}` : "e.g. 75000"}
+          placeholder={
+            salaryMin ? `${salaryMin / 100} - ${(salaryMax || salaryMin) / 100}` : "e.g. 75000"
+          }
           value={salary}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSalary(e.target.value)}
         />
@@ -198,9 +202,21 @@ export function OfferDetailsModal({
       <div className="space-y-3">
         {(
           [
-            { value: "SIGNING_LINK" as const, label: "Paste a signing link", desc: "DocuSign, HelloSign, or another e-signing tool" },
-            { value: "DOCUMENT_UPLOAD" as const, label: "Upload a signing document", desc: "Upload a PDF for the candidate to download" },
-            { value: "OFFLINE" as const, label: "Handle offline", desc: "Signing will happen outside of Canopy" },
+            {
+              value: "SIGNING_LINK" as const,
+              label: "Paste a signing link",
+              desc: "DocuSign, HelloSign, or another e-signing tool",
+            },
+            {
+              value: "DOCUMENT_UPLOAD" as const,
+              label: "Upload a signing document",
+              desc: "Upload a PDF for the candidate to download",
+            },
+            {
+              value: "OFFLINE" as const,
+              label: "Handle offline",
+              desc: "Signing will happen outside of Canopy",
+            },
           ] as const
         ).map((option) => (
           <label
@@ -208,7 +224,7 @@ export function OfferDetailsModal({
             className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
               signingMethod === option.value
                 ? "border-[var(--border-brand)] bg-[var(--background-brand-subtle)]"
-                : "border-[var(--border-default)] hover:bg-[var(--background-subtle)]"
+                : "border-[var(--border-default)] hover:bg-[var(--background-interactive-hover)]"
             }`}
           >
             <input
@@ -255,9 +271,7 @@ export function OfferDetailsModal({
           </DialogTitle>
         </DialogHeader>
 
-        {error && (
-          <div className="rounded-lg bg-red-50 p-3 text-body-sm text-red-700">{error}</div>
-        )}
+        {error && <div className="rounded-lg bg-red-50 p-3 text-body-sm text-red-700">{error}</div>}
 
         {step === "details" && renderDetailsStep()}
         {step === "preview" && renderPreviewStep()}
@@ -270,7 +284,13 @@ export function OfferDetailsModal({
                 Cancel
               </Button>
               <Button onClick={handleGeneratePreview} disabled={!startDate || isGeneratingPreview}>
-                {isGeneratingPreview ? <><Spinner size="sm" /> Generating...</> : "Preview Letter"}
+                {isGeneratingPreview ? (
+                  <>
+                    <Spinner size="sm" /> Generating...
+                  </>
+                ) : (
+                  "Preview Letter"
+                )}
               </Button>
             </>
           )}
@@ -288,7 +308,13 @@ export function OfferDetailsModal({
                 Back
               </Button>
               <Button onClick={handleCreateOffer} disabled={isSubmitting}>
-                {isSubmitting ? <><Spinner size="sm" /> Creating...</> : "Create Offer"}
+                {isSubmitting ? (
+                  <>
+                    <Spinner size="sm" /> Creating...
+                  </>
+                ) : (
+                  "Create Offer"
+                )}
               </Button>
             </>
           )}

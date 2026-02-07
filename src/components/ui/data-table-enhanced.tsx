@@ -269,7 +269,7 @@ const ViewSwitcher = React.memo(function ViewSwitcher({
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-1",
                   currentView === view
                     ? "bg-[var(--background-subtle)] text-[var(--foreground-default)]"
-                    : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
+                    : "hover:bg-[var(--background-interactive-hover)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
                 )}
                 aria-selected={currentView === view}
                 aria-label={viewLabels[view]}
@@ -319,7 +319,7 @@ const QuickFiltersBar = React.memo(function QuickFiltersBar({
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-1",
           activeFilterId === null
             ? "border border-[var(--border-default)] bg-[var(--background-subtle)] text-[var(--foreground-default)]"
-            : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
+            : "hover:bg-[var(--background-interactive-hover)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
         )}
         aria-selected={activeFilterId === null}
         role="tab"
@@ -337,7 +337,7 @@ const QuickFiltersBar = React.memo(function QuickFiltersBar({
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)] focus-visible:ring-offset-1",
             activeFilterId === filter.id
               ? "border border-[var(--border-default)] bg-[var(--background-subtle)] text-[var(--foreground-default)]"
-              : "hover:bg-[var(--background-subtle)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
+              : "hover:bg-[var(--background-interactive-hover)]/50 text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]"
           )}
           aria-selected={activeFilterId === filter.id}
           role="tab"
@@ -674,7 +674,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
                 "rounded-md",
                 isSmall ? "p-0.5" : "p-1",
                 "text-[var(--foreground-muted)] hover:text-[var(--foreground-default)]",
-                "hover:bg-[var(--background-muted)]",
+                "hover:bg-[var(--background-interactive-hover)]",
                 "transition-all duration-150",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)]"
               )}
@@ -735,7 +735,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
                   "focus-visible:outline-none",
                   selectedIndex === index
                     ? "bg-[var(--background-interactive-selected)]"
-                    : "hover:bg-[var(--background-muted)]"
+                    : "hover:bg-[var(--background-interactive-hover)]"
                 )}
               >
                 <span className="rounded bg-[var(--background-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--foreground-muted)]">
@@ -813,7 +813,7 @@ function EnhancedTableHead<T>({
         "bg-[var(--table-background-header)]",
         column.sticky && "sticky left-0 z-20",
         (column.sortable || column.filterConfig) &&
-          "cursor-pointer select-none transition-colors duration-150 hover:bg-[var(--background-subtle)]"
+          "cursor-pointer select-none transition-colors duration-150 hover:bg-[var(--background-interactive-hover)]"
       )}
       style={{
         width: columnWidth ? `${columnWidth}px` : column.width,
@@ -1051,7 +1051,7 @@ function ColumnFilterContent<T>({ column, value, onChange, options }: ColumnFilt
             return (
               <label
                 key={option.value}
-                className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-[var(--background-muted)]"
+                className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-[var(--background-interactive-hover)]"
               >
                 <Checkbox
                   checked={selected}
@@ -1648,7 +1648,7 @@ const Pagination = React.memo(function Pagination({
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-interactive-focus)]",
                   isCurrentPage
                     ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)] shadow-sm"
-                    : "text-[var(--foreground-muted)] hover:bg-[var(--background-muted)] hover:text-[var(--foreground-default)]"
+                    : "text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
                 )}
                 aria-label={`Page ${pageNum}`}
                 aria-current={isCurrentPage ? "page" : undefined}

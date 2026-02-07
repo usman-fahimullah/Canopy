@@ -164,7 +164,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
             variant="ghost"
             size="icon"
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="h-9 w-9 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="h-9 w-9 rounded-lg hover:bg-[var(--background-interactive-hover)]"
           >
             <CaretLeft className="h-5 w-5" />
           </Button>
@@ -173,7 +173,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
             variant="ghost"
             size="icon"
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="h-9 w-9 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="h-9 w-9 rounded-lg hover:bg-[var(--background-interactive-hover)]"
           >
             <CaretRight className="h-5 w-5" />
           </Button>
@@ -215,7 +215,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                         ? "cursor-not-allowed text-foreground-disabled opacity-40"
                         : !isCurrentMonth
                           ? "text-foreground-muted/50"
-                          : "text-foreground-default hover:scale-105 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                          : "text-foreground-default hover:scale-105 hover:bg-[var(--background-interactive-hover)]"
                 )}
               >
                 {format(day, "d")}

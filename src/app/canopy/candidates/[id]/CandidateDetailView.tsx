@@ -250,7 +250,7 @@ export function CandidateDetailView({
                   href={seeker.resumeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 rounded-lg border border-[var(--border-muted)] px-4 py-3 transition-colors hover:bg-[var(--background-subtle)]"
+                  className="inline-flex items-center gap-3 rounded-lg border border-[var(--border-muted)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]"
                 >
                   <File size={20} weight="regular" className="text-[var(--foreground-muted)]" />
                   <span className="text-body-sm text-[var(--foreground-default)]">Resume</span>

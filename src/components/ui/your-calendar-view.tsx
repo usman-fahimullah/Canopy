@@ -181,14 +181,14 @@ export const YourCalendarView: React.FC<YourCalendarViewProps> = ({
           <button
             type="button"
             onClick={() => navigateWeek("prev")}
-            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)]"
           >
             <CaretLeft size={16} weight="bold" />
           </button>
           <button
             type="button"
             onClick={() => navigateWeek("next")}
-            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-200)]"
+            className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)]"
           >
             <CaretRight size={16} weight="bold" />
           </button>

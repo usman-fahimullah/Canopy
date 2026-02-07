@@ -928,7 +928,7 @@ export function GoalDetailModal({
                     <div className="mt-6">
                       <button
                         onClick={() => setNotesExpanded(!notesExpanded)}
-                        className="flex w-full items-center justify-between rounded-lg p-2 transition-colors hover:bg-[var(--background-subtle)]"
+                        className="flex w-full items-center justify-between rounded-lg p-2 transition-colors hover:bg-[var(--background-interactive-hover)]"
                         aria-expanded={notesExpanded}
                         aria-controls="notes-section"
                       >

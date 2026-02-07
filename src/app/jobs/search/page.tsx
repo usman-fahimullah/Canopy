@@ -635,10 +635,18 @@ export default function JobsPage() {
                 </Chip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem onSelect={() => setDatePostedFilter("all")}>Any time</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setDatePostedFilter("24h")}>Past 24 hours</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setDatePostedFilter("week")}>Past week</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setDatePostedFilter("month")}>Past month</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("all")}>
+                  Any time
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("24h")}>
+                  Past 24 hours
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("week")}>
+                  Past week
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("month")}>
+                  Past month
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -671,11 +679,21 @@ export default function JobsPage() {
                 </Chip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem onSelect={() => setExperienceFilter("all")}>All levels</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setExperienceFilter("entry")}>Entry level</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setExperienceFilter("mid")}>Mid level</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setExperienceFilter("senior")}>Senior level</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setExperienceFilter("executive")}>Executive</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("all")}>
+                  All levels
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("entry")}>
+                  Entry level
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("mid")}>
+                  Mid level
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("senior")}>
+                  Senior level
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("executive")}>
+                  Executive
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -687,12 +705,24 @@ export default function JobsPage() {
                 </Chip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem onSelect={() => setPathwayFilter("")}>All pathways</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setPathwayFilter("agriculture")}>Agriculture</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setPathwayFilter("conservation")}>Conservation</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setPathwayFilter("construction")}>Construction</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setPathwayFilter("education")}>Education</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setPathwayFilter("energy")}>Energy</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("")}>
+                  All pathways
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("agriculture")}>
+                  Agriculture
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("conservation")}>
+                  Conservation
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("construction")}>
+                  Construction
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("education")}>
+                  Education
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("energy")}>
+                  Energy
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -861,7 +891,7 @@ export default function JobsPage() {
                 <Link
                   key={pathway}
                   href={`/jobs/search?pathway=${pathway}`}
-                  className="flex shrink-0 flex-col items-center gap-2 rounded-xl p-3 transition-colors hover:bg-[var(--background-subtle)]"
+                  className="flex shrink-0 flex-col items-center gap-2 rounded-xl p-3 transition-colors hover:bg-[var(--background-interactive-hover)]"
                 >
                   <div className="rounded-xl bg-[var(--background-subtle)] p-3">
                     <PathwayIllustration pathway={pathway} size="lg" />

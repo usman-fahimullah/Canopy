@@ -453,7 +453,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             <button
               type="button"
               onClick={() => navigateWeek("prev")}
-              className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--foreground-default)]"
+              className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
               aria-label="Previous week"
             >
               <CaretLeft size={16} weight="bold" />
@@ -461,7 +461,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
             <button
               type="button"
               onClick={() => navigateWeek("next")}
-              className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--foreground-default)]"
+              className="rounded p-1.5 text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]"
               aria-label="Next week"
             >
               <CaretRight size={16} weight="bold" />

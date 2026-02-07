@@ -108,6 +108,29 @@ export const foundationsNav: NavItem[] = [
     href: "/design-system/foundations/motion",
     description: "Animation and transition tokens",
   },
+  {
+    id: "surfaces",
+    label: "Surfaces",
+    href: "/design-system/foundations/surfaces",
+    description: "Context-aware hover system with surface levels",
+    children: [
+      {
+        id: "surface-scale",
+        label: "Surface Scale",
+        href: "/design-system/foundations/surfaces#surface-scale",
+      },
+      {
+        id: "surface-usage",
+        label: "Usage",
+        href: "/design-system/foundations/surfaces#usage",
+      },
+      {
+        id: "surface-tokens",
+        label: "Tokens",
+        href: "/design-system/foundations/surfaces#tokens",
+      },
+    ],
+  },
 ];
 
 export const componentsNav: NavItem[] = [
@@ -518,6 +541,34 @@ export const searchIndex: SearchItem[] = [
     category: "Foundations",
     href: "/design-system/foundations/motion",
     keywords: ["animation", "transition", "duration", "easing"],
+  },
+  {
+    id: "surfaces",
+    title: "Surfaces",
+    category: "Foundations",
+    href: "/design-system/foundations/surfaces",
+    keywords: ["surface", "hover", "level", "context", "cascade", "interactive", "background"],
+  },
+  {
+    id: "surface-scale",
+    title: "Surface Scale",
+    category: "Foundations",
+    href: "/design-system/foundations/surfaces#surface-scale",
+    keywords: ["surface", "level", "depth", "neutral"],
+  },
+  {
+    id: "surface-usage",
+    title: "Surface Usage",
+    category: "Foundations",
+    href: "/design-system/foundations/surfaces#usage",
+    keywords: ["surface", "hover", "class", "data-surface"],
+  },
+  {
+    id: "surface-tokens",
+    title: "Surface Tokens",
+    category: "Foundations",
+    href: "/design-system/foundations/surfaces#tokens",
+    keywords: ["surface-hover", "surface-active", "surface-bg", "css variable"],
   },
 
   // Components - Buttons

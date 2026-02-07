@@ -933,7 +933,7 @@ export function ApplyFormModals({
             <div className="flex flex-col gap-3">
               <label className="text-body text-foreground">Accepted file types</label>
               <div className="flex flex-wrap gap-3">
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <Checkbox
                     checked={tempFileUpload.acceptedTypes.pdf}
                     onCheckedChange={(checked) =>
@@ -948,7 +948,7 @@ export function ApplyFormModals({
                   />
                   <span className="text-body-sm">PDF</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <Checkbox
                     checked={tempFileUpload.acceptedTypes.doc}
                     onCheckedChange={(checked) =>
@@ -963,7 +963,7 @@ export function ApplyFormModals({
                   />
                   <span className="text-body-sm">DOC/DOCX</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--primitive-neutral-200)]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <Checkbox
                     checked={tempFileUpload.acceptedTypes.images}
                     onCheckedChange={(checked) =>

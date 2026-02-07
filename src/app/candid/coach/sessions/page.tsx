@@ -137,7 +137,7 @@ export default function CoachSessionsPage() {
               className={`rounded-[12px] px-4 py-2.5 text-caption font-bold transition-colors ${
                 activeTab === tab.key
                   ? "bg-[var(--primitive-green-800)] text-[var(--primitive-blue-100)]"
-                  : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-neutral-700)] hover:bg-[var(--primitive-neutral-300)]"
+                  : "bg-[var(--primitive-neutral-200)] text-[var(--primitive-neutral-700)] hover:bg-[var(--background-interactive-hover)]"
               }`}
             >
               {tab.label}

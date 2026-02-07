@@ -1814,7 +1814,7 @@ function GroupRow<T>({
   renderGroupHeader,
 }: GroupRowProps<T>) {
   return (
-    <TableRow className="bg-[var(--background-subtle)] hover:bg-[var(--background-muted)]">
+    <TableRow className="bg-[var(--background-subtle)] hover:bg-[var(--background-interactive-hover)]">
       <TableCell colSpan={colSpan} className="py-2">
         <button
           onClick={onToggle}

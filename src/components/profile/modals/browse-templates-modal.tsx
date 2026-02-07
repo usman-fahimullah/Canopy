@@ -229,7 +229,7 @@ function CategoryFilter({
           "rounded-full px-3 py-1.5 text-caption font-medium transition-colors",
           selected === null
             ? "bg-[var(--background-brand)] text-white"
-            : "bg-[var(--background-muted)] text-[var(--foreground-muted)] hover:bg-[var(--background-subtle)]"
+            : "bg-[var(--background-muted)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
         )}
       >
         All
@@ -245,7 +245,7 @@ function CategoryFilter({
               "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-caption font-medium transition-colors",
               selected === key
                 ? "bg-[var(--background-brand)] text-white"
-                : "bg-[var(--background-muted)] text-[var(--foreground-muted)] hover:bg-[var(--background-subtle)]"
+                : "bg-[var(--background-muted)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
             )}
           >
             <Icon size={14} weight={selected === key ? "fill" : "regular"} />
@@ -449,7 +449,7 @@ export function BrowseTemplatesModal({
                       "rounded-full px-2 py-0.5 text-caption transition-colors",
                       selectedExperience === level
                         ? "bg-[var(--background-brand)] text-white"
-                        : "bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--background-muted)]"
+                        : "bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
                     )}
                   >
                     {EXPERIENCE_LABELS[level]}

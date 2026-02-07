@@ -338,7 +338,7 @@ export default function CoachDashboardPage() {
             <h2 className="text-foreground-default text-heading-sm font-medium">Your Schedule</h2>
             <Link
               href="/candid/coach/schedule"
-              className="flex items-center justify-center rounded-[16px] bg-[var(--primitive-neutral-200)] p-2.5 transition-colors hover:bg-[var(--primitive-neutral-300)]"
+              className="flex items-center justify-center rounded-[16px] bg-[var(--primitive-neutral-200)] p-2.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
             >
               <CalendarDots size={20} weight="regular" />
             </Link>

@@ -141,11 +141,10 @@ const CoachTipAnchor = PopoverPrimitive.Anchor;
 
 type CoachTipType = "paginated" | "single" | "single-no-title";
 
-interface CoachTipContentProps
-  extends Omit<
-    React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>,
-    "title"
-  > {
+interface CoachTipContentProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>,
+  "title"
+> {
   /** Type of coach tip */
   type?: CoachTipType;
   /** Title text (not shown for single-no-title) */
@@ -232,19 +231,14 @@ const CoachTipContent = React.forwardRef<
           {...props}
         >
           {/* Caret */}
-          <div
-            className={cn(
-              "flex shrink-0",
-              isVerticalCaret ? "justify-center" : "items-center"
-            )}
-          >
+          <div className={cn("flex shrink-0", isVerticalCaret ? "justify-center" : "items-center")}>
             <Caret side={caret} />
           </div>
 
           {/* Content Container */}
           <div
             className={cn(
-              "bg-[var(--background-default)] rounded-xl p-4",
+              "rounded-xl bg-[var(--background-default)] p-4",
               "flex flex-col gap-2",
               "min-w-[240px] max-w-[320px]"
             )}
@@ -258,14 +252,10 @@ const CoachTipContent = React.forwardRef<
                 {showClose && (
                   <button
                     onClick={onClose}
-                    className="shrink-0 p-0.5 -m-0.5 rounded hover:bg-[var(--background-subtle)] transition-colors"
+                    className="-m-0.5 shrink-0 rounded p-0.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
                     aria-label="Close"
                   >
-                    <X
-                      size={20}
-                      weight="bold"
-                      className="text-[var(--foreground-default)]"
-                    />
+                    <X size={20} weight="bold" className="text-[var(--foreground-default)]" />
                   </button>
                 )}
               </div>
@@ -282,21 +272,17 @@ const CoachTipContent = React.forwardRef<
               {!hasTitle && showClose && (
                 <button
                   onClick={onClose}
-                  className="shrink-0 p-0.5 -m-0.5 rounded hover:bg-[var(--background-subtle)] transition-colors"
+                  className="-m-0.5 shrink-0 rounded p-0.5 transition-colors hover:bg-[var(--background-interactive-hover)]"
                   aria-label="Close"
                 >
-                  <X
-                    size={20}
-                    weight="bold"
-                    className="text-[var(--foreground-default)]"
-                  />
+                  <X size={20} weight="bold" className="text-[var(--foreground-default)]" />
                 </button>
               )}
             </div>
 
             {/* Footer with pagination and buttons (paginated only) */}
             {isPaginated && (
-              <div className="flex items-center gap-2 mt-1">
+              <div className="mt-1 flex items-center gap-2">
                 {/* Pagination indicator */}
                 <span className="flex-1 text-caption text-[var(--foreground-subtle)]">
                   {currentStep} of {totalSteps}
@@ -307,7 +293,7 @@ const CoachTipContent = React.forwardRef<
                   variant="ghost"
                   size="sm"
                   onClick={onSecondaryClick}
-                  className="text-[var(--foreground-brand)] hover:text-[var(--foreground-brand-emphasis)] font-bold"
+                  className="font-bold text-[var(--foreground-brand)] hover:text-[var(--foreground-brand-emphasis)]"
                 >
                   {secondaryLabel}
                 </Button>
@@ -315,7 +301,7 @@ const CoachTipContent = React.forwardRef<
                   variant="ghost"
                   size="sm"
                   onClick={onPrimaryClick}
-                  className="text-[var(--foreground-brand)] hover:text-[var(--foreground-brand-emphasis)] font-bold"
+                  className="font-bold text-[var(--foreground-brand)] hover:text-[var(--foreground-brand-emphasis)]"
                 >
                   {primaryLabel}
                 </Button>

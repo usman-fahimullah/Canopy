@@ -108,7 +108,7 @@ export function ShellNotificationBell({ shell }: ShellNotificationBellProps) {
                     className={cn(
                       "flex cursor-pointer gap-3 px-4 py-3 transition-colors",
                       isRead
-                        ? "hover:bg-[var(--background-subtle)]"
+                        ? "hover:bg-[var(--background-interactive-hover)]"
                         : "bg-[var(--primitive-green-100)]/30 hover:bg-[var(--primitive-green-100)]/50"
                     )}
                     onClick={() => handleNotificationClick(notification)}

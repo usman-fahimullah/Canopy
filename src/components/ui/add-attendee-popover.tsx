@@ -106,7 +106,7 @@ const AddAttendeePopover: React.FC<AddAttendeePopoverProps> = ({
                   key={member.id}
                   type="button"
                   onClick={() => handleSelect(member)}
-                  className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-[var(--primitive-neutral-100)]"
+                  className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-[var(--background-interactive-hover)]"
                 >
                   <Avatar src={member.avatar} name={member.name} size="sm" className="h-8 w-8" />
                   <div className="min-w-0 flex-1">

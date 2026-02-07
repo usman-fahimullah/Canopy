@@ -285,7 +285,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
               <button
                 type="button"
                 onClick={handleClear}
-                className="flex items-center justify-center rounded-full p-0.5 text-[var(--primitive-neutral-500)] transition-colors hover:bg-[var(--primitive-neutral-200)] hover:text-[var(--primitive-neutral-700)] focus-visible:outline-none"
+                className="flex items-center justify-center rounded-full p-0.5 text-[var(--primitive-neutral-500)] transition-colors hover:bg-[var(--background-interactive-hover)] hover:text-[var(--primitive-neutral-700)] focus-visible:outline-none"
                 aria-label="Clear value"
               >
                 <X size={14} weight="bold" />

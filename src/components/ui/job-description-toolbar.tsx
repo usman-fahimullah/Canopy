@@ -170,15 +170,60 @@ export interface TemplateVariable {
 }
 
 export const defaultVariables: TemplateVariable[] = [
-  { id: "company_name", label: "Company Name", placeholder: "{{company_name}}", description: "Your organization's name" },
-  { id: "job_title", label: "Job Title", placeholder: "{{job_title}}", description: "The position title" },
-  { id: "location", label: "Location", placeholder: "{{location}}", description: "Job location or Remote" },
-  { id: "department", label: "Department", placeholder: "{{department}}", description: "Team or department name" },
-  { id: "salary_range", label: "Salary Range", placeholder: "{{salary_range}}", description: "Compensation range" },
-  { id: "employment_type", label: "Employment Type", placeholder: "{{employment_type}}", description: "Full-time, Part-time, Contract" },
-  { id: "start_date", label: "Start Date", placeholder: "{{start_date}}", description: "Expected start date" },
-  { id: "hiring_manager", label: "Hiring Manager", placeholder: "{{hiring_manager}}", description: "Manager's name" },
-  { id: "apply_url", label: "Apply Link", placeholder: "{{apply_url}}", description: "Application URL" },
+  {
+    id: "company_name",
+    label: "Company Name",
+    placeholder: "{{company_name}}",
+    description: "Your organization's name",
+  },
+  {
+    id: "job_title",
+    label: "Job Title",
+    placeholder: "{{job_title}}",
+    description: "The position title",
+  },
+  {
+    id: "location",
+    label: "Location",
+    placeholder: "{{location}}",
+    description: "Job location or Remote",
+  },
+  {
+    id: "department",
+    label: "Department",
+    placeholder: "{{department}}",
+    description: "Team or department name",
+  },
+  {
+    id: "salary_range",
+    label: "Salary Range",
+    placeholder: "{{salary_range}}",
+    description: "Compensation range",
+  },
+  {
+    id: "employment_type",
+    label: "Employment Type",
+    placeholder: "{{employment_type}}",
+    description: "Full-time, Part-time, Contract",
+  },
+  {
+    id: "start_date",
+    label: "Start Date",
+    placeholder: "{{start_date}}",
+    description: "Expected start date",
+  },
+  {
+    id: "hiring_manager",
+    label: "Hiring Manager",
+    placeholder: "{{hiring_manager}}",
+    description: "Manager's name",
+  },
+  {
+    id: "apply_url",
+    label: "Apply Link",
+    placeholder: "{{apply_url}}",
+    description: "Application URL",
+  },
 ];
 
 /* ============================================
@@ -293,34 +338,34 @@ export function JobDescriptionToolbar({
           <DropdownMenuTrigger asChild>
             <button
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm",
+                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm",
                 "text-[var(--primitive-neutral-600)]",
-                "hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--primitive-green-900)]",
+                "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--primitive-green-900)]",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]",
                 "transition-colors duration-150",
-                disabled && "opacity-50 pointer-events-none"
+                disabled && "pointer-events-none opacity-50"
               )}
             >
               <HeadingIcon level={headingLevel} />
               <span className="hidden sm:inline">{headingLabels[headingLevel]}</span>
-              <ChevronDown weight="bold" className="w-4 h-4" />
+              <ChevronDown weight="bold" className="h-4 w-4" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => onHeadingChange?.("paragraph")}>
-              <span className="w-6 text-center mr-2">¶</span>
+              <span className="mr-2 w-6 text-center">¶</span>
               Paragraph
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onHeadingChange?.("h1")}>
-              <Heading1 weight="bold" className="w-6 h-6 mr-2" />
+              <Heading1 weight="bold" className="mr-2 h-6 w-6" />
               Heading 1
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onHeadingChange?.("h2")}>
-              <Heading2 weight="bold" className="w-6 h-6 mr-2" />
+              <Heading2 weight="bold" className="mr-2 h-6 w-6" />
               Heading 2
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onHeadingChange?.("h3")}>
-              <Heading3 weight="bold" className="w-6 h-6 mr-2" />
+              <Heading3 weight="bold" className="mr-2 h-6 w-6" />
               Heading 3
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -392,11 +437,7 @@ export function JobDescriptionToolbar({
         </ToolbarToggleGroup>
 
         {/* Link */}
-        <ToolbarButton
-          onClick={onInsertLink}
-          tooltip="Insert link"
-          shortcut="⌘K"
-        >
+        <ToolbarButton onClick={onInsertLink} tooltip="Insert link" shortcut="⌘K">
           <Link weight="bold" />
         </ToolbarButton>
       </ToolbarSection>
@@ -408,29 +449,26 @@ export function JobDescriptionToolbar({
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium",
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium",
               "bg-[var(--primitive-green-50)] text-[var(--primitive-green-700)]",
               "hover:bg-[var(--primitive-green-100)]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]",
               "transition-colors duration-150",
-              disabled && "opacity-50 pointer-events-none"
+              disabled && "pointer-events-none opacity-50"
             )}
           >
-            <Plus weight="bold" className="w-4 h-4" />
+            <Plus weight="bold" className="h-4 w-4" />
             <span className="hidden sm:inline">Add Section</span>
-            <ChevronDown weight="bold" className="w-4 h-4" />
+            <ChevronDown weight="bold" className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>Insert Section</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {sections.map((section) => (
-            <DropdownMenuItem
-              key={section.id}
-              onClick={() => onInsertSection?.(section)}
-            >
+            <DropdownMenuItem key={section.id} onClick={() => onInsertSection?.(section)}>
               {section.icon && (
-                <span className="w-5 h-5 mr-2 flex items-center justify-center [&>svg]:w-5 [&>svg]:h-5">
+                <span className="mr-2 flex h-5 w-5 items-center justify-center [&>svg]:h-5 [&>svg]:w-5">
                   {section.icon}
                 </span>
               )}
@@ -445,17 +483,17 @@ export function JobDescriptionToolbar({
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm",
+              "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm",
               "text-[var(--primitive-neutral-600)]",
-              "hover:bg-[var(--primitive-neutral-100)] hover:text-[var(--primitive-green-900)]",
+              "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--primitive-green-900)]",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]",
               "transition-colors duration-150",
-              disabled && "opacity-50 pointer-events-none"
+              disabled && "pointer-events-none opacity-50"
             )}
           >
             <span className="font-mono text-xs">{"{{}}"}</span>
             <span className="hidden sm:inline">Variable</span>
-            <ChevronDown weight="bold" className="w-4 h-4" />
+            <ChevronDown weight="bold" className="h-4 w-4" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
@@ -468,7 +506,7 @@ export function JobDescriptionToolbar({
               className="flex flex-col items-start gap-0.5"
             >
               <span className="font-medium">{variable.label}</span>
-              <span className="text-xs text-foreground-muted font-mono">
+              <span className="font-mono text-xs text-foreground-muted">
                 {variable.placeholder}
               </span>
             </DropdownMenuItem>
@@ -480,27 +518,14 @@ export function JobDescriptionToolbar({
 
       {/* Actions */}
       <ToolbarActions>
-        <ToolbarButton
-          onClick={onUndo}
-          disabled={!canUndo}
-          tooltip="Undo"
-          shortcut="⌘Z"
-        >
+        <ToolbarButton onClick={onUndo} disabled={!canUndo} tooltip="Undo" shortcut="⌘Z">
           <Undo weight="bold" />
         </ToolbarButton>
-        <ToolbarButton
-          onClick={onRedo}
-          disabled={!canRedo}
-          tooltip="Redo"
-          shortcut="⌘⇧Z"
-        >
+        <ToolbarButton onClick={onRedo} disabled={!canRedo} tooltip="Redo" shortcut="⌘⇧Z">
           <Redo weight="bold" />
         </ToolbarButton>
         <ToolbarSeparator />
-        <ToolbarButton
-          onClick={onCopy}
-          tooltip="Copy to clipboard"
-        >
+        <ToolbarButton onClick={onCopy} tooltip="Copy to clipboard">
           <Copy weight="bold" />
         </ToolbarButton>
         <ToolbarButton
@@ -534,13 +559,22 @@ export function JobDescriptionToolbarCompact({
   sections = defaultJobSections,
   disabled = false,
   className,
-}: Omit<JobDescriptionToolbarProps, "headingLevel" | "onHeadingChange" | "alignment" | "onAlignmentChange" | "isUnderline" | "onUnderlineChange" | "onInsertVariable" | "variables" | "isPreview" | "onPreviewToggle" | "onCopy">) {
+}: Omit<
+  JobDescriptionToolbarProps,
+  | "headingLevel"
+  | "onHeadingChange"
+  | "alignment"
+  | "onAlignmentChange"
+  | "isUnderline"
+  | "onUnderlineChange"
+  | "onInsertVariable"
+  | "variables"
+  | "isPreview"
+  | "onPreviewToggle"
+  | "onCopy"
+>) {
   return (
-    <Toolbar
-      disabled={disabled}
-      aria-label="Job description editor"
-      className={className}
-    >
+    <Toolbar disabled={disabled} aria-label="Job description editor" className={className}>
       <ToolbarSection>
         {/* Text Formatting */}
         <ToolbarGroup variant="plain" aria-label="Text formatting">
@@ -590,27 +624,22 @@ export function JobDescriptionToolbarCompact({
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
-              "flex items-center gap-1 px-2 py-1 rounded-lg text-sm",
+              "flex items-center gap-1 rounded-lg px-2 py-1 text-sm",
               "bg-[var(--primitive-green-50)] text-[var(--primitive-green-700)]",
               "hover:bg-[var(--primitive-green-100)]",
               "transition-colors duration-150",
-              disabled && "opacity-50 pointer-events-none"
+              disabled && "pointer-events-none opacity-50"
             )}
           >
-            <Plus weight="bold" className="w-4 h-4" />
-            <ChevronDown weight="bold" className="w-3 h-3" />
+            <Plus weight="bold" className="h-4 w-4" />
+            <ChevronDown weight="bold" className="h-3 w-3" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {sections.slice(0, 5).map((section) => (
-            <DropdownMenuItem
-              key={section.id}
-              onClick={() => onInsertSection?.(section)}
-            >
+            <DropdownMenuItem key={section.id} onClick={() => onInsertSection?.(section)}>
               {section.icon && (
-                <span className="w-4 h-4 mr-2 [&>svg]:w-4 [&>svg]:h-4">
-                  {section.icon}
-                </span>
+                <span className="mr-2 h-4 w-4 [&>svg]:h-4 [&>svg]:w-4">{section.icon}</span>
               )}
               {section.label}
             </DropdownMenuItem>

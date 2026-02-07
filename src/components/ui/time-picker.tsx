@@ -1044,7 +1044,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
                     className={cn(
                       "relative flex h-8 w-8 items-center justify-center rounded-lg",
                       "text-[var(--foreground-muted)]",
-                      "hover:bg-[var(--background-subtle)] hover:text-[var(--foreground-default)]",
+                      "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-default)]",
                       "active:bg-[var(--background-error)] active:text-[var(--foreground-error)]",
                       "transition-all duration-200 ease-out",
                       "before:absolute before:inset-[-4px] before:content-['']"
@@ -1838,7 +1838,7 @@ const DateTimePicker = React.forwardRef<HTMLButtonElement, DateTimePickerProps>(
                           className={cn(
                             "flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-sm",
                             "transition-all duration-200",
-                            "hover:bg-[var(--background-subtle)]",
+                            "hover:bg-[var(--background-interactive-hover)]",
                             isSelected &&
                               "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
                             isAnimating && "scale-[0.96] bg-[var(--background-brand-muted)]"
