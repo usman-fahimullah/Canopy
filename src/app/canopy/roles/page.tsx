@@ -389,7 +389,7 @@ export default function RolesPage() {
     setError(null);
     try {
       const [rolesRes, templatesRes] = await Promise.all([
-        fetch("/api/canopy/roles"),
+        fetch("/api/canopy/roles?skip=0&take=100"),
         fetch("/api/canopy/templates"),
       ]);
 

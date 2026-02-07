@@ -73,3 +73,5 @@ export async function sendEmail(
 
 // Re-export templates
 export * from "./templates";
+export * from "./hiring-templates";
+export { renderTemplate } from "./render";

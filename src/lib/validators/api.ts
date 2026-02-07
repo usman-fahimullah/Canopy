@@ -281,6 +281,8 @@ export const CheckoutSchema = z.object({
     .int()
     .min(15, "Duration must be at least 15 minutes")
     .max(180, "Duration must be at most 180 minutes"),
+  sessionType: z.string().optional(),
+  notes: z.string().max(2000).optional(),
 });
 
 export const RefundSchema = z.object({

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { safeJsonParse } from "@/lib/safe-json";
 
 /**
  * PATCH /api/canopy/roles/[id]/applications/[appId]
@@ -61,18 +62,13 @@ export async function PATCH(
     }
 
     // Parse and validate the requested stage exists in job's pipeline
-    let validStages: { id: string; name: string }[] = [];
-    try {
-      validStages = JSON.parse(job.stages);
-    } catch {
-      validStages = [
-        { id: "applied", name: "Applied" },
-        { id: "screening", name: "Screening" },
-        { id: "interview", name: "Interview" },
-        { id: "offer", name: "Offer" },
-        { id: "hired", name: "Hired" },
-      ];
-    }
+    const validStages = safeJsonParse<{ id: string; name: string }[]>(job.stages, [
+      { id: "applied", name: "Applied" },
+      { id: "screening", name: "Screening" },
+      { id: "interview", name: "Interview" },
+      { id: "offer", name: "Offer" },
+      { id: "hired", name: "Hired" },
+    ]);
 
     const body = await request.json();
     const result = UpdateApplicationSchema.safeParse(body);
@@ -95,6 +91,56 @@ export async function PATCH(
       );
     }
 
+    // --- Offer stage: signal frontend to open the Offer Details Modal ---
+    if (stage === "offer") {
+      // Check if an offer already exists for this application
+      const existingOffer = await prisma.offerRecord.findUnique({
+        where: { applicationId: appId },
+        select: { id: true, status: true },
+      });
+
+      if (existingOffer) {
+        // Offer already exists — just update the stage
+        await prisma.application.updateMany({
+          where: { id: appId, jobId },
+          data: { stage, stageOrder },
+        });
+        return NextResponse.json({
+          success: true,
+          stage,
+          stageOrder,
+          offerId: existingOffer.id,
+          offerStatus: existingOffer.status,
+        });
+      }
+
+      // No offer exists — tell frontend to open the modal
+      return NextResponse.json({
+        success: true,
+        stage,
+        stageOrder,
+        requiresOfferModal: true,
+        applicationId: appId,
+      });
+    }
+
+    // --- Hired stage: verify offer is SIGNED before allowing ---
+    if (stage === "hired") {
+      const offer = await prisma.offerRecord.findUnique({
+        where: { applicationId: appId },
+        select: { id: true, status: true },
+      });
+
+      if (offer && offer.status !== "SIGNED") {
+        return NextResponse.json(
+          {
+            error: `Cannot move to hired: offer is in ${offer.status} status. Offer must be signed first.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Update the application — scoped to the correct job
     const updated = await prisma.application.updateMany({
       where: {
@@ -107,6 +153,7 @@ export async function PATCH(
         // Track milestones
         ...(stage === "hired" ? { hiredAt: new Date() } : {}),
         ...(stage === "rejected" ? { rejectedAt: new Date() } : {}),
+        ...(stage === "offer" ? { offeredAt: new Date() } : {}),
       },
     });
 

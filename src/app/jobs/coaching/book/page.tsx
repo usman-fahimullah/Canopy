@@ -61,19 +61,32 @@ export default function BookSessionPage() {
 
   // ---- Submit booking ----
   const handleBook = useCallback(async (booking: BookingData): Promise<{ sessionId: string }> => {
-    const res = await fetch("/api/sessions", {
+    // Create Stripe checkout session — the webhook will create Session + Booking after payment
+    const res = await fetch("/api/payments/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(booking),
+      body: JSON.stringify({
+        coachId: booking.coachId,
+        sessionDate: booking.scheduledAt,
+        sessionDuration: booking.duration,
+        sessionType: booking.sessionType,
+        notes: booking.notes,
+      }),
     });
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({}));
-      throw new Error(error.message || "Failed to create session. Please try again.");
+      throw new Error(error.message || error.error || "Failed to create checkout session. Please try again.");
     }
 
     const data = await res.json();
-    return { sessionId: data.session?.id || data.id || "new" };
+
+    // Redirect to Stripe-hosted checkout page
+    if (data.url) {
+      window.location.href = data.url;
+    }
+
+    return { sessionId: data.sessionId || "pending" };
   }, []);
 
   // ---- Success handler ----

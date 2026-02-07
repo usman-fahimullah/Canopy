@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import Stripe from "stripe";
 import { createSessionBookedNotifications } from "@/lib/notifications";
 import { logger, formatError } from "@/lib/logger";
+import { createAuditLog } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -88,6 +89,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const menteeId = metadata.menteeId;
   const sessionDate = new Date(metadata.sessionDate);
   const sessionDuration = parseInt(metadata.sessionDuration || "60");
+  const sessionType = metadata.sessionType || "ONE_ON_ONE";
+  const sessionNotes = metadata.notes || null;
   const coachPayout = parseInt(metadata.coachPayout || "0");
   const platformFee = parseInt(metadata.platformFee || "0");
 
@@ -139,6 +142,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         menteeId,
         scheduledAt: sessionDate,
         duration: sessionDuration,
+        title: sessionType !== "ONE_ON_ONE" ? sessionType : null,
+        menteeMessage: sessionNotes,
         status: "SCHEDULED",
         videoLink: coach.videoLink,
       },
@@ -168,6 +173,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     });
 
     return createdSession;
+  });
+
+  // Audit log: track payment completed
+  await createAuditLog({
+    action: "CREATE",
+    entityType: "Booking",
+    entityId: coachingSession.id,
+    changes: { status: { from: null, to: "PAID" } },
+    metadata: {
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId: session.payment_intent as string,
+      amount: session.amount_total,
+      webhookEvent: "checkout.session.completed",
+    },
   });
 
   // Send booking notifications to both parties
@@ -200,11 +219,23 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   });
 
   if (booking && booking.status !== "PAID") {
+    const previousStatus = booking.status;
     await prisma.booking.update({
       where: { id: booking.id },
       data: {
         status: "PAID",
         paidAt: new Date(),
+      },
+    });
+
+    await createAuditLog({
+      action: "UPDATE",
+      entityType: "Booking",
+      entityId: booking.id,
+      changes: { status: { from: previousStatus, to: "PAID" } },
+      metadata: {
+        stripePaymentIntentId: paymentIntent.id,
+        webhookEvent: "payment_intent.succeeded",
       },
     });
   }
@@ -230,6 +261,17 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
           cancelledAt: new Date(),
         },
       });
+    });
+
+    await createAuditLog({
+      action: "UPDATE",
+      entityType: "Booking",
+      entityId: booking.id,
+      changes: { status: { from: booking.status, to: "FAILED" } },
+      metadata: {
+        stripePaymentIntentId: paymentIntent.id,
+        webhookEvent: "payment_intent.payment_failed",
+      },
     });
   }
 }
@@ -262,6 +304,22 @@ async function handleRefund(charge: Stripe.Charge) {
           totalSessions: { decrement: 1 },
         },
       });
+    });
+
+    await createAuditLog({
+      action: "REFUND",
+      entityType: "Booking",
+      entityId: booking.id,
+      changes: {
+        status: { from: booking.status, to: isFullRefund ? "REFUNDED" : "PARTIALLY_REFUNDED" },
+        refundAmount: { from: booking.refundAmount || 0, to: refundAmount },
+      },
+      metadata: {
+        stripeChargeId: charge.id,
+        stripePaymentIntentId: charge.payment_intent,
+        webhookEvent: "charge.refunded",
+        isFullRefund,
+      },
     });
   }
 }

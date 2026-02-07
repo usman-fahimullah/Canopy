@@ -11,7 +11,9 @@ export type CareerPageSection =
   | BenefitsSection
   | TeamSection
   | OpenRolesSection
-  | CTASection;
+  | CTASection
+  | TestimonialsSection
+  | FAQSection;
 
 export interface HeroSection {
   type: "hero";
@@ -61,6 +63,18 @@ export interface CTASection {
   type: "cta";
   headline: string;
   buttonText: string;
+}
+
+export interface TestimonialsSection {
+  type: "testimonials";
+  title: string;
+  items: Array<{ quote: string; author: string; role: string; photo?: string }>;
+}
+
+export interface FAQSection {
+  type: "faq";
+  title: string;
+  items: Array<{ question: string; answer: string }>;
 }
 
 export interface CareerPageTheme {

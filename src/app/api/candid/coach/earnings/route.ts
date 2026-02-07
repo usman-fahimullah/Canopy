@@ -30,40 +30,32 @@ export async function GET() {
     const totalEarnings = account.coachProfile.totalEarnings;
     const totalSessions = account.coachProfile.totalSessions;
 
-    // Get paid bookings for monthly breakdown
-    const bookings = await prisma.booking.findMany({
-      where: {
-        coachId,
-        status: { in: ["PAID", "REFUNDED", "PARTIALLY_REFUNDED"] },
-      },
-      select: {
-        coachPayout: true,
-        paidAt: true,
-        status: true,
-        refundAmount: true,
-      },
-      orderBy: { paidAt: "desc" },
-      take: 200,
+    // Monthly breakdown (last 6 months) — use per-month SQL aggregates
+    const now = new Date();
+    const monthlyBreakdown: { month: string; earnings: number; sessions: number }[] = [];
+
+    const monthQueries = Array.from({ length: 6 }, (_, i) => {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+      return prisma.booking.aggregate({
+        where: {
+          coachId,
+          status: { in: ["PAID", "REFUNDED", "PARTIALLY_REFUNDED"] },
+          paidAt: { gte: monthStart, lte: monthEnd },
+        },
+        _sum: { coachPayout: true },
+        _count: { _all: true },
+      });
     });
 
-    // Monthly breakdown (last 6 months)
-    const monthlyBreakdown: { month: string; earnings: number; sessions: number }[] = [];
-    const now = new Date();
-
+    const monthResults = await Promise.all(monthQueries);
     for (let i = 0; i < 6; i++) {
       const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
       const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, "0")}`;
-
-      const monthBookings = bookings.filter((b) => {
-        if (!b.paidAt) return false;
-        return b.paidAt >= monthDate && b.paidAt <= monthEnd;
-      });
-
       monthlyBreakdown.push({
         month: monthKey,
-        earnings: monthBookings.reduce((sum, b) => sum + b.coachPayout, 0),
-        sessions: monthBookings.length,
+        earnings: monthResults[i]._sum.coachPayout ?? 0,
+        sessions: monthResults[i]._count._all,
       });
     }
 

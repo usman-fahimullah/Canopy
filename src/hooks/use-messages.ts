@@ -95,6 +95,20 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
     }
   }, [conversationId, fetchMessages]);
 
+  // Cache of participant sender info (populated from initial message fetch)
+  const senderCacheRef = useRef<
+    Map<string, { id: string; name: string | null; avatar: string | null }>
+  >(new Map());
+
+  // Build sender cache whenever messages load
+  useEffect(() => {
+    messages.forEach((msg) => {
+      if (msg.sender && !senderCacheRef.current.has(msg.senderId)) {
+        senderCacheRef.current.set(msg.senderId, msg.sender);
+      }
+    });
+  }, [messages]);
+
   // Subscribe to realtime message inserts for this conversation
   useEffect(() => {
     if (!conversationId) return;
@@ -112,12 +126,42 @@ export function useMessages({ conversationId, limit = 50 }: UseMessagesOptions) 
           filter: `conversationId=eq.${conversationId}`,
         },
         (payload) => {
-          // Only add if we're still on this conversation
+          // Only process if we're still on this conversation
           if (currentConversationRef.current !== conversationId) return;
 
-          // payload.new has the raw record; we need to add sender info
-          // For simplicity, refetch latest messages
-          fetchMessages();
+          const newRecord = payload.new as {
+            id: string;
+            content: string;
+            senderId: string;
+            conversationId: string;
+            createdAt: string;
+            attachmentUrls: string[] | null;
+          };
+
+          // Surgically add to local state instead of full refetch
+          setMessages((prev) => {
+            // Skip if we already have this message (from optimistic add in sendMessage)
+            if (prev.some((m) => m.id === newRecord.id)) return prev;
+
+            // Look up sender info from cache
+            const cachedSender = senderCacheRef.current.get(newRecord.senderId);
+            if (!cachedSender) {
+              // Sender not in cache — fall back to refetch to get full sender info
+              fetchMessages();
+              return prev;
+            }
+
+            const newMessage: MessageItem = {
+              id: newRecord.id,
+              content: newRecord.content,
+              senderId: newRecord.senderId,
+              attachmentUrls: newRecord.attachmentUrls || [],
+              createdAt: newRecord.createdAt,
+              sender: cachedSender,
+            };
+
+            return [...prev, newMessage];
+          });
         }
       )
       .subscribe();

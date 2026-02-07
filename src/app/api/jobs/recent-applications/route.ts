@@ -27,28 +27,44 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden: talent profile required" }, { status: 403 });
     }
 
-    // In production, fetch from database for the authenticated user
-    // For now, return mock data matching the RecentItem interface
-    const recentApplications = [
-      {
-        id: "app_001",
-        title: "Solar Project Engineer at Solaris Energy",
-        subtitle: "Applied 2d ago",
-        href: "/jobs/applications/app_001",
+    // Fetch real recent applications from database
+    const applications = await prisma.application.findMany({
+      where: { seekerId: account.seekerProfile.id },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        stage: true,
+        createdAt: true,
+        job: {
+          select: {
+            title: true,
+            organization: {
+              select: { name: true },
+            },
+          },
+        },
       },
-      {
-        id: "app_002",
-        title: "ESG Analyst at GreenLeaf Analytics",
-        subtitle: "Applied 5d ago",
-        href: "/jobs/applications/app_002",
-      },
-      {
-        id: "app_003",
-        title: "Climate Policy Advisor at Verdant Systems",
-        subtitle: "Applied 1w ago",
-        href: "/jobs/applications/app_003",
-      },
-    ];
+    });
+
+    // Format relative time for subtitle
+    const now = Date.now();
+    const formatRelativeTime = (date: Date): string => {
+      const diffMs = now - date.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) return "Applied today";
+      if (diffDays === 1) return "Applied 1d ago";
+      if (diffDays < 7) return `Applied ${diffDays}d ago`;
+      if (diffDays < 30) return `Applied ${Math.floor(diffDays / 7)}w ago`;
+      return `Applied ${Math.floor(diffDays / 30)}mo ago`;
+    };
+
+    const recentApplications = applications.map((app) => ({
+      id: app.id,
+      title: `${app.job.title} at ${app.job.organization.name}`,
+      subtitle: formatRelativeTime(app.createdAt),
+      href: `/jobs/applications/${app.id}`,
+    }));
 
     return NextResponse.json(recentApplications);
   } catch (error) {

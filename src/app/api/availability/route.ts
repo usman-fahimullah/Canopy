@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
 import { UpdateAvailabilitySchema } from "@/lib/validators/api";
+import { safeJsonParse } from "@/lib/safe-json";
 
 // GET — get current coach's availability settings
 export async function GET() {
@@ -26,7 +27,7 @@ export async function GET() {
     const coach = account.coachProfile;
 
     return NextResponse.json({
-      availability: coach.availability ? JSON.parse(coach.availability) : null,
+      availability: safeJsonParse(coach.availability, null),
       sessionDuration: coach.sessionDuration,
       bufferTime: coach.bufferTime,
       maxSessionsPerWeek: coach.maxSessionsPerWeek,
@@ -92,7 +93,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      availability: updated.availability ? JSON.parse(updated.availability) : null,
+      availability: safeJsonParse(updated.availability, null),
       sessionDuration: updated.sessionDuration,
       bufferTime: updated.bufferTime,
       maxSessionsPerWeek: updated.maxSessionsPerWeek,

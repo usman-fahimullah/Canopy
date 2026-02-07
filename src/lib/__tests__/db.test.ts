@@ -8,6 +8,7 @@ vi.mock("@prisma/client", () => {
   class MockPrismaClient {
     $connect = vi.fn();
     $disconnect = vi.fn();
+    $extends = vi.fn().mockReturnThis();
     account = {};
     job = {};
 

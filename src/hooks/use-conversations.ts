@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useDebouncedCallback } from "use-debounce";
 import { logger, formatError } from "@/lib/logger";
 
 export interface ConversationListItem {
@@ -49,22 +50,77 @@ export function useConversations() {
     fetchConversations();
   }, [fetchConversations]);
 
-  // Subscribe to realtime updates for new messages
+  // Debounced refetch — batches rapid message events into a single API call
+  const debouncedRefetch = useDebouncedCallback(fetchConversations, 500);
+
+  // Track conversation IDs for scoped subscription
+  const conversationIdsRef = useRef<string[]>([]);
+  useEffect(() => {
+    conversationIdsRef.current = conversations.map((c) => c.id);
+  }, [conversations]);
+
+  // Subscribe to realtime updates scoped to user's conversations
   useEffect(() => {
     const supabase = createClient();
+    const convIds = conversationIdsRef.current;
+
+    // Build a scoped filter if we have conversations, otherwise listen broadly
+    const filterConfig =
+      convIds.length > 0
+        ? { filter: `conversationId=in.(${convIds.join(",")})` }
+        : {};
 
     const channel = supabase
       .channel("conversations-updates")
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "Message",
+          ...filterConfig,
         },
-        () => {
-          // Refetch conversation list on any message change
-          fetchConversations();
+        (payload) => {
+          const newRecord = payload.new as {
+            id: string;
+            content: string;
+            senderId: string;
+            conversationId: string;
+            createdAt: string;
+          };
+
+          // Surgically update the matching conversation in local state
+          setConversations((prev) => {
+            const idx = prev.findIndex((c) => c.id === newRecord.conversationId);
+            if (idx === -1) {
+              // New conversation we don't have yet — debounced full refetch
+              debouncedRefetch();
+              return prev;
+            }
+
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              lastMessageAt: newRecord.createdAt,
+              lastMessage: {
+                id: newRecord.id,
+                content: newRecord.content,
+                senderId: newRecord.senderId,
+                createdAt: newRecord.createdAt,
+              },
+              // Increment unread count (will be corrected on next full fetch)
+              unreadCount: updated[idx].unreadCount + 1,
+            };
+
+            // Re-sort by lastMessageAt (most recent first)
+            updated.sort((a, b) => {
+              const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+              const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+              return bTime - aTime;
+            });
+
+            return updated;
+          });
         }
       )
       .subscribe();
@@ -72,7 +128,7 @@ export function useConversations() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchConversations]);
+  }, [debouncedRefetch]);
 
   const createConversation = useCallback(
     async (recipientAccountId: string, initialMessage?: string) => {

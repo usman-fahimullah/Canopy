@@ -307,6 +307,41 @@ export default function JobsPage() {
         if (filtersToUse.workplace !== "all") {
           params.set("locationType", filtersToUse.workplace);
         }
+        if (filtersToUse.datePosted !== "all") {
+          const now = new Date();
+          let publishedAfter: Date;
+          switch (filtersToUse.datePosted) {
+            case "24h":
+              publishedAfter = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+              break;
+            case "week":
+              publishedAfter = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+              break;
+            case "month":
+              publishedAfter = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+              break;
+            default:
+              publishedAfter = new Date(0);
+          }
+          params.set("publishedAfter", publishedAfter.toISOString());
+        }
+        if (filtersToUse.experience !== "all") {
+          params.set("experienceLevel", filtersToUse.experience);
+        }
+        if (filtersToUse.pathway) {
+          params.set("climateCategory", filtersToUse.pathway);
+        }
+        if (filtersToUse.salary) {
+          const salaryMap: Record<string, string> = {
+            "50k": "50000",
+            "75k": "75000",
+            "100k": "100000",
+            "150k": "150000",
+          };
+          if (salaryMap[filtersToUse.salary]) {
+            params.set("minSalary", salaryMap[filtersToUse.salary]);
+          }
+        }
 
         const res = await fetch(`/api/jobs/matches?${params.toString()}`);
         if (res.ok) {
@@ -410,6 +445,10 @@ export default function JobsPage() {
       if (location.trim()) params.set("location", location.trim());
       if (activeFilters.bipocOwned) params.set("bipocOwned", "true");
       if (activeFilters.workplace !== "all") params.set("workplace", activeFilters.workplace);
+      if (activeFilters.datePosted !== "all") params.set("datePosted", activeFilters.datePosted);
+      if (activeFilters.experience !== "all") params.set("experience", activeFilters.experience);
+      if (activeFilters.pathway) params.set("pathway", activeFilters.pathway);
+      if (activeFilters.salary) params.set("salary", activeFilters.salary);
 
       const newUrl = params.toString() ? `/jobs/search?${params.toString()}` : "/jobs/search";
       router.push(newUrl, { scroll: false });
@@ -449,6 +488,66 @@ export default function JobsPage() {
   const setWorkplaceFilter = useCallback(
     async (workplace: WorkplaceFilter) => {
       const newFilters = { ...filters, workplace };
+      setFilters(newFilters);
+      setHasSearched(true);
+
+      updateUrl(searchQuery, locationQuery, newFilters);
+
+      setSearching(true);
+      await fetchJobs(searchQuery, locationQuery, newFilters);
+      setSearching(false);
+    },
+    [filters, searchQuery, locationQuery, fetchJobs, updateUrl]
+  );
+
+  const setDatePostedFilter = useCallback(
+    async (datePosted: DatePostedFilter) => {
+      const newFilters = { ...filters, datePosted };
+      setFilters(newFilters);
+      setHasSearched(true);
+
+      updateUrl(searchQuery, locationQuery, newFilters);
+
+      setSearching(true);
+      await fetchJobs(searchQuery, locationQuery, newFilters);
+      setSearching(false);
+    },
+    [filters, searchQuery, locationQuery, fetchJobs, updateUrl]
+  );
+
+  const setExperienceFilter = useCallback(
+    async (experience: ExperienceFilter) => {
+      const newFilters = { ...filters, experience };
+      setFilters(newFilters);
+      setHasSearched(true);
+
+      updateUrl(searchQuery, locationQuery, newFilters);
+
+      setSearching(true);
+      await fetchJobs(searchQuery, locationQuery, newFilters);
+      setSearching(false);
+    },
+    [filters, searchQuery, locationQuery, fetchJobs, updateUrl]
+  );
+
+  const setPathwayFilter = useCallback(
+    async (pathway: string) => {
+      const newFilters = { ...filters, pathway };
+      setFilters(newFilters);
+      setHasSearched(true);
+
+      updateUrl(searchQuery, locationQuery, newFilters);
+
+      setSearching(true);
+      await fetchJobs(searchQuery, locationQuery, newFilters);
+      setSearching(false);
+    },
+    [filters, searchQuery, locationQuery, fetchJobs, updateUrl]
+  );
+
+  const setSalaryFilter = useCallback(
+    async (salary: string) => {
+      const newFilters = { ...filters, salary };
       setFilters(newFilters);
       setHasSearched(true);
 
@@ -536,10 +635,10 @@ export default function JobsPage() {
                 </Chip>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem onSelect={() => {}}>Any time</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => {}}>Past 24 hours</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => {}}>Past week</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => {}}>Past month</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("all")}>Any time</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("24h")}>Past 24 hours</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("week")}>Past week</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDatePostedFilter("month")}>Past month</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -564,10 +663,54 @@ export default function JobsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <FilterChip label="Experience" hasDropdown />
-            <FilterChip label="Pathways" hasDropdown />
-            <FilterChip label="Job Role" hasDropdown />
-            <FilterChip label="Salary" hasDropdown />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Chip variant="neutral" size="lg" selected={filters.experience !== "all"}>
+                  Experience
+                  <CaretDown size={16} weight="bold" />
+                </Chip>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onSelect={() => setExperienceFilter("all")}>All levels</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("entry")}>Entry level</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("mid")}>Mid level</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("senior")}>Senior level</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setExperienceFilter("executive")}>Executive</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Chip variant="neutral" size="lg" selected={!!filters.pathway}>
+                  Pathways
+                  <CaretDown size={16} weight="bold" />
+                </Chip>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onSelect={() => setPathwayFilter("")}>All pathways</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("agriculture")}>Agriculture</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("conservation")}>Conservation</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("construction")}>Construction</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("education")}>Education</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setPathwayFilter("energy")}>Energy</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Chip variant="neutral" size="lg" selected={!!filters.salary}>
+                  Salary
+                  <CaretDown size={16} weight="bold" />
+                </Chip>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onSelect={() => setSalaryFilter("")}>Any salary</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSalaryFilter("50k")}>$50k+</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSalaryFilter("75k")}>$75k+</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSalaryFilter("100k")}>$100k+</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setSalaryFilter("150k")}>$150k+</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button variant="outline" size="sm">
               <Faders size={16} weight="bold" />
@@ -623,6 +766,19 @@ export default function JobsPage() {
                 onClick: clearSearch,
               }}
             />
+          )}
+
+          {/* Load More */}
+          {displayJobs.length > 0 && displayJobs.length >= 24 && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={() => fetchJobs(searchQuery, locationQuery, filters)}
+                disabled={searching}
+              >
+                {searching ? "Loading..." : "Load More Jobs"}
+              </Button>
+            </div>
           )}
         </div>
       </div>

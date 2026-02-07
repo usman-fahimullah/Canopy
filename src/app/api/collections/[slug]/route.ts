@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { JobStatus } from "@prisma/client";
+import { safeJsonParse } from "@/lib/safe-json";
 
 /**
  * GET /api/collections/[slug]
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       title: collection.title,
       slug: collection.slug,
       description: collection.description,
-      gradientColors: collection.gradientColors ? JSON.parse(collection.gradientColors) : null,
+      gradientColors: safeJsonParse(collection.gradientColors, null),
       backgroundImage: collection.backgroundImage,
       isFeatured: collection.isFeatured,
       displayOrder: collection.displayOrder,

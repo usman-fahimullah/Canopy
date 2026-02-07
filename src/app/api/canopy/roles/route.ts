@@ -10,7 +10,15 @@ import { z } from "zod";
  * Returns the authenticated employer's organization roles (all statuses).
  * Includes pathway/category info and application counts for the roles table.
  */
-export async function GET() {
+const GetRolesSchema = z.object({
+  skip: z.coerce.number().int().min(0).default(0),
+  take: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.enum(["DRAFT", "PUBLISHED", "PAUSED", "CLOSED"]).optional(),
+  employmentType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"]).optional(),
+  locationType: z.enum(["ONSITE", "REMOTE", "HYBRID"]).optional(),
+});
+
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
     const {
@@ -36,32 +44,56 @@ export async function GET() {
 
     const organizationId = account.orgMemberships[0].organizationId;
 
-    const jobs = await prisma.job.findMany({
-      where: { organizationId },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        location: true,
-        locationType: true,
-        status: true,
-        publishedAt: true,
-        closesAt: true,
-        climateCategory: true,
-        pathway: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            icon: true,
-            color: true,
+    // Parse and validate query params
+    const params = GetRolesSchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
+    if (!params.success) {
+      return NextResponse.json(
+        { error: "Invalid parameters", details: params.error.flatten() },
+        { status: 422 }
+      );
+    }
+
+    const { skip, take, status, employmentType, locationType } = params.data;
+
+    // Build where clause with filters
+    const where = {
+      organizationId,
+      ...(status ? { status } : {}),
+      ...(employmentType ? { employmentType } : {}),
+      ...(locationType ? { locationType } : {}),
+    };
+
+    // Execute count and findMany in parallel
+    const [jobs, total] = await Promise.all([
+      prisma.job.findMany({
+        where,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          location: true,
+          locationType: true,
+          status: true,
+          publishedAt: true,
+          closesAt: true,
+          climateCategory: true,
+          pathway: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+              color: true,
+            },
           },
+          _count: { select: { applications: true } },
         },
-        _count: { select: { applications: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    });
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+      prisma.job.count({ where }),
+    ]);
 
     const formattedJobs = jobs.map((job) => ({
       id: job.id,
@@ -77,7 +109,15 @@ export async function GET() {
       applicationCount: job._count.applications,
     }));
 
-    return NextResponse.json({ jobs: formattedJobs });
+    return NextResponse.json({
+      jobs: formattedJobs,
+      meta: {
+        total,
+        skip,
+        take,
+        hasMore: skip + take < total,
+      },
+    });
   } catch (error) {
     logger.error("Error fetching employer roles", {
       error: formatError(error),

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         { status: 422 }
       );
     }
-    const { coachId, sessionDate, sessionDuration } = result.data;
+    const { coachId, sessionDate, sessionDuration, sessionType, notes } = result.data;
 
     // Get coach profile
     const coach = await prisma.coachProfile.findUnique({
@@ -99,6 +99,8 @@ export async function POST(request: NextRequest) {
           menteeId: mentee.id,
           sessionDate,
           sessionDuration: sessionDuration.toString(),
+          ...(sessionType && { sessionType }),
+          ...(notes && { notes }),
         },
       },
       customer_email: user.email,
@@ -111,6 +113,8 @@ export async function POST(request: NextRequest) {
         sessionDuration: sessionDuration.toString(),
         coachPayout: coachPayout.toString(),
         platformFee: platformFee.toString(),
+        ...(sessionType && { sessionType }),
+        ...(notes && { notes }),
       },
     });
 

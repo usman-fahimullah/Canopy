@@ -9,51 +9,39 @@ export async function GET(request: NextRequest) {
     if (!account) return unauthorizedResponse();
     if (!isAdminAccount(account)) return forbiddenResponse();
 
-    // Get metrics in parallel
+    // Get metrics in parallel using SQL aggregates instead of in-memory calculations
     const [
       pendingApplications,
       activeCoaches,
       totalSessions,
-      bookings,
-      reviews,
+      revenueAgg,
+      reviewAgg,
     ] = await Promise.all([
-      // Pending coach applications
       prisma.coachProfile.count({
         where: { status: "PENDING" },
       }),
-
-      // Active coaches
       prisma.coachProfile.count({
         where: { status: "ACTIVE" },
       }),
-
-      // Total completed sessions
       prisma.session.count({
         where: { status: "COMPLETED" },
       }),
-
-      // Get bookings for revenue calculation
-      prisma.booking.findMany({
+      // Use Prisma aggregate for revenue instead of loading all bookings
+      prisma.booking.aggregate({
         where: { status: "PAID" },
-        select: { platformFee: true },
-        take: 1000,
+        _sum: { platformFee: true },
+        _count: { _all: true },
       }),
-
-      // Get reviews for average rating
-      prisma.review.findMany({
+      // Use Prisma aggregate for ratings instead of loading all reviews
+      prisma.review.aggregate({
         where: { isVisible: true },
-        select: { rating: true },
-        take: 1000,
+        _avg: { rating: true },
+        _count: { _all: true },
       }),
     ]);
 
-    // Calculate total platform revenue
-    const totalRevenue = bookings.reduce((sum, b) => sum + b.platformFee, 0);
-
-    // Calculate average rating
-    const avgRating = reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0;
+    const totalRevenue = revenueAgg._sum.platformFee ?? 0;
+    const avgRating = reviewAgg._avg.rating ?? 0;
 
     // Extended analytics if requested
     const { searchParams } = new URL(request.url);
@@ -110,11 +98,16 @@ export async function GET(request: NextRequest) {
         revenueByMonth[key].fees += b.platformFee;
       }
 
-      // Rating distribution
+      // Rating distribution via SQL groupBy
+      const ratingGroupBy = await prisma.review.groupBy({
+        by: ["rating"],
+        where: { isVisible: true },
+        _count: { _all: true },
+      });
       const ratingDist = [0, 0, 0, 0, 0]; // index 0 = 1 star, index 4 = 5 stars
-      for (const r of reviews) {
+      for (const r of ratingGroupBy) {
         if (r.rating >= 1 && r.rating <= 5) {
-          ratingDist[r.rating - 1]++;
+          ratingDist[r.rating - 1] = r._count._all;
         }
       }
 
@@ -140,8 +133,8 @@ export async function GET(request: NextRequest) {
       totalSessions,
       totalRevenue,
       avgRating,
-      totalReviews: reviews.length,
-      totalBookings: bookings.length,
+      totalReviews: reviewAgg._count._all,
+      totalBookings: revenueAgg._count._all,
       ...analytics,
     });
   } catch (error) {

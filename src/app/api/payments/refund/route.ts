@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { paymentLimiter } from "@/lib/rate-limit";
 import { logger, formatError } from "@/lib/logger";
 import { RefundSchema } from "@/lib/validators/api";
+import { createAuditLog } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -147,6 +148,29 @@ export async function POST(request: NextRequest) {
           totalSessions: { decrement: 1 },
         },
       });
+    });
+
+    // Audit log: track refund
+    const account = await prisma.account.findUnique({
+      where: { supabaseId: user.id },
+      select: { id: true },
+    });
+    await createAuditLog({
+      action: "REFUND",
+      entityType: "Booking",
+      entityId: booking.id,
+      userId: account?.id,
+      changes: {
+        status: { from: booking.status, to: refundPercent === 100 ? "REFUNDED" : "PARTIALLY_REFUNDED" },
+        refundAmount: { from: 0, to: refundAmount },
+      },
+      metadata: {
+        stripeRefundId: refund.id,
+        refundPercent,
+        reason: refundReason,
+        cancelledBy: isMentee ? "mentee" : "coach",
+        ip,
+      },
     });
 
     return NextResponse.json({

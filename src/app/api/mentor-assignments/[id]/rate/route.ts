@@ -88,19 +88,18 @@ export async function POST(
         },
       });
 
-      const allReviews = await tx.mentorReview.findMany({
+      // Use SQL aggregate instead of loading all reviews into memory
+      const reviewAgg = await tx.mentorReview.aggregate({
         where: { mentorId: assignment.mentorId },
-        select: { rating: true },
+        _avg: { rating: true },
+        _count: { _all: true },
       });
-
-      const avgRating =
-        allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
 
       await tx.seekerProfile.update({
         where: { id: assignment.mentorId },
         data: {
-          mentorRating: Math.round(avgRating * 10) / 10,
-          mentorReviewCount: allReviews.length,
+          mentorRating: Math.round((reviewAgg._avg.rating ?? 0) * 10) / 10,
+          mentorReviewCount: reviewAgg._count._all,
         },
       });
 

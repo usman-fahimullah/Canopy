@@ -8,6 +8,7 @@ import { DashboardChecklist } from "@/components/shell/dashboard-checklist";
 import { Spinner } from "@/components/ui/spinner";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { UpcomingInterviewsWidget } from "@/components/canopy/UpcomingInterviewsWidget";
 import {
   BriefcaseMetal,
   Users,
@@ -345,6 +346,11 @@ export default function EmployerDashboardPage() {
             </p>
           </div>
         )}
+      </section>
+
+      {/* Upcoming Interviews Widget */}
+      <section className="px-8 py-6 lg:px-12">
+        <UpcomingInterviewsWidget />
       </section>
 
       {/* Hiring Pipeline */}

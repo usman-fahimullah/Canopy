@@ -75,3 +75,24 @@ export function unauthorizedResponse() {
 export function forbiddenResponse(message = "Admin access required") {
   return NextResponse.json({ error: message }, { status: 403 });
 }
+
+/**
+ * Get the current organization for an authenticated user.
+ * Returns the first organization the user is a member of.
+ * Use this in API routes to scope data by organization.
+ *
+ * @param accountId - The Account ID (not Supabase user ID)
+ * @returns The Organization object or null if user has no memberships
+ */
+export async function getCurrentOrganization(accountId: string) {
+  const member = await prisma.organizationMember.findFirst({
+    where: {
+      accountId,
+    },
+    include: {
+      organization: true,
+    },
+  });
+
+  return member?.organization || null;
+}

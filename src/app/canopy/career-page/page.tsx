@@ -8,10 +8,14 @@ import { Switch, SwitchWithLabel } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
 import { Banner } from "@/components/ui/banner";
 import { FormCard, FormSection, FormField } from "@/components/ui/form-section";
-import { Plus, Trash, DotsSixVertical, Eye, ArrowSquareOut, Globe } from "@phosphor-icons/react";
+import { Plus, Trash, DotsSixVertical, Eye, ArrowSquareOut, Globe, Quotes, Question } from "@phosphor-icons/react";
 import type { CareerPageConfig, CareerPageSection } from "@/lib/career-pages/types";
 import { DEFAULT_CAREER_PAGE_CONFIG } from "@/lib/career-pages/default-template";
 import { logger, formatError } from "@/lib/logger";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { SimpleRichTextEditor } from "@/components/ui/rich-text-editor";
 
 interface CareerPageData {
   slug: string | null;
@@ -30,7 +34,63 @@ const SECTION_LABELS: Record<string, string> = {
   team: "Team Members",
   openRoles: "Open Positions",
   cta: "Call to Action",
+  testimonials: "Testimonials",
+  faq: "FAQ",
 };
+
+// =====================================================================
+// SortableSectionItem — drag-and-drop list item
+// =====================================================================
+
+function SortableSectionItem({
+  section,
+  index,
+  isSelected,
+  onSelect,
+  onDelete,
+}: {
+  section: CareerPageSection;
+  index: number;
+  isSelected: boolean;
+  onSelect: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: `section-${index}`,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group flex items-center gap-2 rounded-xl px-3 py-2.5 transition-colors cursor-pointer ${
+        isSelected
+          ? "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand-emphasis)]"
+          : "text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
+      }`}
+      onClick={onSelect}
+    >
+      <button {...attributes} {...listeners} className="cursor-grab touch-none">
+        <DotsSixVertical size={16} weight="bold" />
+      </button>
+      <span className="flex-1 text-sm font-medium truncate">
+        {SECTION_LABELS[section.type] || section.type}
+      </span>
+      <button
+        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        className="opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <Trash size={14} className="text-[var(--foreground-muted)] hover:text-[var(--foreground-error)]" />
+      </button>
+    </div>
+  );
+}
 
 export default function CareerPageEditor() {
   const [loading, setLoading] = React.useState(true);
@@ -43,6 +103,12 @@ export default function CareerPageEditor() {
   const [enabled, setEnabled] = React.useState(false);
   const [slug, setSlug] = React.useState("");
   const [selectedSectionIndex, setSelectedSectionIndex] = React.useState<number | null>(null);
+
+  // Drag-and-drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor)
+  );
 
   // Fetch current config
   React.useEffect(() => {
@@ -130,6 +196,28 @@ export default function CareerPageEditor() {
         i === index ? ({ ...s, ...updates } as CareerPageSection) : s
       ),
     }));
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = parseInt(active.id.replace("section-", ""));
+    const newIndex = parseInt(over.id.replace("section-", ""));
+
+    const newSections = arrayMove(config.sections, oldIndex, newIndex);
+    setConfig({ ...config, sections: newSections });
+
+    // Adjust selected index
+    if (selectedSectionIndex === oldIndex) {
+      setSelectedSectionIndex(newIndex);
+    } else if (selectedSectionIndex !== null) {
+      if (oldIndex < selectedSectionIndex && newIndex >= selectedSectionIndex) {
+        setSelectedSectionIndex(selectedSectionIndex - 1);
+      } else if (oldIndex > selectedSectionIndex && newIndex <= selectedSectionIndex) {
+        setSelectedSectionIndex(selectedSectionIndex + 1);
+      }
+    }
   };
 
   if (loading) {
@@ -270,31 +358,27 @@ export default function CareerPageEditor() {
             <AddSectionMenu onAdd={addSection} />
           </div>
 
-          {config.sections.map((section, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedSectionIndex(index)}
-              className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
-                selectedSectionIndex === index
-                  ? "border-[var(--border-brand)] bg-[var(--background-brand-subtle)]"
-                  : "border-[var(--border-muted)] hover:border-[var(--border-default)]"
-              }`}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={config.sections.map((_, i) => `section-${i}`)}
+              strategy={verticalListSortingStrategy}
             >
-              <DotsSixVertical size={16} className="shrink-0 text-[var(--foreground-subtle)]" />
-              <span className="flex-1 font-medium text-[var(--foreground-default)]">
-                {SECTION_LABELS[section.type] || section.type}
-              </span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeSection(index);
-                }}
-                className="rounded p-1 text-[var(--foreground-subtle)] hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]"
-              >
-                <Trash size={14} />
-              </button>
-            </button>
-          ))}
+              {config.sections.map((section, index) => (
+                <SortableSectionItem
+                  key={index}
+                  section={section}
+                  index={index}
+                  isSelected={selectedSectionIndex === index}
+                  onSelect={() => setSelectedSectionIndex(index)}
+                  onDelete={() => removeSection(index)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* Right: Section Editor */}
@@ -334,6 +418,8 @@ function AddSectionMenu({ onAdd }: { onAdd: (type: CareerPageSection["type"]) =>
     "team",
     "openRoles",
     "cta",
+    "testimonials",
+    "faq",
   ];
 
   return (
@@ -350,8 +436,10 @@ function AddSectionMenu({ onAdd }: { onAdd: (type: CareerPageSection["type"]) =>
                 onAdd(type);
                 setOpen(false);
               }}
-              className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--background-interactive-hover)]"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-[var(--background-interactive-hover)]"
             >
+              {type === "testimonials" && <Quotes size={16} weight="bold" />}
+              {type === "faq" && <Question size={16} weight="bold" />}
               {SECTION_LABELS[type]}
             </button>
           ))}
@@ -384,19 +472,6 @@ function SectionEditor({
         title={SECTION_LABELS[section.type] || section.type}
         description={`Edit the content for this ${section.type} section`}
       >
-        <div className="mb-4 flex gap-2">
-          <Button variant="tertiary" size="sm" disabled={index === 0} onClick={() => onMove("up")}>
-            Move Up
-          </Button>
-          <Button
-            variant="tertiary"
-            size="sm"
-            disabled={index === total - 1}
-            onClick={() => onMove("down")}
-          >
-            Move Down
-          </Button>
-        </div>
 
         {section.type === "hero" && (
           <div className="space-y-4">
@@ -435,12 +510,9 @@ function SectionEditor({
               />
             </FormField>
             <FormField label="Content">
-              <textarea
-                id="about-content"
-                value={section.content}
-                onChange={(e) => onUpdate({ content: e.target.value })}
-                rows={5}
-                className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-background)] px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+              <SimpleRichTextEditor
+                value={(section as any).content || ""}
+                onChange={(html) => onUpdate({ content: html })}
               />
             </FormField>
             <FormField label="Image URL (optional)">
@@ -650,6 +722,140 @@ function SectionEditor({
             </FormField>
           </div>
         )}
+
+        {section.type === "testimonials" && (
+          <div className="space-y-4">
+            <FormField label="Section Title">
+              <Input
+                id="testimonials-title"
+                value={section.title}
+                onChange={(e) => onUpdate({ title: e.target.value })}
+              />
+            </FormField>
+            {section.items.map((item, i) => (
+              <div key={i} className="space-y-2 rounded-lg border border-[var(--border-muted)] p-3">
+                <Label className="text-caption-strong">Testimonial {i + 1}</Label>
+                <Input
+                  placeholder="Quote"
+                  value={item.quote}
+                  onChange={(e) => {
+                    const items = [...section.items];
+                    items[i] = { ...items[i], quote: e.target.value };
+                    onUpdate({ items });
+                  }}
+                />
+                <Input
+                  placeholder="Author Name"
+                  value={item.author}
+                  onChange={(e) => {
+                    const items = [...section.items];
+                    items[i] = { ...items[i], author: e.target.value };
+                    onUpdate({ items });
+                  }}
+                />
+                <Input
+                  placeholder="Author Role"
+                  value={item.role}
+                  onChange={(e) => {
+                    const items = [...section.items];
+                    items[i] = { ...items[i], role: e.target.value };
+                    onUpdate({ items });
+                  }}
+                />
+                <Input
+                  placeholder="Photo URL (optional)"
+                  value={item.photo || ""}
+                  onChange={(e) => {
+                    const items = [...section.items];
+                    items[i] = { ...items[i], photo: e.target.value || undefined };
+                    onUpdate({ items });
+                  }}
+                />
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => {
+                    const items = section.items.filter((_, idx) => idx !== i);
+                    onUpdate({ items });
+                  }}
+                >
+                  <Trash size={14} className="mr-1.5" />
+                  Remove
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                const items = [...section.items, { quote: "", author: "", role: "", photo: undefined }];
+                onUpdate({ items });
+              }}
+            >
+              <Plus size={14} className="mr-1.5" />
+              Add Testimonial
+            </Button>
+          </div>
+        )}
+
+        {section.type === "faq" && (
+          <div className="space-y-4">
+            <FormField label="Section Title">
+              <Input
+                id="faq-title"
+                value={section.title}
+                onChange={(e) => onUpdate({ title: e.target.value })}
+              />
+            </FormField>
+            {section.items.map((item, i) => (
+              <div key={i} className="space-y-2 rounded-lg border border-[var(--border-muted)] p-3">
+                <Label className="text-caption-strong">Question {i + 1}</Label>
+                <Input
+                  placeholder="Question"
+                  value={item.question}
+                  onChange={(e) => {
+                    const items = [...section.items];
+                    items[i] = { ...items[i], question: e.target.value };
+                    onUpdate({ items });
+                  }}
+                />
+                <textarea
+                  placeholder="Answer"
+                  value={item.answer}
+                  onChange={(e) => {
+                    const items = [...section.items];
+                    items[i] = { ...items[i], answer: e.target.value };
+                    onUpdate({ items });
+                  }}
+                  rows={3}
+                  className="w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-background)] px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+                />
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => {
+                    const items = section.items.filter((_, idx) => idx !== i);
+                    onUpdate({ items });
+                  }}
+                >
+                  <Trash size={14} className="mr-1.5" />
+                  Remove
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                const items = [...section.items, { question: "", answer: "" }];
+                onUpdate({ items });
+              }}
+            >
+              <Plus size={14} className="mr-1.5" />
+              Add Question
+            </Button>
+          </div>
+        )}
       </FormSection>
     </FormCard>
   );
@@ -704,5 +910,21 @@ function createDefaultSection(type: CareerPageSection["type"]): CareerPageSectio
       return { type: "openRoles", title: "Open Positions", showFilters: true };
     case "cta":
       return { type: "cta", headline: "Ready to join us?", buttonText: "View All Roles" };
+    case "testimonials":
+      return {
+        type: "testimonials",
+        title: "What Our Team Says",
+        items: [
+          { quote: "Great company to work for", author: "Jane Doe", role: "Engineer", photo: undefined },
+        ],
+      };
+    case "faq":
+      return {
+        type: "faq",
+        title: "Frequently Asked Questions",
+        items: [
+          { question: "What is the hiring process?", answer: "Our hiring process typically takes 2-3 weeks and includes initial screening, technical interviews, and a final round." },
+        ],
+      };
   }
 }

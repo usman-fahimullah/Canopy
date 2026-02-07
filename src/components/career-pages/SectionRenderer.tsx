@@ -9,6 +9,8 @@ import type {
   TeamSection,
   OpenRolesSection,
   CTASection,
+  TestimonialsSection,
+  FAQSection,
 } from "@/lib/career-pages/types";
 import { HeroBlock } from "./sections/HeroBlock";
 import { AboutBlock } from "./sections/AboutBlock";
@@ -18,6 +20,8 @@ import { BenefitsBlock } from "./sections/BenefitsBlock";
 import { TeamBlock } from "./sections/TeamBlock";
 import { OpenRolesBlock } from "./sections/OpenRolesBlock";
 import { CTABlock } from "./sections/CTABlock";
+import { TestimonialsBlock } from "./sections/TestimonialsBlock";
+import { FAQBlock } from "./sections/FAQBlock";
 
 interface SectionRendererProps {
   sections: CareerPageSection[];
@@ -60,6 +64,10 @@ export function SectionRenderer({ sections, theme, orgSlug, jobs = [] }: Section
             );
           case "cta":
             return <CTABlock key={index} section={section as CTASection} theme={theme} />;
+          case "testimonials":
+            return <TestimonialsBlock key={index} title={section.title} items={section.items} theme={theme} />;
+          case "faq":
+            return <FAQBlock key={index} title={section.title} items={section.items} theme={theme} />;
           default:
             return null;
         }

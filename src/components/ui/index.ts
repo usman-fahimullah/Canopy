@@ -466,80 +466,44 @@ export {
   type StageVariant,
 } from "./stage-badge";
 
-// Charts & Analytics (Legacy - ATS-specific charts)
-export {
-  ChartContainer as LegacyChartContainer,
-  ChartTooltip as LegacyChartTooltip,
-  PipelineFunnel,
-  StageDistribution,
-  ScoreDistribution,
-  TrendChart,
-  SourceEffectiveness,
-  ComparisonChart,
-  MetricSparkline,
-  chartColors,
-  type PipelineStage,
-  type StageData,
-  type ScoreRange,
-  type TrendDataPoint,
-  type SourceData,
-  type ComparisonSeries,
-} from "./charts";
+// Charts & Analytics — EXCLUDED from barrel to reduce bundle size.
+// Import directly from "@/components/ui/charts" or "@/components/ui/chart" instead.
+// These pull in Recharts (~300-400KB) which should only load on pages that need it.
 
-// Charts (New - shadcn/ui inspired with ChartConfig system)
-export {
-  // Core components
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-  ChartCard,
+// Rich Text Editor — EXCLUDED from barrel to reduce bundle size.
+// Import directly from "@/components/ui/rich-text-editor" instead.
+// This pulls in Tiptap (~150-200KB) which should only load on pages that need it.
 
-  // Chart types
-  AreaChart,
-  BarChart,
-  LineChart,
-  DonutChart,
-
-  // Utilities & hooks
-  useChart,
-  useDarkMode as useChartDarkMode,
-  getChartThemeColors,
-  getColorFromConfig,
-
-  // Color constants
-  CHART_COLORS,
-  CHART_COLORS_RAW,
-
-  // Types
-  type ChartConfig,
-  type ChartContainerProps,
-  type ChartTooltipContentProps,
-  type ChartLegendContentProps,
-  type ChartCardProps,
-  type AreaChartProps,
-  type BarChartProps,
-  type LineChartProps,
-  type DonutChartProps,
-  type ChartDataPoint,
-  type AreaChartVariant,
-  type CurveType,
-  type TooltipPayloadItem,
-  type LegendPayloadItem,
+// Type-only re-exports are zero-cost and safe to keep in the barrel
+export type {
+  ChartConfig,
+  ChartContainerProps,
+  ChartTooltipContentProps,
+  ChartLegendContentProps,
+  ChartCardProps,
+  AreaChartProps,
+  BarChartProps,
+  LineChartProps,
+  DonutChartProps,
+  ChartDataPoint,
+  AreaChartVariant,
+  CurveType,
+  TooltipPayloadItem,
+  LegendPayloadItem,
 } from "./chart";
-
-// Rich Text Editor
-export {
-  RichTextEditor,
-  RichTextToolbar,
-  RichTextExtendedToolbar,
-  RichTextRenderer,
-  useRichTextEditor,
-  type RichTextEditorProps,
-  type RichTextToolbarProps,
-  type RichTextExtendedToolbarProps,
-  type RichTextRendererProps,
+export type {
+  PipelineStage,
+  StageData,
+  ScoreRange,
+  TrendDataPoint,
+  SourceData,
+  ComparisonSeries,
+} from "./charts";
+export type {
+  RichTextEditorProps,
+  RichTextToolbarProps,
+  RichTextExtendedToolbarProps,
+  RichTextRendererProps,
 } from "./rich-text-editor";
 
 // Combobox / Autocomplete

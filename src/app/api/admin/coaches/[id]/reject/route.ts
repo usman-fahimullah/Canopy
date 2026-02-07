@@ -10,6 +10,8 @@ import {
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
 import { createCoachStatusNotification } from "@/lib/notifications";
+import { safeJsonParse } from "@/lib/safe-json";
+import { createAuditLog } from "@/lib/audit";
 
 const rejectBodySchema = z.object({
   reason: z.string().max(2000).optional().default(""),
@@ -62,16 +64,27 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Update coach status to REJECTED
+    const existingAvailability = safeJsonParse<Record<string, unknown>>(coach.availability, {});
     const updatedCoach = await prisma.coachProfile.update({
       where: { id },
       data: {
         status: "REJECTED",
         availability: JSON.stringify({
-          ...JSON.parse(coach.availability || "{}"),
+          ...existingAvailability,
           rejectionReason,
           rejectedAt: new Date().toISOString(),
         }),
       },
+    });
+
+    // Audit log: track admin rejection
+    await createAuditLog({
+      action: "REJECT",
+      entityType: "CoachProfile",
+      entityId: id,
+      userId: account.id,
+      changes: { status: { from: coach.status, to: "REJECTED" } },
+      metadata: { reason: rejectionReason, ip },
     });
 
     await createCoachStatusNotification({

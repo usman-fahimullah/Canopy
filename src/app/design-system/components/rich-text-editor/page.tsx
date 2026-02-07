@@ -2,16 +2,19 @@
 
 import React from "react";
 import {
-  RichTextEditor,
-  RichTextToolbar,
-  RichTextExtendedToolbar,
-  RichTextRenderer,
   Label,
   Button,
   Card,
   CardContent,
   Badge,
 } from "@/components/ui";
+// Rich text editor imported directly to avoid pulling Tiptap into barrel bundle
+import {
+  RichTextEditor,
+  RichTextToolbar,
+  RichTextExtendedToolbar,
+  RichTextRenderer,
+} from "@/components/ui/rich-text-editor";
 import {
   ComponentCard,
   UsageGuide,

@@ -239,6 +239,22 @@ export const employerNavConfig: ShellNavConfig = {
           iconWeight: "bold",
         },
         {
+          id: "messages",
+          href: "/canopy/messages",
+          label: "Messages",
+          icon: ChatCircleDots,
+          iconWeight: "fill",
+          badgeKey: "unreadMessages",
+        },
+        {
+          id: "calendar",
+          href: "/canopy/calendar",
+          label: "Calendar",
+          icon: CalendarDots,
+          iconWeight: "fill",
+          requiredRoles: ["ADMIN", "RECRUITER"],
+        },
+        {
           id: "team",
           href: "/canopy/team",
           label: "Team",

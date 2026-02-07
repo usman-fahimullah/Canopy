@@ -683,6 +683,129 @@ const RichTextRenderer: React.FC<RichTextRendererProps> = ({
 };
 
 /* ============================================
+   Simple Rich Text Editor (for career page builder)
+   A lightweight version with value/onChange API
+   ============================================ */
+interface SimpleRichTextEditorProps {
+  value: string;
+  onChange: (html: string) => void;
+  placeholder?: string;
+}
+
+function SimpleRichTextEditor({ value, onChange, placeholder }: SimpleRichTextEditorProps) {
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+      }),
+      Placeholder.configure({
+        placeholder: placeholder || "Write something...",
+        emptyEditorClass: "is-editor-empty",
+      }),
+      Underline,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: "text-foreground-link underline cursor-pointer hover:text-foreground-link-hover",
+        },
+      }),
+    ],
+    content: value,
+    onUpdate: ({ editor: e }) => {
+      onChange(e.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: cn(
+          "prose prose-sm max-w-none focus:outline-none",
+          "prose-headings:font-medium prose-headings:text-foreground-default",
+          "prose-p:text-foreground-default prose-p:leading-relaxed",
+          "prose-strong:font-semibold",
+          "prose-ul:list-disc prose-ol:list-decimal",
+          "prose-li:text-foreground-default"
+        ),
+      },
+    },
+  });
+
+  if (!editor) return null;
+
+  return (
+    <div className="rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] overflow-hidden focus-within:border-[var(--primitive-green-500)] transition-all duration-150">
+      {/* Simple toolbar */}
+      <div className="flex items-center gap-1 border-b border-[var(--primitive-neutral-200)] px-3 py-2">
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={cn(
+            "rounded-md p-1.5 text-sm transition-colors",
+            editor.isActive("bold")
+              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
+              : "text-foreground-muted hover:bg-[var(--primitive-neutral-200)]"
+          )}
+          title="Bold"
+        >
+          <TextB size={16} weight={editor.isActive("bold") ? "bold" : "regular"} />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={cn(
+            "rounded-md p-1.5 text-sm transition-colors",
+            editor.isActive("italic")
+              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
+              : "text-foreground-muted hover:bg-[var(--primitive-neutral-200)]"
+          )}
+          title="Italic"
+        >
+          <TextItalic size={16} weight={editor.isActive("italic") ? "bold" : "regular"} />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={cn(
+            "rounded-md p-1.5 text-sm transition-colors",
+            editor.isActive("bulletList")
+              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
+              : "text-foreground-muted hover:bg-[var(--primitive-neutral-200)]"
+          )}
+          title="Bullet list"
+        >
+          <ListBullets size={16} weight={editor.isActive("bulletList") ? "bold" : "regular"} />
+        </button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={cn(
+            "rounded-md p-1.5 text-sm transition-colors",
+            editor.isActive("orderedList")
+              ? "bg-[var(--primitive-blue-100)] text-[var(--primitive-blue-700)]"
+              : "text-foreground-muted hover:bg-[var(--primitive-neutral-200)]"
+          )}
+          title="Numbered list"
+        >
+          <ListNumbers size={16} weight={editor.isActive("orderedList") ? "bold" : "regular"} />
+        </button>
+      </div>
+      <EditorContent
+        editor={editor}
+        className={cn(
+          "px-4 py-3",
+          "[&_.ProseMirror]:min-h-[120px]",
+          "[&_.ProseMirror]:text-base [&_.ProseMirror]:leading-6 [&_.ProseMirror]:text-foreground",
+          "[&_.is-editor-empty]:before:content-[attr(data-placeholder)]",
+          "[&_.is-editor-empty]:before:text-[var(--primitive-neutral-500)]",
+          "[&_.is-editor-empty]:before:float-left",
+          "[&_.is-editor-empty]:before:h-0",
+          "[&_.is-editor-empty]:before:pointer-events-none"
+        )}
+      />
+    </div>
+  );
+}
+
+/* ============================================
    Exports
    ============================================ */
 export {
@@ -690,9 +813,11 @@ export {
   RichTextToolbar,
   RichTextExtendedToolbar,
   RichTextRenderer,
+  SimpleRichTextEditor,
   useRichTextEditor,
   type RichTextEditorProps,
   type RichTextToolbarProps,
   type RichTextExtendedToolbarProps,
   type RichTextRendererProps,
+  type SimpleRichTextEditorProps,
 };

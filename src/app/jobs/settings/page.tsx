@@ -27,6 +27,7 @@ import {
   MagnifyingGlass,
 } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import { NOTIFICATION_CATEGORIES } from "@/lib/validators/notifications";
 
 type SettingsSection = "profile" | "notifications" | "privacy";
 
@@ -46,41 +47,6 @@ const SIDEBAR_ITEMS = [
   { id: "notifications" as SettingsSection, label: "Notifications", icon: Bell },
   { id: "privacy" as SettingsSection, label: "Privacy", icon: ShieldCheck },
 ];
-
-const NOTIFICATION_STORAGE_KEY = "talent-notification-prefs";
-
-interface NotificationPrefs {
-  jobAlerts: boolean;
-  applicationUpdates: boolean;
-  messages: boolean;
-  emailDigest: boolean;
-}
-
-const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
-  jobAlerts: true,
-  applicationUpdates: true,
-  messages: true,
-  emailDigest: false,
-};
-
-function loadNotificationPrefs(): NotificationPrefs {
-  if (typeof window === "undefined") return DEFAULT_NOTIFICATION_PREFS;
-  try {
-    const stored = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
-    if (stored) return JSON.parse(stored);
-  } catch {
-    // localStorage unavailable or corrupted
-  }
-  return DEFAULT_NOTIFICATION_PREFS;
-}
-
-function saveNotificationPrefs(prefs: NotificationPrefs) {
-  try {
-    localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(prefs));
-  } catch {
-    // localStorage unavailable
-  }
-}
 
 export default function TalentSettingsPage() {
   const router = useRouter();
@@ -102,7 +68,16 @@ export default function TalentSettingsPage() {
   const [formLocation, setFormLocation] = useState("");
 
   // Notification prefs
-  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(DEFAULT_NOTIFICATION_PREFS);
+  const [notifLoading, setNotifLoading] = useState(true);
+  const [notifPrefs, setNotifPrefs] = useState<{
+    inAppPrefs: Record<string, boolean>;
+    emailPrefs: Record<string, boolean>;
+    emailFrequency: string;
+  }>({
+    inAppPrefs: {},
+    emailPrefs: {},
+    emailFrequency: "immediate",
+  });
 
   // Privacy toggles
   const [profileVisible, setProfileVisible] = useState(true);
@@ -144,15 +119,59 @@ export default function TalentSettingsPage() {
     fetchProfile();
   }, []);
 
-  // Load notification prefs from localStorage
+  // Fetch notification prefs from API
   useEffect(() => {
-    setNotifPrefs(loadNotificationPrefs());
-  }, []);
+    if (activeSection !== "notifications") return;
+    const fetchPrefs = async () => {
+      try {
+        const res = await fetch("/api/notifications/preferences");
+        if (res.ok) {
+          const data = await res.json();
+          setNotifPrefs({
+            inAppPrefs: typeof data.preferences.inAppPrefs === "string"
+              ? JSON.parse(data.preferences.inAppPrefs)
+              : (data.preferences.inAppPrefs || {}),
+            emailPrefs: typeof data.preferences.emailPrefs === "string"
+              ? JSON.parse(data.preferences.emailPrefs)
+              : (data.preferences.emailPrefs || {}),
+            emailFrequency: data.preferences.emailFrequency || "immediate",
+          });
+        }
+      } catch (err) {
+        logger.error("Failed to fetch notification prefs", { error: formatError(err) });
+      } finally {
+        setNotifLoading(false);
+      }
+    };
+    fetchPrefs();
+  }, [activeSection]);
 
-  const handleNotifChange = (key: keyof NotificationPrefs, value: boolean) => {
-    const updated = { ...notifPrefs, [key]: value };
-    setNotifPrefs(updated);
-    saveNotificationPrefs(updated);
+  const handleNotifToggle = async (type: string, channel: "inApp" | "email", value: boolean) => {
+    const key = channel === "inApp" ? "inAppPrefs" : "emailPrefs";
+    const updated = { ...notifPrefs, [key]: { ...notifPrefs[key], [type]: value } };
+    setNotifPrefs(updated); // optimistic
+    try {
+      await fetch("/api/notifications/preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: updated[key] }),
+      });
+    } catch (err) {
+      logger.error("Failed to save notification pref", { error: formatError(err) });
+    }
+  };
+
+  const handleFrequencyChange = async (frequency: string) => {
+    setNotifPrefs((prev) => ({ ...prev, emailFrequency: frequency }));
+    try {
+      await fetch("/api/notifications/preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailFrequency: frequency }),
+      });
+    } catch (err) {
+      logger.error("Failed to save email frequency", { error: formatError(err) });
+    }
   };
 
   const handleSave = async () => {
@@ -426,40 +445,95 @@ export default function TalentSettingsPage() {
                 </p>
               </div>
 
-              <div className="divide-y divide-[var(--border-muted)] rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)]">
-                <div className="px-6 py-4">
-                  <SwitchWithLabel
-                    label="Job alerts"
-                    helperText="Get notified about new matching jobs"
-                    checked={notifPrefs.jobAlerts}
-                    onCheckedChange={(val) => handleNotifChange("jobAlerts", val)}
-                  />
+              {notifLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Spinner size="lg" />
                 </div>
-                <div className="px-6 py-4">
-                  <SwitchWithLabel
-                    label="Application updates"
-                    helperText="Status changes on your applications"
-                    checked={notifPrefs.applicationUpdates}
-                    onCheckedChange={(val) => handleNotifChange("applicationUpdates", val)}
-                  />
+              ) : (
+                <div className="space-y-6">
+                  {/* Email Frequency Selector */}
+                  <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] p-6">
+                    <div className="space-y-3">
+                      <Label className="text-foreground-default font-medium">Email Frequency</Label>
+                      <div className="space-y-2">
+                        {["immediate", "daily", "weekly", "never"].map((freq) => (
+                          <label key={freq} className="flex items-center gap-3 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="email-frequency"
+                              value={freq}
+                              checked={notifPrefs.emailFrequency === freq}
+                              onChange={(e) => handleFrequencyChange(e.target.value)}
+                              className="h-4 w-4"
+                            />
+                            <span className="text-body capitalize text-foreground-default">
+                              {freq === "immediate" ? "Immediate" : freq.charAt(0).toUpperCase() + freq.slice(1)}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Categorized Notification Preferences */}
+                  {NOTIFICATION_CATEGORIES.map((category) => (
+                    <div key={category.label} className="space-y-3">
+                      <h3 className="text-foreground-default text-body-sm font-semibold">
+                        {category.label}
+                      </h3>
+                      <div className="divide-y divide-[var(--border-muted)] rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)]">
+                        {category.types.map((notification) => (
+                          <div key={notification.type} className="px-6 py-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-foreground-default text-body-sm font-medium">
+                                  {notification.label}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`inapp-${notification.type}`}
+                                    checked={notifPrefs.inAppPrefs[notification.type] !== false}
+                                    onChange={(e) =>
+                                      handleNotifToggle(notification.type, "inApp", e.target.checked)
+                                    }
+                                    className="h-4 w-4 rounded"
+                                  />
+                                  <label
+                                    htmlFor={`inapp-${notification.type}`}
+                                    className="text-caption text-foreground-muted cursor-pointer"
+                                  >
+                                    In-app
+                                  </label>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`email-${notification.type}`}
+                                    checked={notifPrefs.emailPrefs[notification.type] !== false}
+                                    onChange={(e) =>
+                                      handleNotifToggle(notification.type, "email", e.target.checked)
+                                    }
+                                    className="h-4 w-4 rounded"
+                                  />
+                                  <label
+                                    htmlFor={`email-${notification.type}`}
+                                    className="text-caption text-foreground-muted cursor-pointer"
+                                  >
+                                    Email
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="px-6 py-4">
-                  <SwitchWithLabel
-                    label="Messages"
-                    helperText="New messages from employers and coaches"
-                    checked={notifPrefs.messages}
-                    onCheckedChange={(val) => handleNotifChange("messages", val)}
-                  />
-                </div>
-                <div className="px-6 py-4">
-                  <SwitchWithLabel
-                    label="Email digest"
-                    helperText="Weekly summary of activity"
-                    checked={notifPrefs.emailDigest}
-                    onCheckedChange={(val) => handleNotifChange("emailDigest", val)}
-                  />
-                </div>
-              </div>
+              )}
             </div>
           )}
 

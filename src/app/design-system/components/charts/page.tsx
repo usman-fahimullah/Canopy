@@ -2,7 +2,15 @@
 
 import React from "react";
 import {
-  // Legacy charts (ATS-specific)
+  // UI components
+  Label,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui";
+// Chart components imported directly to avoid pulling Recharts into barrel bundle
+import {
   PipelineFunnel,
   StageDistribution,
   ScoreDistribution,
@@ -11,23 +19,14 @@ import {
   ComparisonChart,
   MetricSparkline,
   chartColors,
-  // New chart components
-  ChartCard,
-  // UI components
-  Label,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui";
-import type {
-  PipelineStage,
-  StageData,
-  ScoreRange,
-  TrendDataPoint,
-  SourceData,
-  ComparisonSeries,
-} from "@/components/ui";
+  type PipelineStage,
+  type StageData,
+  type ScoreRange,
+  type TrendDataPoint,
+  type SourceData,
+  type ComparisonSeries,
+} from "@/components/ui/charts";
+import { ChartCard } from "@/components/ui/chart";
 import {
   ComponentCard,
   UsageGuide,

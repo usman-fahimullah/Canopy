@@ -29,8 +29,20 @@ export async function GET() {
 
     const organizationId = account.orgMemberships[0].organizationId;
 
-    // Fetch all dashboard data in parallel, scoped to the organization
-    const [jobs, applications, candidateCount] = await Promise.all([
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Fetch all dashboard data in parallel using SQL counts instead of in-memory filtering
+    const [
+      recentJobs,
+      activeRolesCount,
+      candidateCount,
+      newApplicationCount,
+      hiredCount,
+      recentApplications,
+      pipelineGroupBy,
+    ] = await Promise.all([
+      // Recent jobs for display
       prisma.job.findMany({
         where: { organizationId },
         select: {
@@ -43,8 +55,25 @@ export async function GET() {
           _count: { select: { applications: true } },
         },
         orderBy: { createdAt: "desc" },
-        take: 50,
+        take: 5,
       }),
+      // Active roles count via SQL
+      prisma.job.count({
+        where: { organizationId, status: "PUBLISHED" },
+      }),
+      // Total unique candidates
+      prisma.application.count({
+        where: { job: { organizationId } },
+      }),
+      // New applications in last 7 days via SQL
+      prisma.application.count({
+        where: { job: { organizationId }, createdAt: { gte: sevenDaysAgo } },
+      }),
+      // Hired count via SQL
+      prisma.application.count({
+        where: { job: { organizationId }, stage: { equals: "hired", mode: "insensitive" } },
+      }),
+      // Recent applications for display (only 5 needed)
       prisma.application.findMany({
         where: { job: { organizationId } },
         select: {
@@ -64,35 +93,28 @@ export async function GET() {
           },
         },
         orderBy: { createdAt: "desc" },
-        take: 100,
+        take: 5,
       }),
-      prisma.application.count({
+      // Pipeline stage counts via SQL groupBy
+      prisma.application.groupBy({
+        by: ["stage"],
         where: { job: { organizationId } },
+        _count: { _all: true },
       }),
     ]);
 
-    const activeRolesCount = jobs.filter((j) => j.status === "PUBLISHED").length;
-
-    // Pipeline stats
+    // Build pipeline stats from groupBy result
     const pipelineStats: Record<string, number> = {};
     const stages = ["Applied", "Screening", "Interview", "Offer", "Hired"];
     stages.forEach((stage) => {
-      pipelineStats[stage] = applications.filter(
-        (a) => a.stage.toLowerCase() === stage.toLowerCase()
-      ).length;
+      const match = pipelineGroupBy.find(
+        (g) => g.stage.toLowerCase() === stage.toLowerCase()
+      );
+      pipelineStats[stage] = match?._count._all ?? 0;
     });
 
-    // Recent applications (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const newApplicationCount = applications.filter(
-      (a) => new Date(a.createdAt) >= sevenDaysAgo
-    ).length;
-
-    const hiredCount = applications.filter((a) => a.stage.toLowerCase() === "hired").length;
-
     // Map applications to the expected shape
-    const recentApplications = applications.slice(0, 5).map((app) => ({
+    const mappedApplications = recentApplications.map((app) => ({
       id: app.id,
       stage: app.stage,
       createdAt: app.createdAt.toISOString(),
@@ -108,7 +130,7 @@ export async function GET() {
     }));
 
     // Map jobs to the expected shape
-    const recentRoles = jobs.slice(0, 5).map((job) => ({
+    const recentRoles = recentJobs.map((job) => ({
       id: job.id,
       title: job.title,
       location: job.location,
@@ -124,7 +146,7 @@ export async function GET() {
       candidateCount,
       newApplicationCount,
       hiredCount,
-      recentApplications,
+      recentApplications: mappedApplications,
       pipelineStats,
     });
   } catch (error) {

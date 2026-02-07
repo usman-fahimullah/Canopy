@@ -9,6 +9,7 @@ import {
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
 import { createCoachStatusNotification } from "@/lib/notifications";
+import { createAuditLog } from "@/lib/audit";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -51,6 +52,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         status: "APPROVED",
         approvalDate: new Date(),
       },
+    });
+
+    // Audit log: track admin approval
+    await createAuditLog({
+      action: "APPROVE",
+      entityType: "CoachProfile",
+      entityId: id,
+      userId: account.id,
+      changes: { status: { from: coach.status, to: "APPROVED" } },
+      metadata: { ip },
     });
 
     await createCoachStatusNotification({

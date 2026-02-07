@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
 import { UpdateMilestoneSchema } from "@/lib/validators/api";
+import { safeJsonParse } from "@/lib/safe-json";
 
 type Params = { params: Promise<{ id: string; milestoneId: string }> };
 
@@ -118,9 +119,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     // Parse resources for response
-    const parsedResources = updatedMilestone.resources
-      ? JSON.parse(updatedMilestone.resources)
-      : null;
+    const parsedResources = safeJsonParse(updatedMilestone.resources, null);
 
     return NextResponse.json({
       milestone: {

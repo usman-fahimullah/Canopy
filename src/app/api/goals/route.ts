@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
 import { CreateGoalSchema } from "@/lib/validators/api";
+import { safeJsonParse } from "@/lib/safe-json";
 
 // GET — list seeker's goals with milestones
 export async function GET() {
@@ -52,7 +53,7 @@ export async function GET() {
       ...goal,
       milestones: goal.milestones.map((m) => ({
         ...m,
-        resources: m.resources ? JSON.parse(m.resources) : null,
+        resources: safeJsonParse(m.resources, null),
       })),
     }));
 
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
       ...goalRaw,
       milestones: goalRaw.milestones.map((m) => ({
         ...m,
-        resources: m.resources ? JSON.parse(m.resources) : null,
+        resources: safeJsonParse(m.resources, null),
       })),
     };
 

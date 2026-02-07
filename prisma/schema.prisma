@@ -2,7 +2,6 @@
 
 generator client {
   provider      = "prisma-client-js"
-  engineType    = "library"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -19,35 +18,35 @@ datasource db {
 // =================================================================
 
 model Account {
-  id          String   @id @default(cuid())
-  supabaseId  String   @unique
-  email       String   @unique
-  name        String?
-  avatar      String?
-  phone       String?
-  location    String?
-  timezone    String?
-  bio         String?  @db.Text
+  id         String  @id @default(cuid())
+  supabaseId String  @unique
+  email      String  @unique
+  name       String?
+  avatar     String?
+  phone      String?
+  location   String?
+  timezone   String?
+  bio        String? @db.Text
 
   // Onboarding fields (shared across roles)
-  pronouns    String?  // e.g., "he/him", "she/her", "they/them"
-  ethnicity   String?  // For diversity reporting
-  birthday    DateTime?
+  pronouns  String? // e.g., "he/him", "she/her", "they/them"
+  ethnicity String? // For diversity reporting
+  birthday  DateTime?
 
   // Social URLs
-  linkedinUrl   String?  // LinkedIn profile URL
-  instagramUrl  String?
-  threadsUrl    String?
-  facebookUrl   String?
-  blueskyUrl    String?
-  xUrl          String?
-  websiteUrl    String?
+  linkedinUrl  String? // LinkedIn profile URL
+  instagramUrl String?
+  threadsUrl   String?
+  facebookUrl  String?
+  blueskyUrl   String?
+  xUrl         String?
+  websiteUrl   String?
 
   // Multi-role onboarding
-  entryIntent         String?   // "talent" | "coach" | "employer" — what brought them here
-  activeRoles         String[]  // Accumulated roles: ["talent", "coach", "employer"]
-  primaryRole         String?   // Determines default shell on login
-  onboardingProgress  Json?     // Per-role completion tracking (OnboardingProgress type)
+  entryIntent        String? // "talent" | "coach" | "employer" — what brought them here
+  activeRoles        String[] // Accumulated roles: ["talent", "coach", "employer"]
+  primaryRole        String? // Determines default shell on login
+  onboardingProgress Json? // Per-role completion tracking (OnboardingProgress type)
 
   // Role profiles (a person can hold multiple)
   orgMemberships OrganizationMember[]
@@ -56,10 +55,11 @@ model Account {
 
   // Messaging
   conversationParticipants ConversationParticipant[]
-  sentMessages             Message[]                @relation("MessageSender")
+  sentMessages             Message[]                 @relation("MessageSender")
 
   // Notifications
-  notifications Notification[]
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
 
   // Team invites sent by this account
   invitesSent TeamInvite[] @relation("InvitedByAccount")
@@ -73,35 +73,35 @@ model Account {
 // =================================================================
 
 model Organization {
-  id             String   @id @default(cuid())
-  name           String
-  slug           String   @unique
-  logo           String?
+  id   String  @id @default(cuid())
+  name String
+  slug String  @unique
+  logo String?
 
   // Onboarding fields
-  description    String?  @db.Text  // Company description
-  website        String?            // Company website URL
-  location       String?            // Company headquarters location
-  size           String?            // "1-10" | "11-50" | "51-200" | "201-1000" | "1000+"
-  industries     String[]           // PathwayType slugs: ["energy", "agriculture"]
-  hiringGoal     String?            // "specific-role" | "multiple-roles" | "exploring"
+  description String?  @db.Text // Company description
+  website     String? // Company website URL
+  location    String? // Company headquarters location
+  size        String? // "1-10" | "11-50" | "51-200" | "201-1000" | "1000+"
+  industries  String[] // PathwayType slugs: ["energy", "agriculture"]
+  hiringGoal  String? // "specific-role" | "multiple-roles" | "exploring"
 
   // Brand kit for career pages
-  primaryColor   String   @default("#0F766E")
+  primaryColor   String  @default("#0F766E")
   secondaryColor String?
-  fontFamily     String   @default("Inter")
+  fontFamily     String  @default("Inter")
 
   // Career page settings
-  customDomain      String?  @unique
-  careerPageJson    String?  @db.Text
-  careerPageSlug    String?  @unique
-  careerPageConfig  Json?           // Structured career page config (sections + theme)
-  careerPageEnabled Boolean  @default(false)
+  customDomain      String? @unique
+  careerPageJson    String? @db.Text
+  careerPageSlug    String? @unique
+  careerPageConfig  Json? // Structured career page config (sections + theme)
+  careerPageEnabled Boolean @default(false)
 
   // Diversity badges (NEW for Job Seeker Portal)
-  isBipocOwned   Boolean  @default(false)
-  isWomenOwned   Boolean  @default(false)
-  isVeteranOwned Boolean  @default(false)
+  isBipocOwned   Boolean @default(false)
+  isWomenOwned   Boolean @default(false)
+  isVeteranOwned Boolean @default(false)
 
   // Onboarding status
   onboardingCompleted Boolean @default(false)
@@ -110,20 +110,33 @@ model Organization {
   primaryPathwayId String?
   primaryPathway   Pathway? @relation("OrganizationPrimaryPathway", fields: [primaryPathwayId], references: [id])
 
-  members        OrganizationMember[]
-  jobs           Job[]
+  members OrganizationMember[]
+  jobs    Job[]
 
   // Sponsor collections (NEW for Job Seeker Portal)
   sponsoredCollections Collection[]
 
   // Team invites
-  teamInvites    TeamInvite[]
+  teamInvites TeamInvite[]
 
   // Job templates (Canopy ATS)
-  jobTemplates   JobTemplate[]
+  jobTemplates JobTemplate[]
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  // Offer letter configuration
+  offerTemplate        String?        @db.Text // JSON: default offer letter template
+  defaultSigningMethod SigningMethod? // Org's preferred signing method
+
+  // Offer records
+  offers OfferRecord[]
+
+  // Email templates
+  emailTemplates EmailTemplate[]
+
+  // Approval requests
+  approvalRequests ApprovalRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // =================================================================
@@ -133,25 +146,32 @@ model Organization {
 // =================================================================
 
 model OrganizationMember {
-  id             String        @id @default(cuid())
+  id String @id @default(cuid())
 
-  accountId      String
-  account        Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   organizationId String
-  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  role           OrgMemberRole @default(MEMBER)
-  title          String?
+  role  OrgMemberRole @default(MEMBER)
+  title String?
 
   // Authored content
-  notes          Note[]
-  scores         Score[]
+  notes  Note[]
+  scores Score[]
 
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  // Interview & approval relations
+  interviews          Interview[]
+  approvalRequests    ApprovalRequest[] @relation("ApprovalRequester")
+  approvalAssignments ApprovalRequest[] @relation("ApprovalApprover")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([accountId, organizationId])
+  @@index([accountId])
+  @@index([organizationId])
 }
 
 enum OrgMemberRole {
@@ -168,24 +188,24 @@ enum OrgMemberRole {
 // =================================================================
 
 model TeamInvite {
-  id              String         @id @default(cuid())
+  id String @id @default(cuid())
 
-  organizationId  String
-  organization    Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  invitedById     String
-  invitedBy       Account        @relation("InvitedByAccount", fields: [invitedById], references: [id])
+  invitedById String
+  invitedBy   Account @relation("InvitedByAccount", fields: [invitedById], references: [id])
 
-  email           String
-  role            OrgMemberRole  @default(RECRUITER)
-  assignedJobIds  String[]
-  token           String         @unique
-  expiresAt       DateTime
-  status          InviteStatus   @default(PENDING)
-  acceptedAt      DateTime?
+  email          String
+  role           OrgMemberRole @default(RECRUITER)
+  assignedJobIds String[]
+  token          String        @unique
+  expiresAt      DateTime
+  status         InviteStatus  @default(PENDING)
+  acceptedAt     DateTime?
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([organizationId])
   @@index([email])
@@ -205,28 +225,28 @@ enum InviteStatus {
 // =================================================================
 
 model SeekerProfile {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  accountId       String   @unique
-  account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   // Profile display (NEW for Job Seeker Portal)
-  coverImage      String?
-  badge           String?  // e.g., "Just Graduated", "Climate Leader"
-  summary         String?  @db.Text
+  coverImage String?
+  badge      String? // e.g., "Just Graduated", "Climate Leader"
+  summary    String? @db.Text
 
   // Onboarding - Career Journey
-  careerStage     CareerStage?  // Entry level, mid-career, career changer, etc.
-  motivations     String[]      // ["finding-job", "exploring-options", "learning-skills", etc.]
+  careerStage CareerStage? // Entry level, mid-career, career changer, etc.
+  motivations String[] // ["finding-job", "exploring-options", "learning-skills", etc.]
 
   // Onboarding - Pathway interests (many-to-many)
   interestedPathways SeekerPathway[]
 
   // Professional info
-  resumeUrl       String?
-  coverLetterUrl  String?
-  portfolioUrl    String?
-  headline        String?
+  resumeUrl      String?
+  coverLetterUrl String?
+  portfolioUrl   String?
+  headline       String?
 
   // Skills & qualifications
   skills          String[]
@@ -235,23 +255,23 @@ model SeekerProfile {
   yearsExperience Int?
 
   // AI-enriched data
-  aiSummary       String?  @db.Text
+  aiSummary String? @db.Text
 
   // Mentorship (peer-to-peer, pro-bono)
   isMentor          Boolean  @default(false)
   mentorBio         String?  @db.Text
   mentorTopics      String[]
-  mentorSpecialty   String?            // Primary expertise area (e.g., "Clean Product Development")
-  mentorBadge       String?            // "top_mentor" | "quick_responder" | "featured"
+  mentorSpecialty   String? // Primary expertise area (e.g., "Clean Product Development")
+  mentorBadge       String? // "top_mentor" | "quick_responder" | "featured"
   mentorRating      Float?   @default(0)
   mentorReviewCount Int      @default(0)
 
   // Sector interests (for matching)
-  targetSectors   String[]
+  targetSectors String[]
 
   // Relations
-  applications    Application[]
-  notes           Note[]
+  applications Application[]
+  notes        Note[]
 
   // Mentorship relations
   mentorAssignmentsAsMentor MentorAssignment[] @relation("MentorSide")
@@ -261,20 +281,22 @@ model SeekerProfile {
   coachAssignmentsAsSeeker  CoachAssignment[]
 
   // Coaching session relations
-  sessions        Session[]
-  bookings        Booking[]
-  reviews         Review[]
-  actionItems     ActionItem[]
+  sessions    Session[]
+  bookings    Booking[]
+  reviews     Review[]
+  actionItems ActionItem[]
 
   // Job Seeker Portal relations (NEW)
-  goals           Goal[]
-  savedJobs       SavedJob[]
-  workExperiences WorkExperience[]
+  goals            Goal[]
+  savedJobs        SavedJob[]
+  workExperiences  WorkExperience[]
   authoredJobNotes JobNote[]        @relation("JobNoteAuthor")
-  savedJobNotes   JobNoteSave[]
+  savedJobNotes    JobNoteSave[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isMentor])
 }
 
 // =================================================================
@@ -282,52 +304,52 @@ model SeekerProfile {
 // =================================================================
 
 model CoachProfile {
-  id              String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  accountId       String   @unique
-  account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   // Profile info (denormalized for easy access)
-  firstName       String?
-  lastName        String?
-  photoUrl        String?
-  bio             String?  @db.Text
+  firstName String?
+  lastName  String?
+  photoUrl  String?
+  bio       String? @db.Text
 
   // Professional info
-  headline        String?
-  expertise       String[]
-  sectors         String[]
-  sessionTypes    String[]
-  yearsInClimate  Int?
+  headline       String?
+  expertise      String[]
+  sectors        String[]
+  sessionTypes   String[]
+  yearsInClimate Int?
 
   // Pricing (in cents for precision)
-  sessionRate     Int      @default(15000)  // Default $150
-  sessionDuration Int      @default(60)     // minutes
+  sessionRate     Int  @default(15000) // Default $150
+  sessionDuration Int  @default(60) // minutes
   hourlyRate      Int?
   monthlyRate     Int?
 
   // Availability (JSON: WeeklyAvailability)
-  availability    String?  @db.Text
-  bufferTime      Int      @default(15)     // minutes between sessions
+  availability       String? @db.Text
+  bufferTime         Int     @default(15) // minutes between sessions
   maxSessionsPerWeek Int?
-  videoLink       String?
+  videoLink          String?
 
   // Stripe Connect
   stripeAccountId String?
 
   // Stats
-  rating          Float?   @default(0)
-  reviewCount     Int      @default(0)
-  totalSessions   Int      @default(0)
-  totalEarnings   Int      @default(0)  // in cents
-  successStories  Int      @default(0)
+  rating         Float? @default(0)
+  reviewCount    Int    @default(0)
+  totalSessions  Int    @default(0)
+  totalEarnings  Int    @default(0) // in cents
+  successStories Int    @default(0)
 
   // Status
   status          CoachStatus @default(PENDING)
   applicationDate DateTime?
   approvalDate    DateTime?
-  isActive        Boolean  @default(true)
-  isFeatured      Boolean  @default(false)
+  isActive        Boolean     @default(true)
+  isFeatured      Boolean     @default(false)
 
   // Relations
   coachAssignments CoachAssignment[]
@@ -337,8 +359,12 @@ model CoachProfile {
   actionItems      ActionItem[]
   notes            Note[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([isActive])
+  @@index([isActive, isFeatured])
 }
 
 enum CoachStatus {
@@ -356,23 +382,23 @@ enum CoachStatus {
 // =================================================================
 
 model MentorAssignment {
-  id         String           @id @default(cuid())
+  id String @id @default(cuid())
 
-  mentorId   String
-  mentor     SeekerProfile    @relation("MentorSide", fields: [mentorId], references: [id], onDelete: Cascade)
+  mentorId String
+  mentor   SeekerProfile @relation("MentorSide", fields: [mentorId], references: [id], onDelete: Cascade)
 
-  menteeId   String
-  mentee     SeekerProfile    @relation("MenteeSide", fields: [menteeId], references: [id], onDelete: Cascade)
+  menteeId String
+  mentee   SeekerProfile @relation("MenteeSide", fields: [menteeId], references: [id], onDelete: Cascade)
 
-  status     MentorshipStatus @default(ACTIVE)
-  startedAt  DateTime         @default(now())
-  endedAt    DateTime?
-  notes      String?          @db.Text
+  status    MentorshipStatus @default(ACTIVE)
+  startedAt DateTime         @default(now())
+  endedAt   DateTime?
+  notes     String?          @db.Text
 
-  reviews    MentorReview[]
+  reviews MentorReview[]
 
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([mentorId, menteeId])
 }
@@ -389,21 +415,21 @@ enum MentorshipStatus {
 // =================================================================
 
 model MentorReview {
-  id            String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  assignmentId  String
-  assignment    MentorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignmentId String
+  assignment   MentorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
 
-  menteeId      String
-  mentee        SeekerProfile @relation("MentorReviewsByMentee", fields: [menteeId], references: [id], onDelete: Cascade)
+  menteeId String
+  mentee   SeekerProfile @relation("MentorReviewsByMentee", fields: [menteeId], references: [id], onDelete: Cascade)
 
-  mentorId      String
-  mentor        SeekerProfile @relation("MentorReviewsReceived", fields: [mentorId], references: [id], onDelete: Cascade)
+  mentorId String
+  mentor   SeekerProfile @relation("MentorReviewsReceived", fields: [mentorId], references: [id], onDelete: Cascade)
 
-  rating        Int       // 1-5
-  comment       String?   @db.Text
+  rating  Int // 1-5
+  comment String? @db.Text
 
-  createdAt     DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([assignmentId, menteeId])
 }
@@ -413,23 +439,23 @@ model MentorReview {
 // =================================================================
 
 model CoachAssignment {
-  id                String         @id @default(cuid())
+  id String @id @default(cuid())
 
-  coachId           String
-  coach             CoachProfile   @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
 
-  seekerId          String
-  seeker            SeekerProfile  @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
-  status            CoachingStatus @default(ACTIVE)
-  startedAt         DateTime       @default(now())
-  endedAt           DateTime?
+  status    CoachingStatus @default(ACTIVE)
+  startedAt DateTime       @default(now())
+  endedAt   DateTime?
 
-  sessionsCompleted Int            @default(0)
-  plan              String?        @db.Text
+  sessionsCompleted Int     @default(0)
+  plan              String? @db.Text
 
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([coachId, seekerId])
 }
@@ -446,36 +472,46 @@ enum CoachingStatus {
 // =================================================================
 
 model Session {
-  id              String        @id @default(cuid())
-  title           String?       // e.g., "1:1 Overview Session", "Resume Review"
+  id    String  @id @default(cuid())
+  title String? // e.g., "1:1 Overview Session", "Resume Review"
 
-  coachId         String
-  coach           CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
 
-  menteeId        String
-  mentee          SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+  menteeId String
+  mentee   SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
 
-  scheduledAt     DateTime
-  duration        Int           @default(60)  // minutes
-  status          SessionStatus @default(SCHEDULED)
+  scheduledAt DateTime
+  duration    Int           @default(60) // minutes
+  status      SessionStatus @default(SCHEDULED)
 
-  videoLink       String?
-  menteeMessage   String?       @db.Text
-  coachNotes      String?       @db.Text
-  sessionNumber   Int?          // e.g., "Session 3 of 8"
+  videoLink     String?
+  menteeMessage String? @db.Text
+  coachNotes    String? @db.Text
+  sessionNumber Int? // e.g., "Session 3 of 8"
 
   cancellationReason String?
-  cancelledBy        String?    // "mentee" or "coach"
+  cancelledBy        String? // "mentee" or "coach"
   cancelledAt        DateTime?
   completedAt        DateTime?
 
   // Relations
-  booking         Booking?
-  review          Review?
-  actionItems     ActionItem[]
+  booking     Booking?
+  review      Review?
+  actionItems ActionItem[]
 
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([coachId])
+  @@index([menteeId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([coachId, scheduledAt])
+  @@index([menteeId, status])
+  @@index([menteeId, scheduledAt])
+  @@index([deletedAt])
 }
 
 enum SessionStatus {
@@ -491,37 +527,44 @@ enum SessionStatus {
 // =================================================================
 
 model Booking {
-  id                    String        @id @default(cuid())
+  id String @id @default(cuid())
 
-  sessionId             String        @unique
-  session               Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  menteeId              String
-  mentee                SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+  menteeId String
+  mentee   SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
 
-  coachId               String
-  coach                 CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
 
   // Amounts in cents
-  amount                Int           // Total charged
-  platformFee           Int           // Platform's cut (18%)
-  coachPayout           Int           // What coach receives
-  currency              String        @default("usd")
+  amount      Int // Total charged
+  platformFee Int // Platform's cut (18%)
+  coachPayout Int // What coach receives
+  currency    String @default("usd")
 
   // Stripe references
-  stripeCheckoutSessionId String?     @unique
-  stripePaymentIntentId   String?     @unique
+  stripeCheckoutSessionId String? @unique
+  stripePaymentIntentId   String? @unique
   stripeTransferId        String?
 
-  status                BookingStatus @default(PENDING)
-  refundAmount          Int?
-  refundReason          String?
+  status       BookingStatus @default(PENDING)
+  refundAmount Int?
+  refundReason String?
 
-  paidAt                DateTime?
-  refundedAt            DateTime?
+  paidAt     DateTime?
+  refundedAt DateTime?
 
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([coachId])
+  @@index([menteeId])
+  @@index([menteeId, status])
+  @@index([status])
+  @@index([coachId, createdAt])
+  @@index([status, createdAt])
 }
 
 enum BookingStatus {
@@ -537,27 +580,34 @@ enum BookingStatus {
 // =================================================================
 
 model Review {
-  id            String        @id @default(cuid())
+  id String @id @default(cuid())
 
-  sessionId     String        @unique
-  session       Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  menteeId      String
-  mentee        SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+  menteeId String
+  mentee   SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
 
-  coachId       String
-  coach         CoachProfile  @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
 
-  rating        Int           // 1-5
-  comment       String?       @db.Text
-  coachResponse String?       @db.Text
+  rating        Int // 1-5
+  comment       String? @db.Text
+  coachResponse String? @db.Text
 
-  isVisible     Boolean       @default(true)
-  isFlagged     Boolean       @default(false)
-  flagReason    String?
+  isVisible  Boolean @default(true)
+  isFlagged  Boolean @default(false)
+  flagReason String?
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([coachId])
+  @@index([coachId, isVisible])
+  @@index([menteeId])
+  @@index([createdAt])
+  @@index([deletedAt])
 }
 
 // =================================================================
@@ -565,24 +615,27 @@ model Review {
 // =================================================================
 
 model ActionItem {
-  id            String          @id @default(cuid())
+  id String @id @default(cuid())
 
-  sessionId     String
-  session       Session         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  menteeId      String
-  mentee        SeekerProfile   @relation(fields: [menteeId], references: [id], onDelete: Cascade)
+  menteeId String
+  mentee   SeekerProfile @relation(fields: [menteeId], references: [id], onDelete: Cascade)
 
-  coachId       String
-  coach         CoachProfile    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  coachId String
+  coach   CoachProfile @relation(fields: [coachId], references: [id], onDelete: Cascade)
 
-  description   String
-  dueDate       DateTime?
-  status        ActionItemStatus @default(PENDING)
-  completedAt   DateTime?
+  description String
+  dueDate     DateTime?
+  status      ActionItemStatus @default(PENDING)
+  completedAt DateTime?
 
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([menteeId, status])
+  @@index([sessionId])
 }
 
 enum ActionItemStatus {
@@ -595,14 +648,14 @@ enum ActionItemStatus {
 // =================================================================
 
 model Conversation {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   lastMessageAt DateTime?
 
-  participants  ConversationParticipant[]
-  messages      Message[]
+  participants ConversationParticipant[]
+  messages     Message[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // =================================================================
@@ -613,11 +666,11 @@ model ConversationParticipant {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  accountId      String
-  account        Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  joinedAt       DateTime  @default(now())
-  lastReadAt     DateTime?
+  joinedAt   DateTime  @default(now())
+  lastReadAt DateTime?
 
   @@id([conversationId, accountId])
 }
@@ -627,20 +680,21 @@ model ConversationParticipant {
 // =================================================================
 
 model Message {
-  id             String   @id @default(cuid())
+  id String @id @default(cuid())
 
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  senderId       String
-  sender         Account @relation("MessageSender", fields: [senderId], references: [id])
+  senderId String
+  sender   Account @relation("MessageSender", fields: [senderId], references: [id])
 
-  content        String  @db.Text
+  content        String   @db.Text
   attachmentUrls String[]
 
-  createdAt      DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([conversationId, createdAt])
+  @@index([senderId])
 }
 
 // =================================================================
@@ -648,17 +702,17 @@ model Message {
 // =================================================================
 
 model Notification {
-  id        String           @id @default(cuid())
+  id String @id @default(cuid())
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  type      NotificationType
-  title     String
-  body      String
-  data      String?          @db.Text // JSON for action URL, entity IDs, etc.
+  type  NotificationType
+  title String
+  body  String
+  data  String?          @db.Text // JSON for action URL, entity IDs, etc.
 
-  readAt    DateTime?
+  readAt DateTime?
 
   createdAt DateTime @default(now())
 
@@ -677,9 +731,40 @@ enum NotificationType {
   COACH_REJECTED
   PAYMENT_RECEIVED
   MENTOR_REQUEST
-  GOAL_DUE_SOON      // Goal due in 3 days
-  GOAL_INACTIVE      // Goal hasn't been updated in 5 days
-  NEW_APPLICATION     // New application received on a job
+  GOAL_DUE_SOON // Goal due in 3 days
+  GOAL_INACTIVE // Goal hasn't been updated in 5 days
+  NEW_APPLICATION // New application received on a job
+  OFFER_RECEIVED // Candidate received an offer letter
+  OFFER_VIEWED // Employer notified: candidate viewed the offer
+  APPLICATION_RECEIVED // Candidate notified: their application was received
+  STAGE_CHANGED // Candidate notified: moved to a new hiring stage
+  INTERVIEW_SCHEDULED // Candidate notified: interview has been scheduled
+  APPLICATION_REJECTED // Candidate notified: application was rejected
+  APPROVAL_PENDING // Approver notified: action needs approval
+  APPROVAL_APPROVED // Requester notified: action was approved
+  APPROVAL_REJECTED // Requester notified: action was rejected
+}
+
+// =================================================================
+// NOTIFICATION PREFERENCES — Per-account notification settings.
+// =================================================================
+
+model NotificationPreference {
+  id String @id @default(cuid())
+
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Per-type toggles stored as JSON for flexibility
+  // e.g. { "SESSION_BOOKED": true, "NEW_MESSAGE": false }
+  inAppPrefs Json @default("{}")
+  emailPrefs Json @default("{}")
+
+  // Global email frequency: "immediate" | "daily" | "weekly" | "never"
+  emailFrequency String @default("immediate")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // =================================================================
@@ -687,56 +772,60 @@ enum NotificationType {
 // =================================================================
 
 model Job {
-  id              String         @id @default(cuid())
-  title           String
-  slug            String
-  description     String         @db.Text
-  location        String?
-  locationType    LocationType   @default(ONSITE)
-  employmentType  EmploymentType @default(FULL_TIME)
-  salaryMin       Int?
-  salaryMax       Int?
-  salaryCurrency  String         @default("USD")
+  id             String         @id @default(cuid())
+  title          String
+  slug           String
+  description    String         @db.Text
+  location       String?
+  locationType   LocationType   @default(ONSITE)
+  employmentType EmploymentType @default(FULL_TIME)
+  salaryMin      Int?
+  salaryMax      Int?
+  salaryCurrency String         @default("USD")
 
   // Climate-specific fields
   climateCategory   String?
-  impactDescription String?      @db.Text
+  impactDescription String?  @db.Text
   requiredCerts     String[]
   greenSkills       String[]
 
   // Job Seeker Portal fields (NEW)
-  pathwayId         String?
-  pathway           Pathway?       @relation(fields: [pathwayId], references: [id])
-  experienceLevel   ExperienceLevel?
-  isFeatured        Boolean        @default(false)
+  pathwayId       String?
+  pathway         Pathway?         @relation(fields: [pathwayId], references: [id])
+  experienceLevel ExperienceLevel?
+  isFeatured      Boolean          @default(false)
 
-  status          JobStatus      @default(DRAFT)
-  publishedAt     DateTime?
-  closesAt        DateTime?
+  status      JobStatus @default(DRAFT)
+  publishedAt DateTime?
+  closesAt    DateTime?
 
-  stages          String         @default("[{\"id\":\"applied\",\"name\":\"Applied\"},{\"id\":\"screening\",\"name\":\"Screening\"},{\"id\":\"interview\",\"name\":\"Interview\"},{\"id\":\"offer\",\"name\":\"Offer\"},{\"id\":\"hired\",\"name\":\"Hired\"}]")
+  stages String @default("[{\"id\":\"applied\",\"name\":\"Applied\"},{\"id\":\"screening\",\"name\":\"Screening\"},{\"id\":\"interview\",\"name\":\"Interview\"},{\"id\":\"offer\",\"name\":\"Offer\"},{\"id\":\"hired\",\"name\":\"Hired\"}]")
 
   // Application form configuration
-  formConfig      Json?          // { personalDetails: {...}, careerDetails: {...}, requiredFiles: {...} }
-  formQuestions   Json?          // Array of custom question objects
+  formConfig    Json? // { personalDetails: {...}, careerDetails: {...}, requiredFiles: {...} }
+  formQuestions Json? // Array of custom question objects
 
   // External syndication
-  syndicationEnabled Boolean     @default(false)
+  syndicationEnabled Boolean @default(false)
 
-  organizationId  String
-  organization    Organization   @relation(fields: [organizationId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   applications    Application[]
   syndicationLogs SyndicationLog[]
 
   // Job Seeker Portal relations (NEW)
-  savedBy         SavedJob[]
-  collections     CollectionJob[]
+  savedBy     SavedJob[]
+  collections CollectionJob[]
 
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([status])
+  @@index([pathwayId])
+  @@index([publishedAt])
 }
 
 // =================================================================
@@ -745,15 +834,15 @@ model Job {
 // =================================================================
 
 model JobTemplate {
-  id              String   @id @default(cuid())
-  name            String
-  sourceJobId     String?
-  organizationId  String
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  fieldData       String   @db.Text   // JSON: { title: "...", climateCategory: "...", ... }
-  activeFields    String   @db.Text   // JSON: ["title", "climateCategory", ...]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String       @id @default(cuid())
+  name           String
+  sourceJobId    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fieldData      String       @db.Text // JSON: { title: "...", climateCategory: "...", ... }
+  activeFields   String       @db.Text // JSON: ["title", "climateCategory", ...]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([organizationId])
 }
@@ -790,37 +879,52 @@ enum EmploymentType {
 // =================================================================
 
 model Application {
-  id             String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  seekerId       String
-  seeker         SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
-  jobId          String
-  job            Job       @relation(fields: [jobId], references: [id])
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id])
 
-  stage          String    @default("applied")
-  stageOrder     Int       @default(0)
+  stage      String @default("applied")
+  stageOrder Int    @default(0)
 
-  formResponses  String?   @db.Text
-  coverLetter    String?   @db.Text
+  formResponses String? @db.Text
+  coverLetter   String? @db.Text
 
-  matchScore     Float?
-  matchReasons   String?   @db.Text
+  matchScore   Float?
+  matchReasons String? @db.Text
 
-  knockoutPassed Boolean   @default(true)
+  knockoutPassed Boolean @default(true)
 
-  source         String?
+  source String?
 
-  scores         Score[]
-  goals          Goal[]    // Related goals for this application
+  scores Score[]
+  goals  Goal[] // Related goals for this application
 
-  rejectedAt     DateTime?
-  hiredAt        DateTime?
+  // Offer tracking
+  offer     OfferRecord?
+  offeredAt DateTime?
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  // Interview tracking
+  interviews Interview[]
+
+  rejectedAt DateTime?
+  hiredAt    DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@unique([seekerId, jobId])
+  @@index([seekerId])
+  @@index([jobId])
+  @@index([stage])
+  @@index([createdAt])
+  @@index([jobId, stage])
+  @@index([jobId, createdAt])
+  @@index([deletedAt])
 }
 
 // =================================================================
@@ -829,25 +933,28 @@ model Application {
 // =================================================================
 
 model Note {
-  id                 String   @id @default(cuid())
-  content            String   @db.Text
+  id      String @id @default(cuid())
+  content String @db.Text
 
   // Subject: which seeker is this note about
-  seekerId           String
-  seeker             SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
   // Author: exactly one of these should be set (enforced at app level)
-  orgMemberAuthorId  String?
-  orgMemberAuthor    OrganizationMember? @relation(fields: [orgMemberAuthorId], references: [id], onDelete: SetNull)
+  orgMemberAuthorId String?
+  orgMemberAuthor   OrganizationMember? @relation(fields: [orgMemberAuthorId], references: [id], onDelete: SetNull)
 
-  coachAuthorId      String?
-  coachAuthor        CoachProfile?       @relation(fields: [coachAuthorId], references: [id], onDelete: SetNull)
+  coachAuthorId String?
+  coachAuthor   CoachProfile? @relation(fields: [coachAuthorId], references: [id], onDelete: SetNull)
 
   // For @mentions (Account IDs)
-  mentions           String[]
+  mentions String[]
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([seekerId])
+  @@index([seekerId, createdAt])
 }
 
 // =================================================================
@@ -855,21 +962,21 @@ model Note {
 // =================================================================
 
 model Score {
-  id             String             @id @default(cuid())
+  id String @id @default(cuid())
 
-  applicationId  String
-  application    Application        @relation(fields: [applicationId], references: [id])
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id])
 
-  scorerId       String
-  scorer         OrganizationMember @relation(fields: [scorerId], references: [id])
+  scorerId String
+  scorer   OrganizationMember @relation(fields: [scorerId], references: [id])
 
-  responses      String             @db.Text
+  responses      String         @db.Text
   overallRating  Int
   recommendation Recommendation
-  comments       String?            @db.Text
+  comments       String?        @db.Text
 
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([applicationId, scorerId])
 }
@@ -891,23 +998,23 @@ enum Recommendation {
 // =================================================================
 
 model Pathway {
-  id           String   @id @default(cuid())
+  id           String  @id @default(cuid())
   name         String
-  slug         String   @unique
-  description  String?  @db.Text
-  icon         String?  // Phosphor icon name (e.g., "Leaf", "Tree", "Lightning")
-  illustration String?  // Path to spot illustration SVG (e.g., "/illustrations/pathways/energy.svg")
-  color        String?  // Color family: green, blue, orange, red, yellow, purple
-  displayOrder Int      @default(0)
-  isActive     Boolean  @default(true)
+  slug         String  @unique
+  description  String? @db.Text
+  icon         String? // Phosphor icon name (e.g., "Leaf", "Tree", "Lightning")
+  illustration String? // Path to spot illustration SVG (e.g., "/illustrations/pathways/energy.svg")
+  color        String? // Color family: green, blue, orange, red, yellow, purple
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
 
   // Relations
-  jobs                Job[]
-  interestedSeekers   SeekerPathway[]
-  organizationsPrimary Organization[] @relation("OrganizationPrimaryPathway")
+  jobs                 Job[]
+  interestedSeekers    SeekerPathway[]
+  organizationsPrimary Organization[]  @relation("OrganizationPrimaryPathway")
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // =================================================================
@@ -915,28 +1022,28 @@ model Pathway {
 // =================================================================
 
 model Collection {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   title           String
-  slug            String   @unique
-  description     String?  @db.Text
+  slug            String  @unique
+  description     String? @db.Text
   backgroundImage String?
-  gradientColors  String?  // JSON array of hex colors, e.g., ["#10B981", "#3B82F6"]
+  gradientColors  String? // JSON array of hex colors, e.g., ["#10B981", "#3B82F6"]
 
   // Sponsor (optional)
-  sponsorId       String?
-  sponsor         Organization? @relation(fields: [sponsorId], references: [id])
+  sponsorId String?
+  sponsor   Organization? @relation(fields: [sponsorId], references: [id])
 
-  isFeatured      Boolean  @default(false)
-  displayOrder    Int      @default(0)
-  isActive        Boolean  @default(true)
+  isFeatured   Boolean @default(false)
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
 
   // Filter criteria for dynamic collections (JSON)
-  filterCriteria  String?  @db.Text
+  filterCriteria String? @db.Text
 
-  jobs            CollectionJob[]
+  jobs CollectionJob[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Join table for Collection <-> Job (many-to-many)
@@ -944,11 +1051,11 @@ model CollectionJob {
   collectionId String
   collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
-  jobId        String
-  job          Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
-  displayOrder Int        @default(0)
-  addedAt      DateTime   @default(now())
+  displayOrder Int      @default(0)
+  addedAt      DateTime @default(now())
 
   @@id([collectionId, jobId])
 }
@@ -958,10 +1065,10 @@ model CollectionJob {
 // =================================================================
 
 model Goal {
-  id          String        @id @default(cuid())
+  id String @id @default(cuid())
 
-  seekerId    String
-  seeker      SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
   // Optional link to a job application
   applicationId String?
@@ -969,28 +1076,31 @@ model Goal {
 
   title       String
   description String?       @db.Text
-  notes       String?       @db.Text  // Journal/reflection notes
-  icon        String?       // Phosphor icon name
+  notes       String?       @db.Text // Journal/reflection notes
+  icon        String? // Phosphor icon name
   category    GoalCategory?
 
-  progress    Int           @default(0) // 0-100
+  progress    Int        @default(0) // 0-100
   targetDate  DateTime?
   completedAt DateTime?
-  status      GoalStatus    @default(ACTIVE)
+  status      GoalStatus @default(ACTIVE)
 
-  milestones  Milestone[]
+  milestones Milestone[]
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([applicationId])
+  @@index([seekerId])
+  @@index([seekerId, status])
+  @@index([targetDate])
 }
 
 model Milestone {
-  id          String    @id @default(cuid())
+  id String @id @default(cuid())
 
-  goalId      String
-  goal        Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goalId String
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   title       String
   completed   Boolean   @default(false)
@@ -998,7 +1108,7 @@ model Milestone {
   order       Int       @default(0)
   resources   String?   @db.Text // JSON array of {title: string, url: string} (max 3 resources)
 
-  createdAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
 }
 
 enum GoalStatus {
@@ -1019,14 +1129,14 @@ enum GoalCategory {
 // =================================================================
 
 model SavedJob {
-  seekerId  String
-  seeker    SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
-  jobId     String
-  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
-  notes     String?       @db.Text
-  savedAt   DateTime      @default(now())
+  notes   String?  @db.Text
+  savedAt DateTime @default(now())
 
   @@id([seekerId, jobId])
 }
@@ -1036,10 +1146,10 @@ model SavedJob {
 // =================================================================
 
 model WorkExperience {
-  id             String         @id @default(cuid())
+  id String @id @default(cuid())
 
-  seekerId       String
-  seeker         SeekerProfile  @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
   companyName    String
   companyLogo    String?
@@ -1047,15 +1157,15 @@ model WorkExperience {
   employmentType EmploymentType
   workType       LocationType
 
-  startDate      DateTime
-  endDate        DateTime?
-  isCurrent      Boolean        @default(false)
+  startDate DateTime
+  endDate   DateTime?
+  isCurrent Boolean   @default(false)
 
-  description    String?        @db.Text
-  skills         String[]
+  description String?  @db.Text
+  skills      String[]
 
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // =================================================================
@@ -1063,43 +1173,43 @@ model WorkExperience {
 // =================================================================
 
 model JobNote {
-  id          String       @id @default(cuid())
+  id String @id @default(cuid())
 
-  authorId    String
-  author      SeekerProfile @relation("JobNoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  author   SeekerProfile @relation("JobNoteAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
-  category    NoteCategory
-  title       String
-  content     String       @db.Text
+  category NoteCategory
+  title    String
+  content  String       @db.Text
 
-  savedCount  Int          @default(0)
-  isPublished Boolean      @default(false)
-  isFeatured  Boolean      @default(false)
+  savedCount  Int     @default(0)
+  isPublished Boolean @default(false)
+  isFeatured  Boolean @default(false)
 
-  saves       JobNoteSave[]
+  saves JobNoteSave[]
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Join table for JobNote saves
 model JobNoteSave {
-  seekerId  String
-  seeker    SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
-  noteId    String
-  note      JobNote       @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  noteId String
+  note   JobNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
-  savedAt   DateTime      @default(now())
+  savedAt DateTime @default(now())
 
   @@id([seekerId, noteId])
 }
 
 enum NoteCategory {
-  BUILDING_PATHS   // Career path discovery
+  BUILDING_PATHS // Career path discovery
   WRITE_YOUR_STORY // Resume & cover letter tips
-  PREP_TALK        // Interview preparation
-  THE_SEARCH       // Job search strategies
+  PREP_TALK // Interview preparation
+  THE_SEARCH // Job search strategies
 }
 
 // =================================================================
@@ -1107,12 +1217,12 @@ enum NoteCategory {
 // =================================================================
 
 enum CareerStage {
-  STUDENT           // Currently in school
-  ENTRY_LEVEL       // Just starting career
-  MID_CAREER        // 3-7 years experience
-  SENIOR            // 7+ years experience
-  CAREER_CHANGER    // Transitioning from another field
-  RETURNING         // Returning to workforce
+  STUDENT // Currently in school
+  ENTRY_LEVEL // Just starting career
+  MID_CAREER // 3-7 years experience
+  SENIOR // 7+ years experience
+  CAREER_CHANGER // Transitioning from another field
+  RETURNING // Returning to workforce
 }
 
 // =================================================================
@@ -1120,15 +1230,15 @@ enum CareerStage {
 // =================================================================
 
 model SeekerPathway {
-  seekerId  String
-  seeker    SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
+  seekerId String
+  seeker   SeekerProfile @relation(fields: [seekerId], references: [id], onDelete: Cascade)
 
   pathwayId String
-  pathway   Pathway       @relation(fields: [pathwayId], references: [id], onDelete: Cascade)
+  pathway   Pathway @relation(fields: [pathwayId], references: [id], onDelete: Cascade)
 
   // How interested they are (for sorting/matching)
-  priority  Int           @default(0)
-  addedAt   DateTime      @default(now())
+  priority Int      @default(0)
+  addedAt  DateTime @default(now())
 
   @@id([seekerId, pathwayId])
 }
@@ -1138,18 +1248,229 @@ model SeekerPathway {
 // =================================================================
 
 model SyndicationLog {
-  id         String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  jobId      String
-  job        Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
-  platform   String   // "indeed", "linkedin", "ziprecruiter"
-  action     String   // "post", "update", "remove"
-  status     String   // "pending", "success", "failed"
-  externalId String?  // Platform's external job ID
+  platform   String // "indeed", "linkedin", "ziprecruiter"
+  action     String // "post", "update", "remove"
+  status     String // "pending", "success", "failed"
+  externalId String? // Platform's external job ID
   error      String?
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([jobId, platform])
+}
+
+// =================================================================
+// AUDIT LOG — Tracks sensitive operations for compliance & debugging.
+// Records payments, admin actions, status changes, and refunds.
+// =================================================================
+
+model AuditLog {
+  id         String  @id @default(cuid())
+  action     String // "CREATE" | "UPDATE" | "DELETE" | "REFUND" | "APPROVE" | "REJECT"
+  entityType String // "Booking" | "CoachProfile" | "Application" | "Session"
+  entityId   String
+  userId     String? // Account ID of the actor (null for system/webhook actions)
+  changes    String? @db.Text // JSON: { field: { from: oldValue, to: newValue } }
+  metadata   String? @db.Text // JSON: extra context (IP, reason, webhook event, etc.)
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+// =================================================================
+// OFFER LETTER — Tracks the full offer lifecycle from draft to signed.
+// One offer per application. Created when employer drags to "Offer" stage.
+// =================================================================
+
+enum OfferStatus {
+  DRAFT
+  SENT
+  VIEWED
+  AWAITING_SIGNATURE
+  SIGNED
+  WITHDRAWN
+}
+
+enum SigningMethod {
+  SIGNING_LINK // External tool like DocuSign, HelloSign
+  DOCUMENT_UPLOAD // Employer uploads a signing document
+  OFFLINE // Signing handled outside the platform
+}
+
+model OfferRecord {
+  id String @id @default(cuid())
+
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdById String // OrgMember who created the offer
+
+  // Offer terms
+  salary         Int? // Annual salary in cents
+  salaryCurrency String   @default("USD")
+  startDate      DateTime
+  department     String?
+  managerId      String? // Reporting manager (OrgMember ID)
+  notes          String?  @db.Text // Personal message from employer
+
+  // Branded letter
+  letterContent String @db.Text // Rendered offer letter body (HTML/markdown)
+
+  // Signing configuration
+  signingMethod       SigningMethod
+  signingLink         String? // URL to external signing tool
+  signingDocumentUrl  String? // Uploaded document URL
+  signingInstructions String?       @db.Text // Custom Next Steps footer text
+
+  // Status progression
+  status      OfferStatus @default(DRAFT)
+  sentAt      DateTime?
+  viewedAt    DateTime?
+  signedAt    DateTime?
+  withdrawnAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+// =================================================================
+// INTERVIEW — Scheduled interview for a candidate application.
+// Created when recruiter schedules from the pipeline.
+// =================================================================
+
+model Interview {
+  id String @id @default(cuid())
+
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  interviewerId String
+  interviewer   OrganizationMember @relation(fields: [interviewerId], references: [id], onDelete: Cascade)
+
+  organizationId String
+
+  scheduledAt DateTime
+  duration    Int             @default(60) // minutes
+  type        InterviewType   @default(VIDEO)
+  location    String? // Physical address for ONSITE
+  meetingLink String? // Video call URL
+  status      InterviewStatus @default(SCHEDULED)
+  notes       String?         @db.Text
+
+  cancelledAt DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([applicationId])
+  @@index([interviewerId])
+  @@index([organizationId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@index([organizationId, scheduledAt])
+}
+
+enum InterviewType {
+  PHONE
+  VIDEO
+  ONSITE
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+// =================================================================
+// EMAIL TEMPLATE — Reusable email templates per organization.
+// Used for candidate communication (rejection, interview invite, etc.)
+// =================================================================
+
+model EmailTemplate {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  type      EmailTemplateType
+  name      String
+  subject   String
+  content   String            @db.Text // HTML content with {{variable}} placeholders
+  variables String[] // Available variable names
+  isDefault Boolean           @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([organizationId, type])
+}
+
+enum EmailTemplateType {
+  REJECTION
+  INTERVIEW_INVITE
+  STAGE_ADVANCE
+  WELCOME
+  CUSTOM
+}
+
+// =================================================================
+// APPROVAL REQUEST — Lightweight approval chain for job publish / offer send.
+// =================================================================
+
+model ApprovalRequest {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  requesterId String
+  requester   OrganizationMember @relation("ApprovalRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  approverId String
+  approver   OrganizationMember @relation("ApprovalApprover", fields: [approverId], references: [id], onDelete: Cascade)
+
+  type     ApprovalType
+  entityId String // Job ID or OfferRecord ID
+  status   ApprovalStatus @default(PENDING)
+  reason   String?        @db.Text // Rejection reason or approval note
+
+  respondedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, status])
+  @@index([approverId, status])
+  @@index([requesterId])
+  @@index([createdAt])
+}
+
+enum ApprovalType {
+  JOB_PUBLISH
+  OFFER_SEND
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

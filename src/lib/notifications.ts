@@ -4,6 +4,7 @@
 import { prisma } from "@/lib/db";
 import { NotificationType } from "@prisma/client";
 import { logger, formatError } from "@/lib/logger";
+import { safeJsonParse } from "@/lib/utils";
 import {
   sendEmail,
   sessionBookingConfirmation,
@@ -27,25 +28,79 @@ interface CreateNotificationParams {
   };
 }
 
+// In-memory cache for notification preferences (30s TTL)
+const prefsCache = new Map<string, { prefs: any; timestamp: number }>();
+const PREFS_CACHE_TTL = 30_000; // 30 seconds
+
+async function getNotificationPreferences(accountId: string) {
+  const cached = prefsCache.get(accountId);
+  if (cached && Date.now() - cached.timestamp < PREFS_CACHE_TTL) {
+    return cached.prefs;
+  }
+
+  const prefs = await (prisma as any).notificationPreference.findUnique({
+    where: { accountId },
+  });
+
+  if (prefs) {
+    prefsCache.set(accountId, { prefs, timestamp: Date.now() });
+  }
+
+  return prefs;
+}
+
+function isNotificationEnabled(
+  prefs: any,
+  type: string,
+  channel: "inApp" | "email"
+): boolean {
+  if (!prefs) return true; // No prefs = all enabled (default)
+
+  const prefsMap = channel === "inApp"
+    ? safeJsonParse<Record<string, boolean>>(
+        typeof prefs.inAppPrefs === "string" ? prefs.inAppPrefs : JSON.stringify(prefs.inAppPrefs),
+        {}
+      )
+    : safeJsonParse<Record<string, boolean>>(
+        typeof prefs.emailPrefs === "string" ? prefs.emailPrefs : JSON.stringify(prefs.emailPrefs),
+        {}
+      );
+
+  // If the type is not in the map, default to enabled
+  if (prefsMap[type] === undefined) return true;
+  return prefsMap[type];
+}
+
 /**
  * Create an in-app notification and optionally send an email
  */
 export async function createNotification(params: CreateNotificationParams) {
   const { accountId, type, title, body, data, sendEmailNotification, emailPayload } = params;
 
-  // Create in-app notification
-  const notification = await prisma.notification.create({
-    data: {
-      accountId,
-      type,
-      title,
-      body,
-      data: data ? JSON.stringify(data) : null,
-    },
-  });
+  // Check user preferences
+  const prefs = await getNotificationPreferences(accountId).catch(() => null);
 
-  // Send email if requested and payload provided
-  if (sendEmailNotification && emailPayload) {
+  // Check in-app preference
+  const inAppEnabled = isNotificationEnabled(prefs, type, "inApp");
+
+  let notification = null;
+  if (inAppEnabled) {
+    notification = await prisma.notification.create({
+      data: {
+        accountId,
+        type,
+        title,
+        body,
+        data: data ? JSON.stringify(data) : null,
+      },
+    });
+  }
+
+  // Check email preference
+  const emailEnabled = isNotificationEnabled(prefs, type, "email");
+  const emailFrequency = prefs?.emailFrequency || "immediate";
+
+  if (sendEmailNotification && emailPayload && emailEnabled && emailFrequency !== "never") {
     await sendEmail(emailPayload).catch((err) => {
       logger.error("Notification email send failed", {
         error: formatError(err),
