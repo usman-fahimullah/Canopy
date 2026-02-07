@@ -114,7 +114,7 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
       />
 
       {/* Main Content */}
-      <main className="min-w-0 bg-[var(--primitive-neutral-100)] px-12 py-6">
+      <main className="min-w-0 bg-[var(--primitive-neutral-100)] px-4 py-6 md:px-8 lg:px-12">
         {/* Job Post Tab */}
         {activeTab === "job-post" && <JobPostTab jobPostState={jobPostState} />}
 

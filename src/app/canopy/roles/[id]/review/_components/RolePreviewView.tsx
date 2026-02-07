@@ -91,6 +91,7 @@ export function RolePreviewView({ job, roleId, isPublished }: RolePreviewViewPro
         <div className="w-full shrink-0 space-y-6 lg:w-[350px]">
           <ApplyBeforeCard closesAt={job.closesAt} />
           <RecruiterCard recruiter={job.recruiter} />
+          <RecruiterCard recruiter={job.hiringManager} label="Hiring Manager" />
           <HighlightsCard job={job} />
           <RoleOverviewCard job={job} />
           <AboutCompanyCard organization={job.organization} />

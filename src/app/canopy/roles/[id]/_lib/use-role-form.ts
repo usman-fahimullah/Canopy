@@ -22,6 +22,19 @@ import {
 } from "./constants";
 
 // ============================================
+// TYPES
+// ============================================
+
+export interface OrgMemberOption {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+  role: string;
+  title: string | null;
+}
+
+// ============================================
 // RETURN TYPE
 // ============================================
 
@@ -70,6 +83,13 @@ export interface JobPostState {
   setCompensationDetails: (v: string) => void;
   showRecruiter: boolean;
   setShowRecruiter: (v: boolean) => void;
+  recruiterId: string | null;
+  setRecruiterId: (v: string | null) => void;
+  showHiringManager: boolean;
+  setShowHiringManager: (v: boolean) => void;
+  hiringManagerId: string | null;
+  setHiringManagerId: (v: string | null) => void;
+  orgMembers: OrgMemberOption[];
   closingDate: Date | undefined;
   setClosingDate: (v: Date | undefined) => void;
   externalLink: string;
@@ -164,6 +184,10 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
   const [selectedBenefits, setSelectedBenefits] = React.useState<string[]>([]);
   const [compensationDetails, setCompensationDetails] = React.useState("");
   const [showRecruiter, setShowRecruiter] = React.useState(false);
+  const [recruiterId, setRecruiterId] = React.useState<string | null>(null);
+  const [showHiringManager, setShowHiringManager] = React.useState(false);
+  const [hiringManagerId, setHiringManagerId] = React.useState<string | null>(null);
+  const [orgMembers, setOrgMembers] = React.useState<OrgMemberOption[]>([]);
   const [closingDate, setClosingDate] = React.useState<Date | undefined>();
   const [externalLink, setExternalLink] = React.useState("");
   const [requireResume, setRequireResume] = React.useState(true);
@@ -355,6 +379,9 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
         if (typeof fc.compensationDetails === "string")
           setCompensationDetails(fc.compensationDetails);
         if (typeof fc.showRecruiter === "boolean") setShowRecruiter(fc.showRecruiter);
+        if (typeof fc.recruiterId === "string") setRecruiterId(fc.recruiterId);
+        if (typeof fc.showHiringManager === "boolean") setShowHiringManager(fc.showHiringManager);
+        if (typeof fc.hiringManagerId === "string") setHiringManagerId(fc.hiringManagerId);
         if (typeof fc.externalLink === "string") setExternalLink(fc.externalLink);
       } else if (job.description) {
         // No formConfig at all — use the raw description
@@ -376,6 +403,14 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
   React.useEffect(() => {
     fetchRole();
   }, [fetchRole]);
+
+  // ---- Fetch org members for recruiter/hiring manager pickers ----
+  React.useEffect(() => {
+    fetch("/api/canopy/members")
+      .then((res) => (res.ok ? res.json() : { members: [] }))
+      .then((data: { members?: OrgMemberOption[] }) => setOrgMembers(data.members ?? []))
+      .catch(() => setOrgMembers([]));
+  }, []);
 
   // ---- Compose full description from structured fields ----
   const composeFullDescription = React.useCallback((): string => {
@@ -449,6 +484,9 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
           selectedBenefits,
           compensationDetails,
           showRecruiter,
+          recruiterId,
+          showHiringManager,
+          hiringManagerId,
           externalLink,
         },
         formQuestions: questionsEnabled ? questions : [],
@@ -586,6 +624,13 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       setCompensationDetails,
       showRecruiter,
       setShowRecruiter,
+      recruiterId,
+      setRecruiterId,
+      showHiringManager,
+      setShowHiringManager,
+      hiringManagerId,
+      setHiringManagerId,
+      orgMembers,
       closingDate,
       setClosingDate,
       externalLink,
@@ -625,6 +670,10 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       selectedBenefits,
       compensationDetails,
       showRecruiter,
+      recruiterId,
+      showHiringManager,
+      hiringManagerId,
+      orgMembers,
       closingDate,
       externalLink,
       requireResume,

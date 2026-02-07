@@ -90,6 +90,13 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
     setCompensationDetails,
     showRecruiter,
     setShowRecruiter,
+    recruiterId,
+    setRecruiterId,
+    showHiringManager,
+    setShowHiringManager,
+    hiringManagerId,
+    setHiringManagerId,
+    orgMembers,
     closingDate,
     setClosingDate,
     externalLink,
@@ -106,7 +113,7 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
   } = jobPostState;
 
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-col gap-4 xl:flex-row">
       {/* Left Column - Form */}
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         {/* Basic Info Card */}
@@ -337,9 +344,9 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
               label="Compensation"
               helpText="Outline the pay range, and incentives needed to fairly reward, attract, and retain someone in this role."
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center">
                 <Select value={payType} onValueChange={setPayType}>
-                  <SelectTrigger size="lg" className="w-[340px]">
+                  <SelectTrigger size="lg" className="w-full md:w-[340px]">
                     <SelectValue placeholder="Pay Type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -414,6 +421,13 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
       <JobPostSidebar
         showRecruiter={showRecruiter}
         setShowRecruiter={setShowRecruiter}
+        recruiterId={recruiterId}
+        setRecruiterId={setRecruiterId}
+        showHiringManager={showHiringManager}
+        setShowHiringManager={setShowHiringManager}
+        hiringManagerId={hiringManagerId}
+        setHiringManagerId={setHiringManagerId}
+        orgMembers={orgMembers}
         closingDate={closingDate}
         setClosingDate={setClosingDate}
         externalLink={externalLink}

@@ -245,6 +245,9 @@ const UpdateJobSchema = z.object({
       selectedBenefits: z.array(z.string()).optional(),
       compensationDetails: z.string().optional(),
       showRecruiter: z.boolean().optional(),
+      recruiterId: z.string().optional().nullable(),
+      showHiringManager: z.boolean().optional(),
+      hiringManagerId: z.string().optional().nullable(),
       externalLink: z.string().optional(),
     })
     .optional(),

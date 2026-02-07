@@ -73,25 +73,58 @@ async function getRolePreview(
 
     if (!job) return null;
 
-    // Fetch recruiter (first RECRUITER/OWNER/ADMIN member)
-    const recruiterMember = await prisma.organizationMember.findFirst({
-      where: {
-        organizationId: membership.organizationId,
-        role: { in: ["RECRUITER", "OWNER", "ADMIN"] },
-      },
-      orderBy: [{ role: "asc" }],
-      include: {
-        account: {
-          select: { name: true, email: true, avatar: true },
-        },
-      },
-    });
+    // Read formConfig for recruiter/hiring manager selection
+    const formConfig = job.formConfig as Record<string, unknown> | null;
+    const showRecruiter = formConfig?.showRecruiter !== false;
+    const selectedRecruiterId =
+      typeof formConfig?.recruiterId === "string" ? formConfig.recruiterId : null;
+    const showHiringManager = formConfig?.showHiringManager === true;
+    const selectedHiringManagerId =
+      typeof formConfig?.hiringManagerId === "string" ? formConfig.hiringManagerId : null;
+
+    // Fetch recruiter: specific member if set, otherwise fallback to first RECRUITER/OWNER/ADMIN
+    const recruiterMember = showRecruiter
+      ? await prisma.organizationMember.findFirst({
+          where: selectedRecruiterId
+            ? { id: selectedRecruiterId, organizationId: membership.organizationId }
+            : {
+                organizationId: membership.organizationId,
+                role: { in: ["RECRUITER", "OWNER", "ADMIN"] },
+              },
+          orderBy: selectedRecruiterId ? undefined : [{ role: "asc" }],
+          include: {
+            account: { select: { name: true, email: true, avatar: true } },
+          },
+        })
+      : null;
+
+    // Fetch hiring manager if enabled and selected
+    const hiringManagerMember =
+      showHiringManager && selectedHiringManagerId
+        ? await prisma.organizationMember.findFirst({
+            where: {
+              id: selectedHiringManagerId,
+              organizationId: membership.organizationId,
+            },
+            include: {
+              account: { select: { name: true, email: true, avatar: true } },
+            },
+          })
+        : null;
 
     const recruiter: Recruiter | null = recruiterMember
       ? {
           name: recruiterMember.account.name ?? recruiterMember.account.email,
           title: recruiterMember.title,
           avatar: recruiterMember.account.avatar,
+        }
+      : null;
+
+    const hiringManager: Recruiter | null = hiringManagerMember
+      ? {
+          name: hiringManagerMember.account.name ?? hiringManagerMember.account.email,
+          title: hiringManagerMember.title,
+          avatar: hiringManagerMember.account.avatar,
         }
       : null;
 
@@ -117,6 +150,7 @@ async function getRolePreview(
       organization: job.organization,
       pathway: job.pathway,
       recruiter,
+      hiringManager,
       isSaved: false,
       savedNotes: null,
     };
