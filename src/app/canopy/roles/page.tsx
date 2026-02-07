@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shell/page-header";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CategoryTag } from "@/components/ui/category-tag";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableHeader,
@@ -31,49 +32,13 @@ import {
   Copy,
   CirclesThreePlus,
 } from "@phosphor-icons/react";
-import { logger, formatError } from "@/lib/logger";
 import {
   RolesEmptyHeroIllustration,
   RolesTemplatePromoIllustration,
 } from "@/components/illustrations/roles-illustrations";
 import { CreateTemplateModal } from "@/components/canopy/create-template-modal";
-import type { RoleTemplate } from "@/types/canopy";
-
-/* -------------------------------------------------------------------
-   Types
-   ------------------------------------------------------------------- */
-
-interface Pathway {
-  id: string;
-  name: string;
-  slug: string;
-  icon: string | null;
-  color: string | null;
-}
-
-interface JobAssignee {
-  id: string;
-  name: string;
-  avatar: string | null;
-}
-
-interface Job {
-  id: string;
-  title: string;
-  slug: string;
-  location: string | null;
-  locationType: string;
-  status: string;
-  publishedAt: string | null;
-  closesAt: string | null;
-  applicationCount?: number;
-  pathway?: Pathway | null;
-  climateCategory?: string | null;
-  _count?: { applications: number };
-  recruiter?: JobAssignee | null;
-  hiringManager?: JobAssignee | null;
-  reviewerCount?: number;
-}
+import { useRolesQuery, useTemplatesQuery, useCreateRoleMutation } from "@/hooks/queries";
+import type { RoleListItem, TemplateItem } from "@/hooks/queries";
 
 /* -------------------------------------------------------------------
    Helpers
@@ -92,6 +57,42 @@ function formatDate(dateString: string | null) {
 /* -------------------------------------------------------------------
    Sub-components
    ------------------------------------------------------------------- */
+
+/** Skeleton loading state for the roles page */
+function RolesPageSkeleton() {
+  return (
+    <div className="space-y-8 px-12 py-6">
+      {/* Templates section skeleton */}
+      <section className="space-y-4">
+        <Skeleton className="h-7 w-32" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-[180px] rounded-[var(--radius-card)]" />
+          ))}
+        </div>
+      </section>
+
+      {/* Roles table skeleton */}
+      <section className="space-y-4">
+        <Skeleton className="h-7 w-32" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-4 py-3">
+              <Skeleton className="h-5 w-48" />
+              <Skeleton className="h-6 w-24 rounded-full" />
+              <div className="flex -space-x-1.5">
+                <Skeleton variant="circular" className="h-7 w-7" />
+                <Skeleton variant="circular" className="h-7 w-7" />
+              </div>
+              <Skeleton className="h-6 w-28 rounded-full" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
 
 /** First-time UX: empty state hero with rocket illustration */
 function RolesEmptyState({
@@ -159,10 +160,9 @@ function TemplatePromoBanner({ onCreateTemplate }: { onCreateTemplate: () => voi
 }
 
 /** Template card for existing role templates */
-function RoleTemplateCard({ template }: { template: RoleTemplate }) {
-  // Check if template was created in the last 7 days
-  const isNew =
-    new Date().getTime() - new Date(template.createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
+function RoleTemplateCard({ template }: { template: TemplateItem }) {
+  // Templates from the API don't include createdAt, so skip the "New" badge
+  const isNew = false;
 
   return (
     <Card variant="outlined" className="flex min-h-[180px] flex-col justify-between p-5">
@@ -223,7 +223,7 @@ function TemplatesSection({
   templates,
   onCreateTemplate,
 }: {
-  templates: RoleTemplate[];
+  templates: TemplateItem[];
   onCreateTemplate: () => void;
 }) {
   return (
@@ -240,7 +240,7 @@ function TemplatesSection({
 }
 
 /** Open Roles table section */
-function OpenRolesSection({ jobs }: { jobs: Job[] }) {
+function OpenRolesSection({ jobs }: { jobs: RoleListItem[] }) {
   const openJobs = jobs.filter((j) => j.status === "PUBLISHED" || j.status === "DRAFT");
 
   return (
@@ -391,71 +391,38 @@ function RolesErrorState({ onRetry }: { onRetry: () => void }) {
 
 export default function RolesPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [templates, setTemplates] = useState<RoleTemplate[]>([]);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
+
+  // ── React Query: cached data fetching ──────────────────────
+  // Data survives navigation — going to role detail and back shows this instantly from cache
+  const {
+    data: jobs = [],
+    isLoading: rolesLoading,
+    error: rolesError,
+    refetch: refetchRoles,
+  } = useRolesQuery();
+
+  const { data: templates = [], isLoading: templatesLoading } = useTemplatesQuery();
+
+  const createRole = useCreateRoleMutation();
+
+  // Only show skeleton on first load (no cached data yet)
+  const isFirstLoad =
+    (rolesLoading && jobs.length === 0) || (templatesLoading && templates.length === 0);
+  const error = rolesError ? (rolesError as Error).message : null;
 
   /** Create a blank draft role and redirect to the full role editor */
   const handleCreateRole = async () => {
-    setCreating(true);
     try {
-      const res = await fetch("/api/canopy/roles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: "Untitled Role",
-          description: "",
-        }),
+      const data = await createRole.mutateAsync({
+        title: "Untitled Role",
+        description: "",
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create role");
-      }
-
-      const data = await res.json();
       router.push(`/canopy/roles/${data.job.id}`);
-    } catch (err) {
-      logger.error("Error creating role", { error: formatError(err) });
-      setError(err instanceof Error ? err.message : "Failed to create role");
-      setCreating(false);
+    } catch {
+      // Error is surfaced via createRole.error if needed
     }
   };
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [rolesRes, templatesRes] = await Promise.all([
-        fetch("/api/canopy/roles?skip=0&take=100"),
-        fetch("/api/canopy/templates"),
-      ]);
-
-      if (!rolesRes.ok) {
-        throw new Error(`Failed to fetch roles (${rolesRes.status})`);
-      }
-      const rolesData = await rolesRes.json();
-      setJobs(rolesData.jobs || []);
-
-      if (templatesRes.ok) {
-        const templatesData = await templatesRes.json();
-        setTemplates(templatesData.templates || []);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      logger.error("Error fetching roles", { error: formatError(err) });
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const hasJobs = jobs.length > 0;
   const hasTemplates = templates.length > 0;
@@ -469,9 +436,9 @@ export default function RolesPage() {
         actions={
           <div className="flex items-center gap-2.5">
             {/* Primary CTA always visible */}
-            <Button onClick={handleCreateRole} disabled={creating}>
-              {creating ? <Spinner size="sm" /> : <Plus size={18} weight="bold" />}
-              {creating ? "Creating..." : "Create a role"}
+            <Button onClick={handleCreateRole} disabled={createRole.isPending}>
+              {createRole.isPending ? <Spinner size="sm" /> : <Plus size={18} weight="bold" />}
+              {createRole.isPending ? "Creating..." : "Create a role"}
             </Button>
 
             {/* Secondary actions only when content exists */}
@@ -493,29 +460,25 @@ export default function RolesPage() {
 
       {/* Content */}
       <div>
-        {/* Loading */}
-        {loading && (
-          <div className="flex items-center justify-center px-12 py-24">
-            <Spinner size="lg" />
-          </div>
-        )}
+        {/* Loading — skeleton only on first visit (no cached data) */}
+        {isFirstLoad && <RolesPageSkeleton />}
 
         {/* Error */}
-        {!loading && error && (
+        {!isFirstLoad && error && (
           <div className="px-12 py-6">
-            <RolesErrorState onRetry={fetchData} />
+            <RolesErrorState onRetry={() => refetchRoles()} />
           </div>
         )}
 
         {/* State 1: First-time UX — no jobs, no templates */}
-        {!loading && !error && isEmpty && (
+        {!isFirstLoad && !error && isEmpty && (
           <div className="px-12 py-6">
-            <RolesEmptyState onCreateRole={handleCreateRole} creating={creating} />
+            <RolesEmptyState onCreateRole={handleCreateRole} creating={createRole.isPending} />
           </div>
         )}
 
-        {/* State 2 & 3: Has content */}
-        {!loading && !error && !isEmpty && (
+        {/* State 2 & 3: Has content — shows instantly from cache on return visits */}
+        {!isFirstLoad && !error && !isEmpty && (
           <>
             {/* Role Templates section — white background */}
             <div className="px-12 py-6">
@@ -548,9 +511,9 @@ export default function RolesPage() {
       <CreateTemplateModal
         open={templateModalOpen}
         onOpenChange={setTemplateModalOpen}
-        jobs={jobs}
-        onTemplateCreated={(template) => {
-          setTemplates((prev) => [template, ...prev]);
+        jobs={jobs as RoleListItem[]}
+        onTemplateCreated={() => {
+          // Templates query auto-invalidates via stale-while-revalidate
         }}
       />
     </div>

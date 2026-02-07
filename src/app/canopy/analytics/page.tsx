@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/shell/page-header";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Clock, Users, ChartLineUp, Lightning, ArrowDown } from "@phosphor-icons/react";
+import {
+  Clock,
+  Users,
+  ChartLineUp,
+  Lightning,
+  ArrowDown,
+  ArrowClockwise,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { CHART_COLORS_RAW } from "@/components/ui/chart";
 import {
   ResponsiveContainer,
@@ -15,6 +22,8 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
+import { useAnalyticsQuery } from "@/hooks/queries";
+import type { AnalyticsData, PipelineStage } from "@/hooks/queries";
 
 /* -------------------------------------------------------------------
    Types
@@ -27,40 +36,10 @@ interface StatItem {
   icon: React.ElementType;
 }
 
-interface PipelineStage {
-  stage: string;
-  count: number;
-}
-
-interface ApplicationsOverTimePoint {
-  week: string;
-  count: number;
-}
-
 interface SourceItem {
   name: string;
   count: number;
   percentage: number;
-}
-
-interface TopJob {
-  id: string;
-  title: string;
-  applications: number;
-  hired: number;
-}
-
-interface AnalyticsData {
-  pipeline: { stage: string; count: number }[];
-  stats: {
-    timeToHire: number | null;
-    appsPerRole: number | null;
-    offerRate: number | null;
-    pipelineVelocity: number | null;
-  };
-  applicationsOverTime: ApplicationsOverTimePoint[];
-  topJobs: TopJob[];
-  sourceBreakdown: { source: string; count: number }[];
 }
 
 /* -------------------------------------------------------------------
@@ -87,43 +66,69 @@ function getConversionRate(pipeline: PipelineStage[]): number {
 }
 
 /* -------------------------------------------------------------------
+   Loading skeleton
+   ------------------------------------------------------------------- */
+
+function AnalyticsSkeleton() {
+  return (
+    <div className="space-y-8 px-8 py-6 lg:px-12">
+      {/* Stat cards skeleton */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex flex-col gap-3 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] px-5 py-5"
+          >
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-8 w-8 rounded-lg" />
+            </div>
+            <Skeleton className="h-7 w-24" />
+            <Skeleton className="h-3 w-32" />
+          </div>
+        ))}
+      </div>
+
+      {/* Pipeline funnel skeleton */}
+      <div className="space-y-4">
+        <Skeleton className="h-7 w-36" />
+        <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 flex-1" style={{ maxWidth: `${90 - i * 15}%` }} />
+                <Skeleton className="h-4 w-8" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Chart skeleton */}
+      <div className="space-y-4">
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-[300px] rounded-[16px]" />
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------
    Page
    ------------------------------------------------------------------- */
 
 export default function AnalyticsPage() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<AnalyticsData | null>(null);
+  // ── React Query: cached data fetching ──────────────────────
+  // Data persists across navigations — no re-fetch skeleton on return visits
+  const { data, isLoading, error, refetch } = useAnalyticsQuery();
 
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch("/api/canopy/analytics");
-        if (!response.ok) {
-          throw new Error("Failed to fetch analytics data");
-        }
-        const analyticsData: AnalyticsData = await response.json();
-        setData(analyticsData);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "An error occurred";
-        setError(message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAnalytics();
-  }, []);
-
-  if (loading) {
+  // Only show skeleton when there's no cached data
+  if (isLoading && !data) {
     return (
       <div>
         <PageHeader title="Analytics" />
-        <div className="flex items-center justify-center px-8 py-12 lg:px-12">
-          <Spinner size="lg" label="Loading analytics data..." />
-        </div>
+        <AnalyticsSkeleton />
       </div>
     );
   }
@@ -132,13 +137,22 @@ export default function AnalyticsPage() {
     return (
       <div>
         <PageHeader title="Analytics" />
-        <div className="space-y-4 px-8 py-12 lg:px-12">
-          <div className="rounded-[16px] border border-[var(--primitive-red-200)] bg-[var(--background-error)] p-6">
-            <p className="text-body font-medium text-[var(--foreground-error)]">{error}</p>
-            <Button variant="secondary" className="mt-4" onClick={() => window.location.reload()}>
-              Retry
-            </Button>
+        <div className="flex flex-col items-center justify-center gap-4 px-8 py-24 text-center lg:px-12">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--background-error)]">
+            <WarningCircle size={32} weight="fill" className="text-[var(--foreground-error)]" />
           </div>
+          <div className="max-w-sm space-y-1.5">
+            <h3 className="text-body-strong text-[var(--foreground-default)]">
+              Unable to load analytics
+            </h3>
+            <p className="text-caption text-[var(--foreground-muted)]">
+              {(error as Error).message}
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => refetch()}>
+            <ArrowClockwise size={16} weight="bold" />
+            Try again
+          </Button>
         </div>
       </div>
     );
@@ -326,8 +340,8 @@ export default function AnalyticsPage() {
                       borderRadius: "8px",
                     }}
                     labelStyle={{ color: "var(--foreground-default)" }}
-                    formatter={(value: any) => [value, "Applications"]}
-                    labelFormatter={(label: any) => `Week: ${formatWeekLabel(label)}`}
+                    formatter={(value) => `${value} Applications`}
+                    labelFormatter={(label) => `Week: ${formatWeekLabel(String(label))}`}
                   />
                   <Area
                     type="monotone"
@@ -395,7 +409,7 @@ export default function AnalyticsPage() {
             <div className="rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6">
               <div className="space-y-3">
                 {data.topJobs.map((job) => {
-                  const conversionRate =
+                  const jobConversionRate =
                     job.applications > 0 ? Math.round((job.hired / job.applications) * 100) : 0;
                   return (
                     <div
@@ -419,7 +433,7 @@ export default function AnalyticsPage() {
                         </div>
                         <div className="w-16">
                           <p className="text-foreground-default text-caption font-semibold">
-                            {conversionRate}%
+                            {jobConversionRate}%
                           </p>
                           <p className="text-caption-sm text-foreground-muted">Rate</p>
                         </div>
