@@ -15,7 +15,9 @@ vi.mock("@/lib/logger", () => ({
 import { parseAvailability } from "../availability";
 
 describe("parseAvailability", () => {
-  beforeEach(() => { vi.restoreAllMocks(); });
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it("returns null for null input", () => {
     expect(parseAvailability(null)).toBeNull();
@@ -28,8 +30,12 @@ describe("parseAvailability", () => {
   it("parses valid JSON availability", () => {
     const avail = {
       monday: [{ start: "09:00", end: "17:00" }],
-      tuesday: [], wednesday: [{ start: "10:00", end: "14:00" }],
-      thursday: [], friday: [], saturday: [], sunday: [],
+      tuesday: [],
+      wednesday: [{ start: "10:00", end: "14:00" }],
+      thursday: [],
+      friday: [],
+      saturday: [],
+      sunday: [],
     };
     const result = parseAvailability(JSON.stringify(avail));
     expect(result).toEqual(avail);
@@ -41,10 +47,19 @@ describe("parseAvailability", () => {
 
   it("handles multiple time windows per day", () => {
     const avail = {
-      monday: [{ start: "09:00", end: "12:00" }, { start: "14:00", end: "17:00" }],
-      tuesday: [], wednesday: [], thursday: [],
-      friday: [], saturday: [], sunday: [],
+      monday: [
+        { start: "09:00", end: "12:00" },
+        { start: "14:00", end: "17:00" },
+      ],
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+      friday: [],
+      saturday: [],
+      sunday: [],
     };
-    expect(parseAvailability(JSON.stringify(avail)).monday).toHaveLength(2);
+    const result = parseAvailability(JSON.stringify(avail));
+    expect(result).not.toBeNull();
+    expect(result!.monday).toHaveLength(2);
   });
 });

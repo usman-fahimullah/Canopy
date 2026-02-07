@@ -53,8 +53,7 @@ describe("db", () => {
   });
 
   it("uses error-only logging in production", async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
 
     // Also clear global cache
     const g = globalThis as unknown as { prisma?: unknown };
@@ -66,6 +65,6 @@ describe("db", () => {
     const opts = constructorCalls[0];
     expect(opts.log).toEqual(["error"]);
 
-    process.env.NODE_ENV = originalEnv;
+    vi.unstubAllEnvs();
   });
 });
