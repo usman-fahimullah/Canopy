@@ -1,8 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { StarRating } from "@/components/ui/scorecard";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { CaretDown, CaretRight, ArrowCircleRight, Star, Clock } from "@phosphor-icons/react";
 import type { Recommendation } from "@prisma/client";
@@ -11,7 +9,14 @@ import { formatDistanceToNow } from "date-fns";
 /**
  * HiringStagesSection — Figma-aligned stage card with 3-column rows.
  *
- * @figma https://figma.com/design/niUFJMIpfrizs1Kjsu1O4S/Candid?node-id=890-1314
+ * @figma https://figma.com/design/niUFJMIpfrizs1Kjsu1O4S/Candid?node-id=889-1742
+ *
+ * Structure (per Figma):
+ * - Section title: heading-sm/medium, color primary/g800
+ * - Outer card: bg neutral-100, border neutral-200, p-24, gap-24, rounded-16
+ *   - White stage row: bg white, shadow level-1, rounded-16, pl-16 pr-8 py-8
+ *     - 3 equal flex columns + CaretRight icon-button
+ *   - "Show more stages" trigger: px-16, left-aligned, text-body, neutral-600
  */
 
 interface ScoreData {
@@ -68,71 +73,73 @@ export function HiringStagesSection({
 
   return (
     <section>
-      <h3 className="mb-3 text-heading-sm font-medium text-[var(--foreground-default)]">
+      {/* Section title — Figma: heading-sm/medium, primary/g800, mb-16px */}
+      <h3 className="mb-4 text-heading-sm font-medium text-[var(--foreground-brand-emphasis)]">
         Hiring Stages
       </h3>
 
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <div
-          className="overflow-clip rounded-2xl border border-[var(--card-border)] bg-[var(--card-background)]"
-          style={{ boxShadow: "var(--shadow-card)" }}
-        >
-          {/* Primary stage row */}
+        {/* Outer card — Figma: bg neutral-100, border neutral-200, p-24, gap-24, rounded-16 */}
+        <div className="flex flex-col gap-6 rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] p-6">
+          {/* Primary stage row — Figma: bg white, shadow level-1, rounded-16, pl-16 pr-8 py-8 */}
           <button
             type="button"
             onClick={() => onOpenReview?.(currentStage)}
-            className={`flex w-full items-center px-4 py-2 pr-2 transition-colors hover:bg-[var(--background-interactive-hover)] ${
+            className={`flex w-full items-center gap-1 rounded-2xl bg-[var(--background-default)] py-2 pl-4 pr-2 transition-colors hover:bg-[var(--background-interactive-hover)] ${
               selectedStageId?.toLowerCase() === currentStage.toLowerCase()
                 ? "ring-2 ring-inset ring-[var(--border-brand)]"
                 : ""
             }`}
+            style={{ boxShadow: "1px 2px 16px 0px rgba(31, 29, 28, 0.08)" }}
           >
             {/* Col 1: Stage icon + name */}
-            <div className="flex flex-1 items-center gap-3">
+            <div className="flex flex-1 items-center gap-2">
               <ArrowCircleRight
                 size={24}
                 weight="fill"
                 className="text-[var(--primitive-blue-500)]"
               />
-              <span className="text-body font-medium text-[var(--foreground-default)]">
-                {currentStageName}
-              </span>
+              <span className="text-body text-[var(--foreground-default)]">{currentStageName}</span>
             </div>
 
-            {/* Col 2: Score */}
+            {/* Col 2: Score — Figma: text-body, color neutral/n600 */}
             <div className="flex flex-1 items-center gap-2">
               {hasReviews ? (
                 <>
                   <Star size={24} weight="fill" className="text-[var(--primitive-yellow-500)]" />
-                  <span className="text-body font-medium text-[var(--foreground-default)]">
+                  <span className="text-body text-[var(--foreground-subtle)]">
                     {averageScore.toFixed(1)}
                   </span>
-                  <span className="text-caption text-[var(--foreground-muted)]">
+                  <span className="text-body text-[var(--foreground-subtle)]">
                     ({scores.length} {scores.length === 1 ? "Review" : "Reviews"})
                   </span>
                 </>
               ) : (
-                <span className="text-caption text-[var(--foreground-muted)]">In Review</span>
+                <span className="text-body text-[var(--foreground-subtle)]">In Review</span>
               )}
             </div>
 
-            {/* Col 3: Time + CaretRight */}
-            <div className="flex flex-1 items-center justify-end gap-2">
+            {/* Col 3: Time — Figma: text-body, color neutral/n600, gap-4px */}
+            <div className="flex flex-1 items-center gap-1">
               {timeAgo && (
                 <>
-                  <Clock size={24} weight="regular" className="text-[var(--foreground-muted)]" />
-                  <span className="text-caption text-[var(--foreground-muted)]">
+                  <Clock size={24} weight="regular" className="text-[var(--foreground-subtle)]" />
+                  <span className="text-body text-[var(--foreground-subtle)]">
                     Applied {timeAgo} ago
                   </span>
                 </>
               )}
-              <CaretRight size={20} weight="bold" className="text-[var(--foreground-muted)]" />
+            </div>
+
+            {/* CaretRight icon button — Figma: p-12, rounded-16 */}
+            <div className="shrink-0 rounded-2xl p-3">
+              <CaretRight size={24} weight="bold" className="text-[var(--foreground-subtle)]" />
             </div>
           </button>
 
           {/* Expanded: all stages */}
           <CollapsibleContent>
-            <div className="border-t border-[var(--border-muted)] px-4 py-2">
+            <div className="flex flex-col gap-2 px-4">
               {stages.map((stage, idx) => {
                 const isCurrent = stage.id.toLowerCase() === currentStage.toLowerCase();
                 const isPast = idx < currentStageIdx;
@@ -145,7 +152,7 @@ export function HiringStagesSection({
                     key={stage.id}
                     type="button"
                     onClick={() => onOpenReview?.(stage.id)}
-                    className={`flex w-full items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[var(--background-interactive-hover)] ${
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-[var(--background-interactive-hover)] ${
                       isSelected ? "bg-[var(--background-interactive-selected)]" : ""
                     }`}
                   >
@@ -173,11 +180,11 @@ export function HiringStagesSection({
             </div>
           </CollapsibleContent>
 
-          {/* Show more trigger */}
+          {/* Show more trigger — Figma: px-16, gap-4, left-aligned, text-body, neutral/n600 */}
           <CollapsibleTrigger asChild>
-            <button className="flex w-full items-center justify-center gap-1 border-t border-[var(--border-muted)] py-2 text-caption text-[var(--foreground-muted)] transition-colors hover:bg-[var(--background-interactive-hover)]">
+            <button className="flex items-center gap-1 px-4 text-body text-[var(--foreground-subtle)] transition-colors hover:text-[var(--foreground-muted)]">
               <CaretDown
-                size={14}
+                size={24}
                 className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               />
               {isOpen ? "Show less" : "Show more stages"}

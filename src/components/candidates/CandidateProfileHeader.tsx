@@ -39,9 +39,8 @@ export function CandidateProfileHeader({
           <span>Applied {timeAgo}</span>
         </p>
         <div>
-          <Button variant="tertiary">
-            <PaperPlaneTilt size={16} weight="fill" className="mr-2" />
-            Message Candidate
+          <Button variant="tertiary" leftIcon={<PaperPlaneTilt size={20} weight="fill" />}>
+            Send Message
           </Button>
         </div>
       </div>
