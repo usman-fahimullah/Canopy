@@ -1,13 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-// Dynamic import to avoid build-time DOMMatrix error (pdf-parse v2 uses pdfjs-dist)
-async function parsePdf(buffer: Buffer): Promise<string> {
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
-  const result = await parser.getText();
-  return result.text;
-}
-import { createAdminClient } from "@/lib/supabase/admin";
-import { logger, formatError } from "@/lib/logger";
+import { logger } from "@/lib/logger";
 
 // ============================================
 // TYPES
@@ -36,12 +28,22 @@ const anthropic = new Anthropic({
 });
 
 /**
- * Download a file from Supabase Storage and extract its text content.
+ * Extract text from a PDF buffer using pdf-parse v1.
+ * Uses dynamic import to avoid pdf-parse loading test fixtures at build time.
+ */
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  // pdf-parse v1 must use require() to avoid loading test fixtures at build time
+  const mod = await import("pdf-parse");
+  const pdfParse = mod.default as unknown as (buf: Buffer) => Promise<{ text: string }>;
+  const result = await pdfParse(buffer);
+  return result.text;
+}
+
+/**
+ * Download a file from a URL and extract its text content.
  * Supports PDF files (the primary resume format).
  */
 async function extractTextFromUrl(fileUrl: string): Promise<string> {
-  // For Supabase Storage URLs, we can download directly
-  // For other URLs, fetch the file
   const response = await fetch(fileUrl);
   if (!response.ok) {
     throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
@@ -51,7 +53,7 @@ async function extractTextFromUrl(fileUrl: string): Promise<string> {
   const buffer = Buffer.from(await response.arrayBuffer());
 
   if (contentType.includes("pdf") || fileUrl.toLowerCase().endsWith(".pdf")) {
-    return parsePdf(buffer);
+    return extractPdfText(buffer);
   }
 
   // For plain text or other formats, return as string

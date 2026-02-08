@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRoleDetailQuery, queryKeys } from "@/hooks/queries";
 import { logger, formatError } from "@/lib/logger";
 import type {
   JobData,
@@ -150,18 +152,31 @@ export interface UseRoleFormReturn {
 
 export function useRoleForm(roleId: string): UseRoleFormReturn {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  // ---- Data Fetching State ----
-  const [loading, setLoading] = React.useState(true);
+  // ── React Query: cached role detail fetching ──────────────
+  // Data survives navigations — returning to role detail shows cached form instantly.
+  const {
+    data: roleDetailData,
+    isLoading: queryLoading,
+    error: queryError,
+  } = useRoleDetailQuery(roleId);
+
+  // ---- Saving State ----
   const [saving, setSaving] = React.useState(false);
-  const [fetchError, setFetchError] = React.useState<string | null>(null);
   const [saveError, setSaveError] = React.useState<string | null>(null);
 
-  // ---- Raw API Data ----
+  // ---- Raw API Data (populated from query cache) ----
   const [jobData, setJobData] = React.useState<JobData | null>(null);
   const [applications, setApplications] = React.useState<ApplicationData[]>([]);
   const [stageCounts, setStageCounts] = React.useState<Record<string, number>>({});
   const [totalApplications, setTotalApplications] = React.useState(0);
+
+  // Derived loading/error from React Query — only show loading when no cached data
+  const loading = queryLoading && !jobData;
+  const fetchError = queryError
+    ? (queryError as Error).message || "Failed to load role details"
+    : null;
 
   // ---- Job Post Form State ----
   const [roleTitle, setRoleTitle] = React.useState("");
@@ -252,179 +267,163 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     }));
   }, []);
 
-  // ---- Fetch Role from API ----
-  const fetchRole = React.useCallback(async () => {
-    try {
-      setLoading(true);
-      setFetchError(null);
+  // ---- Populate form state from React Query cache ----
+  // Track which data version we've populated from to avoid re-running on the same data.
+  const populatedRef = React.useRef<string | null>(null);
 
-      const res = await fetch(`/api/canopy/roles/${roleId}`);
-      if (!res.ok) {
-        if (res.status === 404) {
-          setFetchError("Role not found");
-        } else {
-          setFetchError("Failed to load role details");
-        }
-        return;
+  React.useEffect(() => {
+    if (!roleDetailData) return;
+
+    const data = roleDetailData as Record<string, unknown>;
+    const job = data.job as JobData;
+    if (!job) return;
+
+    // Fingerprint: only re-populate form when we get genuinely new data
+    const fingerprint = `${job.id}-${(job as unknown as Record<string, unknown>).updatedAt || ""}`;
+    if (populatedRef.current === fingerprint) return;
+    populatedRef.current = fingerprint;
+
+    // Store raw API data
+    setJobData(job);
+    setApplications((data.applications as ApplicationData[]) || []);
+    setStageCounts((data.stageCounts as Record<string, number>) || {});
+    setTotalApplications((data.totalApplications as number) || 0);
+
+    // Map DB values → form state
+    if (job.title) setRoleTitle(job.title);
+    if (job.climateCategory) setJobCategory(job.climateCategory);
+    if (job.employmentType) {
+      setPositionType(employmentTypeToForm[job.employmentType] || "");
+    }
+    if (job.experienceLevel) {
+      setExperienceLevel(experienceLevelToForm[job.experienceLevel] || "");
+    }
+    if (job.location) {
+      const parts = job.location.split(", ");
+      if (parts[0]) setCity(parts[0]);
+      if (parts[1]) {
+        const stateMatch = usStates.find(
+          (s) =>
+            s.label.toLowerCase() === parts[1].toLowerCase() || s.value === parts[1].toLowerCase()
+        );
+        if (stateMatch) setState(stateMatch.value);
+      }
+      if (parts[2]) {
+        const countryMatch = countries.find(
+          (c) =>
+            c.label.toLowerCase() === parts[2].toLowerCase() || c.value === parts[2].toLowerCase()
+        );
+        if (countryMatch) setCountry(countryMatch.value);
+      }
+    }
+    if (job.locationType) {
+      setWorkplaceType(locationTypeToForm[job.locationType] || "onsite");
+    }
+    if (job.salaryMin) setMinPay(String(job.salaryMin));
+    if (job.salaryMax) setMaxPay(String(job.salaryMax));
+    if (job.closesAt) setClosingDate(new Date(job.closesAt));
+
+    // Initialize apply form config from DB
+    if (job.formConfig) {
+      const fc = job.formConfig as Record<string, unknown>;
+      const personalDeets = fc.personalDetails as
+        | Record<string, { visible: boolean; required: boolean }>
+        | undefined;
+      const careerDeets = fc.careerDetails as
+        | Record<string, { visible: boolean; required: boolean }>
+        | undefined;
+
+      if (personalDeets) {
+        setPersonalDetails((prev) => ({
+          ...prev,
+          ...Object.fromEntries(
+            Object.entries(personalDeets).map(([k, v]) => [
+              k,
+              { visible: v.visible, required: v.required },
+            ])
+          ),
+        }));
+      }
+      if (careerDeets) {
+        setCareerDetails((prev) => ({
+          ...prev,
+          ...Object.fromEntries(
+            Object.entries(careerDeets).map(([k, v]) => [
+              k,
+              { visible: v.visible, required: v.required },
+            ])
+          ),
+        }));
       }
 
-      const data = await res.json();
-      const job = data.job as JobData;
-
-      // Store raw API data
-      setJobData(job);
-      setApplications(data.applications || []);
-      setStageCounts(data.stageCounts || {});
-      setTotalApplications(data.totalApplications || 0);
-
-      // Map DB values → form state
-      if (job.title) setRoleTitle(job.title);
-      if (job.climateCategory) setJobCategory(job.climateCategory);
-      if (job.employmentType) {
-        setPositionType(employmentTypeToForm[job.employmentType] || "");
-      }
-      if (job.experienceLevel) {
-        setExperienceLevel(experienceLevelToForm[job.experienceLevel] || "");
-      }
-      if (job.location) {
-        const parts = job.location.split(", ");
-        if (parts[0]) setCity(parts[0]);
-        if (parts[1]) {
-          const stateMatch = usStates.find(
-            (s) =>
-              s.label.toLowerCase() === parts[1].toLowerCase() || s.value === parts[1].toLowerCase()
-          );
-          if (stateMatch) setState(stateMatch.value);
-        }
-        if (parts[2]) {
-          const countryMatch = countries.find(
-            (c) =>
-              c.label.toLowerCase() === parts[2].toLowerCase() || c.value === parts[2].toLowerCase()
-          );
-          if (countryMatch) setCountry(countryMatch.value);
-        }
-      }
-      if (job.locationType) {
-        setWorkplaceType(locationTypeToForm[job.locationType] || "onsite");
-      }
-      if (job.salaryMin) setMinPay(String(job.salaryMin));
-      if (job.salaryMax) setMaxPay(String(job.salaryMax));
-      if (job.closesAt) setClosingDate(new Date(job.closesAt));
-
-      // Initialize apply form config from DB
-      if (job.formConfig) {
-        const fc = job.formConfig as Record<string, unknown>;
-        const personalDeets = fc.personalDetails as
-          | Record<string, { visible: boolean; required: boolean }>
-          | undefined;
-        const careerDeets = fc.careerDetails as
-          | Record<string, { visible: boolean; required: boolean }>
-          | undefined;
-
-        if (personalDeets) {
-          setPersonalDetails((prev) => ({
-            ...prev,
-            ...Object.fromEntries(
-              Object.entries(personalDeets).map(([k, v]) => [
-                k,
-                { visible: v.visible, required: v.required },
-              ])
-            ),
-          }));
-        }
-        if (careerDeets) {
-          setCareerDetails((prev) => ({
-            ...prev,
-            ...Object.fromEntries(
-              Object.entries(careerDeets).map(([k, v]) => [
-                k,
-                { visible: v.visible, required: v.required },
-              ])
-            ),
-          }));
-        }
-
-        // Restore structured description fields
-        const structured = fc.structuredDescription as
-          | {
-              description?: string;
-              responsibilities?: string;
-              requiredQuals?: string;
-              desiredQuals?: string;
-            }
-          | undefined;
-        if (structured) {
-          if (structured.description) setDescription(structured.description);
-          if (structured.responsibilities) setResponsibilities(structured.responsibilities);
-          if (structured.requiredQuals) setRequiredQuals(structured.requiredQuals);
-          if (structured.desiredQuals) setDesiredQuals(structured.desiredQuals);
-        } else if (job.description) {
-          // Fallback: if no structured data stored yet, put full description in the main field
-          setDescription(job.description);
-        }
-
-        // Restore additional form fields
-        const requiredFiles = fc.requiredFiles as
-          | { resume?: boolean; coverLetter?: boolean; portfolio?: boolean }
-          | undefined;
-        if (requiredFiles) {
-          if (requiredFiles.resume !== undefined) setRequireResume(requiredFiles.resume);
-          if (requiredFiles.coverLetter !== undefined)
-            setRequireCoverLetter(requiredFiles.coverLetter);
-          if (requiredFiles.portfolio !== undefined) setRequirePortfolio(requiredFiles.portfolio);
-        }
-        if (typeof fc.educationLevel === "string") setEducationLevel(fc.educationLevel);
-        if (typeof fc.educationDetails === "string") setEducationDetails(fc.educationDetails);
-        if (typeof fc.payType === "string") setPayType(fc.payType);
-        if (typeof fc.payFrequency === "string") setPayFrequency(fc.payFrequency);
-        if (Array.isArray(fc.selectedBenefits))
-          setSelectedBenefits(fc.selectedBenefits as string[]);
-        if (typeof fc.compensationDetails === "string")
-          setCompensationDetails(fc.compensationDetails);
-        if (typeof fc.showRecruiter === "boolean") setShowRecruiter(fc.showRecruiter);
-        if (typeof fc.showHiringManager === "boolean") setShowHiringManager(fc.showHiringManager);
-        if (typeof fc.externalLink === "string") setExternalLink(fc.externalLink);
+      // Restore structured description fields
+      const structured = fc.structuredDescription as
+        | {
+            description?: string;
+            responsibilities?: string;
+            requiredQuals?: string;
+            desiredQuals?: string;
+          }
+        | undefined;
+      if (structured) {
+        if (structured.description) setDescription(structured.description);
+        if (structured.responsibilities) setResponsibilities(structured.responsibilities);
+        if (structured.requiredQuals) setRequiredQuals(structured.requiredQuals);
+        if (structured.desiredQuals) setDesiredQuals(structured.desiredQuals);
       } else if (job.description) {
-        // No formConfig at all — use the raw description
         setDescription(job.description);
       }
 
-      // Read team assignment from top-level job fields (proper FK columns)
-      // Falls back to formConfig for backward compat with un-migrated data
-      if (job.recruiterId) {
-        setRecruiterId(job.recruiterId);
-      } else if (job.formConfig) {
-        const fc = job.formConfig as Record<string, unknown>;
-        if (typeof fc.recruiterId === "string") setRecruiterId(fc.recruiterId);
+      // Restore additional form fields
+      const requiredFiles = fc.requiredFiles as
+        | { resume?: boolean; coverLetter?: boolean; portfolio?: boolean }
+        | undefined;
+      if (requiredFiles) {
+        if (requiredFiles.resume !== undefined) setRequireResume(requiredFiles.resume);
+        if (requiredFiles.coverLetter !== undefined)
+          setRequireCoverLetter(requiredFiles.coverLetter);
+        if (requiredFiles.portfolio !== undefined) setRequirePortfolio(requiredFiles.portfolio);
       }
+      if (typeof fc.educationLevel === "string") setEducationLevel(fc.educationLevel);
+      if (typeof fc.educationDetails === "string") setEducationDetails(fc.educationDetails);
+      if (typeof fc.payType === "string") setPayType(fc.payType);
+      if (typeof fc.payFrequency === "string") setPayFrequency(fc.payFrequency);
+      if (Array.isArray(fc.selectedBenefits)) setSelectedBenefits(fc.selectedBenefits as string[]);
+      if (typeof fc.compensationDetails === "string")
+        setCompensationDetails(fc.compensationDetails);
+      if (typeof fc.showRecruiter === "boolean") setShowRecruiter(fc.showRecruiter);
+      if (typeof fc.showHiringManager === "boolean") setShowHiringManager(fc.showHiringManager);
+      if (typeof fc.externalLink === "string") setExternalLink(fc.externalLink);
+    } else if (job.description) {
+      setDescription(job.description);
+    }
 
-      if (job.hiringManagerId) {
-        setHiringManagerId(job.hiringManagerId);
-      } else if (job.formConfig) {
-        const fc = job.formConfig as Record<string, unknown>;
-        if (typeof fc.hiringManagerId === "string") setHiringManagerId(fc.hiringManagerId);
-      }
+    // Read team assignment from top-level job fields (proper FK columns)
+    // Falls back to formConfig for backward compat with un-migrated data
+    if (job.recruiterId) {
+      setRecruiterId(job.recruiterId);
+    } else if (job.formConfig) {
+      const fc = job.formConfig as Record<string, unknown>;
+      if (typeof fc.recruiterId === "string") setRecruiterId(fc.recruiterId);
+    }
 
-      // Load reviewer assignments from the assignments endpoint
-      if (job.reviewerAssignments && Array.isArray(job.reviewerAssignments)) {
-        setReviewerIds(job.reviewerAssignments.map((a: { member: { id: string } }) => a.member.id));
-      }
+    if (job.hiringManagerId) {
+      setHiringManagerId(job.hiringManagerId);
+    } else if (job.formConfig) {
+      const fc = job.formConfig as Record<string, unknown>;
+      if (typeof fc.hiringManagerId === "string") setHiringManagerId(fc.hiringManagerId);
+    }
 
-      if (job.formQuestions && Array.isArray(job.formQuestions) && job.formQuestions.length > 0) {
-        setQuestions(job.formQuestions);
-      }
-    } catch (err) {
-      logger.error("Error fetching role detail", { error: formatError(err) });
-      setFetchError("Failed to load role details");
-    } finally {
-      setLoading(false);
+    // Load reviewer assignments from the assignments endpoint
+    if (job.reviewerAssignments && Array.isArray(job.reviewerAssignments)) {
+      setReviewerIds(job.reviewerAssignments.map((a: { member: { id: string } }) => a.member.id));
+    }
+
+    if (job.formQuestions && Array.isArray(job.formQuestions) && job.formQuestions.length > 0) {
+      setQuestions(job.formQuestions);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roleId]);
-
-  React.useEffect(() => {
-    fetchRole();
-  }, [fetchRole]);
+  }, [roleDetailData]);
 
   // ---- Fetch org members for recruiter/hiring manager pickers ----
   React.useEffect(() => {
@@ -557,6 +556,11 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
         });
       }
 
+      // Invalidate React Query cache so other views see updated data
+      queryClient.invalidateQueries({ queryKey: queryKeys.canopy.roles.detail(roleId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.canopy.roles.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.canopy.dashboard.all });
+
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save role";
@@ -604,6 +608,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     questionsEnabled,
     questions,
     jobData,
+    queryClient,
   ]);
 
   // ---- Review Role — Save draft then navigate ----
