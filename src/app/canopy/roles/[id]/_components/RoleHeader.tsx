@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { SegmentedController } from "@/components/ui/segmented-controller";
 import {
   CircleDashed,
+  CheckCircle,
+  Pause,
+  XCircle,
   PencilSimpleLine,
   ListChecks,
   Nut,
@@ -38,35 +41,49 @@ export function RoleHeader({
   onReviewRole,
   saving,
 }: RoleHeaderProps) {
-  // Determine status badge variant
-  const statusBadge = () => {
-    const status = jobStatus || "DRAFT";
-    switch (status) {
-      case "PUBLISHED":
-        return <Badge variant="success">Published</Badge>;
-      case "PAUSED":
-        return <Badge variant="warning">Paused</Badge>;
-      case "CLOSED":
-        return <Badge variant="neutral">Closed</Badge>;
-      default:
-        return <Badge variant="feature">Draft</Badge>;
-    }
-  };
+  const status = jobStatus || "DRAFT";
+
+  // Status icon + badge mapping
+  const statusConfig = {
+    PUBLISHED: {
+      icon: CheckCircle,
+      iconColor: "text-[var(--foreground-success)]",
+      badge: <Badge variant="success">Published</Badge>,
+    },
+    PAUSED: {
+      icon: Pause,
+      iconColor: "text-[var(--foreground-warning)]",
+      badge: <Badge variant="warning">Paused</Badge>,
+    },
+    CLOSED: {
+      icon: XCircle,
+      iconColor: "text-[var(--foreground-subtle)]",
+      badge: <Badge variant="neutral">Closed</Badge>,
+    },
+    DRAFT: {
+      icon: CircleDashed,
+      iconColor: "text-[var(--foreground-subtle)]",
+      badge: <Badge variant="feature">Draft</Badge>,
+    },
+  } as const;
+
+  const { icon: StatusIcon, iconColor, badge: statusBadge } =
+    statusConfig[status as keyof typeof statusConfig] ?? statusConfig.DRAFT;
 
   return (
     <div className="sticky top-0 z-[var(--z-sticky)] border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] px-4 py-4 md:px-8 lg:px-12 lg:py-6">
       <div className="relative flex items-center justify-between">
         {/* Left: Icon + Title + Badge */}
         <div className="flex min-w-0 items-center gap-3">
-          <CircleDashed
+          <StatusIcon
             weight="bold"
-            className="h-8 w-8 shrink-0 text-[var(--primitive-neutral-500)]"
+            className={`h-8 w-8 shrink-0 ${iconColor}`}
           />
-          <div className="flex min-w-0 flex-col gap-[var(--space-0-5)]">
+          <div className="flex min-w-0 flex-col items-start gap-[var(--space-0-5)]">
             <h1 className="truncate text-heading-sm font-medium leading-[2rem] text-[var(--primitive-neutral-900)]">
               {roleTitle || "Untitled Role"}
             </h1>
-            {statusBadge()}
+            {statusBadge}
           </div>
         </div>
 

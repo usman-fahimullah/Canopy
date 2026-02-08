@@ -34,6 +34,22 @@ export interface FormQuestion {
   options?: string[];
 }
 
+export interface ApplicationScoreData {
+  id: string;
+  overallRating: number;
+  recommendation: "STRONG_YES" | "YES" | "NEUTRAL" | "NO" | "STRONG_NO";
+  scorer: {
+    id: string;
+    account: { name: string | null; avatar: string | null };
+  };
+}
+
+export interface ApplicationInterviewData {
+  id: string;
+  scheduledAt: string;
+  status: string;
+}
+
 export interface ApplicationData {
   id: string;
   stage: string;
@@ -62,7 +78,14 @@ export interface ApplicationData {
       email: string;
       avatar: string | null;
     };
+    notes?: Array<{
+      id: string;
+      content: string;
+      createdAt: string;
+    }>;
   };
+  scores?: ApplicationScoreData[];
+  interviews?: ApplicationInterviewData[];
 }
 
 export interface JobData {

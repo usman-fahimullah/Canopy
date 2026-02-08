@@ -75,11 +75,11 @@ export function NotesEditor({ jobId, initialNotes, isSaved }: NotesEditorProps) 
         onChange={handleChange}
         placeholder="Add your notes about this job..."
         className="min-h-[120px] resize-y"
-        maxLength={2000}
+        maxLength={10000}
         aria-label="Your notes about this job"
       />
       <div className="flex items-center justify-between">
-        <span className="text-caption-sm text-[var(--foreground-subtle)]">{notes.length}/2000</span>
+        <span className="text-caption-sm text-[var(--foreground-subtle)]">{notes.length}/10000</span>
         {status === "saving" && (
           <span className="flex items-center gap-1 text-caption-sm text-[var(--foreground-muted)]">
             <Spinner size="xs" variant="current" label="Saving" />

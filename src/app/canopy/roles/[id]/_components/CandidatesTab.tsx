@@ -10,12 +10,14 @@ import { useKanbanState, type KanbanItem } from "@/components/ui/kanban-state";
 import {
   CandidateCard,
   CandidateKanbanHeader,
-  CandidateTags,
+  CandidateActivity,
+  CandidateReviewers,
   DaysInStage,
+  type ReviewerData,
+  type DecisionType,
 } from "@/components/ui/candidate-card";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
-import { Badge } from "@/components/ui/badge";
 import {
   Plus,
   Funnel,
@@ -24,9 +26,57 @@ import {
   Prohibit,
   UserCirclePlus,
 } from "@phosphor-icons/react";
-import type { JobData, ApplicationData } from "../_lib/types";
+import type { JobData, ApplicationData, ApplicationScoreData } from "../_lib/types";
 import { defaultStages } from "../_lib/constants";
 import { mapStageToKanbanType } from "../_lib/helpers";
+
+// ============================================
+// HELPERS
+// ============================================
+
+/** Map DB Recommendation enum to CandidateCard DecisionType */
+function mapRecommendation(
+  rec: ApplicationScoreData["recommendation"]
+): DecisionType {
+  switch (rec) {
+    case "STRONG_YES":
+      return "strong_yes";
+    case "YES":
+      return "yes";
+    case "NO":
+    case "STRONG_NO":
+      return "no";
+    case "NEUTRAL":
+    default:
+      return "maybe";
+  }
+}
+
+/** Format a relative time for the last note (e.g., "2h ago", "3d ago") */
+function formatNoteTime(dateStr: string): string {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(diffMs / 3600000);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(diffMs / 86400000);
+  return `${days}d ago`;
+}
+
+/** Format an upcoming interview date (e.g., "Tomorrow, 2pm", "Mon, 10am") */
+function formatInterviewDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((d.getTime() - now.getTime()) / 86400000);
+  const time = d
+    .toLocaleTimeString("en-US", { hour: "numeric", hour12: true })
+    .toLowerCase();
+
+  if (diffDays === 0) return `Today, ${time}`;
+  if (diffDays === 1) return `Tomorrow, ${time}`;
+  const day = d.toLocaleDateString("en-US", { weekday: "short" });
+  return `${day}, ${time}`;
+}
 
 // ============================================
 // TYPES
@@ -106,17 +156,32 @@ export function CandidatesTab({
         id: app.id,
         columnId: app.stage,
         content: (() => {
-          // Build tags from skills, greenSkills, and certifications
-          const tags = [
-            ...app.seeker.greenSkills.map((s) => ({ label: s, variant: "green" as const })),
-            ...app.seeker.certifications.map((c) => ({ label: c, variant: "blue" as const })),
-            ...app.seeker.skills.map((s) => ({ label: s, variant: "default" as const })),
-          ];
-
           // Calculate days in current stage
           const daysInStage = Math.floor(
             (Date.now() - new Date(app.updatedAt).getTime()) / 86400000
           );
+
+          // Build reviewer data from scores
+          const reviewers: ReviewerData[] = (app.scores ?? []).map(
+            (score) => ({
+              name: score.scorer.account.name || "Unknown",
+              avatarUrl: score.scorer.account.avatar || undefined,
+              status: mapRecommendation(score.recommendation),
+              rating: score.overallRating,
+            })
+          );
+
+          // Last note / comment time
+          const lastNote = app.seeker.notes?.[0];
+          const lastComment = lastNote
+            ? formatNoteTime(lastNote.createdAt)
+            : undefined;
+
+          // Next scheduled interview
+          const nextInterview = app.interviews?.[0];
+          const scheduledInterview = nextInterview
+            ? formatInterviewDate(nextInterview.scheduledAt)
+            : undefined;
 
           return (
             <CandidateCard
@@ -130,8 +195,17 @@ export function CandidatesTab({
                 matchScore={app.matchScore ?? undefined}
                 appliedDate={app.createdAt}
               />
-              {tags.length > 0 && <CandidateTags tags={tags} maxVisible={2} className="mt-2" />}
+              {(lastComment || scheduledInterview) && (
+                <CandidateActivity
+                  lastComment={lastComment}
+                  scheduledInterview={scheduledInterview}
+                  className="mt-2"
+                />
+              )}
               <DaysInStage days={daysInStage} compact className="mt-2" />
+              {reviewers.length > 0 && (
+                <CandidateReviewers reviewers={reviewers} />
+              )}
             </CandidateCard>
           );
         })(),
@@ -167,7 +241,7 @@ export function CandidatesTab({
     <>
       <div className="flex flex-1 flex-col">
         {/* Toolbar — Search + Filter + Add + View Toggle */}
-        <div className="flex items-center justify-between border-b border-[var(--border-muted)] bg-[var(--background-default)] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[var(--border-muted)] bg-[var(--background-default)] px-4 py-3">
           <div className="flex items-center gap-3">
             <SearchInput
               placeholder="Search candidates"
@@ -259,7 +333,7 @@ export function CandidatesTab({
 
         {/* Status bar for non-pipeline candidates */}
         {(rejectedCount > 0 || talentPoolCount > 0) && (
-          <div className="flex items-center gap-4 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] px-6 py-2.5">
+          <div className="flex items-center gap-4 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] px-4 py-2">
             {rejectedCount > 0 && (
               <div className="flex items-center gap-2">
                 <Prohibit size={14} className="text-[var(--foreground-error)]" />

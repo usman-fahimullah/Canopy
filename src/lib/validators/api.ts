@@ -320,7 +320,7 @@ export const CoachApplySchema = z.object({
 // --- Saved Jobs ---
 
 export const UpdateSavedJobNotesSchema = z.object({
-  notes: z.string().max(2000, "Notes must be 2000 characters or fewer").optional(),
+  notes: z.string().max(10000, "Notes must be 10000 characters or fewer").optional(),
 });
 
 // --- Applications ---

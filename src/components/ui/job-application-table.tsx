@@ -73,6 +73,7 @@ export interface JobApplicationTableProps {
   onStageChange?: (applicationId: string, newStage: ApplicationSection) => void;
   onReactionChange?: (applicationId: string, reaction: EmojiReaction) => void;
   onFavoriteToggle?: (applicationId: string) => void;
+  onRowClick?: (applicationId: string) => void;
   onExploreJobs?: () => void;
   className?: string;
 }
@@ -218,7 +219,7 @@ export const stageColors: Record<
 };
 
 // Stage order for determining past/future states in dropdown
-const stageOrder: ApplicationSection[] = [
+export const stageOrder: ApplicationSection[] = [
   "saved",
   "applied",
   "interview",
@@ -231,7 +232,7 @@ const stageOrder: ApplicationSection[] = [
 // EMOJI CONFIG
 // ============================================
 
-const emojiConfig: Record<
+export const emojiConfig: Record<
   Exclude<EmojiReaction, "none">,
   { icon: React.ElementType; label: string }
 > = {
@@ -381,9 +382,9 @@ interface StagePillProps {
 }
 
 /** Determine the visual state of a stage option in the dropdown */
-type StageItemState = "past" | "selected" | "default";
+export type StageItemState = "past" | "selected" | "default";
 
-function getStageItemState(
+export function getStageItemState(
   optionStage: ApplicationSection,
   currentStage: ApplicationSection
 ): StageItemState {
@@ -580,6 +581,7 @@ interface TableRowProps {
   onStageChange?: (applicationId: string, newStage: ApplicationSection) => void;
   onReactionChange?: (applicationId: string, reaction: EmojiReaction) => void;
   onFavoriteToggle?: (applicationId: string) => void;
+  onRowClick?: (applicationId: string) => void;
 }
 
 function TableRow({
@@ -587,13 +589,31 @@ function TableRow({
   onStageChange,
   onReactionChange,
   onFavoriteToggle,
+  onRowClick,
 }: TableRowProps) {
   return (
-    <div className="flex h-[80px] items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]">
+    <div
+      className={cn(
+        "flex h-[80px] items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]",
+        onRowClick && "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]"
+      )}
+      onClick={() => onRowClick?.(application.id)}
+      role={onRowClick ? "button" : undefined}
+      tabIndex={onRowClick ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (onRowClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onRowClick(application.id);
+        }
+      }}
+    >
       {/* Job Title Cell */}
       <div className="flex w-[250px] items-center gap-3 overflow-hidden py-6 pl-6 pr-3">
         <button
-          onClick={() => onFavoriteToggle?.(application.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFavoriteToggle?.(application.id);
+          }}
           className="shrink-0 transition-colors"
           aria-label={application.isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
@@ -626,7 +646,8 @@ function TableRow({
       </div>
 
       {/* Stage Cell */}
-      <div className="relative h-[80px] min-w-0 flex-1 px-3">
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div className="relative h-[80px] min-w-0 flex-1 px-3" onClick={(e) => e.stopPropagation()}>
         <div className="absolute left-3 top-5">
           <StagePill
             currentStage={application.stage}
@@ -643,7 +664,8 @@ function TableRow({
       </div>
 
       {/* Reaction Cell */}
-      <div className="flex h-[80px] min-w-0 flex-1 items-center justify-center py-6">
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div className="flex h-[80px] min-w-0 flex-1 items-center justify-center py-6" onClick={(e) => e.stopPropagation()}>
         <EmojiReactionButton
           reaction={application.reaction}
           onReactionChange={(reaction) => onReactionChange?.(application.id, reaction)}
@@ -695,6 +717,7 @@ export function JobApplicationTable({
   onStageChange,
   onReactionChange,
   onFavoriteToggle,
+  onRowClick,
   onExploreJobs,
   className,
 }: JobApplicationTableProps) {
@@ -736,6 +759,7 @@ export function JobApplicationTable({
                   onStageChange={onStageChange}
                   onReactionChange={onReactionChange}
                   onFavoriteToggle={onFavoriteToggle}
+                  onRowClick={onRowClick}
                 />
               ))}
             </>
@@ -755,6 +779,7 @@ export interface ApplicationTrackerProps {
   onStageChange?: (applicationId: string, newStage: ApplicationSection) => void;
   onReactionChange?: (applicationId: string, reaction: EmojiReaction) => void;
   onFavoriteToggle?: (applicationId: string) => void;
+  onRowClick?: (applicationId: string) => void;
   onExploreJobs?: () => void;
   defaultOpenSections?: ApplicationSection[];
   className?: string;
@@ -771,6 +796,7 @@ export function ApplicationTracker({
   onStageChange,
   onReactionChange,
   onFavoriteToggle,
+  onRowClick,
   onExploreJobs,
   defaultOpenSections = ["saved", "applied", "interview"],
   className,
@@ -812,6 +838,7 @@ export function ApplicationTracker({
           onStageChange={onStageChange}
           onReactionChange={onReactionChange}
           onFavoriteToggle={onFavoriteToggle}
+          onRowClick={onRowClick}
           onExploreJobs={onExploreJobs}
         />
       ))}

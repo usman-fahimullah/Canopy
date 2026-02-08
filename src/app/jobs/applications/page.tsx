@@ -205,12 +205,26 @@ export default function ApplicationsPage() {
               return (
                 <div
                   key={app.id}
-                  onClick={() =>
-                    app.hasOffer ? router.push(`/jobs/applications/${app.id}/offer`) : undefined
-                  }
-                  className={`flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card ${
-                    app.hasOffer ? "cursor-pointer" : ""
-                  }`}
+                  onClick={() => {
+                    if (app.hasOffer) {
+                      router.push(`/jobs/applications/${app.id}/offer`);
+                    } else {
+                      router.push(`/jobs/applications/track/${app.job.id}`);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      if (app.hasOffer) {
+                        router.push(`/jobs/applications/${app.id}/offer`);
+                      } else {
+                        router.push(`/jobs/applications/track/${app.job.id}`);
+                      }
+                    }
+                  }}
+                  className="flex cursor-pointer items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-5 transition-shadow hover:shadow-card"
                 >
                   {/* Company logo or icon */}
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--background-info)]">
