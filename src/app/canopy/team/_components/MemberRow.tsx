@@ -37,7 +37,6 @@ interface MemberRowProps {
 
 export function MemberRow({ member, currentUserRole, onRoleChange, onRemove }: MemberRowProps) {
   const isManageable = canManageTeam(currentUserRole);
-  const isOwner = member.role === "OWNER";
 
   return (
     <tr className="group border-b border-[var(--border-default)] last:border-b-0">
@@ -99,7 +98,7 @@ export function MemberRow({ member, currentUserRole, onRoleChange, onRemove }: M
 
       {/* Actions */}
       <td className="py-4 pl-3 pr-6 text-right">
-        {isManageable && !isOwner && (
+        {isManageable && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon-sm" aria-label={`Actions for ${member.name}`}>

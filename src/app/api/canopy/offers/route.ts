@@ -9,7 +9,7 @@ import { CreateOfferSchema } from "@/lib/validators/offer";
  * POST /api/canopy/offers
  *
  * Create a new offer record (DRAFT status).
- * Auth: org member with OWNER/ADMIN/RECRUITER role.
+ * Auth: org member with ADMIN/RECRUITER role.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -66,13 +66,13 @@ export async function POST(request: NextRequest) {
       where: {
         accountId: account.id,
         organizationId: application.job.organizationId,
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Insufficient permissions. Must be OWNER, ADMIN, or RECRUITER." },
+        { error: "Insufficient permissions. Must be ADMIN or RECRUITER." },
         { status: 403 }
       );
     }

@@ -53,14 +53,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    // Fetch recruiter for this job's organization (first RECRUITER or OWNER member)
+    // Fetch recruiter for this job's organization (first RECRUITER or ADMIN member)
     const recruiterMember = await prisma.organizationMember.findFirst({
       where: {
         organizationId: job.organizationId,
-        role: { in: ["RECRUITER", "OWNER", "ADMIN"] },
+        role: { in: ["RECRUITER", "ADMIN"] },
       },
       orderBy: [
-        { role: "asc" }, // RECRUITER sorts before OWNER/ADMIN alphabetically
+        { role: "asc" }, // RECRUITER sorts before ADMIN alphabetically
       ],
       include: {
         account: {

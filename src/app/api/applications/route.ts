@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Fire-and-forget: notify org OWNER/ADMIN members about a new application.
+ * Fire-and-forget: notify org ADMIN members about a new application.
  */
 async function notifyEmployer(params: {
   jobId: string;
@@ -203,7 +203,7 @@ async function notifyEmployer(params: {
   const members = await prisma.organizationMember.findMany({
     where: {
       organizationId: params.organizationId,
-      role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+      role: { in: ["ADMIN", "RECRUITER"] },
     },
     select: {
       account: { select: { id: true, email: true, name: true } },

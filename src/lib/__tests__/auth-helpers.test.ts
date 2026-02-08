@@ -19,15 +19,6 @@ describe("isAdminAccount", () => {
     expect(isAdminAccount({ email: "user@example.com", orgMemberships: [] })).toBe(false);
   });
 
-  it("returns false for OWNER role without admin email", () => {
-    expect(
-      isAdminAccount({
-        email: "user@example.com",
-        orgMemberships: [{ role: "OWNER" }],
-      })
-    ).toBe(false);
-  });
-
   it("returns false for ADMIN role without admin email", () => {
     expect(
       isAdminAccount({
@@ -62,17 +53,17 @@ describe("isAdminAccount", () => {
     expect(
       isAdminAccount({
         email: "admin@greenjobsboard.us",
-        orgMemberships: [{ role: "OWNER" }],
+        orgMemberships: [{ role: "ADMIN" }],
       })
     ).toBe(false);
   });
 
-  it("returns false for email not in admin list even with OWNER role", () => {
+  it("returns false for email not in admin list even with ADMIN role", () => {
     process.env.PLATFORM_ADMIN_EMAILS = "boss@greenjobsboard.us";
     expect(
       isAdminAccount({
         email: "notboss@greenjobsboard.us",
-        orgMemberships: [{ role: "OWNER" }],
+        orgMemberships: [{ role: "ADMIN" }],
       })
     ).toBe(false);
   });

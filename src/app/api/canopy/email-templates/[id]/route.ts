@@ -114,7 +114,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       where: {
         accountId: account.id,
         organizationId: template.organizationId,
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 
@@ -217,7 +217,7 @@ export async function DELETE(
       where: {
         accountId: account.id,
         organizationId: template.organizationId,
-        role: { in: ["OWNER", "ADMIN"] },
+        role: { in: ["ADMIN"] },
       },
     });
 

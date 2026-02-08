@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Only pipeline managers can bulk send
-    if (!["OWNER", "ADMIN", "RECRUITER", "HIRING_MANAGER"].includes(ctx.role)) {
+    if (!["ADMIN", "RECRUITER", "HIRING_MANAGER"].includes(ctx.role)) {
       return NextResponse.json(
         { error: "You do not have permission to send bulk emails" },
         { status: 403 }

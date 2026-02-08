@@ -8,7 +8,7 @@ const updateRoleSchema = z.object({
   role: z.enum(["ADMIN", "RECRUITER", "HIRING_MANAGER", "MEMBER", "VIEWER"]),
 });
 
-/** Resolve the authenticated user's account and org membership (OWNER/ADMIN). */
+/** Resolve the authenticated user's account and org membership (ADMIN). */
 async function getAdminContext() {
   const supabase = await createClient();
   const {
@@ -25,11 +25,11 @@ async function getAdminContext() {
   const membership = await prisma.organizationMember.findFirst({
     where: {
       accountId: account.id,
-      role: { in: ["OWNER", "ADMIN"] },
+      role: { in: ["ADMIN"] },
     },
   });
   if (!membership) {
-    return { error: "Only owners and admins can manage team members", status: 403 } as const;
+    return { error: "Only admins can manage team members", status: 403 } as const;
   }
 
   return { account, membership } as const;
@@ -38,7 +38,7 @@ async function getAdminContext() {
 /**
  * PATCH /api/canopy/team/members/[id]
  *
- * Change a team member's role. OWNER/ADMIN only.
+ * Change a team member's role. ADMIN only.
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -64,10 +64,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (!target || target.organizationId !== ctx.membership.organizationId) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
-    }
-
-    if (target.role === "OWNER") {
-      return NextResponse.json({ error: "Cannot change the owner's role" }, { status: 403 });
     }
 
     if (target.id === ctx.membership.id) {
@@ -106,7 +102,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 /**
  * DELETE /api/canopy/team/members/[id]
  *
- * Remove a team member. OWNER/ADMIN only.
+ * Remove a team member. ADMIN only.
  */
 export async function DELETE(
   _request: NextRequest,
@@ -125,10 +121,6 @@ export async function DELETE(
 
     if (!target || target.organizationId !== ctx.membership.organizationId) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
-    }
-
-    if (target.role === "OWNER") {
-      return NextResponse.json({ error: "Cannot remove the organization owner" }, { status: 403 });
     }
 
     if (target.id === ctx.membership.id) {

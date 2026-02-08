@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only OWNER/ADMIN can create templates
-    if (!["OWNER", "ADMIN"].includes(ctx.role)) {
+    // Only ADMIN can create templates
+    if (!["ADMIN"].includes(ctx.role)) {
       return NextResponse.json(
         { error: "You do not have permission to create email templates" },
         { status: 403 }
@@ -128,7 +128,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!["OWNER", "ADMIN"].includes(ctx.role)) {
+    if (!["ADMIN"].includes(ctx.role)) {
       return NextResponse.json(
         { error: "You do not have permission to update email templates" },
         { status: 403 }
@@ -183,7 +183,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!["OWNER", "ADMIN"].includes(ctx.role)) {
+    if (!["ADMIN"].includes(ctx.role)) {
       return NextResponse.json(
         { error: "You do not have permission to delete email templates" },
         { status: 403 }

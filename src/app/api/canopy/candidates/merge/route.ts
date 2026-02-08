@@ -17,7 +17,7 @@ import { z } from "zod";
  *   secondaryIds: string[] - IDs of secondary candidates to merge from
  * }
  *
- * Auth: OWNER/ADMIN only
+ * Auth: ADMIN only
  */
 
 const mergeCandidatesSchema = z.object({
@@ -49,14 +49,14 @@ export async function POST(request: NextRequest) {
     const membership = await prisma.organizationMember.findFirst({
       where: {
         accountId: account.id,
-        role: { in: ["OWNER", "ADMIN"] },
+        role: { in: ["ADMIN"] },
       },
       select: { id: true, organizationId: true },
     });
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Insufficient permissions. Must be OWNER or ADMIN." },
+        { error: "Insufficient permissions. Must be ADMIN." },
         { status: 403 }
       );
     }

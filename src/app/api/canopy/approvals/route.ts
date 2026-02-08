@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
  * POST /api/canopy/approvals
  *
  * Create a new approval request.
- * Requires RECRUITER, ADMIN, or OWNER role.
+ * Requires RECRUITER or ADMIN role.
  *
  * Body:
  * {
@@ -196,8 +196,8 @@ export async function POST(request: NextRequest) {
       return apiError("Member not found in organization", 403);
     }
 
-    // Check authorization: must be RECRUITER, ADMIN, or OWNER
-    if (!["RECRUITER", "ADMIN", "OWNER"].includes(requester.role)) {
+    // Check authorization: must be RECRUITER or ADMIN
+    if (!["RECRUITER", "ADMIN"].includes(requester.role)) {
       return apiError("Insufficient permissions to create approvals", 403);
     }
 

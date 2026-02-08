@@ -100,7 +100,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
  * PATCH /api/canopy/interviews/[id]
  *
  * Update interview
- * Auth: OWNER/ADMIN/RECRUITER
+ * Auth: ADMIN/RECRUITER
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
@@ -135,13 +135,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       where: {
         accountId: account.id,
         organizationId: interview.organizationId,
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Insufficient permissions. Must be OWNER, ADMIN, or RECRUITER." },
+        { error: "Insufficient permissions. Must be ADMIN or RECRUITER." },
         { status: 403 }
       );
     }
@@ -242,7 +242,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
  * DELETE /api/canopy/interviews/[id]
  *
  * Delete interview
- * Auth: OWNER/ADMIN/RECRUITER
+ * Auth: ADMIN/RECRUITER
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
@@ -277,13 +277,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: {
         accountId: account.id,
         organizationId: interview.organizationId,
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Insufficient permissions. Must be OWNER, ADMIN, or RECRUITER." },
+        { error: "Insufficient permissions. Must be ADMIN or RECRUITER." },
         { status: 403 }
       );
     }

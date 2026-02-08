@@ -75,9 +75,9 @@ describe("isAdminAccount - platform admin emails", () => {
     expect(isAdminAccount(account)).toBe(false);
   });
 
-  it("does NOT fall back to org role — OWNER alone is not enough", () => {
+  it("does NOT fall back to org role — ADMIN alone is not enough", () => {
     process.env.PLATFORM_ADMIN_EMAILS = "admin@greenjobsboard.us";
-    const account = { email: "other@example.com", orgMemberships: [{ role: "OWNER" }] };
+    const account = { email: "other@example.com", orgMemberships: [{ role: "ADMIN" }] };
     expect(isAdminAccount(account)).toBe(false);
   });
 
@@ -96,7 +96,7 @@ describe("isAdminAccount - platform admin emails", () => {
   it("returns false for multiple org memberships without admin email", () => {
     const account = {
       email: "user@example.com",
-      orgMemberships: [{ role: "VIEWER" }, { role: "MEMBER" }, { role: "OWNER" }],
+      orgMemberships: [{ role: "VIEWER" }, { role: "MEMBER" }, { role: "ADMIN" }],
     };
     expect(isAdminAccount(account)).toBe(false);
   });

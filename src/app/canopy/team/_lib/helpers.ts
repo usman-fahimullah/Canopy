@@ -3,7 +3,6 @@ import type { OrgMemberRole } from "@prisma/client";
 /** Map DB role enum to human-readable display name. */
 export function formatRoleName(role: OrgMemberRole): string {
   const map: Record<OrgMemberRole, string> = {
-    OWNER: "Owner",
     ADMIN: "Admin",
     RECRUITER: "Recruiter",
     HIRING_MANAGER: "Hiring Manager",
@@ -18,7 +17,6 @@ export function roleBadgeVariant(
   role: OrgMemberRole
 ): "default" | "info" | "success" | "feature" | "neutral" {
   const map: Record<OrgMemberRole, "default" | "info" | "success" | "feature" | "neutral"> = {
-    OWNER: "default",
     ADMIN: "info",
     RECRUITER: "success",
     HIRING_MANAGER: "feature",
@@ -28,7 +26,7 @@ export function roleBadgeVariant(
   return map[role] || "neutral";
 }
 
-/** Roles available for assignment (excludes OWNER — only one per org). */
+/** Roles available for assignment. */
 export const ASSIGNABLE_ROLES: OrgMemberRole[] = [
   "ADMIN",
   "RECRUITER",
@@ -39,7 +37,7 @@ export const ASSIGNABLE_ROLES: OrgMemberRole[] = [
 
 /** Can the current user manage team members (change roles, remove, invite)? */
 export function canManageTeam(role: OrgMemberRole): boolean {
-  return role === "OWNER" || role === "ADMIN";
+  return role === "ADMIN";
 }
 
 /** Format time until expiry as human-readable text. */

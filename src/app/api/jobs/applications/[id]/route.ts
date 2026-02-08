@@ -117,7 +117,7 @@ export async function DELETE(
 }
 
 /**
- * Fire-and-forget: notify org OWNER/ADMIN/RECRUITER that a candidate withdrew.
+ * Fire-and-forget: notify org ADMIN/RECRUITER that a candidate withdrew.
  */
 async function notifyOrgOfWithdrawal(params: {
   orgId: string;
@@ -128,7 +128,7 @@ async function notifyOrgOfWithdrawal(params: {
   const members = await prisma.organizationMember.findMany({
     where: {
       organizationId: params.orgId,
-      role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+      role: { in: ["ADMIN", "RECRUITER"] },
     },
     select: { account: { select: { id: true } } },
   });

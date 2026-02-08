@@ -48,7 +48,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       where: {
         accountId: account.id,
         organizationId: offer.organizationId,
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 

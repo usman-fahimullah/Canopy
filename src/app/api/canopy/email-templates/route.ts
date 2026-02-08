@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const membership = await prisma.organizationMember.findFirst({
       where: {
         accountId: account.id,
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
       where: {
         accountId: account.id,
         organizationId: { not: undefined },
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 

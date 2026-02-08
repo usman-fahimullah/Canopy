@@ -76,7 +76,7 @@ const REJECT_URL = "http://localhost:3000/api/admin/coaches/coach-1/reject";
 const mockAdminAccount = {
   id: "admin-1",
   email: "admin@greenjobsboard.us",
-  orgMemberships: [{ role: "OWNER", organizationId: "org-1" }],
+  orgMemberships: [{ role: "ADMIN", organizationId: "org-1" }],
 };
 
 const mockNonAdminAccount = {

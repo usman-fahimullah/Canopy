@@ -66,7 +66,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         const orgMembers = await tx.organizationMember.findMany({
           where: {
             organizationId: offer.organization.id,
-            role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+            role: { in: ["ADMIN", "RECRUITER"] },
           },
           select: { accountId: true },
         });

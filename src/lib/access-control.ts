@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { OrgMemberRole, Prisma } from "@prisma/client";
 
 // Roles with unrestricted access to all jobs/candidates
-const FULL_ACCESS_ROLES: OrgMemberRole[] = ["OWNER", "ADMIN", "RECRUITER", "VIEWER"];
+const FULL_ACCESS_ROLES: OrgMemberRole[] = ["ADMIN", "RECRUITER", "VIEWER"];
 
 export interface AuthContext {
   accountId: string;
@@ -114,9 +114,9 @@ export function canAccessJob(ctx: AuthContext, jobId: string): boolean {
   return ctx.assignedJobIds.includes(jobId);
 }
 
-/** OWNER/ADMIN/RECRUITER/HIRING_MANAGER can move candidates through stages. */
+/** ADMIN/RECRUITER/HIRING_MANAGER can move candidates through stages. */
 export function canManagePipeline(ctx: AuthContext): boolean {
-  return (["OWNER", "ADMIN", "RECRUITER", "HIRING_MANAGER"] as OrgMemberRole[]).includes(ctx.role);
+  return (["ADMIN", "RECRUITER", "HIRING_MANAGER"] as OrgMemberRole[]).includes(ctx.role);
 }
 
 /** Everyone except VIEWER can leave notes. */
@@ -129,7 +129,7 @@ export function canSubmitScorecard(ctx: AuthContext): boolean {
   return ctx.role !== "VIEWER";
 }
 
-/** Only OWNER/ADMIN/RECRUITER can modify job assignments. */
+/** Only ADMIN/RECRUITER can modify job assignments. */
 export function canManageAssignments(ctx: AuthContext): boolean {
-  return (["OWNER", "ADMIN", "RECRUITER"] as OrgMemberRole[]).includes(ctx.role);
+  return (["ADMIN", "RECRUITER"] as OrgMemberRole[]).includes(ctx.role);
 }

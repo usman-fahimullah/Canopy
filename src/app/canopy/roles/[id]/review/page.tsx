@@ -82,14 +82,14 @@ async function getRolePreview(
     const selectedHiringManagerId =
       typeof formConfig?.hiringManagerId === "string" ? formConfig.hiringManagerId : null;
 
-    // Fetch recruiter: specific member if set, otherwise fallback to first RECRUITER/OWNER/ADMIN
+    // Fetch recruiter: specific member if set, otherwise fallback to first RECRUITER/ADMIN
     const recruiterMember = showRecruiter
       ? await prisma.organizationMember.findFirst({
           where: selectedRecruiterId
             ? { id: selectedRecruiterId, organizationId: membership.organizationId }
             : {
                 organizationId: membership.organizationId,
-                role: { in: ["RECRUITER", "OWNER", "ADMIN"] },
+                role: { in: ["RECRUITER", "ADMIN"] },
               },
           orderBy: selectedRecruiterId ? undefined : [{ role: "asc" }],
           include: {

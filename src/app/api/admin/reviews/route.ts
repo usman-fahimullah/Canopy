@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const isAdmin = account.orgMemberships.some((m) => m.role === "OWNER" || m.role === "ADMIN");
+    const isAdmin = account.orgMemberships.some((m) => m.role === "ADMIN");
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
@@ -104,7 +104,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    const isAdmin = account.orgMemberships.some((m) => m.role === "OWNER" || m.role === "ADMIN");
+    const isAdmin = account.orgMemberships.some((m) => m.role === "ADMIN");
 
     if (!isAdmin) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });

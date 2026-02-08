@@ -143,7 +143,7 @@ export async function PATCH(request: NextRequest) {
     const membership = await prisma.organizationMember.findFirst({
       where: {
         accountId: account.id,
-        role: { in: ["OWNER", "ADMIN"] },
+        role: { in: ["ADMIN"] },
       },
       select: { organizationId: true },
     });

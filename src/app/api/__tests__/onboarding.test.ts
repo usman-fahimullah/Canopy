@@ -327,7 +327,7 @@ describe("POST /api/onboarding", () => {
       expect.objectContaining({
         data: expect.objectContaining({
           accountId: "account-1",
-          role: "OWNER",
+          role: "ADMIN",
         }),
       })
     );

@@ -183,7 +183,6 @@ model OrganizationMember {
 }
 
 enum OrgMemberRole {
-  OWNER
   ADMIN
   RECRUITER
   HIRING_MANAGER

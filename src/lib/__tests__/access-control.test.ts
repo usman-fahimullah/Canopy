@@ -112,7 +112,7 @@ describe("canAccessJob", () => {
 // ── canManagePipeline ──────────────────────────────────────
 
 describe("canManagePipeline", () => {
-  const allowed: OrgMemberRole[] = ["OWNER", "ADMIN", "RECRUITER", "HIRING_MANAGER"];
+  const allowed: OrgMemberRole[] = ["ADMIN", "RECRUITER", "HIRING_MANAGER"];
   const denied: OrgMemberRole[] = ["MEMBER", "VIEWER"];
 
   allowed.forEach((role) => {
@@ -132,7 +132,7 @@ describe("canManagePipeline", () => {
 
 describe("canLeaveNotes", () => {
   it("allows all roles except VIEWER", () => {
-    const roles: OrgMemberRole[] = ["OWNER", "ADMIN", "RECRUITER", "HIRING_MANAGER", "MEMBER"];
+    const roles: OrgMemberRole[] = ["ADMIN", "RECRUITER", "HIRING_MANAGER", "MEMBER"];
     roles.forEach((role) => {
       expect(canLeaveNotes(makeCtx({ role }))).toBe(true);
     });
@@ -147,7 +147,7 @@ describe("canLeaveNotes", () => {
 
 describe("canSubmitScorecard", () => {
   it("allows all roles except VIEWER", () => {
-    const roles: OrgMemberRole[] = ["OWNER", "ADMIN", "RECRUITER", "HIRING_MANAGER", "MEMBER"];
+    const roles: OrgMemberRole[] = ["ADMIN", "RECRUITER", "HIRING_MANAGER", "MEMBER"];
     roles.forEach((role) => {
       expect(canSubmitScorecard(makeCtx({ role }))).toBe(true);
     });
@@ -161,7 +161,7 @@ describe("canSubmitScorecard", () => {
 // ── canManageAssignments ───────────────────────────────────
 
 describe("canManageAssignments", () => {
-  const allowed: OrgMemberRole[] = ["OWNER", "ADMIN", "RECRUITER"];
+  const allowed: OrgMemberRole[] = ["ADMIN", "RECRUITER"];
   const denied: OrgMemberRole[] = ["HIRING_MANAGER", "MEMBER", "VIEWER"];
 
   allowed.forEach((role) => {

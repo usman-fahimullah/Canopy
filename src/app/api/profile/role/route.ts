@@ -75,7 +75,7 @@ export async function GET() {
     const candidRoles: CandidRole[] = [];
     let primaryCandidRole: CandidRole = "seeker";
 
-    const isAdmin = account.orgMemberships.some((m) => m.role === "OWNER" || m.role === "ADMIN");
+    const isAdmin = account.orgMemberships.some((m) => m.role === "ADMIN");
     if (isAdmin) {
       candidRoles.push("admin");
     }

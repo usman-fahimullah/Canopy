@@ -60,7 +60,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  *
  * Sync reviewer assignments for a job. Accepts the complete list of reviewer
  * member IDs — creates new assignments and deletes removed ones.
- * Auth: OWNER/ADMIN/RECRUITER only.
+ * Auth: ADMIN/RECRUITER only.
  */
 const SyncAssignmentsSchema = z.object({
   reviewerIds: z.array(z.string()).max(50),

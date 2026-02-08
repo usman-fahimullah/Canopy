@@ -45,7 +45,6 @@ const ROLE_FILTER_OPTIONS: Array<{ value: string; label: string }> = [
     value: r,
     label: formatRoleName(r),
   })),
-  { value: "OWNER", label: "Owner" },
 ];
 
 /* -------------------------------------------------------------------

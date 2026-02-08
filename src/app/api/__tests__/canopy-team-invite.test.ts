@@ -92,7 +92,7 @@ describe("POST /api/canopy/team/invite", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 403 when user is not OWNER or ADMIN", async () => {
+  it("returns 403 when user is not ADMIN", async () => {
     mockPrisma.organizationMember.findFirst.mockResolvedValue(null);
     const req = new NextRequest("http://localhost:3000/api/canopy/team/invite", {
       method: "POST",

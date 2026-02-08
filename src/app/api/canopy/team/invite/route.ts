@@ -49,18 +49,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
-    // Verify caller is OWNER or ADMIN of an organization
+    // Verify caller is ADMIN of an organization
     const membership = await prisma.organizationMember.findFirst({
       where: {
         accountId: account.id,
-        role: { in: ["OWNER", "ADMIN"] },
+        role: { in: ["ADMIN"] },
       },
       include: { organization: true },
     });
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Only organization owners and admins can send invites" },
+        { error: "Only organization admins can send invites" },
         { status: 403 }
       );
     }

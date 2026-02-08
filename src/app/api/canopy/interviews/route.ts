@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
  * POST /api/canopy/interviews
  *
  * Create a new interview
- * Auth: OWNER/ADMIN/RECRUITER
+ * Auth: ADMIN/RECRUITER
  */
 export async function POST(request: NextRequest) {
   try {
@@ -222,13 +222,13 @@ export async function POST(request: NextRequest) {
       where: {
         accountId: account.id,
         organizationId: application.job.organizationId,
-        role: { in: ["OWNER", "ADMIN", "RECRUITER"] },
+        role: { in: ["ADMIN", "RECRUITER"] },
       },
     });
 
     if (!membership) {
       return NextResponse.json(
-        { error: "Insufficient permissions. Must be OWNER, ADMIN, or RECRUITER." },
+        { error: "Insufficient permissions. Must be ADMIN or RECRUITER." },
         { status: 403 }
       );
     }

@@ -9,7 +9,7 @@ import { sendEmail, teamInviteEmail } from "@/lib/email";
  * POST /api/canopy/team/invites/[id]/resend
  *
  * Resend a pending invite with a fresh token and extended expiry.
- * OWNER/ADMIN only.
+ * ADMIN only.
  */
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -34,15 +34,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const membership = await prisma.organizationMember.findFirst({
       where: {
         accountId: account.id,
-        role: { in: ["OWNER", "ADMIN"] },
+        role: { in: ["ADMIN"] },
       },
       include: { organization: true },
     });
     if (!membership) {
-      return NextResponse.json(
-        { error: "Only owners and admins can resend invites" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Only admins can resend invites" }, { status: 403 });
     }
 
     const invite = await prisma.teamInvite.findUnique({ where: { id } });

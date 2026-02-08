@@ -627,7 +627,7 @@ export async function POST(request: NextRequest) {
             data: {
               accountId: account.id,
               organizationId: org.id,
-              role: "OWNER",
+              role: "ADMIN",
               title: body.userTitle || null,
             },
           });

@@ -6,7 +6,7 @@ import { logger, formatError } from "@/lib/logger";
 /**
  * DELETE /api/canopy/team/invites/[id]
  *
- * Revoke a pending invite. OWNER/ADMIN only.
+ * Revoke a pending invite. ADMIN only.
  */
 export async function DELETE(
   _request: NextRequest,
@@ -34,14 +34,11 @@ export async function DELETE(
     const membership = await prisma.organizationMember.findFirst({
       where: {
         accountId: account.id,
-        role: { in: ["OWNER", "ADMIN"] },
+        role: { in: ["ADMIN"] },
       },
     });
     if (!membership) {
-      return NextResponse.json(
-        { error: "Only owners and admins can revoke invites" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Only admins can revoke invites" }, { status: 403 });
     }
 
     const invite = await prisma.teamInvite.findUnique({ where: { id } });

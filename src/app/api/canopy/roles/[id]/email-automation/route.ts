@@ -81,8 +81,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only OWNER/ADMIN can configure automation
-    if (!["OWNER", "ADMIN"].includes(ctx.role)) {
+    // Only ADMIN can configure automation
+    if (!["ADMIN"].includes(ctx.role)) {
       return NextResponse.json(
         { error: "You do not have permission to configure email automation" },
         { status: 403 }
