@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
     const climateCategory = searchParams.get("climateCategory");
 
     // Pagination
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
+    const page = Math.max(parseInt(searchParams.get("page") || "1") || 1, 1);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "20") || 20, 100);
     const skip = (page - 1) * limit;
 
     // Sort
@@ -57,8 +57,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (minSalary || maxSalary) {
-      if (minSalary) where.salaryMin = { gte: parseInt(minSalary) };
-      if (maxSalary) where.salaryMax = { lte: parseInt(maxSalary) };
+      const minSalaryNum = minSalary ? parseInt(minSalary) : NaN;
+      const maxSalaryNum = maxSalary ? parseInt(maxSalary) : NaN;
+      if (!Number.isNaN(minSalaryNum)) where.salaryMin = { gte: minSalaryNum };
+      if (!Number.isNaN(maxSalaryNum)) where.salaryMax = { lte: maxSalaryNum };
     }
 
     if (featured === "true") {

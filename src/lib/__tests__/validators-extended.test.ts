@@ -200,15 +200,21 @@ describe("CreateExperienceSchema", () => {
   });
 
   it("rejects empty companyName", () => {
-    expect(CreateExperienceSchema.safeParse({ ...validExperience, companyName: "" }).success).toBe(false);
+    expect(CreateExperienceSchema.safeParse({ ...validExperience, companyName: "" }).success).toBe(
+      false
+    );
   });
 
   it("rejects empty jobTitle", () => {
-    expect(CreateExperienceSchema.safeParse({ ...validExperience, jobTitle: "" }).success).toBe(false);
+    expect(CreateExperienceSchema.safeParse({ ...validExperience, jobTitle: "" }).success).toBe(
+      false
+    );
   });
 
   it("rejects empty startDate", () => {
-    expect(CreateExperienceSchema.safeParse({ ...validExperience, startDate: "" }).success).toBe(false);
+    expect(CreateExperienceSchema.safeParse({ ...validExperience, startDate: "" }).success).toBe(
+      false
+    );
   });
 
   it("rejects missing companyName", () => {
@@ -233,7 +239,9 @@ describe("CreateExperienceSchema", () => {
   });
 
   it("accepts nullable endDate", () => {
-    expect(CreateExperienceSchema.safeParse({ ...validExperience, endDate: null }).success).toBe(true);
+    expect(CreateExperienceSchema.safeParse({ ...validExperience, endDate: null }).success).toBe(
+      true
+    );
   });
 
   it("trims companyName whitespace", () => {
@@ -250,7 +258,9 @@ describe("CreateExperienceSchema", () => {
 // =========================================================================
 describe("RescheduleSessionSchema", () => {
   it("accepts a valid date string", () => {
-    expect(RescheduleSessionSchema.safeParse({ newDate: "2025-06-15T10:00:00Z" }).success).toBe(true);
+    expect(RescheduleSessionSchema.safeParse({ newDate: "2025-06-15T10:00:00Z" }).success).toBe(
+      true
+    );
   });
 
   it("rejects empty newDate", () => {
@@ -279,7 +289,9 @@ describe("CreateActionItemSchema", () => {
   });
 
   it("accepts nullable dueDate", () => {
-    expect(CreateActionItemSchema.safeParse({ description: "Task", dueDate: null }).success).toBe(true);
+    expect(CreateActionItemSchema.safeParse({ description: "Task", dueDate: null }).success).toBe(
+      true
+    );
   });
 });
 
@@ -313,7 +325,9 @@ describe("CreateMentorAssignmentSchema", () => {
   });
 
   it("accepts nullable notes", () => {
-    expect(CreateMentorAssignmentSchema.safeParse({ mentorProfileId: "mp_1", notes: null }).success).toBe(true);
+    expect(
+      CreateMentorAssignmentSchema.safeParse({ mentorProfileId: "mp_1", notes: null }).success
+    ).toBe(true);
   });
 });
 
@@ -322,23 +336,33 @@ describe("CreateMentorAssignmentSchema", () => {
 // =========================================================================
 describe("UpdateMentorAssignmentSchema", () => {
   it("accepts ACTIVE status", () => {
-    expect(UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "ACTIVE" }).success).toBe(true);
+    expect(
+      UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "ACTIVE" }).success
+    ).toBe(true);
   });
 
   it("accepts PAUSED status", () => {
-    expect(UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "PAUSED" }).success).toBe(true);
+    expect(
+      UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "PAUSED" }).success
+    ).toBe(true);
   });
 
   it("accepts COMPLETED status", () => {
-    expect(UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "COMPLETED" }).success).toBe(true);
+    expect(
+      UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "COMPLETED" }).success
+    ).toBe(true);
   });
 
   it("rejects invalid status value", () => {
-    expect(UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "CANCELLED" }).success).toBe(false);
+    expect(
+      UpdateMentorAssignmentSchema.safeParse({ assignmentId: "a1", status: "CANCELLED" }).success
+    ).toBe(false);
   });
 
   it("rejects empty assignmentId", () => {
-    expect(UpdateMentorAssignmentSchema.safeParse({ assignmentId: "", status: "ACTIVE" }).success).toBe(false);
+    expect(
+      UpdateMentorAssignmentSchema.safeParse({ assignmentId: "", status: "ACTIVE" }).success
+    ).toBe(false);
   });
 
   it("rejects missing assignmentId", () => {
@@ -396,7 +420,9 @@ describe("UpdateProfileSchema - extended", () => {
   });
 
   it("accepts avatar with valid URL", () => {
-    expect(UpdateProfileSchema.safeParse({ avatar: "https://example.com/photo.jpg" }).success).toBe(true);
+    expect(UpdateProfileSchema.safeParse({ avatar: "https://example.com/photo.jpg" }).success).toBe(
+      true
+    );
   });
 
   it("accepts avatar as null", () => {
@@ -436,7 +462,9 @@ describe("CoachApplySchema", () => {
   });
 
   it("rejects invalid email format", () => {
-    expect(CoachApplySchema.safeParse({ ...validApplication, email: "bad-email" }).success).toBe(false);
+    expect(CoachApplySchema.safeParse({ ...validApplication, email: "bad-email" }).success).toBe(
+      false
+    );
   });
 
   it("rejects empty email", () => {
@@ -473,7 +501,9 @@ describe("RefundSchema", () => {
   });
 
   it("accepts refund with optional reason", () => {
-    expect(RefundSchema.safeParse({ bookingId: "bk_123", reason: "Changed mind" }).success).toBe(true);
+    expect(RefundSchema.safeParse({ bookingId: "bk_123", reason: "Changed mind" }).success).toBe(
+      true
+    );
   });
 
   it("rejects empty bookingId", () => {
@@ -490,19 +520,43 @@ describe("RefundSchema", () => {
 // =========================================================================
 describe("CheckoutSchema - extended", () => {
   it("accepts duration at boundary 15", () => {
-    expect(CheckoutSchema.safeParse({ coachId: "c1", sessionDate: "2025-03-15T10:00:00.000Z", sessionDuration: 15 }).success).toBe(true);
+    expect(
+      CheckoutSchema.safeParse({
+        coachId: "c1",
+        sessionDate: "2025-03-15T10:00:00.000Z",
+        sessionDuration: 15,
+      }).success
+    ).toBe(true);
   });
 
   it("accepts duration at boundary 180", () => {
-    expect(CheckoutSchema.safeParse({ coachId: "c1", sessionDate: "2025-03-15T10:00:00.000Z", sessionDuration: 180 }).success).toBe(true);
+    expect(
+      CheckoutSchema.safeParse({
+        coachId: "c1",
+        sessionDate: "2025-03-15T10:00:00.000Z",
+        sessionDuration: 180,
+      }).success
+    ).toBe(true);
   });
 
   it("rejects non-integer duration", () => {
-    expect(CheckoutSchema.safeParse({ coachId: "c1", sessionDate: "2025-03-15T10:00:00.000Z", sessionDuration: 30.5 }).success).toBe(false);
+    expect(
+      CheckoutSchema.safeParse({
+        coachId: "c1",
+        sessionDate: "2025-03-15T10:00:00.000Z",
+        sessionDuration: 30.5,
+      }).success
+    ).toBe(false);
   });
 
   it("rejects empty coachId", () => {
-    expect(CheckoutSchema.safeParse({ coachId: "", sessionDate: "2025-03-15T10:00:00.000Z", sessionDuration: 60 }).success).toBe(false);
+    expect(
+      CheckoutSchema.safeParse({
+        coachId: "",
+        sessionDate: "2025-03-15T10:00:00.000Z",
+        sessionDuration: 60,
+      }).success
+    ).toBe(false);
   });
 
   it("rejects missing sessionDate", () => {
@@ -522,12 +576,12 @@ describe("UpdateSavedJobNotesSchema", () => {
     expect(UpdateSavedJobNotesSchema.safeParse({}).success).toBe(true);
   });
 
-  it("rejects notes exceeding 2000 characters", () => {
-    expect(UpdateSavedJobNotesSchema.safeParse({ notes: "x".repeat(2001) }).success).toBe(false);
+  it("rejects notes exceeding 10000 characters", () => {
+    expect(UpdateSavedJobNotesSchema.safeParse({ notes: "x".repeat(10001) }).success).toBe(false);
   });
 
-  it("accepts notes at exactly 2000 characters", () => {
-    expect(UpdateSavedJobNotesSchema.safeParse({ notes: "x".repeat(2000) }).success).toBe(true);
+  it("accepts notes at exactly 10000 characters", () => {
+    expect(UpdateSavedJobNotesSchema.safeParse({ notes: "x".repeat(10000) }).success).toBe(true);
   });
 });
 
@@ -536,7 +590,9 @@ describe("UpdateSavedJobNotesSchema", () => {
 // =========================================================================
 describe("UpdateChecklistSchema", () => {
   it("accepts valid checklist update", () => {
-    expect(UpdateChecklistSchema.safeParse({ itemId: "item_1", completed: true }).success).toBe(true);
+    expect(UpdateChecklistSchema.safeParse({ itemId: "item_1", completed: true }).success).toBe(
+      true
+    );
   });
 
   it("rejects empty itemId", () => {
@@ -557,7 +613,9 @@ describe("UpdateChecklistSchema", () => {
 // =========================================================================
 describe("UpdateSessionSchema", () => {
   it("accepts valid session update", () => {
-    expect(UpdateSessionSchema.safeParse({ sessionId: "sess_1", status: "completed" }).success).toBe(true);
+    expect(
+      UpdateSessionSchema.safeParse({ sessionId: "sess_1", status: "completed" }).success
+    ).toBe(true);
   });
 
   it("rejects empty sessionId", () => {
@@ -569,7 +627,9 @@ describe("UpdateSessionSchema", () => {
   });
 
   it("accepts optional coachNotes", () => {
-    expect(UpdateSessionSchema.safeParse({ sessionId: "sess_1", coachNotes: "Good progress" }).success).toBe(true);
+    expect(
+      UpdateSessionSchema.safeParse({ sessionId: "sess_1", coachNotes: "Good progress" }).success
+    ).toBe(true);
   });
 });
 
@@ -599,19 +659,27 @@ describe("UpdateCoachProfileSchema", () => {
   });
 
   it("accepts partial coach profile update", () => {
-    expect(UpdateCoachProfileSchema.safeParse({ firstName: "Jane", headline: "Coach" }).success).toBe(true);
+    expect(
+      UpdateCoachProfileSchema.safeParse({ firstName: "Jane", headline: "Coach" }).success
+    ).toBe(true);
   });
 
   it("accepts nullable fields", () => {
-    expect(UpdateCoachProfileSchema.safeParse({ bio: null, photoUrl: null, headline: null }).success).toBe(true);
+    expect(
+      UpdateCoachProfileSchema.safeParse({ bio: null, photoUrl: null, headline: null }).success
+    ).toBe(true);
   });
 
   it("accepts numeric rates", () => {
-    expect(UpdateCoachProfileSchema.safeParse({ hourlyRate: 150, monthlyRate: 2000 }).success).toBe(true);
+    expect(UpdateCoachProfileSchema.safeParse({ hourlyRate: 150, monthlyRate: 2000 }).success).toBe(
+      true
+    );
   });
 
   it("accepts expertise array", () => {
-    expect(UpdateCoachProfileSchema.safeParse({ expertise: ["Leadership", "ESG"] }).success).toBe(true);
+    expect(UpdateCoachProfileSchema.safeParse({ expertise: ["Leadership", "ESG"] }).success).toBe(
+      true
+    );
   });
 });
 

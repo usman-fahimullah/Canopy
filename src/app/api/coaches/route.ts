@@ -31,13 +31,18 @@ export async function GET(request: NextRequest) {
 
     if (minPrice || maxPrice) {
       const sessionRate: Record<string, number> = {};
-      if (minPrice) sessionRate.gte = parseInt(minPrice) * 100;
-      if (maxPrice) sessionRate.lte = parseInt(maxPrice) * 100;
-      where.sessionRate = sessionRate;
+      const minPriceNum = minPrice ? parseInt(minPrice) : NaN;
+      const maxPriceNum = maxPrice ? parseInt(maxPrice) : NaN;
+      if (!Number.isNaN(minPriceNum)) sessionRate.gte = minPriceNum * 100;
+      if (!Number.isNaN(maxPriceNum)) sessionRate.lte = maxPriceNum * 100;
+      if (Object.keys(sessionRate).length > 0) where.sessionRate = sessionRate;
     }
 
     if (minRating) {
-      where.rating = { gte: parseFloat(minRating) };
+      const ratingNum = parseFloat(minRating);
+      if (!Number.isNaN(ratingNum) && ratingNum >= 0 && ratingNum <= 5) {
+        where.rating = { gte: ratingNum };
+      }
     }
 
     if (featured === "true") {
