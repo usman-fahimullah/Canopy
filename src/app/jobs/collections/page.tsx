@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shell/page-header";
 import {
   CollectionCard,
-  PathwayIllustration,
+  PathwayCard,
   Button,
   Skeleton,
   EmptyStateNoResults,
 } from "@/components/ui";
-import { type PathwayType, pathwayLabels } from "@/components/ui/pathway-tag";
+import { type PathwayType } from "@/components/ui/pathway-tag";
 import { ArrowCircleRight } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
 import { getCollectionPathways } from "@/lib/jobs/helpers";
@@ -260,18 +260,12 @@ export default function CollectionsPage() {
             {/* Right side: Pathway cards */}
             <div className="scrollbar-hide flex flex-1 gap-6 overflow-x-auto pb-2">
               {FEATURED_PATHWAYS.map((pathway) => (
-                <Link
+                <PathwayCard
                   key={pathway}
+                  pathway={pathway}
                   href={`/jobs/search?pathway=${pathway}`}
-                  className="flex shrink-0 flex-col items-center gap-2 rounded-xl p-3 transition-colors hover:bg-[var(--background-interactive-hover)]"
-                >
-                  <div className="rounded-xl bg-[var(--background-subtle)] p-3">
-                    <PathwayIllustration pathway={pathway} size="lg" />
-                  </div>
-                  <span className="text-body font-medium text-[var(--foreground-default)]">
-                    {pathwayLabels[pathway]}
-                  </span>
-                </Link>
+                  className="shrink-0"
+                />
               ))}
             </div>
           </div>

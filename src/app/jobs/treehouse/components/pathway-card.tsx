@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 
-interface PathwayCardProps {
+interface LearningPathwayCardProps {
   title: string;
   description: string;
   courseCount: number;
@@ -10,7 +10,13 @@ interface PathwayCardProps {
   icon: string;
 }
 
-export function PathwayCard({ title, description, courseCount, progress, icon }: PathwayCardProps) {
+export function LearningPathwayCard({
+  title,
+  description,
+  courseCount,
+  progress,
+  icon,
+}: LearningPathwayCardProps) {
   return (
     <div className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 transition-shadow hover:shadow-card">
       {/* Icon */}

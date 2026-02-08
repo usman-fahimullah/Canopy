@@ -6,7 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/components/ui/tabs";
 import { BookOpen } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
-import { PathwayCard } from "./components/pathway-card";
+import { LearningPathwayCard } from "./components/pathway-card";
 import { CourseCard } from "./components/course-card";
 import { CertificationCard } from "./components/certification-card";
 import { logger, formatError } from "@/lib/logger";
@@ -121,7 +121,7 @@ export default function TreehousePage() {
                 </h2>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {data.pathways.map((pathway) => (
-                    <PathwayCard
+                    <LearningPathwayCard
                       key={pathway.id}
                       title={pathway.title}
                       description={pathway.description}

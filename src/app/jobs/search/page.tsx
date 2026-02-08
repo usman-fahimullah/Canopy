@@ -8,7 +8,7 @@ import {
   SearchBar,
   JobPostCard,
   CollectionCard,
-  PathwayIllustration,
+  PathwayCard,
   EmptyStateNoResults,
   Button,
   Chip,
@@ -888,21 +888,13 @@ export default function JobsPage() {
             {/* Right side: Pathway cards */}
             <div className="scrollbar-hide flex flex-1 gap-6 overflow-x-auto pb-2">
               {FEATURED_PATHWAYS.map((pathway) => (
-                <Link
+                <PathwayCard
                   key={pathway}
+                  pathway={pathway}
+                  jobCount={pathwayCounts[pathway] || 20}
                   href={`/jobs/search?pathway=${pathway}`}
-                  className="flex shrink-0 flex-col items-center gap-2 rounded-xl p-3 transition-colors hover:bg-[var(--background-interactive-hover)]"
-                >
-                  <div className="rounded-xl bg-[var(--background-subtle)] p-3">
-                    <PathwayIllustration pathway={pathway} size="lg" />
-                  </div>
-                  <span className="text-body font-medium text-[var(--foreground-default)]">
-                    {pathwayLabels[pathway]}
-                  </span>
-                  <span className="text-caption text-[var(--foreground-muted)]">
-                    {pathwayCounts[pathway] || 20} Jobs
-                  </span>
-                </Link>
+                  className="shrink-0"
+                />
               ))}
             </div>
           </div>

@@ -115,6 +115,7 @@ export {
   type PathwayIllustrationProps,
   type PathwayIllustrationSize,
 } from "./pathway-illustration";
+export { PathwayCard, type PathwayCardProps } from "./pathway-card";
 
 // Layout & Display
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
