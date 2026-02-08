@@ -1,18 +1,12 @@
 /**
  * Helper functions for the Job Detail Page
+ *
+ * formatSalary and getExperienceLevelLabel are re-exported from
+ * the shared canonical source at @/lib/jobs/helpers.
  */
 
-export function formatSalary(min: number | null, max: number | null, currency: string): string {
-  if (!min && !max) return "Not specified";
-  const formatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  });
-  if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`;
-  if (min) return `From ${formatter.format(min)}`;
-  return `Up to ${formatter.format(max!)}`;
-}
+// Re-export shared helpers so existing `./helpers` imports keep working
+export { formatSalary, getExperienceLevelLabel } from "@/lib/jobs/helpers";
 
 export function formatDate(dateStr: string | null): string {
   if (!dateStr) return "Not specified";
@@ -47,21 +41,6 @@ export function isClosingSoon(closesAt: string | null): boolean {
   if (!closesAt) return false;
   const daysLeft = (new Date(closesAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
   return daysLeft > 0 && daysLeft <= 14;
-}
-
-export function getExperienceLevelLabel(level: string | null): string {
-  switch (level) {
-    case "ENTRY":
-      return "Entry Level";
-    case "INTERMEDIATE":
-      return "Mid Level";
-    case "SENIOR":
-      return "Senior or Executive";
-    case "EXECUTIVE":
-      return "Executive";
-    default:
-      return "Not specified";
-  }
 }
 
 /**

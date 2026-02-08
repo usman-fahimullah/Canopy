@@ -3,9 +3,12 @@
 import { Separator } from "@/components/ui/separator";
 import { PathwayTag } from "@/components/ui/pathway-tag";
 import type { PathwayType } from "@/components/ui/pathway-tag";
-import { getLocationTypeLabel, getEmploymentTypeLabel } from "@/lib/jobs/helpers";
-import { getExperienceLevelLabel } from "@/app/jobs/search/[id]/_components/helpers";
-import { formatSalary } from "@/app/jobs/search/[id]/_components/helpers";
+import {
+  getLocationTypeLabel,
+  getEmploymentTypeLabel,
+  getExperienceLevelLabel,
+  formatSalary,
+} from "@/lib/jobs/helpers";
 import { ReactionSelector } from "./ReactionSelector";
 import { MigrateToSection } from "./MigrateToSection";
 import type { TrackedJobData, ApplicationSection, EmojiReaction } from "./types";

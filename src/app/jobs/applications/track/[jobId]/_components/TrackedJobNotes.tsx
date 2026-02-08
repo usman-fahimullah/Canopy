@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { Card, CardContent } from "@/components/ui";
+import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle } from "@phosphor-icons/react";
 import { Spinner } from "@/components/ui/spinner";
 import { SimpleRichTextEditor } from "@/components/ui/rich-text-editor";

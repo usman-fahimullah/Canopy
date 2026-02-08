@@ -33,6 +33,49 @@ export function getEmploymentTypeLabel(employmentType: string): string {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Experience Level Labels                                             */
+/* ------------------------------------------------------------------ */
+
+export function getExperienceLevelLabel(level: string | null): string {
+  switch (level) {
+    case "ENTRY":
+      return "Entry Level";
+    case "INTERMEDIATE":
+      return "Mid Level";
+    case "SENIOR":
+      return "Senior or Executive";
+    case "EXECUTIVE":
+      return "Executive";
+    default:
+      return "Not specified";
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Salary Formatting                                                   */
+/* ------------------------------------------------------------------ */
+
+export function formatSalary(min: number | null, max: number | null, currency: string): string {
+  if (!min && !max) return "Not specified";
+  try {
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    });
+    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`;
+    if (min) return `From ${formatter.format(min)}`;
+    return `Up to ${formatter.format(max!)}`;
+  } catch {
+    // Fallback for invalid currency codes
+    const fallback = (v: number) => `$${v.toLocaleString()}`;
+    if (min && max) return `${fallback(min)} - ${fallback(max)}`;
+    if (min) return `From ${fallback(min)}`;
+    return `Up to ${fallback(max!)}`;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /*  Job Status                                                         */
 /* ------------------------------------------------------------------ */
 
