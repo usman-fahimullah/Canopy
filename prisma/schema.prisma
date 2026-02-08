@@ -814,6 +814,9 @@ model Job {
   formConfig    Json? // { personalDetails: {...}, careerDetails: {...}, requiredFiles: {...} }
   formQuestions Json? // Array of custom question objects
 
+  // Email automation config per pipeline stage
+  emailAutomation String? @db.Text // JSON: { [stageId]: { enabled: boolean, templateId: string } }
+
   // External syndication
   syndicationEnabled Boolean @default(false)
 
