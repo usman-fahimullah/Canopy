@@ -16,8 +16,8 @@ import {
   CaretRight,
   Bookmark,
   PaperPlaneTilt,
-  ChatsCircle,
-  HandCoins,
+  ChatCircleDots,
+  SealCheck,
   Trophy,
   Prohibit,
   Star,
@@ -86,6 +86,7 @@ interface SectionConfig {
   label: string;
   icon: React.ElementType;
   iconColor: string;
+  emptyIconBg: string;
   emptyTitle: string;
   emptyDescription: string;
   emptyCta: string;
@@ -96,6 +97,7 @@ export const sectionConfig: Record<ApplicationSection, SectionConfig> = {
     label: "Saved",
     icon: Bookmark,
     iconColor: "text-[var(--primitive-blue-500)]",
+    emptyIconBg: "bg-[var(--primitive-blue-500)]",
     emptyTitle: "No saved jobs yet!",
     emptyDescription:
       "Discover and find hundreds of jobs in Pathways! Save it and don't forget it!",
@@ -104,42 +106,48 @@ export const sectionConfig: Record<ApplicationSection, SectionConfig> = {
   applied: {
     label: "Applied",
     icon: PaperPlaneTilt,
-    iconColor: "text-[var(--primitive-yellow-500)]",
-    emptyTitle: "No applications yet!",
-    emptyDescription: "Start applying to jobs that match your skills and interests.",
-    emptyCta: "Find Jobs",
+    iconColor: "text-[var(--primitive-purple-500)]",
+    emptyIconBg: "bg-[var(--primitive-purple-500)]",
+    emptyTitle: "No applied jobs yet!",
+    emptyDescription:
+      "When you apply for a job make sure to migrate your saved job to this section",
+    emptyCta: "",
   },
   interview: {
-    label: "Interview",
-    icon: ChatsCircle,
-    iconColor: "text-[var(--primitive-green-600)]",
-    emptyTitle: "No interviews scheduled!",
-    emptyDescription: "Keep applying and you'll get interview invitations soon.",
-    emptyCta: "View Applications",
+    label: "Interviews",
+    icon: ChatCircleDots,
+    iconColor: "text-[var(--primitive-orange-500)]",
+    emptyIconBg: "bg-[var(--primitive-orange-500)]",
+    emptyTitle: "No interviews here yet!",
+    emptyDescription: "When have a job interview make sure to migrate it to this section",
+    emptyCta: "",
   },
   offer: {
-    label: "Offer",
-    icon: HandCoins,
-    iconColor: "text-[var(--primitive-purple-500)]",
+    label: "Offers",
+    icon: SealCheck,
+    iconColor: "text-[var(--primitive-green-500)]",
+    emptyIconBg: "bg-[var(--primitive-green-500)]",
     emptyTitle: "No offers yet!",
-    emptyDescription: "Keep going through the interview process. Offers will come!",
-    emptyCta: "View Interviews",
+    emptyDescription: "When have an offer make sure to migrate it to this section",
+    emptyCta: "",
   },
   hired: {
     label: "Hired",
     icon: Trophy,
     iconColor: "text-[var(--primitive-green-500)]",
+    emptyIconBg: "bg-[var(--primitive-green-500)]",
     emptyTitle: "No hired positions yet!",
     emptyDescription: "When you accept an offer, it will appear here.",
-    emptyCta: "View Offers",
+    emptyCta: "",
   },
   ineligible: {
     label: "Ineligible",
     icon: Prohibit,
     iconColor: "text-[var(--primitive-red-500)]",
+    emptyIconBg: "bg-[var(--primitive-red-500)]",
     emptyTitle: "No ineligible applications!",
     emptyDescription: "Applications that didn't proceed will show up here.",
-    emptyCta: "View All Applications",
+    emptyCta: "",
   },
 };
 
@@ -300,7 +308,7 @@ function SectionHeader({ section, count, isOpen, onToggle }: SectionHeaderProps)
         aria-expanded={isOpen}
         aria-label={isOpen ? "Collapse section" : "Expand section"}
       >
-        <CaretIcon size={20} weight="bold" className="text-[var(--primitive-green-800)]" />
+        <CaretIcon size={18} weight="bold" className="text-[var(--primitive-green-800)]" />
       </button>
       <div className="flex items-center gap-2.5">
         <Icon size={24} weight="fill" className={config.iconColor} />
@@ -595,7 +603,8 @@ function TableRow({
     <div
       className={cn(
         "flex h-[80px] items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]",
-        onRowClick && "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]"
+        onRowClick &&
+          "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]"
       )}
       onClick={() => onRowClick?.(application.id)}
       role={onRowClick ? "button" : undefined}
@@ -665,7 +674,10 @@ function TableRow({
 
       {/* Reaction Cell */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div className="flex h-[80px] min-w-0 flex-1 items-center justify-center py-6" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="flex h-[80px] min-w-0 flex-1 items-center justify-center py-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <EmojiReactionButton
           reaction={application.reaction}
           onReactionChange={(reaction) => onReactionChange?.(application.id, reaction)}
@@ -687,7 +699,7 @@ function EmptyState({ section, onAction }: EmptyStateProps) {
 
   return (
     <div className="flex h-[204px] flex-col items-center justify-center gap-4 overflow-hidden p-6">
-      <div className="flex size-6 items-center justify-center rounded bg-[var(--primitive-blue-500)]">
+      <div className={cn("flex size-6 items-center justify-center rounded", config.emptyIconBg)}>
         <Icon size={18} weight="fill" className="text-white" />
       </div>
       <div className="flex w-[492px] flex-col items-center justify-center">
@@ -698,9 +710,11 @@ function EmptyState({ section, onAction }: EmptyStateProps) {
           {config.emptyDescription}
         </p>
       </div>
-      <Button variant="inverse" size="default" onClick={onAction}>
-        {config.emptyCta}
-      </Button>
+      {section === "saved" && config.emptyCta && (
+        <Button variant="tertiary" size="default" className="rounded-full" onClick={onAction}>
+          {config.emptyCta}
+        </Button>
+      )}
     </div>
   );
 }
@@ -737,7 +751,12 @@ export function JobApplicationTable({
   const isEmpty = filteredApplications.length === 0;
 
   return (
-    <div className={cn("w-full overflow-hidden", className)}>
+    <div
+      className={cn(
+        "w-full overflow-hidden rounded-2xl border border-[var(--card-border)] bg-[var(--card-background)]",
+        className
+      )}
+    >
       <SectionHeader
         section={section}
         count={filteredApplications.length}
@@ -827,7 +846,7 @@ export function ApplicationTracker({
   ];
 
   return (
-    <div className={cn("flex flex-col divide-y divide-[var(--primitive-neutral-300)]", className)}>
+    <div className={cn("flex flex-col gap-6", className)}>
       {sections.map((section) => (
         <JobApplicationTable
           key={section}
