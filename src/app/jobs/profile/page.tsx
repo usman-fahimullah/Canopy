@@ -7,9 +7,11 @@ import { Chip } from "@/components/ui/chip";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Toast } from "@/components/ui/toast";
-import { Target, Briefcase, FolderSimple, Plus } from "@phosphor-icons/react";
+import { Target, Briefcase, FolderSimple, Plus, CheckCircle } from "@phosphor-icons/react";
+import { Badge } from "@/components/ui/badge";
 import { logger, formatError } from "@/lib/logger";
 import type { GoalCategoryKey } from "@/lib/profile/goal-categories";
+import { type CoverPresetId, isCustomCoverUrl } from "@/lib/profile/cover-presets";
 
 // Profile components
 import { ProfileHeader } from "@/components/profile/profile-header";
@@ -356,6 +358,32 @@ export default function ProfilePage() {
   const hasSummary = !!seeker?.summary;
   const hasSkills = seeker?.skills && seeker.skills.length > 0;
 
+  // Profile completeness calculation
+  const hasSocials = [
+    account?.linkedinUrl,
+    account?.instagramUrl,
+    account?.threadsUrl,
+    account?.facebookUrl,
+    account?.blueskyUrl,
+    account?.xUrl,
+    account?.websiteUrl,
+  ].some((v) => v != null && v !== "");
+  const completenessChecks = [
+    { weight: 10, done: !!account?.name },
+    { weight: 10, done: !!account?.avatar },
+    { weight: 10, done: !!account?.location },
+    { weight: 15, done: hasSummary },
+    { weight: 15, done: !!hasSkills },
+    { weight: 15, done: experiences.length > 0 },
+    { weight: 10, done: !!seeker?.resumeUrl },
+    { weight: 5, done: hasSocials },
+    { weight: 10, done: goals.length > 0 },
+  ];
+  const profileCompleteness = completenessChecks.reduce(
+    (sum, c) => sum + (c.done ? c.weight : 0),
+    0
+  );
+
   /* ---- Render ----------------------------------------------------- */
   return (
     <div>
@@ -396,6 +424,30 @@ export default function ProfilePage() {
         onShare={() => setActiveModal("share")}
       />
 
+      {/* ---- Profile Completeness Indicator ----------------------------- */}
+      <div className="px-12 pt-6">
+        {profileCompleteness < 100 ? (
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <div className="h-2 overflow-hidden rounded-full bg-[var(--background-muted)]">
+                <div
+                  className="h-full rounded-full bg-[var(--background-brand)] transition-all duration-500"
+                  style={{ width: `${profileCompleteness}%` }}
+                />
+              </div>
+            </div>
+            <span className="shrink-0 text-caption text-[var(--foreground-muted)]">
+              {profileCompleteness}% complete
+            </span>
+          </div>
+        ) : (
+          <Badge variant="success" size="default">
+            <CheckCircle size={16} weight="fill" className="mr-1" />
+            Profile complete
+          </Badge>
+        )}
+      </div>
+
       {/* ---- Content sections — 48px padding per Figma (node 2219:6763) */}
       <div className="flex flex-col gap-12 px-12 pb-12 pt-6">
         {/* ---- Empty State CTA Cards (Summary & Skills) -------------- */}
@@ -403,7 +455,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Summary CTA Card - Figma: purple/lavender bg with illustration */}
             {!hasSummary && (
-              <div className="flex items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--primitive-purple-100)] p-6">
+              <div className="flex items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--background-info)] p-6">
                 <div className="flex max-w-[280px] flex-col gap-4">
                   <div className="flex flex-col gap-2">
                     <h3 className="text-body-strong text-[var(--foreground-default)]">
@@ -425,7 +477,7 @@ export default function ProfilePage() {
 
             {/* Skills CTA Card - Figma: neutral bg with person illustration */}
             {!hasSkills && (
-              <div className="relative flex items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--primitive-neutral-100)] p-6">
+              <div className="relative flex items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--background-subtle)] p-6">
                 <div className="flex max-w-[280px] flex-col gap-4">
                   <div className="flex flex-col gap-2">
                     <h3 className="text-body-strong text-[var(--foreground-default)]">
@@ -621,10 +673,43 @@ export default function ProfilePage() {
         open={activeModal === "cover"}
         onOpenChange={(open) => !open && setActiveModal(null)}
         currentCoverId={
-          (seeker?.coverImage as import("@/lib/profile/cover-presets").CoverPresetId) ?? null
+          isCustomCoverUrl(seeker?.coverImage)
+            ? null
+            : ((seeker?.coverImage as CoverPresetId) ?? null)
         }
-        onSave={async (coverId) => {
-          await updateProfile({ coverImage: coverId });
+        currentCustomUrl={isCustomCoverUrl(seeker?.coverImage) ? seeker?.coverImage : null}
+        onSave={async (coverId, customFile) => {
+          if (customFile) {
+            // Upload custom cover image
+            const formData = new FormData();
+            formData.append("file", customFile);
+            setSaving(true);
+            try {
+              const res = await fetch("/api/profile/cover", {
+                method: "POST",
+                body: formData,
+              });
+              if (res.ok) {
+                await fetchProfile();
+                setActiveModal(null);
+                showToast("Cover image updated");
+              } else {
+                const data = await res.json().catch(() => ({}));
+                showToast(data.error || "Failed to upload cover image", "critical");
+              }
+            } catch (err) {
+              logger.error("Error uploading cover", { error: formatError(err) });
+              showToast("Something went wrong. Please try again.", "critical");
+            } finally {
+              setSaving(false);
+            }
+          } else if (coverId) {
+            // Save preset selection
+            await updateProfile({ coverImage: coverId });
+          } else {
+            // No change (existing custom URL kept)
+            setActiveModal(null);
+          }
         }}
         loading={saving}
       />
@@ -744,7 +829,7 @@ export default function ProfilePage() {
               }),
             });
             if (res.ok) {
-              await fetchGoals();
+              await Promise.all([fetchGoals(), fetchStreak()]);
               setActiveModal(null);
               setSelectedTemplate(null);
               showToast("Goal created");
@@ -799,76 +884,165 @@ export default function ProfilePage() {
               : null,
           }}
           onUpdateTitle={async (title) => {
-            await fetch(`/api/goals/${selectedGoal.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title }),
-            });
-            await fetchGoals();
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title }),
+              });
+              if (res.ok) {
+                await fetchGoals();
+                showToast("Goal updated");
+              } else {
+                showToast("Failed to update goal", "critical");
+              }
+            } catch (err) {
+              logger.error("Error updating goal title", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onUpdateDescription={async (description) => {
-            await fetch(`/api/goals/${selectedGoal.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ description }),
-            });
-            await fetchGoals();
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ description }),
+              });
+              if (res.ok) {
+                await fetchGoals();
+                showToast("Goal updated");
+              } else {
+                showToast("Failed to update goal", "critical");
+              }
+            } catch (err) {
+              logger.error("Error updating goal description", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onUpdateNotes={async (notes) => {
-            await fetch(`/api/goals/${selectedGoal.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ notes }),
-            });
-            await fetchGoals();
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ notes }),
+              });
+              if (res.ok) {
+                await fetchGoals();
+                showToast("Notes saved");
+              } else {
+                showToast("Failed to save notes", "critical");
+              }
+            } catch (err) {
+              logger.error("Error updating goal notes", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onUpdateCategory={async (category) => {
-            await fetch(`/api/goals/${selectedGoal.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ category }),
-            });
-            await fetchGoals();
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ category }),
+              });
+              if (res.ok) {
+                await fetchGoals();
+                showToast("Category updated");
+              } else {
+                showToast("Failed to update category", "critical");
+              }
+            } catch (err) {
+              logger.error("Error updating goal category", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onToggleMilestone={async (milestoneId) => {
-            await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
-              method: "PATCH",
-            });
-            await Promise.all([fetchGoals(), fetchStreak()]);
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
+                method: "PATCH",
+              });
+              if (res.ok) {
+                await Promise.all([fetchGoals(), fetchStreak()]);
+              } else {
+                showToast("Failed to update milestone", "critical");
+              }
+            } catch (err) {
+              logger.error("Error toggling milestone", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onAddMilestone={async (title) => {
-            await fetch(`/api/goals/${selectedGoal.id}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title }),
-            });
-            await fetchGoals();
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title }),
+              });
+              if (res.ok) {
+                await Promise.all([fetchGoals(), fetchStreak()]);
+                showToast("Milestone added");
+              } else {
+                showToast("Failed to add milestone", "critical");
+              }
+            } catch (err) {
+              logger.error("Error adding milestone", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onDeleteMilestone={async (milestoneId) => {
-            await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
-              method: "DELETE",
-            });
-            await fetchGoals();
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
+                method: "DELETE",
+              });
+              if (res.ok) {
+                await Promise.all([fetchGoals(), fetchStreak()]);
+                showToast("Milestone removed");
+              } else {
+                showToast("Failed to remove milestone", "critical");
+              }
+            } catch (err) {
+              logger.error("Error deleting milestone", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onUpdateMilestoneResources={async (milestoneId, resources) => {
-            await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ resources }),
-            });
-            await fetchGoals();
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}/milestones/${milestoneId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ resources }),
+              });
+              if (res.ok) {
+                await fetchGoals();
+                showToast("Resources updated");
+              } else {
+                showToast("Failed to update resources", "critical");
+              }
+            } catch (err) {
+              logger.error("Error updating milestone resources", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           onCompleteGoal={async () => {
-            await fetch(`/api/goals/${selectedGoal.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "COMPLETED" }),
-            });
-            await fetchGoals();
-            setActiveModal(null);
+            try {
+              const res = await fetch(`/api/goals/${selectedGoal.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "COMPLETED" }),
+              });
+              if (res.ok) {
+                await Promise.all([fetchGoals(), fetchStreak()]);
+                setActiveModal(null);
+                showToast("Goal completed!");
+              } else {
+                showToast("Failed to complete goal", "critical");
+              }
+            } catch (err) {
+              logger.error("Error completing goal", { error: formatError(err) });
+              showToast("Something went wrong", "critical");
+            }
           }}
           hasPrev={selectedGoalIndex > 0}
-          hasNext={selectedGoalIndex < goals.length - 1}
+          hasNext={selectedGoalIndex >= 0 && selectedGoalIndex < goals.length - 1}
           onPrev={() => {
             if (selectedGoalIndex > 0) {
               setSelectedGoalId(goals[selectedGoalIndex - 1].id);

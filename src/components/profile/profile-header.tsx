@@ -5,6 +5,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Camera,
   PencilSimple,
   Plus,
   MapPin,
@@ -94,27 +95,43 @@ export function ProfileHeader({
       <div className="relative px-12 pb-8">
         {/* Avatar overlapping cover - positioned with negative margin */}
         <div className="relative -mt-16 mb-4">
-          <div className="relative inline-block">
-            {/* One-off: Avatar boundary ring — 6px white border with subtle outer glow */}
-            <div className="rounded-full border-[6px] border-[var(--primitive-neutral-0)] shadow-[0_0_0_2px_rgba(0,0,0,0.05)]">
-              <Avatar
-                src={avatar ?? undefined}
-                name={name ?? undefined}
-                size="2xl"
-                shape="circle"
-                color="purple"
-                className="h-[116px] w-[116px] !border-0"
-              />
-            </div>
-            {/* Edit photo button - Figma: teal/green circle overlapping avatar bottom-right */}
+          <div
+            className={cn(
+              "group relative inline-block rounded-full border-4 border-[var(--background-default)] shadow-[var(--shadow-sm)]",
+              isOwner && "cursor-pointer"
+            )}
+            onClick={isOwner ? onEditPhoto : undefined}
+            role={isOwner ? "button" : undefined}
+            tabIndex={isOwner ? 0 : undefined}
+            aria-label={isOwner ? "Change profile photo" : undefined}
+            onKeyDown={
+              isOwner
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onEditPhoto?.();
+                    }
+                  }
+                : undefined
+            }
+          >
+            <Avatar
+              src={avatar ?? undefined}
+              name={name ?? undefined}
+              size="2xl"
+              shape="circle"
+              color="purple"
+              className="h-[120px] w-[120px] !border-0"
+            />
+            {/* Hover overlay for changing photo */}
             {isOwner && (
-              <button
-                onClick={onEditPhoto}
-                aria-label="Edit profile photo"
-                className="absolute -bottom-1 -right-1 flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[var(--primitive-neutral-0)] bg-[var(--primitive-blue-300)] text-[var(--primitive-green-800)] shadow-[var(--shadow-xs)] transition-colors hover:bg-[var(--primitive-blue-400)]"
-              >
-                <PencilSimple size={18} weight="bold" />
-              </button>
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/40">
+                <Camera
+                  size={28}
+                  weight="fill"
+                  className="text-white opacity-0 transition-opacity group-hover:opacity-100"
+                />
+              </div>
             )}
           </div>
         </div>
