@@ -78,7 +78,7 @@ async function getJobDetail(jobId: string): Promise<{
                 ? { id: selectedRecruiterId, organizationId: job.organizationId }
                 : {
                     organizationId: job.organizationId,
-                    role: { in: ["RECRUITER", "OWNER", "ADMIN"] },
+                    role: { in: ["RECRUITER", "ADMIN"] },
                   },
               orderBy: selectedRecruiterId ? undefined : [{ role: "asc" }],
               include: {
@@ -155,19 +155,31 @@ async function getJobDetail(jobId: string): Promise<{
       ]
     );
 
-    const recruiter: Recruiter | null = recruiterMember
+    // Cast to include the account relation which is always present when non-null
+    const recruiterWithAccount = recruiterMember as
+      | (typeof recruiterMember & {
+          account: { name: string | null; email: string; avatar: string | null };
+        })
+      | null;
+    const hiringManagerWithAccount = hiringManagerMember as
+      | (typeof hiringManagerMember & {
+          account: { name: string | null; email: string; avatar: string | null };
+        })
+      | null;
+
+    const recruiter: Recruiter | null = recruiterWithAccount
       ? {
-          name: recruiterMember.account.name ?? recruiterMember.account.email,
-          title: recruiterMember.title,
-          avatar: recruiterMember.account.avatar,
+          name: recruiterWithAccount.account.name ?? recruiterWithAccount.account.email,
+          title: recruiterWithAccount.title,
+          avatar: recruiterWithAccount.account.avatar,
         }
       : null;
 
-    const hiringManager: Recruiter | null = hiringManagerMember
+    const hiringManager: Recruiter | null = hiringManagerWithAccount
       ? {
-          name: hiringManagerMember.account.name ?? hiringManagerMember.account.email,
-          title: hiringManagerMember.title,
-          avatar: hiringManagerMember.account.avatar,
+          name: hiringManagerWithAccount.account.name ?? hiringManagerWithAccount.account.email,
+          title: hiringManagerWithAccount.title,
+          avatar: hiringManagerWithAccount.account.avatar,
         }
       : null;
 
