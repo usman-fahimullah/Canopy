@@ -63,7 +63,7 @@ export function ProfileSectionContainer({
   return (
     <div className="overflow-hidden rounded-[16px] border border-[var(--border-muted)]">
       {/* Header row - Figma: inside container, white bg */}
-      <div className="flex items-center justify-between bg-white px-6 py-4">
+      <div className="flex items-center justify-between bg-[var(--background-default)] px-6 py-4">
         <div className="flex items-center gap-2.5">
           {/* Icon - Figma: 24px, brand color */}
           <span className="flex h-6 w-6 items-center justify-center text-[var(--foreground-brand)]">
@@ -95,9 +95,9 @@ export function ProfileSectionContainer({
 
       {/* Content area */}
       {isEmpty && emptyState ? (
-        <div className="bg-white">{emptyState}</div>
+        <div className="bg-[var(--background-default)]">{emptyState}</div>
       ) : (
-        <div className="bg-white">{children}</div>
+        <div className="bg-[var(--background-default)]">{children}</div>
       )}
     </div>
   );

@@ -11,9 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SwitchWithLabel } from "@/components/ui/switch";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { Toast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/client";
+import { logger, formatError } from "@/lib/logger";
 import {
   Buildings,
   Bell,
@@ -39,10 +42,10 @@ type SettingSection = "company" | "team" | "notifications" | "privacy" | "career
 
 interface TeamMember {
   id: string;
-  name: string;
+  name: string | null;
   email: string;
+  avatar: string | null;
   role: "ADMIN" | "RECRUITER" | "HIRING_TEAM" | "VIEWER";
-  avatarColor?: "green" | "blue" | "purple" | "orange";
 }
 
 interface CompanyData {
@@ -97,44 +100,13 @@ const SETTING_SECTIONS = [
   },
 ];
 
-const MOCK_COMPANY: CompanyData = {
-  name: "Your Company",
+const EMPTY_COMPANY: CompanyData = {
+  name: "",
   website: "",
-  size: "1-10",
-  sector: "Climate Tech",
+  size: "",
+  sector: "",
   description: "",
 };
-
-const MOCK_TEAM: TeamMember[] = [
-  {
-    id: "tm_001",
-    name: "Jordan Rivera",
-    email: "jordan@canopy.co",
-    role: "ADMIN",
-    avatarColor: "green",
-  },
-  {
-    id: "tm_002",
-    name: "Alex Chen",
-    email: "alex@canopy.co",
-    role: "RECRUITER",
-    avatarColor: "blue",
-  },
-  {
-    id: "tm_003",
-    name: "Sam Okafor",
-    email: "sam@canopy.co",
-    role: "HIRING_TEAM",
-    avatarColor: "purple",
-  },
-  {
-    id: "tm_004",
-    name: "Casey Nguyen",
-    email: "casey@canopy.co",
-    role: "RECRUITER",
-    avatarColor: "orange",
-  },
-];
 
 const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   newApplications: true,
@@ -143,7 +115,13 @@ const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   teamActivity: false,
 };
 
-const NOTIFICATION_PREFS_KEY = "employer-notification-prefs";
+/** Maps our UI toggle keys to the API's inAppPrefs keys */
+const NOTIF_KEY_MAP: Record<keyof NotificationPrefs, string> = {
+  newApplications: "NEW_APPLICATION",
+  messages: "NEW_MESSAGE",
+  jobExpiring: "OFFER_RECEIVED",
+  teamActivity: "APPROVAL_PENDING",
+};
 
 /* -------------------------------------------------------------------
    Helpers
@@ -177,6 +155,30 @@ function formatRole(role: string) {
     default:
       return role;
   }
+}
+
+/** Convert API inAppPrefs to our UI toggle state */
+function mapApiPrefsToUI(
+  inAppPrefs: Record<string, boolean> | null | undefined
+): NotificationPrefs {
+  if (!inAppPrefs) return DEFAULT_NOTIFICATION_PREFS;
+  return {
+    newApplications:
+      inAppPrefs[NOTIF_KEY_MAP.newApplications] ?? DEFAULT_NOTIFICATION_PREFS.newApplications,
+    messages: inAppPrefs[NOTIF_KEY_MAP.messages] ?? DEFAULT_NOTIFICATION_PREFS.messages,
+    jobExpiring: inAppPrefs[NOTIF_KEY_MAP.jobExpiring] ?? DEFAULT_NOTIFICATION_PREFS.jobExpiring,
+    teamActivity: inAppPrefs[NOTIF_KEY_MAP.teamActivity] ?? DEFAULT_NOTIFICATION_PREFS.teamActivity,
+  };
+}
+
+/** Convert UI toggle state to API inAppPrefs */
+function mapUIPrefsToApi(prefs: NotificationPrefs): Record<string, boolean> {
+  return {
+    [NOTIF_KEY_MAP.newApplications]: prefs.newApplications,
+    [NOTIF_KEY_MAP.messages]: prefs.messages,
+    [NOTIF_KEY_MAP.jobExpiring]: prefs.jobExpiring,
+    [NOTIF_KEY_MAP.teamActivity]: prefs.teamActivity,
+  };
 }
 
 /* -------------------------------------------------------------------
@@ -344,7 +346,15 @@ function CompanyProfileSection({
   );
 }
 
-function TeamPermissionsSection() {
+function TeamPermissionsSection({
+  members,
+  loadingTeam,
+  teamError,
+}: {
+  members: TeamMember[];
+  loadingTeam: boolean;
+  teamError: string | null;
+}) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -360,31 +370,56 @@ function TeamPermissionsSection() {
       </div>
 
       <div className="rounded-[16px] border border-[var(--card-border)] bg-[var(--card-background)] p-6">
-        <p className="mb-4 text-caption text-foreground-muted">
-          {MOCK_TEAM.length} member{MOCK_TEAM.length !== 1 ? "s" : ""}
-        </p>
-
-        <div className="space-y-3">
-          {MOCK_TEAM.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center gap-4 rounded-xl border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3"
-            >
-              <Avatar name={member.name} color={member.avatarColor} size="sm" />
-
-              <div className="min-w-0 flex-1">
-                <p className="text-foreground-default truncate text-body-sm font-medium">
-                  {member.name}
-                </p>
-                <p className="truncate text-caption text-foreground-muted">{member.email}</p>
+        {loadingTeam ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center gap-4 px-4 py-3">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full" />
               </div>
+            ))}
+          </div>
+        ) : teamError ? (
+          <p className="py-4 text-center text-body-sm text-[var(--foreground-error)]">
+            {teamError}
+          </p>
+        ) : (
+          <>
+            <p className="mb-4 text-caption text-foreground-muted">
+              {members.length} member{members.length !== 1 ? "s" : ""}
+            </p>
 
-              <Badge variant={roleBadgeVariant(member.role)} size="sm">
-                {formatRole(member.role)}
-              </Badge>
+            <div className="space-y-3">
+              {members.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center gap-4 rounded-xl border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3"
+                >
+                  <Avatar
+                    src={member.avatar ?? undefined}
+                    name={member.name ?? undefined}
+                    size="sm"
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-foreground-default truncate text-body-sm font-medium">
+                      {member.name || "Unnamed"}
+                    </p>
+                    <p className="truncate text-caption text-foreground-muted">{member.email}</p>
+                  </div>
+
+                  <Badge variant={roleBadgeVariant(member.role)} size="sm">
+                    {formatRole(member.role)}
+                  </Badge>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
 
       <div className="rounded-xl border border-[var(--border-info)] bg-[var(--background-info)] px-5 py-4">
@@ -514,13 +549,18 @@ function PrivacyAccountSection({ onSignOut }: { onSignOut: () => void }) {
   );
 }
 
-function CareerPageSettingsSection() {
+function CareerPageSettingsSection({
+  showToast,
+}: {
+  showToast: (message: string, variant?: "success" | "critical") => void;
+}) {
   const router = useRouter();
   const [slug, setSlug] = useState("");
   const [initialSlug, setInitialSlug] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [initialEnabled, setInitialEnabled] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [savingConfig, setSavingConfig] = useState(false);
 
   useEffect(() => {
@@ -536,9 +576,11 @@ function CareerPageSettingsSection() {
           setInitialSlug(loadedSlug);
           setEnabled(loadedEnabled);
           setInitialEnabled(loadedEnabled);
+        } else {
+          setFetchError("Failed to load career page settings");
         }
       } catch {
-        // API not available
+        setFetchError("Failed to load career page settings");
       } finally {
         setLoadingConfig(false);
       }
@@ -559,13 +601,17 @@ function CareerPageSettingsSection() {
       if (res.ok) {
         setInitialSlug(slug);
         setInitialEnabled(enabled);
+        showToast("Career page updated");
+      } else {
+        showToast("Failed to save career page settings", "critical");
       }
-    } catch {
-      // Save failed silently — user can retry
+    } catch (err) {
+      logger.error("Save career page error", { error: formatError(err) });
+      showToast("Failed to save career page settings", "critical");
     } finally {
       setSavingConfig(false);
     }
-  }, [slug, enabled]);
+  }, [slug, enabled, showToast]);
 
   return (
     <div className="space-y-6">
@@ -588,6 +634,10 @@ function CareerPageSettingsSection() {
       {loadingConfig ? (
         <div className="flex items-center justify-center py-12">
           <Spinner size="md" />
+        </div>
+      ) : fetchError ? (
+        <div className="rounded-[16px] border border-[var(--border-error)] bg-[var(--background-error)] px-5 py-4">
+          <p className="text-body-sm text-[var(--foreground-error)]">{fetchError}</p>
         </div>
       ) : (
         <>
@@ -660,56 +710,94 @@ export default function EmployerSettingsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Toast
+  const [toast, setToast] = useState<{
+    message: string;
+    variant: "success" | "critical";
+  } | null>(null);
+
+  const showToast = useCallback((message: string, variant: "success" | "critical" = "success") => {
+    setToast({ message, variant });
+  }, []);
+
   // Company data
-  const [company, setCompany] = useState<CompanyData>(MOCK_COMPANY);
-  const [formFields, setFormFields] = useState<CompanyData>(MOCK_COMPANY);
+  const [company, setCompany] = useState<CompanyData>(EMPTY_COMPANY);
+  const [formFields, setFormFields] = useState<CompanyData>(EMPTY_COMPANY);
+
+  // Team data
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(true);
+  const [teamError, setTeamError] = useState<string | null>(null);
 
   // Notification prefs
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(
     DEFAULT_NOTIFICATION_PREFS
   );
 
-  /* ---------- Fetch profile on mount ---------- */
+  /* ---------- Fetch data on mount ---------- */
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchProfile() {
+    async function fetchOrganization() {
       try {
-        const res = await fetch("/api/profile");
+        const res = await fetch("/api/canopy/organization");
         if (res.ok) {
           const data = await res.json();
-          // If the API returns org/company info, use it
           if (data?.organization && !cancelled) {
             const org = data.organization;
             const loaded: CompanyData = {
-              name: org.name || MOCK_COMPANY.name,
-              website: org.website || MOCK_COMPANY.website,
-              size: org.size || MOCK_COMPANY.size,
-              sector: org.sector || org.industry || MOCK_COMPANY.sector,
-              description: org.description || MOCK_COMPANY.description,
+              name: org.name || "",
+              website: org.website || "",
+              size: org.size || "",
+              sector: org.industries?.[0] || "",
+              description: org.description || "",
             };
             setCompany(loaded);
             setFormFields(loaded);
           }
         }
-      } catch {
-        // API not available - fall back to mock data silently
+      } catch (err) {
+        logger.error("Fetch organization error", { error: formatError(err) });
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    // Load notification prefs from localStorage
-    try {
-      const stored = localStorage.getItem(NOTIFICATION_PREFS_KEY);
-      if (stored) {
-        setNotificationPrefs(JSON.parse(stored));
+    async function fetchTeam() {
+      try {
+        const res = await fetch("/api/canopy/team");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.members && !cancelled) {
+            setTeamMembers(data.members);
+          }
+        } else {
+          if (!cancelled) setTeamError("Failed to load team members");
+        }
+      } catch {
+        if (!cancelled) setTeamError("Failed to load team members");
+      } finally {
+        if (!cancelled) setLoadingTeam(false);
       }
-    } catch {
-      // localStorage unavailable
     }
 
-    fetchProfile();
+    async function fetchNotificationPrefs() {
+      try {
+        const res = await fetch("/api/notifications/preferences");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.preferences && !cancelled) {
+            setNotificationPrefs(mapApiPrefsToUI(data.preferences.inAppPrefs));
+          }
+        }
+      } catch {
+        // Fall back to defaults silently
+      }
+    }
+
+    fetchOrganization();
+    fetchTeam();
+    fetchNotificationPrefs();
 
     return () => {
       cancelled = true;
@@ -735,48 +823,57 @@ export default function EmployerSettingsPage() {
   const handleSave = useCallback(async () => {
     setSaving(true);
     try {
-      const res = await fetch("/api/profile", {
+      const res = await fetch("/api/canopy/organization", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formFields.name,
-          website: formFields.website,
-          size: formFields.size,
-          sector: formFields.sector,
-          description: formFields.description,
+          website: formFields.website || null,
+          size: formFields.size || null,
+          industries: formFields.sector ? [formFields.sector] : [],
+          description: formFields.description || null,
         }),
       });
 
       if (res.ok) {
         setCompany({ ...formFields });
         setIsEditing(false);
+        showToast("Company profile updated");
       } else {
-        // Fallback: persist to localStorage as a mock save
-        localStorage.setItem("employer-company-profile", JSON.stringify(formFields));
-        setCompany({ ...formFields });
-        setIsEditing(false);
+        showToast("Failed to save company profile", "critical");
       }
-    } catch {
-      // API unavailable - persist to localStorage as a fallback
-      localStorage.setItem("employer-company-profile", JSON.stringify(formFields));
-      setCompany({ ...formFields });
-      setIsEditing(false);
+    } catch (err) {
+      logger.error("Save company profile error", { error: formatError(err) });
+      showToast("Something went wrong. Please try again.", "critical");
     } finally {
       setSaving(false);
     }
-  }, [formFields]);
+  }, [formFields, showToast]);
 
-  const handleToggleNotification = useCallback((key: keyof NotificationPrefs) => {
-    setNotificationPrefs((prev) => {
-      const updated = { ...prev, [key]: !prev[key] };
+  const handleToggleNotification = useCallback(
+    async (key: keyof NotificationPrefs) => {
+      const updated = { ...notificationPrefs, [key]: !notificationPrefs[key] };
+      setNotificationPrefs(updated);
+
       try {
-        localStorage.setItem(NOTIFICATION_PREFS_KEY, JSON.stringify(updated));
+        const res = await fetch("/api/notifications/preferences", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inAppPrefs: mapUIPrefsToApi(updated) }),
+        });
+        if (!res.ok) {
+          // Revert on failure
+          setNotificationPrefs(notificationPrefs);
+          showToast("Failed to save notification preference", "critical");
+        }
       } catch {
-        // localStorage unavailable
+        // Revert on failure
+        setNotificationPrefs(notificationPrefs);
+        showToast("Failed to save notification preference", "critical");
       }
-      return updated;
-    });
-  }, []);
+    },
+    [notificationPrefs, showToast]
+  );
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -819,7 +916,13 @@ export default function EmployerSettingsPage() {
           />
         );
       case "team":
-        return <TeamPermissionsSection />;
+        return (
+          <TeamPermissionsSection
+            members={teamMembers}
+            loadingTeam={loadingTeam}
+            teamError={teamError}
+          />
+        );
       case "notifications":
         return (
           <NotificationsSection prefs={notificationPrefs} onToggle={handleToggleNotification} />
@@ -827,7 +930,7 @@ export default function EmployerSettingsPage() {
       case "privacy":
         return <PrivacyAccountSection onSignOut={handleSignOut} />;
       case "career-page":
-        return <CareerPageSettingsSection />;
+        return <CareerPageSettingsSection showToast={showToast} />;
       default:
         return null;
     }
@@ -879,6 +982,20 @@ export default function EmployerSettingsPage() {
         {/* Main content */}
         <div className="min-w-0 flex-1">{renderSection()}</div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[var(--z-toast)]">
+          <Toast
+            variant={toast.variant}
+            dismissible
+            autoDismiss={4000}
+            onDismiss={() => setToast(null)}
+          >
+            {toast.message}
+          </Toast>
+        </div>
+      )}
     </div>
   );
 }

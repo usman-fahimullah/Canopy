@@ -853,6 +853,9 @@ export {
   type GoalType,
 } from "./progress-meter";
 
+// Goal Card
+export { GoalCard, goalCardBg, type GoalCardProps } from "./goal-card";
+
 // Progress Steps (Job Seeker Pipeline)
 export {
   ProgressStep,

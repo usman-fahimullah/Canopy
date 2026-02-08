@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Chip } from "@/components/ui/chip";
 import {
   Camera,
   PencilSimple,
@@ -35,11 +36,15 @@ interface ProfileHeaderProps {
   badge: string | null;
   coverImage: string | null;
   socialLinks: SocialLinks;
+  summary: string | null;
+  skills: string[];
   isOwner?: boolean;
   onEditCover?: () => void;
   onEditPhoto?: () => void;
   onEditContact?: () => void;
   onEditSocials?: () => void;
+  onEditSummary?: () => void;
+  onEditSkills?: () => void;
   onShare?: () => void;
 }
 
@@ -52,11 +57,15 @@ export function ProfileHeader({
   badge,
   coverImage,
   socialLinks,
+  summary,
+  skills,
   isOwner = true,
   onEditCover,
   onEditPhoto,
   onEditContact,
   onEditSocials,
+  onEditSummary,
+  onEditSkills,
   onShare,
 }: ProfileHeaderProps) {
   const cover = getCoverPreset(coverImage);
@@ -121,16 +130,12 @@ export function ProfileHeader({
               size="2xl"
               shape="circle"
               color="purple"
-              className="h-[120px] w-[120px] !border-0"
+              className="!border-0"
             />
-            {/* Hover overlay for changing photo */}
+            {/* Hover overlay — sized to match the avatar (inside the border) */}
             {isOwner && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 transition-colors group-hover:bg-black/40">
-                <Camera
-                  size={28}
-                  weight="fill"
-                  className="text-white opacity-0 transition-opacity group-hover:opacity-100"
-                />
+              <div className="pointer-events-none absolute inset-1 flex items-center justify-center rounded-full opacity-0 transition-all duration-200 group-hover:bg-black/40 group-hover:opacity-100">
+                <Camera size={32} weight="fill" className="text-white drop-shadow-md" />
               </div>
             )}
           </div>
@@ -225,6 +230,119 @@ export function ProfileHeader({
             </div>
           ) : null}
         </div>
+
+        {/* Summary + Skills — side by side */}
+        {(summary || (skills && skills.length > 0) || isOwner) && (
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Summary column */}
+            {(summary || isOwner) && (
+              <div>
+                {summary ? (
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <h3 className="text-caption-strong text-[var(--foreground-muted)]">
+                        Summary
+                      </h3>
+                      {isOwner && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={onEditSummary}
+                          className="p-0 text-caption"
+                        >
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-body-sm leading-relaxed text-[var(--foreground-default)]">
+                      {summary}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex h-full items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--background-info)] p-6">
+                    <div className="flex max-w-[280px] flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="text-body-strong text-[var(--foreground-default)]">
+                          Add a summary about yourself.
+                        </h3>
+                        <p className="text-caption text-[var(--foreground-muted)]">
+                          Tell your career story, and show recruiters what you&apos;re made of!
+                        </p>
+                      </div>
+                      <Button variant="inverse" onClick={onEditSummary} className="w-fit">
+                        Write Your Story
+                      </Button>
+                    </div>
+                    <div className="hidden shrink-0 sm:block">
+                      <Image
+                        src="/illustrations/profile-summary-illustration.svg"
+                        alt=""
+                        width={120}
+                        height={100}
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Skills column */}
+            {(skills && skills.length > 0) || isOwner ? (
+              <div>
+                {skills && skills.length > 0 ? (
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <h3 className="text-caption-strong text-[var(--foreground-muted)]">Skills</h3>
+                      {isOwner && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={onEditSkills}
+                          className="p-0 text-caption"
+                        >
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((skill) => (
+                        <Chip key={skill} variant="neutral" size="md">
+                          {skill}
+                        </Chip>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex h-full items-start justify-between overflow-hidden rounded-[var(--radius-2xl)] bg-[var(--background-subtle)] p-6">
+                    <div className="flex max-w-[280px] flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <h3 className="text-body-strong text-[var(--foreground-default)]">
+                          Add your skills
+                        </h3>
+                        <p className="text-caption text-[var(--foreground-muted)]">
+                          Showcase your expertise to help you stand out in a competitive landscape.
+                        </p>
+                      </div>
+                      <Button variant="inverse" onClick={onEditSkills} className="w-fit">
+                        Add Skills
+                      </Button>
+                    </div>
+                    <div className="hidden shrink-0 sm:block">
+                      <Image
+                        src="/illustrations/profile-skills-illustration.svg"
+                        alt=""
+                        width={120}
+                        height={100}
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -189,3 +189,55 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: "Failed to add milestone" }, { status: 500 });
   }
 }
+
+// DELETE — delete goal and cascade milestones
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await standardLimiter.check(10, `goals-delete:${ip}`);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
+    const { id: goalId } = await params;
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const account = await prisma.account.findUnique({
+      where: { supabaseId: user.id },
+      include: { seekerProfile: true },
+    });
+
+    if (!account?.seekerProfile) {
+      return NextResponse.json({ error: "Seeker profile not found" }, { status: 404 });
+    }
+
+    const goal = await prisma.goal.findUnique({
+      where: { id: goalId },
+    });
+
+    if (!goal || goal.seekerId !== account.seekerProfile.id) {
+      return NextResponse.json({ error: "Goal not found" }, { status: 404 });
+    }
+
+    // Milestones cascade-delete via Prisma schema relation
+    await prisma.goal.delete({ where: { id: goalId } });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    logger.error("Delete goal error", { error: formatError(error), endpoint: "/api/goals/[id]" });
+    return NextResponse.json({ error: "Failed to delete goal" }, { status: 500 });
+  }
+}
