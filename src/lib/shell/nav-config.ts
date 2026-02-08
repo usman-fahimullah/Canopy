@@ -48,7 +48,7 @@ export const talentNavConfig: ShellNavConfig = {
         {
           id: "applications",
           href: "/jobs/applications",
-          label: "Applications",
+          label: "Your Jobs",
           icon: Table,
           iconWeight: "fill",
         },
