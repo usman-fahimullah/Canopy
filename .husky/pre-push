@@ -1,0 +1,5 @@
+echo "🔍 Pre-push: regenerating Prisma client and type-checking..."
+pnpm db:generate && pnpm type-check
+
+echo "📊 Pre-push: checking API route test coverage..."
+pnpm check:routes
