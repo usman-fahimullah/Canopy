@@ -28,15 +28,17 @@ const anthropic = new Anthropic({
 });
 
 /**
- * Extract text from a PDF buffer using pdf-parse v1.
- * Uses dynamic import to avoid pdf-parse loading test fixtures at build time.
+ * Extract text from a PDF buffer using pdf-parse v2.
  */
 async function extractPdfText(buffer: Buffer): Promise<string> {
-  // pdf-parse v1 must use require() to avoid loading test fixtures at build time
-  const mod = await import("pdf-parse");
-  const pdfParse = mod.default as unknown as (buf: Buffer) => Promise<{ text: string }>;
-  const result = await pdfParse(buffer);
-  return result.text;
+  const { PDFParse } = await import("pdf-parse");
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  try {
+    const result = await parser.getText();
+    return result.text;
+  } finally {
+    await parser.destroy();
+  }
 }
 
 /**

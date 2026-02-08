@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DotsSixVertical, Trash, Check, X } from "@phosphor-icons/react";
+import { DotsSixVertical, Trash, Check, X, Copy, Eye, EyeSlash } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
 interface SectionHoverToolbarProps {
   label: string;
   dragHandleProps?: Record<string, unknown>;
+  isHidden?: boolean;
   onDelete: () => void;
+  onDuplicate?: () => void;
+  onToggleVisibility?: () => void;
 }
 
 export function SectionHoverToolbar({
   label,
   dragHandleProps,
+  isHidden,
   onDelete,
+  onDuplicate,
+  onToggleVisibility,
 }: SectionHoverToolbarProps) {
   const [confirming, setConfirming] = useState(false);
 
@@ -36,6 +42,40 @@ export function SectionHoverToolbar({
       >
         <DotsSixVertical size={14} weight="bold" />
       </button>
+
+      {/* Duplicate */}
+      {onDuplicate && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate();
+          }}
+          title="Duplicate section"
+          aria-label="Duplicate section"
+        >
+          <Copy size={14} weight="bold" />
+        </Button>
+      )}
+
+      {/* Visibility toggle */}
+      {onToggleVisibility && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`h-6 w-6 ${isHidden ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]"}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleVisibility();
+          }}
+          title={isHidden ? "Show section" : "Hide section"}
+          aria-label={isHidden ? "Show section" : "Hide section"}
+        >
+          {isHidden ? <EyeSlash size={14} weight="bold" /> : <Eye size={14} weight="bold" />}
+        </Button>
+      )}
 
       {confirming ? (
         <div className="flex items-center gap-0.5">

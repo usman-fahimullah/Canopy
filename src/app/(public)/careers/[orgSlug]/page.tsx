@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { SectionRenderer } from "@/components/career-pages/SectionRenderer";
 import type { CareerPageConfig } from "@/lib/career-pages/types";
 import { DEFAULT_CAREER_PAGE_CONFIG } from "@/lib/career-pages/default-template";
+import { getGoogleFontsUrl, getFontValue } from "@/lib/career-pages/fonts";
 
 interface CareerPageProps {
   params: Promise<{ orgSlug: string }>;
@@ -83,22 +84,38 @@ export default async function CareerPage({ params }: CareerPageProps) {
 
   const { org, jobs, config } = data;
 
+  // Build Google Fonts URL for the selected fonts
+  const fontsToLoad = [config.theme.fontFamily];
+  if (config.theme.headingFontFamily) fontsToLoad.push(config.theme.headingFontFamily);
+  const googleFontsUrl = getGoogleFontsUrl(fontsToLoad);
+
+  // Use logo from theme (synced) or org-level
+  const logoUrl = config.theme.logo || org.logo;
+
   return (
-    <main style={{ fontFamily: config.theme.fontFamily }}>
-      {/* Org logo header */}
-      {org.logo && (
-        <div className="flex items-center gap-3 border-b border-[var(--border-muted)] px-6 py-4">
-          <img src={org.logo} alt={org.name} className="h-8 w-8 rounded-lg object-contain" />
-          <span className="font-semibold text-[var(--foreground-default)]">{org.name}</span>
-        </div>
+    <>
+      {/* Load Google Fonts */}
+      {googleFontsUrl && (
+        // eslint-disable-next-line @next/next/no-page-custom-font
+        <link rel="stylesheet" href={googleFontsUrl} />
       )}
 
-      <SectionRenderer
-        sections={config.sections}
-        theme={config.theme}
-        orgSlug={orgSlug}
-        jobs={jobs}
-      />
-    </main>
+      <main style={{ fontFamily: getFontValue(config.theme.fontFamily) }}>
+        {/* Org logo header */}
+        {logoUrl && (
+          <div className="flex items-center gap-3 border-b border-[var(--border-muted)] px-6 py-4">
+            <img src={logoUrl} alt={org.name} className="h-8 w-auto max-w-[120px] object-contain" />
+            <span className="font-semibold text-[var(--foreground-default)]">{org.name}</span>
+          </div>
+        )}
+
+        <SectionRenderer
+          sections={config.sections}
+          theme={config.theme}
+          orgSlug={orgSlug}
+          jobs={jobs}
+        />
+      </main>
+    </>
   );
 }

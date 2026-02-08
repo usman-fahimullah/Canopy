@@ -11,9 +11,10 @@ import type {
 import { DEFAULT_CAREER_PAGE_CONFIG } from "@/lib/career-pages/default-template";
 import { logger, formatError } from "@/lib/logger";
 import { arrayMove } from "@dnd-kit/sortable";
+import { getGoogleFontsUrl } from "@/lib/career-pages/fonts";
 import { EditorToolbar } from "./EditorToolbar";
 import { EditorCanvas } from "./EditorCanvas";
-import { SectionEditPanel } from "./SectionEditPanel";
+import { EditorRightPanel } from "./EditorRightPanel";
 import { PageSettingsSheet } from "./PageSettingsSheet";
 import type { DeviceMode } from "./DeviceFrame";
 
@@ -23,6 +24,12 @@ interface CareerPageData {
   config: CareerPageConfig;
   orgName: string;
   orgSlug: string;
+  orgBrand?: {
+    primaryColor: string;
+    secondaryColor: string | null;
+    fontFamily: string;
+    logo: string | null;
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -116,6 +123,7 @@ export function CareerPageEditor() {
   const [slug, setSlug] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [orgSlug, setOrgSlug] = useState("");
+  const [organizationId, setOrganizationId] = useState<string | undefined>();
 
   // UI state
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -132,11 +140,12 @@ export function CareerPageEditor() {
         const res = await fetch("/api/canopy/career-page");
         if (!res.ok) throw new Error("Failed to load career page config");
         const json = await res.json();
-        const pageData = json.data as CareerPageData;
+        const pageData = json.data as CareerPageData & { organizationId?: string };
         setConfig(pageData.config);
         setEnabled(pageData.enabled);
         setSlug(pageData.slug || pageData.orgSlug);
         setOrgSlug(pageData.orgSlug);
+        if (pageData.organizationId) setOrganizationId(pageData.organizationId);
       } catch (err) {
         logger.error("Error fetching career page config", { error: formatError(err) });
         setError("Failed to load career page settings");
@@ -146,6 +155,26 @@ export function CareerPageEditor() {
     }
     fetchConfig();
   }, []);
+
+  // ----- Load Google Fonts for editor canvas -----
+  useEffect(() => {
+    const fonts = [config.theme.fontFamily];
+    if (config.theme.headingFontFamily) fonts.push(config.theme.headingFontFamily);
+    const url = getGoogleFontsUrl(fonts);
+    if (!url) return;
+
+    const linkId = "career-page-editor-fonts";
+    let link = document.getElementById(linkId) as HTMLLinkElement | null;
+    if (link) {
+      link.href = url;
+    } else {
+      link = document.createElement("link");
+      link.id = linkId;
+      link.rel = "stylesheet";
+      link.href = url;
+      document.head.appendChild(link);
+    }
+  }, [config.theme.fontFamily, config.theme.headingFontFamily]);
 
   // ----- Unsaved changes warning -----
   useEffect(() => {
@@ -267,6 +296,35 @@ export function CareerPageEditor() {
     [markDirty]
   );
 
+  const duplicateSection = useCallback(
+    (index: number) => {
+      setConfig((prev) => {
+        const sections = [...prev.sections];
+        const clone = JSON.parse(JSON.stringify(sections[index])) as CareerPageSection;
+        sections.splice(index + 1, 0, clone);
+        return { ...prev, sections };
+      });
+      setSelectedIndex(index + 1);
+      markDirty();
+    },
+    [markDirty]
+  );
+
+  const toggleSectionVisibility = useCallback(
+    (index: number) => {
+      setConfig((prev) => ({
+        ...prev,
+        sections: prev.sections.map((s, i) =>
+          i === index
+            ? ({ ...s, visible: s.visible === false ? true : false } as CareerPageSection)
+            : s
+        ),
+      }));
+      markDirty();
+    },
+    [markDirty]
+  );
+
   const handleThemeChange = useCallback(
     (theme: CareerPageTheme) => {
       setConfig((prev) => ({ ...prev, theme }));
@@ -304,9 +362,6 @@ export function CareerPageEditor() {
     );
   }
 
-  // ----- Selected section -----
-  const selectedSection = selectedIndex !== null ? (config.sections[selectedIndex] ?? null) : null;
-
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[var(--background-default)]">
       {/* Error banner */}
@@ -329,7 +384,7 @@ export function CareerPageEditor() {
         previewUrl={previewUrl}
       />
 
-      {/* Main area: canvas + optional edit panel */}
+      {/* Main area: canvas + always-visible right panel */}
       <div className="flex min-h-0 flex-1">
         {/* Canvas */}
         <EditorCanvas
@@ -340,17 +395,25 @@ export function CareerPageEditor() {
           onDeleteSection={deleteSection}
           onMoveSection={moveSection}
           onInsertSection={insertSection}
+          onDuplicateSection={duplicateSection}
+          onToggleSectionVisibility={toggleSectionVisibility}
           orgSlug={orgSlug}
         />
 
-        {/* Edit panel (slides in when section selected) */}
-        {selectedSection && selectedIndex !== null && (
-          <SectionEditPanel
-            section={selectedSection}
-            onUpdate={(updates) => updateSection(selectedIndex, updates)}
-            onClose={() => setSelectedIndex(null)}
-          />
-        )}
+        {/* Right panel — always visible, like Figma's properties panel.
+            Shows page overview when nothing selected, section editor when selected. */}
+        <EditorRightPanel
+          config={config}
+          selectedIndex={selectedIndex}
+          isPublished={enabled}
+          onSelectSection={setSelectedIndex}
+          onDeselectSection={() => setSelectedIndex(null)}
+          onUpdateSection={(updates) => {
+            if (selectedIndex !== null) updateSection(selectedIndex, updates);
+          }}
+          onOpenSettings={() => setSettingsOpen(true)}
+          theme={config.theme}
+        />
       </div>
 
       {/* Page settings sheet */}
@@ -363,6 +426,7 @@ export function CareerPageEditor() {
         onEnabledChange={handleEnabledChange}
         theme={config.theme}
         onThemeChange={handleThemeChange}
+        organizationId={organizationId}
       />
     </div>
   );

@@ -13,7 +13,12 @@ import {
   CardContent,
   Badge,
 } from "@/components/ui";
-import type { EmailRecipient, EmailTemplate, EmailVariable } from "@/components/ui";
+import type {
+  EmailRecipient,
+  EmailTemplate,
+  EmailVariable,
+  EmailAttachment,
+} from "@/components/ui";
 import {
   ComponentCard,
   UsageGuide,
@@ -44,6 +49,21 @@ const sampleRecipients: EmailRecipient[] = [
   },
 ];
 
+const sampleAttachments: EmailAttachment[] = [
+  {
+    id: "att-1",
+    name: "JohnCV.pdf",
+    size: 12582912,
+    type: "application/pdf",
+  },
+  {
+    id: "att-2",
+    name: "Portfolio.zip",
+    size: 58720256,
+    type: "application/zip",
+  },
+];
+
 const sampleTemplates: EmailTemplate[] = [
   {
     id: "1",
@@ -57,6 +77,7 @@ const sampleTemplates: EmailTemplate[] = [
 <li>{{interview_date_2}}</li>
 </ul>
 <p>Best regards,<br/>{{sender_name}}<br/>{{company_name}}</p>`,
+    category: "Scheduling",
   },
   {
     id: "2",
@@ -67,6 +88,7 @@ const sampleTemplates: EmailTemplate[] = [
 <p>After careful consideration, we have decided to move forward with other candidates whose experience more closely matches our current needs.</p>
 <p>We appreciate your time and wish you success in your job search.</p>
 <p>Best regards,<br/>{{sender_name}}</p>`,
+    category: "Status",
   },
   {
     id: "3",
@@ -83,6 +105,7 @@ const sampleTemplates: EmailTemplate[] = [
 <p>Please confirm your acceptance by {{response_deadline}}.</p>
 <p>Welcome to the team!</p>
 <p>{{sender_name}}<br/>{{company_name}}</p>`,
+    category: "Offers",
   },
 ];
 
@@ -132,89 +155,31 @@ const sampleVariables: EmailVariable[] = [
   },
 ];
 
-const quickReplies = [
-  {
-    id: "1",
-    label: "Schedule Interview",
-    message: "Let me check our availability and get back to you with some time slots.",
-  },
-  {
-    id: "2",
-    label: "Request More Info",
-    message: "Could you please provide more details about your experience with...",
-  },
-  {
-    id: "3",
-    label: "Thanks for Applying",
-    message: "Thank you for your interest! We'll review your application and be in touch soon.",
-  },
-];
-
 // ============================================
 // PROPS DEFINITIONS
 // ============================================
 
 const emailComposerProps = [
-  {
-    name: "to",
-    type: "EmailRecipient[]",
-    description: "Array of primary recipients",
-  },
-  {
-    name: "cc",
-    type: "EmailRecipient[]",
-    description: "Array of CC recipients",
-  },
-  {
-    name: "bcc",
-    type: "EmailRecipient[]",
-    description: "Array of BCC recipients",
-  },
-  {
-    name: "subject",
-    type: "string",
-    description: "Email subject line",
-  },
-  {
-    name: "body",
-    type: "string",
-    description: "Email body content (HTML)",
-  },
-  {
-    name: "templates",
-    type: "EmailTemplate[]",
-    description: "Available email templates",
-  },
-  {
-    name: "variables",
-    type: "EmailVariable[]",
-    description: "Variables available for insertion",
-  },
-  {
-    name: "attachments",
-    type: "EmailAttachment[]",
-    description: "File attachments",
-  },
+  { name: "to", type: "EmailRecipient[]", description: "Array of primary recipients" },
+  { name: "cc", type: "EmailRecipient[]", description: "Array of CC recipients" },
+  { name: "bcc", type: "EmailRecipient[]", description: "Array of BCC recipients" },
+  { name: "subject", type: "string", description: "Email subject line" },
+  { name: "body", type: "string", description: "Email body content (HTML)" },
+  { name: "templates", type: "EmailTemplate[]", description: "Available email templates" },
+  { name: "variables", type: "EmailVariable[]", description: "Variables available for insertion" },
+  { name: "attachments", type: "EmailAttachment[]", description: "File attachments" },
   {
     name: "onSend",
     type: "(email: EmailPayload) => void",
     description: "Callback when send button is clicked, receives full email payload",
   },
-  {
-    name: "onSaveDraft",
-    type: "() => void",
-    description: "Callback when save draft is clicked",
-  },
+  { name: "onSaveDraft", type: "() => void", description: "Callback when save draft is clicked" },
   {
     name: "onSchedule",
     type: "(date: Date) => void",
     description: "Callback for scheduling email",
   },
-  {
-    name: "onDiscard",
-    type: "() => void",
-    description: "Callback when discard is clicked",
-  },
+  { name: "onDiscard", type: "() => void", description: "Callback when discard is clicked" },
   {
     name: "suggestedRecipients",
     type: "EmailRecipient[]",
@@ -245,19 +210,16 @@ const emailComposerProps = [
     description: "Shows loading state on send button",
   },
   {
-    name: "className",
-    type: "string",
-    description: "Additional CSS classes",
+    name: "characterLimit",
+    type: "number",
+    default: "2000",
+    description: "Character limit for body text. Shows counter in footer when typing.",
   },
+  { name: "className", type: "string", description: "Additional CSS classes" },
 ];
 
 const quickReplyProps = [
-  {
-    name: "to",
-    type: "EmailRecipient",
-    required: true,
-    description: "The recipient to reply to",
-  },
+  { name: "to", type: "EmailRecipient", required: true, description: "The recipient to reply to" },
   {
     name: "replyTo",
     type: "{ subject: string; body: string }",
@@ -269,25 +231,12 @@ const quickReplyProps = [
     required: true,
     description: "Callback when reply is sent",
   },
-  {
-    name: "onCancel",
-    type: "() => void",
-    description: "Callback when reply is cancelled",
-  },
-  {
-    name: "className",
-    type: "string",
-    description: "Additional CSS classes",
-  },
+  { name: "onCancel", type: "() => void", description: "Callback when reply is cancelled" },
+  { name: "className", type: "string", description: "Additional CSS classes" },
 ];
 
 const recipientInputProps = [
-  {
-    name: "value",
-    type: "EmailRecipient[]",
-    required: true,
-    description: "Current recipients",
-  },
+  { name: "value", type: "EmailRecipient[]", required: true, description: "Current recipients" },
   {
     name: "onChange",
     type: "(recipients: EmailRecipient[]) => void",
@@ -317,67 +266,29 @@ const variableInserterProps = [
   },
   {
     name: "onInsert",
-    type: "(variable: EmailVariable) => void",
+    type: "(variable: string) => void",
     required: true,
     description: "Callback when a variable is inserted",
   },
-  {
-    name: "className",
-    type: "string",
-    description: "Additional CSS classes",
-  },
+  { name: "disabled", type: "boolean", default: "false", description: "Disables the inserter" },
 ];
 
 const emailRecipientType = [
-  {
-    name: "id",
-    type: "string",
-    required: true,
-    description: "Unique identifier",
-  },
-  {
-    name: "email",
-    type: "string",
-    required: true,
-    description: "Email address",
-  },
-  {
-    name: "name",
-    type: "string",
-    required: true,
-    description: "Display name",
-  },
-  {
-    name: "avatar",
-    type: "string",
-    description: "URL to avatar image",
-  },
+  { name: "id", type: "string", required: true, description: "Unique identifier" },
+  { name: "email", type: "string", required: true, description: "Email address" },
+  { name: "name", type: "string", required: true, description: "Display name" },
+  { name: "avatar", type: "string", description: "URL to avatar image" },
 ];
 
 const emailTemplateType = [
+  { name: "id", type: "string", required: true, description: "Unique identifier" },
+  { name: "name", type: "string", required: true, description: "Template name" },
+  { name: "subject", type: "string", required: true, description: "Email subject with variables" },
+  { name: "body", type: "string", required: true, description: "Email body HTML with variables" },
   {
-    name: "id",
+    name: "category",
     type: "string",
-    required: true,
-    description: "Unique identifier",
-  },
-  {
-    name: "name",
-    type: "string",
-    required: true,
-    description: "Template name",
-  },
-  {
-    name: "subject",
-    type: "string",
-    required: true,
-    description: "Email subject with variables",
-  },
-  {
-    name: "body",
-    type: "string",
-    required: true,
-    description: "Email body HTML with variables",
+    description: "Category for grouping (e.g., Scheduling, Offers)",
   },
 ];
 
@@ -394,21 +305,13 @@ const emailVariableType = [
     required: true,
     description: 'Display label (e.g., "Candidate First Name")',
   },
-  {
-    name: "description",
-    type: "string",
-    description: "Optional description for the variable",
-  },
+  { name: "description", type: "string", description: "Optional description for the variable" },
   {
     name: "category",
     type: '"candidate" | "job" | "company" | "other"',
     description: "Category for grouping variables",
   },
-  {
-    name: "sampleValue",
-    type: "string",
-    description: 'Sample value for preview (e.g., "John")',
-  },
+  { name: "sampleValue", type: "string", description: 'Sample value for preview (e.g., "John")' },
 ];
 
 // ============================================
@@ -416,7 +319,6 @@ const emailVariableType = [
 // ============================================
 
 export default function EmailComposerPage() {
-  // Recipient input state
   const [recipients, setRecipients] = React.useState<EmailRecipient[]>([sampleRecipients[0]]);
 
   const handleSend = (email: {
@@ -432,16 +334,13 @@ export default function EmailComposerPage() {
 
   return (
     <div className="space-y-12">
-      {/* ============================================ */}
-      {/* 1. OVERVIEW */}
-      {/* ============================================ */}
+      {/* ── 1. OVERVIEW ── */}
       <div id="overview">
         <h1 className="mb-2 text-heading-lg text-foreground">Email Composer</h1>
         <p className="max-w-3xl text-body text-foreground-muted">
-          A comprehensive email composition interface for sending candidate communications. Features
-          template selection, variable placeholders, rich text formatting, recipient management, and
-          attachments. Designed for ATS workflows where consistent, personalized emails are
-          essential.
+          A modern email composition interface for candidate communications. Features recipient
+          chips with avatars, inline subject fields, rich text editing, template selection, variable
+          placeholders, attachments, and a streamlined send footer. Designed for ATS workflows.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
@@ -455,7 +354,6 @@ export default function EmailComposerPage() {
           </span>
         </div>
 
-        {/* When to Use / When Not to Use */}
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-border-success bg-background-success p-4">
             <h3 className="mb-2 font-semibold text-foreground-success">When to use</h3>
@@ -480,53 +378,49 @@ export default function EmailComposerPage() {
         </div>
       </div>
 
-      {/* ============================================ */}
-      {/* 2. ANATOMY */}
-      {/* ============================================ */}
+      {/* ── 2. ANATOMY ── */}
       <ComponentAnatomy
         parts={[
           {
-            name: "Header",
-            description: "Template selector dropdown and action buttons (Send, Save Draft)",
+            name: "Header Bar",
+            description:
+              "Title, template toggle, preview toggle, and window controls (minimize/expand/close)",
             required: true,
           },
           {
             name: "Recipients Section",
-            description: "To, CC, BCC fields with autocomplete and chip display",
+            description:
+              "Inline To/CC/BCC fields with pill-shaped recipient chips featuring avatars",
             required: true,
           },
           {
             name: "Subject Line",
-            description: "Email subject input with variable support",
+            description: "Inline subject input with label, separated by subtle dividers",
             required: true,
           },
           {
             name: "Body Editor",
-            description: "Rich text editor for email content with toolbar",
+            description:
+              "Rich text editor with integrated formatting toolbar and variable inserter",
             required: true,
           },
           {
-            name: "Variable Inserter",
-            description: "Dropdown to insert dynamic variables like {{candidate_name}}",
-          },
-          {
             name: "Attachments",
-            description: "File upload area and attachment list",
+            description: "Horizontal chip-style attachment cards with file icons and sizes",
           },
           {
-            name: "Footer Actions",
-            description: "Send button with loading state, secondary actions",
+            name: "Footer",
+            description:
+              "Left: action icons (attach, schedule, emoji, link). Right: character count, draft status, discard, split send button",
           },
         ]}
       />
 
-      {/* ============================================ */}
-      {/* 3. BASIC USAGE */}
-      {/* ============================================ */}
+      {/* ── 3. BASIC USAGE ── */}
       <ComponentCard
         id="basic-usage"
         title="Basic Usage"
-        description="A complete email composer with templates and variables"
+        description="A complete email composer with templates, variables, and attachments"
       >
         <CodePreview
           code={`import { EmailComposer } from "@/components/ui";
@@ -535,26 +429,32 @@ export default function EmailComposerPage() {
   to={[{ id: "1", name: "John Doe", email: "john@email.com" }]}
   templates={templates}
   variables={variables}
+  attachments={attachments}
   suggestedRecipients={suggestedRecipients}
   onSend={(email) => console.log("Send:", email)}
   onSaveDraft={() => console.log("Draft saved")}
+  onSchedule={(date) => console.log("Schedule:", date)}
+  onDiscard={() => console.log("Discard")}
 />`}
         >
           <EmailComposer
             to={[sampleRecipients[0]]}
             templates={sampleTemplates}
             variables={sampleVariables}
+            attachments={sampleAttachments}
             suggestedRecipients={sampleRecipients}
             onSend={handleSend}
             // eslint-disable-next-line no-console
             onSaveDraft={() => console.log("Draft saved")}
+            // eslint-disable-next-line no-console
+            onSchedule={(date) => console.log("Schedule:", date)}
+            // eslint-disable-next-line no-console
+            onDiscard={() => console.log("Discard")}
           />
         </CodePreview>
       </ComponentCard>
 
-      {/* ============================================ */}
-      {/* 4. QUICK REPLY */}
-      {/* ============================================ */}
+      {/* ── 4. QUICK REPLY ── */}
       <ComponentCard
         id="quick-reply"
         title="Quick Reply"
@@ -565,8 +465,8 @@ export default function EmailComposerPage() {
 
 <QuickReply
   to={{ id: "1", email: "john@email.com", name: "John Doe" }}
-  replyTo={{ subject: "Interview Invitation", body: "Previous message..." }}
-  onSend={(body) => console.log("Reply sent:", body)}
+  replyTo={{ subject: "Interview Invitation", body: "..." }}
+  onSend={(body) => console.log("Reply:", body)}
   onCancel={() => console.log("Cancelled")}
 />`}
         >
@@ -586,13 +486,11 @@ export default function EmailComposerPage() {
         </CodePreview>
       </ComponentCard>
 
-      {/* ============================================ */}
-      {/* 5. RECIPIENT INPUT */}
-      {/* ============================================ */}
+      {/* ── 5. RECIPIENT INPUT ── */}
       <ComponentCard
         id="recipient-input"
         title="Recipient Input"
-        description="Standalone recipient input with autocomplete"
+        description="Standalone recipient input with autocomplete and avatar chips"
       >
         <CodePreview
           code={`import { RecipientInput } from "@/components/ui";
@@ -601,7 +499,7 @@ export default function EmailComposerPage() {
   value={recipients}
   onChange={setRecipients}
   suggestions={contactSuggestions}
-  placeholder="Add recipients..."
+  placeholder="Type email or name..."
 />`}
         >
           <div className="max-w-md space-y-4">
@@ -619,9 +517,7 @@ export default function EmailComposerPage() {
         </CodePreview>
       </ComponentCard>
 
-      {/* ============================================ */}
-      {/* 6. VARIABLE INSERTER */}
-      {/* ============================================ */}
+      {/* ── 6. VARIABLE INSERTER ── */}
       <ComponentCard
         id="variable-inserter"
         title="Variable Inserter"
@@ -632,10 +528,7 @@ export default function EmailComposerPage() {
 
 <VariableInserter
   variables={emailDefaultVariables}
-  onInsert={(variableKey) => {
-    // Insert {{variableKey}} at cursor position
-    insertAtCursor(\`{{\${variableKey}}}\`);
-  }}
+  onInsert={(variableKey) => insertAtCursor(variableKey)}
 />`}
         >
           <div className="space-y-4">
@@ -643,17 +536,17 @@ export default function EmailComposerPage() {
             <VariableInserter
               variables={sampleVariables}
               onInsert={(variableKey) => {
-                alert(`Inserted: {{${variableKey}}}`);
+                alert(`Inserted: ${variableKey}`);
               }}
             />
             <div className="rounded-lg bg-background-muted p-3">
               <Label className="mb-2 block text-caption text-foreground-muted">
-                Default Variables Available:
+                Default Variables:
               </Label>
               <div className="flex flex-wrap gap-2">
                 {emailDefaultVariables.map((v) => (
                   <Badge key={v.key} variant="secondary">
-                    {`{{${v.key}}}`}
+                    {v.key}
                   </Badge>
                 ))}
               </div>
@@ -662,9 +555,7 @@ export default function EmailComposerPage() {
         </CodePreview>
       </ComponentCard>
 
-      {/* ============================================ */}
-      {/* 7. STATES */}
-      {/* ============================================ */}
+      {/* ── 7. STATES ── */}
       <ComponentCard
         id="states"
         title="States"
@@ -672,21 +563,22 @@ export default function EmailComposerPage() {
       >
         <div className="space-y-8">
           <div className="space-y-2">
-            <Label className="font-semibold">Loading State</Label>
+            <Label className="font-semibold">With Pre-filled Content + Attachments</Label>
             <p className="mb-2 text-caption text-foreground-muted">
-              Shows loading indicator on send button
+              Pre-populated subject, body, and attachments
             </p>
-            <div className="rounded-lg border border-border-muted p-4">
-              <div className="flex gap-2">
-                <Button variant="primary" disabled>
-                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Sending...
-                </Button>
-                <Button variant="tertiary" disabled>
-                  Save Draft
-                </Button>
-              </div>
-            </div>
+            <EmailComposer
+              to={[sampleRecipients[0], sampleRecipients[1]]}
+              subject="Application for Product Designer - John Doe"
+              body="<p>Hi Albert,</p><p>I hope this message finds you well. I'm writing to express my interest in the Product Designer position. I've attached my resume and portfolio for your review.</p><p>Best regards,<br/>John Doe</p>"
+              attachments={sampleAttachments}
+              variables={sampleVariables}
+              onSend={handleSend}
+              // eslint-disable-next-line no-console
+              onSaveDraft={() => console.log("Draft saved")}
+              // eslint-disable-next-line no-console
+              onDiscard={() => console.log("Discard")}
+            />
           </div>
 
           <div className="space-y-2">
@@ -704,25 +596,21 @@ export default function EmailComposerPage() {
           </div>
 
           <div className="space-y-2">
-            <Label className="font-semibold">With Pre-filled Content</Label>
+            <Label className="font-semibold">Minimal — No Templates</Label>
             <p className="mb-2 text-caption text-foreground-muted">
-              Pass subject and body to pre-fill the composer
+              Simple composer without templates, schedule, or AI suggestions
             </p>
             <EmailComposer
               to={[sampleRecipients[0]]}
-              subject="Interview Invitation - Senior Sustainability Analyst"
-              body="<p>Dear John,</p><p>We would like to invite you for an interview...</p>"
-              templates={sampleTemplates}
               variables={sampleVariables}
+              showAiSuggestions={false}
               onSend={handleSend}
             />
           </div>
         </div>
       </ComponentCard>
 
-      {/* ============================================ */}
-      {/* 8. TEMPLATE WORKFLOW */}
-      {/* ============================================ */}
+      {/* ── 8. TEMPLATE WORKFLOW ── */}
       <ComponentCard
         id="templates"
         title="Template Workflow"
@@ -745,21 +633,24 @@ export default function EmailComposerPage() {
                       </p>
                     </div>
                   </div>
+                  {template.category && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {template.category}
+                    </Badge>
+                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
           <p className="text-caption text-foreground-muted">
-            Templates are available in the composer dropdown. Variables like{" "}
+            Click &quot;Templates&quot; in the composer header to browse and select. Variables like{" "}
             <code className="rounded bg-background-muted px-1">{"{{candidate_first_name}}"}</code>{" "}
-            will be replaced with actual values when sending.
+            are replaced with actual values when sending.
           </p>
         </div>
       </ComponentCard>
 
-      {/* ============================================ */}
-      {/* 9. PROPS TABLES */}
-      {/* ============================================ */}
+      {/* ── 9. PROPS TABLES ── */}
       <div id="props" className="space-y-6">
         <h2 className="text-heading-sm text-foreground">Props Reference</h2>
 
@@ -792,14 +683,12 @@ export default function EmailComposerPage() {
         </ComponentCard>
       </div>
 
-      {/* ============================================ */}
-      {/* 10. USAGE GUIDELINES */}
-      {/* ============================================ */}
+      {/* ── 10. USAGE GUIDELINES ── */}
       <div id="guidelines">
         <h2 className="mb-4 text-heading-sm text-foreground">Usage Guidelines</h2>
         <UsageGuide
           dos={[
-            "Always provide commonly used templates for consistency",
+            "Provide commonly used templates for consistency",
             "Include candidate-specific variables for personalization",
             "Show a preview before sending when possible",
             "Allow saving drafts for long compositions",
@@ -817,25 +706,21 @@ export default function EmailComposerPage() {
         />
       </div>
 
-      {/* ============================================ */}
-      {/* 11. ACCESSIBILITY */}
-      {/* ============================================ */}
+      {/* ── 11. ACCESSIBILITY ── */}
       <div id="accessibility">
         <AccessibilityInfo
           items={[
-            "**Keyboard navigation**: Tab through all form fields and buttons",
+            "**Keyboard navigation**: Tab through all form fields, toolbar buttons, and actions",
             "**Focus management**: Focus moves logically through the composition flow",
-            "**Screen readers**: All inputs have proper labels and descriptions",
-            "**Rich text toolbar**: Toolbar buttons have accessible names",
-            "**Variable insertion**: Variables are announced when inserted",
-            "**Error states**: Validation errors are announced and visually indicated",
+            "**Screen readers**: All inputs have proper labels; recipient chips announce name and removal",
+            "**Rich text toolbar**: All formatting buttons have accessible names via aria-label",
+            "**Variable insertion**: Variables are announced when inserted into the body",
+            "**Error states**: Send warnings are announced and visually indicated",
           ]}
         />
       </div>
 
-      {/* ============================================ */}
-      {/* 12. RELATED COMPONENTS */}
-      {/* ============================================ */}
+      {/* ── 12. RELATED COMPONENTS ── */}
       <div id="related">
         <RelatedComponents
           components={[
@@ -863,9 +748,7 @@ export default function EmailComposerPage() {
         />
       </div>
 
-      {/* ============================================ */}
-      {/* 13. REAL-WORLD EXAMPLES */}
-      {/* ============================================ */}
+      {/* ── 13. REAL-WORLD EXAMPLES ── */}
       <div id="examples" className="space-y-6">
         <h2 className="text-heading-sm text-foreground">Real-World Examples</h2>
 
@@ -883,7 +766,6 @@ export default function EmailComposerPage() {
                   </div>
                   <Badge variant="info">Interview</Badge>
                 </div>
-
                 <EmailComposer
                   to={[sampleRecipients[0]]}
                   subject="Interview Invitation - Senior Sustainability Analyst at GreenTech"
@@ -914,21 +796,17 @@ export default function EmailComposerPage() {
                   <Lightning className="h-5 w-5 text-foreground-brand" />
                   <h3 className="text-body-strong text-foreground">Quick Responses</h3>
                 </div>
-
-                <div className="space-y-3">
-                  <Label>Quick Reply to Candidate</Label>
-                  <QuickReply
-                    to={sampleRecipients[0]}
-                    replyTo={{
-                      subject: "Application Status - Senior Analyst",
-                      body: "I applied for the Senior Analyst position...",
-                    }}
-                    // eslint-disable-next-line no-console
-                    onSend={(body) => console.log("Reply sent:", body)}
-                    // eslint-disable-next-line no-console
-                    onCancel={() => console.log("Cancelled")}
-                  />
-                </div>
+                <QuickReply
+                  to={sampleRecipients[0]}
+                  replyTo={{
+                    subject: "Application Status - Senior Analyst",
+                    body: "I applied for the Senior Analyst position...",
+                  }}
+                  // eslint-disable-next-line no-console
+                  onSend={(body) => console.log("Reply sent:", body)}
+                  // eslint-disable-next-line no-console
+                  onCancel={() => console.log("Cancelled")}
+                />
               </div>
             </CardContent>
           </Card>
@@ -953,12 +831,7 @@ export default function EmailComposerPage() {
                   </div>
                   <Badge variant="info">Screening</Badge>
                 </div>
-
                 <div className="border-t border-border-muted pt-4">
-                  <div className="mb-4 flex items-center gap-2">
-                    <PaperPlaneTilt className="h-4 w-4 text-foreground-muted" />
-                    <Label>Send Email</Label>
-                  </div>
                   <EmailComposer
                     to={[sampleRecipients[0]]}
                     templates={sampleTemplates}

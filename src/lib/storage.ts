@@ -9,6 +9,7 @@ const BUCKETS = {
   messageAttachments: "message-attachments",
   resumes: "resumes",
   coverLetters: "cover-letters",
+  organizationLogos: "organization-logos",
 } as const;
 
 type BucketName = (typeof BUCKETS)[keyof typeof BUCKETS];
@@ -87,6 +88,19 @@ export async function uploadCoverLetter(
   const ext = file.name.split(".").pop() || "pdf";
   const path = `${seekerId}/cover-letter.${ext}`;
   return uploadFile(file, BUCKETS.coverLetters, path);
+}
+
+/**
+ * Upload an organization logo
+ * Accepts PNG, SVG, or JPEG. Max 2MB enforced at the UI level.
+ */
+export async function uploadOrganizationLogo(
+  file: File,
+  organizationId: string
+): Promise<{ url: string; error?: string }> {
+  const ext = file.name.split(".").pop() || "png";
+  const path = `${organizationId}/logo.${ext}`;
+  return uploadFile(file, BUCKETS.organizationLogos, path);
 }
 
 /**

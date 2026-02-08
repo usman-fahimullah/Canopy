@@ -1,44 +1,81 @@
 "use client";
 
-import { X, Plus, Trash } from "@phosphor-icons/react";
+import { ArrowLeft, Plus, Trash } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SwitchWithLabel } from "@/components/ui/switch";
 import { SimpleRichTextEditor } from "@/components/ui/rich-text-editor";
-import type { CareerPageSection } from "@/lib/career-pages/types";
+import { Tabs, TabsContent, TabsListUnderline, TabsTriggerUnderline } from "@/components/ui/tabs";
+import type { CareerPageSection, CareerPageTheme, SectionStyle } from "@/lib/career-pages/types";
+import { SectionStyleControls } from "./SectionStyleControls";
 import { SECTION_LABELS } from "./constants";
 
 interface SectionEditPanelProps {
   section: CareerPageSection;
   onUpdate: (updates: Partial<CareerPageSection>) => void;
   onClose: () => void;
+  theme?: CareerPageTheme;
 }
 
-export function SectionEditPanel({ section, onUpdate, onClose }: SectionEditPanelProps) {
+export function SectionEditPanel({ section, onUpdate, onClose, theme }: SectionEditPanelProps) {
+  const handleStyleChange = (styleUpdates: Partial<SectionStyle>) => {
+    const currentStyle = section.style || {};
+    onUpdate({ style: { ...currentStyle, ...styleUpdates } } as Partial<CareerPageSection>);
+  };
+
   return (
-    <div className="flex h-full w-[380px] shrink-0 flex-col border-l border-[var(--border-default)] bg-[var(--background-default)]">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[var(--border-default)] px-4 py-3">
-        <h2 className="text-sm font-semibold text-[var(--foreground-default)]">
-          {SECTION_LABELS[section.type] || section.type}
-        </h2>
+    <div className="flex h-full flex-col">
+      {/* Header with back button + section name */}
+      <div className="flex items-center gap-2 border-b border-[var(--border-default)] px-4 py-3">
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7"
+          className="h-7 w-7 shrink-0"
           onClick={onClose}
-          aria-label="Close edit panel"
+          aria-label="Back to page overview"
         >
-          <X size={18} />
+          <ArrowLeft size={18} />
         </Button>
+        <h2 className="text-sm font-semibold text-[var(--foreground-default)]">
+          {SECTION_LABELS[section.type] || section.type}
+        </h2>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <SectionFields section={section} onUpdate={onUpdate} />
-      </div>
+      {/* Tabs: Content / Design */}
+      <Tabs defaultValue="content" className="flex min-h-0 flex-1 flex-col">
+        <TabsListUnderline className="shrink-0 px-4">
+          <TabsTriggerUnderline value="content">Content</TabsTriggerUnderline>
+          <TabsTriggerUnderline value="design">Design</TabsTriggerUnderline>
+        </TabsListUnderline>
+
+        {/* Content Tab */}
+        <TabsContent
+          value="content"
+          className="flex-1 overflow-y-auto p-4 data-[state=inactive]:hidden"
+        >
+          <SectionFields section={section} onUpdate={onUpdate} />
+        </TabsContent>
+
+        {/* Design Tab */}
+        <TabsContent
+          value="design"
+          className="flex-1 overflow-y-auto p-4 data-[state=inactive]:hidden"
+        >
+          {theme ? (
+            <SectionStyleControls
+              style={section.style}
+              theme={theme}
+              onStyleChange={handleStyleChange}
+            />
+          ) : (
+            <p className="text-xs text-[var(--foreground-subtle)]">
+              Theme not available. Save and reload to enable design controls.
+            </p>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -68,6 +105,20 @@ function SectionFields({
             <Input
               value={section.subheadline}
               onChange={(e) => onUpdate({ subheadline: e.target.value })}
+            />
+          </Field>
+          <Field label="CTA Button Text">
+            <Input
+              value={section.ctaButtonText || ""}
+              onChange={(e) => onUpdate({ ctaButtonText: e.target.value || undefined })}
+              placeholder="e.g., View Open Roles"
+            />
+          </Field>
+          <Field label="CTA Button URL">
+            <Input
+              value={section.ctaButtonUrl || ""}
+              onChange={(e) => onUpdate({ ctaButtonUrl: e.target.value || undefined })}
+              placeholder="#open-positions or https://..."
             />
           </Field>
           <Field label="Background Image URL">
@@ -109,7 +160,14 @@ function SectionFields({
             <Input value={section.title} onChange={(e) => onUpdate({ title: e.target.value })} />
           </Field>
           {section.items.map((item, i) => (
-            <ItemCard key={i} label={`Value ${i + 1}`}>
+            <ItemCard
+              key={i}
+              label={`Value ${i + 1}`}
+              onRemove={() => {
+                const items = section.items.filter((_, idx) => idx !== i);
+                onUpdate({ items });
+              }}
+            >
               <Input
                 placeholder="Icon name (e.g., Leaf, Users, Lightbulb)"
                 value={item.icon}
@@ -139,6 +197,17 @@ function SectionFields({
               />
             </ItemCard>
           ))}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const items = [...section.items, { icon: "Star", title: "", description: "" }];
+              onUpdate({ items });
+            }}
+          >
+            <Plus size={14} className="mr-1.5" />
+            Add Value
+          </Button>
         </div>
       );
 
@@ -149,29 +218,49 @@ function SectionFields({
             <Input value={section.title} onChange={(e) => onUpdate({ title: e.target.value })} />
           </Field>
           {section.metrics.map((metric, i) => (
-            <div key={i} className="flex gap-2">
-              <Input
-                placeholder="Value (e.g., 50K)"
-                value={metric.value}
-                onChange={(e) => {
-                  const metrics = [...section.metrics];
-                  metrics[i] = { ...metrics[i], value: e.target.value };
-                  onUpdate({ metrics });
-                }}
-                className="w-24"
-              />
-              <Input
-                placeholder="Label"
-                value={metric.label}
-                onChange={(e) => {
-                  const metrics = [...section.metrics];
-                  metrics[i] = { ...metrics[i], label: e.target.value };
-                  onUpdate({ metrics });
-                }}
-                className="flex-1"
-              />
-            </div>
+            <ItemCard
+              key={i}
+              label={`Metric ${i + 1}`}
+              onRemove={() => {
+                const metrics = section.metrics.filter((_, idx) => idx !== i);
+                onUpdate({ metrics });
+              }}
+            >
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Value (e.g., 50K)"
+                  value={metric.value}
+                  onChange={(e) => {
+                    const metrics = [...section.metrics];
+                    metrics[i] = { ...metrics[i], value: e.target.value };
+                    onUpdate({ metrics });
+                  }}
+                  className="w-24"
+                />
+                <Input
+                  placeholder="Label"
+                  value={metric.label}
+                  onChange={(e) => {
+                    const metrics = [...section.metrics];
+                    metrics[i] = { ...metrics[i], label: e.target.value };
+                    onUpdate({ metrics });
+                  }}
+                  className="flex-1"
+                />
+              </div>
+            </ItemCard>
           ))}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const metrics = [...section.metrics, { value: "0", label: "" }];
+              onUpdate({ metrics });
+            }}
+          >
+            <Plus size={14} className="mr-1.5" />
+            Add Metric
+          </Button>
         </div>
       );
 
@@ -182,7 +271,14 @@ function SectionFields({
             <Input value={section.title} onChange={(e) => onUpdate({ title: e.target.value })} />
           </Field>
           {section.items.map((item, i) => (
-            <ItemCard key={i} label={`Benefit ${i + 1}`}>
+            <ItemCard
+              key={i}
+              label={`Benefit ${i + 1}`}
+              onRemove={() => {
+                const items = section.items.filter((_, idx) => idx !== i);
+                onUpdate({ items });
+              }}
+            >
               <Input
                 placeholder="Icon name"
                 value={item.icon}
@@ -212,6 +308,17 @@ function SectionFields({
               />
             </ItemCard>
           ))}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const items = [...section.items, { icon: "CheckCircle", title: "", description: "" }];
+              onUpdate({ items });
+            }}
+          >
+            <Plus size={14} className="mr-1.5" />
+            Add Benefit
+          </Button>
         </div>
       );
 
@@ -222,7 +329,14 @@ function SectionFields({
             <Input value={section.title} onChange={(e) => onUpdate({ title: e.target.value })} />
           </Field>
           {section.members.map((member, i) => (
-            <div key={i} className="flex gap-2">
+            <ItemCard
+              key={i}
+              label={`Member ${i + 1}`}
+              onRemove={() => {
+                const members = section.members.filter((_, idx) => idx !== i);
+                onUpdate({ members });
+              }}
+            >
               <Input
                 placeholder="Name"
                 value={member.name}
@@ -241,8 +355,37 @@ function SectionFields({
                   onUpdate({ members });
                 }}
               />
-            </div>
+              <Input
+                placeholder="Photo URL (optional)"
+                value={member.photo || ""}
+                onChange={(e) => {
+                  const members = [...section.members];
+                  members[i] = { ...members[i], photo: e.target.value || undefined };
+                  onUpdate({ members });
+                }}
+              />
+              <Input
+                placeholder="Bio (optional)"
+                value={member.bio || ""}
+                onChange={(e) => {
+                  const members = [...section.members];
+                  members[i] = { ...members[i], bio: e.target.value || undefined };
+                  onUpdate({ members });
+                }}
+              />
+            </ItemCard>
           ))}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const members = [...section.members, { name: "", role: "" }];
+              onUpdate({ members });
+            }}
+          >
+            <Plus size={14} className="mr-1.5" />
+            Add Member
+          </Button>
         </div>
       );
 
@@ -288,7 +431,14 @@ function SectionFields({
             <Input value={section.title} onChange={(e) => onUpdate({ title: e.target.value })} />
           </Field>
           {section.items.map((item, i) => (
-            <ItemCard key={i} label={`Testimonial ${i + 1}`}>
+            <ItemCard
+              key={i}
+              label={`Testimonial ${i + 1}`}
+              onRemove={() => {
+                const items = section.items.filter((_, idx) => idx !== i);
+                onUpdate({ items });
+              }}
+            >
               <Input
                 placeholder="Quote"
                 value={item.quote}
@@ -325,17 +475,6 @@ function SectionFields({
                   onUpdate({ items });
                 }}
               />
-              <Button
-                variant="tertiary"
-                size="sm"
-                onClick={() => {
-                  const items = section.items.filter((_, idx) => idx !== i);
-                  onUpdate({ items });
-                }}
-              >
-                <Trash size={14} className="mr-1.5" />
-                Remove
-              </Button>
             </ItemCard>
           ))}
           <Button
@@ -362,7 +501,14 @@ function SectionFields({
             <Input value={section.title} onChange={(e) => onUpdate({ title: e.target.value })} />
           </Field>
           {section.items.map((item, i) => (
-            <ItemCard key={i} label={`Question ${i + 1}`}>
+            <ItemCard
+              key={i}
+              label={`Question ${i + 1}`}
+              onRemove={() => {
+                const items = section.items.filter((_, idx) => idx !== i);
+                onUpdate({ items });
+              }}
+            >
               <Input
                 placeholder="Question"
                 value={item.question}
@@ -382,17 +528,6 @@ function SectionFields({
                 }}
                 rows={3}
               />
-              <Button
-                variant="tertiary"
-                size="sm"
-                onClick={() => {
-                  const items = section.items.filter((_, idx) => idx !== i);
-                  onUpdate({ items });
-                }}
-              >
-                <Trash size={14} className="mr-1.5" />
-                Remove
-              </Button>
             </ItemCard>
           ))}
           <Button
@@ -427,10 +562,31 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function ItemCard({ label, children }: { label: string; children: React.ReactNode }) {
+function ItemCard({
+  label,
+  children,
+  onRemove,
+}: {
+  label: string;
+  children: React.ReactNode;
+  onRemove?: () => void;
+}) {
   return (
     <div className="space-y-2 rounded-lg border border-[var(--border-muted)] p-3">
-      <Label className="text-xs font-semibold text-[var(--foreground-muted)]">{label}</Label>
+      <div className="flex items-center justify-between">
+        <Label className="text-xs font-semibold text-[var(--foreground-muted)]">{label}</Label>
+        {onRemove && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-[var(--foreground-subtle)] hover:text-[var(--foreground-error)]"
+            onClick={onRemove}
+            aria-label={`Remove ${label}`}
+          >
+            <Trash size={14} />
+          </Button>
+        )}
+      </div>
       {children}
     </div>
   );

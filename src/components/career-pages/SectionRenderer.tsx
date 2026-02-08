@@ -39,27 +39,31 @@ interface SectionRendererProps {
 }
 
 export function SectionRenderer({ sections, theme, orgSlug, jobs = [] }: SectionRendererProps) {
+  // Filter out sections that are explicitly hidden
+  const visibleSections = sections.filter((s) => s.visible !== false);
+
   return (
     <div>
-      {sections.map((section, index) => {
+      {visibleSections.map((section, index) => {
         switch (section.type) {
           case "hero":
             return <HeroBlock key={index} section={section as HeroSection} theme={theme} />;
           case "about":
-            return <AboutBlock key={index} section={section as AboutSection} />;
+            return <AboutBlock key={index} section={section as AboutSection} theme={theme} />;
           case "values":
-            return <ValuesBlock key={index} section={section as ValuesSection} />;
+            return <ValuesBlock key={index} section={section as ValuesSection} theme={theme} />;
           case "impact":
             return <ImpactBlock key={index} section={section as ImpactSection} theme={theme} />;
           case "benefits":
-            return <BenefitsBlock key={index} section={section as BenefitsSection} />;
+            return <BenefitsBlock key={index} section={section as BenefitsSection} theme={theme} />;
           case "team":
-            return <TeamBlock key={index} section={section as TeamSection} />;
+            return <TeamBlock key={index} section={section as TeamSection} theme={theme} />;
           case "openRoles":
             return (
               <OpenRolesBlock
                 key={index}
                 section={section as OpenRolesSection}
+                theme={theme}
                 jobs={jobs}
                 orgSlug={orgSlug}
               />
@@ -70,15 +74,12 @@ export function SectionRenderer({ sections, theme, orgSlug, jobs = [] }: Section
             return (
               <TestimonialsBlock
                 key={index}
-                title={section.title}
-                items={section.items}
+                section={section as TestimonialsSection}
                 theme={theme}
               />
             );
           case "faq":
-            return (
-              <FAQBlock key={index} title={section.title} items={section.items} theme={theme} />
-            );
+            return <FAQBlock key={index} section={section as FAQSection} theme={theme} />;
           default:
             return null;
         }

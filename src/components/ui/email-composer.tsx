@@ -8,10 +8,8 @@ import { Input } from "./input";
 import { Label } from "./label";
 import { Badge } from "./badge";
 import { Avatar } from "./avatar";
-import { Tooltip } from "./tooltip";
-import { RichTextEditor, RichTextToolbar, RichTextExtendedToolbar } from "./rich-text-editor";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./dropdown";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Spinner } from "./spinner";
+import { RichTextEditor, RichTextToolbar } from "./rich-text-editor";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,27 +17,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import {
   PaperPlaneTilt,
   X,
   CaretDown,
   Paperclip,
-  Image as ImageIcon,
   Code,
   Eye,
   Clock,
   Trash,
-  Copy,
-  ArrowBendUpLeft,
-  ArrowBendUpRight,
   Plus,
   MagicWand,
   User,
   Briefcase,
   CalendarBlank,
   Buildings,
-  Lightning,
-  CircleNotch,
   PencilSimple,
   File,
   FilePdf,
@@ -51,16 +44,18 @@ import {
   FileVideo,
   FileAudio,
   Warning,
-  CheckCircle,
   WarningCircle,
   Sparkle,
   EnvelopeSimple,
-  PaperPlane,
   Timer,
   CaretRight,
-  Lightning as LightningIcon,
   Rows,
   SquaresFour,
+  CheckCircle,
+  Smiley,
+  Link,
+  ArrowsOutSimple,
+  Minus,
 } from "@phosphor-icons/react";
 
 /* ============================================
@@ -127,6 +122,10 @@ export interface EmailComposerProps {
   showAiSuggestions?: boolean;
   /** Loading state */
   loading?: boolean;
+  /** Character limit for body */
+  characterLimit?: number;
+  /** Show broadcast toggle */
+  showBroadcast?: boolean;
 }
 
 /* ============================================
@@ -199,25 +198,25 @@ const defaultVariables: EmailVariable[] = [
    Helper Functions
    ============================================ */
 const getFileIcon = (type: string) => {
-  if (type.includes("pdf")) return <FilePdf className="h-5 w-5 text-red-500" />;
+  if (type.includes("pdf")) return <FilePdf className="h-4 w-4 text-red-500" />;
   if (type.includes("word") || type.includes("doc"))
-    return <FileDoc className="h-5 w-5 text-blue-500" />;
+    return <FileDoc className="h-4 w-4 text-blue-500" />;
   if (type.includes("sheet") || type.includes("excel") || type.includes("xls"))
-    return <FileXls className="h-5 w-5 text-green-500" />;
+    return <FileXls className="h-4 w-4 text-green-500" />;
   if (type.includes("presentation") || type.includes("powerpoint") || type.includes("ppt"))
-    return <FilePpt className="h-5 w-5 text-orange-500" />;
+    return <FilePpt className="h-4 w-4 text-orange-500" />;
   if (type.includes("zip") || type.includes("rar") || type.includes("tar"))
-    return <FileZip className="h-5 w-5 text-yellow-600" />;
-  if (type.includes("image")) return <FileImage className="h-5 w-5 text-purple-500" />;
-  if (type.includes("video")) return <FileVideo className="h-5 w-5 text-pink-500" />;
-  if (type.includes("audio")) return <FileAudio className="h-5 w-5 text-teal-500" />;
-  return <File className="h-5 w-5 text-foreground-muted" />;
+    return <FileZip className="h-4 w-4 text-yellow-600" />;
+  if (type.includes("image")) return <FileImage className="h-4 w-4 text-purple-500" />;
+  if (type.includes("video")) return <FileVideo className="h-4 w-4 text-pink-500" />;
+  if (type.includes("audio")) return <FileAudio className="h-4 w-4 text-teal-500" />;
+  return <File className="h-4 w-4 text-foreground-muted" />;
 };
 
 const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(0)}MB`;
 };
 
 const getFileExtension = (filename: string): string => {
@@ -226,7 +225,49 @@ const getFileExtension = (filename: string): string => {
 };
 
 /* ============================================
-   Attachment Card Component
+   Recipient Chip — Pill with avatar + remove
+   ============================================ */
+interface RecipientChipProps {
+  recipient: EmailRecipient;
+  onRemove?: (id: string) => void;
+  disabled?: boolean;
+}
+
+const RecipientChip: React.FC<RecipientChipProps> = ({ recipient, onRemove, disabled }) => {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full py-1 pl-1 pr-2.5",
+        "border border-[var(--border-default)] bg-[var(--background-subtle)]",
+        "text-sm text-[var(--foreground-default)]",
+        "transition-colors duration-100",
+        !disabled && "hover:bg-[var(--background-muted)]"
+      )}
+    >
+      <Avatar src={recipient.avatar} name={recipient.name} size="xs" />
+      <span className="max-w-40 truncate leading-none">{recipient.name || recipient.email}</span>
+      {!disabled && onRemove && (
+        <button
+          type="button"
+          onClick={() => onRemove(recipient.id)}
+          className={cn(
+            "ml-0.5 flex h-4 w-4 items-center justify-center rounded-full",
+            "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+            "hover:bg-[var(--background-emphasized)]",
+            "transition-colors duration-100",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]"
+          )}
+          aria-label={`Remove ${recipient.name}`}
+        >
+          <X className="h-3 w-3" weight="bold" />
+        </button>
+      )}
+    </span>
+  );
+};
+
+/* ============================================
+   Attachment Card — Compact inline style
    ============================================ */
 interface AttachmentCardProps {
   attachment: EmailAttachment;
@@ -239,64 +280,57 @@ const AttachmentCard: React.FC<AttachmentCardProps> = ({
   onRemove,
   disabled = false,
 }) => {
-  const isImage = attachment.type.includes("image");
-  const extension = getFileExtension(attachment.name);
-
   return (
     <div
       className={cn(
-        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5",
-        "dark:bg-neutral-800/50 border border-border-muted bg-neutral-50",
-        "hover:border-border-default hover:bg-[var(--background-interactive-hover)]",
-        "transition-all duration-150"
+        "group inline-flex items-center gap-2.5 rounded-xl px-3 py-2",
+        "border border-[var(--border-default)] bg-[var(--background-subtle)]",
+        "transition-colors duration-100",
+        !disabled && "hover:bg-[var(--background-muted)]"
       )}
     >
-      {/* File icon or thumbnail */}
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-muted bg-[var(--card-background)] dark:bg-neutral-900">
-        {isImage && attachment.url ? (
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-muted)] bg-[var(--card-background)]">
+        {attachment.url && attachment.type.includes("image") ? (
           <Image
             src={attachment.url}
             alt={attachment.name}
-            width={40}
-            height={40}
-            className="h-full w-full object-cover"
+            width={32}
+            height={32}
+            className="h-full w-full rounded-lg object-cover"
           />
         ) : (
           getFileIcon(attachment.type)
         )}
-      </div>
-
-      {/* File details */}
-      <div className="min-w-0 flex-1">
-        <p className="text-foreground-default truncate text-sm font-medium">{attachment.name}</p>
-        <p className="text-xs text-foreground-muted">
-          {extension && <span className="uppercase">{extension} • </span>}
-          {formatFileSize(attachment.size)}
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium leading-tight text-[var(--foreground-default)]">
+          {attachment.name}
         </p>
+        <p className="text-xs text-[var(--foreground-subtle)]">{formatFileSize(attachment.size)}</p>
       </div>
-
-      {/* Remove button */}
       {!disabled && (
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
+          type="button"
           onClick={() => onRemove(attachment.id)}
           className={cn(
-            "h-7 w-7 rounded-full",
+            "ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md",
+            "text-[var(--foreground-subtle)]",
             "opacity-0 group-hover:opacity-100",
-            "hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30",
-            "transition-all duration-150"
+            "hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]",
+            "transition-all duration-100",
+            "focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]"
           )}
+          aria-label={`Remove ${attachment.name}`}
         >
-          <X className="h-4 w-4" />
-        </Button>
+          <Trash className="h-3.5 w-3.5" />
+        </button>
       )}
     </div>
   );
 };
 
 /* ============================================
-   Send Warning Component
+   Send Warning Banner
    ============================================ */
 interface SendWarning {
   type: "error" | "warning";
@@ -311,18 +345,18 @@ const SendWarningBanner: React.FC<{ warnings: SendWarning[] }> = ({ warnings }) 
   return (
     <div
       className={cn(
-        "flex items-start gap-2 px-4 py-2.5 text-sm",
+        "flex items-start gap-2.5 px-5 py-2.5 text-sm",
         hasError
-          ? "border-t border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
-          : "border-t border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+          ? "bg-[var(--background-error)] text-[var(--foreground-error)]"
+          : "bg-[var(--background-warning)] text-[var(--foreground-warning)]"
       )}
     >
       {hasError ? (
-        <WarningCircle className="mt-0.5 h-4 w-4 flex-shrink-0" weight="fill" />
+        <WarningCircle className="mt-0.5 h-4 w-4 shrink-0" weight="fill" />
       ) : (
-        <Warning className="mt-0.5 h-4 w-4 flex-shrink-0" weight="fill" />
+        <Warning className="mt-0.5 h-4 w-4 shrink-0" weight="fill" />
       )}
-      <div className="flex-1">
+      <div className="flex-1 space-y-0.5">
         {warnings.map((warning, i) => (
           <p key={i}>{warning.message}</p>
         ))}
@@ -332,7 +366,7 @@ const SendWarningBanner: React.FC<{ warnings: SendWarning[] }> = ({ warnings }) 
 };
 
 /* ============================================
-   Template Gallery Component
+   Template Gallery — Card grid
    ============================================ */
 interface TemplateGalleryProps {
   templates: EmailTemplate[];
@@ -349,142 +383,122 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
 }) => {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
-  // Group templates by category
-  const groupedTemplates = React.useMemo(() => {
-    const groups: Record<string, EmailTemplate[]> = {};
-    templates.forEach((t) => {
-      const category = t.category || "General";
-      if (!groups[category]) groups[category] = [];
-      groups[category].push(t);
-    });
-    return groups;
-  }, [templates]);
-
   if (templates.length === 0) return null;
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-3", className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkle className="h-4 w-4 text-primary-600" weight="fill" />
-          <h4 className="text-foreground-default text-sm font-semibold">Quick Templates</h4>
-          <Badge variant="secondary" className="text-xs">
-            {templates.length}
-          </Badge>
+          <Sparkle className="h-4 w-4 text-[var(--foreground-brand)]" weight="fill" />
+          <span className="text-sm font-semibold text-[var(--foreground-default)]">Templates</span>
+          <span className="text-xs text-[var(--foreground-subtle)]">{templates.length}</span>
         </div>
-        <div className="flex items-center gap-1 rounded-lg bg-neutral-100 p-0.5 dark:bg-neutral-800">
+        <div className="flex items-center rounded-lg border border-[var(--border-default)] p-0.5">
           <button
             onClick={() => setViewMode("grid")}
             className={cn(
-              "rounded-md p-1.5 transition-all duration-150",
+              "rounded-md p-1.5 transition-colors duration-100",
               viewMode === "grid"
-                ? "bg-[var(--background-interactive-default)] shadow-sm dark:bg-neutral-700"
-                : "hover:text-foreground-default text-foreground-muted"
+                ? "bg-[var(--background-subtle)] text-[var(--foreground-default)]"
+                : "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]"
             )}
+            aria-label="Grid view"
           >
-            <SquaresFour className="h-4 w-4" />
+            <SquaresFour className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => setViewMode("list")}
             className={cn(
-              "rounded-md p-1.5 transition-all duration-150",
+              "rounded-md p-1.5 transition-colors duration-100",
               viewMode === "list"
-                ? "bg-[var(--background-interactive-default)] shadow-sm dark:bg-neutral-700"
-                : "hover:text-foreground-default text-foreground-muted"
+                ? "bg-[var(--background-subtle)] text-[var(--foreground-default)]"
+                : "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]"
             )}
+            aria-label="List view"
           >
-            <Rows className="h-4 w-4" />
+            <Rows className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Templates */}
+      {/* Grid */}
       {viewMode === "grid" ? (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
           {templates.slice(0, 6).map((template) => (
             <button
               key={template.id}
               onClick={() => onSelect(template)}
               className={cn(
-                "group relative flex flex-col rounded-xl border p-4 text-left transition-all duration-150",
-                "hover:bg-primary-50/50 hover:border-primary-300 hover:shadow-md",
-                "dark:hover:bg-primary-900/20 dark:hover:border-primary-600",
-                "focus:ring-ring-color focus:outline-none focus:ring-2 focus:ring-offset-2",
+                "group relative flex flex-col rounded-xl border p-3.5 text-left",
+                "transition-all duration-150",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                 selectedId === template.id
-                  ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500"
-                  : "bg-surface-default border-border-muted"
+                  ? "border-[var(--border-brand)] bg-[var(--background-brand-subtle)]"
+                  : "border-[var(--border-default)] hover:border-[var(--border-emphasis)] hover:shadow-[var(--shadow-sm)]"
               )}
             >
-              {/* Category tag */}
               {template.category && (
-                <span className="mb-2 text-[10px] font-medium uppercase tracking-wider text-foreground-muted">
+                <span className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--foreground-subtle)]">
                   {template.category}
                 </span>
               )}
-              <h5 className="text-foreground-default line-clamp-1 text-sm font-medium group-hover:text-primary-700 dark:group-hover:text-primary-300">
+              <span className="line-clamp-1 text-sm font-medium text-[var(--foreground-default)]">
                 {template.name}
-              </h5>
-              <p className="mt-1 line-clamp-2 text-xs text-foreground-muted">{template.subject}</p>
-              {/* Use indicator */}
-              <div
-                className={cn(
-                  "absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full transition-all",
-                  selectedId === template.id
-                    ? "bg-primary-600 text-white"
-                    : "bg-transparent group-hover:bg-primary-100 dark:group-hover:bg-primary-800"
-                )}
-              >
-                {selectedId === template.id ? (
-                  <CheckCircle className="h-3.5 w-3.5" weight="fill" />
-                ) : (
-                  <CaretRight className="h-3.5 w-3.5 text-primary-600 opacity-0 transition-opacity group-hover:opacity-100" />
-                )}
-              </div>
+              </span>
+              <span className="mt-1 line-clamp-2 text-xs text-[var(--foreground-subtle)]">
+                {template.subject}
+              </span>
+              {selectedId === template.id && (
+                <span className="absolute right-2.5 top-2.5">
+                  <CheckCircle className="h-4 w-4 text-[var(--foreground-brand)]" weight="fill" />
+                </span>
+              )}
             </button>
           ))}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {templates.map((template) => (
             <button
               key={template.id}
               onClick={() => onSelect(template)}
               className={cn(
-                "group flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all duration-150",
-                "hover:bg-primary-50/50 hover:border-primary-300 hover:shadow-sm",
-                "dark:hover:bg-primary-900/20 dark:hover:border-primary-600",
-                "focus:ring-ring-color focus:outline-none focus:ring-2 focus:ring-offset-2",
+                "group flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left",
+                "transition-all duration-150",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                 selectedId === template.id
-                  ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500"
-                  : "bg-surface-default border-border-muted"
+                  ? "border-[var(--border-brand)] bg-[var(--background-brand-subtle)]"
+                  : "border-[var(--border-default)] hover:border-[var(--border-emphasis)] hover:bg-[var(--background-subtle)]"
               )}
             >
-              <div
+              <span
                 className={cn(
-                  "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg",
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
                   selectedId === template.id
-                    ? "bg-primary-600 text-white"
-                    : "bg-neutral-100 text-foreground-muted group-hover:bg-primary-100 group-hover:text-primary-600 dark:bg-neutral-800"
+                    ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]"
+                    : "bg-[var(--background-subtle)] text-[var(--foreground-subtle)] group-hover:text-[var(--foreground-brand)]"
                 )}
               >
                 <EnvelopeSimple className="h-4 w-4" />
-              </div>
+              </span>
               <div className="min-w-0 flex-1">
-                <h5 className="text-foreground-default truncate text-sm font-medium">
+                <span className="block truncate text-sm font-medium text-[var(--foreground-default)]">
                   {template.name}
-                </h5>
-                <p className="truncate text-xs text-foreground-muted">{template.subject}</p>
+                </span>
+                <span className="block truncate text-xs text-[var(--foreground-subtle)]">
+                  {template.subject}
+                </span>
               </div>
               {template.category && (
-                <Badge variant="secondary" className="flex-shrink-0 text-[10px]">
+                <Badge variant="secondary" className="shrink-0 text-[10px]">
                   {template.category}
                 </Badge>
               )}
               <CaretRight
                 className={cn(
-                  "h-4 w-4 text-foreground-muted transition-all",
-                  "group-hover:translate-x-0.5 group-hover:text-primary-600"
+                  "h-3.5 w-3.5 shrink-0 text-[var(--foreground-subtle)]",
+                  "transition-transform duration-150 group-hover:translate-x-0.5"
                 )}
               />
             </button>
@@ -496,7 +510,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
 };
 
 /* ============================================
-   Recipient Input Component
+   Recipient Input — Chips + autocomplete
    ============================================ */
 interface RecipientInputProps {
   value: EmailRecipient[];
@@ -541,7 +555,6 @@ const RecipientInput: React.FC<RecipientInputProps> = ({
     }
     if (e.key === "Enter" && inputValue) {
       e.preventDefault();
-      // Add as plain email if no match
       const match = filteredSuggestions[0];
       if (match) {
         handleAddRecipient(match);
@@ -563,27 +576,17 @@ const RecipientInput: React.FC<RecipientInputProps> = ({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            "flex min-h-10 flex-wrap items-center gap-1.5 rounded-lg border px-3 py-1.5",
-            "bg-input-background border-input-border",
-            "focus-within:ring-ring-color focus-within:ring-2 focus-within:ring-offset-1",
+            "flex min-h-[38px] flex-wrap items-center gap-1.5 py-1",
             disabled && "cursor-not-allowed opacity-50"
           )}
         >
           {value.map((recipient) => (
-            <Badge key={recipient.id} variant="secondary" className="gap-1 pr-1">
-              <Avatar src={recipient.avatar} name={recipient.name} size="xs" />
-              <span className="max-w-32 truncate">{recipient.name}</span>
-              {!disabled && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleRemoveRecipient(recipient.id)}
-                  className="h-5 w-5 rounded-full"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </Badge>
+            <RecipientChip
+              key={recipient.id}
+              recipient={recipient}
+              onRemove={disabled ? undefined : handleRemoveRecipient}
+              disabled={disabled}
+            />
           ))}
           <input
             ref={inputRef}
@@ -597,25 +600,36 @@ const RecipientInput: React.FC<RecipientInputProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={value.length === 0 ? placeholder : ""}
             disabled={disabled}
-            className="min-w-32 flex-1 bg-transparent text-sm focus:outline-none"
+            className={cn(
+              "min-w-24 flex-1 bg-transparent text-sm",
+              "text-[var(--foreground-default)] placeholder:text-[var(--foreground-subtle)]",
+              "focus:outline-none"
+            )}
           />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-1" align="start">
-        <div className="max-h-48 overflow-auto">
+      <PopoverContent className="w-72 p-1" align="start">
+        <div className="max-h-52 overflow-auto">
           {filteredSuggestions.map((suggestion) => (
-            <Button
+            <button
               key={suggestion.id}
-              variant="ghost"
               onClick={() => handleAddRecipient(suggestion)}
-              className="flex h-auto w-full items-center justify-start gap-2 px-2 py-2"
+              className={cn(
+                "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left",
+                "hover:bg-[var(--background-interactive-hover)]",
+                "transition-colors duration-100"
+              )}
             >
               <Avatar src={suggestion.avatar} name={suggestion.name} size="sm" />
-              <div className="min-w-0 text-left">
-                <p className="truncate font-medium">{suggestion.name}</p>
-                <p className="truncate text-xs text-foreground-muted">{suggestion.email}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-[var(--foreground-default)]">
+                  {suggestion.name}
+                </p>
+                <p className="truncate text-xs text-[var(--foreground-subtle)]">
+                  {suggestion.email}
+                </p>
               </div>
-            </Button>
+            </button>
           ))}
         </div>
       </PopoverContent>
@@ -624,7 +638,7 @@ const RecipientInput: React.FC<RecipientInputProps> = ({
 };
 
 /* ============================================
-   Variable Inserter Component
+   Variable Inserter
    ============================================ */
 interface VariableInserterProps {
   variables: EmailVariable[];
@@ -652,10 +666,10 @@ const VariableInserter: React.FC<VariableInserterProps> = ({
   }, [variables]);
 
   const categoryIcons = {
-    candidate: <User className="h-4 w-4" />,
-    job: <Briefcase className="h-4 w-4" />,
-    company: <Buildings className="h-4 w-4" />,
-    other: <CalendarBlank className="h-4 w-4" />,
+    candidate: <User className="h-3.5 w-3.5" />,
+    job: <Briefcase className="h-3.5 w-3.5" />,
+    company: <Buildings className="h-3.5 w-3.5" />,
+    other: <CalendarBlank className="h-3.5 w-3.5" />,
   };
 
   const categoryLabels = {
@@ -668,17 +682,17 @@ const VariableInserter: React.FC<VariableInserterProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" disabled={disabled}>
-          <Code className="mr-1 h-4 w-4" />
-          Variables
-          <CaretDown className="ml-1 h-3 w-3" />
+        <Button variant="ghost" size="sm" disabled={disabled} className="h-8 gap-1.5 px-2.5">
+          <Code className="h-4 w-4" />
+          <span className="hidden text-xs sm:inline">Variables</span>
+          <CaretDown className="h-3 w-3" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72">
         {Object.entries(groupedVariables).map(([category, vars]) =>
           vars.length > 0 ? (
             <React.Fragment key={category}>
-              <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase tracking-wide text-foreground-muted">
+              <div className="flex items-center gap-2 px-2 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--foreground-subtle)]">
                 {categoryIcons[category as keyof typeof categoryIcons]}
                 {categoryLabels[category as keyof typeof categoryLabels]}
               </div>
@@ -688,10 +702,10 @@ const VariableInserter: React.FC<VariableInserterProps> = ({
                   onClick={() => onInsert(variable.key)}
                   className="flex cursor-pointer flex-col items-start gap-1 py-2"
                 >
-                  <span className="rounded bg-background-brand-subtle px-1.5 py-0.5 font-mono text-xs text-foreground-brand">
+                  <span className="rounded bg-[var(--background-brand-subtle)] px-1.5 py-0.5 font-mono text-xs text-[var(--foreground-brand)]">
                     {variable.key}
                   </span>
-                  <span className="text-xs text-foreground-muted">{variable.label}</span>
+                  <span className="text-xs text-[var(--foreground-subtle)]">{variable.label}</span>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
@@ -704,7 +718,14 @@ const VariableInserter: React.FC<VariableInserterProps> = ({
 };
 
 /* ============================================
-   Email Composer Component
+   Email Composer — Main Component
+
+   Redesigned with a modern, clean aesthetic:
+   - Minimal header with title + window controls
+   - Inline To/Subject fields with subtle labels
+   - Full-width body with generous padding
+   - Compact attachment chips
+   - Streamlined footer: toolbar left, actions right
    ============================================ */
 const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
   (
@@ -727,6 +748,7 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
       allowAttachments = true,
       showAiSuggestions = true,
       loading = false,
+      characterLimit = 2000,
     },
     ref
   ) => {
@@ -740,21 +762,19 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
     const [attachments, setAttachments] = React.useState<EmailAttachment[]>(initialAttachments);
     const [showPreview, setShowPreview] = React.useState(false);
     const [selectedTemplate, setSelectedTemplate] = React.useState<string>("");
-
     const [showTemplates, setShowTemplates] = React.useState(templates.length > 0 && !initialBody);
+    const [draftSaved, setDraftSaved] = React.useState(false);
+
+    const bodyTextLength = React.useMemo(() => {
+      // Strip HTML tags for character count
+      return body.replace(/<[^>]*>/g, "").length;
+    }, [body]);
 
     const handleTemplateSelect = (template: EmailTemplate) => {
       setSubject(template.subject);
       setBody(template.body);
       setSelectedTemplate(template.id);
       setShowTemplates(false);
-    };
-
-    const handleTemplateSelectById = (templateId: string) => {
-      const template = templates.find((t) => t.id === templateId);
-      if (template) {
-        handleTemplateSelect(template);
-      }
     };
 
     const handleInsertVariable = (variable: string) => {
@@ -773,17 +793,21 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
       });
     };
 
+    const handleSaveDraft = () => {
+      onSaveDraft?.();
+      setDraftSaved(true);
+      setTimeout(() => setDraftSaved(false), 2000);
+    };
+
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files) return;
-
       const newAttachments: EmailAttachment[] = Array.from(files).map((file) => ({
         id: `${Date.now()}-${file.name}`,
         name: file.name,
         size: file.size,
         type: file.type,
       }));
-
       setAttachments((prev) => [...prev, ...newAttachments]);
     };
 
@@ -794,32 +818,25 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
     // Smart send warnings
     const sendWarnings = React.useMemo(() => {
       const warnings: SendWarning[] = [];
-
-      // Check for empty subject
       if (!subject.trim()) {
         warnings.push({ type: "warning", message: "No subject line" });
       }
-
-      // Check for attachment mention without actual attachments
       const bodyLower = body.toLowerCase();
       const attachmentKeywords = ["attach", "attached", "attachment", "enclosed", "enclosing"];
       const mentionsAttachment = attachmentKeywords.some((keyword) => bodyLower.includes(keyword));
       if (mentionsAttachment && attachments.length === 0) {
         warnings.push({
           type: "warning",
-          message: "You mentioned an attachment but haven't attached any files",
+          message: "You mentioned an attachment but none are attached",
         });
       }
-
-      // Check for unfilled variables
       const unfilledVars = body.match(/\{\{[^}]+\}\}/g);
       if (unfilledVars && unfilledVars.length > 0) {
         warnings.push({
           type: "warning",
-          message: `${unfilledVars.length} variable(s) will be replaced with actual values`,
+          message: `${unfilledVars.length} variable(s) will be replaced when sending`,
         });
       }
-
       return warnings;
     }, [subject, body, attachments]);
 
@@ -839,72 +856,86 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
       <div
         ref={ref}
         className={cn(
-          "bg-surface-default flex flex-col overflow-hidden rounded-xl border border-border-muted shadow-sm",
+          "flex flex-col overflow-hidden rounded-2xl",
+          "border border-[var(--border-default)] bg-[var(--card-background)]",
+          "shadow-[var(--shadow-card)]",
           className
         )}
       >
-        {/* Header - Enhanced with better spacing and visual hierarchy */}
-        <div className="flex items-center justify-between border-b border-border-muted bg-gradient-to-b from-background-subtle to-transparent px-5 py-4">
-          <div className="flex items-center gap-3">
-            <div className="dark:bg-primary-900/30 flex h-9 w-9 items-center justify-center rounded-lg bg-primary-100">
-              <EnvelopeSimple className="h-5 w-5 text-primary-600" weight="duotone" />
-            </div>
-            <div>
-              <h3 className="text-foreground-default font-semibold">New Message</h3>
-              {to.length > 0 && (
-                <p className="text-xs text-foreground-muted">
-                  To {to.length} recipient{to.length !== 1 ? "s" : ""}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
+        {/* ── Header: Title + window controls ── */}
+        <div className="flex items-center justify-between border-b border-[var(--border-muted)] px-5 py-3.5">
+          <h3 className="text-base font-semibold text-[var(--foreground-default)]">
+            Compose Email
+          </h3>
+          <div className="flex items-center gap-1">
             {templates.length > 0 && (
               <Button
                 variant={showTemplates ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setShowTemplates(!showTemplates)}
-                className="gap-1.5"
+                className="h-7 gap-1.5 px-2 text-xs"
               >
-                <Sparkle className="h-4 w-4" weight={showTemplates ? "fill" : "regular"} />
+                <Sparkle className="h-3.5 w-3.5" weight={showTemplates ? "fill" : "regular"} />
                 Templates
               </Button>
             )}
-            <div className="mx-1 h-4 w-px bg-border-muted" />
             <Button
               variant={showPreview ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setShowPreview(!showPreview)}
-              className="gap-1.5 transition-all duration-150"
+              className="h-7 gap-1 px-2 text-xs"
             >
               {showPreview ? (
-                <>
-                  <PencilSimple className="h-4 w-4" />
-                  Edit
-                </>
+                <PencilSimple className="h-3.5 w-3.5" />
               ) : (
-                <>
-                  <Eye className="h-4 w-4" />
-                  Preview
-                </>
+                <Eye className="h-3.5 w-3.5" />
               )}
+              {showPreview ? "Edit" : "Preview"}
             </Button>
+            <span className="mx-1 h-4 w-px bg-[var(--border-muted)]" />
+            <button
+              onClick={onDiscard}
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-md",
+                "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+                "hover:bg-[var(--background-subtle)]",
+                "transition-colors duration-100"
+              )}
+              aria-label="Minimize"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <button
+              className={cn(
+                "flex h-7 w-7 items-center justify-center rounded-md",
+                "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+                "hover:bg-[var(--background-subtle)]",
+                "transition-colors duration-100"
+              )}
+              aria-label="Expand"
+            >
+              <ArrowsOutSimple className="h-4 w-4" />
+            </button>
             {onDiscard && (
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={onDiscard}
-                className="h-8 w-8 transition-colors duration-150 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30"
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-md",
+                  "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+                  "hover:bg-[var(--background-subtle)]",
+                  "transition-colors duration-100"
+                )}
+                aria-label="Close"
               >
-                <Trash className="h-4 w-4" />
-              </Button>
+                <X className="h-4 w-4" />
+              </button>
             )}
           </div>
         </div>
 
-        {/* Template Gallery - Collapsible section */}
+        {/* ── Template Gallery (collapsible) ── */}
         {showTemplates && templates.length > 0 && (
-          <div className="border-b border-border-muted bg-neutral-50/50 px-5 py-4 dark:bg-neutral-900/30">
+          <div className="border-b border-[var(--border-muted)] bg-[var(--background-subtle)] px-5 py-4">
             <TemplateGallery
               templates={templates}
               onSelect={handleTemplateSelect}
@@ -914,61 +945,47 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
         )}
 
         {showPreview ? (
-          /* Preview Mode - Enhanced with better visual hierarchy */
-          <div className="flex-1 space-y-6 overflow-auto p-6">
-            {/* Recipients preview */}
+          /* ── Preview Mode ── */
+          <div className="flex-1 space-y-5 overflow-auto p-6">
             <div className="space-y-1">
-              <Label className="text-xs font-medium uppercase tracking-wider text-foreground-muted">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--foreground-subtle)]">
                 Recipients
-              </Label>
-              <div className="mt-2 flex flex-wrap gap-2">
+              </span>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
                 {to.map((r) => (
-                  <div
-                    key={r.id}
-                    className="flex items-center gap-2 rounded-full bg-neutral-100 px-3 py-1.5 dark:bg-neutral-800"
-                  >
-                    <Avatar src={r.avatar} name={r.name} size="xs" />
-                    <span className="text-sm font-medium">{r.name}</span>
-                    <span className="text-xs text-foreground-muted">{r.email}</span>
-                  </div>
+                  <RecipientChip key={r.id} recipient={r} disabled />
                 ))}
               </div>
             </div>
-
-            {/* Subject preview */}
             <div className="space-y-1">
-              <Label className="text-xs font-medium uppercase tracking-wider text-foreground-muted">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--foreground-subtle)]">
                 Subject
-              </Label>
-              <p className="text-foreground-default text-lg font-semibold">
+              </span>
+              <p className="text-lg font-semibold text-[var(--foreground-default)]">
                 {subject || "(No subject)"}
               </p>
             </div>
-
-            {/* Body preview */}
-            <div className="space-y-2">
-              <Label className="text-xs font-medium uppercase tracking-wider text-foreground-muted">
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--foreground-subtle)]">
                 Message
-              </Label>
+              </span>
               <div
-                className="prose prose-sm mt-3 max-w-none rounded-lg border border-border-muted bg-neutral-50 p-4 dark:bg-neutral-900/50"
+                className="prose prose-sm max-w-none rounded-xl border border-[var(--border-muted)] bg-[var(--background-subtle)] p-5"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewBody) }}
               />
             </div>
-
-            {/* Attachments preview */}
             {attachments.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-xs font-medium uppercase tracking-wider text-foreground-muted">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--foreground-subtle)]">
                   Attachments ({attachments.length})
-                </Label>
-                <div className="mt-2 grid grid-cols-2 gap-2">
+                </span>
+                <div className="mt-1 flex flex-wrap gap-2">
                   {attachments.map((attachment) => (
                     <AttachmentCard
                       key={attachment.id}
                       attachment={attachment}
                       onRemove={handleRemoveAttachment}
-                      disabled={true}
+                      disabled
                     />
                   ))}
                 </div>
@@ -976,16 +993,16 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
             )}
           </div>
         ) : (
-          /* Edit Mode - Enhanced with better spacing */
+          /* ── Edit Mode ── */
           <>
-            {/* Recipients Section */}
-            <div className="space-y-3 border-b border-border-muted px-5 py-4">
+            {/* Recipients area — clean inline layout */}
+            <div className="space-y-2 px-5 pb-0 pt-4">
               {/* To field */}
-              <div className="flex items-start gap-3">
-                <Label className="w-14 pt-2.5 text-right text-sm font-medium text-foreground-muted">
-                  To
-                </Label>
-                <div className="flex-1">
+              <div className="flex items-start gap-0">
+                <span className="w-10 shrink-0 pt-2 text-sm font-medium text-[var(--foreground-subtle)]">
+                  To:
+                </span>
+                <div className="min-w-0 flex-1">
                   <RecipientInput
                     value={to}
                     onChange={setTo}
@@ -994,34 +1011,27 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
                   />
                 </div>
                 {allowCcBcc && !showCc && !showBcc && (
-                  <div className="flex gap-1 pt-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowCc(true)}
-                      className="hover:text-foreground-default h-7 px-2 text-xs text-foreground-muted"
+                  <span className="shrink-0 pt-1.5 text-sm text-[var(--foreground-subtle)]">
+                    <button
+                      onClick={() => {
+                        setShowCc(true);
+                        setShowBcc(true);
+                      }}
+                      className="px-1 transition-colors duration-100 hover:text-[var(--foreground-default)]"
                     >
-                      Cc
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowBcc(true)}
-                      className="hover:text-foreground-default h-7 px-2 text-xs text-foreground-muted"
-                    >
-                      Bcc
-                    </Button>
-                  </div>
+                      CC/BCC
+                    </button>
+                  </span>
                 )}
               </div>
 
-              {/* Cc field */}
+              {/* CC field */}
               {showCc && (
-                <div className="flex items-start gap-3">
-                  <Label className="w-14 pt-2.5 text-right text-sm font-medium text-foreground-muted">
-                    Cc
-                  </Label>
-                  <div className="flex-1">
+                <div className="flex items-start gap-0">
+                  <span className="w-10 shrink-0 pt-2 text-sm font-medium text-[var(--foreground-subtle)]">
+                    CC
+                  </span>
+                  <div className="min-w-0 flex-1">
                     <RecipientInput
                       value={cc}
                       onChange={setCc}
@@ -1029,27 +1039,25 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
                       disabled={loading}
                     />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                  <button
                     onClick={() => {
                       setShowCc(false);
                       setCc([]);
                     }}
-                    className="h-8 w-8 text-foreground-muted"
+                    className="shrink-0 pt-2 text-[var(--foreground-subtle)] transition-colors hover:text-[var(--foreground-default)]"
                   >
                     <X className="h-4 w-4" />
-                  </Button>
+                  </button>
                 </div>
               )}
 
-              {/* Bcc field */}
+              {/* BCC field */}
               {showBcc && (
-                <div className="flex items-start gap-3">
-                  <Label className="w-14 pt-2.5 text-right text-sm font-medium text-foreground-muted">
-                    Bcc
-                  </Label>
-                  <div className="flex-1">
+                <div className="flex items-start gap-0">
+                  <span className="w-10 shrink-0 pt-2 text-sm font-medium text-[var(--foreground-subtle)]">
+                    BCC
+                  </span>
+                  <div className="min-w-0 flex-1">
                     <RecipientInput
                       value={bcc}
                       onChange={setBcc}
@@ -1057,99 +1065,94 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
                       disabled={loading}
                     />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                  <button
                     onClick={() => {
                       setShowBcc(false);
                       setBcc([]);
                     }}
-                    className="h-8 w-8 text-foreground-muted"
+                    className="shrink-0 pt-2 text-[var(--foreground-subtle)] transition-colors hover:text-[var(--foreground-default)]"
                   >
                     <X className="h-4 w-4" />
-                  </Button>
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* Subject Field - Separate section for visual hierarchy */}
-            <div className="border-b border-border-muted px-5 py-3">
-              <div className="flex items-center gap-3">
-                <Label className="w-14 text-right text-sm font-medium text-foreground-muted">
-                  Subject
-                </Label>
-                <Input
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="What's this email about?"
-                  disabled={loading}
-                  className="placeholder:text-foreground-muted/60 flex-1 border-0 bg-transparent px-0 text-base font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
-              </div>
+            {/* Divider */}
+            <div className="mx-5 border-b border-[var(--border-muted)]" />
+
+            {/* Subject field — inline with label */}
+            <div className="flex items-center gap-0 px-5 py-3">
+              <span className="w-16 shrink-0 text-sm font-medium text-[var(--foreground-subtle)]">
+                Subject:
+              </span>
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="What's this about?"
+                disabled={loading}
+                className={cn(
+                  "flex-1 bg-transparent text-sm font-medium",
+                  "text-[var(--foreground-default)] placeholder:text-[var(--foreground-disabled)]",
+                  "focus:outline-none"
+                )}
+              />
             </div>
 
-            {/* Body Editor */}
+            {/* Divider */}
+            <div className="mx-5 border-b border-[var(--border-muted)]" />
+
+            {/* Body editor */}
             <div className="flex min-h-0 flex-1 flex-col">
               <RichTextEditor
                 content={body}
                 onChange={setBody}
                 placeholder="Write your message..."
                 className="flex-1 rounded-none border-0"
-                minHeight="200px"
+                minHeight="180px"
               >
-                {/* Toolbar with better spacing */}
-                <div className="flex items-center justify-between gap-3 bg-neutral-50/50 px-5 py-3 dark:bg-neutral-900/30">
+                {/* Minimal toolbar — integrated into the editor area */}
+                <div className="flex items-center gap-1 px-5 py-2">
                   <RichTextToolbar />
-                  <div className="flex flex-shrink-0 items-center gap-2">
-                    <div className="h-4 w-px bg-border-muted" />
-                    <VariableInserter
-                      variables={variables}
-                      onInsert={handleInsertVariable}
+                  <span className="mx-1 h-4 w-px bg-[var(--border-muted)]" />
+                  <VariableInserter
+                    variables={variables}
+                    onInsert={handleInsertVariable}
+                    disabled={loading}
+                  />
+                  {showAiSuggestions && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       disabled={loading}
-                    />
-                    {showAiSuggestions && (
-                      <Button variant="ghost" size="sm" disabled={loading} className="gap-1.5">
-                        <MagicWand className="h-4 w-4" />
-                        <span className="hidden sm:inline">AI Suggest</span>
-                      </Button>
-                    )}
-                  </div>
+                      className="h-8 gap-1.5 px-2.5"
+                    >
+                      <MagicWand className="h-4 w-4" />
+                      <span className="hidden text-xs sm:inline">AI Suggest</span>
+                    </Button>
+                  )}
                 </div>
               </RichTextEditor>
             </div>
 
-            {/* Attachments Section - Improved layout */}
+            {/* Attachments section — horizontal chips */}
             {attachments.length > 0 && (
-              <div className="border-t border-border-muted bg-neutral-50/50 px-5 py-4 dark:bg-neutral-900/30">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-200 dark:bg-neutral-700">
-                      <Paperclip className="h-4 w-4 text-foreground-muted" />
-                    </div>
-                    <div>
-                      <span className="text-foreground-default text-sm font-semibold">
-                        {attachments.length}{" "}
-                        {attachments.length === 1 ? "Attachment" : "Attachments"}
-                      </span>
-                      <span className="ml-2 text-xs text-foreground-muted">
-                        ({formatFileSize(attachments.reduce((acc, a) => acc + a.size, 0))} total)
-                      </span>
-                    </div>
-                  </div>
+              <div className="px-5 pb-3 pt-1">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-medium text-[var(--foreground-subtle)]">
+                    Attachments
+                  </span>
                   {allowAttachments && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <button
                       onClick={() => document.getElementById("email-attachments")?.click()}
                       disabled={loading}
-                      className="gap-1.5"
+                      className="text-xs text-[var(--foreground-brand)] hover:underline"
                     >
-                      <Plus className="h-3.5 w-3.5" />
-                      Add more
-                    </Button>
+                      + Add more
+                    </button>
                   )}
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex flex-wrap gap-2">
                   {attachments.map((attachment) => (
                     <AttachmentCard
                       key={attachment.id}
@@ -1167,10 +1170,10 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
         {/* Send Warnings */}
         <SendWarningBanner warnings={sendWarnings} />
 
-        {/* Footer - Enhanced with better visual hierarchy */}
-        <div className="flex items-center justify-between border-t border-border-muted bg-gradient-to-t from-background-subtle to-transparent px-5 py-4">
-          {/* Left side actions */}
-          <div className="flex items-center gap-3">
+        {/* ── Footer: Toolbar icons left, status + actions right ── */}
+        <div className="flex items-center justify-between border-t border-[var(--border-muted)] px-4 py-3">
+          {/* Left: quick action icons */}
+          <div className="flex items-center gap-0.5">
             {allowAttachments && (
               <>
                 <input
@@ -1181,44 +1184,41 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
                   onChange={handleFileUpload}
                   disabled={loading}
                 />
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() => document.getElementById("email-attachments")?.click()}
                   disabled={loading}
-                  className="gap-1.5"
+                  className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-md",
+                    "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+                    "hover:bg-[var(--background-subtle)]",
+                    "transition-colors duration-100",
+                    "disabled:cursor-not-allowed disabled:opacity-50"
+                  )}
+                  aria-label="Attach file"
                 >
-                  <Paperclip className="h-4 w-4" />
-                  <span className="hidden sm:inline">Attach</span>
-                </Button>
+                  <Paperclip className="h-[18px] w-[18px]" />
+                </button>
               </>
             )}
-            {onSaveDraft && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onSaveDraft}
-                disabled={loading}
-                className="text-foreground-muted"
-              >
-                Save draft
-              </Button>
-            )}
-          </div>
-
-          {/* Right side actions */}
-          <div className="flex items-center gap-3">
             {onSchedule && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="sm" disabled={loading} className="gap-1.5">
-                    <Timer className="h-4 w-4" />
-                    <span className="hidden sm:inline">Schedule</span>
-                    <CaretDown className="ml-0.5 h-3 w-3" />
-                  </Button>
+                  <button
+                    disabled={loading}
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-md",
+                      "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+                      "hover:bg-[var(--background-subtle)]",
+                      "transition-colors duration-100",
+                      "disabled:cursor-not-allowed disabled:opacity-50"
+                    )}
+                    aria-label="Schedule send"
+                  >
+                    <Clock className="h-[18px] w-[18px]" />
+                  </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <div className="px-2 py-1.5 text-xs font-medium text-foreground-muted">
+                <DropdownMenuContent align="start" className="w-48">
+                  <div className="px-2 py-1.5 text-xs font-medium text-[var(--foreground-subtle)]">
                     Send later
                   </div>
                   <DropdownMenuItem
@@ -1250,24 +1250,127 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
-            <Button
-              onClick={handleSend}
-              disabled={loading || to.length === 0}
-              size="default"
-              className="min-w-[100px] gap-2 shadow-sm transition-all duration-150 hover:shadow-md"
-            >
-              {loading ? (
-                <>
-                  <CircleNotch className="h-4 w-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <PaperPlaneTilt className="h-4 w-4" weight="fill" />
-                  Send
-                </>
+            <button
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-md",
+                "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+                "hover:bg-[var(--background-subtle)]",
+                "transition-colors duration-100"
               )}
-            </Button>
+              aria-label="Insert emoji"
+            >
+              <Smiley className="h-[18px] w-[18px]" />
+            </button>
+            <button
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-md",
+                "text-[var(--foreground-subtle)] hover:text-[var(--foreground-default)]",
+                "hover:bg-[var(--background-subtle)]",
+                "transition-colors duration-100"
+              )}
+              aria-label="Insert link"
+            >
+              <Link className="h-[18px] w-[18px]" />
+            </button>
+          </div>
+
+          {/* Right: status + actions */}
+          <div className="flex items-center gap-3">
+            {/* Character count */}
+            {characterLimit > 0 && bodyTextLength > 0 && (
+              <span
+                className={cn(
+                  "text-xs tabular-nums",
+                  bodyTextLength > characterLimit
+                    ? "text-[var(--foreground-error)]"
+                    : "text-[var(--foreground-subtle)]"
+                )}
+              >
+                {bodyTextLength}/{characterLimit}
+              </span>
+            )}
+
+            {/* Draft saved indicator */}
+            {draftSaved && (
+              <span className="flex items-center gap-1 text-xs text-[var(--foreground-success)]">
+                <CheckCircle className="h-3.5 w-3.5" weight="fill" />
+                Draft Saved
+              </span>
+            )}
+
+            {/* Save draft */}
+            {onSaveDraft && !draftSaved && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSaveDraft}
+                disabled={loading}
+                className="h-8 text-xs text-[var(--foreground-subtle)]"
+              >
+                Save draft
+              </Button>
+            )}
+
+            {/* Discard */}
+            {onDiscard && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDiscard}
+                disabled={loading}
+                className="h-8 text-xs"
+              >
+                Discard
+              </Button>
+            )}
+
+            {/* Generate / Send button with split action */}
+            <div className="flex items-center">
+              <Button
+                onClick={handleSend}
+                disabled={loading || to.length === 0}
+                size="sm"
+                className={cn("h-8 gap-1.5 rounded-r-none px-4", "shadow-[var(--shadow-button)]")}
+              >
+                {loading ? (
+                  <>
+                    <Spinner size="sm" variant="current" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Sparkle className="h-3.5 w-3.5" weight="fill" />
+                    Send
+                  </>
+                )}
+              </Button>
+              {onSchedule && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      disabled={loading || to.length === 0}
+                      className="h-8 rounded-l-none border-l border-l-white/20 px-1.5 shadow-[var(--shadow-button)]"
+                    >
+                      <CaretDown className="h-3.5 w-3.5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => onSchedule(new Date(Date.now() + 3600000))}
+                      className="gap-2"
+                    >
+                      <Timer className="h-4 w-4" />
+                      Schedule for later
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSaveDraft} className="gap-2">
+                      <PencilSimple className="h-4 w-4" />
+                      Save as draft
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1277,7 +1380,7 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
 EmailComposer.displayName = "EmailComposer";
 
 /* ============================================
-   Quick Reply Component
+   Quick Reply Component — Streamlined
    ============================================ */
 interface QuickReplyProps {
   to: EmailRecipient;
@@ -1294,28 +1397,24 @@ const QuickReply: React.FC<QuickReplyProps> = ({ to, replyTo, onSend, onCancel, 
   return (
     <div
       className={cn(
-        "bg-surface-default overflow-hidden rounded-xl border transition-all duration-200",
+        "overflow-hidden rounded-xl border",
+        "bg-[var(--card-background)]",
+        "transition-all duration-200",
         isFocused
-          ? "dark:ring-primary-900/30 border-primary-300 shadow-md ring-2 ring-primary-100"
-          : "hover:border-border-default border-border-muted shadow-sm",
+          ? "border-[var(--border-brand)] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--border-brand)]"
+          : "border-[var(--border-default)] shadow-[var(--shadow-card)] hover:border-[var(--border-emphasis)]",
         className
       )}
     >
-      {/* Header */}
-      <div className="flex items-center gap-3 border-b border-border-muted bg-gradient-to-b from-background-subtle to-transparent px-4 py-3">
-        <div className="dark:bg-primary-900/30 flex h-8 w-8 items-center justify-center rounded-full bg-primary-100">
-          <ArrowBendUpLeft className="h-4 w-4 text-primary-600" />
-        </div>
+      {/* Compact header */}
+      <div className="flex items-center gap-2.5 border-b border-[var(--border-muted)] px-4 py-2.5">
+        <Avatar src={to.avatar} name={to.name} size="xs" />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-foreground-muted">Reply to</span>
-            <div className="flex items-center gap-1.5">
-              <Avatar src={to.avatar} name={to.name} size="xs" />
-              <span className="text-sm font-medium">{to.name}</span>
-            </div>
-          </div>
+          <span className="text-sm font-medium text-[var(--foreground-default)]">{to.name}</span>
           {replyTo && (
-            <p className="mt-0.5 truncate text-xs text-foreground-muted">Re: {replyTo.subject}</p>
+            <span className="ml-2 text-xs text-[var(--foreground-subtle)]">
+              Re: {replyTo.subject}
+            </span>
           )}
         </div>
       </div>
@@ -1327,22 +1426,23 @@ const QuickReply: React.FC<QuickReplyProps> = ({ to, replyTo, onSend, onCancel, 
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder="Write your reply..."
-        rows={4}
+        rows={3}
         className={cn(
           "w-full border-0 bg-transparent px-4 py-3 text-sm",
           "resize-none focus:outline-none",
-          "placeholder:text-foreground-muted/60"
+          "text-[var(--foreground-default)]",
+          "placeholder:text-[var(--foreground-disabled)]"
         )}
       />
 
-      {/* Footer */}
-      <div className="flex items-center justify-between gap-3 border-t border-border-muted bg-neutral-50/50 px-4 py-3 dark:bg-neutral-900/30">
-        <div className="text-xs text-foreground-muted">
+      {/* Compact footer */}
+      <div className="flex items-center justify-between border-t border-[var(--border-muted)] px-4 py-2.5">
+        <span className="text-xs text-[var(--foreground-subtle)]">
           {body.length > 0 && `${body.length} characters`}
-        </div>
+        </span>
         <div className="flex items-center gap-2">
           {onCancel && (
-            <Button variant="ghost" size="sm" onClick={onCancel}>
+            <Button variant="ghost" size="sm" onClick={onCancel} className="h-7 text-xs">
               Cancel
             </Button>
           )}
@@ -1350,10 +1450,10 @@ const QuickReply: React.FC<QuickReplyProps> = ({ to, replyTo, onSend, onCancel, 
             size="sm"
             onClick={() => onSend(body)}
             disabled={!body.trim()}
-            className="gap-1.5 shadow-sm"
+            className="h-7 gap-1.5 text-xs"
           >
-            <PaperPlaneTilt className="h-4 w-4" weight="fill" />
-            Send Reply
+            <PaperPlaneTilt className="h-3.5 w-3.5" weight="fill" />
+            Reply
           </Button>
         </div>
       </div>

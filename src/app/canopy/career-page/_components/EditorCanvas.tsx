@@ -49,6 +49,8 @@ interface EditorCanvasProps {
   onDeleteSection: (index: number) => void;
   onMoveSection: (oldIndex: number, newIndex: number) => void;
   onInsertSection: (type: CareerPageSection["type"], atIndex: number) => void;
+  onDuplicateSection?: (index: number) => void;
+  onToggleSectionVisibility?: (index: number) => void;
   orgSlug: string;
 }
 
@@ -60,6 +62,8 @@ export function EditorCanvas({
   onDeleteSection,
   onMoveSection,
   onInsertSection,
+  onDuplicateSection,
+  onToggleSectionVisibility,
   orgSlug,
 }: EditorCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -119,9 +123,14 @@ export function EditorCanvas({
                     id={`section-${index}`}
                     index={index}
                     isSelected={selectedIndex === index}
+                    isHidden={section.visible === false}
                     sectionLabel={SECTION_LABELS[section.type] || section.type}
                     onSelect={() => onSelectSection(index)}
                     onDelete={() => onDeleteSection(index)}
+                    onDuplicate={onDuplicateSection ? () => onDuplicateSection(index) : undefined}
+                    onToggleVisibility={
+                      onToggleSectionVisibility ? () => onToggleSectionVisibility(index) : undefined
+                    }
                   >
                     {renderSection(section, theme, orgSlug)}
                   </EditorSectionWrapper>
@@ -166,29 +175,30 @@ function renderSection(
     case "hero":
       return <HeroBlock section={section as HeroSection} theme={theme} />;
     case "about":
-      return <AboutBlock section={section as AboutSection} />;
+      return <AboutBlock section={section as AboutSection} theme={theme} />;
     case "values":
-      return <ValuesBlock section={section as ValuesSection} />;
+      return <ValuesBlock section={section as ValuesSection} theme={theme} />;
     case "impact":
       return <ImpactBlock section={section as ImpactSection} theme={theme} />;
     case "benefits":
-      return <BenefitsBlock section={section as BenefitsSection} />;
+      return <BenefitsBlock section={section as BenefitsSection} theme={theme} />;
     case "team":
-      return <TeamBlock section={section as TeamSection} />;
+      return <TeamBlock section={section as TeamSection} theme={theme} />;
     case "openRoles":
-      return <OpenRolesBlock section={section as OpenRolesSection} jobs={[]} orgSlug={orgSlug} />;
+      return (
+        <OpenRolesBlock
+          section={section as OpenRolesSection}
+          theme={theme}
+          jobs={[]}
+          orgSlug={orgSlug}
+        />
+      );
     case "cta":
       return <CTABlock section={section as CTASection} theme={theme} />;
     case "testimonials":
-      return (
-        <TestimonialsBlock
-          title={section.title}
-          items={(section as TestimonialsSection).items}
-          theme={theme}
-        />
-      );
+      return <TestimonialsBlock section={section as TestimonialsSection} theme={theme} />;
     case "faq":
-      return <FAQBlock title={section.title} items={(section as FAQSection).items} theme={theme} />;
+      return <FAQBlock section={section as FAQSection} theme={theme} />;
     default:
       return null;
   }

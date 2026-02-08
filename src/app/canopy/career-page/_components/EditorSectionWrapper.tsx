@@ -10,9 +10,12 @@ interface EditorSectionWrapperProps {
   id: string;
   index: number;
   isSelected: boolean;
+  isHidden?: boolean;
   sectionLabel: string;
   onSelect: () => void;
   onDelete: () => void;
+  onDuplicate?: () => void;
+  onToggleVisibility?: () => void;
   children: React.ReactNode;
 }
 
@@ -20,9 +23,12 @@ export function EditorSectionWrapper({
   id,
   index,
   isSelected,
+  isHidden,
   sectionLabel,
   onSelect,
   onDelete,
+  onDuplicate,
+  onToggleVisibility,
   children,
 }: EditorSectionWrapperProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -34,7 +40,7 @@ export function EditorSectionWrapper({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : isHidden ? 0.4 : 1,
   };
 
   const showToolbar = isHovered || isSelected;
@@ -62,7 +68,10 @@ export function EditorSectionWrapper({
         <SectionHoverToolbar
           label={sectionLabel}
           dragHandleProps={{ ...attributes, ...listeners }}
+          isHidden={isHidden}
           onDelete={onDelete}
+          onDuplicate={onDuplicate}
+          onToggleVisibility={onToggleVisibility}
         />
       )}
 

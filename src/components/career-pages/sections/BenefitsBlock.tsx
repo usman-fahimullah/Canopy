@@ -1,8 +1,11 @@
-import type { BenefitsSection } from "@/lib/career-pages/types";
+import type { BenefitsSection, CareerPageTheme } from "@/lib/career-pages/types";
+import { resolveSectionStyle } from "@/lib/career-pages/section-style-utils";
+import { getFontValue } from "@/lib/career-pages/fonts";
 import * as PhosphorIcons from "@phosphor-icons/react/dist/ssr";
 
 interface BenefitsBlockProps {
   section: BenefitsSection;
+  theme: CareerPageTheme;
 }
 
 function getIcon(iconName: string) {
@@ -10,11 +13,20 @@ function getIcon(iconName: string) {
   return icons[iconName] || PhosphorIcons.CheckCircle;
 }
 
-export function BenefitsBlock({ section }: BenefitsBlockProps) {
+export function BenefitsBlock({ section, theme }: BenefitsBlockProps) {
+  const resolved = resolveSectionStyle(section.style, theme, "#FFFFFF");
+  const headingFont = getFontValue(theme.headingFontFamily || theme.fontFamily);
+
   return (
-    <section className="px-6 py-16 md:px-12">
-      <div className="mx-auto max-w-5xl">
-        <h2 className="mb-10 text-center text-3xl font-bold text-[var(--foreground-default)]">
+    <section
+      className={resolved.paddingClass}
+      style={{ backgroundColor: resolved.backgroundColor }}
+    >
+      <div className={`mx-auto ${resolved.maxWidthClass}`}>
+        <h2
+          className={`mb-10 text-3xl font-bold ${resolved.textAlignClass}`}
+          style={{ color: resolved.headingColor, fontFamily: headingFont }}
+        >
           {section.title}
         </h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -29,8 +41,12 @@ export function BenefitsBlock({ section }: BenefitsBlockProps) {
                   <Icon size={20} weight="regular" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[var(--foreground-default)]">{item.title}</h3>
-                  <p className="mt-1 text-sm text-[var(--foreground-muted)]">{item.description}</p>
+                  <h3 className="font-semibold" style={{ color: resolved.headingColor }}>
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-sm" style={{ color: resolved.mutedTextColor }}>
+                    {item.description}
+                  </p>
                 </div>
               </div>
             );

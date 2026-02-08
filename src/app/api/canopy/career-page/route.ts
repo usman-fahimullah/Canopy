@@ -40,11 +40,16 @@ export async function GET() {
     const org = await prisma.organization.findUnique({
       where: { id: membership.organizationId },
       select: {
+        id: true,
         careerPageSlug: true,
         careerPageConfig: true,
         careerPageEnabled: true,
         name: true,
         slug: true,
+        primaryColor: true,
+        secondaryColor: true,
+        fontFamily: true,
+        logo: true,
       },
     });
 
@@ -61,6 +66,14 @@ export async function GET() {
         config,
         orgName: org.name,
         orgSlug: org.slug,
+        organizationId: org.id,
+        // Brand fields from Organization (for initializing theme)
+        orgBrand: {
+          primaryColor: org.primaryColor,
+          secondaryColor: org.secondaryColor,
+          fontFamily: org.fontFamily,
+          logo: org.logo,
+        },
       },
     });
   } catch (error) {
@@ -87,11 +100,17 @@ const UpdateCareerPageSchema = z.object({
           })
           .passthrough()
       ),
-      theme: z.object({
-        primaryColor: z.string(),
-        secondaryColor: z.string().optional(),
-        fontFamily: z.string(),
-      }),
+      theme: z
+        .object({
+          primaryColor: z.string(),
+          secondaryColor: z.string().optional(),
+          accentColor: z.string().optional(),
+          fontFamily: z.string(),
+          headingFontFamily: z.string().optional(),
+          logo: z.string().optional(),
+          defaultSectionPadding: z.enum(["compact", "default", "spacious"]).optional(),
+        })
+        .passthrough(),
     })
     .optional(),
   enabled: z.boolean().optional(),
@@ -144,10 +163,18 @@ export async function PATCH(request: NextRequest) {
     const data = result.data;
     const updateData: Record<string, unknown> = {};
 
-    if (data.config !== undefined) updateData.careerPageConfig = data.config;
+    if (data.config !== undefined) {
+      updateData.careerPageConfig = data.config;
+
+      // Sync brand fields from career page theme → Organization
+      const theme = data.config.theme;
+      if (theme.primaryColor) updateData.primaryColor = theme.primaryColor;
+      if (theme.secondaryColor !== undefined) updateData.secondaryColor = theme.secondaryColor;
+      if (theme.fontFamily) updateData.fontFamily = theme.fontFamily;
+      if (theme.logo !== undefined) updateData.logo = theme.logo || null;
+    }
     if (data.enabled !== undefined) updateData.careerPageEnabled = data.enabled;
     if (data.slug !== undefined) {
-      // Auto-generate slug from org name if enabling for first time
       updateData.careerPageSlug = data.slug;
     }
 
