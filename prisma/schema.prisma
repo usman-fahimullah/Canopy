@@ -784,12 +784,14 @@ model Job {
   title          String
   slug           String
   description    String         @db.Text
+  descriptionHtml String?       @db.Text
   location       String?
   locationType   LocationType   @default(ONSITE)
   employmentType EmploymentType @default(FULL_TIME)
   salaryMin      Int?
   salaryMax      Int?
   salaryCurrency String         @default("USD")
+  salaryPeriod   SalaryPeriod?
 
   // Climate-specific fields
   climateCategory   String?
@@ -801,6 +803,7 @@ model Job {
   pathwayId       String?
   pathway         Pathway?         @relation(fields: [pathwayId], references: [id])
   experienceLevel ExperienceLevel?
+  educationLevel  EducationLevel?
   isFeatured      Boolean          @default(false)
 
   status      JobStatus @default(DRAFT)
@@ -916,6 +919,25 @@ enum EmploymentType {
   PART_TIME
   CONTRACT
   INTERNSHIP
+  VOLUNTEER
+}
+
+enum SalaryPeriod {
+  ANNUAL
+  HOURLY
+  WEEKLY
+  MONTHLY
+}
+
+enum EducationLevel {
+  NONE
+  HIGH_SCHOOL
+  ASSOCIATE
+  BACHELOR
+  MASTER
+  DOCTORATE
+  VOCATIONAL
+  PROFESSIONAL
 }
 
 // =================================================================

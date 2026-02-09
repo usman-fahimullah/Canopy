@@ -2,7 +2,7 @@
 
 import { InfoTag } from "@/components/ui";
 import { CalendarStar } from "@phosphor-icons/react";
-import { formatSalary } from "./helpers";
+import { formatSalary, getEducationLevelLabel } from "./helpers";
 import type { JobDetail } from "./types";
 
 interface HighlightsCardProps {
@@ -10,7 +10,7 @@ interface HighlightsCardProps {
 }
 
 export function HighlightsCard({ job }: HighlightsCardProps) {
-  const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency);
+  const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency, job.salaryPeriod);
 
   return (
     <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)]">
@@ -36,13 +36,16 @@ export function HighlightsCard({ job }: HighlightsCardProps) {
         </div>
 
         {/* Education */}
-        {job.requiredCerts.length > 0 && (
+        {(job.educationLevel || job.requiredCerts.length > 0) && (
           <div className="space-y-2 border-b border-[var(--border-muted)] pb-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-[var(--foreground-default)]">
                 Education
               </span>
               <div className="flex flex-wrap justify-end gap-1">
+                {job.educationLevel && job.educationLevel !== "NONE" && (
+                  <InfoTag>{getEducationLevelLabel(job.educationLevel)}</InfoTag>
+                )}
                 {job.requiredCerts.slice(0, 2).map((cert) => (
                   <InfoTag key={cert}>{cert}</InfoTag>
                 ))}

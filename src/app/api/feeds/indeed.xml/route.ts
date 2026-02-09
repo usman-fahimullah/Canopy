@@ -30,6 +30,7 @@ export async function GET() {
       salaryMin: true,
       salaryMax: true,
       salaryCurrency: true,
+      salaryPeriod: true,
       climateCategory: true,
       publishedAt: true,
       closesAt: true,
@@ -55,8 +56,19 @@ export async function GET() {
       PART_TIME: "part-time",
       CONTRACT: "contract",
       INTERNSHIP: "internship",
+      VOLUNTEER: "volunteer",
     };
     return map[type] || "full-time";
+  };
+
+  const mapSalaryType = (period: string | null) => {
+    const map: Record<string, string> = {
+      ANNUAL: "yearly",
+      HOURLY: "hourly",
+      WEEKLY: "weekly",
+      MONTHLY: "monthly",
+    };
+    return period ? map[period] || "yearly" : "yearly";
   };
 
   const items = jobs
@@ -71,7 +83,7 @@ export async function GET() {
       if (job.salaryMin) {
         salaryXml = `
       <salary>${job.salaryMin}${job.salaryMax ? ` - ${job.salaryMax}` : ""}</salary>
-      <salary_type>yearly</salary_type>
+      <salary_type>${mapSalaryType(job.salaryPeriod)}</salary_type>
       <currency>${escapeXml(job.salaryCurrency)}</currency>`;
       }
 

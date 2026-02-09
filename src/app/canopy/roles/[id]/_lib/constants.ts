@@ -26,6 +26,7 @@ export const positionTypes = [
   { value: "contract", label: "Contract" },
   { value: "internship", label: "Internship" },
   { value: "temporary", label: "Temporary" },
+  { value: "volunteer", label: "Volunteer" },
 ];
 
 export const experienceLevels = [
@@ -43,6 +44,8 @@ export const educationLevels = [
   { value: "bachelor", label: "Bachelor's Degree" },
   { value: "master", label: "Master's Degree" },
   { value: "doctorate", label: "Doctorate (PhD)" },
+  { value: "vocational", label: "Vocational / Trade School" },
+  { value: "professional", label: "Professional Degree" },
 ];
 
 export const payTypes = [
@@ -75,6 +78,7 @@ export const employmentTypeToForm: Record<string, string> = {
   PART_TIME: "part-time",
   CONTRACT: "contract",
   INTERNSHIP: "internship",
+  VOLUNTEER: "volunteer",
 };
 
 export const formToEmploymentType: Record<string, string> = {
@@ -82,6 +86,8 @@ export const formToEmploymentType: Record<string, string> = {
   "part-time": "PART_TIME",
   contract: "CONTRACT",
   internship: "INTERNSHIP",
+  temporary: "CONTRACT",
+  volunteer: "VOLUNTEER",
 };
 
 export const locationTypeToForm: Record<string, string> = {
@@ -111,6 +117,47 @@ export const formToExperienceLevel: Record<string, string> = {
   senior: "SENIOR",
   lead: "SENIOR",
   executive: "EXECUTIVE",
+};
+
+// Education level mapping: DB enum → form value
+export const educationLevelToForm: Record<string, string> = {
+  NONE: "none",
+  HIGH_SCHOOL: "high-school",
+  ASSOCIATE: "associate",
+  BACHELOR: "bachelor",
+  MASTER: "master",
+  DOCTORATE: "doctorate",
+  VOCATIONAL: "vocational",
+  PROFESSIONAL: "professional",
+};
+
+// Education level mapping: form value → DB enum
+export const formToEducationLevel: Record<string, string> = {
+  none: "NONE",
+  "high-school": "HIGH_SCHOOL",
+  associate: "ASSOCIATE",
+  bachelor: "BACHELOR",
+  master: "MASTER",
+  doctorate: "DOCTORATE",
+  vocational: "VOCATIONAL",
+  professional: "PROFESSIONAL",
+};
+
+// Salary period mapping: DB enum → form value
+export const salaryPeriodToForm: Record<string, string> = {
+  ANNUAL: "salary",
+  HOURLY: "hourly",
+  WEEKLY: "weekly",
+  MONTHLY: "monthly",
+};
+
+// Salary period mapping: form value → DB enum
+export const formToSalaryPeriod: Record<string, string> = {
+  salary: "ANNUAL",
+  hourly: "HOURLY",
+  weekly: "WEEKLY",
+  monthly: "MONTHLY",
+  commission: "ANNUAL", // fallback
 };
 
 export const defaultStages = [

@@ -27,6 +27,8 @@ export function getEmploymentTypeLabel(employmentType: string): string {
       return "Contract";
     case "INTERNSHIP":
       return "Internship";
+    case "VOLUNTEER":
+      return "Volunteer";
     default:
       return employmentType;
   }
@@ -52,26 +54,78 @@ export function getExperienceLevelLabel(level: string | null): string {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Education Level Labels                                              */
+/* ------------------------------------------------------------------ */
+
+export function getEducationLevelLabel(level: string | null): string {
+  switch (level) {
+    case "NONE":
+      return "No Requirement";
+    case "HIGH_SCHOOL":
+      return "High School Diploma";
+    case "ASSOCIATE":
+      return "Associate Degree";
+    case "BACHELOR":
+      return "Bachelor's Degree";
+    case "MASTER":
+      return "Master's Degree";
+    case "DOCTORATE":
+      return "Doctorate (PhD)";
+    case "VOCATIONAL":
+      return "Vocational / Trade School";
+    case "PROFESSIONAL":
+      return "Professional Degree";
+    default:
+      return "Not specified";
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Salary Period Labels                                                */
+/* ------------------------------------------------------------------ */
+
+export function getSalaryPeriodLabel(period: string | null): string {
+  switch (period) {
+    case "ANNUAL":
+      return "per year";
+    case "HOURLY":
+      return "per hour";
+    case "WEEKLY":
+      return "per week";
+    case "MONTHLY":
+      return "per month";
+    default:
+      return "per year";
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /*  Salary Formatting                                                   */
 /* ------------------------------------------------------------------ */
 
-export function formatSalary(min: number | null, max: number | null, currency: string): string {
+export function formatSalary(
+  min: number | null,
+  max: number | null,
+  currency: string,
+  period?: string | null
+): string {
   if (!min && !max) return "Not specified";
+  const suffix = period ? ` ${getSalaryPeriodLabel(period)}` : "";
   try {
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency,
       maximumFractionDigits: 0,
     });
-    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}`;
-    if (min) return `From ${formatter.format(min)}`;
-    return `Up to ${formatter.format(max!)}`;
+    if (min && max) return `${formatter.format(min)} - ${formatter.format(max)}${suffix}`;
+    if (min) return `From ${formatter.format(min)}${suffix}`;
+    return `Up to ${formatter.format(max!)}${suffix}`;
   } catch {
     // Fallback for invalid currency codes
     const fallback = (v: number) => `$${v.toLocaleString()}`;
-    if (min && max) return `${fallback(min)} - ${fallback(max)}`;
-    if (min) return `From ${fallback(min)}`;
-    return `Up to ${fallback(max!)}`;
+    if (min && max) return `${fallback(min)} - ${fallback(max)}${suffix}`;
+    if (min) return `From ${fallback(min)}${suffix}`;
+    return `Up to ${fallback(max!)}${suffix}`;
   }
 }
 

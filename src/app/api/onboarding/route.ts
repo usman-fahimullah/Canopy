@@ -648,12 +648,13 @@ export async function POST(request: NextRequest) {
 
           const employmentTypeMap: Record<
             string,
-            "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP"
+            "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP" | "VOLUNTEER"
           > = {
             "full-time": "FULL_TIME",
             "part-time": "PART_TIME",
             contract: "CONTRACT",
             internship: "INTERNSHIP",
+            volunteer: "VOLUNTEER",
           };
 
           await tx.job.create({

@@ -7,7 +7,9 @@ import { logger, formatError } from "@/lib/logger";
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -72,9 +74,12 @@ export async function GET(request: NextRequest) {
       salaryMin: saved.job.salaryMin,
       salaryMax: saved.job.salaryMax,
       salaryCurrency: saved.job.salaryCurrency,
+      salaryPeriod: saved.job.salaryPeriod,
       climateCategory: saved.job.climateCategory,
       greenSkills: saved.job.greenSkills,
       experienceLevel: saved.job.experienceLevel,
+      educationLevel: saved.job.educationLevel,
+      descriptionHtml: saved.job.descriptionHtml,
       isFeatured: saved.job.isFeatured,
       status: saved.job.status,
       publishedAt: saved.job.publishedAt,
@@ -88,10 +93,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ jobs: formattedJobs });
   } catch (error) {
-    logger.error("Fetch saved jobs error", { error: formatError(error), endpoint: "/api/jobs/saved" });
-    return NextResponse.json(
-      { error: "Failed to fetch saved jobs" },
-      { status: 500 }
-    );
+    logger.error("Fetch saved jobs error", {
+      error: formatError(error),
+      endpoint: "/api/jobs/saved",
+    });
+    return NextResponse.json({ error: "Failed to fetch saved jobs" }, { status: 500 });
   }
 }

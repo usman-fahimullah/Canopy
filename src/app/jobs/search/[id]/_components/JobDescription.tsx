@@ -5,10 +5,11 @@ import { formatDescription } from "./helpers";
 
 interface JobDescriptionProps {
   description: string;
+  descriptionHtml?: string | null;
 }
 
-export function JobDescription({ description }: JobDescriptionProps) {
-  const formattedHtml = formatDescription(description);
+export function JobDescription({ description, descriptionHtml }: JobDescriptionProps) {
+  const formattedHtml = descriptionHtml || formatDescription(description);
   const sanitizedHtml = DOMPurify.sanitize(formattedHtml, {
     ALLOWED_TAGS: [
       "h1",

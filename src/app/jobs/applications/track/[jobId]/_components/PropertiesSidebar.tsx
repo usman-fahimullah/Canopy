@@ -7,6 +7,7 @@ import {
   getLocationTypeLabel,
   getEmploymentTypeLabel,
   getExperienceLevelLabel,
+  getEducationLevelLabel,
   formatSalary,
 } from "@/lib/jobs/helpers";
 import { ReactionSelector } from "./ReactionSelector";
@@ -75,7 +76,7 @@ export function PropertiesSidebar({
   if (data.salaryMin || data.salaryMax) {
     overviewRows.push({
       label: "Salary",
-      content: formatSalary(data.salaryMin, data.salaryMax, data.salaryCurrency),
+      content: formatSalary(data.salaryMin, data.salaryMax, data.salaryCurrency, data.salaryPeriod),
     });
   }
 
@@ -83,6 +84,13 @@ export function PropertiesSidebar({
     overviewRows.push({
       label: "Level",
       content: getExperienceLevelLabel(data.experienceLevel),
+    });
+  }
+
+  if (data.educationLevel) {
+    overviewRows.push({
+      label: "Education",
+      content: getEducationLevelLabel(data.educationLevel),
     });
   }
 

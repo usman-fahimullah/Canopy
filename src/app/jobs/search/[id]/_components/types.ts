@@ -40,11 +40,14 @@ export interface JobDetail {
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string;
+  salaryPeriod: string | null;
   climateCategory: string | null;
   impactDescription: string | null;
   greenSkills: string[];
   requiredCerts: string[];
   experienceLevel: string | null;
+  educationLevel: string | null;
+  descriptionHtml: string | null;
   isFeatured: boolean;
   publishedAt: string | null;
   closesAt: string | null;

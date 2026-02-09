@@ -6,7 +6,7 @@
  */
 
 // Re-export shared helpers so existing `./helpers` imports keep working
-export { formatSalary, getExperienceLevelLabel } from "@/lib/jobs/helpers";
+export { formatSalary, getExperienceLevelLabel, getEducationLevelLabel } from "@/lib/jobs/helpers";
 
 export function formatDate(dateStr: string | null): string {
   if (!dateStr) return "Not specified";

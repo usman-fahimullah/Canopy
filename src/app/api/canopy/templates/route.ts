@@ -11,10 +11,6 @@ import type { Job } from "@prisma/client";
    These keys correspond to the toggle switches in the Create Template
    modal. Each key maps to one or more columns on the Job model.
 
-   MVP Note: educationLevel and specialEducation both map to
-   requiredCerts because the Job model does not yet have dedicated
-   education fields. When those fields are added to the schema,
-   update these extractors accordingly.
    ------------------------------------------------------------------- */
 
 const FIELD_EXTRACTORS: Record<string, (job: Job) => unknown> = {
@@ -25,14 +21,14 @@ const FIELD_EXTRACTORS: Record<string, (job: Job) => unknown> = {
   }),
   employmentType: (job) => job.employmentType,
   experienceLevel: (job) => job.experienceLevel,
+  educationLevel: (job) => job.educationLevel,
   description: (job) => job.description,
   responsibilities: (job) => job.description, // MVP: same source as description
   qualifications: (job) => ({
     requiredCerts: job.requiredCerts,
     greenSkills: job.greenSkills,
   }),
-  educationLevel: (job) => job.requiredCerts, // MVP: see note above
-  specialEducation: (job) => job.requiredCerts, // MVP: see note above
+  specialEducation: (job) => job.requiredCerts,
 };
 
 /* -------------------------------------------------------------------

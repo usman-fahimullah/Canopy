@@ -18,7 +18,7 @@ export interface SyndicationJobPayload {
   description: string;
   location: string | null;
   locationType: "ONSITE" | "REMOTE" | "HYBRID";
-  employmentType: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP";
+  employmentType: "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERNSHIP" | "VOLUNTEER";
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string;

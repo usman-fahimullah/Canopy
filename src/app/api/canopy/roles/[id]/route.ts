@@ -43,11 +43,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         salaryMin: true,
         salaryMax: true,
         salaryCurrency: true,
+        salaryPeriod: true,
         climateCategory: true,
         impactDescription: true,
         requiredCerts: true,
         greenSkills: true,
         experienceLevel: true,
+        educationLevel: true,
+        descriptionHtml: true,
         status: true,
         publishedAt: true,
         closesAt: true,
@@ -193,14 +196,18 @@ const UpdateJobSchema = z.object({
   // Core details
   title: z.string().min(1).max(200).optional(),
   description: z.string().optional(),
+  descriptionHtml: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
   locationType: z.enum(["ONSITE", "REMOTE", "HYBRID"]).optional(),
-  employmentType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"]).optional(),
+  employmentType: z
+    .enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "VOLUNTEER"])
+    .optional(),
 
   // Compensation
   salaryMin: z.number().int().positive().optional().nullable(),
   salaryMax: z.number().int().positive().optional().nullable(),
   salaryCurrency: z.string().optional(),
+  salaryPeriod: z.enum(["ANNUAL", "HOURLY", "WEEKLY", "MONTHLY"]).optional().nullable(),
 
   // Climate-specific
   climateCategory: z.string().optional().nullable(),
@@ -210,6 +217,19 @@ const UpdateJobSchema = z.object({
 
   // Experience
   experienceLevel: z.enum(["ENTRY", "INTERMEDIATE", "SENIOR", "EXECUTIVE"]).optional().nullable(),
+  educationLevel: z
+    .enum([
+      "NONE",
+      "HIGH_SCHOOL",
+      "ASSOCIATE",
+      "BACHELOR",
+      "MASTER",
+      "DOCTORATE",
+      "VOCATIONAL",
+      "PROFESSIONAL",
+    ])
+    .optional()
+    .nullable(),
 
   // Dates
   closesAt: z.string().datetime().optional().nullable(),
@@ -319,6 +339,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     // Core fields
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
+    if (data.descriptionHtml !== undefined) updateData.descriptionHtml = data.descriptionHtml;
     if (data.location !== undefined) updateData.location = data.location;
     if (data.locationType !== undefined) updateData.locationType = data.locationType;
     if (data.employmentType !== undefined) updateData.employmentType = data.employmentType;
@@ -327,6 +348,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (data.salaryMin !== undefined) updateData.salaryMin = data.salaryMin;
     if (data.salaryMax !== undefined) updateData.salaryMax = data.salaryMax;
     if (data.salaryCurrency !== undefined) updateData.salaryCurrency = data.salaryCurrency;
+    if (data.salaryPeriod !== undefined) updateData.salaryPeriod = data.salaryPeriod;
 
     // Climate-specific
     if (data.climateCategory !== undefined) updateData.climateCategory = data.climateCategory;
@@ -336,6 +358,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Experience
     if (data.experienceLevel !== undefined) updateData.experienceLevel = data.experienceLevel;
+    if (data.educationLevel !== undefined) updateData.educationLevel = data.educationLevel;
 
     // Dates
     if (data.closesAt !== undefined) {

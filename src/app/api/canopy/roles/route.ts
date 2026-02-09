@@ -15,7 +15,9 @@ const GetRolesSchema = z.object({
   skip: z.coerce.number().int().min(0).default(0),
   take: z.coerce.number().int().min(1).max(100).default(20),
   status: z.enum(["DRAFT", "PUBLISHED", "PAUSED", "CLOSED"]).optional(),
-  employmentType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"]).optional(),
+  employmentType: z
+    .enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "VOLUNTEER"])
+    .optional(),
   locationType: z.enum(["ONSITE", "REMOTE", "HYBRID"]).optional(),
 });
 
@@ -148,17 +150,31 @@ const CreateRoleSchema = z.object({
   location: z.string().optional().nullable(),
   locationType: z.enum(["ONSITE", "REMOTE", "HYBRID"]).optional().default("ONSITE"),
   employmentType: z
-    .enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"])
+    .enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "VOLUNTEER"])
     .optional()
     .default("FULL_TIME"),
   salaryMin: z.number().int().positive().optional().nullable(),
   salaryMax: z.number().int().positive().optional().nullable(),
   salaryCurrency: z.string().optional().default("USD"),
+  salaryPeriod: z.enum(["ANNUAL", "HOURLY", "WEEKLY", "MONTHLY"]).optional().nullable(),
   climateCategory: z.string().optional().nullable(),
   impactDescription: z.string().optional().nullable(),
   requiredCerts: z.array(z.string()).optional().default([]),
   greenSkills: z.array(z.string()).optional().default([]),
   experienceLevel: z.enum(["ENTRY", "INTERMEDIATE", "SENIOR", "EXECUTIVE"]).optional().nullable(),
+  educationLevel: z
+    .enum([
+      "NONE",
+      "HIGH_SCHOOL",
+      "ASSOCIATE",
+      "BACHELOR",
+      "MASTER",
+      "DOCTORATE",
+      "VOCATIONAL",
+      "PROFESSIONAL",
+    ])
+    .optional()
+    .nullable(),
   closesAt: z.string().datetime().optional().nullable(),
 });
 
@@ -236,11 +252,13 @@ export async function POST(request: NextRequest) {
         salaryMin: data.salaryMin,
         salaryMax: data.salaryMax,
         salaryCurrency: data.salaryCurrency,
+        salaryPeriod: data.salaryPeriod,
         climateCategory: data.climateCategory,
         impactDescription: data.impactDescription,
         requiredCerts: data.requiredCerts,
         greenSkills: data.greenSkills,
         experienceLevel: data.experienceLevel,
+        educationLevel: data.educationLevel,
         closesAt: data.closesAt ? new Date(data.closesAt) : null,
         status: "DRAFT",
         organizationId,

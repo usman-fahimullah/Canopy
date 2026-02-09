@@ -70,6 +70,7 @@ const ModalContent = React.forwardRef<
         "rounded-[var(--radius-modal)]",
         "shadow-[var(--shadow-modal)]",
         "overflow-hidden",
+        "max-h-[calc(100vh-2rem)]",
         "data-[state=open]:animate-in data-[state=closed]:animate-out",
         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -249,7 +250,13 @@ const ModalBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex w-full flex-col items-start", "px-8 py-4", "gap-4", className)}
+      className={cn(
+        "flex w-full flex-col items-start",
+        "px-8 py-4",
+        "gap-4",
+        "min-h-0 flex-1 overflow-y-auto",
+        className
+      )}
       {...props}
     />
   )

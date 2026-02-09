@@ -10,7 +10,9 @@ export interface TrackedJobData {
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string;
+  salaryPeriod: string | null;
   experienceLevel: string | null;
+  educationLevel: string | null;
   location: string | null;
   locationType: string;
   employmentType: string;
