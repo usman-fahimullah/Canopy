@@ -2,6 +2,17 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import {
+  PaperPlaneTilt,
+  HourglassSimpleMedium,
+  ChatCircleDots,
+  SealCheck,
+  Trophy,
+  Prohibit,
+  UsersThree,
+  Plus,
+} from "@phosphor-icons/react";
+import type { PhaseGroup } from "@/lib/pipeline/stage-registry";
 
 /**
  * Kanban Board Components for ATS Pipeline Management
@@ -132,101 +143,72 @@ type KanbanStageType =
   | "rejected"
   | "talent-pool";
 
-/** Stage icon configuration using design system tokens */
-const stageIcons: Record<KanbanStageType, { icon: React.ReactNode; colorClass: string }> = {
-  applied: {
-    colorClass: "text-[var(--primitive-purple-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-      </svg>
-    ),
-  },
-  screening: {
-    colorClass: "text-[var(--primitive-blue-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  qualified: {
-    colorClass: "text-[var(--primitive-blue-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  interview: {
-    colorClass: "text-[var(--primitive-orange-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  offer: {
-    colorClass: "text-[var(--primitive-green-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  hired: {
-    colorClass: "text-[var(--primitive-green-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  rejected: {
-    colorClass: "text-[var(--primitive-red-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
-  "talent-pool": {
-    colorClass: "text-[var(--primitive-yellow-500)]",
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ),
-  },
+/**
+ * Map KanbanStageType to PhaseGroup for registry lookups.
+ * "screening" and "qualified" both map to the "review" phase group.
+ */
+const KANBAN_TO_PHASE: Record<KanbanStageType, PhaseGroup> = {
+  applied: "applied",
+  screening: "review",
+  qualified: "review",
+  interview: "interview",
+  offer: "offer",
+  hired: "hired",
+  rejected: "rejected",
+  "talent-pool": "talent-pool",
 };
+
+/** Phosphor icon components for each phase group */
+const PHASE_ICONS: Record<PhaseGroup, React.ElementType> = {
+  applied: PaperPlaneTilt,
+  review: HourglassSimpleMedium,
+  interview: ChatCircleDots,
+  offer: SealCheck,
+  hired: Trophy,
+  rejected: Prohibit,
+  withdrawn: Prohibit,
+  "talent-pool": UsersThree,
+};
+
+/** Phosphor icon weights for each phase group (fill for most, bold for prohibit/users) */
+const PHASE_ICON_WEIGHTS: Record<PhaseGroup, "fill" | "bold" | "regular"> = {
+  applied: "fill",
+  review: "fill",
+  interview: "fill",
+  offer: "fill",
+  hired: "fill",
+  rejected: "bold",
+  withdrawn: "bold",
+  "talent-pool": "bold",
+};
+
+/** Kanban column color classes for each phase group */
+const PHASE_COLORS: Record<PhaseGroup, string> = {
+  applied: "text-[var(--primitive-purple-500)]",
+  review: "text-[var(--primitive-blue-500)]",
+  interview: "text-[var(--primitive-orange-500)]",
+  offer: "text-[var(--primitive-green-500)]",
+  hired: "text-[var(--primitive-green-600)]",
+  rejected: "text-[var(--primitive-red-500)]",
+  withdrawn: "text-[var(--foreground-muted)]",
+  "talent-pool": "text-[var(--primitive-yellow-500)]",
+};
+
+/** Stage icon configuration derived from the pipeline stage registry */
+const stageIcons: Record<KanbanStageType, { icon: React.ReactNode; colorClass: string }> =
+  Object.fromEntries(
+    (Object.keys(KANBAN_TO_PHASE) as KanbanStageType[]).map((stage) => {
+      const phase = KANBAN_TO_PHASE[stage];
+      const Icon = PHASE_ICONS[phase];
+      return [
+        stage,
+        {
+          colorClass: PHASE_COLORS[phase],
+          icon: <Icon size={16} weight={PHASE_ICON_WEIGHTS[phase]} />,
+        },
+      ];
+    })
+  ) as Record<KanbanStageType, { icon: React.ReactNode; colorClass: string }>;
 
 interface KanbanColumnProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -362,15 +344,7 @@ const KanbanAddCard = React.forwardRef<HTMLButtonElement, KanbanAddCardProps>(
       )}
       {...props}
     >
-      <svg
-        className="h-4 w-4"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M8 3v10M3 8h10" strokeLinecap="round" />
-      </svg>
+      <Plus size={16} weight="bold" />
       {label}
     </button>
   )

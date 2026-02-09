@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/candidate-card";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import {
   Plus,
   Funnel,
@@ -25,7 +26,9 @@ import {
   ListBullets,
   Prohibit,
   UserCirclePlus,
+  GearSix,
 } from "@phosphor-icons/react";
+import Link from "next/link";
 import type { JobData, ApplicationData, ApplicationScoreData } from "../_lib/types";
 import { defaultStages } from "../_lib/constants";
 import { mapStageToKanbanType } from "../_lib/helpers";
@@ -35,9 +38,7 @@ import { mapStageToKanbanType } from "../_lib/helpers";
 // ============================================
 
 /** Map DB Recommendation enum to CandidateCard DecisionType */
-function mapRecommendation(
-  rec: ApplicationScoreData["recommendation"]
-): DecisionType {
+function mapRecommendation(rec: ApplicationScoreData["recommendation"]): DecisionType {
   switch (rec) {
     case "STRONG_YES":
       return "strong_yes";
@@ -68,9 +69,7 @@ function formatInterviewDate(dateStr: string): string {
   const d = new Date(dateStr);
   const now = new Date();
   const diffDays = Math.floor((d.getTime() - now.getTime()) / 86400000);
-  const time = d
-    .toLocaleTimeString("en-US", { hour: "numeric", hour12: true })
-    .toLowerCase();
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", hour12: true }).toLowerCase();
 
   if (diffDays === 0) return `Today, ${time}`;
   if (diffDays === 1) return `Tomorrow, ${time}`;
@@ -162,20 +161,16 @@ export function CandidatesTab({
           );
 
           // Build reviewer data from scores
-          const reviewers: ReviewerData[] = (app.scores ?? []).map(
-            (score) => ({
-              name: score.scorer.account.name || "Unknown",
-              avatarUrl: score.scorer.account.avatar || undefined,
-              status: mapRecommendation(score.recommendation),
-              rating: score.overallRating,
-            })
-          );
+          const reviewers: ReviewerData[] = (app.scores ?? []).map((score) => ({
+            name: score.scorer.account.name || "Unknown",
+            avatarUrl: score.scorer.account.avatar || undefined,
+            status: mapRecommendation(score.recommendation),
+            rating: score.overallRating,
+          }));
 
           // Last note / comment time
           const lastNote = app.seeker.notes?.[0];
-          const lastComment = lastNote
-            ? formatNoteTime(lastNote.createdAt)
-            : undefined;
+          const lastComment = lastNote ? formatNoteTime(lastNote.createdAt) : undefined;
 
           // Next scheduled interview
           const nextInterview = app.interviews?.[0];
@@ -203,9 +198,7 @@ export function CandidatesTab({
                 />
               )}
               <DaysInStage days={daysInStage} compact className="mt-2" />
-              {reviewers.length > 0 && (
-                <CandidateReviewers reviewers={reviewers} />
-              )}
+              {reviewers.length > 0 && <CandidateReviewers reviewers={reviewers} />}
             </CandidateCard>
           );
         })(),
@@ -261,6 +254,13 @@ export function CandidatesTab({
               <Plus weight="bold" className="mr-2 h-4 w-4" />
               Add Candidates
             </Button>
+            <SimpleTooltip content="Pipeline settings">
+              <Button variant="ghost" size="icon" asChild>
+                <Link href={`/canopy/roles/${roleId}/pipeline`}>
+                  <GearSix size={18} />
+                </Link>
+              </Button>
+            </SimpleTooltip>
           </div>
           <SegmentedController
             options={[

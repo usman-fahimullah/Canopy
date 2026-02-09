@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import {
+  resolveJobStages,
+  resolveStage,
+  getPhaseProgress,
+  getSeekerSection,
+  getPhaseGroup,
+} from "@/lib/pipeline/stage-registry";
 
 /**
  * GET /api/jobs/applications
@@ -59,6 +66,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             title: true,
+            stages: true,
             organization: {
               select: {
                 name: true,
@@ -92,30 +100,62 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({
-      applications: applications.map((app) => ({
-        id: app.id,
-        appliedAt: app.createdAt.toISOString(),
-        updatedAt: app.updatedAt.toISOString(),
-        status: app.stage,
-        rejectedAt: app.rejectedAt?.toISOString() ?? null,
-        hiredAt: app.hiredAt?.toISOString() ?? null,
-        offeredAt: app.offeredAt?.toISOString() ?? null,
-        job: {
-          id: app.job.id,
-          title: app.job.title,
-          company: app.job.organization?.name ?? null,
-          logo: app.job.organization?.logo ?? null,
-        },
-        hasOffer: !!app.offer,
-        offerStatus: app.offer?.status ?? null,
-        nextInterview: app.interviews[0]
-          ? {
-              id: app.interviews[0].id,
-              scheduledAt: app.interviews[0].scheduledAt.toISOString(),
-              type: app.interviews[0].type,
-            }
-          : null,
-      })),
+      seekerId: account.seekerProfile.id,
+      applications: applications.map((app) => {
+        // Resolve the job's pipeline stages and compute phase progress
+        const jobStages = resolveJobStages(
+          typeof app.job.stages === "string"
+            ? app.job.stages
+            : app.job.stages
+              ? JSON.stringify(app.job.stages)
+              : null
+        );
+        const resolvedStage = resolveStage({
+          id: app.stage,
+          name: app.stage,
+          phaseGroup: undefined,
+        });
+        // Try to find the actual stage name from the job's pipeline
+        const matchingStage = jobStages.find((s) => s.id === app.stage);
+        const stageName = matchingStage?.name ?? resolvedStage.name;
+        const phaseGroup = matchingStage?.phaseGroup ?? resolvedStage.phaseGroup;
+        const seekerSection = getSeekerSection(app.stage);
+        const phaseProgress = getPhaseProgress(app.stage, jobStages);
+
+        return {
+          id: app.id,
+          appliedAt: app.createdAt.toISOString(),
+          updatedAt: app.updatedAt.toISOString(),
+          status: app.stage,
+          rejectedAt: app.rejectedAt?.toISOString() ?? null,
+          hiredAt: app.hiredAt?.toISOString() ?? null,
+          offeredAt: app.offeredAt?.toISOString() ?? null,
+          job: {
+            id: app.job.id,
+            title: app.job.title,
+            company: app.job.organization?.name ?? null,
+            logo: app.job.organization?.logo ?? null,
+          },
+          hasOffer: !!app.offer,
+          offerStatus: app.offer?.status ?? null,
+          nextInterview: app.interviews[0]
+            ? {
+                id: app.interviews[0].id,
+                scheduledAt: app.interviews[0].scheduledAt.toISOString(),
+                type: app.interviews[0].type,
+              }
+            : null,
+          // Enriched stage metadata (Phase 3)
+          stageName,
+          phaseGroup,
+          seekerSection,
+          phaseProgress: {
+            current: phaseProgress.current,
+            total: phaseProgress.total,
+            stages: phaseProgress.stageNames,
+          },
+        };
+      }),
     });
   } catch (error) {
     logger.error("Error fetching seeker applications", {

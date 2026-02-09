@@ -107,7 +107,7 @@ export interface JobData {
   status: string;
   publishedAt: string | null;
   closesAt: string | null;
-  stages: { id: string; name: string }[];
+  stages: { id: string; name: string; phaseGroup?: string }[];
   formConfig: Record<string, unknown> | null;
   formQuestions: FormQuestion[] | null;
   syndicationEnabled: boolean;

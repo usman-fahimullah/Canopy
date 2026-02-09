@@ -15,11 +15,6 @@ import {
   CaretDown,
   CaretRight,
   Bookmark,
-  PaperPlaneTilt,
-  ChatCircleDots,
-  SealCheck,
-  Trophy,
-  Prohibit,
   Star,
   SmileyNervous,
   SmileyWink,
@@ -30,6 +25,7 @@ import {
   Check,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { getPhaseGroupConfig, type PhaseGroup } from "@/lib/pipeline/stage-registry-ui";
 import { Avatar } from "./avatar";
 import { Button } from "./button";
 import {
@@ -53,6 +49,12 @@ export type ApplicationSection =
 
 export type EmojiReaction = "excited" | "happy" | "meh" | "nervous" | "shocked" | "none";
 
+export interface PhaseProgress {
+  current: number;
+  total: number;
+  stages: string[];
+}
+
 export interface JobApplication {
   id: string;
   jobTitle: string;
@@ -60,6 +62,10 @@ export interface JobApplication {
   companyInitials?: string;
   companyLogo?: string;
   stage: ApplicationSection;
+  /** Employer's actual stage name (e.g., "Phone Screen") */
+  stageName?: string;
+  /** Phase progress within the current seeker section */
+  phaseProgress?: PhaseProgress;
   activity: Date | string;
   reaction?: EmojiReaction;
   isFavorite?: boolean;
@@ -79,12 +85,13 @@ export interface JobApplicationTableProps {
 }
 
 // ============================================
-// SECTION CONFIG
+// SECTION CONFIG (derived from pipeline stage registry)
 // ============================================
 
 interface SectionConfig {
   label: string;
   icon: React.ElementType;
+  iconWeight: "fill" | "bold" | "regular";
   iconColor: string;
   emptyIconBg: string;
   emptyTitle: string;
@@ -92,12 +99,27 @@ interface SectionConfig {
   emptyCta: string;
 }
 
-export const sectionConfig: Record<ApplicationSection, SectionConfig> = {
+/**
+ * Map ApplicationSection → PhaseGroup for registry lookups.
+ * "saved" has no phase group equivalent — uses Bookmark icon with blue color.
+ * "ineligible" maps to "rejected".
+ */
+const SECTION_TO_PHASE: Record<ApplicationSection, PhaseGroup | null> = {
+  saved: null, // No phase group — "saved" is seeker-only
+  applied: "applied",
+  interview: "interview",
+  offer: "offer",
+  hired: "hired",
+  ineligible: "rejected",
+};
+
+/** Section-specific labels and empty states */
+const SECTION_META: Record<
+  ApplicationSection,
+  { label: string; emptyTitle: string; emptyDescription: string; emptyCta: string }
+> = {
   saved: {
     label: "Saved",
-    icon: Bookmark,
-    iconColor: "text-[var(--primitive-blue-500)]",
-    emptyIconBg: "bg-[var(--primitive-blue-500)]",
     emptyTitle: "No saved jobs yet!",
     emptyDescription:
       "Discover and find hundreds of jobs in Pathways! Save it and don't forget it!",
@@ -105,9 +127,6 @@ export const sectionConfig: Record<ApplicationSection, SectionConfig> = {
   },
   applied: {
     label: "Applied",
-    icon: PaperPlaneTilt,
-    iconColor: "text-[var(--primitive-purple-500)]",
-    emptyIconBg: "bg-[var(--primitive-purple-500)]",
     emptyTitle: "No applied jobs yet!",
     emptyDescription:
       "When you apply for a job make sure to migrate your saved job to this section",
@@ -115,45 +134,68 @@ export const sectionConfig: Record<ApplicationSection, SectionConfig> = {
   },
   interview: {
     label: "Interviews",
-    icon: ChatCircleDots,
-    iconColor: "text-[var(--primitive-orange-500)]",
-    emptyIconBg: "bg-[var(--primitive-orange-500)]",
     emptyTitle: "No interviews here yet!",
     emptyDescription: "When have a job interview make sure to migrate it to this section",
     emptyCta: "",
   },
   offer: {
     label: "Offers",
-    icon: SealCheck,
-    iconColor: "text-[var(--primitive-green-500)]",
-    emptyIconBg: "bg-[var(--primitive-green-500)]",
     emptyTitle: "No offers yet!",
     emptyDescription: "When have an offer make sure to migrate it to this section",
     emptyCta: "",
   },
   hired: {
     label: "Hired",
-    icon: Trophy,
-    iconColor: "text-[var(--primitive-green-500)]",
-    emptyIconBg: "bg-[var(--primitive-green-500)]",
     emptyTitle: "No hired positions yet!",
     emptyDescription: "When you accept an offer, it will appear here.",
     emptyCta: "",
   },
   ineligible: {
     label: "Ineligible",
-    icon: Prohibit,
-    iconColor: "text-[var(--primitive-red-500)]",
-    emptyIconBg: "bg-[var(--primitive-red-500)]",
     emptyTitle: "No ineligible applications!",
     emptyDescription: "Applications that didn't proceed will show up here.",
     emptyCta: "",
   },
 };
 
+/** Build sectionConfig by deriving icons/colors from the pipeline registry */
+export const sectionConfig: Record<ApplicationSection, SectionConfig> = Object.fromEntries(
+  (Object.keys(SECTION_TO_PHASE) as ApplicationSection[]).map((section) => {
+    const phase = SECTION_TO_PHASE[section];
+    const meta = SECTION_META[section];
+
+    if (phase) {
+      const phaseConfig = getPhaseGroupConfig(phase);
+      return [
+        section,
+        {
+          ...meta,
+          icon: phaseConfig.icon,
+          iconWeight: phaseConfig.iconWeight,
+          iconColor: phaseConfig.sectionIconColor,
+          emptyIconBg: phaseConfig.sectionIconBg,
+        },
+      ];
+    }
+
+    // "saved" — seeker-only section, uses Bookmark icon with blue
+    return [
+      section,
+      {
+        ...meta,
+        icon: Bookmark,
+        iconWeight: "fill" as const,
+        iconColor: "text-[var(--primitive-blue-500)]",
+        emptyIconBg: "bg-[var(--primitive-blue-500)]",
+      },
+    ];
+  })
+) as Record<ApplicationSection, SectionConfig>;
+
 // ============================================
 // STAGE COLORS (for dropdown pills)
 // Based on Figma: node-id=3145-16691 (MigrateToFilterPill)
+// Derived from the pipeline stage registry where possible.
 // ============================================
 
 export const stageColors: Record<
@@ -167,64 +209,72 @@ export const stageColors: Record<
     selectedText: string;
     iconBg: string;
   }
-> = {
-  saved: {
-    bg: "bg-[var(--primitive-blue-200)]",
-    text: "text-[var(--primitive-blue-600)]",
-    iconColor: "text-[var(--primitive-blue-600)]",
-    hoverBorder: "border-[var(--primitive-blue-300)]",
-    selectedBg: "bg-[var(--primitive-blue-100)]",
-    selectedText: "text-[var(--primitive-blue-500)]",
-    iconBg: "bg-[var(--primitive-blue-500)]",
-  },
-  applied: {
-    bg: "bg-[var(--primitive-purple-200)]",
-    text: "text-[var(--primitive-purple-600)]",
-    iconColor: "text-[var(--primitive-purple-600)]",
-    hoverBorder: "border-[var(--primitive-purple-300)]",
-    selectedBg: "bg-[var(--primitive-purple-100)]",
-    selectedText: "text-[var(--primitive-purple-500)]",
-    iconBg: "bg-[var(--primitive-purple-500)]",
-  },
-  interview: {
-    bg: "bg-[var(--primitive-orange-200)]",
-    text: "text-[var(--primitive-orange-600)]",
-    iconColor: "text-[var(--primitive-orange-600)]",
-    hoverBorder: "border-[var(--primitive-orange-300)]",
-    selectedBg: "bg-[var(--primitive-orange-100)]",
-    selectedText: "text-[var(--primitive-orange-500)]",
-    iconBg: "bg-[var(--primitive-orange-500)]",
-  },
-  offer: {
-    bg: "bg-[var(--primitive-green-200)]",
-    text: "text-[var(--primitive-green-600)]",
-    iconColor: "text-[var(--primitive-green-600)]",
-    hoverBorder: "border-[var(--primitive-green-300)]",
-    selectedBg: "bg-[var(--primitive-green-100)]",
-    selectedText: "text-[var(--primitive-green-500)]",
-    iconBg: "bg-[var(--primitive-green-500)]",
-  },
-  hired: {
-    bg: "bg-[var(--primitive-neutral-100)]",
-    text: "text-[var(--primitive-green-800)]",
-    iconColor: "text-[var(--primitive-green-800)]",
-    hoverBorder: "border-[var(--primitive-neutral-300)]",
-    selectedBg:
-      "bg-gradient-to-r from-[var(--primitive-red-200)] via-[var(--primitive-yellow-200)] to-[var(--primitive-green-200)]",
-    selectedText: "text-[var(--primitive-green-800)]",
-    iconBg:
-      "bg-gradient-to-br from-[var(--primitive-red-400)] via-[var(--primitive-yellow-400)] to-[var(--primitive-green-400)]",
-  },
-  ineligible: {
-    bg: "bg-[var(--primitive-red-200)]",
-    text: "text-[var(--primitive-red-600)]",
-    iconColor: "text-[var(--primitive-red-600)]",
-    hoverBorder: "border-[var(--primitive-red-300)]",
-    selectedBg: "bg-[var(--primitive-red-100)]",
-    selectedText: "text-[var(--primitive-red-500)]",
-    iconBg: "bg-[var(--primitive-red-500)]",
-  },
-};
+> = Object.fromEntries(
+  (Object.keys(SECTION_TO_PHASE) as ApplicationSection[]).map((section) => {
+    const phase = SECTION_TO_PHASE[section];
+
+    // "hired" has a special gradient treatment that can't come from the registry
+    if (section === "hired") {
+      return [
+        section,
+        {
+          bg: "bg-[var(--primitive-neutral-100)]",
+          text: "text-[var(--primitive-green-800)]",
+          iconColor: "text-[var(--primitive-green-800)]",
+          hoverBorder: "border-[var(--primitive-neutral-300)]",
+          selectedBg:
+            "bg-gradient-to-r from-[var(--primitive-red-200)] via-[var(--primitive-yellow-200)] to-[var(--primitive-green-200)]",
+          selectedText: "text-[var(--primitive-green-800)]",
+          iconBg:
+            "bg-gradient-to-br from-[var(--primitive-red-400)] via-[var(--primitive-yellow-400)] to-[var(--primitive-green-400)]",
+        },
+      ];
+    }
+
+    // "saved" uses blue from registry lookup (no phase group)
+    if (!phase) {
+      const blueConfig = getPhaseGroupConfig("review"); // blue color family
+      return [
+        section,
+        {
+          bg: blueConfig.pillBg,
+          text: blueConfig.pillText,
+          iconColor: blueConfig.pillIconColor,
+          hoverBorder: blueConfig.pillHoverBorder,
+          selectedBg: blueConfig.pillSelectedBg,
+          selectedText: blueConfig.pillSelectedText,
+          iconBg: blueConfig.pillIconBg,
+        },
+      ];
+    }
+
+    // All other sections derive from their phase group
+    const phaseConfig = getPhaseGroupConfig(phase);
+    return [
+      section,
+      {
+        bg: phaseConfig.pillBg,
+        text: phaseConfig.pillText,
+        iconColor: phaseConfig.pillIconColor,
+        hoverBorder: phaseConfig.pillHoverBorder,
+        selectedBg: phaseConfig.pillSelectedBg,
+        selectedText: phaseConfig.pillSelectedText,
+        iconBg: phaseConfig.pillIconBg,
+      },
+    ];
+  })
+) as Record<
+  ApplicationSection,
+  {
+    bg: string;
+    text: string;
+    iconColor: string;
+    hoverBorder: string;
+    selectedBg: string;
+    selectedText: string;
+    iconBg: string;
+  }
+>;
 
 // Stage order for determining past/future states in dropdown
 export const stageOrder: ApplicationSection[] = [
@@ -311,7 +361,7 @@ function SectionHeader({ section, count, isOpen, onToggle }: SectionHeaderProps)
         <CaretIcon size={18} weight="bold" className="text-[var(--primitive-green-800)]" />
       </button>
       <div className="flex items-center gap-2.5">
-        <Icon size={24} weight="fill" className={config.iconColor} />
+        <Icon size={24} weight={config.iconWeight} className={config.iconColor} />
         <span className="text-body-strong text-[var(--primitive-neutral-800)]">{config.label}</span>
         <div className="flex items-center rounded bg-[var(--primitive-neutral-200)] px-0.5">
           <span className="w-5 text-center text-caption-strong text-[var(--primitive-neutral-800)]">
@@ -649,9 +699,23 @@ function TableRow({
 
       {/* Company Cell */}
       <div className="flex h-[80px] w-[250px] items-center px-3 py-6">
-        <span className="truncate text-caption text-[var(--primitive-neutral-600)]">
-          {application.company}
-        </span>
+        <div className="min-w-0 flex-1">
+          <span className="block truncate text-caption text-[var(--primitive-neutral-600)]">
+            {application.company}
+          </span>
+          {application.stageName && (
+            <span className="block truncate text-caption-sm text-[var(--primitive-neutral-500)]">
+              {application.stageName}
+              {application.phaseProgress && application.phaseProgress.total > 1 && (
+                <>
+                  {" "}
+                  &middot; Step {application.phaseProgress.current} of{" "}
+                  {application.phaseProgress.total}
+                </>
+              )}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Stage Cell */}
@@ -700,7 +764,7 @@ function EmptyState({ section, onAction }: EmptyStateProps) {
   return (
     <div className="flex h-[204px] flex-col items-center justify-center gap-4 overflow-hidden p-6">
       <div className={cn("flex size-6 items-center justify-center rounded", config.emptyIconBg)}>
-        <Icon size={18} weight="fill" className="text-white" />
+        <Icon size={18} weight={config.iconWeight} className="text-white" />
       </div>
       <div className="flex w-[492px] flex-col items-center justify-center">
         <span className="text-body-strong text-[var(--primitive-neutral-900)]">

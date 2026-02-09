@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ListBullets, Circle, CheckSquare, Upload } from "@phosphor-icons/react";
 import type { KanbanStageType } from "@/components/ui/kanban";
+import { getPhaseGroup } from "@/lib/pipeline/stage-registry";
 
 // ============================================
 // HELPERS — Role Edit Page
@@ -45,9 +46,14 @@ export function getQuestionIconWithBg(type: string): React.ReactNode {
   }
 }
 
-/** Map stage IDs to KanbanStageType for semantic icons */
+/**
+ * Map stage IDs to KanbanStageType for semantic icons.
+ * Uses the stage registry's phase group to determine the kanban type,
+ * falling back to direct ID match for built-in stages.
+ */
 export function mapStageToKanbanType(stageId: string): KanbanStageType {
-  const mapping: Record<string, KanbanStageType> = {
+  // Direct match for built-in stages (preserves existing behavior)
+  const directMapping: Record<string, KanbanStageType> = {
     applied: "applied",
     screening: "screening",
     qualified: "qualified",
@@ -57,7 +63,20 @@ export function mapStageToKanbanType(stageId: string): KanbanStageType {
     rejected: "rejected",
     "talent-pool": "talent-pool",
   };
-  return mapping[stageId] || "applied";
+  if (directMapping[stageId]) return directMapping[stageId];
+
+  // For custom stages, derive from phase group
+  const phaseGroup = getPhaseGroup(stageId);
+  const phaseToKanban: Record<string, KanbanStageType> = {
+    applied: "applied",
+    review: "screening",
+    interview: "interview",
+    offer: "offer",
+    hired: "hired",
+    rejected: "rejected",
+    "talent-pool": "talent-pool",
+  };
+  return phaseToKanban[phaseGroup] || "applied";
 }
 
 /** Format relative time for application dates */
@@ -82,30 +101,26 @@ export function getMatchScoreBadgeVariant(score: number | null): "success" | "wa
   return "neutral";
 }
 
-/** Get badge variant for application stage */
+/**
+ * Get badge variant for application stage.
+ * Uses the stage registry's phase group to determine the badge variant,
+ * so custom stages automatically get the correct color.
+ */
 export function getStageBadgeVariant(
   stage: string
 ): "neutral" | "info" | "success" | "warning" | "error" {
-  switch (stage) {
-    case "applied":
-      return "info";
-    case "screening":
-      return "info";
-    case "qualified":
-      return "info";
-    case "interview":
-      return "warning";
-    case "offer":
-      return "success";
-    case "hired":
-      return "success";
-    case "rejected":
-      return "error";
-    case "talent-pool":
-      return "warning";
-    default:
-      return "neutral";
-  }
+  const phaseGroup = getPhaseGroup(stage);
+  const phaseToVariant: Record<string, "neutral" | "info" | "success" | "warning" | "error"> = {
+    applied: "info",
+    review: "info",
+    interview: "warning",
+    offer: "success",
+    hired: "success",
+    rejected: "error",
+    withdrawn: "neutral",
+    "talent-pool": "warning",
+  };
+  return phaseToVariant[phaseGroup] ?? "neutral";
 }
 
 /** Format stage name for display (capitalize first letter) */

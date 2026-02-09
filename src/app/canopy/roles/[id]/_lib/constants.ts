@@ -161,10 +161,10 @@ export const formToSalaryPeriod: Record<string, string> = {
 };
 
 export const defaultStages = [
-  { id: "applied", name: "Applied" },
-  { id: "screening", name: "Screening" },
-  { id: "qualified", name: "Qualified" },
-  { id: "interview", name: "Interview" },
-  { id: "offer", name: "Offer" },
-  { id: "hired", name: "Hired" },
+  { id: "applied", name: "Applied", phaseGroup: "applied" as const },
+  { id: "screening", name: "Screening", phaseGroup: "review" as const },
+  { id: "qualified", name: "Qualified", phaseGroup: "review" as const },
+  { id: "interview", name: "Interview", phaseGroup: "interview" as const },
+  { id: "offer", name: "Offer", phaseGroup: "offer" as const },
+  { id: "hired", name: "Hired", phaseGroup: "hired" as const },
 ];

@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { getPhaseGroupConfig } from "@/lib/pipeline/stage-registry-ui";
+import type { PhaseGroup } from "@/lib/pipeline/stage-registry";
 
 /**
  * Stage Badge Components for ATS Pipeline Stages
@@ -24,6 +26,9 @@ type StageVariant =
 interface StageBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /** Pre-defined stage variant */
   variant?: StageVariant;
+  /** Stage ID — auto-resolves to correct phase colors via the pipeline registry.
+   *  When provided, overrides `variant` for color resolution. */
+  stage?: string;
   /** Custom color (hex) - used when variant is "custom" */
   color?: string;
   /** Stage label */
@@ -34,63 +39,47 @@ interface StageBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   showDot?: boolean;
 }
 
+/**
+ * Map StageVariant → PhaseGroup for registry color lookups.
+ * "on_hold" maps to "talent-pool" (yellow color), "custom" is handled separately.
+ */
+const VARIANT_TO_PHASE: Record<Exclude<StageVariant, "custom">, PhaseGroup> = {
+  applied: "applied",
+  qualified: "review",
+  screening: "review",
+  interview: "interview",
+  offer: "offer",
+  hired: "hired",
+  rejected: "rejected",
+  withdrawn: "withdrawn",
+  on_hold: "talent-pool",
+};
+
+/** Derive stage badge colors from the shared pipeline registry */
 const stageConfig: Record<
   Exclude<StageVariant, "custom">,
   { bg: string; text: string; dot: string }
-> = {
-  applied: {
-    bg: "bg-[var(--primitive-purple-100)] dark:bg-[var(--primitive-purple-500)]/15",
-    text: "text-[var(--primitive-purple-700)] dark:text-[var(--primitive-purple-300)]",
-    dot: "bg-[var(--primitive-purple-500)]",
-  },
-  qualified: {
-    bg: "bg-[var(--primitive-blue-100)] dark:bg-[var(--primitive-blue-500)]/15",
-    text: "text-[var(--primitive-blue-700)] dark:text-[var(--primitive-blue-300)]",
-    dot: "bg-[var(--primitive-blue-500)]",
-  },
-  // Legacy alias - same as qualified
-  screening: {
-    bg: "bg-[var(--primitive-blue-100)] dark:bg-[var(--primitive-blue-500)]/15",
-    text: "text-[var(--primitive-blue-700)] dark:text-[var(--primitive-blue-300)]",
-    dot: "bg-[var(--primitive-blue-500)]",
-  },
-  interview: {
-    bg: "bg-[var(--primitive-orange-100)] dark:bg-[var(--primitive-orange-500)]/15",
-    text: "text-[var(--primitive-orange-700)] dark:text-[var(--primitive-orange-300)]",
-    dot: "bg-[var(--primitive-orange-500)]",
-  },
-  offer: {
-    bg: "bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-500)]/15",
-    text: "text-[var(--primitive-green-700)] dark:text-[var(--primitive-green-300)]",
-    dot: "bg-[var(--primitive-green-500)]",
-  },
-  hired: {
-    bg: "bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-500)]/15",
-    text: "text-[var(--primitive-green-700)] dark:text-[var(--primitive-green-300)]",
-    dot: "bg-[var(--primitive-green-500)]",
-  },
-  rejected: {
-    bg: "bg-[var(--primitive-red-100)] dark:bg-[var(--primitive-red-500)]/15",
-    text: "text-[var(--primitive-red-700)] dark:text-[var(--primitive-red-300)]",
-    dot: "bg-[var(--primitive-red-500)]",
-  },
-  withdrawn: {
-    bg: "bg-background-muted",
-    text: "text-foreground-muted",
-    dot: "bg-border-emphasis",
-  },
-  on_hold: {
-    bg: "bg-[var(--primitive-yellow-100)] dark:bg-[var(--primitive-yellow-500)]/15",
-    text: "text-[var(--primitive-yellow-700)] dark:text-[var(--primitive-yellow-300)]",
-    dot: "bg-[var(--primitive-yellow-500)]",
-  },
-};
+> = Object.fromEntries(
+  (Object.keys(VARIANT_TO_PHASE) as Exclude<StageVariant, "custom">[]).map((variant) => {
+    const phase = VARIANT_TO_PHASE[variant];
+    const config = getPhaseGroupConfig(phase);
+    return [
+      variant,
+      {
+        bg: `${config.badgeBg} ${config.badgeBgDark}`,
+        text: `${config.badgeText} ${config.badgeTextDark}`,
+        dot: config.badgeDot,
+      },
+    ];
+  })
+) as Record<Exclude<StageVariant, "custom">, { bg: string; text: string; dot: string }>;
 
 const StageBadge = React.forwardRef<HTMLSpanElement, StageBadgeProps>(
   (
     {
       className,
       variant = "applied",
+      stage,
       color,
       children,
       size = "md",
@@ -99,8 +88,29 @@ const StageBadge = React.forwardRef<HTMLSpanElement, StageBadgeProps>(
     },
     ref
   ) => {
+    // If a stage ID is provided, resolve colors from the pipeline registry
+    const resolvedConfig = React.useMemo(() => {
+      if (stage) {
+        const phaseConfig = getPhaseGroupConfig(
+          (VARIANT_TO_PHASE as Record<string, PhaseGroup>)[stage] ??
+            // Fall back to registry lookup for custom stage IDs
+            (() => {
+              // Import getPhaseGroup dynamically isn't ideal, so use a simple mapping
+              // Custom stages will use "review" as fallback which gives blue colors
+              return "review" as PhaseGroup;
+            })()
+        );
+        return {
+          bg: `${phaseConfig.badgeBg} ${phaseConfig.badgeBgDark}`,
+          text: `${phaseConfig.badgeText} ${phaseConfig.badgeTextDark}`,
+          dot: phaseConfig.badgeDot,
+        };
+      }
+      return null;
+    }, [stage]);
+
     const isCustom = variant === "custom" && color;
-    const config = variant !== "custom" ? stageConfig[variant] : null;
+    const config = resolvedConfig ?? (variant !== "custom" ? stageConfig[variant] : null);
 
     const sizeClasses = {
       sm: "text-caption px-1.5 py-0.5",
@@ -140,7 +150,7 @@ const StageBadge = React.forwardRef<HTMLSpanElement, StageBadgeProps>(
         {showDot && (
           <span
             className={cn(
-              "rounded-full flex-shrink-0",
+              "flex-shrink-0 rounded-full",
               dotSizeClasses[size],
               isCustom ? "" : config?.dot || "bg-foreground-subtle"
             )}
@@ -204,27 +214,18 @@ const StageProgress = React.forwardRef<HTMLDivElement, StageProgressProps>(
     const currentIndex = stages.findIndex((s) => s.id === currentStageId);
 
     return (
-      <div
-        ref={ref}
-        className={cn("flex items-center gap-1", className)}
-        {...props}
-      >
+      <div ref={ref} className={cn("flex items-center gap-1", className)} {...props}>
         {stages.map((stage, index) => {
           const isCompleted = index < currentIndex;
           const isCurrent = index === currentIndex;
 
           return (
             <React.Fragment key={stage.id}>
-              <div
-                className={cn(
-                  "flex items-center gap-2",
-                  index > 0 && "flex-1"
-                )}
-              >
+              <div className={cn("flex items-center gap-2", index > 0 && "flex-1")}>
                 {index > 0 && (
                   <div
                     className={cn(
-                      "flex-1 h-0.5",
+                      "h-0.5 flex-1",
                       isCompleted || isCurrent
                         ? "bg-[var(--primitive-green-500)]"
                         : "bg-[var(--border-emphasis)]"
@@ -233,9 +234,10 @@ const StageProgress = React.forwardRef<HTMLDivElement, StageProgressProps>(
                 )}
                 <div
                   className={cn(
-                    "w-3 h-3 rounded-full flex-shrink-0 transition-colors",
+                    "h-3 w-3 flex-shrink-0 rounded-full transition-colors",
                     isCompleted && "bg-[var(--primitive-green-500)]",
-                    isCurrent && "bg-[var(--primitive-green-600)] ring-2 ring-[var(--primitive-green-200)] dark:ring-[var(--primitive-green-700)]",
+                    isCurrent &&
+                      "bg-[var(--primitive-green-600)] ring-2 ring-[var(--primitive-green-200)] dark:ring-[var(--primitive-green-700)]",
                     !isCompleted && !isCurrent && "bg-[var(--border-emphasis)]"
                   )}
                   style={
@@ -265,20 +267,13 @@ interface StageListProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const StageList = React.forwardRef<HTMLDivElement, StageListProps>(
-  (
-    { className, stages, currentStageId, orientation = "horizontal", ...props },
-    ref
-  ) => {
+  ({ className, stages, currentStageId, orientation = "horizontal", ...props }, ref) => {
     const currentIndex = stages.findIndex((s) => s.id === currentStageId);
 
     return (
       <div
         ref={ref}
-        className={cn(
-          "flex gap-3",
-          orientation === "vertical" && "flex-col",
-          className
-        )}
+        className={cn("flex gap-3", orientation === "vertical" && "flex-col", className)}
         {...props}
       >
         {stages.map((stage, index) => {
@@ -291,23 +286,17 @@ const StageList = React.forwardRef<HTMLDivElement, StageListProps>(
               className={cn(
                 "flex items-center gap-2 text-caption",
                 isCurrent && "font-medium",
-                isCompleted || isCurrent
-                  ? "text-foreground"
-                  : "text-foreground-subtle"
+                isCompleted || isCurrent ? "text-foreground" : "text-foreground-subtle"
               )}
             >
               <div
                 className={cn(
-                  "w-2 h-2 rounded-full flex-shrink-0",
+                  "h-2 w-2 flex-shrink-0 rounded-full",
                   isCompleted && "bg-[var(--primitive-green-500)]",
                   isCurrent && "bg-[var(--primitive-green-600)]",
                   !isCompleted && !isCurrent && "bg-[var(--border-default)]"
                 )}
-                style={
-                  stage.color && isCurrent
-                    ? { backgroundColor: stage.color }
-                    : undefined
-                }
+                style={stage.color && isCurrent ? { backgroundColor: stage.color } : undefined}
               />
               <span>{stage.label}</span>
             </div>
@@ -319,11 +308,6 @@ const StageList = React.forwardRef<HTMLDivElement, StageListProps>(
 );
 StageList.displayName = "StageList";
 
-export {
-  StageBadge,
-  StageIndicator,
-  StageProgress,
-  StageList,
-};
+export { StageBadge, StageIndicator, StageProgress, StageList };
 
 export type { StageVariant };

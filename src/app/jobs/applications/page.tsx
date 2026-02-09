@@ -10,9 +10,12 @@ import {
   type JobApplication,
   type ApplicationSection,
   type EmojiReaction,
+  type PhaseProgress,
 } from "@/components/ui/job-application-table";
 import { Briefcase } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import { getSeekerSection } from "@/lib/pipeline/stage-registry";
+import { useApplicationUpdates } from "@/hooks/use-application-updates";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -39,6 +42,15 @@ interface ApiApplication {
     scheduledAt: string;
     type: string;
   } | null;
+  // Enriched stage metadata
+  stageName?: string;
+  phaseGroup?: string;
+  seekerSection?: string;
+  phaseProgress?: {
+    current: number;
+    total: number;
+    stages: string[];
+  };
 }
 
 interface ApiSavedJob {
@@ -51,7 +63,8 @@ interface ApiSavedJob {
   };
 }
 
-const POLL_INTERVAL_MS = 30_000; // 30 seconds
+const POLL_INTERVAL_DEFAULT_MS = 30_000; // 30 seconds (when Realtime is not connected)
+const POLL_INTERVAL_REALTIME_MS = 60_000; // 60 seconds (fallback when Realtime is active)
 const REACTIONS_STORAGE_KEY = "your-jobs-reactions";
 const FAVORITES_STORAGE_KEY = "your-jobs-favorites";
 const STAGES_STORAGE_KEY = "your-jobs-stage-overrides";
@@ -60,26 +73,13 @@ const STAGES_STORAGE_KEY = "your-jobs-stage-overrides";
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-/** Map API status string to ApplicationSection */
+/**
+ * Map API status string to ApplicationSection.
+ * Delegates to the shared stage registry so both portals use the
+ * same phase-group → seeker-section mapping.
+ */
 function mapStatusToSection(status: string): ApplicationSection {
-  switch (status.toLowerCase()) {
-    case "new":
-    case "applied":
-      return "applied";
-    case "screening":
-    case "reviewing":
-    case "interview":
-      return "interview";
-    case "offer":
-      return "offer";
-    case "hired":
-      return "hired";
-    case "rejected":
-    case "withdrawn":
-      return "ineligible";
-    default:
-      return "applied";
-  }
+  return getSeekerSection(status) as ApplicationSection;
 }
 
 /** Get initials from a company name (e.g., "Aurora Climate" → "AC") */
@@ -123,6 +123,8 @@ export default function YourJobsPage() {
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const pollRef = useRef<NodeJS.Timeout | null>(null);
+  const [seekerId, setSeekerId] = useState<string | null>(null);
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
 
   // Local state maps persisted in localStorage
   const [reactions, setReactions] = useState<Record<string, EmojiReaction>>({});
@@ -150,6 +152,10 @@ export default function YourJobsPage() {
 
         if (appsRes.ok) {
           const data = await appsRes.json();
+          // Capture seekerId from API response for Realtime subscription
+          if (data.seekerId && !seekerId) {
+            setSeekerId(data.seekerId);
+          }
           const apiApps: ApiApplication[] = data.applications ?? [];
           appItems = apiApps.map((app) => ({
             id: app.job.id, // Use job ID for consistency with track page
@@ -157,7 +163,19 @@ export default function YourJobsPage() {
             company: app.job.company || "Unknown Company",
             companyLogo: app.job.logo || undefined,
             companyInitials: getInitials(app.job.company || "UC"),
-            stage: stageOverrides[app.job.id] ?? mapStatusToSection(app.status),
+            // Prefer API-provided seekerSection when available
+            stage:
+              stageOverrides[app.job.id] ??
+              (app.seekerSection as ApplicationSection | undefined) ??
+              mapStatusToSection(app.status),
+            stageName: app.stageName,
+            phaseProgress: app.phaseProgress
+              ? {
+                  current: app.phaseProgress.current,
+                  total: app.phaseProgress.total,
+                  stages: app.phaseProgress.stages,
+                }
+              : undefined,
             activity: app.updatedAt,
             reaction: reactions[app.job.id] ?? undefined,
             isFavorite: favorites[app.job.id] ?? false,
@@ -194,21 +212,40 @@ export default function YourJobsPage() {
         if (!isPolling) setLoading(false);
       }
     },
-    [reactions, favorites, stageOverrides]
+    [reactions, favorites, stageOverrides, seekerId]
   );
 
   /* ---- initial fetch + polling ----------------------------------- */
   useEffect(() => {
     fetchData(false);
 
+    // Use longer poll interval when Realtime is connected
+    const interval = realtimeConnected ? POLL_INTERVAL_REALTIME_MS : POLL_INTERVAL_DEFAULT_MS;
+
     pollRef.current = setInterval(() => {
       fetchData(true);
-    }, POLL_INTERVAL_MS);
+    }, interval);
 
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [fetchData]);
+  }, [fetchData, realtimeConnected]);
+
+  /* ---- Supabase Realtime subscription ---------------------------- */
+  useApplicationUpdates({
+    seekerId,
+    onStageChange: useCallback(() => {
+      // When a stage change comes through Realtime, refetch to get enriched data
+      fetchData(true);
+    }, [fetchData]),
+    onNewApplication: useCallback(() => {
+      // When a new application is inserted, refetch
+      fetchData(true);
+    }, [fetchData]),
+    onConnectionChange: useCallback((connected: boolean) => {
+      setRealtimeConnected(connected);
+    }, []),
+  });
 
   /* ---- callbacks ------------------------------------------------- */
   const handleStageChange = useCallback((applicationId: string, newStage: ApplicationSection) => {
