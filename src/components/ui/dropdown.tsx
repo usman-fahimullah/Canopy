@@ -143,7 +143,7 @@ const DropdownContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-dropdown min-w-[8rem] overflow-hidden",
+        "relative z-popover min-w-[8rem] overflow-hidden",
         // Figma: white bg, 8px radius
         "rounded-lg bg-[var(--select-content-background)]",
         // Shadow on open - elevated shadow for visibility
