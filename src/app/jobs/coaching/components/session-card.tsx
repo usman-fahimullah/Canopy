@@ -5,6 +5,7 @@ import { CalendarBlank, Clock, VideoCamera } from "@phosphor-icons/react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TruncateText } from "@/components/ui/truncate-text";
 
 interface SessionCardProps {
   session: {
@@ -46,13 +47,13 @@ export function SessionCard({ session }: SessionCardProps) {
 
       <div className="min-w-0 flex-1">
         {/* Coach info */}
-        <p className="truncate text-body font-semibold text-[var(--primitive-green-800)]">
+        <TruncateText className="text-body font-semibold text-[var(--primitive-green-800)]">
           {session.coach.name}
-        </p>
+        </TruncateText>
         {session.coach.headline && (
-          <p className="truncate text-caption text-[var(--primitive-neutral-600)]">
+          <TruncateText className="text-caption text-[var(--primitive-neutral-600)]">
             {session.coach.headline}
-          </p>
+          </TruncateText>
         )}
 
         {/* Date and duration */}

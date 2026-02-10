@@ -14,6 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SwitchWithLabel } from "@/components/ui/switch";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { Toast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/client";
 import { logger, formatError } from "@/lib/logger";
@@ -420,10 +421,12 @@ function TeamPermissionsSection({
                   />
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-foreground-default truncate text-body-sm font-medium">
+                    <TruncateText className="text-foreground-default text-body-sm font-medium">
                       {member.name || "Unnamed"}
-                    </p>
-                    <p className="truncate text-caption text-foreground-muted">{member.email}</p>
+                    </TruncateText>
+                    <TruncateText className="text-caption text-foreground-muted">
+                      {member.email}
+                    </TruncateText>
                   </div>
 
                   <Badge variant={roleBadgeVariant(member.role)} size="sm">

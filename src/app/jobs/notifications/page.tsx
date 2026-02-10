@@ -13,6 +13,7 @@ import {
   EnvelopeSimple,
   CalendarDots,
 } from "@phosphor-icons/react";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { logger, formatError } from "@/lib/logger";
 
 interface Notification {
@@ -156,9 +157,9 @@ export default function TalentNotificationsPage() {
                           >
                             {notif.title}
                           </p>
-                          <p className="truncate text-caption text-foreground-muted">
+                          <TruncateText className="text-caption text-foreground-muted">
                             {notif.body}
-                          </p>
+                          </TruncateText>
                         </div>
                         <span className="flex-shrink-0 text-caption text-foreground-muted">
                           {new Date(notif.createdAt).toLocaleTimeString("en-US", {

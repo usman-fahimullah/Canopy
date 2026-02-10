@@ -993,7 +993,7 @@ const AvatarStack = React.forwardRef<HTMLDivElement, AvatarStackProps>(
         <div
           className={cn(
             "flex items-center gap-0.5 text-sm text-[var(--primitive-neutral-800)]",
-            "min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap"
+            "min-w-0 flex-1 truncate"
           )}
         >
           {showCount && <span>{totalCount}</span>}

@@ -17,6 +17,7 @@ import {
   MapPin,
   Plus,
 } from "@phosphor-icons/react";
+import { TruncateText } from "@/components/ui/truncate-text";
 import type { DashboardData } from "@/lib/services/dashboard";
 
 function getGreeting() {
@@ -186,9 +187,9 @@ export function DashboardView({ data }: DashboardViewProps) {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-body font-medium text-[var(--foreground-default)]">
+                  <TruncateText className="text-body font-medium text-[var(--foreground-default)]">
                     {job.title}
-                  </p>
+                  </TruncateText>
                   <div className="flex items-center gap-2 text-caption text-[var(--foreground-muted)]">
                     {job.location && (
                       <span className="flex items-center gap-1">
@@ -240,9 +241,9 @@ export function DashboardView({ data }: DashboardViewProps) {
                 className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-body font-medium text-[var(--foreground-default)]">
+                  <TruncateText className="text-body font-medium text-[var(--foreground-default)]">
                     {app.candidate.name}
-                  </p>
+                  </TruncateText>
                   <p className="text-caption text-[var(--foreground-muted)]">
                     {app.job.title} ·{" "}
                     {new Date(app.createdAt).toLocaleDateString("en-US", {

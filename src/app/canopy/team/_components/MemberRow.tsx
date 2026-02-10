@@ -2,6 +2,7 @@
 
 import type { OrgMemberRole } from "@prisma/client";
 import { Avatar } from "@/components/ui/avatar";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,10 +46,12 @@ export function MemberRow({ member, currentUserRole, onRoleChange, onRemove }: M
         <div className="flex items-center gap-3">
           <Avatar name={member.name} src={member.avatar ?? undefined} size="default" />
           <div className="min-w-0">
-            <p className="truncate text-body-sm font-medium text-[var(--foreground-default)]">
+            <TruncateText className="text-body-sm font-medium text-[var(--foreground-default)]">
               {member.name}
-            </p>
-            <p className="truncate text-caption text-[var(--foreground-muted)]">{member.email}</p>
+            </TruncateText>
+            <TruncateText className="text-caption text-[var(--foreground-muted)]">
+              {member.email}
+            </TruncateText>
           </div>
         </div>
       </td>

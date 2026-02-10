@@ -176,6 +176,7 @@ export {
   type TooltipContentProps,
   type SimpleTooltipProps,
 } from "./tooltip";
+export { TruncateText, type TruncateTextProps } from "./truncate-text";
 export {
   CoachTip,
   CoachTipTrigger,

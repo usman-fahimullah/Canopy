@@ -7,6 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { DatePicker } from "@/components/ui/date-picker";
 import { RoleTemplateCard } from "@/components/ui/role-template-card";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { TruncateText } from "@/components/ui/truncate-text";
 import {
   Select,
   SelectContent,
@@ -131,13 +132,13 @@ function MemberPickerSection({
             size="default"
           />
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-caption-strong font-bold text-[var(--foreground-default)]">
+            <TruncateText className="text-caption-strong font-bold text-[var(--foreground-default)]">
               {selectedMember.name}
-            </span>
+            </TruncateText>
             {selectedMember.title && (
-              <span className="truncate text-caption-sm text-[var(--foreground-subtle)]">
+              <TruncateText className="text-caption-sm text-[var(--foreground-subtle)]">
                 {selectedMember.title}
-              </span>
+              </TruncateText>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -289,13 +290,13 @@ function ReviewerPickerSection({
             >
               <Avatar name={member.name} src={member.avatar ?? undefined} size="default" />
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-caption-strong font-bold text-[var(--foreground-default)]">
+                <TruncateText className="text-caption-strong font-bold text-[var(--foreground-default)]">
                   {member.name}
-                </span>
+                </TruncateText>
                 {member.title && (
-                  <span className="truncate text-caption-sm text-[var(--foreground-subtle)]">
+                  <TruncateText className="text-caption-sm text-[var(--foreground-subtle)]">
                     {member.title}
-                  </span>
+                  </TruncateText>
                 )}
               </div>
               <SimpleTooltip content="Remove" side="top" variant="dark">

@@ -2,6 +2,7 @@
 
 import type { OrgMemberRole } from "@prisma/client";
 import { Avatar } from "@/components/ui/avatar";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,9 +39,9 @@ export function PendingInviteRow({
         <div className="flex items-center gap-3">
           <Avatar name={invite.email} size="default" />
           <div className="min-w-0">
-            <p className="truncate text-body-sm font-medium text-[var(--foreground-default)]">
+            <TruncateText className="text-body-sm font-medium text-[var(--foreground-default)]">
               {invite.email}
-            </p>
+            </TruncateText>
             <Badge variant={roleBadgeVariant(invite.role)} size="sm" className="mt-1">
               {formatRoleName(invite.role)}
             </Badge>

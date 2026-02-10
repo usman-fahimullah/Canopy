@@ -21,6 +21,7 @@ import {
   SegmentedController,
   EmptyState,
   Chip,
+  TruncateText,
 } from "@/components/ui";
 import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from "@/components/ui/tabs";
 import { MentorListItem, MentorDetailPanel } from "@/components/coaching";
@@ -404,25 +405,24 @@ function MentorAssignmentCard({
 
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-center gap-2">
-            <span className="truncate text-body-sm font-semibold text-[var(--foreground-default)]">
+            <TruncateText className="text-body-sm font-semibold text-[var(--foreground-default)]">
               {assignment.name}
-            </span>
+            </TruncateText>
             <Badge variant={status.variant} size="sm">
               {status.label}
             </Badge>
           </div>
 
           {assignment.headline && (
-            <p className="mb-2 truncate text-caption text-[var(--foreground-muted)]">
+            <TruncateText className="mb-2 text-caption text-[var(--foreground-muted)]">
               {assignment.headline}
-            </p>
+            </TruncateText>
           )}
 
           {!assignment.headline && assignment.role && (
-            <p className="mb-2 truncate text-caption text-[var(--foreground-muted)]">
-              {assignment.role}
-              {assignment.specialty ? ` \u00B7 ${assignment.specialty}` : ""}
-            </p>
+            <TruncateText className="mb-2 text-caption text-[var(--foreground-muted)]">
+              {`${assignment.role}${assignment.specialty ? ` \u00B7 ${assignment.specialty}` : ""}`}
+            </TruncateText>
           )}
 
           {specialties.length > 0 && (

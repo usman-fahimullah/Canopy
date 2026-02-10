@@ -3,6 +3,7 @@
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { Bell, Check, BriefcaseMetal, ChatCircleDots, Users, Warning } from "@phosphor-icons/react";
 import {
   useNotificationsQuery,
@@ -169,9 +170,9 @@ export default function EmployerNotificationsPage() {
                           >
                             {notif.title}
                           </p>
-                          <p className="truncate text-caption text-foreground-muted">
+                          <TruncateText className="text-caption text-foreground-muted">
                             {notif.body}
-                          </p>
+                          </TruncateText>
                         </div>
                         <span className="flex-shrink-0 text-caption text-foreground-muted">
                           {new Date(notif.createdAt).toLocaleTimeString("en-US", {

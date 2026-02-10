@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from "@/components/ui/dropdown";
 import { Spinner } from "@/components/ui/spinner";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { logger } from "@/lib/logger";
 import {
   CaretLeft,
@@ -310,9 +311,9 @@ export default function CalendarPage() {
                                     size="xs"
                                   />
                                 )}
-                                <p className="truncate text-caption text-[var(--foreground-muted)]">
+                                <TruncateText className="text-caption text-[var(--foreground-muted)]">
                                   {interview.interviewer.account.name}
-                                </p>
+                                </TruncateText>
                               </div>
 
                               {interview.meetingLink && interview.type === "VIDEO" && (

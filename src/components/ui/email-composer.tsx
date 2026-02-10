@@ -443,7 +443,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   {template.category}
                 </span>
               )}
-              <span className="line-clamp-1 text-sm font-medium text-[var(--foreground-default)]">
+              <span className="truncate text-sm font-medium text-[var(--foreground-default)]">
                 {template.name}
               </span>
               <span className="mt-1 line-clamp-2 text-xs text-[var(--foreground-subtle)]">

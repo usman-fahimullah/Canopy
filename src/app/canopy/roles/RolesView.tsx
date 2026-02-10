@@ -305,7 +305,7 @@ function OpenRolesSection({ jobs }: { jobs: RoleListItem[] }) {
                       href={`/canopy/roles/${job.id}`}
                       className="font-medium text-[var(--foreground-default)] hover:underline"
                     >
-                      <span className="line-clamp-1">{job.title}</span>
+                      <span className="truncate">{job.title}</span>
                     </Link>
                   </TableCell>
                   <TableCell>

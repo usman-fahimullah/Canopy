@@ -80,7 +80,7 @@ export function PageOverviewPanel({
                   {index + 1}
                 </span>
                 <span
-                  className={`flex-1 truncate ${isHidden ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-default)]"}`}
+                  className={`min-w-0 flex-1 truncate ${isHidden ? "text-[var(--foreground-disabled)]" : "text-[var(--foreground-default)]"}`}
                 >
                   {SECTION_LABELS[section.type] || section.type}
                 </span>

@@ -233,7 +233,7 @@ function SelectCoachStep({
                   </p>
 
                   {coach.headline && (
-                    <p className="mt-0.5 line-clamp-1 text-caption text-[var(--foreground-muted)]">
+                    <p className="mt-0.5 truncate text-caption text-[var(--foreground-muted)]">
                       {coach.headline}
                     </p>
                   )}

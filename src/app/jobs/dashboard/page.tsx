@@ -10,6 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { stageBadgeVariant } from "@/lib/jobs/helpers";
 import { Card } from "@/components/ui/card";
+import { TruncateText } from "@/components/ui/truncate-text";
 import {
   MagnifyingGlass,
   Table,
@@ -228,10 +229,12 @@ export default function TalentDashboardPage() {
                   <Buildings size={20} weight="fill" className="text-[var(--foreground-info)]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-foreground-default truncate text-body font-medium">
+                  <TruncateText className="text-foreground-default text-body font-medium">
                     {job.title}
-                  </p>
-                  <p className="truncate text-caption text-foreground-muted">{job.company}</p>
+                  </TruncateText>
+                  <TruncateText className="text-caption text-foreground-muted">
+                    {job.company}
+                  </TruncateText>
                 </div>
                 {job.location && (
                   <div className="hidden items-center gap-1 text-caption text-foreground-muted sm:flex">
@@ -288,9 +291,9 @@ export default function TalentDashboardPage() {
                 className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-foreground-default truncate text-body font-medium">
+                  <TruncateText className="text-foreground-default text-body font-medium">
                     {app.job.title}
-                  </p>
+                  </TruncateText>
                   <p className="text-caption text-foreground-muted">
                     {app.job.organization?.name || "Company"} · Applied{" "}
                     {new Date(app.createdAt).toLocaleDateString("en-US", {

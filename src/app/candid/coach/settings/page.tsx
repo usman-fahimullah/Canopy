@@ -11,6 +11,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { SwitchWithLabel } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { createClient } from "@/lib/supabase/client";
 import {
   User,
@@ -199,9 +200,9 @@ function ProfileSection({
               </div>
             ) : (
               <>
-                <h3 className="text-foreground-default truncate text-body-strong font-semibold">
+                <TruncateText className="text-foreground-default text-body-strong font-semibold">
                   {profile.name}
-                </h3>
+                </TruncateText>
                 {profile.coachProfile?.headline && (
                   <p className="mt-0.5 text-body-sm text-foreground-muted">
                     {profile.coachProfile.headline}

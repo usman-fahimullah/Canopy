@@ -342,7 +342,7 @@ const LocationInput = React.forwardRef<HTMLInputElement, LocationInputProps>(
               "min-w-0 flex-1 bg-transparent outline-none",
               "text-lg font-medium leading-6 tracking-[-0.36px]",
               "placeholder:text-[var(--input-foreground-placeholder)]",
-              "overflow-hidden text-ellipsis whitespace-nowrap",
+              "truncate",
               hasValue ? "text-[var(--foreground-muted)]" : "text-[var(--foreground-subtle)]"
             )}
             {...props}
@@ -408,7 +408,7 @@ const RecentlySearchedItem = React.forwardRef<HTMLDivElement, RecentlySearchedIt
             className={cn(
               "text-lg font-medium leading-6 tracking-[-0.36px]",
               "text-[var(--primitive-neutral-800)]",
-              "overflow-hidden text-ellipsis whitespace-nowrap"
+              "truncate"
             )}
           >
             {text}

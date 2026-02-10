@@ -158,7 +158,7 @@ export function CoachCard({
         </div>
 
         {coach.headline && (
-          <p className="mt-1 line-clamp-1 text-body-sm text-[var(--foreground-muted)]">
+          <p className="mt-1 truncate text-body-sm text-[var(--foreground-muted)]">
             {coach.headline}
           </p>
         )}

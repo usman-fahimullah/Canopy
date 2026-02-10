@@ -17,6 +17,7 @@ import {
   EmptyStateNoResults,
   EmptyStateError,
 } from "@/components/ui/empty-state";
+import { TruncateText } from "@/components/ui/truncate-text";
 import {
   Star,
   CalendarBlank,
@@ -111,7 +112,12 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
     () => ({ skip, take, stage, matchScoreMin, matchScoreMax, source, search }),
     [skip, take, stage, matchScoreMin, matchScoreMax, source, search]
   );
-  const { data: candidatesData, isLoading, error, refetch } = useCandidatesQuery(filters, {
+  const {
+    data: candidatesData,
+    isLoading,
+    error,
+    refetch,
+  } = useCandidatesQuery(filters, {
     initialData,
   });
 
@@ -505,9 +511,9 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
 
                       {/* Info */}
                       <div className="min-w-0 flex-1">
-                        <p className="text-foreground-default truncate text-body font-medium">
+                        <TruncateText className="text-foreground-default text-body font-medium">
                           {candidateName}
-                        </p>
+                        </TruncateText>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-foreground-muted">
                           <span className="flex items-center gap-1">
                             <BriefcaseMetal size={12} weight="bold" />

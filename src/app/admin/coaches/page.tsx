@@ -18,6 +18,7 @@ import {
   CaretDown,
   MagnifyingGlass,
 } from "@phosphor-icons/react";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { logger, formatError } from "@/lib/logger";
 
 export default function AdminCoachesPage() {
@@ -202,14 +203,14 @@ function AdminCoachesContent() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="mb-1 flex items-center gap-2">
-                        <h3 className="truncate font-semibold text-[var(--primitive-green-800)]">
-                          {coach.firstName} {coach.lastName}
-                        </h3>
+                        <TruncateText className="font-semibold text-[var(--primitive-green-800)]">
+                          {`${coach.firstName ?? ""} ${coach.lastName ?? ""}`.trim()}
+                        </TruncateText>
                         <StatusBadge status={coach.status} />
                       </div>
-                      <p className="truncate text-sm text-[var(--primitive-neutral-600)]">
-                        {coach.headline}
-                      </p>
+                      <TruncateText className="text-sm text-[var(--primitive-neutral-600)]">
+                        {coach.headline ?? ""}
+                      </TruncateText>
                       <div className="mt-2 flex items-center gap-4 text-xs text-[var(--primitive-neutral-500)]">
                         <span className="flex items-center gap-1">
                           <Briefcase size={14} />

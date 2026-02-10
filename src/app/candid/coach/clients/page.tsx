@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Avatar } from "@/components/ui/avatar";
 import { Users, MagnifyingGlass, CalendarDots } from "@phosphor-icons/react";
 import { format } from "date-fns";
+import { TruncateText } from "@/components/ui/truncate-text";
 import { logger, formatError } from "@/lib/logger";
 
 interface Session {
@@ -167,9 +168,9 @@ export default function CoachClientsPage() {
                     color="green"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-body font-medium text-[var(--primitive-neutral-800)]">
+                    <TruncateText className="text-body font-medium text-[var(--primitive-neutral-800)]">
                       {client.name}
-                    </p>
+                    </TruncateText>
                   </div>
                 </div>
 

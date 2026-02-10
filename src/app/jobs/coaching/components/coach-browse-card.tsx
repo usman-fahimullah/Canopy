@@ -4,6 +4,7 @@ import { Star, ChatCircle } from "@phosphor-icons/react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TruncateText } from "@/components/ui/truncate-text";
 
 interface CoachBrowseCardProps {
   coach: {
@@ -31,12 +32,12 @@ export function CoachBrowseCard({ coach }: CoachBrowseCardProps) {
       <div className="flex items-start gap-4">
         <Avatar src={coach.avatar ?? undefined} name={coach.name} size="lg" shape="square" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-body font-semibold text-[var(--primitive-green-800)]">
+          <TruncateText className="text-body font-semibold text-[var(--primitive-green-800)]">
             {coach.name}
-          </p>
-          <p className="truncate text-caption text-[var(--primitive-neutral-600)]">
+          </TruncateText>
+          <TruncateText className="text-caption text-[var(--primitive-neutral-600)]">
             {coach.headline}
-          </p>
+          </TruncateText>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Button } from "@/components/ui";
+import { Avatar, Button, TruncateText } from "@/components/ui";
 import type { Recruiter } from "./types";
 
 interface RecruiterCardProps {
@@ -16,13 +16,13 @@ export function RecruiterCard({ recruiter, label = "Recruiter" }: RecruiterCardP
       <div className="flex items-center gap-3">
         <Avatar size="lg" src={recruiter.avatar ?? undefined} name={recruiter.name} />
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-body font-medium text-[var(--foreground-default)]">
+          <TruncateText className="text-body font-medium text-[var(--foreground-default)]">
             {recruiter.name}
-          </span>
+          </TruncateText>
           {recruiter.title && (
-            <span className="truncate text-sm text-[var(--foreground-subtle)]">
+            <TruncateText className="text-sm text-[var(--foreground-subtle)]">
               {recruiter.title}
-            </span>
+            </TruncateText>
           )}
         </div>
       </div>
