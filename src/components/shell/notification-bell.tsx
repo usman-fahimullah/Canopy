@@ -8,7 +8,7 @@ import { NotificationBadge } from "@/components/ui/notification-badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
-import type { Shell } from "@/lib/onboarding/types";
+import { getShellSlug, type Shell } from "@/lib/onboarding/types";
 
 function formatNotificationDate(date: string): string {
   const d = new Date(date);
@@ -168,7 +168,7 @@ export function ShellNotificationBell({ shell }: ShellNotificationBellProps) {
           {notifications.length > 0 && (
             <div className="border-t border-[var(--border-default)] px-4 py-2.5">
               <Link
-                href={`/${shell}/notifications`}
+                href={`/${getShellSlug(shell)}/notifications`}
                 onClick={() => setIsOpen(false)}
                 className="block text-center text-caption text-[var(--shell-nav-accent)] hover:underline"
               >
