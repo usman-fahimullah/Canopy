@@ -12,6 +12,14 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/modal";
+import {
   X,
   CaretUp,
   CaretDown,
@@ -25,7 +33,9 @@ import {
   Export,
   Archive,
   CheckCircle,
+  WarningCircle,
 } from "@phosphor-icons/react";
+import { getStageVisualConfig } from "@/lib/pipeline/stage-registry-ui";
 
 interface CandidateDetailNavBarProps {
   currentIndex?: number;
@@ -40,6 +50,8 @@ interface CandidateDetailNavBarProps {
   activePanel?: "review" | "comments" | "todo" | "history" | null;
   /** Pipeline stages available for this job */
   stages?: Array<{ id: string; name: string }>;
+  /** Candidate name — used in rejection confirmation modal */
+  candidateName?: string;
   onClose: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -60,6 +72,7 @@ export function CandidateDetailNavBar({
   isActionLoading,
   activePanel = null,
   stages = [],
+  candidateName,
   onClose,
   onPrevious,
   onNext,
@@ -71,6 +84,7 @@ export function CandidateDetailNavBar({
   onSaveToTalentPool,
 }: CandidateDetailNavBarProps) {
   const [overflowOpen, setOverflowOpen] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const splitButtonRef = useRef<HTMLDivElement>(null);
 
   // Hide reject/talent-pool actions if candidate is already in a terminal stage
@@ -159,29 +173,38 @@ export function CandidateDetailNavBar({
               </Button>
             </DropdownMenuTrigger>
           </SimpleTooltip>
-          <DropdownMenuContent align="end" className="min-w-[180px]">
-            {stages.map((stage) => (
-              <DropdownMenuItem
-                key={stage.id}
-                onClick={() => onAdvanceStage?.(stage.id)}
-                disabled={stage.id === currentStage}
-                className="flex items-center justify-between gap-2"
-              >
-                <span>{stage.name}</span>
-                {stage.id === currentStage && (
-                  <CheckCircle
-                    size={16}
-                    weight="fill"
-                    className="text-[var(--foreground-success)]"
-                  />
-                )}
-              </DropdownMenuItem>
-            ))}
+          <DropdownMenuContent align="end" className="min-w-[200px]">
+            {stages.map((stage) => {
+              const config = getStageVisualConfig(stage.id);
+              const isCurrent = stage.id === currentStage;
+              return (
+                <DropdownMenuItem
+                  key={stage.id}
+                  onClick={() => onAdvanceStage?.(stage.id)}
+                  disabled={isCurrent}
+                  className="flex items-center justify-between gap-2"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <span
+                      className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${config.badgeDot}`}
+                    />
+                    <span>{stage.name}</span>
+                  </span>
+                  {isCurrent && (
+                    <CheckCircle
+                      size={16}
+                      weight="fill"
+                      className="text-[var(--foreground-success)]"
+                    />
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
 
         {/* Reject + overflow actions SplitButton (non-terminal stages)
-            Left side: Reject action (direct click)
+            Left side: Reject action (opens confirmation modal)
             Right side: Opens overflow dropdown menu via controlled state */}
         {!isTerminalStage && (
           <DropdownMenu open={overflowOpen} onOpenChange={setOverflowOpen}>
@@ -190,12 +213,14 @@ export function CandidateDetailNavBar({
               <div ref={splitButtonRef} className="inline-flex">
                 <SplitButton
                   variant="outline"
-                  leftIcon={<Prohibit size={24} weight="bold" />}
+                  leftIcon={
+                    <Prohibit size={24} weight="bold" className="text-[var(--primitive-red-500)]" />
+                  }
                   rightIcon={<DotsThreeVertical size={24} weight="bold" />}
                   onPrimaryClick={(e) => {
                     // Prevent the DropdownMenuTrigger from capturing this click
                     e.stopPropagation();
-                    onReject?.();
+                    setRejectModalOpen(true);
                   }}
                   onSecondaryClick={(e) => {
                     e.stopPropagation();
@@ -257,6 +282,43 @@ export function CandidateDetailNavBar({
           </DropdownMenu>
         )}
       </div>
+
+      {/* ---- Rejection confirmation modal ---- */}
+      <Modal open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <ModalContent size="default">
+          <ModalHeader>
+            <ModalTitle>Reject candidate</ModalTitle>
+          </ModalHeader>
+          <ModalBody>
+            <div className="flex flex-col items-center gap-4 py-2 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--background-error)]">
+                <WarningCircle size={28} weight="fill" className="text-[var(--foreground-error)]" />
+              </div>
+              <p className="text-body text-[var(--foreground-default)]">
+                Are you sure you want to reject{" "}
+                <span className="font-semibold">{candidateName ?? "this candidate"}</span>? This
+                will move them out of the active pipeline and notify them of the decision.
+              </p>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="tertiary" onClick={() => setRejectModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setRejectModalOpen(false);
+                onReject?.();
+              }}
+              loading={isActionLoading}
+            >
+              <Prohibit size={16} weight="bold" className="mr-1.5" />
+              Reject Candidate
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </nav>
   );
 }

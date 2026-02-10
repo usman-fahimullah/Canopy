@@ -340,6 +340,7 @@ export function CandidateDetailView({
         isActionLoading={isActionLoading}
         activePanel={panelType}
         stages={jobStages}
+        candidateName={candidateName}
         onClose={handleClose}
         onPrevious={handlePrevious}
         onNext={handleNext}
