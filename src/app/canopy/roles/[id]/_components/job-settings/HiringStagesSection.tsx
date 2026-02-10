@@ -13,6 +13,24 @@ import {
   SelectValue,
 } from "@/components/ui/dropdown";
 import { Plus, Trash, DotsSixVertical, ArrowLeft } from "@phosphor-icons/react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { logger, formatError } from "@/lib/logger";
@@ -47,6 +65,94 @@ const phaseGroupColors: Record<string, string> = {
   offer: "warning",
   hired: "success",
 };
+
+// ============================================
+// SORTABLE STAGE ROW
+// ============================================
+
+function SortableStageRow({
+  stage,
+  onEdit,
+  onDelete,
+}: {
+  stage: StageDefinition;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: stage.id,
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-4 rounded-xl border border-[var(--border-default)] bg-[var(--background-default)] px-4 py-3.5",
+        "transition-all",
+        isDragging
+          ? "z-10 border-[var(--border-brand)] opacity-90 shadow-[var(--shadow-elevated)]"
+          : "hover:border-[var(--border-emphasis)]"
+      )}
+    >
+      <button
+        type="button"
+        className={cn(
+          "flex h-8 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg",
+          "text-[var(--foreground-disabled)] transition-colors",
+          "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--foreground-subtle)]",
+          "active:cursor-grabbing",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2"
+        )}
+        {...attributes}
+        {...listeners}
+        aria-label={`Drag to reorder ${stage.name}`}
+      >
+        <DotsSixVertical weight="bold" className="h-5 w-5" />
+      </button>
+
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <span className="truncate text-body-sm font-medium text-[var(--foreground-default)]">
+          {stage.name}
+        </span>
+        <Badge
+          variant={
+            (phaseGroupColors[stage.phaseGroup] as
+              | "info"
+              | "neutral"
+              | "feature"
+              | "warning"
+              | "success") ?? "neutral"
+          }
+        >
+          {stage.phaseGroup}
+        </Badge>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Button variant="tertiary" size="sm" onClick={onEdit}>
+          <span className="text-caption font-medium text-[var(--foreground-brand)]">Edit</span>
+        </Button>
+        {!stage.isBuiltIn && (
+          <Button
+            variant="tertiary"
+            size="icon"
+            className="h-8 w-8"
+            onClick={onDelete}
+            aria-label={`Delete ${stage.name}`}
+          >
+            <Trash weight="bold" className="h-4 w-4 text-[var(--foreground-error)]" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ============================================
 // STAGE SETTINGS PANEL
@@ -136,6 +242,11 @@ export function HiringStagesSection({ roleId }: HiringStagesSectionProps) {
   const [saving, setSaving] = React.useState(false);
   const [editingStage, setEditingStage] = React.useState<StageDefinition | null>(null);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
   // Fetch pipeline stages
   React.useEffect(() => {
     fetch(`/api/canopy/roles/${roleId}/pipeline`)
@@ -149,6 +260,17 @@ export function HiringStagesSection({ roleId }: HiringStagesSectionProps) {
       })
       .finally(() => setLoading(false));
   }, [roleId]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setStages((prev) => {
+      const oldIndex = prev.findIndex((s) => s.id === active.id);
+      const newIndex = prev.findIndex((s) => s.id === over.id);
+      return arrayMove(prev, oldIndex, newIndex);
+    });
+  };
 
   const handleAddStage = () => {
     const id = `stage-${Date.now()}`;
@@ -228,61 +350,25 @@ export function HiringStagesSection({ roleId }: HiringStagesSectionProps) {
       </div>
 
       {/* Stage List */}
-      <div className="flex flex-col gap-2">
-        {stages.map((stage) => (
-          <div
-            key={stage.id}
-            className={cn(
-              "flex items-center gap-3 rounded-xl border border-[var(--border-default)] p-3",
-              "transition-colors hover:border-[var(--border-emphasis)]"
-            )}
-          >
-            <DotsSixVertical
-              weight="bold"
-              className="h-5 w-5 shrink-0 cursor-grab text-[var(--foreground-disabled)]"
-            />
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <span className="truncate text-caption-strong font-medium text-[var(--foreground-default)]">
-                {stage.name}
-              </span>
-              <Badge
-                variant={
-                  (phaseGroupColors[stage.phaseGroup] as
-                    | "info"
-                    | "neutral"
-                    | "feature"
-                    | "warning"
-                    | "success") ?? "neutral"
-                }
-              >
-                {stage.phaseGroup}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="tertiary"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setEditingStage(stage)}
-              >
-                <span className="text-caption-sm font-medium text-[var(--foreground-brand)]">
-                  Edit
-                </span>
-              </Button>
-              {!stage.isBuiltIn && (
-                <Button
-                  variant="tertiary"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => handleDeleteStage(stage.id)}
-                >
-                  <Trash weight="bold" className="h-4 w-4 text-[var(--foreground-error)]" />
-                </Button>
-              )}
-            </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+      >
+        <SortableContext items={stages.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-3">
+            {stages.map((stage) => (
+              <SortableStageRow
+                key={stage.id}
+                stage={stage}
+                onEdit={() => setEditingStage(stage)}
+                onDelete={() => handleDeleteStage(stage.id)}
+              />
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Add Stage Button */}
       <Button variant="tertiary" onClick={handleAddStage} className="w-fit">

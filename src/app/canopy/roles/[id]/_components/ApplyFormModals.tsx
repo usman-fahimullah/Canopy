@@ -315,39 +315,47 @@ export function ApplyFormModals({
             <ModalTitle>Personal Details</ModalTitle>
           </ModalHeader>
 
-          <ModalBody>
+          <ModalBody className="items-stretch">
             <ModalDescription className="text-body text-foreground">
               Select what should be included or required in the apply form.
             </ModalDescription>
 
-            <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+            <div className="w-full overflow-hidden rounded-2xl border border-[var(--border-default)]">
               {/* Table Header */}
-              <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-200)] p-4">
-                <span className="flex-1 text-body text-foreground">Field</span>
-                <span className="flex-1 text-body text-foreground">Require an answer</span>
+              <div className="flex items-center gap-2 border-b border-[var(--border-default)] bg-[var(--background-subtle)] p-4">
+                <span className="flex-1 text-caption-strong font-medium text-[var(--foreground-subtle)]">
+                  Field
+                </span>
+                <span className="flex-1 text-caption-strong font-medium text-[var(--foreground-subtle)]">
+                  Require an answer
+                </span>
               </div>
 
               {/* Name Row - Always required */}
-              <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
+              <div className="flex items-center gap-2 border-b border-[var(--border-default)] p-4 opacity-50">
                 <div className="flex flex-1 items-center gap-3">
                   <Switch checked={true} disabled />
-                  <span className="text-body text-foreground">Name</span>
+                  <span className="text-body-sm text-[var(--foreground-default)]">Name</span>
                 </div>
                 <div className="flex flex-1 items-center gap-2">
                   <Checkbox checked={true} disabled />
-                  <span className="text-caption text-foreground-brand">Always required</span>
+                  <span className="text-caption text-[var(--foreground-brand)]">
+                    Always required
+                  </span>
                 </div>
               </div>
 
               {/* Email Row - Always required */}
-              <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] p-4 opacity-50">
+              <div className="flex items-center gap-2 border-b border-[var(--border-default)] p-4 opacity-50">
                 <div className="flex flex-1 items-center gap-3">
                   <Switch checked={true} disabled />
-                  <span className="text-body text-foreground">Email</span>
+                  <span className="text-body-sm text-[var(--foreground-default)]">Email</span>
                 </div>
                 <div className="flex flex-1 items-center gap-2">
                   <Checkbox checked={true} disabled />
-                  <span className="text-caption text-foreground-brand">Always required</span>
+                  <span className="text-caption text-[var(--foreground-brand)]">
+                    Always required
+                  </span>
                 </div>
               </div>
 
@@ -409,19 +417,23 @@ export function ApplyFormModals({
             <ModalTitle>Career Details</ModalTitle>
           </ModalHeader>
 
-          <ModalBody>
-            <ModalDescription className="text-body-sm text-foreground-muted">
+          <ModalBody className="items-stretch">
+            <ModalDescription className="text-body-sm text-[var(--foreground-muted)]">
               Select what should be included or required in the apply form.
             </ModalDescription>
 
-            <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
+            <div className="w-full overflow-hidden rounded-2xl border border-[var(--border-default)]">
               {/* Table Header Row */}
-              <div className="flex items-center gap-2 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-4">
+              <div className="flex items-center gap-2 border-b border-[var(--border-default)] bg-[var(--background-subtle)] p-4">
                 <div className="flex-1">
-                  <span className="text-caption font-medium text-foreground-subtle">Field</span>
+                  <span className="text-caption-strong font-medium text-[var(--foreground-subtle)]">
+                    Field
+                  </span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-caption font-medium text-foreground-subtle">Require</span>
+                  <span className="text-caption-strong font-medium text-[var(--foreground-subtle)]">
+                    Require
+                  </span>
                 </div>
               </div>
 
@@ -499,23 +511,27 @@ export function ApplyFormModals({
             <ModalTitle>Text</ModalTitle>
           </ModalHeader>
 
-          <ModalBody className="gap-6">
+          <ModalBody className="items-stretch gap-6">
             {/* Question Title Field */}
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Question title</label>
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Question title
+              </label>
               <Input
                 value={tempTextQuestion.title}
                 onChange={(e) =>
                   setTempTextQuestion({ ...tempTextQuestion, title: e.target.value })
                 }
                 placeholder="Write your question?"
-                className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                inputSize="lg"
               />
             </div>
 
             {/* Answer Type Selection */}
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Answer Type</label>
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Answer Type
+              </label>
               <RadioGroup
                 value={tempTextQuestion.answerType}
                 onValueChange={(value) =>
@@ -632,33 +648,37 @@ export function ApplyFormModals({
             <ModalTitle>Yes/No</ModalTitle>
           </ModalHeader>
 
-          <ModalBody className="gap-6">
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Question title</label>
+          <ModalBody className="items-stretch gap-6">
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Question title
+              </label>
               <Input
                 value={tempYesNoQuestion.title}
                 onChange={(e) =>
                   setTempYesNoQuestion({ ...tempYesNoQuestion, title: e.target.value })
                 }
                 placeholder="Write your yes/no question?"
-                className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                inputSize="lg"
               />
             </div>
 
             {/* Preview Section */}
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Answer Preview</label>
-              <div className="rounded-2xl bg-[var(--primitive-neutral-100)] p-6">
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Answer Preview
+              </label>
+              <div className="rounded-2xl bg-[var(--background-subtle)] p-6">
                 <div className="flex gap-4">
-                  <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--primitive-blue-500)]">
-                      <div className="h-2.5 w-2.5 rounded-full bg-[var(--primitive-blue-500)]" />
+                  <div className="flex items-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--background-interactive-default)] px-6 py-3">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--border-brand-emphasis)]">
+                      <div className="h-2.5 w-2.5 rounded-full bg-[var(--border-brand-emphasis)]" />
                     </div>
-                    <span className="text-body-sm text-foreground">Yes</span>
+                    <span className="text-body-sm text-[var(--foreground-default)]">Yes</span>
                   </div>
-                  <div className="flex items-center gap-2 rounded-xl border border-[var(--primitive-neutral-300)] bg-[var(--background-interactive-default)] px-6 py-3">
-                    <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
-                    <span className="text-body-sm text-foreground">No</span>
+                  <div className="flex items-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--background-interactive-default)] px-6 py-3">
+                    <div className="h-5 w-5 rounded-full border-2 border-[var(--border-emphasis)]" />
+                    <span className="text-body-sm text-[var(--foreground-default)]">No</span>
                   </div>
                 </div>
               </div>
@@ -704,22 +724,26 @@ export function ApplyFormModals({
             <ModalTitle>Multiple Choice</ModalTitle>
           </ModalHeader>
 
-          <ModalBody className="gap-6">
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Question title</label>
+          <ModalBody className="items-stretch gap-6">
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Question title
+              </label>
               <Input
                 value={tempMultipleChoice.title}
                 onChange={(e) =>
                   setTempMultipleChoice({ ...tempMultipleChoice, title: e.target.value })
                 }
                 placeholder="Write your question?"
-                className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                inputSize="lg"
               />
             </div>
 
             {/* Selection Type - Single vs Multiple */}
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Selection Type</label>
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Selection Type
+              </label>
               <RadioGroup
                 value={tempMultipleChoice.allowMultiple ? "multiple" : "single"}
                 onValueChange={(value) =>
@@ -835,16 +859,18 @@ export function ApplyFormModals({
             </div>
 
             {/* Options Section */}
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Answer Options</label>
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Answer Options
+              </label>
               <div className="flex flex-col gap-2">
                 {tempMultipleChoice.options.map((option, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <div className="flex flex-1 items-center gap-3 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3">
+                    <div className="flex flex-1 items-center gap-3 rounded-xl border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3">
                       {tempMultipleChoice.allowMultiple ? (
-                        <div className="h-5 w-5 rounded-md border-2 border-[var(--primitive-neutral-400)]" />
+                        <div className="h-5 w-5 rounded-md border-2 border-[var(--border-emphasis)]" />
                       ) : (
-                        <div className="h-5 w-5 rounded-full border-2 border-[var(--primitive-neutral-400)]" />
+                        <div className="h-5 w-5 rounded-full border-2 border-[var(--border-emphasis)]" />
                       )}
                       <Input
                         value={option}
@@ -918,22 +944,26 @@ export function ApplyFormModals({
             <ModalTitle>File Upload</ModalTitle>
           </ModalHeader>
 
-          <ModalBody className="gap-6">
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Question title</label>
+          <ModalBody className="items-stretch gap-6">
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Question title
+              </label>
               <Input
                 value={tempFileUpload.title}
                 onChange={(e) => setTempFileUpload({ ...tempFileUpload, title: e.target.value })}
                 placeholder="e.g., Upload your resume"
-                className="border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-4 text-body"
+                inputSize="lg"
               />
             </div>
 
             {/* Accepted File Types */}
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Accepted file types</label>
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Accepted file types
+              </label>
               <div className="flex flex-wrap gap-3">
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <Checkbox
                     checked={tempFileUpload.acceptedTypes.pdf}
                     onCheckedChange={(checked) =>
@@ -948,7 +978,7 @@ export function ApplyFormModals({
                   />
                   <span className="text-body-sm">PDF</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <Checkbox
                     checked={tempFileUpload.acceptedTypes.doc}
                     onCheckedChange={(checked) =>
@@ -963,7 +993,7 @@ export function ApplyFormModals({
                   />
                   <span className="text-body-sm">DOC/DOCX</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-neutral-100)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--background-subtle)] px-4 py-3 transition-colors hover:bg-[var(--background-interactive-hover)]">
                   <Checkbox
                     checked={tempFileUpload.acceptedTypes.images}
                     onCheckedChange={(checked) =>
@@ -982,17 +1012,19 @@ export function ApplyFormModals({
             </div>
 
             {/* Upload Preview */}
-            <div className="flex flex-col gap-3">
-              <label className="text-body text-foreground">Upload Preview</label>
-              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-100)] p-8">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--primitive-blue-100)]">
-                  <Upload weight="regular" className="h-6 w-6 text-[var(--primitive-blue-500)]" />
+            <div className="flex w-full flex-col gap-3">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Upload Preview
+              </label>
+              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[var(--border-emphasis)] bg-[var(--background-subtle)] p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--background-brand-subtle)]">
+                  <Upload weight="regular" className="h-6 w-6 text-[var(--foreground-brand)]" />
                 </div>
                 <div className="text-center">
-                  <p className="text-body-sm font-medium text-foreground">
+                  <p className="text-body-sm font-medium text-[var(--foreground-default)]">
                     Drop files here or click to upload
                   </p>
-                  <p className="text-caption text-foreground-subtle">
+                  <p className="text-caption text-[var(--foreground-subtle)]">
                     Max file size: {tempFileUpload.maxFileSize}MB
                   </p>
                 </div>
@@ -1043,14 +1075,14 @@ function FieldRow({
 }) {
   return (
     <div
-      className={`flex items-center gap-2 p-4 ${hasBorder ? "border-b border-[var(--primitive-neutral-300)]" : ""}`}
+      className={`flex items-center gap-2 p-4 ${hasBorder ? "border-b border-[var(--border-default)]" : ""}`}
     >
       <div className="flex flex-1 items-center gap-3">
         <Switch
           checked={field.visible}
           onCheckedChange={(checked) => onChange({ ...field, visible: checked })}
         />
-        <span className="text-body text-foreground">{label}</span>
+        <span className="text-body-sm text-[var(--foreground-default)]">{label}</span>
       </div>
       <div className="flex flex-1 items-center gap-2">
         <Checkbox
@@ -1058,7 +1090,9 @@ function FieldRow({
           disabled={!field.visible}
           onCheckedChange={(checked) => onChange({ ...field, required: checked === true })}
         />
-        {field.required && <span className="text-caption text-foreground-brand">Required</span>}
+        {field.required && (
+          <span className="text-caption text-[var(--foreground-brand)]">Required</span>
+        )}
       </div>
     </div>
   );
@@ -1077,15 +1111,19 @@ function SettingsSection({
   onRequireChange: (checked: boolean) => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <label className="text-body text-foreground">Settings</label>
-      <div className="overflow-hidden rounded-2xl border border-[var(--primitive-neutral-300)]">
-        <div className="flex items-center justify-between border-b border-[var(--primitive-neutral-300)] px-4 py-3">
-          <span className="text-body text-foreground">Hide from apply form</span>
+    <div className="flex w-full flex-col gap-3">
+      <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+        Settings
+      </label>
+      <div className="overflow-hidden rounded-2xl border border-[var(--border-default)]">
+        <div className="flex items-center justify-between border-b border-[var(--border-default)] px-4 py-3">
+          <span className="text-body-sm text-[var(--foreground-default)]">
+            Hide from apply form
+          </span>
           <Switch checked={hideFromApplyForm} onCheckedChange={onHideChange} />
         </div>
         <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-body text-foreground">Require an answer</span>
+          <span className="text-body-sm text-[var(--foreground-default)]">Require an answer</span>
           <Switch checked={requireAnswer} onCheckedChange={onRequireChange} />
         </div>
       </div>

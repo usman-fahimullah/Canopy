@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/dropdown";
+import { EnvelopeSimple, ChatCircleDots } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { logger, formatError } from "@/lib/logger";
 
@@ -130,38 +131,47 @@ export function ConfirmationEmailSection({ roleId }: EmailSectionProps) {
         </p>
       </div>
 
-      <SwitchWithLabel
-        label="Send confirmation email on application"
-        helperText="Candidates will receive an email confirming their application was received."
-        labelPosition="right"
-        checked={enabled}
-        onCheckedChange={setEnabled}
-      />
-
-      {enabled && (
-        <div className="flex flex-col gap-2">
-          <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
-            Email Template
-          </label>
-          <Select value={templateId} onValueChange={setTemplateId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select template" />
-            </SelectTrigger>
-            <SelectContent>
-              {templates.map((tmpl) => (
-                <SelectItem key={tmpl.id} value={tmpl.id}>
-                  <span className="flex flex-col">
-                    <span>{tmpl.name}</span>
-                    <span className="text-caption-sm text-[var(--foreground-subtle)]">
-                      {tmpl.subject}
-                    </span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="flex flex-col gap-4 rounded-xl border border-[var(--border-default)] p-4">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--background-brand-subtle)]">
+            <EnvelopeSimple size={20} weight="regular" className="text-[var(--foreground-brand)]" />
+          </div>
+          <div className="flex-1">
+            <SwitchWithLabel
+              label="Send confirmation email on application"
+              helperText="Candidates will receive an email confirming their application was received."
+              labelPosition="right"
+              checked={enabled}
+              onCheckedChange={setEnabled}
+            />
+          </div>
         </div>
-      )}
+
+        {enabled && (
+          <div className="flex flex-col gap-2 border-t border-[var(--border-muted)] pt-4">
+            <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+              Email Template
+            </label>
+            <Select value={templateId} onValueChange={setTemplateId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select template" />
+              </SelectTrigger>
+              <SelectContent>
+                {templates.map((tmpl) => (
+                  <SelectItem key={tmpl.id} value={tmpl.id}>
+                    <span className="flex flex-col">
+                      <span>{tmpl.name}</span>
+                      <span className="text-caption-sm text-[var(--foreground-subtle)]">
+                        {tmpl.subject}
+                      </span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
 
       <div className="flex justify-end border-t border-[var(--border-default)] pt-4">
         <Button variant="primary" onClick={handleSave} disabled={saving}>
@@ -229,58 +239,67 @@ export function FirstReplySection({ roleId }: EmailSectionProps) {
         </p>
       </div>
 
-      <SwitchWithLabel
-        label="Auto-reply on stage advancement"
-        helperText="Send an email when a candidate moves from Applied to the next stage."
-        labelPosition="right"
-        checked={enabled}
-        onCheckedChange={setEnabled}
-      />
-
-      {enabled && (
-        <>
-          <div className="flex flex-col gap-2">
-            <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
-              Email Template
-            </label>
-            <Select value={templateId} onValueChange={setTemplateId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select template" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map((tmpl) => (
-                  <SelectItem key={tmpl.id} value={tmpl.id}>
-                    <span className="flex flex-col">
-                      <span>{tmpl.name}</span>
-                      <span className="text-caption-sm text-[var(--foreground-subtle)]">
-                        {tmpl.subject}
-                      </span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <div className="flex flex-col gap-4 rounded-xl border border-[var(--border-default)] p-4">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--background-brand-subtle)]">
+            <ChatCircleDots size={20} weight="regular" className="text-[var(--foreground-brand)]" />
           </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
-              Delay (hours)
-            </label>
-            <Input
-              type="number"
-              min="0"
-              max="72"
-              value={delayHours}
-              onChange={(e) => setDelayHours(e.target.value)}
-              placeholder="0"
-              inputSize="lg"
+          <div className="flex-1">
+            <SwitchWithLabel
+              label="Auto-reply on stage advancement"
+              helperText="Send an email when a candidate moves from Applied to the next stage."
+              labelPosition="right"
+              checked={enabled}
+              onCheckedChange={setEnabled}
             />
-            <p className="text-caption-sm text-[var(--foreground-subtle)]">
-              Set to 0 to send immediately. Maximum 72 hours.
-            </p>
           </div>
-        </>
-      )}
+        </div>
+
+        {enabled && (
+          <div className="flex flex-col gap-4 border-t border-[var(--border-muted)] pt-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Email Template
+              </label>
+              <Select value={templateId} onValueChange={setTemplateId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map((tmpl) => (
+                    <SelectItem key={tmpl.id} value={tmpl.id}>
+                      <span className="flex flex-col">
+                        <span>{tmpl.name}</span>
+                        <span className="text-caption-sm text-[var(--foreground-subtle)]">
+                          {tmpl.subject}
+                        </span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Delay (hours)
+              </label>
+              <Input
+                type="number"
+                min="0"
+                max="72"
+                value={delayHours}
+                onChange={(e) => setDelayHours(e.target.value)}
+                placeholder="0"
+                inputSize="lg"
+              />
+              <p className="text-caption-sm text-[var(--foreground-subtle)]">
+                Set to 0 to send immediately. Maximum 72 hours.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="flex justify-end border-t border-[var(--border-default)] pt-4">
         <Button variant="primary" onClick={handleSave} disabled={saving}>
