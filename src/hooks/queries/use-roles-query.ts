@@ -18,7 +18,7 @@ interface Pathway {
 
 interface JobAssignee {
   id: string;
-  name: string;
+  name: string | null;
   avatar: string | null;
 }
 
@@ -47,10 +47,10 @@ interface RolesListResponse {
 export interface TemplateItem {
   id: string;
   name: string;
-  title: string;
-  description: string | null;
-  climateCategory: string | null;
-  tags: string[];
+  sourceJobId: string | null;
+  activeFields: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface TemplatesResponse {
@@ -62,20 +62,26 @@ interface TemplatesResponse {
 // ============================================
 
 /** Fetch the roles list. Data cached for 2min stale / 5min GC. */
-export function useRolesQuery() {
+export function useRolesQuery(options?: { initialData?: RoleListItem[] }) {
   return useQuery({
     queryKey: queryKeys.canopy.roles.list(),
     queryFn: () => apiFetch<RolesListResponse>("/api/canopy/roles?skip=0&take=100"),
     select: (data) => data.jobs,
+    ...(options?.initialData
+      ? { initialData: { jobs: options.initialData } as RolesListResponse }
+      : {}),
   });
 }
 
 /** Fetch role templates. */
-export function useTemplatesQuery() {
+export function useTemplatesQuery(options?: { initialData?: TemplateItem[] }) {
   return useQuery({
     queryKey: queryKeys.canopy.templates.all,
     queryFn: () => apiFetch<TemplatesResponse>("/api/canopy/templates"),
     select: (data) => data.templates,
+    ...(options?.initialData
+      ? { initialData: { templates: options.initialData } as TemplatesResponse }
+      : {}),
   });
 }
 

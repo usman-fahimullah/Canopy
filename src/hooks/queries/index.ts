@@ -26,7 +26,11 @@ export {
   useCandidateDetailQuery,
   useStageMutation,
 } from "./use-candidates-query";
-export type { CandidateApplication, CandidateFilters } from "./use-candidates-query";
+export type {
+  CandidateApplication,
+  CandidateFilters,
+  CandidatesListResponse,
+} from "./use-candidates-query";
 
 // Team
 export {

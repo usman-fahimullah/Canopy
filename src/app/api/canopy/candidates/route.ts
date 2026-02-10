@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { z } from "zod";
-import { getAuthContext, scopedApplicationWhere } from "@/lib/access-control";
-import type { Prisma } from "@prisma/client";
+import { getAuthContext } from "@/lib/access-control";
+import { fetchCandidatesList } from "@/lib/services/candidates";
 
 /**
  * GET /api/canopy/candidates
@@ -41,139 +40,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const {
-      skip,
-      take,
-      stage,
-      matchScoreMin,
-      matchScoreMax,
-      source,
-      dateFrom,
-      dateTo,
-      experienceLevel,
-      search,
-    } = params.data;
-
-    // Build where clause — scoped by role-based access
-    const baseWhere = scopedApplicationWhere(ctx);
-    const applicationWhere: Prisma.ApplicationWhereInput = {
-      ...baseWhere,
-    };
-
-    // Add filters
-    if (stage) {
-      applicationWhere.stage = stage;
-    }
-    if (matchScoreMin !== undefined || matchScoreMax !== undefined) {
-      const matchFilter: Prisma.FloatNullableFilter = {};
-      if (matchScoreMin !== undefined) matchFilter.gte = matchScoreMin;
-      if (matchScoreMax !== undefined) matchFilter.lte = matchScoreMax;
-      applicationWhere.matchScore = matchFilter;
-    }
-    if (source) {
-      applicationWhere.source = source;
-    }
-    if (dateFrom || dateTo) {
-      const dateFilter: Prisma.DateTimeFilter = {};
-      if (dateFrom) dateFilter.gte = new Date(dateFrom);
-      if (dateTo) dateFilter.lte = new Date(dateTo);
-      applicationWhere.createdAt = dateFilter;
-    }
-    if (experienceLevel) {
-      const existingJobFilter = (applicationWhere.job ?? {}) as Prisma.JobWhereInput;
-      applicationWhere.job = { ...existingJobFilter, experienceLevel };
-    }
-
-    // Handle search (name/email in candidate)
-    if (search) {
-      applicationWhere.OR = [
-        {
-          seeker: {
-            account: {
-              name: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          },
-        },
-        {
-          seeker: {
-            account: {
-              email: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          },
-        },
-      ];
-    }
-
-    // Execute count and findMany in parallel
-    const [applications, total] = await Promise.all([
-      prisma.application.findMany({
-        where: applicationWhere,
-        select: {
-          id: true,
-          stage: true,
-          source: true,
-          matchScore: true,
-          createdAt: true,
-          seekerId: true,
-          seeker: {
-            select: {
-              id: true,
-              account: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                },
-              },
-            },
-          },
-          job: {
-            select: {
-              id: true,
-              title: true,
-              organizationId: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take,
-      }),
-      prisma.application.count({ where: applicationWhere }),
-    ]);
-
-    // Format response
-    const formattedApplications = applications.map((app) => ({
-      id: app.id,
-      seekerId: app.seekerId,
-      stage: app.stage,
-      source: app.source,
-      matchScore: app.matchScore,
-      createdAt: app.createdAt?.toISOString() ?? null,
-      candidate: {
-        id: app.seeker.account.id,
-        name: app.seeker.account.name,
-        email: app.seeker.account.email,
-      },
-      job: app.job,
-    }));
-
-    return NextResponse.json({
-      applications: formattedApplications,
-      meta: {
-        total,
-        skip,
-        take,
-        hasMore: skip + take < total,
-      },
-      userRole: ctx.role,
-    });
+    const data = await fetchCandidatesList(ctx, params.data);
+    return NextResponse.json(data);
   } catch (error) {
     logger.error("Error fetching candidates", {
       error: formatError(error),

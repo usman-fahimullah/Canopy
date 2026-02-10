@@ -18,11 +18,11 @@ export interface CandidateApplication {
   jobId?: string;
   matchScore?: number | null;
   submittedAt?: string;
-  createdAt?: string;
-  source?: string;
+  createdAt?: string | null;
+  source?: string | null;
   candidate?: {
     id: string;
-    name: string;
+    name: string | null;
     email: string;
   };
   job?: {
@@ -31,7 +31,7 @@ export interface CandidateApplication {
   };
 }
 
-interface CandidatesListResponse {
+export interface CandidatesListResponse {
   applications: CandidateApplication[];
   meta: {
     total: number;
@@ -56,7 +56,10 @@ export interface CandidateFilters {
 // ============================================
 
 /** Fetch paginated/filtered candidates list. Each filter combo is independently cached. */
-export function useCandidatesQuery(filters: CandidateFilters) {
+export function useCandidatesQuery(
+  filters: CandidateFilters,
+  options?: { initialData?: CandidatesListResponse }
+) {
   const params = new URLSearchParams();
   if (filters.skip !== undefined) params.set("skip", String(filters.skip));
   if (filters.take !== undefined) params.set("take", String(filters.take));
@@ -73,6 +76,7 @@ export function useCandidatesQuery(filters: CandidateFilters) {
     queryFn: () => apiFetch<CandidatesListResponse>(`/api/canopy/candidates?${params.toString()}`),
     // Show previous data while new filter results load (no flash of skeleton)
     placeholderData: (previousData) => previousData,
+    ...(options?.initialData ? { initialData: options.initialData } : {}),
   });
 }
 
@@ -81,8 +85,8 @@ export function useCandidateDetailQuery(seekerId: string | null) {
   return useQuery({
     queryKey: queryKeys.canopy.candidates.detail(seekerId ?? ""),
     queryFn: () =>
-      apiFetch<{ data: Record<string, unknown> }>(`/api/canopy/candidates/${seekerId}`).then(
-        (res) => res.data
+      apiFetch<{ data: Record<string, unknown>; orgMemberId: string }>(
+        `/api/canopy/candidates/${seekerId}`
       ),
     enabled: !!seekerId,
   });

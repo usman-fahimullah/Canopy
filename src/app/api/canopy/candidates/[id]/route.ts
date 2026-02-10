@@ -77,7 +77,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             rejectedAt: true,
             hiredAt: true,
             job: {
-              select: { id: true, title: true, stages: true },
+              select: { id: true, title: true, stages: true, climateCategory: true },
             },
             scores: {
               select: {
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    return NextResponse.json({ data: seeker });
+    return NextResponse.json({ data: seeker, orgMemberId: membership.id });
   } catch (error) {
     logger.error("Failed to fetch candidate", {
       error: formatError(error),

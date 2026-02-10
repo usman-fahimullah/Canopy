@@ -3,7 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { z } from "zod";
-import { getAuthContext, scopedJobWhere } from "@/lib/access-control";
+import { getAuthContext } from "@/lib/access-control";
+import { fetchRolesList } from "@/lib/services/roles";
 
 /**
  * GET /api/canopy/roles
@@ -37,99 +38,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { skip, take, status, employmentType, locationType } = params.data;
-
-    // Build where clause — scoped by role-based access
-    const where = {
-      ...scopedJobWhere(ctx),
-      ...(status ? { status } : {}),
-      ...(employmentType ? { employmentType } : {}),
-      ...(locationType ? { locationType } : {}),
-    };
-
-    // Execute count and findMany in parallel
-    const [jobs, total] = await Promise.all([
-      prisma.job.findMany({
-        where,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          location: true,
-          locationType: true,
-          status: true,
-          publishedAt: true,
-          closesAt: true,
-          climateCategory: true,
-          pathway: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              icon: true,
-              color: true,
-            },
-          },
-          recruiter: {
-            select: {
-              id: true,
-              account: { select: { name: true, avatar: true } },
-            },
-          },
-          hiringManager: {
-            select: {
-              id: true,
-              account: { select: { name: true, avatar: true } },
-            },
-          },
-          _count: { select: { applications: true, reviewerAssignments: true } },
-        },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take,
-      }),
-      prisma.job.count({ where }),
-    ]);
-
-    const formattedJobs = jobs.map((job) => ({
-      id: job.id,
-      title: job.title,
-      slug: job.slug,
-      location: job.location,
-      locationType: job.locationType,
-      status: job.status,
-      publishedAt: job.publishedAt?.toISOString() ?? null,
-      closesAt: job.closesAt?.toISOString() ?? null,
-      climateCategory: job.climateCategory,
-      pathway: job.pathway,
-      recruiter: job.recruiter
-        ? {
-            id: job.recruiter.id,
-            name: job.recruiter.account.name,
-            avatar: job.recruiter.account.avatar,
-          }
-        : null,
-      hiringManager: job.hiringManager
-        ? {
-            id: job.hiringManager.id,
-            name: job.hiringManager.account.name,
-            avatar: job.hiringManager.account.avatar,
-          }
-        : null,
-      applicationCount: job._count.applications,
-      reviewerCount: job._count.reviewerAssignments,
-    }));
-
-    return NextResponse.json({
-      jobs: formattedJobs,
-      userRole: ctx.role,
-      meta: {
-        total,
-        skip,
-        take,
-        hasMore: skip + take < total,
-      },
-    });
+    const data = await fetchRolesList(ctx, params.data);
+    return NextResponse.json(data);
   } catch (error) {
     logger.error("Error fetching employer roles", {
       error: formatError(error),

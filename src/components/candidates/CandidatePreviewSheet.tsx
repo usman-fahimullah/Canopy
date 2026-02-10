@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Recommendation } from "@prisma/client";
 
 // UI
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -21,7 +21,6 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 // Icons
 import {
   X,
-  ArrowSquareOut,
   ArrowCircleRight,
   Prohibit,
   UserCirclePlus,
@@ -29,16 +28,23 @@ import {
   CheckCircle,
   CaretUp,
   CaretDown,
+  ClockCounterClockwise,
+  ListChecks,
 } from "@phosphor-icons/react";
 
-// Sub-components — reused from the full-page view
+// Sub-components
 import { CandidateProfileHeader } from "./CandidateProfileHeader";
 import { HiringStagesSection } from "./HiringStagesSection";
 import { DocumentsSection } from "./DocumentsSection";
 import { ContactInfoSection } from "./ContactInfoSection";
 import { AboutSection } from "./AboutSection";
 import { CommentsPanel } from "./CommentsPanel";
+import { TodoPanel } from "./TodoPanel";
+import { HistoryPanel } from "./HistoryPanel";
+import { ApplicationReviewPanel } from "./ApplicationReviewPanel";
 
+// React Query
+import { useCandidateDetailQuery, queryKeys } from "@/hooks/queries";
 import { logger, formatError } from "@/lib/logger";
 
 /* -------------------------------------------------------------------
@@ -109,6 +115,12 @@ interface SeekerData {
 }
 
 /* -------------------------------------------------------------------
+   Panel Types
+   ------------------------------------------------------------------- */
+
+type PanelType = "review" | "comments" | "todo" | "history" | null;
+
+/* -------------------------------------------------------------------
    Props
    ------------------------------------------------------------------- */
 
@@ -143,13 +155,14 @@ export function CandidatePreviewSheet({
   onStageChanged,
   navigation,
 }: CandidatePreviewSheetProps) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const isOpen = seekerId !== null;
 
-  // --- Data fetching ---
-  const [seeker, setSeeker] = React.useState<SeekerData | null>(null);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  // --- React Query data fetching (cached, instant on re-open) ---
+  const { data: queryResult, isLoading: loading, error: queryError } = useCandidateDetailQuery(seekerId);
+  const seeker = (queryResult?.data as unknown as SeekerData) ?? null;
+  const orgMemberId = queryResult?.orgMemberId ?? null;
+  const error = queryError ? (queryError as Error).message : null;
 
   // --- Action state ---
   const [isActionLoading, setIsActionLoading] = React.useState(false);
@@ -160,53 +173,15 @@ export function CandidatePreviewSheet({
   } | null>(null);
 
   // --- Panels ---
-  const [showComments, setShowComments] = React.useState(false);
+  const [panelType, setPanelType] = React.useState<PanelType>(null);
+  const [reviewStageId, setReviewStageId] = React.useState<string | null>(null);
 
-  // Fetch candidate data when seekerId changes
+  // Reset state when seekerId changes
   React.useEffect(() => {
-    if (!seekerId) {
-      setSeeker(null);
-      setError(null);
-      setShowComments(false);
-      setOptimisticStage(null);
-      setActionFeedback(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function fetchCandidate() {
-      setLoading(true);
-      setError(null);
-      setShowComments(false);
-      setOptimisticStage(null);
-      setActionFeedback(null);
-
-      try {
-        const res = await fetch(`/api/canopy/candidates/${seekerId}`);
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.error ?? "Failed to load candidate");
-        }
-        const { data } = await res.json();
-        if (!cancelled) setSeeker(data);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load candidate");
-          logger.error("Failed to fetch candidate for preview", {
-            error: formatError(err),
-            seekerId,
-          });
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    fetchCandidate();
-    return () => {
-      cancelled = true;
-    };
+    setPanelType(null);
+    setReviewStageId(null);
+    setOptimisticStage(null);
+    setActionFeedback(null);
   }, [seekerId]);
 
   // Clear feedback after 4s
@@ -265,6 +240,27 @@ export function CandidatePreviewSheet({
   const isTerminalStage =
     displayStage === "rejected" || displayStage === "talent-pool" || displayStage === "hired";
 
+  // --- Panel toggle handlers ---
+  const togglePanel = (type: Exclude<PanelType, null>) => {
+    if (panelType === type) {
+      setPanelType(null);
+      if (type === "review") setReviewStageId(null);
+    } else {
+      setPanelType(type);
+      if (type !== "review") setReviewStageId(null);
+    }
+  };
+
+  const handleOpenReview = (stageId: string) => {
+    setReviewStageId(stageId);
+    setPanelType("review");
+  };
+
+  const handleClosePanel = () => {
+    setPanelType(null);
+    setReviewStageId(null);
+  };
+
   // --- Actions ---
   const moveToStage = React.useCallback(
     async (newStage: string, label: string) => {
@@ -293,6 +289,9 @@ export function CandidatePreviewSheet({
           message: `Candidate moved to ${label}`,
         });
 
+        // Invalidate related queries
+        queryClient.invalidateQueries({ queryKey: queryKeys.canopy.candidates.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.canopy.dashboard.all });
         onStageChanged?.();
       } catch (err) {
         setOptimisticStage(null);
@@ -300,11 +299,12 @@ export function CandidatePreviewSheet({
           type: "error",
           message: err instanceof Error ? err.message : "Failed to move candidate",
         });
+        logger.error("Failed to move candidate stage", { error: formatError(err) });
       } finally {
         setIsActionLoading(false);
       }
     },
-    [activeApp, onStageChanged]
+    [activeApp, onStageChanged, queryClient]
   );
 
   const handleReject = React.useCallback(() => moveToStage("rejected", "Rejected"), [moveToStage]);
@@ -312,25 +312,21 @@ export function CandidatePreviewSheet({
     () => moveToStage("talent-pool", "Talent Pool"),
     [moveToStage]
   );
+  const handleQualify = React.useCallback(
+    () => moveToStage("qualified", "Qualified"),
+    [moveToStage]
+  );
 
-  // Open full page — pass current pathname as "from" so the back button returns here
-  const currentPathname = usePathname();
-  const handleOpenFullPage = () => {
-    if (!seekerId) return;
-    const params = new URLSearchParams();
-    if (jobId) params.set("jobId", jobId);
-    params.set("from", currentPathname);
-    router.push(`/canopy/candidates/${seekerId}?${params.toString()}`);
-    onClose();
-  };
+  // Determine dynamic sheet size
+  const sheetSize = panelType ? "5xl" : "2xl";
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="right"
-        size="2xl"
+        size={sheetSize}
         hideClose
-        className="flex flex-col gap-0 overflow-hidden p-0"
+        className="flex flex-col gap-0 overflow-hidden p-0 transition-[max-width] duration-300 ease-in-out"
       >
         {/* Accessible title (hidden visually) */}
         <SheetTitle className="sr-only">
@@ -383,19 +379,43 @@ export function CandidatePreviewSheet({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Comments toggle */}
+            {/* Panel toggles */}
             {seeker && (
-              <SimpleTooltip content="Comments">
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={() => setShowComments((prev) => !prev)}
-                  aria-label="Toggle comments"
-                  data-selected={showComments ? "true" : undefined}
-                >
-                  <ChatCircleDots size={20} weight="bold" />
-                </Button>
-              </SimpleTooltip>
+              <>
+                <SimpleTooltip content="Comments">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => togglePanel("comments")}
+                    aria-label="Toggle comments"
+                    data-selected={panelType === "comments" ? "true" : undefined}
+                  >
+                    <ChatCircleDots size={20} weight="bold" />
+                  </Button>
+                </SimpleTooltip>
+                <SimpleTooltip content="History">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => togglePanel("history")}
+                    aria-label="Toggle history"
+                    data-selected={panelType === "history" ? "true" : undefined}
+                  >
+                    <ClockCounterClockwise size={20} weight="bold" />
+                  </Button>
+                </SimpleTooltip>
+                <SimpleTooltip content="Todo">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => togglePanel("todo")}
+                    aria-label="Toggle todo"
+                    data-selected={panelType === "todo" ? "true" : undefined}
+                  >
+                    <ListChecks size={20} weight="bold" />
+                  </Button>
+                </SimpleTooltip>
+              </>
             )}
 
             {/* Stage actions */}
@@ -458,18 +478,6 @@ export function CandidatePreviewSheet({
                 </SimpleTooltip>
               </>
             )}
-
-            {/* Open full page */}
-            <SimpleTooltip content="Open full page">
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={handleOpenFullPage}
-                aria-label="Open full page"
-              >
-                <ArrowSquareOut size={20} weight="bold" />
-              </Button>
-            </SimpleTooltip>
           </div>
         </div>
 
@@ -494,10 +502,32 @@ export function CandidatePreviewSheet({
         <div className="flex flex-1 overflow-hidden">
           {/* Main scrollable content */}
           <main className="flex-1 overflow-y-auto">
-            {/* Loading */}
+            {/* Loading skeleton */}
             {loading && (
-              <div className="flex h-full items-center justify-center py-24">
-                <Spinner size="lg" />
+              <div className="flex flex-col gap-10 p-8">
+                <div className="flex items-center gap-4">
+                  <Skeleton variant="circular" className="h-16 w-16" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-5 w-24" />
+                  <div className="flex gap-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-24 rounded-full" />
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-20 w-full rounded-[var(--radius-card)]" />
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-5 w-28" />
+                  <Skeleton className="h-16 w-full rounded-[var(--radius-card)]" />
+                </div>
               </div>
             )}
 
@@ -530,6 +560,8 @@ export function CandidatePreviewSheet({
                   currentStage={displayStage}
                   scores={activeApp.scores}
                   averageScore={averageScore}
+                  selectedStageId={reviewStageId}
+                  onOpenReview={handleOpenReview}
                   appliedAt={activeApp.createdAt}
                 />
 
@@ -556,14 +588,32 @@ export function CandidatePreviewSheet({
             )}
           </main>
 
-          {/* Comments panel (inline in sheet) */}
-          {showComments && seeker && (
-            <aside className="flex w-[320px] shrink-0 flex-col border-l border-[var(--border-muted)] bg-[var(--background-default)]">
-              <CommentsPanel
-                seekerId={seeker.id}
-                notes={seeker.notes}
-                onClose={() => setShowComments(false)}
-              />
+          {/* Side panel (conditional — widens the sheet) */}
+          {panelType && seeker && (
+            <aside className="flex w-[380px] shrink-0 flex-col border-l border-[var(--border-muted)] bg-[var(--background-default)]">
+              {panelType === "review" && activeApp && orgMemberId && (
+                <ApplicationReviewPanel
+                  applicationId={activeApp.id}
+                  seekerId={seeker.id}
+                  scores={activeApp.scores}
+                  averageScore={averageScore}
+                  orgMemberId={orgMemberId}
+                  candidateName={candidateName}
+                  currentStage={displayStage}
+                  jobId={activeApp.job.id}
+                  isActionLoading={isActionLoading}
+                  onQualify={handleQualify}
+                  onDisqualify={handleReject}
+                  onClose={handleClosePanel}
+                />
+              )}
+              {panelType === "comments" && (
+                <CommentsPanel seekerId={seeker.id} notes={seeker.notes} onClose={handleClosePanel} />
+              )}
+              {panelType === "todo" && <TodoPanel stages={jobStages} onClose={handleClosePanel} />}
+              {panelType === "history" && (
+                <HistoryPanel seekerId={seeker.id} onClose={handleClosePanel} />
+              )}
             </aside>
           )}
         </div>

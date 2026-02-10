@@ -93,13 +93,15 @@ function SortableStageRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center gap-4 rounded-xl border border-[var(--border-default)] bg-[var(--background-default)] px-4 py-3.5",
+        "grid w-full items-center rounded-xl border border-[var(--border-default)] bg-[var(--background-default)] px-3 py-3",
+        "grid-cols-[auto_1fr_auto_auto]",
         "transition-all",
         isDragging
           ? "z-10 border-[var(--border-brand)] opacity-90 shadow-[var(--shadow-elevated)]"
           : "hover:border-[var(--border-emphasis)]"
       )}
     >
+      {/* Col 1: Drag handle */}
       <button
         type="button"
         className={cn(
@@ -116,38 +118,44 @@ function SortableStageRow({
         <DotsSixVertical weight="bold" className="h-5 w-5" />
       </button>
 
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <span className="truncate text-body-sm font-medium text-[var(--foreground-default)]">
-          {stage.name}
-        </span>
-        <Badge
-          variant={
-            (phaseGroupColors[stage.phaseGroup] as
-              | "info"
-              | "neutral"
-              | "feature"
-              | "warning"
-              | "success") ?? "neutral"
-          }
-        >
-          {stage.phaseGroup}
-        </Badge>
-      </div>
+      {/* Col 2: Stage name */}
+      <span className="truncate px-3 text-body-sm font-medium text-[var(--foreground-default)]">
+        {stage.name}
+      </span>
 
+      {/* Col 3: Phase badge */}
+      <Badge
+        variant={
+          (phaseGroupColors[stage.phaseGroup] as
+            | "info"
+            | "neutral"
+            | "feature"
+            | "warning"
+            | "success") ?? "neutral"
+        }
+        className="mr-2"
+      >
+        {stage.phaseGroup}
+      </Badge>
+
+      {/* Col 4: Actions */}
       <div className="flex items-center gap-1">
-        <Button variant="tertiary" size="sm" onClick={onEdit}>
-          <span className="text-caption font-medium text-[var(--foreground-brand)]">Edit</span>
+        <Button variant="ghost" size="sm" onClick={onEdit}>
+          Edit
         </Button>
-        {!stage.isBuiltIn && (
+        {!stage.isBuiltIn ? (
           <Button
-            variant="tertiary"
-            size="icon"
-            className="h-8 w-8"
+            variant="ghost"
+            size="icon-sm"
             onClick={onDelete}
             aria-label={`Delete ${stage.name}`}
+            className="text-[var(--foreground-error)] hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]"
           >
-            <Trash weight="bold" className="h-4 w-4 text-[var(--foreground-error)]" />
+            <Trash weight="bold" className="h-5 w-5" />
           </Button>
+        ) : (
+          /* Placeholder to keep actions column width consistent */
+          <div className="h-8 w-10" />
         )}
       </div>
     </div>
@@ -339,7 +347,7 @@ export function HiringStagesSection({ roleId }: HiringStagesSectionProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex w-full flex-col gap-4 p-6">
       <div>
         <h3 className="text-body-strong font-medium text-[var(--foreground-default)]">
           Hiring Stages
@@ -357,7 +365,7 @@ export function HiringStagesSection({ roleId }: HiringStagesSectionProps) {
         modifiers={[restrictToVerticalAxis, restrictToParentElement]}
       >
         <SortableContext items={stages.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-3">
+          <div className="flex w-full flex-col gap-2">
             {stages.map((stage) => (
               <SortableStageRow
                 key={stage.id}
