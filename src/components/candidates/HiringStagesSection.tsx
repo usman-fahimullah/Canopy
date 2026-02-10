@@ -85,55 +85,56 @@ export function HiringStagesSection({
           <button
             type="button"
             onClick={() => onOpenReview?.(currentStage)}
-            className={`flex w-full items-center gap-1 rounded-2xl bg-[var(--background-default)] py-2 pl-4 pr-2 transition-colors hover:bg-[var(--background-interactive-hover)] ${
+            className={`flex w-full items-center gap-2 rounded-2xl bg-[var(--background-default)] py-2 pl-4 pr-2 shadow-[var(--shadow-card)] transition-colors hover:bg-[var(--background-interactive-hover)] ${
               selectedStageId?.toLowerCase() === currentStage.toLowerCase()
                 ? "ring-2 ring-inset ring-[var(--border-brand)]"
                 : ""
             }`}
-            style={{ boxShadow: "1px 2px 16px 0px rgba(31, 29, 28, 0.08)" }}
           >
             {/* Col 1: Stage icon + name */}
-            <div className="flex flex-1 items-center gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               <ArrowCircleRight
-                size={24}
+                size={20}
                 weight="fill"
-                className="text-[var(--primitive-blue-500)]"
+                className="shrink-0 text-[var(--primitive-blue-500)]"
               />
-              <span className="text-body text-[var(--foreground-default)]">{currentStageName}</span>
+              <span className="truncate text-body text-[var(--foreground-default)]">
+                {currentStageName}
+              </span>
             </div>
 
-            {/* Col 2: Score — Figma: text-body, color neutral/n600 */}
-            <div className="flex flex-1 items-center gap-2">
+            {/* Col 2: Score */}
+            <div className="flex shrink-0 items-center gap-1.5 whitespace-nowrap">
               {hasReviews ? (
                 <>
-                  <Star size={24} weight="fill" className="text-[var(--primitive-yellow-500)]" />
-                  <span className="text-body text-[var(--foreground-subtle)]">
+                  <Star size={18} weight="fill" className="text-[var(--primitive-yellow-500)]" />
+                  <span className="text-caption text-[var(--foreground-subtle)]">
                     {averageScore.toFixed(1)}
                   </span>
-                  <span className="text-body text-[var(--foreground-subtle)]">
+                  <span className="text-caption text-[var(--foreground-subtle)]">
                     ({scores.length} {scores.length === 1 ? "Review" : "Reviews"})
                   </span>
                 </>
               ) : (
-                <span className="text-body text-[var(--foreground-subtle)]">In Review</span>
+                <span className="text-caption text-[var(--foreground-subtle)]">In Review</span>
               )}
             </div>
 
-            {/* Col 3: Time — Figma: text-body, color neutral/n600, gap-4px */}
-            <div className="flex flex-1 items-center gap-1">
+            {/* Col 3: Time */}
+            <div className="flex shrink-0 items-center gap-1 whitespace-nowrap">
               {timeAgo && (
                 <>
-                  <Clock size={24} weight="regular" className="text-[var(--foreground-subtle)]" />
-                  <span className="text-body text-[var(--foreground-subtle)]">
+                  <Clock size={16} weight="regular" className="text-[var(--foreground-subtle)]" />
+                  <span className="text-caption text-[var(--foreground-subtle)]">
                     Applied {timeAgo} ago
                   </span>
                 </>
               )}
             </div>
 
-            {/* CaretRight icon button — Figma: p-12, rounded-16 */}
-            <div className="shrink-0 rounded-2xl p-3">
-              <CaretRight size={24} weight="bold" className="text-[var(--foreground-subtle)]" />
+            {/* CaretRight icon */}
+            <div className="shrink-0 rounded-2xl p-2">
+              <CaretRight size={20} weight="bold" className="text-[var(--foreground-subtle)]" />
             </div>
           </button>
 

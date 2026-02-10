@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { PencilSimple } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 /**
  * ContactInfoSection — Figma-aligned 2-column contact info display.
@@ -32,12 +33,13 @@ function InfoRow({ label, value, href, isLast = false }: InfoRowProps) {
 
   return (
     <div
-      className={`flex items-baseline gap-32 py-3 ${
-        !isLast ? "border-b border-[var(--border-emphasis)]" : ""
-      }`}
+      className={cn(
+        "flex items-baseline gap-4 py-3",
+        !isLast && "border-b border-[var(--border-emphasis)]"
+      )}
     >
-      <dt className="flex-[1_0_0] text-body text-[var(--foreground-muted)]">{label}</dt>
-      <dd className="flex-[1_0_0] text-body text-[var(--foreground-default)]">
+      <dt className="w-32 shrink-0 text-body text-[var(--foreground-muted)]">{label}</dt>
+      <dd className="min-w-0 flex-1 truncate text-body text-[var(--foreground-default)]">
         {href ? (
           <a
             href={href}

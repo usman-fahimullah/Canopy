@@ -6,6 +6,7 @@ import { InfoTag } from "@/components/ui/info-tag";
 import { CategoryTag } from "@/components/ui/category-tag";
 import { format } from "date-fns";
 import type { JobCategoryType } from "@/components/ui/category-tag";
+import { cn } from "@/lib/utils";
 
 /**
  * AboutSection — Figma-aligned 2-column about info display.
@@ -33,12 +34,13 @@ interface InfoRowProps {
 function InfoRow({ label, children, isLast = false }: InfoRowProps) {
   return (
     <div
-      className={`flex items-center gap-32 py-3 ${
-        !isLast ? "border-b border-[var(--border-emphasis)]" : ""
-      }`}
+      className={cn(
+        "flex items-center gap-4 py-3",
+        !isLast && "border-b border-[var(--border-emphasis)]"
+      )}
     >
-      <dt className="flex-[1_0_0] text-body text-[var(--foreground-muted)]">{label}</dt>
-      <dd className="flex-[1_0_0] text-body text-[var(--foreground-default)]">{children}</dd>
+      <dt className="w-36 shrink-0 text-body text-[var(--foreground-muted)]">{label}</dt>
+      <dd className="min-w-0 flex-1 text-body text-[var(--foreground-default)]">{children}</dd>
     </div>
   );
 }

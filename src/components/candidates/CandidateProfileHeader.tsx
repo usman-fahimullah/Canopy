@@ -26,26 +26,30 @@ export function CandidateProfileHeader({
   const timeAgo = formatDistanceToNow(new Date(appliedAt), { addSuffix: true });
 
   return (
-    <div className="flex items-start gap-[22px]">
+    <div className="flex items-start gap-5">
       <Avatar
         size="2xl"
         shape="square"
         name={name}
         src={avatar || getDeterministicAvatarSrc(email || name)}
       />
-      <div className="flex flex-col gap-4">
-        <h1 className="text-heading-lg font-medium text-[var(--foreground-brand-emphasis)]">
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <h1 className="truncate text-heading-sm font-medium text-[var(--foreground-brand-emphasis)]">
           {name}
         </h1>
-        <p className="flex items-center gap-1 text-body text-[var(--foreground-subtle)]">
-          <Globe size={24} weight="regular" />
-          <span>{jobTitle}</span>
-          <span className="text-[var(--foreground-disabled)]">&middot;</span>
-          <Clock size={24} weight="regular" />
-          <span>Applied {timeAgo}</span>
-        </p>
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-caption text-[var(--foreground-subtle)]">
+          <Globe size={16} weight="regular" className="shrink-0" />
+          <span className="truncate">{jobTitle}</span>
+          <span className="shrink-0 text-[var(--foreground-disabled)]">&middot;</span>
+          <Clock size={16} weight="regular" className="shrink-0" />
+          <span className="shrink-0">Applied {timeAgo}</span>
+        </div>
         <div>
-          <Button variant="tertiary" leftIcon={<PaperPlaneTilt size={20} weight="fill" />}>
+          <Button
+            variant="tertiary"
+            size="sm"
+            leftIcon={<PaperPlaneTilt size={16} weight="fill" />}
+          >
             Send Message
           </Button>
         </div>
