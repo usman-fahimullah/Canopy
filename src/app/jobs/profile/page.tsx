@@ -31,7 +31,7 @@ import { StreakBadge } from "@/components/profile/streak-badge";
 
 // Modals
 import { ChangeCoverModal } from "@/components/profile/modals/change-cover-modal";
-import { AddPhotoModal } from "@/components/profile/modals/add-photo-modal";
+import { ChangeAvatarModal } from "@/components/profile/modals/change-avatar-modal";
 import { EditContactModal } from "@/components/profile/modals/edit-contact-modal";
 import { AddSocialsModal } from "@/components/profile/modals/add-socials-modal";
 import { WriteBioModal } from "@/components/profile/modals/write-bio-modal";
@@ -576,27 +576,48 @@ export default function ProfilePage() {
         loading={saving}
       />
 
-      <AddPhotoModal
+      <ChangeAvatarModal
         open={activeModal === "photo"}
         onOpenChange={(open) => !open && setActiveModal(null)}
-        onSave={async (file) => {
-          const formData = new FormData();
-          formData.append("file", file);
+        currentAvatar={account?.avatar ?? null}
+        onSave={async (presetSrc, customFile) => {
           setSaving(true);
           try {
-            const res = await fetch("/api/profile/photo", {
-              method: "POST",
-              body: formData,
-            });
-            if (res.ok) {
-              await fetchProfile();
-              setActiveModal(null);
-              showToast("Photo updated");
+            if (customFile) {
+              // Upload custom photo via existing POST endpoint
+              const formData = new FormData();
+              formData.append("file", customFile);
+              const res = await fetch("/api/profile/photo", {
+                method: "POST",
+                body: formData,
+              });
+              if (res.ok) {
+                await fetchProfile();
+                setActiveModal(null);
+                showToast("Photo updated");
+              } else {
+                showToast("Failed to upload photo", "critical");
+              }
+            } else if (presetSrc) {
+              // Select preset avatar via PATCH endpoint
+              const res = await fetch("/api/profile/photo", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ avatarSrc: presetSrc }),
+              });
+              if (res.ok) {
+                await fetchProfile();
+                setActiveModal(null);
+                showToast("Profile picture updated");
+              } else {
+                showToast("Failed to update profile picture", "critical");
+              }
             } else {
-              showToast("Failed to upload photo", "critical");
+              // No change (existing custom URL kept)
+              setActiveModal(null);
             }
           } catch (err) {
-            logger.error("Error uploading photo", { error: formatError(err) });
+            logger.error("Error updating avatar", { error: formatError(err) });
             showToast("Something went wrong. Please try again.", "critical");
           } finally {
             setSaving(false);

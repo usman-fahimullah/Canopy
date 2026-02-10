@@ -4,6 +4,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { PaperPlaneTilt, Globe, Clock } from "@phosphor-icons/react";
 import { formatDistanceToNow } from "date-fns";
+import { getDeterministicAvatarSrc } from "@/lib/profile/avatar-presets";
 
 interface CandidateProfileHeaderProps {
   name: string;
@@ -26,7 +27,12 @@ export function CandidateProfileHeader({
 
   return (
     <div className="flex items-start gap-[22px]">
-      <Avatar size="2xl" shape="square" name={name} src={avatar ?? undefined} />
+      <Avatar
+        size="2xl"
+        shape="square"
+        name={name}
+        src={avatar || getDeterministicAvatarSrc(email || name)}
+      />
       <div className="flex flex-col gap-4">
         <h1 className="text-heading-lg font-medium text-[var(--foreground-brand-emphasis)]">
           {name}

@@ -13,6 +13,7 @@ import {
   completeRoleOnboarding,
 } from "@/lib/onboarding/types";
 import { sendEmail, teamInviteEmail } from "@/lib/email";
+import { getRandomAvatarSrc } from "@/lib/profile/avatar-presets";
 
 // ── Zod Schemas ──────────────────────────────────────────────────
 
@@ -282,6 +283,7 @@ export async function POST(request: NextRequest) {
           supabaseId: user.id,
           email: user.email,
           name: user.user_metadata?.name || user.user_metadata?.full_name || null,
+          avatar: getRandomAvatarSrc(),
         },
         include: { seekerProfile: true, coachProfile: true },
       });

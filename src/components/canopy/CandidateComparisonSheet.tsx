@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { X } from "@phosphor-icons/react";
+import { getDeterministicAvatarSrc } from "@/lib/profile/avatar-presets";
 
 interface CandidateData {
   id: string;
@@ -144,7 +145,10 @@ export function CandidateComparisonSheet({
                 <div key={candidate.id} className="text-center">
                   <div className="mb-3 flex justify-center">
                     <Avatar
-                      src={candidate.account.avatar || undefined}
+                      src={
+                        candidate.account.avatar ||
+                        getDeterministicAvatarSrc(candidate.account.email || candidate.account.name)
+                      }
                       name={candidate.account.name}
                       size="lg"
                     />

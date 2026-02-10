@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/candidate-card";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
+import { getDeterministicAvatarSrc } from "@/lib/profile/avatar-presets";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import {
   Plus,
@@ -186,7 +187,12 @@ export function CandidatesTab({
             >
               <CandidateKanbanHeader
                 name={app.seeker.account.name || "Unknown"}
-                avatarUrl={app.seeker.account.avatar || undefined}
+                avatarUrl={
+                  app.seeker.account.avatar ||
+                  getDeterministicAvatarSrc(
+                    app.seeker.account.email || app.seeker.account.name || ""
+                  )
+                }
                 matchScore={app.matchScore ?? undefined}
                 appliedDate={app.createdAt}
               />

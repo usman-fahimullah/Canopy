@@ -9,6 +9,7 @@ import {
   type EntryIntent,
   type Shell,
 } from "@/lib/onboarding/types";
+import { getRandomAvatarSrc } from "@/lib/profile/avatar-presets";
 
 /**
  * Auth redirect resolver.
@@ -75,6 +76,7 @@ export default async function AuthRedirectPage({
             supabaseId: user.id,
             email: user.email,
             name: metadata.name || metadata.full_name || null,
+            avatar: getRandomAvatarSrc(),
             // Carry forward the signup intent so the redirect logic knows which
             // onboarding to send the user to (instead of defaulting to role selection)
             ...(entryIntent ? { entryIntent } : {}),

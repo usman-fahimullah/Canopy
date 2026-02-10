@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logger, formatError } from "@/lib/logger";
 import { standardLimiter } from "@/lib/rate-limit";
+import { AVATAR_PRESET_SRCS } from "@/lib/profile/avatar-presets";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB for images
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -112,6 +114,66 @@ export async function POST(request: NextRequest) {
       endpoint: "/api/profile/photo",
     });
     return NextResponse.json({ error: `Failed to upload photo: ${message}` }, { status: 500 });
+  }
+}
+
+// PATCH — select a preset avatar
+const selectPresetSchema = z.object({
+  avatarSrc: z.string().min(1),
+});
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const account = await prisma.account.findUnique({
+      where: { supabaseId: user.id },
+    });
+
+    if (!account) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+
+    const body = await request.json();
+    const parsed = selectPresetSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { avatarSrc } = parsed.data;
+
+    if (!AVATAR_PRESET_SRCS.has(avatarSrc)) {
+      return NextResponse.json({ error: "Invalid avatar preset" }, { status: 422 });
+    }
+
+    await prisma.account.update({
+      where: { id: account.id },
+      data: { avatar: avatarSrc },
+    });
+
+    logger.info("Avatar preset selected", {
+      accountId: account.id,
+      avatarSrc,
+      endpoint: "/api/profile/photo",
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    logger.error("Avatar preset selection error", {
+      error: formatError(error),
+      endpoint: "/api/profile/photo",
+    });
+    return NextResponse.json({ error: "Failed to update avatar" }, { status: 500 });
   }
 }
 
