@@ -1,4 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// React cache() is not available in Vitest — stub it as a passthrough
+vi.mock("react", async () => {
+  const actual = await vi.importActual<typeof import("react")>("react");
+  return { ...actual, cache: (fn: unknown) => fn };
+});
+
 import type { OrgMemberRole } from "@prisma/client";
 import {
   scopedJobWhere,
