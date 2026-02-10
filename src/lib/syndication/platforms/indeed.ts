@@ -15,16 +15,17 @@
  */
 
 import { logger } from "@/lib/logger";
+import { resolveSyndicationToken } from "@/lib/integrations/syndication-auth";
 import type { PlatformAdapter, SyndicationJobPayload, SyndicationResult } from "../types";
 
 export class IndeedAdapter implements PlatformAdapter {
   readonly platform = "indeed" as const;
 
   async post(payload: SyndicationJobPayload): Promise<SyndicationResult> {
-    const apiKey = process.env.INDEED_API_KEY;
+    const resolved = await resolveSyndicationToken("indeed", payload.organizationId);
 
-    if (apiKey) {
-      return this.postViaApi(payload, apiKey);
+    if (resolved) {
+      return this.postViaApi(payload, resolved.accessToken);
     }
 
     // XML feed approach: mark as success — Indeed will pick it up via feed scrape
@@ -40,10 +41,10 @@ export class IndeedAdapter implements PlatformAdapter {
   }
 
   async update(payload: SyndicationJobPayload, externalId: string): Promise<SyndicationResult> {
-    const apiKey = process.env.INDEED_API_KEY;
+    const resolved = await resolveSyndicationToken("indeed", payload.organizationId);
 
-    if (apiKey && !externalId.startsWith("feed:")) {
-      return this.updateViaApi(payload, externalId, apiKey);
+    if (resolved && !externalId.startsWith("feed:")) {
+      return this.updateViaApi(payload, externalId, resolved.accessToken);
     }
 
     // XML feed updates happen automatically on next scrape
@@ -55,10 +56,11 @@ export class IndeedAdapter implements PlatformAdapter {
   }
 
   async remove(externalId: string): Promise<SyndicationResult> {
-    const apiKey = process.env.INDEED_API_KEY;
+    // For remove, we don't have the payload — fall back to env-based token resolution
+    const resolved = await resolveSyndicationToken("indeed");
 
-    if (apiKey && !externalId.startsWith("feed:")) {
-      return this.removeViaApi(externalId, apiKey);
+    if (resolved && !externalId.startsWith("feed:")) {
+      return this.removeViaApi(externalId, resolved.accessToken);
     }
 
     // XML feed: job is excluded from feed when syndicationEnabled is false

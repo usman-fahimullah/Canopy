@@ -138,6 +138,9 @@ model Organization {
   // Approval requests
   approvalRequests ApprovalRequest[]
 
+  // External integrations (Nango)
+  integrationConnections IntegrationConnection[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -1440,6 +1443,10 @@ model Interview {
   cancelledAt DateTime?
   completedAt DateTime?
 
+  // Calendar sync (Nango)
+  calendarEventId  String? // External calendar event ID
+  calendarProvider String? // "google-calendar" | "outlook-calendar"
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1539,4 +1546,47 @@ enum ApprovalStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+// =================================================================
+// INTEGRATION CONNECTION — Lightweight tracking of external OAuth
+// connections managed by Nango. Nango stores actual tokens; this
+// model caches connection status for UI display.
+// =================================================================
+
+model IntegrationConnection {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Who initiated the connection
+  connectedByMemberId String?
+
+  provider          String // "google-calendar", "outlook-calendar", "linkedin", "indeed", "slack"
+  nangoConnectionId String // Nango connection ID: "org_{orgId}" or "member_{memberId}"
+
+  // Scope: org-level (slack, syndication) vs member-level (calendar)
+  scope String @default("organization") // "organization" | "member"
+
+  // Status cache (actual tokens live in Nango)
+  status String @default("active") // "active" | "error" | "expired" | "disconnected"
+
+  // Cached provider account info
+  providerAccountEmail String?
+  providerAccountName  String?
+
+  // Provider-specific config (e.g., Slack channel selection)
+  config Json?
+
+  errorMessage String?
+  lastSyncedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, provider, nangoConnectionId])
+  @@index([organizationId])
+  @@index([provider])
+  @@index([status])
 }

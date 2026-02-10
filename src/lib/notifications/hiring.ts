@@ -12,6 +12,12 @@ import {
   approvalRequestEmail,
   approvalResponseEmail,
 } from "@/lib/email/hiring-templates";
+import {
+  sendSlackNotification,
+  buildNewApplicationMessage,
+  buildInterviewScheduledMessage,
+  buildStageMoveMessage,
+} from "@/lib/integrations/slack";
 
 interface ApplicationReceivedParams {
   applicationId: string;
@@ -19,6 +25,7 @@ interface ApplicationReceivedParams {
   candidateName: string;
   jobTitle: string;
   companyName: string;
+  organizationId?: string;
 }
 
 /**
@@ -64,6 +71,17 @@ export async function createApplicationReceivedNotification(params: ApplicationR
       jobTitle: params.jobTitle,
       endpoint: "lib/notifications/hiring",
     });
+
+    // Fire-and-forget Slack notification
+    if (params.organizationId) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://greenjobsboard.us";
+      const msg = buildNewApplicationMessage({
+        candidateName: params.candidateName,
+        jobTitle: params.jobTitle,
+        applicationUrl: `${appUrl}/canopy/applications/${params.applicationId}`,
+      });
+      sendSlackNotification(params.organizationId, msg.text, msg.blocks).catch(() => {});
+    }
   } catch (error) {
     logger.error("Failed to send application received notification", {
       error: formatError(error),
@@ -81,6 +99,7 @@ interface StageChangedParams {
   companyName: string;
   previousStage: string;
   newStage: string;
+  organizationId?: string;
 }
 
 /**
@@ -129,6 +148,19 @@ export async function createStageChangedNotification(params: StageChangedParams)
       newStage: params.newStage,
       endpoint: "lib/notifications/hiring",
     });
+
+    // Fire-and-forget Slack notification
+    if (params.organizationId) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://greenjobsboard.us";
+      const msg = buildStageMoveMessage({
+        candidateName: params.candidateName,
+        jobTitle: params.jobTitle,
+        previousStage: params.previousStage,
+        newStage: params.newStage,
+        applicationUrl: `${appUrl}/canopy/applications/${params.applicationId}`,
+      });
+      sendSlackNotification(params.organizationId, msg.text, msg.blocks).catch(() => {});
+    }
   } catch (error) {
     logger.error("Failed to send stage changed notification", {
       error: formatError(error),
@@ -147,6 +179,7 @@ interface InterviewScheduledParams {
   interviewDate: Date;
   interviewerName: string;
   meetingLink?: string;
+  organizationId?: string;
 }
 
 /**
@@ -197,6 +230,19 @@ export async function createInterviewScheduledNotification(params: InterviewSche
       interviewDate: params.interviewDate,
       endpoint: "lib/notifications/hiring",
     });
+
+    // Fire-and-forget Slack notification
+    if (params.organizationId) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://greenjobsboard.us";
+      const msg = buildInterviewScheduledMessage({
+        candidateName: params.candidateName,
+        jobTitle: params.jobTitle,
+        interviewerName: params.interviewerName,
+        scheduledAt: params.interviewDate.toLocaleString(),
+        applicationUrl: `${appUrl}/canopy/applications/${params.applicationId}`,
+      });
+      sendSlackNotification(params.organizationId, msg.text, msg.blocks).catch(() => {});
+    }
   } catch (error) {
     logger.error("Failed to send interview scheduled notification", {
       error: formatError(error),

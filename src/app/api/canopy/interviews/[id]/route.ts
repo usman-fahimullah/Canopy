@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { createAuditLog } from "@/lib/audit";
 import { UpdateInterviewSchema } from "@/lib/validators/interviews";
+import { updateCalendarEvent, deleteCalendarEvent } from "@/lib/integrations/calendar";
+import { logger as calLogger, formatError as calFormatError } from "@/lib/logger";
 
 interface RouteParams {
   params: {
@@ -222,6 +224,46 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         statusChange: data.status ? `${interview.status} → ${data.status}` : undefined,
       },
     });
+
+    // Best-effort: sync calendar event changes
+    if (interview.calendarEventId && interview.calendarProvider) {
+      try {
+        if (data.status === "CANCELLED") {
+          await deleteCalendarEvent(
+            interview.organizationId,
+            interview.interviewerId,
+            interview.calendarEventId,
+            interview.calendarProvider as any
+          );
+        } else if (data.scheduledAt || data.duration || data.location || data.meetingLink) {
+          const endTime =
+            data.scheduledAt || data.duration
+              ? new Date(
+                  new Date(data.scheduledAt || interview.scheduledAt).getTime() +
+                    (data.duration || interview.duration || 60) * 60000
+                )
+              : undefined;
+
+          await updateCalendarEvent(
+            interview.organizationId,
+            interview.interviewerId,
+            interview.calendarEventId,
+            interview.calendarProvider as any,
+            {
+              ...(data.scheduledAt && { startTime: new Date(data.scheduledAt) }),
+              ...(endTime && { endTime }),
+              ...(data.location !== undefined && { location: data.location || undefined }),
+              ...(data.meetingLink !== undefined && { meetingLink: data.meetingLink || undefined }),
+            }
+          );
+        }
+      } catch (calError) {
+        calLogger.warn("Calendar sync failed (best-effort)", {
+          interviewId: params.id,
+          error: calFormatError(calError),
+        });
+      }
+    }
 
     logger.info("Interview updated", {
       interviewId: params.id,

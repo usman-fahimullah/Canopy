@@ -32,13 +32,21 @@ import {
   Export,
   Trash,
   Globe,
+  Plugs,
 } from "@phosphor-icons/react";
+import IntegrationsSection from "./integrations/IntegrationsSection";
 
 /* -------------------------------------------------------------------
    Types
    ------------------------------------------------------------------- */
 
-type SettingSection = "company" | "team" | "notifications" | "privacy" | "career-page";
+type SettingSection =
+  | "company"
+  | "team"
+  | "notifications"
+  | "privacy"
+  | "career-page"
+  | "integrations";
 
 interface TeamMember {
   id: string;
@@ -97,6 +105,12 @@ const SETTING_SECTIONS = [
     label: "Career Page",
     description: "Public career page settings",
     icon: Globe,
+  },
+  {
+    id: "integrations" as const,
+    label: "Integrations",
+    description: "Connected services and OAuth",
+    icon: Plugs,
   },
 ];
 
@@ -931,6 +945,8 @@ export default function EmployerSettingsPage() {
         return <PrivacyAccountSection onSignOut={handleSignOut} />;
       case "career-page":
         return <CareerPageSettingsSection showToast={showToast} />;
+      case "integrations":
+        return <IntegrationsSection showToast={showToast} />;
       default:
         return null;
     }

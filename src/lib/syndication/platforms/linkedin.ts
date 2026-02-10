@@ -10,16 +10,17 @@
  */
 
 import { logger } from "@/lib/logger";
+import { resolveSyndicationToken } from "@/lib/integrations/syndication-auth";
 import type { PlatformAdapter, SyndicationJobPayload, SyndicationResult } from "../types";
 
 export class LinkedInAdapter implements PlatformAdapter {
   readonly platform = "linkedin" as const;
 
   async post(payload: SyndicationJobPayload): Promise<SyndicationResult> {
-    const accessToken = process.env.LINKEDIN_ACCESS_TOKEN;
+    const resolved = await resolveSyndicationToken("linkedin", payload.organizationId);
 
-    if (accessToken) {
-      return this.postViaApi(payload, accessToken);
+    if (resolved) {
+      return this.postViaApi(payload, resolved.accessToken);
     }
 
     // Manual fallback: log intent, employer handles via LinkedIn UI
@@ -35,10 +36,10 @@ export class LinkedInAdapter implements PlatformAdapter {
   }
 
   async update(payload: SyndicationJobPayload, externalId: string): Promise<SyndicationResult> {
-    const accessToken = process.env.LINKEDIN_ACCESS_TOKEN;
+    const resolved = await resolveSyndicationToken("linkedin", payload.organizationId);
 
-    if (accessToken && !externalId.startsWith("manual:")) {
-      return this.updateViaApi(payload, externalId, accessToken);
+    if (resolved && !externalId.startsWith("manual:")) {
+      return this.updateViaApi(payload, externalId, resolved.accessToken);
     }
 
     logger.info("LinkedIn: Manual update required", {
@@ -49,10 +50,11 @@ export class LinkedInAdapter implements PlatformAdapter {
   }
 
   async remove(externalId: string): Promise<SyndicationResult> {
-    const accessToken = process.env.LINKEDIN_ACCESS_TOKEN;
+    // For remove, we don't have the payload — fall back to env-based token resolution
+    const resolved = await resolveSyndicationToken("linkedin");
 
-    if (accessToken && !externalId.startsWith("manual:")) {
-      return this.removeViaApi(externalId, accessToken);
+    if (resolved && !externalId.startsWith("manual:")) {
+      return this.removeViaApi(externalId, resolved.accessToken);
     }
 
     logger.info("LinkedIn: Manual removal required", { externalId });

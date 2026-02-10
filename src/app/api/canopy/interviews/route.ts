@@ -5,6 +5,7 @@ import { logger, formatError } from "@/lib/logger";
 import { createAuditLog } from "@/lib/audit";
 import { CreateInterviewSchema } from "@/lib/validators/interviews";
 import { standardLimiter } from "@/lib/rate-limit";
+import { createCalendarEvent } from "@/lib/integrations/calendar";
 import { z } from "zod";
 
 /**
@@ -292,6 +293,41 @@ export async function POST(request: NextRequest) {
         scheduledAt: data.scheduledAt,
       },
     });
+
+    // Best-effort: create calendar event for the interviewer
+    try {
+      const endTime = new Date(
+        new Date(data.scheduledAt).getTime() + (data.duration || 60) * 60000
+      );
+      const candidateName = interview.application?.seeker?.account?.name || "Candidate";
+      const calendarResult = await createCalendarEvent(
+        application.job.organizationId,
+        data.interviewerId,
+        {
+          title: `Interview: ${candidateName} — ${application.job.title}`,
+          description: data.notes || `Interview for ${application.job.title}`,
+          startTime: new Date(data.scheduledAt),
+          endTime,
+          location: data.location || undefined,
+          meetingLink: data.meetingLink || undefined,
+        }
+      );
+
+      if (calendarResult) {
+        await prisma.interview.update({
+          where: { id: interview.id },
+          data: {
+            calendarEventId: calendarResult.calendarEventId,
+            calendarProvider: calendarResult.provider,
+          },
+        });
+      }
+    } catch (calendarError) {
+      logger.warn("Calendar event creation failed (best-effort)", {
+        interviewId: interview.id,
+        error: formatError(calendarError),
+      });
+    }
 
     logger.info("Interview created", {
       interviewId: interview.id,

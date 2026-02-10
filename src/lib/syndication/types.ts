@@ -14,6 +14,7 @@ export type SyndicationStatus = "pending" | "success" | "failed";
 /** The data a platform adapter needs to post/update a job. */
 export interface SyndicationJobPayload {
   jobId: string;
+  organizationId?: string;
   title: string;
   description: string;
   location: string | null;

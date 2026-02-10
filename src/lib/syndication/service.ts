@@ -70,8 +70,9 @@ export async function processPendingSyndication(batchSize = 20) {
           climateCategory: true,
           publishedAt: true,
           closesAt: true,
+          organizationId: true,
           organization: {
-            select: { name: true, logo: true, slug: true },
+            select: { id: true, name: true, logo: true, slug: true },
           },
         },
       },
@@ -103,6 +104,7 @@ export async function processPendingSyndication(batchSize = 20) {
 
       const payload: SyndicationJobPayload = {
         jobId: log.job.id,
+        organizationId: log.job.organization.id,
         title: log.job.title,
         description: log.job.description,
         location: log.job.location,
