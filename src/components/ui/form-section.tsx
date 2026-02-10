@@ -35,7 +35,7 @@ const FormCard = React.forwardRef<HTMLDivElement, FormCardProps>(
       ref={ref}
       className={cn(
         // Figma: white bg, 1px border #e5dfd8, 16px radius, 24px padding
-        "rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6",
+        "rounded-2xl border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 shadow-card",
         className
       )}
       {...props}

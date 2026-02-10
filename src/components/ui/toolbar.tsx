@@ -133,7 +133,7 @@ const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
               "inline-flex flex-wrap items-center",
               "px-3 py-2",
               "rounded-2xl bg-[var(--background-default)]",
-              "shadow-[var(--shadow-card)]",
+              "shadow-card",
               // Figma: gap-6 (24px) between major sections, tighter on mobile
               "gap-2 sm:gap-4 md:gap-6",
               disabled && "pointer-events-none opacity-50",

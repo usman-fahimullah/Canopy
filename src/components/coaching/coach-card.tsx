@@ -141,7 +141,7 @@ export function CoachCard({
   return (
     <Card
       className={cn(
-        "cursor-pointer transition-all hover:shadow-[var(--shadow-card-hover)]",
+        "cursor-pointer transition-all hover:shadow-card-hover",
         selected && "border-[var(--border-brand-emphasis)] bg-[var(--background-brand-subtle)]",
         className
       )}

@@ -160,7 +160,7 @@ export default function CoachSessionsPage() {
               return (
                 <div
                   key={session.id}
-                  className={`flex items-center gap-4 rounded-[16px] border px-6 py-4 transition-shadow hover:shadow-[var(--shadow-card-hover)] ${
+                  className={`flex items-center gap-4 rounded-[16px] border px-6 py-4 shadow-card transition-shadow hover:shadow-card-hover ${
                     todaySession && session.status === "SCHEDULED"
                       ? "border-[var(--primitive-green-300)] bg-[var(--primitive-green-800)]"
                       : activeTab === "upcoming"

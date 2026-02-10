@@ -268,7 +268,7 @@ function TemplateCard({ template, onSelect }: { template: GoalTemplate; onSelect
       className={cn(
         "rounded-xl border transition-all",
         "border-[var(--border-muted)] bg-[var(--background-default)]",
-        "hover:border-[var(--border-brand)] hover:shadow-[var(--shadow-card)]"
+        "hover:border-[var(--border-brand)] hover:shadow-card"
       )}
     >
       <div className="p-4">

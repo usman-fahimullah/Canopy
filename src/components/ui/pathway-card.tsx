@@ -30,8 +30,8 @@ export function PathwayCard({ pathway, jobCount, href, className }: PathwayCardP
   const content = (
     <div
       className={cn(
-        "flex flex-col items-center rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] px-4 pb-4 pt-5 shadow-[var(--shadow-card)] transition-all",
-        href && "cursor-pointer hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]",
+        "flex flex-col items-center rounded-xl border border-[var(--card-border)] bg-[var(--card-background)] px-4 pb-4 pt-5 shadow-card transition-all",
+        href && "cursor-pointer hover:-translate-y-0.5 hover:shadow-card-hover",
         className
       )}
     >

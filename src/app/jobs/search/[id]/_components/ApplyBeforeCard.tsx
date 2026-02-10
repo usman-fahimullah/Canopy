@@ -9,7 +9,7 @@ interface ApplyBeforeCardProps {
 
 export function ApplyBeforeCard({ closesAt }: ApplyBeforeCardProps) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] px-6 py-4">
+    <div className="flex items-center justify-between rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] px-6 py-4 shadow-card">
       <div className="flex flex-col gap-1">
         <span className="text-sm font-bold text-[var(--foreground-default)]">Apply Before:</span>
         <span className="text-body text-[var(--foreground-default)]">

@@ -157,7 +157,7 @@ export default function CoachClientsPage() {
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-5 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+                className="flex flex-col gap-4 rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-5 shadow-card transition-shadow hover:shadow-card-hover"
               >
                 <div className="flex items-center gap-3">
                   <Avatar

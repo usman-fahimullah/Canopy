@@ -283,7 +283,7 @@ export default function CalendarPage() {
                         return (
                           <Card
                             key={interview.id}
-                            className="cursor-pointer p-2 hover:shadow-[var(--shadow-card-hover)]"
+                            className="cursor-pointer p-2 hover:shadow-card-hover"
                           >
                             <div className="space-y-1.5">
                               <div className="flex items-start justify-between gap-2">

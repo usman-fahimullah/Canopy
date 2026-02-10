@@ -219,7 +219,7 @@ function SelectCoachStep({
               <Card
                 key={coach.id}
                 className={cn(
-                  "cursor-pointer transition-all hover:shadow-[var(--shadow-card-hover)]",
+                  "cursor-pointer transition-all hover:shadow-card-hover",
                   isSelected &&
                     "border-[var(--border-brand-emphasis)] bg-[var(--background-brand-subtle)]"
                 )}

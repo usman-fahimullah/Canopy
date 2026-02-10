@@ -201,7 +201,7 @@ function SortableTask({ task, onRemove, isNew }: SortableTaskProps) {
       className={cn(
         "group flex items-center gap-2 rounded-lg border border-transparent py-1.5 transition-all",
         isDragging &&
-          "z-10 border-[var(--border-brand)] bg-[var(--background-default)] shadow-[var(--shadow-card)]",
+          "z-10 border-[var(--border-brand)] bg-[var(--background-default)] shadow-card",
         isNew && "animate-in fade-in slide-in-from-top-2 duration-200"
       )}
     >

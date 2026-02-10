@@ -316,7 +316,7 @@ export function AuthCard() {
     const maxResendsReached = resendCount >= 5;
 
     return (
-      <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-[var(--shadow-card)]">
+      <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-card">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-green-100)]">
             <EnvelopeSimple className="h-8 w-8 text-[var(--primitive-green-600)]" weight="bold" />
@@ -398,7 +398,7 @@ export function AuthCard() {
 
   // ─── Main auth card with tabs ───
   return (
-    <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-[var(--shadow-card)]">
+    <div className="rounded-3xl bg-[var(--card-background)] px-8 py-8 shadow-card">
       <div className="flex flex-col items-center gap-6">
         {/* Segmented Controller — stays static, content below transitions */}
         <SegmentedController

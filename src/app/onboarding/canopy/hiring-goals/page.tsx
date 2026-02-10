@@ -76,8 +76,8 @@ export default function EmployerHiringGoalsPage() {
               className={cn(
                 "flex w-full items-start gap-4 rounded-[var(--radius-card)] border p-5 text-left transition-all",
                 isSelected
-                  ? "border-[var(--border-brand-emphasis)] bg-[var(--background-brand-subtle)] shadow-[var(--shadow-card)]"
-                  : "border-[var(--border-muted)] bg-[var(--card-background)] hover:border-[var(--border-interactive-hover)] hover:shadow-[var(--shadow-card)]"
+                  ? "border-[var(--border-brand-emphasis)] bg-[var(--background-brand-subtle)] shadow-card"
+                  : "border-[var(--border-muted)] bg-[var(--card-background)] hover:border-[var(--border-interactive-hover)] hover:shadow-card"
               )}
             >
               <div
@@ -101,9 +101,7 @@ export default function EmployerHiringGoalsPage() {
                 >
                   {option.label}
                 </p>
-                <p className="text-caption text-[var(--foreground-subtle)]">
-                  {option.description}
-                </p>
+                <p className="text-caption text-[var(--foreground-subtle)]">{option.description}</p>
               </div>
             </button>
           );

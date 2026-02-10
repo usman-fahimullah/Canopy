@@ -12,7 +12,7 @@ export function RecruiterCard({ recruiter, label = "Recruiter" }: RecruiterCardP
   if (!recruiter) return null;
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-6">
+    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-6 shadow-card">
       <div className="flex items-center gap-3">
         <Avatar size="lg" src={recruiter.avatar ?? undefined} name={recruiter.name} />
         <div className="flex min-w-0 flex-1 flex-col">

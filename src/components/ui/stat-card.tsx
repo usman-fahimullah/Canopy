@@ -13,7 +13,7 @@ import { TrendUp, TrendDown, Minus, ArrowRight } from "@phosphor-icons/react";
  */
 
 const statCardVariants = cva(
-  "rounded-card border border-border-default bg-surface-default p-4 transition-shadow hover:shadow-card",
+  "rounded-card border border-border-default bg-surface-default p-4 shadow-card transition-shadow hover:shadow-card-hover",
   {
     variants: {
       size: {

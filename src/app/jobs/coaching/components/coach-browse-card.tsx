@@ -26,7 +26,7 @@ function formatCurrency(amount: number, currency: string) {
 
 export function CoachBrowseCard({ coach }: CoachBrowseCardProps) {
   return (
-    <div className="flex flex-col rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 transition-shadow hover:shadow-[var(--shadow-card-hover)]">
+    <div className="flex flex-col rounded-[16px] border border-[var(--primitive-neutral-200)] bg-[var(--card-background)] p-6 shadow-card transition-shadow hover:shadow-card-hover">
       {/* Top section: avatar + info */}
       <div className="flex items-start gap-4">
         <Avatar src={coach.avatar ?? undefined} name={coach.name} size="lg" shape="square" />

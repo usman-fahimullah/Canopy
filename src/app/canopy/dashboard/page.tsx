@@ -233,7 +233,7 @@ export default function EmployerDashboardPage() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="flex flex-col gap-3 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-4 py-5 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+              className="flex flex-col gap-3 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-4 py-5 shadow-card transition-shadow hover:shadow-card-hover"
             >
               <div className="flex items-center justify-between">
                 <p className="text-caption text-[var(--foreground-muted)]">{stat.label}</p>
@@ -273,7 +273,7 @@ export default function EmployerDashboardPage() {
               <Link
                 key={job.id}
                 href={`/canopy/roles/${job.id}`}
-                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4 shadow-card transition-shadow hover:shadow-card-hover"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background-info)]">
                   <BriefcaseMetal

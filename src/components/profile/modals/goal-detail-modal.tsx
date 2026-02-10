@@ -214,8 +214,7 @@ function SortableTask({ milestone, onToggle, onDelete, onUpdateResources }: Sort
       style={style}
       className={cn(
         "group rounded-lg border border-transparent py-1.5 transition-all",
-        isDragging &&
-          "z-10 border-[var(--border-brand)] bg-[var(--background-default)] shadow-[var(--shadow-card)]"
+        isDragging && "z-10 border-[var(--border-brand)] bg-[var(--background-default)] shadow-card"
       )}
     >
       {/* Main task row */}

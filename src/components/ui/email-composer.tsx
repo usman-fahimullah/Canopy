@@ -858,7 +858,7 @@ const EmailComposer = React.forwardRef<HTMLDivElement, EmailComposerProps>(
         className={cn(
           "flex flex-col overflow-hidden rounded-2xl",
           "border border-[var(--border-default)] bg-[var(--card-background)]",
-          "shadow-[var(--shadow-card)]",
+          "shadow-card",
           className
         )}
       >
@@ -1401,8 +1401,8 @@ const QuickReply: React.FC<QuickReplyProps> = ({ to, replyTo, onSend, onCancel, 
         "bg-[var(--card-background)]",
         "transition-all duration-200",
         isFocused
-          ? "border-[var(--border-brand)] shadow-[var(--shadow-card-hover)] ring-1 ring-[var(--border-brand)]"
-          : "border-[var(--border-default)] shadow-[var(--shadow-card)] hover:border-[var(--border-emphasis)]",
+          ? "border-[var(--border-brand)] shadow-card-hover ring-1 ring-[var(--border-brand)]"
+          : "border-[var(--border-default)] shadow-card hover:border-[var(--border-emphasis)]",
         className
       )}
     >

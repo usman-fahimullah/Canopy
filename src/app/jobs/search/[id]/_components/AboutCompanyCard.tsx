@@ -9,7 +9,7 @@ interface AboutCompanyCardProps {
 
 export function AboutCompanyCard({ organization }: AboutCompanyCardProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-6">
+    <div className="flex flex-col gap-4 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-6 shadow-card">
       <div className="flex flex-col items-center gap-3">
         <Avatar
           size="xl"

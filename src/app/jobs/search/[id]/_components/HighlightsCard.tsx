@@ -13,7 +13,7 @@ export function HighlightsCard({ job }: HighlightsCardProps) {
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency, job.salaryPeriod);
 
   return (
-    <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)]">
+    <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] shadow-card">
       <div className="flex items-center gap-2 px-6 py-4">
         <CalendarStar size={24} weight="duotone" className="text-[var(--foreground-brand)]" />
         <span className="text-body font-bold text-[var(--foreground-default)]">Highlights</span>

@@ -13,7 +13,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-96 animate-pulse rounded-3xl bg-[var(--card-background)] shadow-[var(--shadow-card)]" />
+        <div className="h-96 animate-pulse rounded-3xl bg-[var(--card-background)] shadow-card" />
       }
     >
       <AuthCard />

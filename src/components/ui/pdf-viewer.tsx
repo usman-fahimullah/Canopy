@@ -497,7 +497,7 @@ const DocumentPreviewCard: React.FC<DocumentPreviewCardProps> = ({
     <div
       className={cn(
         "group flex items-center gap-3 rounded-lg border border-border-muted p-3",
-        "hover:border-border-default bg-card-bg hover:bg-card-bg-hover hover:shadow-[var(--shadow-card-hover)]",
+        "hover:border-border-default bg-card-bg hover:bg-card-bg-hover hover:shadow-card-hover",
         "transition-all duration-fast",
         className
       )}

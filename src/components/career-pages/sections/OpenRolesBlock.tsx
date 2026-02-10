@@ -73,7 +73,7 @@ export function OpenRolesBlock({ section, theme, jobs, orgSlug }: OpenRolesBlock
             <a
               key={job.id}
               href={`/apply/${job.id}`}
-              className="flex items-center justify-between rounded-xl border border-[var(--border-muted)] bg-[var(--background-default)] px-6 py-4 transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+              className="flex items-center justify-between rounded-xl border border-[var(--border-muted)] bg-[var(--background-default)] px-6 py-4 shadow-card transition-shadow hover:shadow-card-hover"
             >
               <div>
                 <h3 className="font-semibold text-[var(--foreground-default)]">{job.title}</h3>

@@ -244,7 +244,7 @@ const GoalCardLarge = React.forwardRef<HTMLDivElement, GoalCardInternalProps>(
         ref={ref}
         className={cn(
           "flex flex-col items-start justify-between overflow-hidden",
-          "h-full rounded-[var(--radius-card)] shadow-[var(--shadow-card)]",
+          "h-full rounded-[var(--radius-card)] shadow-card",
           goalCardBg[goal],
           className
         )}

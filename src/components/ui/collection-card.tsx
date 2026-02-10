@@ -133,7 +133,7 @@ const CollectionCard = React.forwardRef<HTMLAnchorElement, CollectionCardProps>(
           "rounded-[var(--radius-card)] p-6",
           // Transitions
           "transition-all duration-[var(--duration-moderate)] ease-[var(--ease-default)]",
-          "hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)]",
+          "hover:scale-[1.02] hover:shadow-card-hover",
           // Focus — visible ring for keyboard navigation
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
           className

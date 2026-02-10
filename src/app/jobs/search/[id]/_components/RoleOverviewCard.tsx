@@ -13,7 +13,7 @@ interface RoleOverviewCardProps {
 
 export function RoleOverviewCard({ job }: RoleOverviewCardProps) {
   return (
-    <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)]">
+    <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] shadow-card">
       <div className="flex items-center gap-2 px-6 py-4">
         <Briefcase size={24} weight="duotone" className="text-[var(--foreground-brand)]" />
         <span className="text-body font-bold text-[var(--foreground-default)]">Role Overview</span>

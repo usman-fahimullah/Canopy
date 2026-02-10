@@ -361,7 +361,7 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
         <div
           ref={ref}
           className={cn(
-            "animate-pulse rounded-xl bg-[var(--card-background)] shadow-[var(--shadow-card)]",
+            "animate-pulse rounded-xl bg-[var(--card-background)] shadow-card",
             variant === "compact" ? "p-4" : "p-5",
             className
           )}
@@ -382,15 +382,15 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
           // Base
           "group relative rounded-xl bg-[var(--card-background)] text-[var(--card-foreground)]",
           // Shadow instead of border
-          "shadow-[var(--shadow-card)]",
+          "shadow-card",
           // Transitions
           "transition-all duration-200 ease-[var(--ease-default)]",
           // Hover — subtle lift + stronger shadow
-          "hover:-translate-y-px hover:shadow-[var(--shadow-card-hover)]",
+          "hover:-translate-y-px hover:shadow-card-hover",
           // Focus
           "focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none",
           // Active
-          "active:scale-[0.995] active:shadow-[var(--shadow-card)]",
+          "active:scale-[0.995] active:shadow-card",
           // Cursor
           "cursor-pointer",
           // Variant sizing
