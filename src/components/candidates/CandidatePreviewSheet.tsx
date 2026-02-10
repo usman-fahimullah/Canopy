@@ -22,6 +22,8 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import {
   X,
   ArrowCircleRight,
+  ArrowsOut,
+  ArrowsIn,
   Prohibit,
   UserCirclePlus,
   ChatCircleDots,
@@ -46,6 +48,7 @@ import { ApplicationReviewPanel } from "./ApplicationReviewPanel";
 // React Query
 import { useCandidateDetailQuery, queryKeys } from "@/hooks/queries";
 import { logger, formatError } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 
 /* -------------------------------------------------------------------
    Types (mirrors the API response shape)
@@ -159,7 +162,11 @@ export function CandidatePreviewSheet({
   const isOpen = seekerId !== null;
 
   // --- React Query data fetching (cached, instant on re-open) ---
-  const { data: queryResult, isLoading: loading, error: queryError } = useCandidateDetailQuery(seekerId);
+  const {
+    data: queryResult,
+    isLoading: loading,
+    error: queryError,
+  } = useCandidateDetailQuery(seekerId);
   const seeker = (queryResult?.data as unknown as SeekerData) ?? null;
   const orgMemberId = queryResult?.orgMemberId ?? null;
   const error = queryError ? (queryError as Error).message : null;
@@ -175,6 +182,7 @@ export function CandidatePreviewSheet({
   // --- Panels ---
   const [panelType, setPanelType] = React.useState<PanelType>(null);
   const [reviewStageId, setReviewStageId] = React.useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   // Reset state when seekerId changes
   React.useEffect(() => {
@@ -182,6 +190,7 @@ export function CandidatePreviewSheet({
     setReviewStageId(null);
     setOptimisticStage(null);
     setActionFeedback(null);
+    setIsExpanded(false);
   }, [seekerId]);
 
   // Clear feedback after 4s
@@ -248,12 +257,14 @@ export function CandidatePreviewSheet({
     } else {
       setPanelType(type);
       if (type !== "review") setReviewStageId(null);
+      setIsExpanded(true);
     }
   };
 
   const handleOpenReview = (stageId: string) => {
     setReviewStageId(stageId);
     setPanelType("review");
+    setIsExpanded(true);
   };
 
   const handleClosePanel = () => {
@@ -318,7 +329,7 @@ export function CandidatePreviewSheet({
   );
 
   // Determine dynamic sheet size
-  const sheetSize = panelType ? "5xl" : "2xl";
+  const sheetSize = isExpanded ? "full" : "2xl";
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -326,7 +337,10 @@ export function CandidatePreviewSheet({
         side="right"
         size={sheetSize}
         hideClose
-        className="flex flex-col gap-0 overflow-hidden p-0 transition-[max-width] duration-300 ease-in-out"
+        className={cn(
+          "flex flex-col gap-0 overflow-hidden p-0 transition-[max-width] duration-300 ease-in-out",
+          isExpanded && "sm:max-w-[calc(100vw-72px)]"
+        )}
       >
         {/* Accessible title (hidden visually) */}
         <SheetTitle className="sr-only">
@@ -379,6 +393,22 @@ export function CandidatePreviewSheet({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Expand / collapse */}
+            <SimpleTooltip content={isExpanded ? "Collapse" : "Expand"}>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setIsExpanded((prev) => !prev)}
+                aria-label={isExpanded ? "Collapse sheet" : "Expand sheet"}
+              >
+                {isExpanded ? (
+                  <ArrowsIn size={20} weight="bold" />
+                ) : (
+                  <ArrowsOut size={20} weight="bold" />
+                )}
+              </Button>
+            </SimpleTooltip>
+
             {/* Panel toggles */}
             {seeker && (
               <>
@@ -590,7 +620,12 @@ export function CandidatePreviewSheet({
 
           {/* Side panel (conditional — widens the sheet) */}
           {panelType && seeker && (
-            <aside className="flex w-[380px] shrink-0 flex-col border-l border-[var(--border-muted)] bg-[var(--background-default)]">
+            <aside
+              className={cn(
+                "flex shrink-0 flex-col border-l border-[var(--border-muted)] bg-[var(--background-default)] transition-[width] duration-300 ease-in-out",
+                isExpanded ? "w-[480px]" : "w-[380px]"
+              )}
+            >
               {panelType === "review" && activeApp && orgMemberId && (
                 <ApplicationReviewPanel
                   applicationId={activeApp.id}
@@ -608,7 +643,11 @@ export function CandidatePreviewSheet({
                 />
               )}
               {panelType === "comments" && (
-                <CommentsPanel seekerId={seeker.id} notes={seeker.notes} onClose={handleClosePanel} />
+                <CommentsPanel
+                  seekerId={seeker.id}
+                  notes={seeker.notes}
+                  onClose={handleClosePanel}
+                />
               )}
               {panelType === "todo" && <TodoPanel stages={jobStages} onClose={handleClosePanel} />}
               {panelType === "history" && (
