@@ -305,6 +305,91 @@ const ModalFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
 );
 ModalFooter.displayName = "ModalFooter";
 
+/**
+ * ModalSidebarLayout — Two-panel container (sidebar + content).
+ * Responsive: side-by-side on md+, stacked (column) on mobile.
+ *
+ * Usage:
+ *   <ModalSidebarLayout>
+ *     <ModalSidebar>…nav items…</ModalSidebar>
+ *     <ModalSidebarContent>…active section…</ModalSidebarContent>
+ *   </ModalSidebarLayout>
+ */
+const ModalSidebarLayout = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex min-h-0 flex-1 flex-col md:flex-row", className)}
+      {...props}
+    />
+  )
+);
+ModalSidebarLayout.displayName = "ModalSidebarLayout";
+
+/**
+ * ModalSidebar — Fixed-width left navigation panel.
+ * On mobile: horizontal scrollable nav strip above content.
+ * On md+: vertical sidebar (w-56) with right border.
+ */
+const ModalSidebar = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  ({ className, ...props }, ref) => (
+    <nav
+      ref={ref}
+      className={cn(
+        // Mobile: horizontal strip
+        "flex shrink-0 gap-1 overflow-x-auto border-b border-[var(--border-default)] px-4 py-2",
+        // Desktop: vertical sidebar
+        "md:w-56 md:flex-col md:overflow-y-auto md:border-b-0 md:border-r md:px-3 md:py-4",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+ModalSidebar.displayName = "ModalSidebar";
+
+/**
+ * ModalSidebarItem — Navigation item for the sidebar.
+ */
+interface ModalSidebarItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  icon?: React.ReactNode;
+  label: string;
+  isActive?: boolean;
+}
+
+const ModalSidebarItem = React.forwardRef<HTMLButtonElement, ModalSidebarItemProps>(
+  ({ icon, label, isActive = false, className, ...props }, ref) => (
+    <button
+      ref={ref}
+      type="button"
+      className={cn(
+        "flex items-center gap-2 rounded-lg px-3 py-2 text-caption transition-colors",
+        "whitespace-nowrap",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+        isActive
+          ? "bg-[var(--background-interactive-selected)] font-medium text-[var(--foreground-default)]"
+          : "text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]",
+        className
+      )}
+      {...props}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  )
+);
+ModalSidebarItem.displayName = "ModalSidebarItem";
+
+/**
+ * ModalSidebarContent — Scrollable content panel (right side of sidebar layout).
+ */
+const ModalSidebarContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("min-h-0 flex-1 overflow-y-auto", className)} {...props} />
+  )
+);
+ModalSidebarContent.displayName = "ModalSidebarContent";
+
 export {
   Modal,
   ModalPortal,
@@ -319,4 +404,8 @@ export {
   ModalBody,
   ModalContentBox,
   ModalIconBadge,
+  ModalSidebarLayout,
+  ModalSidebar,
+  ModalSidebarItem,
+  ModalSidebarContent,
 };

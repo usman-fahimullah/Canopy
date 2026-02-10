@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shell/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
@@ -37,7 +36,8 @@ import {
   RolesTemplatePromoIllustration,
 } from "@/components/illustrations/roles-illustrations";
 import { CreateTemplateModal } from "@/components/canopy/create-template-modal";
-import { useRolesQuery, useTemplatesQuery, useCreateRoleMutation } from "@/hooks/queries";
+import { CreateRoleModal } from "./_components/CreateRoleModal";
+import { useRolesQuery, useTemplatesQuery } from "@/hooks/queries";
 import type { RoleListItem, TemplateItem } from "@/hooks/queries";
 
 /* -------------------------------------------------------------------
@@ -390,8 +390,8 @@ function RolesErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 export default function RolesPage() {
-  const router = useRouter();
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // ── React Query: cached data fetching ──────────────────────
   // Data survives navigation — going to role detail and back shows this instantly from cache
@@ -404,25 +404,10 @@ export default function RolesPage() {
 
   const { data: templates = [], isLoading: templatesLoading } = useTemplatesQuery();
 
-  const createRole = useCreateRoleMutation();
-
   // Only show skeleton on first load (no cached data yet)
   const isFirstLoad =
     (rolesLoading && jobs.length === 0) || (templatesLoading && templates.length === 0);
   const error = rolesError ? (rolesError as Error).message : null;
-
-  /** Create a blank draft role and redirect to the full role editor */
-  const handleCreateRole = async () => {
-    try {
-      const data = await createRole.mutateAsync({
-        title: "Untitled Role",
-        description: "",
-      });
-      router.push(`/canopy/roles/${data.job.id}`);
-    } catch {
-      // Error is surfaced via createRole.error if needed
-    }
-  };
 
   const hasJobs = jobs.length > 0;
   const hasTemplates = templates.length > 0;
@@ -436,9 +421,9 @@ export default function RolesPage() {
         actions={
           <div className="flex items-center gap-2.5">
             {/* Primary CTA always visible */}
-            <Button onClick={handleCreateRole} disabled={createRole.isPending}>
-              {createRole.isPending ? <Spinner size="sm" /> : <Plus size={18} weight="bold" />}
-              {createRole.isPending ? "Creating..." : "Create a role"}
+            <Button onClick={() => setCreateModalOpen(true)}>
+              <Plus size={18} weight="bold" />
+              Create a role
             </Button>
 
             {/* Secondary actions only when content exists */}
@@ -473,7 +458,7 @@ export default function RolesPage() {
         {/* State 1: First-time UX — no jobs, no templates */}
         {!isFirstLoad && !error && isEmpty && (
           <div className="px-12 py-6">
-            <RolesEmptyState onCreateRole={handleCreateRole} creating={createRole.isPending} />
+            <RolesEmptyState onCreateRole={() => setCreateModalOpen(true)} creating={false} />
           </div>
         )}
 
@@ -506,6 +491,9 @@ export default function RolesPage() {
           </>
         )}
       </div>
+
+      {/* Create Role Modal */}
+      <CreateRoleModal open={createModalOpen} onOpenChange={setCreateModalOpen} />
 
       {/* Create Template Modal */}
       <CreateTemplateModal

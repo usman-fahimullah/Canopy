@@ -12,7 +12,6 @@ import {
   PencilSimpleLine,
   ListChecks,
   Nut,
-  ShareNetwork,
 } from "@phosphor-icons/react";
 import { ProfileIcon } from "@/components/Icons/profile-icon";
 
@@ -26,8 +25,31 @@ interface RoleHeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   onReviewRole: () => void;
+  onOpenSettings: () => void;
   saving: boolean;
 }
+
+// ============================================
+// TAB OPTIONS (shared between desktop & mobile)
+// ============================================
+
+const tabOptions = [
+  {
+    value: "job-post",
+    label: "Job Post",
+    icon: <PencilSimpleLine weight="fill" />,
+  },
+  {
+    value: "apply-form",
+    label: "Apply Form",
+    icon: <ListChecks weight="bold" />,
+  },
+  {
+    value: "candidates",
+    label: "Candidates",
+    icon: <ProfileIcon size={16} />,
+  },
+];
 
 // ============================================
 // COMPONENT
@@ -39,6 +61,7 @@ export function RoleHeader({
   activeTab,
   onTabChange,
   onReviewRole,
+  onOpenSettings,
   saving,
 }: RoleHeaderProps) {
   const status = jobStatus || "DRAFT";
@@ -67,55 +90,39 @@ export function RoleHeader({
     },
   } as const;
 
-  const { icon: StatusIcon, iconColor, badge: statusBadge } =
-    statusConfig[status as keyof typeof statusConfig] ?? statusConfig.DRAFT;
+  const {
+    icon: StatusIcon,
+    iconColor,
+    badge: statusBadge,
+  } = statusConfig[status as keyof typeof statusConfig] ?? statusConfig.DRAFT;
 
   return (
-    <div className="sticky top-0 z-[var(--z-sticky)] border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] px-4 py-4 md:px-8 lg:px-12 lg:py-6">
-      <div className="relative flex items-center justify-between">
+    <div className="sticky top-0 z-[var(--z-sticky)] border-b border-[var(--border-default)] bg-[var(--background-default)] px-4 py-4 md:px-8 xl:px-12 xl:py-6">
+      {/* Desktop (xl+): 3-column layout with flexbox centering */}
+      <div className="flex items-center gap-4">
         {/* Left: Icon + Title + Badge */}
-        <div className="flex min-w-0 items-center gap-3">
-          <StatusIcon
-            weight="bold"
-            className={`h-8 w-8 shrink-0 ${iconColor}`}
-          />
+        <div className="flex min-w-0 shrink items-center gap-3">
+          <StatusIcon weight="bold" className={`h-8 w-8 shrink-0 ${iconColor}`} />
           <div className="flex min-w-0 flex-col items-start gap-[var(--space-0-5)]">
-            <h1 className="truncate text-heading-sm font-medium leading-[2rem] text-[var(--primitive-neutral-900)]">
+            <h1 className="max-w-[200px] truncate text-heading-sm font-medium leading-[2rem] text-[var(--foreground-default)] md:max-w-[300px] xl:max-w-none">
               {roleTitle || "Untitled Role"}
             </h1>
             {statusBadge}
           </div>
         </div>
 
-        {/* Center: Segmented Controller — absolutely centered (lg+ only) */}
-        <div className="absolute left-1/2 hidden -translate-x-1/2 lg:block">
+        {/* Center: Segmented Controller (xl+ only) */}
+        <div className="hidden min-w-0 flex-1 justify-center xl:flex">
           <SegmentedController
-            options={[
-              {
-                value: "job-post",
-                label: "Job Post",
-                icon: <PencilSimpleLine weight="fill" />,
-              },
-              {
-                value: "apply-form",
-                label: "Apply Form",
-                icon: <ListChecks weight="bold" />,
-              },
-              { value: "candidates", label: "Candidates", icon: <ProfileIcon size={16} /> },
-              {
-                value: "syndication",
-                label: "Syndication",
-                icon: <ShareNetwork size={16} weight="regular" />,
-              },
-            ]}
+            options={tabOptions}
             value={activeTab}
             onValueChange={onTabChange}
-            className="w-[540px]"
+            className="w-[420px]"
           />
         </div>
 
         {/* Right: Review Role + Settings icon */}
-        <div className="flex shrink-0 items-center gap-[6px]">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <Button
             variant="primary"
             onClick={onReviewRole}
@@ -129,33 +136,17 @@ export function RoleHeader({
             size="icon"
             className="rounded-[var(--radius-2xl)] p-3"
             aria-label="Role settings"
+            onClick={onOpenSettings}
           >
-            <Nut weight="fill" className="h-6 w-6 text-[var(--primitive-green-800)]" />
+            <Nut weight="fill" className="h-6 w-6 text-[var(--foreground-default)]" />
           </Button>
         </div>
       </div>
 
-      {/* Mobile/Tablet: Full-width tabs below header row */}
-      <div className="mt-4 lg:hidden">
+      {/* Mobile/Tablet: Full-width tabs below header row (below xl) */}
+      <div className="mt-4 xl:hidden">
         <SegmentedController
-          options={[
-            {
-              value: "job-post",
-              label: "Job Post",
-              icon: <PencilSimpleLine weight="fill" />,
-            },
-            {
-              value: "apply-form",
-              label: "Apply Form",
-              icon: <ListChecks weight="bold" />,
-            },
-            { value: "candidates", label: "Candidates", icon: <ProfileIcon size={16} /> },
-            {
-              value: "syndication",
-              label: "Syndication",
-              icon: <ShareNetwork size={16} weight="regular" />,
-            },
-          ]}
+          options={tabOptions}
           value={activeTab}
           onValueChange={onTabChange}
           className="w-full"

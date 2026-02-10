@@ -6,13 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
 import { Spinner } from "@/components/ui/spinner";
 import { WarningCircle, ArrowLeft } from "@phosphor-icons/react";
-import { SyndicationPanel } from "@/components/canopy/roles/SyndicationPanel";
-import { logger, formatError } from "@/lib/logger";
 import { useRoleForm } from "../_lib/use-role-form";
 import { RoleHeader } from "./RoleHeader";
 import { JobPostTab } from "./JobPostTab";
 import { ApplyFormTab } from "./ApplyFormTab";
 import { CandidatesTab } from "./CandidatesTab";
+import { JobSettingsModal } from "./JobSettingsModal";
 
 // ============================================
 // TYPES
@@ -28,6 +27,7 @@ interface RoleEditViewProps {
 
 export function RoleEditView({ roleId }: RoleEditViewProps) {
   const [activeTab, setActiveTab] = React.useState("job-post");
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
   const {
     loading,
@@ -110,6 +110,7 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onReviewRole={handleReviewRole}
+        onOpenSettings={() => setIsSettingsOpen(true)}
         saving={saving}
       />
 
@@ -140,29 +141,6 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
           />
         )}
 
-        {/* Syndication Tab */}
-        {activeTab === "syndication" && jobData && (
-          <SyndicationPanel
-            jobId={jobData.id}
-            syndicationEnabled={jobData.syndicationEnabled}
-            jobStatus={jobData.status}
-            onToggleSyndication={async (enabled) => {
-              try {
-                const res = await fetch(`/api/canopy/roles/${jobData.id}`, {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ syndicationEnabled: enabled }),
-                });
-                if (res.ok) {
-                  setJobData((prev) => (prev ? { ...prev, syndicationEnabled: enabled } : prev));
-                }
-              } catch (error) {
-                logger.error("Failed to toggle syndication", { error: formatError(error) });
-              }
-            }}
-          />
-        )}
-
         {/* Footer */}
         <div className="mt-12 text-center">
           <p className="text-caption">
@@ -171,6 +149,18 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
           </p>
         </div>
       </main>
+
+      {/* Job Settings Modal */}
+      {jobData && (
+        <JobSettingsModal
+          open={isSettingsOpen}
+          onOpenChange={setIsSettingsOpen}
+          roleId={roleId}
+          jobData={jobData}
+          setJobData={setJobData}
+          jobPostState={jobPostState}
+        />
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shell/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,6 @@ import {
   EmptyStateError,
 } from "@/components/ui/empty-state";
 import {
-  Users,
   Star,
   CalendarBlank,
   BriefcaseMetal,
@@ -28,40 +28,9 @@ import {
 } from "@phosphor-icons/react";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
+import { useCandidatesQuery, queryKeys } from "@/hooks/queries";
+import type { CandidateApplication } from "@/hooks/queries";
 import { logger, formatError } from "@/lib/logger";
-
-/* -------------------------------------------------------------------
-   Types
-   ------------------------------------------------------------------- */
-
-interface Application {
-  id: string;
-  seekerId?: string;
-  name?: string;
-  email?: string;
-  stage?: string;
-  status?: string;
-  jobId?: string;
-  matchScore?: number | null;
-  submittedAt?: string;
-  createdAt?: string;
-  source?: string;
-  candidate?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  job?: {
-    id: string;
-    title: string;
-  };
-}
-
-/* -------------------------------------------------------------------
-   Constants
-   ------------------------------------------------------------------- */
-
-const PIPELINE_STAGES = ["All", "Applied", "Screening", "Interview", "Offer", "Hired"] as const;
 
 /* -------------------------------------------------------------------
    Helpers
@@ -93,23 +62,23 @@ function formatDate(dateString: string | undefined | null) {
   });
 }
 
-function getCandidateName(app: Application): string {
+function getCandidateName(app: CandidateApplication): string {
   return app.candidate?.name || app.name || "Unknown Candidate";
 }
 
-function getCandidateEmail(app: Application): string {
+function getCandidateEmail(app: CandidateApplication): string {
   return app.candidate?.email || app.email || "";
 }
 
-function getJobTitle(app: Application): string {
+function getJobTitle(app: CandidateApplication): string {
   return app.job?.title || "Untitled Role";
 }
 
-function getStage(app: Application): string {
+function getStage(app: CandidateApplication): string {
   return app.stage || app.status || "applied";
 }
 
-function getAppliedDate(app: Application): string | undefined {
+function getAppliedDate(app: CandidateApplication): string | undefined {
   return app.submittedAt || app.createdAt;
 }
 
@@ -120,17 +89,7 @@ function getAppliedDate(app: Application): string | undefined {
 export default function CandidatesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [loading, setLoading] = useState(true);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [total, setTotal] = useState(0);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [bulkLoading, setBulkLoading] = useState(false);
-  const [previewSeekerId, setPreviewSeekerId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
-  const [fetchVersion, setFetchVersion] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   // Parse URL params
   const skip = parseInt(searchParams.get("skip") || "0");
@@ -143,42 +102,22 @@ export default function CandidatesPage() {
   const source = searchParams.get("source") || undefined;
   const search = searchParams.get("search") || undefined;
 
-  // Fetch applications with filters
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const params = new URLSearchParams();
-        params.set("skip", skip.toString());
-        params.set("take", take.toString());
-        if (stage) params.set("stage", stage);
-        if (matchScoreMin !== undefined) params.set("matchScoreMin", matchScoreMin.toString());
-        if (matchScoreMax !== undefined) params.set("matchScoreMax", matchScoreMax.toString());
-        if (source) params.set("source", source);
-        if (search) params.set("search", search);
+  // ── React Query: cached data fetching ──────────────────────
+  const filters = useMemo(
+    () => ({ skip, take, stage, matchScoreMin, matchScoreMax, source, search }),
+    [skip, take, stage, matchScoreMin, matchScoreMax, source, search]
+  );
+  const { data: candidatesData, isLoading, error, refetch } = useCandidatesQuery(filters);
 
-        const res = await fetch(`/api/canopy/candidates?${params.toString()}`);
-        if (!res.ok) {
-          throw new Error("Failed to load candidates");
-        }
-        const data = await res.json();
-        setApplications(data.applications || []);
-        setTotal(data.meta.total || 0);
-        if (data.userRole) setUserRole(data.userRole);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "An unexpected error occurred";
-        setError(message);
-        logger.error("Error fetching applications", { error: formatError(err) });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const applications = candidatesData?.applications ?? [];
+  const total = candidatesData?.meta?.total ?? 0;
+  const userRole = candidatesData?.userRole ?? null;
 
-    fetchApplications();
-    setSelectedIds(new Set()); // Clear selections on filter change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [skip, take, stage, matchScoreMin, matchScoreMax, source, search, fetchVersion]);
+  // UI state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [previewSeekerId, setPreviewSeekerId] = useState<string | null>(null);
+  const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
 
   // Handle filter updates
   const updateParams = useCallback(
@@ -237,9 +176,9 @@ export default function CandidatesPage() {
         });
 
         if (res.ok) {
-          // Refetch to show updated data
-          router.refresh();
           setSelectedIds(new Set());
+          queryClient.invalidateQueries({ queryKey: queryKeys.canopy.candidates.all });
+          queryClient.invalidateQueries({ queryKey: queryKeys.canopy.dashboard.all });
         } else {
           const err = await res.json();
           logger.error("Bulk update failed", { error: err.error });
@@ -250,7 +189,7 @@ export default function CandidatesPage() {
         setBulkLoading(false);
       }
     },
-    [selectedIds, router]
+    [selectedIds, queryClient]
   );
 
   // Handle bulk reject
@@ -271,8 +210,9 @@ export default function CandidatesPage() {
       });
 
       if (res.ok) {
-        router.refresh();
         setSelectedIds(new Set());
+        queryClient.invalidateQueries({ queryKey: queryKeys.canopy.candidates.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.canopy.dashboard.all });
       } else {
         const err = await res.json();
         logger.error("Bulk reject failed", { error: err.error });
@@ -282,7 +222,7 @@ export default function CandidatesPage() {
     } finally {
       setBulkLoading(false);
     }
-  }, [selectedIds, router]);
+  }, [selectedIds, queryClient]);
 
   // Handle CSV export
   const handleExportCsv = useCallback(() => {
@@ -324,6 +264,9 @@ export default function CandidatesPage() {
     source ||
     search
   );
+
+  // Only show skeleton on first load (no cached data yet)
+  const isFirstLoad = isLoading && applications.length === 0;
 
   return (
     <div>
@@ -426,8 +369,8 @@ export default function CandidatesPage() {
           )}
         </div>
 
-        {/* Loading Skeletons */}
-        {loading && (
+        {/* Loading Skeletons — only on first load (no cached data) */}
+        {isFirstLoad && (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
@@ -447,18 +390,18 @@ export default function CandidatesPage() {
         )}
 
         {/* Error State */}
-        {!loading && error && (
+        {!isFirstLoad && error && (
           <EmptyStateError
             size="lg"
             action={{
               label: "Retry",
-              onClick: () => setFetchVersion((v) => v + 1),
+              onClick: () => refetch(),
             }}
           />
         )}
 
         {/* Empty State */}
-        {!loading &&
+        {!isFirstLoad &&
           !error &&
           applications.length === 0 &&
           (hasActiveFilters ? (
@@ -493,7 +436,7 @@ export default function CandidatesPage() {
           ))}
 
         {/* Candidate Cards */}
-        {!loading && !error && applications.length > 0 && (
+        {!isFirstLoad && !error && applications.length > 0 && (
           <>
             <div className="space-y-3">
               {applications.map((app) => {
@@ -695,7 +638,10 @@ export default function CandidatesPage() {
       <AddCandidateModal
         open={addCandidateModalOpen}
         onOpenChange={setAddCandidateModalOpen}
-        onSuccess={() => setFetchVersion((v) => v + 1)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: queryKeys.canopy.candidates.all });
+          queryClient.invalidateQueries({ queryKey: queryKeys.canopy.dashboard.all });
+        }}
       />
     </div>
   );

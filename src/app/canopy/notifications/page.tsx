@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Bell, Check, BriefcaseMetal, ChatCircleDots, Users, Warning } from "@phosphor-icons/react";
-import { logger, formatError } from "@/lib/logger";
+import {
+  useNotificationsQuery,
+  useMarkReadMutation,
+  useMarkAllReadMutation,
+} from "@/hooks/queries";
 
 interface Notification {
   id: string;
@@ -50,42 +53,63 @@ function groupByDate(notifications: Notification[]) {
   return groups;
 }
 
-export default function EmployerNotificationsPage() {
-  const [loading, setLoading] = useState(true);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+/* -------------------------------------------------------------------
+   Skeleton
+   ------------------------------------------------------------------- */
 
-  useEffect(() => {
-    fetch("/api/notifications")
-      .then((res) => (res.ok ? res.json() : { notifications: [] }))
-      .then((data) => setNotifications(data.notifications || []))
-      .catch((err) => {
-        logger.error("Failed to fetch notifications", { error: formatError(err) });
-        setNotifications([]);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+function NotificationsSkeleton() {
+  return (
+    <div className="px-8 py-6 lg:px-12">
+      <Skeleton className="mb-6 h-4 w-20" />
+      <div className="space-y-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-start gap-4 rounded-[16px] border border-[var(--border-default)] bg-[var(--card-background)] px-6 py-4"
+          >
+            <Skeleton className="h-10 w-10 rounded-xl" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-3 w-64" />
+            </div>
+            <Skeleton className="h-3 w-12" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------
+   Page
+   ------------------------------------------------------------------- */
+
+export default function EmployerNotificationsPage() {
+  const { data: notifications = [], isLoading } = useNotificationsQuery();
+  const markReadMutation = useMarkReadMutation();
+  const markAllReadMutation = useMarkAllReadMutation();
+
+  const isFirstLoad = isLoading && notifications.length === 0;
 
   const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllReadMutation.mutate();
   };
 
   const markRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    fetch(`/api/notifications/${id}/read`, { method: "POST" }).catch((err) => {
-      logger.error("Failed to mark notification as read", { error: formatError(err), notificationId: id });
-    });
+    markReadMutation.mutate(id);
   };
 
-  if (loading) {
+  if (isFirstLoad) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner size="lg" />
+      <div>
+        <PageHeader title="Notifications" />
+        <NotificationsSkeleton />
       </div>
     );
   }
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const groups = groupByDate(notifications);
+  const unreadCount = notifications.filter((n: Notification) => !n.read).length;
+  const groups = groupByDate(notifications as Notification[]);
 
   return (
     <div>

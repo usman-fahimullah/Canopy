@@ -161,6 +161,10 @@ export {
   ModalBody,
   ModalContentBox,
   ModalIconBadge,
+  ModalSidebarLayout,
+  ModalSidebar,
+  ModalSidebarItem,
+  ModalSidebarContent,
 } from "./modal";
 export {
   Tooltip,

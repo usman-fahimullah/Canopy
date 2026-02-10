@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { OrgMemberRole } from "@prisma/client";
 import { toast } from "sonner";
@@ -26,14 +26,19 @@ import {
 } from "@/components/ui/modal";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import { Plus, WarningCircle } from "@phosphor-icons/react";
-import { logger, formatError } from "@/lib/logger";
 import { canManageTeam, formatRoleName, ASSIGNABLE_ROLES } from "../_lib/helpers";
-import type { TeamData, TeamMember, PendingInvite } from "../_lib/types";
+import type { TeamMember } from "../_lib/types";
 import { MemberRow } from "./MemberRow";
 import { PendingInviteRow } from "./PendingInviteRow";
 import { InviteModal } from "./InviteModal";
+import {
+  useTeamQuery,
+  useRoleChangeMutation,
+  useRemoveMemberMutation,
+  useResendInviteMutation,
+  useRevokeInviteMutation,
+} from "@/hooks/queries";
 
 /* -------------------------------------------------------------------
    Role filter options
@@ -83,17 +88,26 @@ export function TeamPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Data state
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
-  const [currentUserRole, setCurrentUserRole] = useState<OrgMemberRole>("MEMBER");
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // ── React Query: cached team data ──────────────────────
+  const { data: teamData, isLoading, error: queryError, refetch } = useTeamQuery();
+
+  const members = teamData?.members ?? [];
+  const pendingInvites = teamData?.pendingInvites ?? [];
+  const currentUserRole = teamData?.currentUserRole ?? ("MEMBER" as OrgMemberRole);
+
+  // Mutations
+  const roleChangeMutation = useRoleChangeMutation();
+  const removeMemberMutation = useRemoveMemberMutation();
+  const resendInviteMutation = useResendInviteMutation();
+  const revokeInviteMutation = useRevokeInviteMutation();
+
+  // Only show skeleton when no cached data exists
+  const isFirstLoad = isLoading && members.length === 0;
+  const error = queryError ? "Failed to load team data. Please try again." : null;
 
   // UI state
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [removingMember, setRemovingMember] = useState<TeamMember | null>(null);
-  const [isRemoving, setIsRemoving] = useState(false);
 
   // Filter state from URL
   const search = searchParams.get("search") || "";
@@ -114,31 +128,6 @@ export function TeamPageClient() {
     [searchParams, router]
   );
 
-  // Fetch team data
-  const fetchTeam = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const res = await fetch("/api/canopy/team");
-      if (!res.ok) {
-        throw new Error("Failed to load team data");
-      }
-      const data: TeamData = await res.json();
-      setMembers(data.members);
-      setPendingInvites(data.pendingInvites);
-      setCurrentUserRole(data.currentUserRole);
-    } catch (err) {
-      logger.error("Failed to fetch team", { error: formatError(err) });
-      setError("Failed to load team data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTeam();
-  }, [fetchTeam]);
-
   // Client-side filtering
   const filteredMembers = useMemo(() => {
     let result = members;
@@ -157,101 +146,54 @@ export function TeamPageClient() {
   // Actions
   const handleRoleChange = useCallback(
     async (memberId: string, newRole: OrgMemberRole) => {
-      // Optimistic update
-      const prevMembers = members;
-      setMembers((prev) => prev.map((m) => (m.id === memberId ? { ...m, role: newRole } : m)));
-
       try {
-        const res = await fetch(`/api/canopy/team/members/${memberId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: newRole }),
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Failed to update role");
-        }
-
+        await roleChangeMutation.mutateAsync({ memberId, role: newRole });
         toast.success(`Role updated to ${formatRoleName(newRole)}`);
       } catch (err) {
-        // Revert optimistic update
-        setMembers(prevMembers);
         const message = err instanceof Error ? err.message : "Failed to update role";
         toast.error(message);
-        logger.error("Role change failed", { error: formatError(err) });
       }
     },
-    [members]
+    [roleChangeMutation]
   );
 
   const handleRemoveConfirm = useCallback(async () => {
     if (!removingMember) return;
 
-    setIsRemoving(true);
     try {
-      const res = await fetch(`/api/canopy/team/members/${removingMember.id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to remove member");
-      }
-
-      setMembers((prev) => prev.filter((m) => m.id !== removingMember.id));
+      await removeMemberMutation.mutateAsync(removingMember.id);
       toast.success(`${removingMember.name} removed from the team`);
       setRemovingMember(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to remove member";
       toast.error(message);
-      logger.error("Remove member failed", { error: formatError(err) });
-    } finally {
-      setIsRemoving(false);
     }
-  }, [removingMember]);
+  }, [removingMember, removeMemberMutation]);
 
-  const handleResendInvite = useCallback(async (inviteId: string) => {
-    try {
-      const res = await fetch(`/api/canopy/team/invites/${inviteId}/resend`, { method: "POST" });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to resend invite");
+  const handleResendInvite = useCallback(
+    async (inviteId: string) => {
+      try {
+        await resendInviteMutation.mutateAsync(inviteId);
+        toast.success("Invite resent");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to resend invite";
+        toast.error(message);
       }
-
-      toast.success("Invite resent");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to resend invite";
-      toast.error(message);
-      logger.error("Resend invite failed", { error: formatError(err) });
-    }
-  }, []);
+    },
+    [resendInviteMutation]
+  );
 
   const handleRevokeInvite = useCallback(
     async (inviteId: string) => {
-      // Optimistic update
-      const prevInvites = pendingInvites;
-      setPendingInvites((prev) => prev.filter((inv) => inv.id !== inviteId));
-
       try {
-        const res = await fetch(`/api/canopy/team/invites/${inviteId}`, { method: "DELETE" });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Failed to revoke invite");
-        }
-
+        await revokeInviteMutation.mutateAsync(inviteId);
         toast.success("Invite revoked");
       } catch (err) {
-        // Revert
-        setPendingInvites(prevInvites);
         const message = err instanceof Error ? err.message : "Failed to revoke invite";
         toast.error(message);
-        logger.error("Revoke invite failed", { error: formatError(err) });
       }
     },
-    [pendingInvites]
+    [revokeInviteMutation]
   );
 
   const isAdmin = canManageTeam(currentUserRole);
@@ -261,7 +203,7 @@ export function TeamPageClient() {
       <PageHeader
         title="Team"
         actions={
-          isAdmin && !isLoading ? (
+          isAdmin && !isFirstLoad ? (
             <Button variant="primary" onClick={() => setInviteModalOpen(true)}>
               <Plus size={18} weight="bold" />
               Invite Member
@@ -272,7 +214,7 @@ export function TeamPageClient() {
 
       <div className="px-8 py-6 lg:px-12">
         {/* Error state */}
-        {error && !isLoading && (
+        {error && !isFirstLoad && (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--background-error)]">
               <WarningCircle size={28} weight="fill" className="text-[var(--foreground-error)]" />
@@ -281,17 +223,17 @@ export function TeamPageClient() {
               Something went wrong
             </p>
             <p className="mb-4 text-caption text-[var(--foreground-muted)]">{error}</p>
-            <Button variant="tertiary" onClick={fetchTeam}>
+            <Button variant="tertiary" onClick={() => refetch()}>
               Try Again
             </Button>
           </div>
         )}
 
         {/* Loading */}
-        {isLoading && <TeamTableSkeleton />}
+        {isFirstLoad && <TeamTableSkeleton />}
 
         {/* Loaded content */}
-        {!isLoading && !error && (
+        {!isFirstLoad && !error && (
           <>
             {/* Stats */}
             <p className="mb-4 text-caption text-[var(--foreground-muted)]">
@@ -470,7 +412,7 @@ export function TeamPageClient() {
       <InviteModal
         open={inviteModalOpen}
         onOpenChange={setInviteModalOpen}
-        onInvitesSent={fetchTeam}
+        onInvitesSent={() => refetch()}
       />
 
       {/* Remove Confirmation Modal */}
@@ -494,11 +436,15 @@ export function TeamPageClient() {
             <Button
               variant="tertiary"
               onClick={() => setRemovingMember(null)}
-              disabled={isRemoving}
+              disabled={removeMemberMutation.isPending}
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleRemoveConfirm} loading={isRemoving}>
+            <Button
+              variant="destructive"
+              onClick={handleRemoveConfirm}
+              loading={removeMemberMutation.isPending}
+            >
               Remove
             </Button>
           </ModalFooter>
