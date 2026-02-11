@@ -2,6 +2,7 @@
 
 import { SearchHeader } from "./SearchHeader";
 import { JobHeader } from "./JobHeader";
+import { JobInfoCards } from "./JobInfoCards";
 import { JobDescription } from "./JobDescription";
 import { SidebarTabs } from "./SidebarTabs";
 import { ApplyBeforeCard } from "./ApplyBeforeCard";
@@ -26,6 +27,11 @@ export function JobDetailView({ job, similarJobs }: JobDetailViewProps) {
 
       {/* Job Header — title, company, action buttons */}
       <JobHeader job={job} />
+
+      {/* Structured Info Cards — key metadata at a glance */}
+      <div className="bg-[var(--background-subtle)]">
+        <JobInfoCards job={job} />
+      </div>
 
       {/* Two-column Content */}
       <div className="mx-auto flex max-w-7xl flex-col gap-6 bg-[var(--background-subtle)] px-6 py-6 lg:flex-row lg:px-12">

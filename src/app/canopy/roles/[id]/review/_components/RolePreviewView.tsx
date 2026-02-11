@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PreviewBanner } from "./PreviewBanner";
 import { PreviewJobHeader } from "./PreviewJobHeader";
 import { CheckoutModal } from "./CheckoutModal";
+import { JobInfoCards } from "@/app/jobs/search/[id]/_components/JobInfoCards";
 import { JobDescription } from "@/app/jobs/search/[id]/_components/JobDescription";
 import { ApplyBeforeCard } from "@/app/jobs/search/[id]/_components/ApplyBeforeCard";
 import { RecruiterCard } from "@/app/jobs/search/[id]/_components/RecruiterCard";
@@ -81,6 +82,9 @@ export function RolePreviewView({ job, roleId, isPublished }: RolePreviewViewPro
 
       {/* Job Header — title, company, badges (no seeker actions) */}
       <PreviewJobHeader job={job} />
+
+      {/* Structured Info Cards — key metadata at a glance */}
+      <JobInfoCards job={job} />
 
       {/* Two-column Content — mirrors the seeker job detail layout */}
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:flex-row lg:px-12">
