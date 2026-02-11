@@ -28,7 +28,7 @@ export function JobDetailView({ job, similarJobs }: JobDetailViewProps) {
       <JobHeader job={job} />
 
       {/* Two-column Content */}
-      <div className="flex flex-col gap-6 bg-[var(--background-subtle)] px-6 py-6 lg:flex-row lg:px-12">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 bg-[var(--background-subtle)] px-6 py-6 lg:flex-row lg:px-12">
         {/* Left Column: Job Description */}
         <JobDescription description={job.description} descriptionHtml={job.descriptionHtml} />
 

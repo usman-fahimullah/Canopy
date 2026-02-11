@@ -83,7 +83,7 @@ export function RolePreviewView({ job, roleId, isPublished }: RolePreviewViewPro
       <PreviewJobHeader job={job} />
 
       {/* Two-column Content — mirrors the seeker job detail layout */}
-      <div className="flex flex-col gap-6 px-6 py-6 lg:flex-row lg:px-12">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:flex-row lg:px-12">
         {/* Left Column: Job Description */}
         <JobDescription description={job.description} />
 

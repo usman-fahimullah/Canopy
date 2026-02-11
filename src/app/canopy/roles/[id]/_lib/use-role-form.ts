@@ -442,7 +442,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     }
 
     if (responsibilities) {
-      sections.push(`<h3>Primary Responsibilities</h3>${responsibilities}`);
+      sections.push(`<h3>What you'll do</h3>${responsibilities}`);
     }
 
     if (requiredQuals) {
@@ -453,8 +453,23 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       sections.push(`<h3>Desired Qualifications</h3>${desiredQuals}`);
     }
 
+    if (educationDetails) {
+      sections.push(`<h3>Education Requirements</h3>${educationDetails}`);
+    }
+
+    if (compensationDetails) {
+      sections.push(`<h3>Compensation & Benefits</h3>${compensationDetails}`);
+    }
+
     return sections.join("\n") || "";
-  }, [description, responsibilities, requiredQuals, desiredQuals]);
+  }, [
+    description,
+    responsibilities,
+    requiredQuals,
+    desiredQuals,
+    educationDetails,
+    compensationDetails,
+  ]);
 
   // ---- Save Handler — PATCH role to API ----
   const handleSaveRole = React.useCallback(async (): Promise<boolean> => {

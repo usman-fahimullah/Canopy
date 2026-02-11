@@ -396,7 +396,7 @@ export function ApplyFormTab({
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="mx-auto flex max-w-3xl flex-col gap-4">
         {/* Apply Form Header Card */}
         <div className="overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--card-background)]">
           {/* Title Row — title left, actions right */}
