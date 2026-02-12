@@ -53,6 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         greenSkills: true,
         certifications: true,
         yearsExperience: true,
+        aiSummary: true,
         account: {
           select: {
             id: true,

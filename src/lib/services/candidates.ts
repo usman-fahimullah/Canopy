@@ -18,6 +18,8 @@ export interface CandidateFilters {
   dateTo?: string;
   experienceLevel?: "ENTRY" | "INTERMEDIATE" | "SENIOR" | "EXECUTIVE";
   search?: string;
+  sortBy?: "name" | "email" | "stage" | "matchScore" | "source" | "createdAt";
+  sortDirection?: "asc" | "desc";
 }
 
 export interface CandidateListResult {
@@ -51,6 +53,34 @@ export interface CandidateListItem {
 }
 
 /* -------------------------------------------------------------------
+   Helpers
+   ------------------------------------------------------------------- */
+
+type SortByField = NonNullable<CandidateFilters["sortBy"]>;
+type SortDir = "asc" | "desc";
+
+function buildCandidateOrderBy(
+  sortBy: SortByField,
+  sortDirection: SortDir
+): Prisma.ApplicationOrderByWithRelationInput {
+  switch (sortBy) {
+    case "name":
+      return { seeker: { account: { name: sortDirection } } };
+    case "email":
+      return { seeker: { account: { email: sortDirection } } };
+    case "stage":
+      return { stage: sortDirection };
+    case "matchScore":
+      return { matchScore: sortDirection };
+    case "source":
+      return { source: sortDirection };
+    case "createdAt":
+    default:
+      return { createdAt: sortDirection };
+  }
+}
+
+/* -------------------------------------------------------------------
    Service
    ------------------------------------------------------------------- */
 
@@ -74,6 +104,8 @@ export async function fetchCandidatesList(
     dateTo,
     experienceLevel,
     search,
+    sortBy = "createdAt",
+    sortDirection = "desc",
   } = filters;
 
   // Build where clause — scoped by role-based access
@@ -151,7 +183,7 @@ export async function fetchCandidatesList(
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: buildCandidateOrderBy(sortBy, sortDirection),
       skip,
       take,
     }),

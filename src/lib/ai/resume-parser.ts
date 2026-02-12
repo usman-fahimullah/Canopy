@@ -58,6 +58,16 @@ async function extractTextFromUrl(fileUrl: string): Promise<string> {
     return extractPdfText(buffer);
   }
 
+  if (
+    contentType.includes("wordprocessingml") ||
+    fileUrl.toLowerCase().endsWith(".docx") ||
+    fileUrl.toLowerCase().endsWith(".doc")
+  ) {
+    const mammoth = await import("mammoth");
+    const result = await mammoth.extractRawText({ buffer });
+    return result.value;
+  }
+
   // For plain text or other formats, return as string
   return buffer.toString("utf-8");
 }

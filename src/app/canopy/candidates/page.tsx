@@ -15,14 +15,14 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
   const skip = parseInt((params.skip as string) || "0");
   const take = parseInt((params.take as string) || "20");
   const stage = (params.stage as string) || undefined;
-  const matchScoreMin = params.matchScoreMin
-    ? parseInt(params.matchScoreMin as string)
-    : undefined;
-  const matchScoreMax = params.matchScoreMax
-    ? parseInt(params.matchScoreMax as string)
-    : undefined;
+  const matchScoreMin = params.matchScoreMin ? parseInt(params.matchScoreMin as string) : undefined;
+  const matchScoreMax = params.matchScoreMax ? parseInt(params.matchScoreMax as string) : undefined;
   const source = (params.source as string) || undefined;
   const search = (params.search as string) || undefined;
+  const sortBy =
+    (params.sortBy as "name" | "email" | "stage" | "matchScore" | "source" | "createdAt") ||
+    undefined;
+  const sortDirection = (params.sortDirection as "asc" | "desc") || undefined;
 
   const data = await fetchCandidatesList(ctx, {
     skip,
@@ -32,6 +32,8 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
     matchScoreMax,
     source,
     search,
+    sortBy,
+    sortDirection,
   });
 
   return (

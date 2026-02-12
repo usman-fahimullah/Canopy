@@ -21,6 +21,7 @@ import {
   FormRow,
 } from "@/components/ui/form-section";
 import type { JobPostState } from "../_lib/use-role-form";
+import { Chip, ChipGroup } from "@/components/ui/chip";
 import {
   jobCategories,
   positionTypes,
@@ -29,6 +30,10 @@ import {
   payTypes,
   usStates,
   countries,
+  greenSkillsOptions,
+  certificationsOptions,
+  currencyOptions,
+  currencySymbols,
 } from "../_lib/constants";
 
 // ============================================
@@ -87,6 +92,14 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
     setSelectedBenefits,
     compensationDetails,
     setCompensationDetails,
+    salaryCurrency,
+    setSalaryCurrency,
+    greenSkills,
+    setGreenSkills,
+    requiredCerts,
+    setRequiredCerts,
+    impactDescription,
+    setImpactDescription,
   } = jobPostState;
 
   return (
@@ -258,6 +271,80 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
         </FormSection>
       </FormCard>
 
+      {/* Climate & Sustainability Card */}
+      <FormCard>
+        <FormSection title="Climate & Sustainability">
+          <FormField
+            label="Impact Description"
+            helpText="Describe how this role contributes to climate or sustainability goals. This helps attract mission-driven candidates."
+          >
+            <RichTextEditor
+              content={impactDescription}
+              onChange={setImpactDescription}
+              placeholder="e.g. This role will help reduce 50K tons of CO2 annually by..."
+              minHeight="80px"
+            >
+              <RichTextToolbar />
+            </RichTextEditor>
+            <div className="mt-2 flex justify-end">
+              <RichTextCharacterCounter htmlContent={impactDescription} max={200} />
+            </div>
+          </FormField>
+
+          <FormField
+            label="Green Skills"
+            helpText="Select the climate and sustainability skills relevant to this role."
+          >
+            <div className="flex flex-wrap gap-2">
+              {greenSkillsOptions.map((skill) => {
+                const isSelected = greenSkills.includes(skill.value);
+                return (
+                  <Chip
+                    key={skill.value}
+                    selected={isSelected}
+                    onClick={() => {
+                      if (isSelected) {
+                        setGreenSkills(greenSkills.filter((s) => s !== skill.value));
+                      } else {
+                        setGreenSkills([...greenSkills, skill.value]);
+                      }
+                    }}
+                  >
+                    {skill.label}
+                  </Chip>
+                );
+              })}
+            </div>
+          </FormField>
+
+          <FormField
+            label="Required Certifications"
+            helpText="Select industry certifications required or preferred for this role."
+          >
+            <div className="flex flex-wrap gap-2">
+              {certificationsOptions.map((cert) => {
+                const isSelected = requiredCerts.includes(cert.value);
+                return (
+                  <Chip
+                    key={cert.value}
+                    selected={isSelected}
+                    onClick={() => {
+                      if (isSelected) {
+                        setRequiredCerts(requiredCerts.filter((c) => c !== cert.value));
+                      } else {
+                        setRequiredCerts([...requiredCerts, cert.value]);
+                      }
+                    }}
+                  >
+                    {cert.label}
+                  </Chip>
+                );
+              })}
+            </div>
+          </FormField>
+        </FormSection>
+      </FormCard>
+
       {/* Workplace Information Card */}
       <FormCard>
         <FormSection title="Workplace Information">
@@ -319,36 +406,60 @@ export function JobPostTab({ jobPostState }: JobPostTabProps) {
             label="Compensation"
             helpText="Outline the pay range, and incentives needed to fairly reward, attract, and retain someone in this role."
           >
-            <div className="flex flex-col gap-4 md:flex-row md:items-center">
-              <Select value={payType} onValueChange={setPayType}>
-                <SelectTrigger size="lg" className="w-full md:w-[340px]">
-                  <SelectValue placeholder="Pay Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {payTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                value={minPay}
-                onChange={(e) => setMinPay(e.target.value)}
-                placeholder="Minimum Pay Amount"
-                inputSize="lg"
-                leftAddon={<span className="text-body font-medium">$</span>}
-                className="flex-1"
-              />
-              <span className="text-[var(--primitive-neutral-500)]">—</span>
-              <Input
-                value={maxPay}
-                onChange={(e) => setMaxPay(e.target.value)}
-                placeholder="Maximum Pay Amount"
-                inputSize="lg"
-                leftAddon={<span className="text-body font-medium">$</span>}
-                className="flex-1"
-              />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                <Select value={payType} onValueChange={setPayType}>
+                  <SelectTrigger size="lg" className="w-full md:w-[240px]">
+                    <SelectValue placeholder="Pay Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {payTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={salaryCurrency} onValueChange={setSalaryCurrency}>
+                  <SelectTrigger size="lg" className="w-full md:w-[140px]">
+                    <SelectValue placeholder="Currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencyOptions.map((cur) => (
+                      <SelectItem key={cur.value} value={cur.value}>
+                        {cur.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                <Input
+                  value={minPay}
+                  onChange={(e) => setMinPay(e.target.value)}
+                  placeholder="Minimum Pay Amount"
+                  inputSize="lg"
+                  leftAddon={
+                    <span className="text-body font-medium">
+                      {currencySymbols[salaryCurrency] || "$"}
+                    </span>
+                  }
+                  className="flex-1"
+                />
+                <span className="text-[var(--primitive-neutral-500)]">—</span>
+                <Input
+                  value={maxPay}
+                  onChange={(e) => setMaxPay(e.target.value)}
+                  placeholder="Maximum Pay Amount"
+                  inputSize="lg"
+                  leftAddon={
+                    <span className="text-body font-medium">
+                      {currencySymbols[salaryCurrency] || "$"}
+                    </span>
+                  }
+                  className="flex-1"
+                />
+              </div>
             </div>
           </FormField>
 

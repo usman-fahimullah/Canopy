@@ -51,6 +51,8 @@ import type { RoleListItem, TemplateItem } from "@/hooks/queries";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { logger, formatError } from "@/lib/logger";
+import { CLIMATE_TEMPLATES } from "@/lib/templates/climate-templates";
+import { Leaf } from "@phosphor-icons/react";
 
 /* -------------------------------------------------------------------
    Helpers
@@ -245,6 +247,74 @@ function TemplatesSection({
           <RoleTemplateCard key={template.id} template={template} />
         ))}
         <CreateTemplateCard onCreateTemplate={onCreateTemplate} />
+      </div>
+    </section>
+  );
+}
+
+/** Pre-built climate template card */
+function PrebuiltTemplateCard({
+  template,
+  onUse,
+  isCreating,
+}: {
+  template: (typeof CLIMATE_TEMPLATES)[number];
+  onUse: (templateId: string) => void;
+  isCreating: boolean;
+}) {
+  return (
+    <Card variant="outlined" className="flex min-h-[180px] flex-col justify-between p-5">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <CategoryTag icon={<Leaf size={18} weight="fill" />}>Climate Template</CategoryTag>
+        </div>
+        <h4 className="text-body-strong text-[var(--foreground-default)]">{template.name}</h4>
+        <p className="line-clamp-2 text-caption text-[var(--foreground-muted)]">
+          {template.greenSkills.length} green skills &middot;{" "}
+          {template.requiredCerts.length > 0
+            ? template.requiredCerts.join(", ")
+            : "No required certs"}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 pt-4">
+        <Button
+          variant="tertiary"
+          size="sm"
+          onClick={() => onUse(template.id)}
+          disabled={isCreating}
+        >
+          {isCreating ? <Spinner size="sm" /> : null}
+          Use Template
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+/** Pre-built climate templates section */
+function ClimateTemplatesSection({
+  onUseTemplate,
+  creatingTemplateId,
+}: {
+  onUseTemplate: (templateId: string) => void;
+  creatingTemplateId: string | null;
+}) {
+  return (
+    <section className="space-y-4">
+      <h2 className="text-heading-sm text-[var(--foreground-default)]">Climate Job Templates</h2>
+      <p className="text-body text-[var(--foreground-muted)]">
+        Start with a pre-built template for common climate roles. Each includes green skills,
+        certifications, and suggested pipeline stages.
+      </p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {CLIMATE_TEMPLATES.map((template) => (
+          <PrebuiltTemplateCard
+            key={template.id}
+            template={template}
+            onUse={onUseTemplate}
+            isCreating={creatingTemplateId === template.id}
+          />
+        ))}
       </div>
     </section>
   );
@@ -536,9 +606,35 @@ interface RolesViewProps {
 }
 
 export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
+  const router = useRouter();
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
+  const [creatingFromTemplate, setCreatingFromTemplate] = useState<string | null>(null);
+
+  const handleUsePrebuiltTemplate = async (templateId: string) => {
+    setCreatingFromTemplate(templateId);
+    try {
+      const res = await fetch("/api/canopy/templates/prebuilt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ templateId }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to create role from template");
+      }
+      const { job } = await res.json();
+      toast.success("Role created from template");
+      router.push(`/canopy/roles/${job.id}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create role";
+      logger.error("Error creating from prebuilt template", { error: formatError(err) });
+      toast.error(message);
+    } finally {
+      setCreatingFromTemplate(null);
+    }
+  };
 
   // React Query with initialData — renders instantly from SSR, refetches in background
   const {
@@ -605,15 +701,31 @@ export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
 
         {/* State 1: First-time UX — no jobs, no templates */}
         {!isFirstLoad && !error && isEmpty && (
-          <div className="px-12 py-6">
-            <RolesEmptyState onCreateRole={() => setCreateModalOpen(true)} creating={false} />
+          <div className="space-y-8">
+            <div className="px-12 py-6">
+              <RolesEmptyState onCreateRole={() => setCreateModalOpen(true)} creating={false} />
+            </div>
+            <div className="px-12 pb-6">
+              <ClimateTemplatesSection
+                onUseTemplate={handleUsePrebuiltTemplate}
+                creatingTemplateId={creatingFromTemplate}
+              />
+            </div>
           </div>
         )}
 
         {/* State 2 & 3: Has content — shows instantly from cache on return visits */}
         {!isFirstLoad && !error && !isEmpty && (
           <>
-            {/* Role Templates section — white background */}
+            {/* Climate Templates section — always visible */}
+            <div className="px-12 py-6">
+              <ClimateTemplatesSection
+                onUseTemplate={handleUsePrebuiltTemplate}
+                creatingTemplateId={creatingFromTemplate}
+              />
+            </div>
+
+            {/* Custom Role Templates section — white background */}
             <div className="px-12 py-6">
               {hasTemplates ? (
                 <TemplatesSection

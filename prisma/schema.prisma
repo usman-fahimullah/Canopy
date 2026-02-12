@@ -752,6 +752,7 @@ enum NotificationType {
   INTERVIEW_SCHEDULED // Candidate notified: interview has been scheduled
   APPLICATION_REJECTED // Candidate notified: application was rejected
   APPROVAL_PENDING // Approver notified: action needs approval
+  NOTE_MENTION // Team member mentioned in a candidate note
   APPROVAL_APPROVED // Requester notified: action was approved
   APPROVAL_REJECTED // Requester notified: action was rejected
 }

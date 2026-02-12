@@ -12,16 +12,26 @@ import { RecruiterCard } from "@/app/jobs/search/[id]/_components/RecruiterCard"
 import { HighlightsCard } from "@/app/jobs/search/[id]/_components/HighlightsCard";
 import { RoleOverviewCard } from "@/app/jobs/search/[id]/_components/RoleOverviewCard";
 import { AboutCompanyCard } from "@/app/jobs/search/[id]/_components/AboutCompanyCard";
+import { ApplicationFormPreview } from "./ApplicationFormPreview";
 import type { JobDetail } from "@/app/jobs/search/[id]/_components/types";
+import type { FormConfigData, FormQuestionData } from "../page";
 import { logger, formatError } from "@/lib/logger";
 
 interface RolePreviewViewProps {
   job: JobDetail;
   roleId: string;
   isPublished: boolean;
+  formConfig: FormConfigData | null;
+  formQuestions: FormQuestionData[];
 }
 
-export function RolePreviewView({ job, roleId, isPublished }: RolePreviewViewProps) {
+export function RolePreviewView({
+  job,
+  roleId,
+  isPublished,
+  formConfig,
+  formQuestions,
+}: RolePreviewViewProps) {
   const router = useRouter();
   const [showCheckout, setShowCheckout] = React.useState(false);
   const [isPublishing, setIsPublishing] = React.useState(false);
@@ -98,6 +108,7 @@ export function RolePreviewView({ job, roleId, isPublished }: RolePreviewViewPro
           <RecruiterCard recruiter={job.hiringManager} label="Hiring Manager" />
           <HighlightsCard job={job} />
           <RoleOverviewCard job={job} />
+          <ApplicationFormPreview formConfig={formConfig} formQuestions={formQuestions} />
           <AboutCompanyCard organization={job.organization} />
         </div>
       </div>

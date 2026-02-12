@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { getAuthContext, canLeaveNotes, scopedApplicationWhere } from "@/lib/access-control";
+import { createNotification } from "@/lib/notifications";
 
 /**
  * POST /api/canopy/candidates/[id]/notes
@@ -77,6 +78,41 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         },
       },
     });
+
+    // Fire-and-forget: notify mentioned team members
+    if (mentions.length > 0) {
+      const authorName = note.orgMemberAuthor?.account?.name ?? "A team member";
+
+      // Look up the mentioned org members to get their accountIds
+      prisma.organizationMember
+        .findMany({
+          where: { id: { in: mentions }, organizationId: ctx.organizationId },
+          select: { accountId: true, account: { select: { name: true } } },
+        })
+        .then(async (mentionedMembers) => {
+          for (const member of mentionedMembers) {
+            try {
+              await createNotification({
+                accountId: member.accountId,
+                type: "NOTE_MENTION" as any, // Will be proper enum after migration
+                title: `${authorName} mentioned you in a note`,
+                body: content.length > 100 ? content.slice(0, 100) + "..." : content,
+                data: { seekerId, noteId: note.id },
+              });
+            } catch (err) {
+              logger.error("Failed to send mention notification", {
+                error: formatError(err),
+                mentionedAccountId: member.accountId,
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          logger.error("Failed to look up mentioned members", {
+            error: formatError(err),
+          });
+        });
+    }
 
     return NextResponse.json({ data: note }, { status: 201 });
   } catch (error) {

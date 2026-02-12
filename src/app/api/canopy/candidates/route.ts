@@ -22,6 +22,8 @@ const GetCandidatesSchema = z.object({
   dateTo: z.string().datetime().optional(),
   experienceLevel: z.enum(["ENTRY", "INTERMEDIATE", "SENIOR", "EXECUTIVE"]).optional(),
   search: z.string().optional(),
+  sortBy: z.enum(["name", "email", "stage", "matchScore", "source", "createdAt"]).optional(),
+  sortDirection: z.enum(["asc", "desc"]).optional(),
 });
 
 export async function GET(request: NextRequest) {

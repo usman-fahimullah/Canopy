@@ -358,10 +358,51 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Status + auto-set publishedAt
     if (data.status !== undefined) {
-      updateData.status = data.status;
+      // Validate required fields before publishing
       if (data.status === "PUBLISHED") {
+        const currentJob = await prisma.job.findUnique({
+          where: { id },
+          select: {
+            title: true,
+            description: true,
+            locationType: true,
+            employmentType: true,
+          },
+        });
+
+        if (!currentJob) {
+          return NextResponse.json({ error: "Role not found" }, { status: 404 });
+        }
+
+        // Merge current job data with incoming update data to check final state
+        const finalTitle = data.title ?? currentJob.title;
+        const finalDescription = data.description ?? currentJob.description;
+        const finalEmploymentType = data.employmentType ?? currentJob.employmentType;
+
+        const missingFields: string[] = [];
+        if (!finalTitle || finalTitle.trim() === "" || finalTitle === "Untitled Role") {
+          missingFields.push("title");
+        }
+        if (!finalDescription || finalDescription.trim() === "") {
+          missingFields.push("description");
+        }
+        if (!finalEmploymentType) {
+          missingFields.push("employment type");
+        }
+
+        if (missingFields.length > 0) {
+          return NextResponse.json(
+            {
+              error: `Cannot publish: the following required fields are missing — ${missingFields.join(", ")}. Please fill them in before publishing.`,
+            },
+            { status: 422 }
+          );
+        }
+
         updateData.publishedAt = new Date();
       }
+
+      updateData.status = data.status;
     }
 
     // Core fields

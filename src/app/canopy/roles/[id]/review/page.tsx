@@ -17,9 +17,29 @@ interface ReviewPageProps {
   params: Promise<{ id: string }>;
 }
 
+export interface FormConfigData {
+  personalDetails?: Record<string, { visible: boolean; required: boolean }>;
+  careerDetails?: Record<string, { visible: boolean; required: boolean }>;
+  requiredFiles?: { resume: boolean; coverLetter: boolean; portfolio: boolean };
+}
+
+export interface FormQuestionData {
+  id: string;
+  type: "text" | "yes-no" | "multiple-choice" | "file-upload";
+  title: string;
+  required: boolean;
+  description?: string;
+  options?: string[];
+}
+
 async function getRolePreview(
   roleId: string
-): Promise<{ job: JobDetail; isPublished: boolean } | null> {
+): Promise<{
+  job: JobDetail;
+  isPublished: boolean;
+  formConfig: FormConfigData | null;
+  formQuestions: FormQuestionData[];
+} | null> {
   try {
     const supabase = await createClient();
     const {
@@ -158,9 +178,15 @@ async function getRolePreview(
       savedNotes: null,
     };
 
+    // Extract form config for application form preview
+    const rawFormConfig = job.formConfig as FormConfigData | null;
+    const rawFormQuestions = (job.formQuestions as FormQuestionData[] | null) ?? [];
+
     return {
       job: jobDetail,
       isPublished: job.status === "PUBLISHED",
+      formConfig: rawFormConfig,
+      formQuestions: rawFormQuestions,
     };
   } catch (error) {
     logger.error("Error fetching role preview", {
@@ -179,5 +205,13 @@ export default async function RoleReviewPage({ params }: ReviewPageProps) {
     notFound();
   }
 
-  return <RolePreviewView job={result.job} roleId={roleId} isPublished={result.isPublished} />;
+  return (
+    <RolePreviewView
+      job={result.job}
+      roleId={roleId}
+      isPublished={result.isPublished}
+      formConfig={result.formConfig}
+      formQuestions={result.formQuestions}
+    />
+  );
 }

@@ -27,13 +27,46 @@ import {
   Info,
   Trash,
   Plus,
+  SortAscending,
+  SortDescending,
+  Scales,
+  EnvelopeOpen,
+  MapPin,
 } from "@phosphor-icons/react";
+import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
+import { CandidateComparisonSheet } from "@/components/canopy/CandidateComparisonSheet";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
+import { DuplicateIndicator } from "@/components/canopy/DuplicateIndicator";
 import { useCandidatesQuery, queryKeys } from "@/hooks/queries";
 import type { CandidateApplication, CandidatesListResponse } from "@/hooks/queries";
 import { logger, formatError } from "@/lib/logger";
+
+/* -------------------------------------------------------------------
+   Sort config
+   ------------------------------------------------------------------- */
+
+type SortField = "name" | "email" | "stage" | "matchScore" | "source" | "createdAt";
+
+const SORT_OPTIONS: { value: SortField; label: string }[] = [
+  { value: "createdAt", label: "Date Added" },
+  { value: "name", label: "Name" },
+  { value: "matchScore", label: "Match Score" },
+  { value: "stage", label: "Stage" },
+  { value: "source", label: "Source" },
+];
+
+const SOURCE_OPTIONS = [
+  "green-jobs-board",
+  "linkedin",
+  "referral",
+  "career-fair",
+  "company-website",
+  "direct-outreach",
+  "other",
+];
 
 /* -------------------------------------------------------------------
    Helpers
@@ -108,11 +141,23 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
   const matchScoreMax = matchScoreMaxParam ? parseInt(matchScoreMaxParam) : undefined;
   const source = searchParams.get("source") || undefined;
   const search = searchParams.get("search") || undefined;
+  const sortBy = (searchParams.get("sortBy") as SortField) || undefined;
+  const sortDirection = (searchParams.get("sortDirection") as "asc" | "desc") || undefined;
 
   // React Query with initialData — renders instantly from SSR, refetches in background
   const filters = useMemo(
-    () => ({ skip, take, stage, matchScoreMin, matchScoreMax, source, search }),
-    [skip, take, stage, matchScoreMin, matchScoreMax, source, search]
+    () => ({
+      skip,
+      take,
+      stage,
+      matchScoreMin,
+      matchScoreMax,
+      source,
+      search,
+      sortBy,
+      sortDirection,
+    }),
+    [skip, take, stage, matchScoreMin, matchScoreMax, source, search, sortBy, sortDirection]
   );
   const {
     data: candidatesData,
@@ -130,9 +175,11 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
   // UI state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number } | null>(null);
   const previewParam = searchParams.get("preview");
   const [previewSeekerId, setPreviewSeekerIdRaw] = useState<string | null>(previewParam);
   const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
 
   // Sync preview param ↔ URL (shallow — no server re-render)
   const setPreviewSeekerId = useCallback(
@@ -180,6 +227,22 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
     [updateParams]
   );
 
+  // Handle sort toggle
+  const handleSort = useCallback(
+    (field: SortField) => {
+      const currentSortBy = sortBy || "createdAt";
+      const currentDir = sortDirection || "desc";
+      if (currentSortBy === field) {
+        // Toggle direction
+        updateParams({ sortBy: field, sortDirection: currentDir === "desc" ? "asc" : "desc" });
+      } else {
+        // New sort field, default desc
+        updateParams({ sortBy: field, sortDirection: "desc" });
+      }
+    },
+    [sortBy, sortDirection, updateParams]
+  );
+
   // Handle checkbox toggle
   const toggleSelection = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -207,7 +270,9 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
     async (newStage: string) => {
       if (selectedIds.size === 0) return;
 
+      const count = selectedIds.size;
       setBulkLoading(true);
+      setBulkProgress({ current: 0, total: count });
       try {
         const res = await fetch("/api/canopy/applications/bulk", {
           method: "PATCH",
@@ -218,6 +283,8 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
             stage: newStage,
           }),
         });
+
+        setBulkProgress({ current: count, total: count });
 
         if (res.ok) {
           setSelectedIds(new Set());
@@ -231,6 +298,7 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
         logger.error("Error during bulk stage move", { error: formatError(error) });
       } finally {
         setBulkLoading(false);
+        setTimeout(() => setBulkProgress(null), 1000);
       }
     },
     [selectedIds, queryClient]
@@ -242,7 +310,9 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
 
     if (!window.confirm(`Reject ${selectedIds.size} candidates?`)) return;
 
+    const count = selectedIds.size;
     setBulkLoading(true);
+    setBulkProgress({ current: 0, total: count });
     try {
       const res = await fetch("/api/canopy/applications/bulk", {
         method: "PATCH",
@@ -252,6 +322,8 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
           action: "REJECT",
         }),
       });
+
+      setBulkProgress({ current: count, total: count });
 
       if (res.ok) {
         setSelectedIds(new Set());
@@ -265,6 +337,7 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
       logger.error("Error during bulk reject", { error: formatError(error) });
     } finally {
       setBulkLoading(false);
+      setTimeout(() => setBulkProgress(null), 1000);
     }
   }, [selectedIds, queryClient]);
 
@@ -309,6 +382,14 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
     search
   );
 
+  // Seeker IDs for comparison (from selected candidates)
+  const comparisonSeekerIds = useMemo(() => {
+    return applications
+      .filter((app) => selectedIds.has(app.id) && app.seekerId)
+      .map((app) => app.seekerId!)
+      .slice(0, 3);
+  }, [applications, selectedIds]);
+
   // Only show skeleton on first load (no cached data yet)
   const isFirstLoad = isLoading && applications.length === 0;
 
@@ -349,7 +430,7 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
             </div>
             <Dropdown>
               <DropdownTrigger asChild>
-                <Button variant="outline">Stage</Button>
+                <Button variant="outline">{stage ? `Stage: ${stage}` : "Stage"}</Button>
               </DropdownTrigger>
               <DropdownContent>
                 <DropdownItem value="all" onClick={() => updateParams({ stage: undefined })}>
@@ -358,6 +439,99 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
                 {["Applied", "Screening", "Interview", "Offer", "Hired"].map((s) => (
                   <DropdownItem key={s} value={s} onClick={() => updateParams({ stage: s })}>
                     {s}
+                  </DropdownItem>
+                ))}
+              </DropdownContent>
+            </Dropdown>
+
+            {/* Source Filter */}
+            <Dropdown>
+              <DropdownTrigger asChild>
+                <Button variant="outline">{source ? `Source: ${source}` : "Source"}</Button>
+              </DropdownTrigger>
+              <DropdownContent>
+                <DropdownItem value="all" onClick={() => updateParams({ source: undefined })}>
+                  All Sources
+                </DropdownItem>
+                {SOURCE_OPTIONS.map((s) => (
+                  <DropdownItem key={s} value={s} onClick={() => updateParams({ source: s })}>
+                    {s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </DropdownItem>
+                ))}
+              </DropdownContent>
+            </Dropdown>
+
+            {/* Match Score Filter */}
+            <Dropdown>
+              <DropdownTrigger asChild>
+                <Button variant="outline">
+                  {matchScoreMin !== undefined || matchScoreMax !== undefined
+                    ? `Score: ${matchScoreMin ?? 0}–${matchScoreMax ?? 100}%`
+                    : "Score"}
+                </Button>
+              </DropdownTrigger>
+              <DropdownContent className="w-56 p-3">
+                <p className="mb-2 text-caption-strong text-[var(--foreground-default)]">
+                  Match Score Range
+                </p>
+                <div className="space-y-3">
+                  <button
+                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
+                    onClick={() =>
+                      updateParams({ matchScoreMin: undefined, matchScoreMax: undefined })
+                    }
+                  >
+                    Any score
+                  </button>
+                  <button
+                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
+                    onClick={() => updateParams({ matchScoreMin: "80", matchScoreMax: undefined })}
+                  >
+                    High (80%+)
+                  </button>
+                  <button
+                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
+                    onClick={() => updateParams({ matchScoreMin: "50", matchScoreMax: "79" })}
+                  >
+                    Medium (50–79%)
+                  </button>
+                  <button
+                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
+                    onClick={() => updateParams({ matchScoreMin: "0", matchScoreMax: "49" })}
+                  >
+                    Low (&lt;50%)
+                  </button>
+                </div>
+              </DropdownContent>
+            </Dropdown>
+
+            {/* Sort */}
+            <Dropdown>
+              <DropdownTrigger asChild>
+                <Button variant="outline" size="sm">
+                  {(sortDirection || "desc") === "desc" ? (
+                    <SortDescending size={16} className="mr-1.5" />
+                  ) : (
+                    <SortAscending size={16} className="mr-1.5" />
+                  )}
+                  {SORT_OPTIONS.find((o) => o.value === (sortBy || "createdAt"))?.label || "Sort"}
+                </Button>
+              </DropdownTrigger>
+              <DropdownContent>
+                {SORT_OPTIONS.map((opt) => (
+                  <DropdownItem
+                    key={opt.value}
+                    value={opt.value}
+                    onClick={() => handleSort(opt.value)}
+                  >
+                    <span className="flex items-center justify-between gap-4">
+                      {opt.label}
+                      {(sortBy || "createdAt") === opt.value && (
+                        <span className="text-caption text-[var(--foreground-subtle)]">
+                          {(sortDirection || "desc") === "desc" ? "↓" : "↑"}
+                        </span>
+                      )}
+                    </span>
                   </DropdownItem>
                 ))}
               </DropdownContent>
@@ -527,14 +701,31 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
 
                       {/* Info */}
                       <div className="min-w-0 flex-1">
-                        <TruncateText className="text-foreground-default text-body font-medium">
-                          {candidateName}
-                        </TruncateText>
+                        <div className="flex min-w-0 items-center gap-2">
+                          <TruncateText className="text-foreground-default text-body font-medium">
+                            {candidateName}
+                          </TruncateText>
+                          <DuplicateIndicator candidateEmail={getCandidateEmail(app)} />
+                        </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-foreground-muted">
                           <span className="flex items-center gap-1">
                             <BriefcaseMetal size={12} weight="bold" />
                             {getJobTitle(app)}
                           </span>
+                          {getCandidateEmail(app) && (
+                            <span className="flex items-center gap-1">
+                              <EnvelopeOpen size={12} weight="bold" />
+                              <TruncateText className="max-w-[180px]">
+                                {getCandidateEmail(app)}
+                              </TruncateText>
+                            </span>
+                          )}
+                          {app.source && (
+                            <span className="flex items-center gap-1">
+                              <MapPin size={12} weight="bold" />
+                              {app.source}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1">
                             <CalendarBlank size={12} weight="bold" />
                             {formatDate(appliedDate)}
@@ -586,65 +777,106 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
             {/* Bulk Actions Bar */}
             {selectedIds.size > 0 && (
               <div className="fixed bottom-6 left-0 right-0 flex items-center justify-center px-4">
-                <div className="flex w-full max-w-2xl items-center gap-4 rounded-[16px] border border-[var(--border-default)] bg-[var(--card-background)] p-4 shadow-lg">
-                  <div className="flex-1">
-                    <p className="text-body font-medium text-[var(--foreground-default)]">
-                      {selectedIds.size} candidate{selectedIds.size !== 1 ? "s" : ""} selected
-                    </p>
+                <div className="w-full max-w-2xl space-y-2 rounded-[16px] border border-[var(--border-default)] bg-[var(--card-background)] p-4 shadow-lg">
+                  {/* Progress indicator */}
+                  {bulkProgress && (
+                    <div className="flex items-center gap-3">
+                      <Progress
+                        value={
+                          bulkProgress.total > 0
+                            ? (bulkProgress.current / bulkProgress.total) * 100
+                            : 0
+                        }
+                        className="h-2 flex-1"
+                      />
+                      <span className="shrink-0 text-caption text-[var(--foreground-muted)]">
+                        {bulkProgress.current}/{bulkProgress.total}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <p className="text-body font-medium text-[var(--foreground-default)]">
+                        {selectedIds.size} candidate{selectedIds.size !== 1 ? "s" : ""} selected
+                      </p>
+                    </div>
+
+                    <Dropdown>
+                      <DropdownTrigger asChild>
+                        <Button variant="outline" disabled={bulkLoading}>
+                          Move Stage
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownContent>
+                        {["Applied", "Screening", "Interview", "Offer", "Hired"].map((s) => (
+                          <DropdownItem key={s} value={s} onClick={() => handleBulkStageMove(s)}>
+                            {s}
+                          </DropdownItem>
+                        ))}
+                      </DropdownContent>
+                    </Dropdown>
+
+                    {/* Compare button — enabled when 2-3 candidates selected */}
+                    <SimpleTooltip
+                      content={
+                        comparisonSeekerIds.length < 2
+                          ? "Select 2–3 candidates to compare"
+                          : "Compare selected candidates"
+                      }
+                      side="top"
+                    >
+                      <span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={bulkLoading || comparisonSeekerIds.length < 2}
+                          onClick={() => setComparisonOpen(true)}
+                        >
+                          <Scales size={16} />
+                          Compare
+                        </Button>
+                      </span>
+                    </SimpleTooltip>
+
+                    <SimpleTooltip content="Coming soon" side="top">
+                      <span>
+                        <Button variant="outline" disabled size="sm">
+                          <EnvelopeSimple size={16} />
+                          Email
+                        </Button>
+                      </span>
+                    </SimpleTooltip>
+
+                    <Button
+                      variant="outline"
+                      onClick={handleExportCsv}
+                      disabled={bulkLoading}
+                      size="sm"
+                    >
+                      <Download size={16} />
+                      Export
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={handleBulkReject}
+                      disabled={bulkLoading}
+                      size="sm"
+                      className="text-[var(--foreground-error)]"
+                    >
+                      <Trash size={16} />
+                      Reject
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={() => setSelectedIds(new Set())}
+                      disabled={bulkLoading}
+                    >
+                      Deselect All
+                    </Button>
                   </div>
-
-                  <Dropdown>
-                    <DropdownTrigger asChild>
-                      <Button variant="outline" disabled={bulkLoading}>
-                        Move Stage
-                      </Button>
-                    </DropdownTrigger>
-                    <DropdownContent>
-                      {["Applied", "Screening", "Interview", "Offer", "Hired"].map((s) => (
-                        <DropdownItem key={s} value={s} onClick={() => handleBulkStageMove(s)}>
-                          {s}
-                        </DropdownItem>
-                      ))}
-                    </DropdownContent>
-                  </Dropdown>
-
-                  <SimpleTooltip content="Coming soon" side="top">
-                    <span>
-                      <Button variant="outline" disabled size="sm">
-                        <EnvelopeSimple size={16} />
-                        Email
-                      </Button>
-                    </span>
-                  </SimpleTooltip>
-
-                  <Button
-                    variant="outline"
-                    onClick={handleExportCsv}
-                    disabled={bulkLoading}
-                    size="sm"
-                  >
-                    <Download size={16} />
-                    Export
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={handleBulkReject}
-                    disabled={bulkLoading}
-                    size="sm"
-                    className="text-[var(--foreground-error)]"
-                  >
-                    <Trash size={16} />
-                    Reject
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    onClick={() => setSelectedIds(new Set())}
-                    disabled={bulkLoading}
-                  >
-                    Deselect All
-                  </Button>
                 </div>
               </div>
             )}
@@ -695,6 +927,13 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
           queryClient.invalidateQueries({ queryKey: queryKeys.canopy.candidates.all });
           queryClient.invalidateQueries({ queryKey: queryKeys.canopy.dashboard.all });
         }}
+      />
+
+      {/* Candidate Comparison Sheet */}
+      <CandidateComparisonSheet
+        candidateIds={comparisonSeekerIds}
+        open={comparisonOpen}
+        onOpenChange={setComparisonOpen}
       />
     </div>
   );

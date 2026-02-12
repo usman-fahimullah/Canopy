@@ -251,6 +251,26 @@ export function AddCandidateModal({
 
       const newApplication: ApplicationData = await res.json();
 
+      // Auto-trigger resume parsing in background (fire-and-forget)
+      if (resumeUrl) {
+        fetch("/api/canopy/resume-parse", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            seekerId: newApplication.seeker.id,
+            resumeUrl,
+          }),
+        })
+          .then((parseRes) => {
+            if (parseRes.ok) {
+              toast.success("Resume parsed successfully");
+            }
+          })
+          .catch((err) => {
+            logger.warn("Background resume parse failed", { error: formatError(err) });
+          });
+      }
+
       // Close modal
       onOpenChange(false);
 

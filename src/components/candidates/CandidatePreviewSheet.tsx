@@ -41,6 +41,8 @@ import { HiringStagesSection } from "./HiringStagesSection";
 import { DocumentsSection } from "./DocumentsSection";
 import { ContactInfoSection } from "./ContactInfoSection";
 import { AboutSection } from "./AboutSection";
+import { AISummarySection } from "./AISummarySection";
+import { SkillsCertificationsSection } from "./SkillsCertificationsSection";
 import { CommentsPanel } from "./CommentsPanel";
 import { TodoPanel } from "./TodoPanel";
 import { HistoryPanel } from "./HistoryPanel";
@@ -118,6 +120,7 @@ interface SeekerData {
   greenSkills: string[];
   certifications: string[];
   yearsExperience: number | null;
+  aiSummary: string | null;
   account: {
     id: string;
     name: string | null;
@@ -647,6 +650,17 @@ export function CandidatePreviewSheet({
                   selectedStageId={reviewStageId}
                   onOpenReview={handleOpenReview}
                   appliedAt={activeApp.createdAt}
+                />
+
+                {/* AI Summary */}
+                <AISummarySection summary={seeker.aiSummary} />
+
+                {/* Skills & Certifications */}
+                <SkillsCertificationsSection
+                  skills={seeker.skills}
+                  greenSkills={seeker.greenSkills}
+                  certifications={seeker.certifications}
+                  yearsExperience={seeker.yearsExperience}
                 />
 
                 {/* Documents */}

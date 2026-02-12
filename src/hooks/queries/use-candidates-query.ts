@@ -49,6 +49,8 @@ export interface CandidateFilters {
   matchScoreMax?: number;
   source?: string;
   search?: string;
+  sortBy?: "name" | "email" | "stage" | "matchScore" | "source" | "createdAt";
+  sortDirection?: "asc" | "desc";
 }
 
 // ============================================
@@ -70,6 +72,8 @@ export function useCandidatesQuery(
     params.set("matchScoreMax", String(filters.matchScoreMax));
   if (filters.source) params.set("source", filters.source);
   if (filters.search) params.set("search", filters.search);
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
 
   return useQuery({
     queryKey: queryKeys.canopy.candidates.list(filters as Record<string, unknown>),

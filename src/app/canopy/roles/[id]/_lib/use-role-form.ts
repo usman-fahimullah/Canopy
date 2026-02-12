@@ -83,6 +83,14 @@ export interface JobPostState {
   setSelectedBenefits: (v: string[]) => void;
   compensationDetails: string;
   setCompensationDetails: (v: string) => void;
+  salaryCurrency: string;
+  setSalaryCurrency: (v: string) => void;
+  greenSkills: string[];
+  setGreenSkills: (v: string[]) => void;
+  requiredCerts: string[];
+  setRequiredCerts: (v: string[]) => void;
+  impactDescription: string;
+  setImpactDescription: (v: string) => void;
   showRecruiter: boolean;
   setShowRecruiter: (v: boolean) => void;
   recruiterId: string | null;
@@ -200,6 +208,10 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
   const [useCompanyBenefits, setUseCompanyBenefits] = React.useState(true);
   const [selectedBenefits, setSelectedBenefits] = React.useState<string[]>([]);
   const [compensationDetails, setCompensationDetails] = React.useState("");
+  const [salaryCurrency, setSalaryCurrency] = React.useState("USD");
+  const [greenSkills, setGreenSkills] = React.useState<string[]>([]);
+  const [requiredCerts, setRequiredCerts] = React.useState<string[]>([]);
+  const [impactDescription, setImpactDescription] = React.useState("");
   const [showRecruiter, setShowRecruiter] = React.useState(false);
   const [recruiterId, setRecruiterId] = React.useState<string | null>(null);
   const [showHiringManager, setShowHiringManager] = React.useState(false);
@@ -321,7 +333,11 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     }
     if (job.salaryMin) setMinPay(String(job.salaryMin));
     if (job.salaryMax) setMaxPay(String(job.salaryMax));
+    if (job.salaryCurrency) setSalaryCurrency(job.salaryCurrency);
     if (job.closesAt) setClosingDate(new Date(job.closesAt));
+    if (job.greenSkills && job.greenSkills.length > 0) setGreenSkills(job.greenSkills);
+    if (job.requiredCerts && job.requiredCerts.length > 0) setRequiredCerts(job.requiredCerts);
+    if (job.impactDescription) setImpactDescription(job.impactDescription);
 
     // Initialize apply form config from DB
     if (job.formConfig) {
@@ -494,8 +510,10 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
         experienceLevel: formToExperienceLevel[experienceLevel] || null,
         salaryMin: minPay ? Number(minPay) : null,
         salaryMax: maxPay ? Number(maxPay) : null,
-        salaryCurrency: "USD",
-        requiredCerts: educationLevel && educationLevel !== "none" ? [educationLevel] : [],
+        salaryCurrency: salaryCurrency || "USD",
+        requiredCerts: requiredCerts.length > 0 ? requiredCerts : [],
+        greenSkills: greenSkills.length > 0 ? greenSkills : [],
+        impactDescription: impactDescription || null,
         closesAt: closingDate ? closingDate.toISOString() : null,
         // Team assignment — top-level fields (proper FK columns)
         recruiterId: recruiterId || null,
@@ -608,6 +626,10 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     payFrequency,
     selectedBenefits,
     compensationDetails,
+    salaryCurrency,
+    greenSkills,
+    requiredCerts,
+    impactDescription,
     showRecruiter,
     recruiterId,
     showHiringManager,
@@ -679,6 +701,14 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       setSelectedBenefits,
       compensationDetails,
       setCompensationDetails,
+      salaryCurrency,
+      setSalaryCurrency,
+      greenSkills,
+      setGreenSkills,
+      requiredCerts,
+      setRequiredCerts,
+      impactDescription,
+      setImpactDescription,
       showRecruiter,
       setShowRecruiter,
       recruiterId,
@@ -728,6 +758,10 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       useCompanyBenefits,
       selectedBenefits,
       compensationDetails,
+      salaryCurrency,
+      greenSkills,
+      requiredCerts,
+      impactDescription,
       showRecruiter,
       recruiterId,
       showHiringManager,
