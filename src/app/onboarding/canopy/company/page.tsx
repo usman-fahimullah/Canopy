@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui";
 import { Camera, GlobeSimple, MapPin } from "@phosphor-icons/react";
 import { EMPLOYER_STEPS } from "@/lib/onboarding/types";
+import { setPendingLogoFile } from "./pending-logo";
 
 const MAX_DESCRIPTION_LENGTH = 250;
 
@@ -48,6 +49,8 @@ export default function EmployerCompanyPage() {
   const { employerData, setEmployerData } = useOnboardingForm();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   const step = EMPLOYER_STEPS[0]; // company
   const canContinue = employerData.companyName.trim().length > 0;
@@ -59,6 +62,27 @@ export default function EmployerCompanyPage() {
     if (value.length <= MAX_DESCRIPTION_LENGTH) {
       setEmployerData({ companyDescription: value });
     }
+  }
+
+  function handleLogoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
+    if (!allowedTypes.includes(file.type)) {
+      setLogoError("Please upload a JPEG, PNG, WebP, or SVG image.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setLogoError("This image is too large. Please choose a file under 5 MB.");
+      return;
+    }
+
+    setLogoError(null);
+    setPendingLogoFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setEmployerData({ companyLogoPreview: previewUrl });
   }
 
   async function handleContinue() {
@@ -112,15 +136,42 @@ export default function EmployerCompanyPage() {
                 autoFocus
               />
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="shrink-0 gap-2"
-              leftIcon={<Camera size={18} weight="fill" />}
-            >
-              Upload company logo
-            </Button>
+            <div className="shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                leftIcon={
+                  employerData.companyLogoPreview ? undefined : <Camera size={18} weight="fill" />
+                }
+                onClick={() => logoInputRef.current?.click()}
+              >
+                {employerData.companyLogoPreview ? "Change Logo" : "Upload company logo"}
+              </Button>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                className="hidden"
+                onChange={handleLogoSelect}
+              />
+            </div>
           </div>
+          {employerData.companyLogoPreview && (
+            <div className="mt-3 flex items-center gap-3">
+              <img
+                src={employerData.companyLogoPreview}
+                alt="Company logo preview"
+                className="h-10 w-10 rounded-[var(--radius-md)] object-cover"
+              />
+              <span className="text-caption text-[var(--foreground-muted)]">Logo selected</span>
+            </div>
+          )}
+          {logoError && (
+            <div className="mt-2">
+              <InlineMessage variant="critical">{logoError}</InlineMessage>
+            </div>
+          )}
         </div>
 
         {/* Company Description with character counter */}

@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     const { applicationId, status, from, to, interviewerId, skip, take } = result.data;
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       organizationId: membership.organizationId,
     };
 
@@ -78,9 +78,10 @@ export async function GET(request: NextRequest) {
     if (interviewerId) where.interviewerId = interviewerId;
 
     if (from || to) {
-      where.scheduledAt = {};
-      if (from) where.scheduledAt.gte = new Date(from);
-      if (to) where.scheduledAt.lte = new Date(to);
+      const dateFilter: Record<string, Date> = {};
+      if (from) dateFilter.gte = new Date(from);
+      if (to) dateFilter.lte = new Date(to);
+      where.scheduledAt = dateFilter;
     }
 
     // Fetch interviews with related data
@@ -146,8 +147,14 @@ export async function GET(request: NextRequest) {
       endpoint: "/api/canopy/interviews",
     });
 
+    // Flatten candidateName for consumer convenience
+    const enriched = interviews.map((interview) => ({
+      ...interview,
+      candidateName: interview.application?.seeker?.account?.name ?? "Unknown Candidate",
+    }));
+
     return NextResponse.json({
-      data: interviews,
+      data: enriched,
       meta: {
         total,
         skip,

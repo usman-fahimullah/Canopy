@@ -1,12 +1,22 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { PageHeader } from "@/components/shell/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { Plus, WarningCircle } from "@phosphor-icons/react";
+import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+  DropdownValue,
+} from "@/components/ui/dropdown";
+import { Plus, WarningCircle, Eye } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
 
 /* -------------------------------------------------------------------
@@ -20,9 +30,10 @@ interface EmailTemplate {
   name: string;
   type: TemplateType;
   subject: string;
-  body: string;
+  content?: string;
+  body?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 /* -------------------------------------------------------------------
@@ -36,6 +47,11 @@ const TEMPLATE_TYPE_LABELS: Record<TemplateType, { label: string; color: string 
   APPLICATION_ACK: { label: "Application Acknowledgment", color: "warning" },
 };
 
+const TEMPLATE_TYPE_OPTIONS = Object.entries(TEMPLATE_TYPE_LABELS).map(([value, { label }]) => ({
+  value,
+  label,
+}));
+
 /* -------------------------------------------------------------------
    Main Component
    ------------------------------------------------------------------- */
@@ -44,6 +60,18 @@ export default function EmailTemplatesPage() {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Modal state
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Form state
+  const [formName, setFormName] = useState("");
+  const [formType, setFormType] = useState<TemplateType>("REJECTION");
+  const [formSubject, setFormSubject] = useState("");
+  const [formContent, setFormContent] = useState("");
 
   // Fetch templates
   const fetchTemplates = useCallback(async () => {
@@ -55,7 +83,8 @@ export default function EmailTemplatesPage() {
         throw new Error("Failed to fetch email templates");
       }
       const data = await res.json();
-      setTemplates(data.templates || []);
+      // API returns { data: [...] } not { templates: [...] }
+      setTemplates(data.data || data.templates || []);
     } catch (err) {
       const message = formatError(err);
       logger.error("Failed to fetch email templates", { error: message });
@@ -69,6 +98,84 @@ export default function EmailTemplatesPage() {
     fetchTemplates();
   }, [fetchTemplates]);
 
+  // Create template
+  const handleCreate = useCallback(async () => {
+    if (!formName.trim() || !formSubject.trim()) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch("/api/canopy/email-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formName,
+          type: formType,
+          subject: formSubject,
+          content: formContent,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to create template");
+      }
+      setCreateModalOpen(false);
+      resetForm();
+      fetchTemplates();
+    } catch (err) {
+      logger.error("Failed to create email template", { error: formatError(err) });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [formName, formType, formSubject, formContent, fetchTemplates]);
+
+  // Update template
+  const handleUpdate = useCallback(async () => {
+    if (!editingTemplate || !formName.trim() || !formSubject.trim()) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/canopy/email-templates/${editingTemplate.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formName,
+          subject: formSubject,
+          content: formContent,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to update template");
+      }
+      setEditingTemplate(null);
+      resetForm();
+      fetchTemplates();
+    } catch (err) {
+      logger.error("Failed to update email template", { error: formatError(err) });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editingTemplate, formName, formSubject, formContent, fetchTemplates]);
+
+  const resetForm = () => {
+    setFormName("");
+    setFormType("REJECTION");
+    setFormSubject("");
+    setFormContent("");
+  };
+
+  const openEditModal = (template: EmailTemplate) => {
+    setFormName(template.name);
+    setFormType(template.type);
+    setFormSubject(template.subject);
+    setFormContent(template.content || template.body || "");
+    setEditingTemplate(template);
+  };
+
+  const openCreateModal = (type?: TemplateType) => {
+    resetForm();
+    if (type) setFormType(type);
+    setCreateModalOpen(true);
+  };
+
   // Group templates by type
   const templatesByType = Object.keys(TEMPLATE_TYPE_LABELS).reduce(
     (acc, type) => {
@@ -80,21 +187,19 @@ export default function EmailTemplatesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header */}
-      <PageHeader
-        title="Email Templates"
-        actions={[
-          <Button key="create" variant="primary" leftIcon={<Plus size={18} />}>
-            Create Template
-          </Button>,
-        ]}
-      />
-
-      <div className="px-8 py-2 lg:px-12">
-        <p className="text-body text-[var(--foreground-muted)]">
-          Create and manage email templates for candidate communications
-        </p>
+      <div className="flex items-center justify-between">
+        <h2 className="text-heading-sm font-medium text-[var(--foreground-default)]">
+          Email Templates
+        </h2>
+        <Button variant="primary" size="sm" onClick={() => openCreateModal()}>
+          <Plus size={16} weight="bold" />
+          Create Template
+        </Button>
       </div>
+
+      <p className="text-body text-[var(--foreground-muted)]">
+        Create and manage email templates for candidate communications
+      </p>
 
       {/* Loading State */}
       {isLoading && (
@@ -140,8 +245,9 @@ export default function EmailTemplatesPage() {
                       variant="secondary"
                       size="sm"
                       className="mt-4"
-                      leftIcon={<Plus size={16} />}
+                      onClick={() => openCreateModal(type as TemplateType)}
                     >
+                      <Plus size={16} />
                       Create Template
                     </Button>
                   </div>
@@ -157,7 +263,10 @@ export default function EmailTemplatesPage() {
                             <h3 className="line-clamp-2 text-body-strong font-semibold text-[var(--foreground-default)] group-hover:text-[var(--foreground-brand)]">
                               {template.name}
                             </h3>
-                            <Badge variant={color as any} className="shrink-0">
+                            <Badge
+                              variant={color as "error" | "info" | "success" | "warning"}
+                              className="shrink-0"
+                            >
                               {label}
                             </Badge>
                           </div>
@@ -172,10 +281,21 @@ export default function EmailTemplatesPage() {
                           </div>
 
                           <div className="flex gap-2 pt-2">
-                            <Button variant="secondary" size="sm" className="flex-1">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => openEditModal(template)}
+                            >
                               Edit
                             </Button>
-                            <Button variant="tertiary" size="sm" className="flex-1">
+                            <Button
+                              variant="tertiary"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => setPreviewTemplate(template)}
+                            >
+                              <Eye size={14} />
                               Preview
                             </Button>
                           </div>
@@ -194,13 +314,147 @@ export default function EmailTemplatesPage() {
               <p className="text-body text-[var(--foreground-muted)]">
                 No email templates found. Create your first template to get started.
               </p>
-              <Button variant="primary" size="lg" leftIcon={<Plus size={18} />} className="mt-6">
+              <Button
+                variant="primary"
+                size="lg"
+                className="mt-6"
+                onClick={() => openCreateModal()}
+              >
+                <Plus size={18} />
                 Create First Template
               </Button>
             </Card>
           )}
         </div>
       )}
+
+      {/* Create / Edit Modal */}
+      <Modal
+        open={createModalOpen || !!editingTemplate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreateModalOpen(false);
+            setEditingTemplate(null);
+            resetForm();
+          }
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>{editingTemplate ? "Edit Template" : "Create Template"}</ModalTitle>
+          </ModalHeader>
+
+          <div className="space-y-4 px-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="template-name">Template Name</Label>
+              <Input
+                id="template-name"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="e.g. Standard Rejection"
+              />
+            </div>
+
+            {!editingTemplate && (
+              <div className="space-y-2">
+                <Label>Template Type</Label>
+                <Dropdown value={formType} onValueChange={(v) => setFormType(v as TemplateType)}>
+                  <DropdownTrigger className="w-full">
+                    <DropdownValue placeholder="Select type" />
+                  </DropdownTrigger>
+                  <DropdownContent>
+                    {TEMPLATE_TYPE_OPTIONS.map((opt) => (
+                      <DropdownItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </DropdownItem>
+                    ))}
+                  </DropdownContent>
+                </Dropdown>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="template-subject">Subject Line</Label>
+              <Input
+                id="template-subject"
+                value={formSubject}
+                onChange={(e) => setFormSubject(e.target.value)}
+                placeholder="e.g. Update on your application"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="template-content">Email Body</Label>
+              <Textarea
+                id="template-content"
+                value={formContent}
+                onChange={(e) => setFormContent(e.target.value)}
+                placeholder="Write your email template content..."
+                rows={8}
+              />
+              <p className="text-caption text-[var(--foreground-muted)]">
+                Use {"{{candidateName}}"}, {"{{jobTitle}}"}, {"{{companyName}}"} as variables.
+              </p>
+            </div>
+          </div>
+
+          <ModalFooter>
+            <Button
+              variant="tertiary"
+              onClick={() => {
+                setCreateModalOpen(false);
+                setEditingTemplate(null);
+                resetForm();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={editingTemplate ? handleUpdate : handleCreate}
+              loading={isSaving}
+              disabled={!formName.trim() || !formSubject.trim()}
+            >
+              {editingTemplate ? "Save Changes" : "Create Template"}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Preview Modal */}
+      <Modal open={!!previewTemplate} onOpenChange={(open) => !open && setPreviewTemplate(null)}>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>Preview: {previewTemplate?.name}</ModalTitle>
+          </ModalHeader>
+
+          <div className="space-y-4 px-6 py-4">
+            <div>
+              <p className="text-caption font-medium uppercase text-[var(--foreground-subtle)]">
+                Subject
+              </p>
+              <p className="mt-1 text-body text-[var(--foreground-default)]">
+                {previewTemplate?.subject}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-caption font-medium uppercase text-[var(--foreground-subtle)]">
+                Body
+              </p>
+              <div className="mt-2 whitespace-pre-wrap rounded-lg border border-[var(--border-muted)] bg-[var(--background-subtle)] p-4 text-body-sm text-[var(--foreground-default)]">
+                {previewTemplate?.content || previewTemplate?.body || "No content"}
+              </div>
+            </div>
+          </div>
+
+          <ModalFooter>
+            <Button variant="tertiary" onClick={() => setPreviewTemplate(null)}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

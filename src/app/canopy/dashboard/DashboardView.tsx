@@ -16,9 +16,12 @@ import {
   ArrowCircleRight,
   MapPin,
   Plus,
+  Warning,
+  Clock,
+  Exam,
 } from "@phosphor-icons/react";
 import { TruncateText } from "@/components/ui/truncate-text";
-import type { DashboardData } from "@/lib/services/dashboard";
+import type { DashboardData, AttentionItem } from "@/lib/services/dashboard";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -153,6 +156,28 @@ export function DashboardView({ data }: DashboardViewProps) {
         </div>
       </section>
 
+      {/* Attention Needed */}
+      {data.attention.totalCount > 0 && (
+        <section className="px-8 py-6 lg:px-12">
+          <div className="mb-4 flex items-center gap-2">
+            <Warning size={22} weight="fill" className="text-[var(--foreground-warning)]" />
+            <h2 className="text-heading-sm font-medium text-[var(--foreground-default)]">
+              Attention Needed
+            </h2>
+            <Badge variant="warning">{data.attention.totalCount}</Badge>
+          </div>
+
+          <div className="space-y-3">
+            {data.attention.staleCandidates.map((item) => (
+              <AttentionRow key={`stale-${item.id}`} item={item} />
+            ))}
+            {data.attention.unscoredInterviews.map((item) => (
+              <AttentionRow key={`unscored-${item.id}`} item={item} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Active Roles */}
       <section className="px-8 py-6 lg:px-12">
         <div className="mb-4 flex items-center justify-between">
@@ -236,9 +261,10 @@ export function DashboardView({ data }: DashboardViewProps) {
         {data.recentApplications.length > 0 ? (
           <div className="space-y-3">
             {data.recentApplications.map((app) => (
-              <div
+              <Link
                 key={app.id}
-                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4"
+                href={`/canopy/candidates?preview=${app.candidate.id}`}
+                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4 shadow-card transition-shadow hover:shadow-card-hover"
               >
                 <div className="min-w-0 flex-1">
                   <TruncateText className="text-body font-medium text-[var(--foreground-default)]">
@@ -253,7 +279,7 @@ export function DashboardView({ data }: DashboardViewProps) {
                   </p>
                 </div>
                 <Badge variant={statusBadgeVariant(app.stage)}>{app.stage}</Badge>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
@@ -302,5 +328,37 @@ export function DashboardView({ data }: DashboardViewProps) {
         </section>
       )}
     </div>
+  );
+}
+
+function AttentionRow({ item }: { item: AttentionItem }) {
+  const icon =
+    item.type === "stale" ? (
+      <Clock size={18} weight="bold" className="text-[var(--foreground-warning)]" />
+    ) : (
+      <Exam size={18} weight="bold" className="text-[var(--foreground-error)]" />
+    );
+
+  const badgeVariant = item.type === "stale" ? "warning" : "error";
+  const badgeLabel = item.type === "stale" ? "Stale" : "Unscored";
+
+  return (
+    <Link
+      href={`/canopy/candidates?preview=${item.seekerId}`}
+      className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4 shadow-card transition-shadow hover:shadow-card-hover"
+    >
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--background-warning)]">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <TruncateText className="text-body font-medium text-[var(--foreground-default)]">
+          {item.candidateName}
+        </TruncateText>
+        <p className="text-caption text-[var(--foreground-muted)]">
+          {item.jobTitle} — {item.detail}
+        </p>
+      </div>
+      <Badge variant={badgeVariant}>{badgeLabel}</Badge>
+    </Link>
   );
 }

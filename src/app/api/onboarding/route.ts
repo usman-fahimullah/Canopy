@@ -725,7 +725,16 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      return finishRoleOnboarding(account, progress, "employer", accountUpdate, body.action);
+      const response = await finishRoleOnboarding(
+        account,
+        progress,
+        "employer",
+        accountUpdate,
+        body.action
+      );
+      // Include orgId in the response so the client can upload the company logo
+      const responseData = await response.json();
+      return NextResponse.json({ ...responseData, orgId });
     }
 
     // ── Legacy format ────────────────────────────────────────────

@@ -18,10 +18,17 @@ import {
 import { Plus, Trash } from "@phosphor-icons/react";
 import { Alert } from "@/components/ui/alert";
 import { EMPLOYER_STEPS } from "@/lib/onboarding/types";
+import {
+  getPendingLogoFile,
+  clearPendingLogoFile,
+} from "@/app/onboarding/canopy/company/pending-logo";
+import { logger } from "@/lib/logger";
 
 const roleOptions = [
-  { value: "RECRUITER", label: "Reviewer" },
-  { value: "MEMBER", label: "Hiring Team" },
+  { value: "ADMIN", label: "Admin" },
+  { value: "RECRUITER", label: "Recruiter" },
+  { value: "HIRING_MANAGER", label: "Hiring Manager" },
+  { value: "MEMBER", label: "Member" },
 ];
 
 export default function EmployerInviteTeamPage() {
@@ -44,7 +51,7 @@ export default function EmployerInviteTeamPage() {
     setNewEmail("");
   }
 
-  function updateInviteRole(index: number, role: "RECRUITER" | "MEMBER") {
+  function updateInviteRole(index: number, role: TeamInviteEntry["role"]) {
     const updated = invites.map((inv, i) => (i === index ? { ...inv, role } : inv));
     setEmployerData({ teamInvites: updated });
   }
@@ -104,6 +111,26 @@ export default function EmployerInviteTeamPage() {
         }
         setError(message);
         return;
+      }
+
+      const responseData = await res.json();
+
+      // Upload company logo if one was selected (non-blocking — don't block navigation)
+      const logoFile = getPendingLogoFile();
+      if (logoFile && responseData.orgId) {
+        const formData = new FormData();
+        formData.append("file", logoFile);
+
+        fetch(`/api/canopy/organization/logo`, {
+          method: "POST",
+          body: formData,
+        })
+          .then(() => clearPendingLogoFile())
+          .catch((err) => {
+            logger.error("Failed to upload company logo during onboarding", {
+              error: err instanceof Error ? err.message : "Unknown error",
+            });
+          });
       }
 
       router.push("/onboarding/complete");
@@ -207,11 +234,11 @@ export default function EmployerInviteTeamPage() {
                 </span>
 
                 {/* Role dropdown */}
-                <div className="w-32">
+                <div className="w-40">
                   <Dropdown
                     value={invite.role}
                     onValueChange={(val: string) =>
-                      updateInviteRole(index, val as "RECRUITER" | "MEMBER")
+                      updateInviteRole(index, val as TeamInviteEntry["role"])
                     }
                   >
                     <DropdownTrigger className="w-full">

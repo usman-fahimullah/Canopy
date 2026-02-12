@@ -35,7 +35,7 @@ export function JobDescription({ description, descriptionHtml }: JobDescriptionP
   });
 
   return (
-    <div className="flex-1 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-8">
+    <div className="flex-1 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-4 sm:p-6 lg:p-8">
       {/* Section label */}
       <p className="mb-6 text-caption font-medium text-[var(--foreground-subtle)]">Description</p>
 
@@ -54,11 +54,11 @@ export function JobDescription({ description, descriptionHtml }: JobDescriptionP
           // First h3 doesn't need top margin or border (flows from intro paragraph)
           "[&_h3:first-child]:mt-0 [&_h3:first-child]:border-t-0 [&_h3:first-child]:pt-0",
           // Paragraphs — caption (14px) for clear hierarchy under body (18px) headers
-          "[&_p]:mb-4 [&_p]:text-caption [&_p]:leading-relaxed [&_p]:text-[var(--foreground-muted)]",
+          "[&_p]:mb-4 [&_p]:text-body-sm [&_p]:leading-relaxed [&_p]:text-[var(--foreground-muted)]",
           // Lists — same size as paragraphs, reset prose margins on li
           "[&_ul]:mb-4 [&_ul]:space-y-1 [&_ul]:pl-5",
           "[&_ol]:mb-4 [&_ol]:space-y-1 [&_ol]:pl-5",
-          "[&_li]:my-0 [&_li]:py-0 [&_li]:text-caption [&_li]:leading-relaxed [&_li]:text-[var(--foreground-muted)]",
+          "[&_li]:my-0 [&_li]:py-0 [&_li]:text-body-sm [&_li]:leading-relaxed [&_li]:text-[var(--foreground-muted)]",
           // Strong text inside paragraphs stays default color
           "[&_strong]:text-[var(--foreground-default)]",
         ].join(" ")}

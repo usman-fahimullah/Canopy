@@ -12,6 +12,8 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { SwitchWithLabel } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItemWithLabel } from "@/components/ui/radio-group";
+import { CheckboxWithLabel } from "@/components/ui/checkbox";
 import {
   User,
   Bell,
@@ -269,7 +271,7 @@ export default function TalentSettingsPage() {
     <div>
       <PageHeader title="Settings" />
 
-      <div className="flex flex-col gap-6 px-8 py-6 lg:flex-row lg:px-12">
+      <div className="flex flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:px-12">
         {/* Sidebar nav */}
         <nav className="flex-shrink-0 lg:w-64">
           <div className="space-y-1">
@@ -457,25 +459,23 @@ export default function TalentSettingsPage() {
                   <div className="rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] p-6">
                     <div className="space-y-3">
                       <Label className="text-foreground-default font-medium">Email Frequency</Label>
-                      <div className="space-y-2">
+                      <RadioGroup
+                        value={notifPrefs.emailFrequency}
+                        onValueChange={handleFrequencyChange}
+                        className="space-y-2"
+                      >
                         {["immediate", "daily", "weekly", "never"].map((freq) => (
-                          <label key={freq} className="flex cursor-pointer items-center gap-3">
-                            <input
-                              type="radio"
-                              name="email-frequency"
-                              value={freq}
-                              checked={notifPrefs.emailFrequency === freq}
-                              onChange={(e) => handleFrequencyChange(e.target.value)}
-                              className="h-4 w-4"
-                            />
-                            <span className="text-foreground-default text-body capitalize">
-                              {freq === "immediate"
+                          <RadioGroupItemWithLabel
+                            key={freq}
+                            value={freq}
+                            label={
+                              freq === "immediate"
                                 ? "Immediate"
-                                : freq.charAt(0).toUpperCase() + freq.slice(1)}
-                            </span>
-                          </label>
+                                : freq.charAt(0).toUpperCase() + freq.slice(1)
+                            }
+                          />
                         ))}
-                      </div>
+                      </RadioGroup>
                     </div>
                   </div>
 
@@ -495,48 +495,22 @@ export default function TalentSettingsPage() {
                                 </span>
                               </div>
                               <div className="flex items-center gap-6">
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    id={`inapp-${notification.type}`}
-                                    checked={notifPrefs.inAppPrefs[notification.type] !== false}
-                                    onChange={(e) =>
-                                      handleNotifToggle(
-                                        notification.type,
-                                        "inApp",
-                                        e.target.checked
-                                      )
-                                    }
-                                    className="h-4 w-4 rounded"
-                                  />
-                                  <label
-                                    htmlFor={`inapp-${notification.type}`}
-                                    className="cursor-pointer text-caption text-foreground-muted"
-                                  >
-                                    In-app
-                                  </label>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="checkbox"
-                                    id={`email-${notification.type}`}
-                                    checked={notifPrefs.emailPrefs[notification.type] !== false}
-                                    onChange={(e) =>
-                                      handleNotifToggle(
-                                        notification.type,
-                                        "email",
-                                        e.target.checked
-                                      )
-                                    }
-                                    className="h-4 w-4 rounded"
-                                  />
-                                  <label
-                                    htmlFor={`email-${notification.type}`}
-                                    className="cursor-pointer text-caption text-foreground-muted"
-                                  >
-                                    Email
-                                  </label>
-                                </div>
+                                <CheckboxWithLabel
+                                  id={`inapp-${notification.type}`}
+                                  label="In-app"
+                                  checked={notifPrefs.inAppPrefs[notification.type] !== false}
+                                  onCheckedChange={(checked) =>
+                                    handleNotifToggle(notification.type, "inApp", checked === true)
+                                  }
+                                />
+                                <CheckboxWithLabel
+                                  id={`email-${notification.type}`}
+                                  label="Email"
+                                  checked={notifPrefs.emailPrefs[notification.type] !== false}
+                                  onCheckedChange={(checked) =>
+                                    handleNotifToggle(notification.type, "email", checked === true)
+                                  }
+                                />
                               </div>
                             </div>
                           </div>

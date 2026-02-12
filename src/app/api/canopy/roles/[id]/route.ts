@@ -120,7 +120,35 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                     avatar: true,
                   },
                 },
+                notes: {
+                  select: { id: true, content: true, createdAt: true },
+                  orderBy: { createdAt: "desc" as const },
+                  take: 1,
+                },
               },
+            },
+            scores: {
+              select: {
+                id: true,
+                overallRating: true,
+                recommendation: true,
+                scorer: {
+                  select: {
+                    id: true,
+                    account: { select: { name: true, avatar: true } },
+                  },
+                },
+              },
+            },
+            interviews: {
+              select: {
+                id: true,
+                scheduledAt: true,
+                status: true,
+              },
+              where: { status: "SCHEDULED" },
+              orderBy: { scheduledAt: "asc" as const },
+              take: 1,
             },
           },
           orderBy: [{ stageOrder: "asc" }, { createdAt: "desc" }],

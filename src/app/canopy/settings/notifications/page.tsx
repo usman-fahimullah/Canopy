@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { PageHeader } from "@/components/shell/page-header";
 import { Card } from "@/components/ui/card";
 import { SwitchWithLabel } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/spinner";
@@ -89,8 +88,28 @@ export default function NotificationPreferencesPage() {
       if (!res.ok) {
         throw new Error("Failed to fetch notification preferences");
       }
-      const data: NotificationPreferencesData = await res.json();
-      setPreferences(data.preferences || []);
+      const data = await res.json();
+      const raw = data.preferences || {};
+
+      // API returns { inAppPrefs: {type: bool}, emailPrefs: {type: bool} }
+      // Transform to array format the UI expects
+      if (Array.isArray(raw)) {
+        setPreferences(raw);
+      } else {
+        const inAppPrefs = (raw.inAppPrefs || {}) as Record<string, boolean>;
+        const emailPrefs = (raw.emailPrefs || {}) as Record<string, boolean>;
+
+        const prefs: NotificationPreference[] = Object.entries(NOTIFICATION_TYPES).map(
+          ([type, { label, description }]) => ({
+            type: type as NotificationType,
+            label,
+            description,
+            inApp: inAppPrefs[type] !== false,
+            email: emailPrefs[type] !== false,
+          })
+        );
+        setPreferences(prefs);
+      }
     } catch (err) {
       const message = formatError(err);
       logger.error("Failed to fetch notification preferences", { error: message });
@@ -120,10 +139,18 @@ export default function NotificationPreferencesPage() {
     setSaveSuccess(false);
     setError(null);
     try {
+      // Transform array format back to the API's { inAppPrefs, emailPrefs } shape
+      const inAppPrefs: Record<string, boolean> = {};
+      const emailPrefs: Record<string, boolean> = {};
+      for (const pref of preferences) {
+        inAppPrefs[pref.type] = pref.inApp;
+        emailPrefs[pref.type] = pref.email;
+      }
+
       const res = await fetch("/api/notifications/preferences", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ preferences }),
+        body: JSON.stringify({ inAppPrefs, emailPrefs }),
       });
 
       if (!res.ok) {
@@ -143,14 +170,13 @@ export default function NotificationPreferencesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header */}
-      <PageHeader title="Notification Preferences" />
+      <h2 className="text-heading-sm font-medium text-[var(--foreground-default)]">
+        Notifications
+      </h2>
 
-      <div className="px-8 py-2 lg:px-12">
-        <p className="text-body text-[var(--foreground-muted)]">
-          Choose how you want to be notified about hiring activities
-        </p>
-      </div>
+      <p className="text-body text-[var(--foreground-muted)]">
+        Choose how you want to be notified about hiring activities
+      </p>
 
       {/* Loading State */}
       {isLoading && (

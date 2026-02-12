@@ -298,7 +298,7 @@ export default function ProfilePage() {
         {/* Profile Header skeleton - Full width, 256px cover */}
         <div className="w-full border-b border-[var(--border-muted)]">
           <Skeleton className="h-[256px] w-full rounded-none" />
-          <div className="px-8 pb-8 lg:px-12 xl:px-[72px]">
+          <div className="px-4 pb-8 sm:px-6 lg:px-12 xl:px-[72px]">
             <div className="relative -mt-16 mb-4">
               <Skeleton variant="circular" className="h-[128px] w-[128px]" />
             </div>
@@ -308,7 +308,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Content sections with responsive padding */}
-        <div className="mx-auto max-w-4xl px-8 lg:px-12 xl:px-[72px]">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-12 xl:px-[72px]">
           {/* CTA Cards skeleton */}
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
             <Skeleton className="h-[180px] rounded-[16px]" />
@@ -329,7 +329,7 @@ export default function ProfilePage() {
   /* ---- Error state ----------------------------------------------- */
   if (error) {
     return (
-      <div className="mx-auto max-w-4xl px-8 py-12 lg:px-12 xl:px-[72px]">
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-12 xl:px-[72px]">
         <Card>
           <CardContent className="p-12">
             <EmptyState

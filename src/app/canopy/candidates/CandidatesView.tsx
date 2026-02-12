@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -23,10 +23,12 @@ import {
   CalendarBlank,
   BriefcaseMetal,
   Download,
+  EnvelopeSimple,
   Info,
   Trash,
   Plus,
 } from "@phosphor-icons/react";
+import { SimpleTooltip } from "@/components/ui/tooltip";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { useCandidatesQuery, queryKeys } from "@/hooks/queries";
@@ -162,6 +164,20 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
       router.push(`/canopy/candidates?${params.toString()}`);
     },
     [searchParams, router]
+  );
+
+  // Debounced search: local state updates instantly, URL updates after 300ms
+  const [localSearch, setLocalSearch] = useState(search || "");
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setLocalSearch(value);
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+      searchTimerRef.current = setTimeout(() => {
+        updateParams({ search: value || undefined });
+      }, 300);
+    },
+    [updateParams]
   );
 
   // Handle checkbox toggle
@@ -327,8 +343,8 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
             <div className="flex-1">
               <SearchInput
                 placeholder="Search by name or email..."
-                value={search || ""}
-                onChange={(e) => updateParams({ search: e.target.value || undefined })}
+                value={localSearch}
+                onValueChange={handleSearchChange}
               />
             </div>
             <Dropdown>
@@ -591,6 +607,15 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
                       ))}
                     </DropdownContent>
                   </Dropdown>
+
+                  <SimpleTooltip content="Coming soon" side="top">
+                    <span>
+                      <Button variant="outline" disabled size="sm">
+                        <EnvelopeSimple size={16} />
+                        Email
+                      </Button>
+                    </span>
+                  </SimpleTooltip>
 
                   <Button
                     variant="outline"

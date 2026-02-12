@@ -15,6 +15,9 @@ const { mockGetAuthContext, mockPrisma } = vi.hoisted(() => {
       count: vi.fn(),
       groupBy: vi.fn(),
     },
+    interview: {
+      findMany: vi.fn(),
+    },
   };
   return { mockGetAuthContext, mockPrisma };
 });
@@ -72,17 +75,46 @@ describe("GET /api/canopy/dashboard", () => {
     vi.clearAllMocks();
     mockGetAuthContext.mockResolvedValue(mockAuthCtx);
 
-    mockPrisma.job.findMany.mockResolvedValue([]);
+    // job.findMany — recent roles with _count
+    mockPrisma.job.findMany.mockResolvedValue([
+      {
+        id: "job-1",
+        title: "Engineer",
+        location: "Remote",
+        locationType: "REMOTE",
+        status: "PUBLISHED",
+        publishedAt: new Date("2026-01-01"),
+        _count: { applications: 5 },
+      },
+    ]);
     mockPrisma.job.count.mockResolvedValue(3);
+
+    // application.count — called 3 times: total, new this week, hired
     mockPrisma.application.count
       .mockResolvedValueOnce(25) // total candidates
       .mockResolvedValueOnce(8) // new this week
       .mockResolvedValueOnce(2); // hired
-    mockPrisma.application.findMany.mockResolvedValue([]);
+
+    // application.findMany — called twice: recent applications, stale candidates
+    mockPrisma.application.findMany
+      .mockResolvedValueOnce([
+        {
+          id: "app-1",
+          stage: "Applied",
+          createdAt: new Date("2026-02-01"),
+          seeker: { id: "s-1", account: { name: "Jane Doe", email: "jane@test.com" } },
+          job: { id: "job-1", title: "Engineer" },
+        },
+      ])
+      .mockResolvedValueOnce([]); // stale candidates
+
     mockPrisma.application.groupBy.mockResolvedValue([
       { stage: "Applied", _count: { _all: 10 } },
       { stage: "Interview", _count: { _all: 5 } },
     ]);
+
+    // interview.findMany — unscored interviews
+    mockPrisma.interview.findMany.mockResolvedValue([]);
   });
 
   it("returns 401 when not authenticated", async () => {

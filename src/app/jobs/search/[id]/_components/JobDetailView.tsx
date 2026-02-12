@@ -21,7 +21,7 @@ interface JobDetailViewProps {
 
 export function JobDetailView({ job, similarJobs }: JobDetailViewProps) {
   return (
-    <div className="pb-20 lg:pb-0">
+    <div className="pb-32 lg:pb-0">
       {/* Search Bar Header */}
       <SearchHeader />
 
@@ -34,7 +34,7 @@ export function JobDetailView({ job, similarJobs }: JobDetailViewProps) {
       </div>
 
       {/* Two-column Content */}
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 bg-[var(--background-subtle)] px-6 py-6 lg:flex-row lg:px-12">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 bg-[var(--background-subtle)] px-4 py-6 sm:px-6 lg:flex-row lg:px-12">
         {/* Left Column: Job Description */}
         <JobDescription description={job.description} descriptionHtml={job.descriptionHtml} />
 

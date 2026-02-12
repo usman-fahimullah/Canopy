@@ -105,7 +105,7 @@ export default function CandidateOfferPage() {
   return (
     <div className="min-h-screen bg-[var(--background-subtle)]">
       {/* Header */}
-      <div className="border-b border-[var(--border-default)] bg-white px-8 py-6">
+      <div className="border-b border-[var(--border-default)] bg-white px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-3xl">
           <Link
             href="/jobs/applications"
@@ -129,7 +129,7 @@ export default function CandidateOfferPage() {
       </div>
 
       {/* Letter content */}
-      <div className="px-8 py-8">
+      <div className="px-4 py-8 sm:px-6">
         <OfferLetterPreview
           letterContent={offer.letterContent}
           organization={{

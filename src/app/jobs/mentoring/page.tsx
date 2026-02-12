@@ -198,7 +198,7 @@ function MentoringContent() {
     <div>
       <PageHeader title="Mentoring" />
 
-      <div className="px-8 py-8 lg:px-12">
+      <div className="px-4 py-8 sm:px-6 lg:px-12">
         <Tabs defaultValue={initialTab}>
           <TabsListUnderline>
             <TabsTriggerUnderline value="find">Find Mentors</TabsTriggerUnderline>

@@ -88,6 +88,7 @@ export function ApplicationReviewPanel({
   const [note, setNote] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [editingScoreId, setEditingScoreId] = React.useState<string | null>(null);
 
   const hasScores = scores.length > 0;
   const isTerminalStage =
@@ -129,7 +130,64 @@ export function ApplicationReviewPanel({
   const handleSkip = () => {
     setRating(0);
     setNote("");
+    setEditingScoreId(null);
     onClose();
+  };
+
+  const handleEditScore = (scoreId: string) => {
+    const score = scores.find((s) => s.id === scoreId);
+    if (!score) return;
+    setEditingScoreId(scoreId);
+    setRating(score.overallRating);
+    setNote(score.comments ?? "");
+  };
+
+  const handleDeleteScore = async (scoreId: string) => {
+    setSubmitError(null);
+    try {
+      const res = await fetch(`/api/canopy/candidates/${seekerId}/scores/${scoreId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to delete review");
+      }
+      router.refresh();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to delete review");
+    }
+  };
+
+  const handleUpdateScore = async () => {
+    if (rating === 0 || !editingScoreId) return;
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch(`/api/canopy/candidates/${seekerId}/scores/${editingScoreId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          overallRating: rating,
+          recommendation: ratingToRecommendation(rating),
+          comments: note || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to update review");
+      }
+
+      setRating(0);
+      setNote("");
+      setEditingScoreId(null);
+      router.refresh();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to update review");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -179,16 +237,22 @@ export function ApplicationReviewPanel({
                 rating={score.overallRating}
                 comments={score.comments}
                 createdAt={score.createdAt}
-                onEdit={() => {}}
-                onDelete={() => {}}
+                onEdit={() => handleEditScore(score.id)}
+                onDelete={() => handleDeleteScore(score.id)}
               />
             ))}
           </div>
         )}
 
-        {/* Review input form (when no review submitted yet) */}
-        {!hasScores && (
+        {/* Review input form (when no review submitted yet OR editing) */}
+        {(!hasScores || editingScoreId) && (
           <div className="space-y-6">
+            {editingScoreId && (
+              <p className="text-caption font-medium text-[var(--foreground-brand)]">
+                Editing review
+              </p>
+            )}
+
             {/* Star rating input */}
             <div className="flex justify-center">
               <StarRating value={rating} onChange={setRating} size="lg" />
@@ -207,14 +271,26 @@ export function ApplicationReviewPanel({
               <Button
                 variant="primary"
                 className="flex-1"
-                onClick={handleSubmit}
+                onClick={editingScoreId ? handleUpdateScore : handleSubmit}
                 disabled={rating === 0}
                 loading={isSubmitting}
               >
-                Submit Review
+                {editingScoreId ? "Update Review" : "Submit Review"}
               </Button>
-              <Button variant="tertiary" className="flex-1" onClick={handleSkip}>
-                Skip
+              <Button
+                variant="tertiary"
+                className="flex-1"
+                onClick={
+                  editingScoreId
+                    ? () => {
+                        setEditingScoreId(null);
+                        setRating(0);
+                        setNote("");
+                      }
+                    : handleSkip
+                }
+              >
+                Cancel
               </Button>
             </div>
           </div>

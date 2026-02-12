@@ -220,7 +220,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
     return (
       <div>
         <PageHeader title="Collection" />
-        <div className="px-8 py-6 lg:px-12">
+        <div className="px-4 py-6 sm:px-6 lg:px-12">
           <CollectionDetailSkeleton />
         </div>
       </div>
@@ -232,7 +232,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
     return (
       <div>
         <PageHeader title="Collection" />
-        <div className="px-8 py-6 lg:px-12">
+        <div className="px-4 py-6 sm:px-6 lg:px-12">
           <EmptyStateNoResults
             title={
               error === "Collection not found"
@@ -261,7 +261,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
     <div>
       <PageHeader title={collection.title} />
 
-      <div className="space-y-6 px-8 py-6 lg:px-12">
+      <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-12">
         {/* Back link */}
         <Link
           href="/jobs/collections"

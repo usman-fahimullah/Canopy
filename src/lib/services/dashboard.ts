@@ -32,6 +32,22 @@ export interface DashboardApplication {
   };
 }
 
+export interface AttentionItem {
+  id: string;
+  type: "stale" | "unscored";
+  candidateName: string;
+  seekerId: string;
+  jobTitle: string;
+  jobId: string;
+  detail: string;
+}
+
+export interface AttentionData {
+  staleCandidates: AttentionItem[];
+  unscoredInterviews: AttentionItem[];
+  totalCount: number;
+}
+
 export interface DashboardData {
   activeRolesCount: number;
   recentRoles: DashboardRole[];
@@ -41,6 +57,7 @@ export interface DashboardData {
   recentApplications: DashboardApplication[];
   pipelineStats: Record<string, number>;
   userRole: string;
+  attention: AttentionData;
 }
 
 /* -------------------------------------------------------------------
@@ -59,6 +76,10 @@ export async function fetchDashboardData(ctx: AuthContext): Promise<DashboardDat
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+  const STALE_THRESHOLD_DAYS = 7;
+  const staleDate = new Date();
+  staleDate.setDate(staleDate.getDate() - STALE_THRESHOLD_DAYS);
+
   const [
     recentJobs,
     activeRolesCount,
@@ -67,6 +88,8 @@ export async function fetchDashboardData(ctx: AuthContext): Promise<DashboardDat
     hiredCount,
     recentApplications,
     pipelineGroupBy,
+    staleApplications,
+    unscoredCompletedInterviews,
   ] = await Promise.all([
     prisma.job.findMany({
       where: jobWhere,
@@ -120,6 +143,62 @@ export async function fetchDashboardData(ctx: AuthContext): Promise<DashboardDat
       where: appWhere,
       _count: { _all: true },
     }),
+    // Stale candidates: in an active stage for 7+ days without movement
+    prisma.application.findMany({
+      where: {
+        ...appWhere,
+        updatedAt: { lte: staleDate },
+        AND: [
+          { NOT: { stage: { equals: "hired", mode: "insensitive" } } },
+          { NOT: { stage: { equals: "rejected", mode: "insensitive" } } },
+          { NOT: { stage: { equals: "withdrawn", mode: "insensitive" } } },
+          { NOT: { stage: { equals: "talent-pool", mode: "insensitive" } } },
+        ],
+      },
+      select: {
+        id: true,
+        stage: true,
+        updatedAt: true,
+        seeker: {
+          select: {
+            id: true,
+            account: { select: { name: true, email: true } },
+          },
+        },
+        job: { select: { id: true, title: true } },
+      },
+      orderBy: { updatedAt: "asc" },
+      take: 10,
+    }),
+    // Completed interviews without any score
+    prisma.interview.findMany({
+      where: {
+        organizationId: ctx.organizationId,
+        status: "COMPLETED",
+        application: {
+          ...appWhere,
+          scores: { none: {} },
+        },
+      },
+      select: {
+        id: true,
+        completedAt: true,
+        application: {
+          select: {
+            id: true,
+            seeker: {
+              select: {
+                id: true,
+                account: { select: { name: true, email: true } },
+              },
+            },
+            job: { select: { id: true, title: true } },
+          },
+        },
+      },
+      orderBy: { completedAt: "desc" },
+      take: 10,
+    }),
   ]);
 
   // Build pipeline stats from groupBy result
@@ -155,6 +234,37 @@ export async function fetchDashboardData(ctx: AuthContext): Promise<DashboardDat
     },
   }));
 
+  // Map attention items
+  const staleCandidateItems: AttentionItem[] = staleApplications.map((app) => {
+    const daysInStage = Math.floor((Date.now() - new Date(app.updatedAt).getTime()) / 86_400_000);
+    return {
+      id: app.id,
+      type: "stale" as const,
+      candidateName: app.seeker.account.name || app.seeker.account.email,
+      seekerId: app.seeker.id,
+      jobTitle: app.job.title,
+      jobId: app.job.id,
+      detail: `In "${app.stage}" for ${daysInStage} days`,
+    };
+  });
+
+  const unscoredItems: AttentionItem[] = unscoredCompletedInterviews.map((interview) => ({
+    id: interview.id,
+    type: "unscored" as const,
+    candidateName:
+      interview.application.seeker.account.name || interview.application.seeker.account.email,
+    seekerId: interview.application.seeker.id,
+    jobTitle: interview.application.job.title,
+    jobId: interview.application.job.id,
+    detail: "Completed interview — no scorecard submitted",
+  }));
+
+  const attention: AttentionData = {
+    staleCandidates: staleCandidateItems,
+    unscoredInterviews: unscoredItems,
+    totalCount: staleCandidateItems.length + unscoredItems.length,
+  };
+
   return {
     activeRolesCount,
     recentRoles,
@@ -164,5 +274,6 @@ export async function fetchDashboardData(ctx: AuthContext): Promise<DashboardDat
     recentApplications: mappedApplications,
     pipelineStats,
     userRole: ctx.role,
+    attention,
   };
 }

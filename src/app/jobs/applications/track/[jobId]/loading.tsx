@@ -4,7 +4,7 @@ export default function TrackedJobLoading() {
   return (
     <div className="flex h-full flex-col bg-[var(--background-default)]">
       {/* Nav bar skeleton */}
-      <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-8">
+      <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-4 sm:px-6 lg:px-8">
         <Skeleton className="h-10 w-10 rounded-lg" />
         <Skeleton className="h-5 w-[250px]" />
         <div className="flex items-center gap-3">

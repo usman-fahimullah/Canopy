@@ -4,13 +4,13 @@ export default function ApplicationsLoading() {
   return (
     <div>
       {/* Page header skeleton */}
-      <div className="flex items-center justify-between border-b border-[var(--border-default)] px-8 py-5 lg:px-12">
+      <div className="flex items-center justify-between border-b border-[var(--border-default)] px-4 py-5 sm:px-6 lg:px-12">
         <Skeleton className="h-8 w-36" />
         <Skeleton className="h-8 w-8 rounded-full" />
       </div>
 
       {/* Tracker skeleton */}
-      <div className="px-8 py-6 lg:px-12">
+      <div className="px-4 py-6 sm:px-6 lg:px-12">
         <div className="flex flex-col divide-y divide-[var(--border-muted)]">
           {["Saved", "Applied", "Interview"].map((section) => (
             <div key={section} className="py-4">

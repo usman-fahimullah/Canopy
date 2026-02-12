@@ -115,8 +115,8 @@ export default function TalentDashboardPage() {
       <PageHeader title="Home" />
 
       {/* Greeting + Quick Actions */}
-      <div className="flex flex-col gap-6 px-8 py-6 lg:px-12">
-        <h2 className="text-heading-md font-medium text-[var(--foreground-brand-emphasis)]">
+      <div className="flex flex-col gap-6 px-4 py-6 sm:px-6 lg:px-12">
+        <h2 className="text-heading-sm font-medium text-[var(--foreground-brand-emphasis)] sm:text-heading-md">
           {getGreeting()}
         </h2>
         <div className="flex flex-wrap gap-3">
@@ -124,7 +124,7 @@ export default function TalentDashboardPage() {
             href="/jobs/search"
             className={cn(
               buttonVariants({ variant: "primary" }),
-              "rounded-2xl px-4 py-4 text-body font-bold"
+              "rounded-2xl px-3 py-4 text-caption font-bold sm:px-4 sm:text-body"
             )}
           >
             <MagnifyingGlass size={20} weight="bold" />
@@ -134,7 +134,7 @@ export default function TalentDashboardPage() {
             href="/jobs/applications"
             className={cn(
               buttonVariants({ variant: "tertiary" }),
-              "rounded-2xl px-4 py-4 text-body font-bold"
+              "rounded-2xl px-3 py-4 text-caption font-bold sm:px-4 sm:text-body"
             )}
           >
             <Table size={20} weight="fill" />
@@ -144,7 +144,7 @@ export default function TalentDashboardPage() {
             href="/jobs/profile"
             className={cn(
               buttonVariants({ variant: "tertiary" }),
-              "rounded-2xl px-4 py-4 text-body font-bold"
+              "rounded-2xl px-3 py-4 text-caption font-bold sm:px-4 sm:text-body"
             )}
           >
             <User size={20} weight="bold" />
@@ -154,12 +154,12 @@ export default function TalentDashboardPage() {
       </div>
 
       {/* Getting Started Checklist */}
-      <section className="px-8 py-4 lg:px-12">
+      <section className="px-4 py-4 sm:px-6 lg:px-12">
         <DashboardChecklist shell="talent" />
       </section>
 
       {/* Stats */}
-      <section className="px-8 py-6 lg:px-12">
+      <section className="px-4 py-6 sm:px-6 lg:px-12">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[
             {
@@ -200,7 +200,7 @@ export default function TalentDashboardPage() {
       </section>
 
       {/* Recent Job Matches */}
-      <section className="px-8 py-6 lg:px-12">
+      <section className="px-4 py-6 sm:px-6 lg:px-12">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-foreground-default text-heading-sm font-medium">
             Recent Job Matches
@@ -223,7 +223,7 @@ export default function TalentDashboardPage() {
               <Link
                 key={job.id}
                 href={`/jobs/search/${job.id}`}
-                className="flex items-center gap-4 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-6 py-4 shadow-card transition-shadow hover:shadow-card-hover"
+                className="flex items-center gap-3 rounded-[var(--radius-2xl)] border border-[var(--border-muted)] bg-[var(--card-background)] px-4 py-4 shadow-card transition-shadow hover:shadow-card-hover sm:gap-4 sm:px-6"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background-info)]">
                   <Buildings size={20} weight="fill" className="text-[var(--foreground-info)]" />
@@ -251,6 +251,7 @@ export default function TalentDashboardPage() {
                           ? "warning"
                           : "neutral"
                     }
+                    className="hidden shrink-0 sm:inline-flex"
                   >
                     {Math.round(job.matchScore)}% match
                   </Badge>
@@ -268,7 +269,7 @@ export default function TalentDashboardPage() {
       </section>
 
       {/* Recent Applications */}
-      <section className="px-8 py-6 lg:px-12">
+      <section className="px-4 py-6 sm:px-6 lg:px-12">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-foreground-default text-heading-sm font-medium">Applications</h2>
           <Link

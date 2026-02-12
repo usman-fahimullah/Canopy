@@ -18,7 +18,7 @@ export default function BookingSuccessPage() {
     <div>
       <PageHeader title="Booking Confirmed" />
 
-      <div className="mx-auto max-w-xl px-8 py-12 lg:px-12">
+      <div className="mx-auto max-w-xl px-4 py-12 sm:px-6 lg:px-12">
         {/* Success Icon & Message */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--background-success)]">

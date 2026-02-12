@@ -205,7 +205,7 @@ function FilterChip({
   onClick?: () => void;
 }) {
   return (
-    <Chip variant="neutral" size="lg" selected={active} onClick={onClick}>
+    <Chip variant="neutral" size="lg" selected={active} onClick={onClick} className="shrink-0">
       {label}
       {hasDropdown && <CaretDown size={16} weight="bold" />}
     </Chip>
@@ -592,7 +592,7 @@ export default function JobsPage() {
             <Skeleton className="h-14 w-24 rounded-2xl" />
           </div>
         </PageHeader>
-        <div className="px-8 py-6 lg:px-12">
+        <div className="px-4 py-6 sm:px-6 lg:px-12">
           {hasSearched ? <SearchResultsSkeleton /> : <DiscoveryPageSkeleton />}
         </div>
       </div>
@@ -618,9 +618,9 @@ export default function JobsPage() {
           />
         </PageHeader>
 
-        <div className="space-y-6 px-8 py-6 lg:px-12">
+        <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-12">
           {/* Filter Chips Row */}
-          <div className="flex flex-wrap gap-3">
+          <div className="scrollbar-hide flex gap-3 overflow-x-auto sm:flex-wrap">
             <FilterChip
               label="BIPOC Owned"
               active={filters.bipocOwned}
@@ -629,7 +629,12 @@ export default function JobsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Chip variant="neutral" size="lg" selected={filters.datePosted !== "all"}>
+                <Chip
+                  variant="neutral"
+                  size="lg"
+                  selected={filters.datePosted !== "all"}
+                  className="shrink-0"
+                >
                   Date Posted
                   <CaretDown size={16} weight="bold" />
                 </Chip>
@@ -652,7 +657,12 @@ export default function JobsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Chip variant="neutral" size="lg" selected={filters.workplace !== "all"}>
+                <Chip
+                  variant="neutral"
+                  size="lg"
+                  selected={filters.workplace !== "all"}
+                  className="shrink-0"
+                >
                   Workplace
                   <CaretDown size={16} weight="bold" />
                 </Chip>
@@ -673,7 +683,12 @@ export default function JobsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Chip variant="neutral" size="lg" selected={filters.experience !== "all"}>
+                <Chip
+                  variant="neutral"
+                  size="lg"
+                  selected={filters.experience !== "all"}
+                  className="shrink-0"
+                >
                   Experience
                   <CaretDown size={16} weight="bold" />
                 </Chip>
@@ -699,7 +714,7 @@ export default function JobsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Chip variant="neutral" size="lg" selected={!!filters.pathway}>
+                <Chip variant="neutral" size="lg" selected={!!filters.pathway} className="shrink-0">
                   Pathways
                   <CaretDown size={16} weight="bold" />
                 </Chip>
@@ -728,7 +743,7 @@ export default function JobsPage() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Chip variant="neutral" size="lg" selected={!!filters.salary}>
+                <Chip variant="neutral" size="lg" selected={!!filters.salary} className="shrink-0">
                   Salary
                   <CaretDown size={16} weight="bold" />
                 </Chip>
@@ -742,7 +757,7 @@ export default function JobsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="shrink-0">
               <Faders size={16} weight="bold" />
               All Filters
             </Button>
@@ -833,7 +848,7 @@ export default function JobsPage() {
         />
       </PageHeader>
 
-      <div className="space-y-10 px-8 py-6 lg:px-12">
+      <div className="space-y-10 px-4 py-6 sm:px-6 lg:px-12">
         {/* Featured Collections */}
         {collections.length > 0 && (
           <section>

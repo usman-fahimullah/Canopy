@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shell/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
@@ -10,6 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CategoryTag } from "@/components/ui/category-tag";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/modal";
 import {
   Table,
   TableHeader,
@@ -29,6 +38,7 @@ import {
   WarningCircle,
   Copy,
   CirclesThreePlus,
+  CheckCircle,
 } from "@phosphor-icons/react";
 import {
   RolesEmptyHeroIllustration,
@@ -36,9 +46,11 @@ import {
 } from "@/components/illustrations/roles-illustrations";
 import { CreateTemplateModal } from "@/components/canopy/create-template-modal";
 import { CreateRoleModal } from "./_components/CreateRoleModal";
-import { useRolesQuery, useTemplatesQuery } from "@/hooks/queries";
+import { useRolesQuery, useTemplatesQuery, useCreateRoleMutation } from "@/hooks/queries";
 import type { RoleListItem, TemplateItem } from "@/hooks/queries";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
+import { logger, formatError } from "@/lib/logger";
 
 /* -------------------------------------------------------------------
    Helpers
@@ -391,6 +403,130 @@ function RolesErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 /* -------------------------------------------------------------------
+   Copy Role Modal
+   ------------------------------------------------------------------- */
+
+function CopyRoleModal({
+  open,
+  onOpenChange,
+  jobs,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  jobs: RoleListItem[];
+}) {
+  const router = useRouter();
+  const createRole = useCreateRoleMutation();
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
+
+  const handleCopy = async () => {
+    if (!selectedJobId) return;
+    setIsCopying(true);
+    try {
+      // Fetch the full role details
+      const res = await fetch(`/api/canopy/roles/${selectedJobId}`);
+      if (!res.ok) throw new Error("Failed to fetch role details");
+      const { job } = await res.json();
+
+      // Create a duplicate with key fields, reset status to DRAFT
+      const data = await createRole.mutateAsync({
+        title: `${job.title} (Copy)`,
+        description: job.description ?? "",
+        location: job.location ?? undefined,
+        locationType: job.locationType ?? undefined,
+        employmentType: job.employmentType ?? undefined,
+        salaryMin: job.salaryMin ?? undefined,
+        salaryMax: job.salaryMax ?? undefined,
+        salaryCurrency: job.salaryCurrency ?? undefined,
+        salaryPeriod: job.salaryPeriod ?? undefined,
+        climateCategory: job.climateCategory ?? undefined,
+        impactDescription: job.impactDescription ?? undefined,
+        requiredCerts: job.requiredCerts ?? [],
+        greenSkills: job.greenSkills ?? [],
+        experienceLevel: job.experienceLevel ?? undefined,
+        educationLevel: job.educationLevel ?? undefined,
+      });
+
+      onOpenChange(false);
+      setSelectedJobId(null);
+      toast.success("Role duplicated as draft");
+      router.push(`/canopy/roles/${data.job.id}`);
+    } catch (err) {
+      logger.error("Failed to duplicate role", { error: formatError(err) });
+      toast.error("Failed to duplicate role");
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <Modal
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) setSelectedJobId(null);
+        onOpenChange(v);
+      }}
+    >
+      <ModalContent size="default">
+        <ModalHeader
+          icon={<Copy weight="fill" className="h-6 w-6 text-[var(--foreground-brand)]" />}
+          iconBg="bg-[var(--background-brand-subtle)]"
+        >
+          <ModalTitle>Duplicate a Role</ModalTitle>
+        </ModalHeader>
+
+        <ModalBody>
+          <p className="mb-4 text-caption text-[var(--foreground-muted)]">
+            Select a role to duplicate. A new draft will be created with the same details.
+          </p>
+          <div className="max-h-64 space-y-2 overflow-y-auto">
+            {jobs.map((job) => (
+              <button
+                key={job.id}
+                type="button"
+                onClick={() => setSelectedJobId(job.id)}
+                className={`flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors ${
+                  selectedJobId === job.id
+                    ? "border-[var(--border-brand)] bg-[var(--background-brand-subtle)]"
+                    : "border-[var(--border-default)] hover:border-[var(--border-emphasis)]"
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-body-sm font-medium text-[var(--foreground-default)]">
+                    {job.title}
+                  </p>
+                  <p className="text-caption text-[var(--foreground-muted)]">
+                    {job.status} · {job.locationType}
+                  </p>
+                </div>
+                {selectedJobId === job.id && (
+                  <CheckCircle
+                    size={20}
+                    weight="fill"
+                    className="ml-3 shrink-0 text-[var(--foreground-brand)]"
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button variant="tertiary" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleCopy} disabled={!selectedJobId || isCopying}>
+            {isCopying && <Spinner size="sm" variant="current" />}
+            {isCopying ? "Duplicating..." : "Duplicate Role"}
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+/* -------------------------------------------------------------------
    Main View
    ------------------------------------------------------------------- */
 
@@ -402,6 +538,7 @@ interface RolesViewProps {
 export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [copyModalOpen, setCopyModalOpen] = useState(false);
 
   // React Query with initialData — renders instantly from SSR, refetches in background
   const {
@@ -444,7 +581,7 @@ export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
                   <CirclesThreePlus size={18} weight="fill" />
                   Create a template
                 </Button>
-                <Button variant="tertiary">
+                <Button variant="tertiary" onClick={() => setCopyModalOpen(true)}>
                   <Copy size={18} weight="fill" />
                   Make a copy
                 </Button>
@@ -515,6 +652,9 @@ export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
           // Templates query auto-invalidates via stale-while-revalidate
         }}
       />
+
+      {/* Copy Role Modal */}
+      <CopyRoleModal open={copyModalOpen} onOpenChange={setCopyModalOpen} jobs={jobs} />
     </div>
   );
 }

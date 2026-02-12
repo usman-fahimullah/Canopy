@@ -19,7 +19,7 @@ export default function TalentError({
   }, [error]);
 
   return (
-    <div className="flex h-[calc(100vh-108px)] flex-col items-center justify-center gap-4 px-8">
+    <div className="flex h-[calc(100vh-108px)] flex-col items-center justify-center gap-4 px-4 sm:px-6">
       <WarningCircle size={48} className="text-[var(--primitive-red-500)]" />
       <h2 className="text-foreground-default text-heading-sm font-medium">Something went wrong</h2>
       <p className="max-w-md text-center text-body text-foreground-muted">

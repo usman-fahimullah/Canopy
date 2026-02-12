@@ -32,6 +32,7 @@ import {
   CaretDown,
   ClockCounterClockwise,
   ListChecks,
+  CalendarPlus,
 } from "@phosphor-icons/react";
 
 // Sub-components
@@ -44,6 +45,20 @@ import { CommentsPanel } from "./CommentsPanel";
 import { TodoPanel } from "./TodoPanel";
 import { HistoryPanel } from "./HistoryPanel";
 import { ApplicationReviewPanel } from "./ApplicationReviewPanel";
+import { InterviewSchedulingModal } from "@/components/ui/interview-scheduling-modal";
+import { OfferDetailsModal } from "@/components/offers/offer-details-modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/modal";
+import { Textarea } from "@/components/ui/textarea";
+
+// Shell
+import { useSidebar } from "@/components/shell/sidebar-context";
 
 // React Query
 import { useCandidateDetailQuery, queryKeys } from "@/hooks/queries";
@@ -159,6 +174,7 @@ export function CandidatePreviewSheet({
   navigation,
 }: CandidatePreviewSheetProps) {
   const queryClient = useQueryClient();
+  const { collapsed } = useSidebar();
   const isOpen = seekerId !== null;
 
   // --- React Query data fetching (cached, instant on re-open) ---
@@ -179,6 +195,12 @@ export function CandidatePreviewSheet({
     message: string;
   } | null>(null);
 
+  // --- Modals ---
+  const [interviewModalOpen, setInterviewModalOpen] = React.useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = React.useState(false);
+  const [rejectReason, setRejectReason] = React.useState("");
+  const [offerModalOpen, setOfferModalOpen] = React.useState(false);
+
   // --- Panels ---
   const [panelType, setPanelType] = React.useState<PanelType>(null);
   const [reviewStageId, setReviewStageId] = React.useState<string | null>(null);
@@ -191,6 +213,10 @@ export function CandidatePreviewSheet({
     setOptimisticStage(null);
     setActionFeedback(null);
     setIsExpanded(false);
+    setInterviewModalOpen(false);
+    setRejectModalOpen(false);
+    setRejectReason("");
+    setOfferModalOpen(false);
   }, [seekerId]);
 
   // Clear feedback after 4s
@@ -318,7 +344,16 @@ export function CandidatePreviewSheet({
     [activeApp, onStageChanged, queryClient]
   );
 
-  const handleReject = React.useCallback(() => moveToStage("rejected", "Rejected"), [moveToStage]);
+  const handleReject = React.useCallback(() => {
+    setRejectReason("");
+    setRejectModalOpen(true);
+  }, []);
+
+  const handleConfirmReject = React.useCallback(async () => {
+    setRejectModalOpen(false);
+    await moveToStage("rejected", "Rejected");
+    // TODO: persist rejectReason to API once rejection reasons are modeled
+  }, [moveToStage]);
   const handleSaveToTalentPool = React.useCallback(
     () => moveToStage("talent-pool", "Talent Pool"),
     [moveToStage]
@@ -339,7 +374,7 @@ export function CandidatePreviewSheet({
         hideClose
         className={cn(
           "flex flex-col gap-0 overflow-hidden p-0 transition-[max-width] duration-300 ease-in-out",
-          isExpanded && "sm:max-w-[calc(100vw-72px)]"
+          isExpanded && (collapsed ? "lg:max-w-[calc(100vw-72px)]" : "lg:max-w-[calc(100vw-280px)]")
         )}
       >
         {/* Accessible title (hidden visually) */}
@@ -469,7 +504,13 @@ export function CandidatePreviewSheet({
                     {jobStages.map((stage) => (
                       <DropdownMenuItem
                         key={stage.id}
-                        onClick={() => moveToStage(stage.id, stage.name)}
+                        onClick={() => {
+                          if (stage.id === "offer") {
+                            setOfferModalOpen(true);
+                          } else {
+                            moveToStage(stage.id, stage.name);
+                          }
+                        }}
                         disabled={stage.id === displayStage}
                         className="flex items-center justify-between gap-2"
                       >
@@ -493,6 +534,19 @@ export function CandidatePreviewSheet({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                {/* Schedule Interview */}
+                <SimpleTooltip content="Schedule Interview">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => setInterviewModalOpen(true)}
+                    disabled={isActionLoading}
+                    aria-label="Schedule interview"
+                  >
+                    <CalendarPlus size={20} weight="bold" />
+                  </Button>
+                </SimpleTooltip>
 
                 {/* Reject */}
                 <SimpleTooltip content="Reject">
@@ -649,7 +703,13 @@ export function CandidatePreviewSheet({
                   onClose={handleClosePanel}
                 />
               )}
-              {panelType === "todo" && <TodoPanel stages={jobStages} onClose={handleClosePanel} />}
+              {panelType === "todo" && (
+                <TodoPanel
+                  stages={jobStages}
+                  applicationId={activeApp?.id}
+                  onClose={handleClosePanel}
+                />
+              )}
               {panelType === "history" && (
                 <HistoryPanel seekerId={seeker.id} onClose={handleClosePanel} />
               )}
@@ -657,6 +717,98 @@ export function CandidatePreviewSheet({
           )}
         </div>
       </SheetContent>
+
+      {/* Interview Scheduling Modal */}
+      {seeker && activeApp && (
+        <InterviewSchedulingModal
+          open={interviewModalOpen}
+          onOpenChange={setInterviewModalOpen}
+          candidate={{
+            id: seeker.id,
+            name: candidateName,
+            email: seeker.account.email,
+            avatar: seeker.account.avatar ?? undefined,
+          }}
+          job={{
+            id: activeApp.job.id,
+            title: activeApp.job.title,
+          }}
+          onSchedule={async (data) => {
+            try {
+              const res = await fetch("/api/canopy/interviews", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  applicationId: activeApp.id,
+                  title: data.title,
+                  duration: data.duration,
+                  videoProvider: data.videoProvider,
+                  instructions: data.instructions,
+                  internalNotes: data.internalNotes,
+                  scheduledAt: data.timeSlots[0]?.start,
+                }),
+              });
+              if (!res.ok) throw new Error("Failed to schedule interview");
+              setInterviewModalOpen(false);
+              setActionFeedback({ type: "success", message: "Interview scheduled" });
+              queryClient.invalidateQueries({ queryKey: queryKeys.canopy.candidates.all });
+            } catch (err) {
+              logger.error("Failed to schedule interview", { error: formatError(err) });
+              setActionFeedback({ type: "error", message: "Failed to schedule interview" });
+            }
+          }}
+        />
+      )}
+
+      {/* Rejection Reason Modal */}
+      <Modal open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <ModalContent size="default">
+          <ModalHeader>
+            <ModalTitle>Reject Candidate</ModalTitle>
+          </ModalHeader>
+          <ModalBody>
+            <p className="mb-4 text-body-sm text-[var(--foreground-muted)]">
+              Are you sure you want to reject{" "}
+              <strong className="text-[var(--foreground-default)]">{candidateName}</strong>? This
+              will move them to the rejected stage.
+            </p>
+            <div className="space-y-2">
+              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+                Reason (optional)
+              </label>
+              <Textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Add a note about why this candidate was rejected..."
+                rows={3}
+              />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="tertiary" onClick={() => setRejectModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmReject}>
+              Reject Candidate
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Offer Details Modal */}
+      {activeApp && (
+        <OfferDetailsModal
+          open={offerModalOpen}
+          onOpenChange={setOfferModalOpen}
+          applicationId={activeApp.id}
+          jobTitle={activeApp.job.title}
+          candidateName={candidateName}
+          onOfferCreated={() => {
+            setOfferModalOpen(false);
+            moveToStage("offer", "Offer");
+          }}
+        />
+      )}
     </Sheet>
   );
 }

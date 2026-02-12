@@ -16,7 +16,7 @@ export function JobInfoCards({ job }: JobInfoCardsProps) {
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency, job.salaryPeriod);
 
   return (
-    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-6 pt-6 sm:grid-cols-2 lg:grid-cols-4 lg:px-12">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-3 px-4 pt-6 sm:grid-cols-2 sm:gap-4 sm:px-6 lg:grid-cols-4 lg:px-12">
       {/* Role & Job Type */}
       <div className="flex flex-col gap-3 rounded-2xl border border-[var(--border-muted)] bg-[var(--background-default)] p-5">
         <span className="text-caption font-medium text-[var(--foreground-subtle)]">

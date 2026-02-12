@@ -8,18 +8,31 @@ import { apiFetch, apiMutate } from "./fetchers";
 // TYPES
 // ============================================
 
+/** Raw notification shape from the API (uses readAt timestamp) */
+interface RawNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  readAt: string | null;
+  createdAt: string;
+  data?: { url?: string };
+}
+
+/** Enriched notification with computed `read` boolean for UI convenience */
 export interface Notification {
   id: string;
   type: string;
   title: string;
   body: string;
+  readAt: string | null;
   read: boolean;
   createdAt: string;
   data?: { url?: string };
 }
 
 interface NotificationsResponse {
-  notifications: Notification[];
+  notifications: RawNotification[];
 }
 
 // ============================================
@@ -31,7 +44,11 @@ export function useNotificationsQuery() {
   return useQuery({
     queryKey: queryKeys.canopy.notifications.all,
     queryFn: () => apiFetch<NotificationsResponse>("/api/notifications"),
-    select: (data) => data.notifications,
+    select: (data) =>
+      data.notifications.map((n) => ({
+        ...n,
+        read: n.readAt !== null,
+      })),
   });
 }
 
@@ -46,7 +63,7 @@ export function useMarkReadMutation() {
   return useMutation({
     mutationFn: (notificationId: string) =>
       apiMutate<Record<string, unknown>>(`/api/notifications/${notificationId}/read`, {
-        method: "POST",
+        method: "PUT",
       }),
     onMutate: async (notificationId) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.canopy.notifications.all });
@@ -58,7 +75,7 @@ export function useMarkReadMutation() {
       if (previous) {
         queryClient.setQueryData<NotificationsResponse>(queryKeys.canopy.notifications.all, {
           notifications: previous.notifications.map((n) =>
-            n.id === notificationId ? { ...n, read: true } : n
+            n.id === notificationId ? { ...n, readAt: new Date().toISOString() } : n
           ),
         });
       }
@@ -79,8 +96,8 @@ export function useMarkAllReadMutation() {
 
   return useMutation({
     mutationFn: () =>
-      apiMutate<Record<string, unknown>>("/api/notifications/mark-all-read", {
-        method: "POST",
+      apiMutate<Record<string, unknown>>("/api/notifications", {
+        method: "PUT",
       }),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: queryKeys.canopy.notifications.all });
@@ -90,8 +107,12 @@ export function useMarkAllReadMutation() {
       );
 
       if (previous) {
+        const now = new Date().toISOString();
         queryClient.setQueryData<NotificationsResponse>(queryKeys.canopy.notifications.all, {
-          notifications: previous.notifications.map((n) => ({ ...n, read: true })),
+          notifications: previous.notifications.map((n) => ({
+            ...n,
+            readAt: n.readAt ?? now,
+          })),
         });
       }
 

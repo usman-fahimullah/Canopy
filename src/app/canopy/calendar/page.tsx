@@ -112,13 +112,25 @@ export default function CalendarPage() {
         if (!response.ok) throw new Error("Failed to fetch team");
         const data = await response.json();
         // Extract unique interviewers from API response
-        if (data.data && Array.isArray(data.data)) {
-          const unique = data.data.reduce((acc: InterviewerOption[], member: any) => {
-            if (!acc.find((m) => m.id === member.id)) {
-              acc.push({ id: member.id, name: member.account?.name || member.email });
-            }
-            return acc;
-          }, []);
+        const membersList = data.members ?? data.data ?? [];
+        if (Array.isArray(membersList)) {
+          const unique = membersList.reduce(
+            (acc: InterviewerOption[], member: Record<string, unknown>) => {
+              const memberId = member.id as string;
+              if (!acc.find((m) => m.id === memberId)) {
+                acc.push({
+                  id: memberId,
+                  name:
+                    (member.name as string) ||
+                    ((member.account as Record<string, unknown>)?.name as string) ||
+                    (member.email as string) ||
+                    "Unknown",
+                });
+              }
+              return acc;
+            },
+            []
+          );
           setInterviewers(unique);
         }
       } catch (err) {

@@ -124,7 +124,7 @@ export default function BookSessionPage() {
         }
       />
 
-      <div className="px-8 py-8 lg:px-12">
+      <div className="px-4 py-8 sm:px-6 lg:px-12">
         <BookingWizard
           coaches={coaches}
           initialCoachId={initialCoachId}

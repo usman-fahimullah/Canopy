@@ -21,6 +21,8 @@ interface TodoPanelProps {
   onClose: () => void;
   /** Pipeline stages to auto-generate default items */
   stages?: Array<{ id: string; name: string }>;
+  /** Application ID for localStorage persistence */
+  applicationId?: string;
 }
 
 const DEFAULT_ITEMS: TodoItem[] = [
@@ -32,9 +34,39 @@ const DEFAULT_ITEMS: TodoItem[] = [
   { id: "decision", label: "Make decision", checked: false },
 ];
 
-export function TodoPanel({ onClose, stages }: TodoPanelProps) {
-  const [items, setItems] = React.useState<TodoItem[]>(DEFAULT_ITEMS);
+function getStorageKey(applicationId: string) {
+  return `canopy-todo-${applicationId}`;
+}
+
+function loadItems(applicationId?: string): TodoItem[] {
+  if (!applicationId) return DEFAULT_ITEMS;
+  try {
+    const stored = localStorage.getItem(getStorageKey(applicationId));
+    if (stored) return JSON.parse(stored) as TodoItem[];
+  } catch {
+    // Fall through to defaults
+  }
+  return DEFAULT_ITEMS;
+}
+
+export function TodoPanel({ onClose, stages, applicationId }: TodoPanelProps) {
+  const [items, setItems] = React.useState<TodoItem[]>(() => loadItems(applicationId));
   const [newTaskText, setNewTaskText] = React.useState("");
+
+  // Persist to localStorage on change
+  React.useEffect(() => {
+    if (!applicationId) return;
+    try {
+      localStorage.setItem(getStorageKey(applicationId), JSON.stringify(items));
+    } catch {
+      // Storage full or unavailable — ignore
+    }
+  }, [items, applicationId]);
+
+  // Reload when applicationId changes
+  React.useEffect(() => {
+    setItems(loadItems(applicationId));
+  }, [applicationId]);
 
   const handleToggle = (id: string) => {
     setItems((prev) =>

@@ -113,7 +113,7 @@ export default function TalentNotificationsPage() {
         }
       />
 
-      <div className="px-8 py-6 lg:px-12">
+      <div className="px-4 py-6 sm:px-6 lg:px-12">
         {notifications.length === 0 ? (
           <Card variant="outlined" className="p-12 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--primitive-neutral-100)]">

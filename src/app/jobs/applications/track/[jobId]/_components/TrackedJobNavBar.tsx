@@ -58,7 +58,7 @@ export function TrackedJobNavBar({
   onRemove,
 }: TrackedJobNavBarProps) {
   return (
-    <nav className="flex h-[72px] shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-8">
+    <nav className="flex h-[72px] shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-4 sm:px-6 lg:px-8">
       {/* Left: Back button only (matching candidate X close button pattern) */}
       <SimpleTooltip content="Back to Your Jobs">
         <Button variant="outline" size="icon" onClick={onBack} aria-label="Back to Your Jobs">

@@ -13,7 +13,7 @@ export function MobileCTA({ jobId, isSaved }: MobileCTAProps) {
   const router = useRouter();
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--border-muted)] bg-[var(--background-default)] p-4 lg:hidden">
+    <div className="fixed inset-x-0 bottom-14 z-30 border-t border-[var(--border-muted)] bg-[var(--background-default)] p-4 lg:bottom-0 lg:hidden">
       <div className="flex gap-3">
         <Button
           variant="primary"

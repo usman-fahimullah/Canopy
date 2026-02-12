@@ -16,6 +16,16 @@ const UpdateOrgSchema = z.object({
   isBipocOwned: z.boolean().optional(),
   isWomenOwned: z.boolean().optional(),
   isVeteranOwned: z.boolean().optional(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a valid hex color")
+    .optional(),
+  secondaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a valid hex color")
+    .optional()
+    .nullable(),
+  fontFamily: z.string().max(100).optional(),
 });
 
 /**

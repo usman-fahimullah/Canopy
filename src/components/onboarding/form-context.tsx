@@ -115,7 +115,7 @@ export type HiringGoal = "specific-role" | "multiple-roles" | "exploring";
 
 export interface TeamInviteEntry {
   email: string;
-  role: "RECRUITER" | "MEMBER";
+  role: "ADMIN" | "RECRUITER" | "HIRING_MANAGER" | "MEMBER";
 }
 
 export interface EmployerFormData {
@@ -129,6 +129,7 @@ export interface EmployerFormData {
   hiringGoal: HiringGoal | null;
   firstRole: EmployerFirstRole | null;
   teamInvites: TeamInviteEntry[];
+  companyLogoPreview: string;
 }
 
 // ─── Initial values ───────────────────────────────────────────────
@@ -236,6 +237,7 @@ const INITIAL_EMPLOYER: EmployerFormData = {
   hiringGoal: null,
   firstRole: null,
   teamInvites: [],
+  companyLogoPreview: "",
 };
 
 // ─── Context shape ────────────────────────────────────────────────

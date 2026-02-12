@@ -20,7 +20,7 @@ export default function TrackedJobError({
   }, [error]);
 
   return (
-    <div className="flex h-[calc(100vh-108px)] flex-col items-center justify-center gap-4 px-8">
+    <div className="flex h-[calc(100vh-108px)] flex-col items-center justify-center gap-4 px-4 sm:px-6">
       <WarningCircle size={48} className="text-[var(--primitive-red-500)]" />
       <h2 className="text-heading-sm font-medium text-[var(--foreground-default)]">
         Unable to load job details

@@ -18,7 +18,7 @@ export function JobHeader({ job }: JobHeaderProps) {
   const salary = formatSalary(job.salaryMin, job.salaryMax, job.salaryCurrency, job.salaryPeriod);
 
   return (
-    <div className="border-b border-[var(--border-muted)] bg-[var(--background-default)] px-6 py-6 lg:px-12">
+    <div className="border-b border-[var(--border-muted)] bg-[var(--background-default)] px-4 py-6 sm:px-6 lg:px-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         {/* Left: Title + Company + Metadata */}
         <div className="flex flex-col gap-3">

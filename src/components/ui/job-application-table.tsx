@@ -407,7 +407,7 @@ function TableHeaderRow({ onSort }: TableHeaderRowProps) {
   };
 
   return (
-    <div className="flex items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] pb-2">
+    <div className="hidden items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] pb-2 md:flex">
       {renderSortButton("Job Title", "jobTitle", "w-[250px] pl-6")}
       {renderSortButton("Company", "company", "w-[250px]")}
       <div className="flex flex-1 items-center border-r border-[var(--primitive-neutral-300)] px-3 py-1">
@@ -649,105 +649,174 @@ function TableRow({
   onFavoriteToggle,
   onRowClick,
 }: TableRowProps) {
+  const rowInteraction = onRowClick
+    ? {
+        onClick: () => onRowClick(application.id),
+        role: "button" as const,
+        tabIndex: 0,
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onRowClick(application.id);
+          }
+        },
+      }
+    : {};
+
   return (
-    <div
-      className={cn(
-        "flex h-[80px] items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)]",
-        onRowClick &&
-          "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]"
-      )}
-      onClick={() => onRowClick?.(application.id)}
-      role={onRowClick ? "button" : undefined}
-      tabIndex={onRowClick ? 0 : undefined}
-      onKeyDown={(e) => {
-        if (onRowClick && (e.key === "Enter" || e.key === " ")) {
-          e.preventDefault();
-          onRowClick(application.id);
-        }
-      }}
-    >
-      {/* Job Title Cell */}
-      <div className="flex w-[250px] items-center gap-3 overflow-hidden py-6 pl-6 pr-3">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onFavoriteToggle?.(application.id);
-          }}
-          className="shrink-0 transition-colors"
-          aria-label={application.isFavorite ? "Remove from favorites" : "Add to favorites"}
-        >
-          <Star
-            size={24}
-            weight={application.isFavorite ? "fill" : "regular"}
-            className={
-              application.isFavorite
-                ? "text-[var(--primitive-yellow-500)]"
-                : "text-[var(--primitive-neutral-200)]"
-            }
-          />
-        </button>
-        <Avatar
-          name={application.company}
-          src={application.companyLogo}
-          size="sm"
-          className="shrink-0"
-        />
-        <span className="truncate text-caption text-[var(--primitive-neutral-800)]">
-          {application.jobTitle}
-        </span>
-      </div>
-
-      {/* Company Cell */}
-      <div className="flex h-[80px] w-[250px] items-center px-3 py-6">
-        <div className="min-w-0 flex-1">
-          <span className="block truncate text-caption text-[var(--primitive-neutral-600)]">
-            {application.company}
-          </span>
-          {application.stageName && (
-            <span className="block truncate text-caption-sm text-[var(--primitive-neutral-500)]">
-              {application.stageName}
-              {application.phaseProgress && application.phaseProgress.total > 1 && (
-                <>
-                  {" "}
-                  &middot; Step {application.phaseProgress.current} of{" "}
-                  {application.phaseProgress.total}
-                </>
-              )}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Stage Cell */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div className="relative h-[80px] min-w-0 flex-1 px-3" onClick={(e) => e.stopPropagation()}>
-        <div className="absolute left-3 top-5">
-          <StagePill
-            currentStage={application.stage}
-            onStageChange={(stage) => onStageChange?.(application.id, stage)}
-          />
-        </div>
-      </div>
-
-      {/* Activity Cell */}
-      <div className="flex h-[80px] min-w-0 flex-1 items-center px-3 py-6">
-        <span className="w-full truncate text-center text-caption text-[var(--primitive-neutral-600)]">
-          {formatActivityTime(application.activity)}
-        </span>
-      </div>
-
-      {/* Reaction Cell */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+    <>
+      {/* ── Mobile Card Layout (below md) ── */}
       <div
-        className="flex h-[80px] min-w-0 flex-1 items-center justify-center py-6"
-        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          "flex flex-col gap-3 border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] p-4 md:hidden",
+          onRowClick &&
+            "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]"
+        )}
+        {...rowInteraction}
       >
-        <EmojiReactionButton
-          reaction={application.reaction}
-          onReactionChange={(reaction) => onReactionChange?.(application.id, reaction)}
-        />
+        {/* Top row: star + avatar + title */}
+        <div className="flex min-w-0 items-center gap-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle?.(application.id);
+            }}
+            className="shrink-0 transition-colors"
+            aria-label={application.isFavorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Star
+              size={20}
+              weight={application.isFavorite ? "fill" : "regular"}
+              className={
+                application.isFavorite
+                  ? "text-[var(--primitive-yellow-500)]"
+                  : "text-[var(--primitive-neutral-200)]"
+              }
+            />
+          </button>
+          <Avatar
+            name={application.company}
+            src={application.companyLogo}
+            size="sm"
+            className="shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-caption text-[var(--primitive-neutral-800)]">
+              {application.jobTitle}
+            </span>
+            <span className="block truncate text-caption-sm text-[var(--primitive-neutral-600)]">
+              {application.company}
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom row: stage pill + activity time */}
+        <div className="flex items-center justify-between gap-3 pl-8">
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <StagePill
+              currentStage={application.stage}
+              onStageChange={(stage) => onStageChange?.(application.id, stage)}
+            />
+          </div>
+          <span className="shrink-0 text-caption text-[var(--primitive-neutral-600)]">
+            {formatActivityTime(application.activity)}
+          </span>
+        </div>
       </div>
-    </div>
+
+      {/* ── Desktop Table Row (md and above) ── */}
+      <div
+        className={cn(
+          "hidden h-[80px] items-center border-b border-[var(--primitive-neutral-300)] bg-[var(--primitive-neutral-0)] md:flex",
+          onRowClick &&
+            "cursor-pointer transition-colors hover:bg-[var(--background-interactive-hover)]"
+        )}
+        {...rowInteraction}
+      >
+        {/* Job Title Cell */}
+        <div className="flex w-[250px] items-center gap-3 overflow-hidden py-6 pl-6 pr-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle?.(application.id);
+            }}
+            className="shrink-0 transition-colors"
+            aria-label={application.isFavorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Star
+              size={24}
+              weight={application.isFavorite ? "fill" : "regular"}
+              className={
+                application.isFavorite
+                  ? "text-[var(--primitive-yellow-500)]"
+                  : "text-[var(--primitive-neutral-200)]"
+              }
+            />
+          </button>
+          <Avatar
+            name={application.company}
+            src={application.companyLogo}
+            size="sm"
+            className="shrink-0"
+          />
+          <span className="truncate text-caption text-[var(--primitive-neutral-800)]">
+            {application.jobTitle}
+          </span>
+        </div>
+
+        {/* Company Cell */}
+        <div className="flex h-[80px] w-[250px] items-center px-3 py-6">
+          <div className="min-w-0 flex-1">
+            <span className="block truncate text-caption text-[var(--primitive-neutral-600)]">
+              {application.company}
+            </span>
+            {application.stageName && (
+              <span className="block truncate text-caption-sm text-[var(--primitive-neutral-500)]">
+                {application.stageName}
+                {application.phaseProgress && application.phaseProgress.total > 1 && (
+                  <>
+                    {" "}
+                    &middot; Step {application.phaseProgress.current} of{" "}
+                    {application.phaseProgress.total}
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Stage Cell */}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        <div className="relative h-[80px] min-w-0 flex-1 px-3" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute left-3 top-5">
+            <StagePill
+              currentStage={application.stage}
+              onStageChange={(stage) => onStageChange?.(application.id, stage)}
+            />
+          </div>
+        </div>
+
+        {/* Activity Cell */}
+        <div className="flex h-[80px] min-w-0 flex-1 items-center px-3 py-6">
+          <span className="w-full truncate text-center text-caption text-[var(--primitive-neutral-600)]">
+            {formatActivityTime(application.activity)}
+          </span>
+        </div>
+
+        {/* Reaction Cell */}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        <div
+          className="flex h-[80px] min-w-0 flex-1 items-center justify-center py-6"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <EmojiReactionButton
+            reaction={application.reaction}
+            onReactionChange={(reaction) => onReactionChange?.(application.id, reaction)}
+          />
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -766,11 +835,11 @@ function EmptyState({ section, onAction }: EmptyStateProps) {
       <div className={cn("flex size-6 items-center justify-center rounded", config.emptyIconBg)}>
         <Icon size={18} weight={config.iconWeight} className="text-white" />
       </div>
-      <div className="flex w-[492px] flex-col items-center justify-center">
+      <div className="flex w-full max-w-[492px] flex-col items-center justify-center">
         <span className="text-body-strong text-[var(--primitive-neutral-900)]">
           {config.emptyTitle}
         </span>
-        <p className="w-[300px] text-center text-caption text-[var(--primitive-neutral-600)]">
+        <p className="w-full max-w-[300px] text-center text-caption text-[var(--primitive-neutral-600)]">
           {config.emptyDescription}
         </p>
       </div>

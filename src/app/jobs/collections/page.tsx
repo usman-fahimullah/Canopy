@@ -163,7 +163,7 @@ export default function CollectionsPage() {
     return (
       <div>
         <PageHeader title="Collections" />
-        <div className="px-8 py-6 lg:px-12">
+        <div className="px-4 py-6 sm:px-6 lg:px-12">
           <CollectionsPageSkeleton />
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function CollectionsPage() {
     return (
       <div>
         <PageHeader title="Collections" />
-        <div className="px-8 py-6 lg:px-12">
+        <div className="px-4 py-6 sm:px-6 lg:px-12">
           <EmptyStateNoResults
             title="Unable to load collections"
             description={error}
@@ -194,7 +194,7 @@ export default function CollectionsPage() {
     return (
       <div>
         <PageHeader title="Collections" />
-        <div className="px-8 py-6 lg:px-12">
+        <div className="px-4 py-6 sm:px-6 lg:px-12">
           <EmptyStateNoResults
             title="No collections yet"
             description="Check back soon for curated job collections."
@@ -209,7 +209,7 @@ export default function CollectionsPage() {
     <div>
       <PageHeader title="Collections" />
 
-      <div className="space-y-10 px-8 py-6 lg:px-12">
+      <div className="space-y-10 px-4 py-6 sm:px-6 lg:px-12">
         {/* Featured Collections */}
         {featuredCollections.length > 0 && (
           <section>
