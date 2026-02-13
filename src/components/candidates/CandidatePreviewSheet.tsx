@@ -34,6 +34,7 @@ import {
   ListChecks,
   CalendarPlus,
   EnvelopeSimple,
+  DotsThreeVertical,
 } from "@phosphor-icons/react";
 
 // Sub-components
@@ -48,6 +49,8 @@ import { CommentsPanel } from "./CommentsPanel";
 import { TodoPanel } from "./TodoPanel";
 import { HistoryPanel } from "./HistoryPanel";
 import { ApplicationReviewPanel } from "./ApplicationReviewPanel";
+import { OfferManagementSection } from "./OfferManagementSection";
+import { InterviewsSection } from "./InterviewsSection";
 import { InterviewSchedulingModal } from "@/components/ui/interview-scheduling-modal";
 import { OfferDetailsModal } from "@/components/offers/offer-details-modal";
 import {
@@ -68,6 +71,9 @@ import {
   DropdownItem,
   DropdownValue,
 } from "@/components/ui/dropdown";
+
+// Split button
+import { SplitButton } from "@/components/ui/split-button";
 
 // Shell
 import { useSidebar } from "@/components/shell/sidebar-context";
@@ -109,6 +115,38 @@ interface ScoreData {
   scorer: ScorerInfo;
 }
 
+interface OfferData {
+  id: string;
+  status: string;
+  salary: number | null;
+  salaryCurrency: string;
+  startDate: string | Date;
+  department: string | null;
+  signingMethod: string;
+  sentAt: string | Date | null;
+  viewedAt: string | Date | null;
+  signedAt: string | Date | null;
+  withdrawnAt: string | Date | null;
+  createdAt: string | Date;
+}
+
+interface InterviewData {
+  id: string;
+  scheduledAt: string | Date;
+  duration: number;
+  type: string;
+  location: string | null;
+  meetingLink: string | null;
+  status: string;
+  notes: string | null;
+  completedAt: string | Date | null;
+  cancelledAt: string | Date | null;
+  createdAt: string | Date;
+  interviewer: {
+    account: { name: string | null; avatar: string | null };
+  };
+}
+
 interface ApplicationData {
   id: string;
   stage: string;
@@ -125,6 +163,8 @@ interface ApplicationData {
     climateCategory?: string | null;
   };
   scores: ScoreData[];
+  offer?: OfferData | null;
+  interviews?: InterviewData[];
 }
 
 interface NoteData {
@@ -222,7 +262,8 @@ export function CandidatePreviewSheet({
     message: string;
   } | null>(null);
 
-  // --- Modals ---
+  // --- Modals & menus ---
+  const [overflowOpen, setOverflowOpen] = React.useState(false);
   const [interviewModalOpen, setInterviewModalOpen] = React.useState(false);
   const [rejectModalOpen, setRejectModalOpen] = React.useState(false);
   const [rejectReason, setRejectReason] = React.useState<RejectionReasonValue | "">("");
@@ -438,140 +479,277 @@ export function CandidatePreviewSheet({
   const sheetSize = isExpanded ? "full" : "2xl";
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent
-        side="right"
-        size={sheetSize}
-        hideClose
-        className={cn(
-          "flex flex-col gap-0 overflow-hidden p-0 transition-[max-width] duration-300 ease-in-out",
-          isExpanded && (collapsed ? "lg:max-w-[calc(100vw-72px)]" : "lg:max-w-[calc(100vw-280px)]")
-        )}
-      >
-        {/* Accessible title (hidden visually) */}
-        <SheetTitle className="sr-only">
-          {loading ? "Loading candidate..." : `${candidateName} - Candidate Preview`}
-        </SheetTitle>
+    <>
+      <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent
+          side="right"
+          size={sheetSize}
+          hideClose
+          className={cn(
+            "flex flex-col gap-0 overflow-hidden p-0 transition-[max-width] duration-300 ease-in-out",
+            isExpanded &&
+              (collapsed ? "lg:max-w-[calc(100vw-72px)]" : "lg:max-w-[calc(100vw-280px)]")
+          )}
+        >
+          {/* Accessible title (hidden visually) */}
+          <SheetTitle className="sr-only">
+            {loading ? "Loading candidate..." : `${candidateName} - Candidate Preview`}
+          </SheetTitle>
 
-        {/* ── Header bar ── */}
-        <div className="flex shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-6 py-4">
-          <div className="flex items-center gap-3">
-            <SimpleTooltip content="Close">
+          {/* ── Header bar ── */}
+          <div className="flex shrink-0 items-center justify-between border-b border-[var(--border-muted)] px-6 py-4">
+            <div className="flex items-center gap-3">
+              {/* Close — no tooltip to avoid auto-show on focus when sheet opens */}
               <Button variant="outline" size="icon-sm" onClick={onClose} aria-label="Close">
                 <X size={20} weight="bold" />
               </Button>
-            </SimpleTooltip>
 
-            {/* Prev/Next navigation */}
-            {navigation && (
-              <>
-                <div className="flex items-center gap-1">
-                  <SimpleTooltip content="Previous candidate">
+              {/* Prev/Next navigation — split button */}
+              {navigation && (
+                <>
+                  <SplitButton
+                    variant="outline"
+                    leftIcon={<CaretUp size={16} weight="bold" />}
+                    rightIcon={<CaretDown size={16} weight="bold" />}
+                    onPrimaryClick={navigation.onPrevious}
+                    onSecondaryClick={navigation.onNext}
+                    disabled={!navigation.hasPrevious && !navigation.hasNext}
+                    aria-label="Navigate candidates"
+                    className="[&_button]:p-2"
+                  />
+                  {navigation.currentIndex !== undefined && navigation.totalCount !== undefined && (
+                    <span className="text-caption text-[var(--foreground-subtle)]">
+                      {navigation.currentIndex + 1} of {navigation.totalCount}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Expand / collapse */}
+              <SimpleTooltip content={isExpanded ? "Collapse" : "Expand"}>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => setIsExpanded((prev) => !prev)}
+                  aria-label={isExpanded ? "Collapse sheet" : "Expand sheet"}
+                >
+                  {isExpanded ? (
+                    <ArrowsIn size={20} weight="bold" />
+                  ) : (
+                    <ArrowsOut size={20} weight="bold" />
+                  )}
+                </Button>
+              </SimpleTooltip>
+
+              {/* Panel toggles */}
+              {seeker && (
+                <>
+                  <SimpleTooltip content="Comments">
                     <Button
                       variant="outline"
                       size="icon-sm"
-                      onClick={navigation.onPrevious}
-                      disabled={!navigation.hasPrevious}
-                      aria-label="Previous candidate"
+                      onClick={() => togglePanel("comments")}
+                      aria-label="Toggle comments"
+                      data-selected={panelType === "comments" ? "true" : undefined}
                     >
-                      <CaretUp size={16} weight="bold" />
+                      <ChatCircleDots size={20} weight="bold" />
                     </Button>
                   </SimpleTooltip>
-                  <SimpleTooltip content="Next candidate">
+                  <SimpleTooltip content="History">
                     <Button
                       variant="outline"
                       size="icon-sm"
-                      onClick={navigation.onNext}
-                      disabled={!navigation.hasNext}
-                      aria-label="Next candidate"
+                      onClick={() => togglePanel("history")}
+                      aria-label="Toggle history"
+                      data-selected={panelType === "history" ? "true" : undefined}
                     >
-                      <CaretDown size={16} weight="bold" />
+                      <ClockCounterClockwise size={20} weight="bold" />
                     </Button>
                   </SimpleTooltip>
-                </div>
-                {navigation.currentIndex !== undefined && navigation.totalCount !== undefined && (
-                  <span className="text-caption text-[var(--foreground-subtle)]">
-                    {navigation.currentIndex + 1} of {navigation.totalCount}
-                  </span>
-                )}
-              </>
-            )}
-          </div>
+                  <SimpleTooltip content="Todo">
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() => togglePanel("todo")}
+                      aria-label="Toggle todo"
+                      data-selected={panelType === "todo" ? "true" : undefined}
+                    >
+                      <ListChecks size={20} weight="bold" />
+                    </Button>
+                  </SimpleTooltip>
+                </>
+              )}
 
-          <div className="flex items-center gap-2">
-            {/* Expand / collapse */}
-            <SimpleTooltip content={isExpanded ? "Collapse" : "Expand"}>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={() => setIsExpanded((prev) => !prev)}
-                aria-label={isExpanded ? "Collapse sheet" : "Expand sheet"}
-              >
-                {isExpanded ? (
-                  <ArrowsIn size={20} weight="bold" />
-                ) : (
-                  <ArrowsOut size={20} weight="bold" />
-                )}
-              </Button>
-            </SimpleTooltip>
+              {/* Stage actions */}
+              {activeApp && !isTerminalStage && (
+                <>
+                  {/* Move to stage */}
+                  <DropdownMenu>
+                    <SimpleTooltip content="Move to stage">
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon-sm"
+                          aria-label="Move to stage"
+                          disabled={isActionLoading}
+                        >
+                          <ArrowCircleRight size={20} weight="bold" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                    </SimpleTooltip>
+                    <DropdownMenuContent align="end" className="min-w-[180px]">
+                      {jobStages.map((stage) => (
+                        <DropdownMenuItem
+                          key={stage.id}
+                          onClick={() => {
+                            if (stage.id === "offer") {
+                              setOfferModalOpen(true);
+                            } else {
+                              moveToStage(stage.id, stage.name);
+                            }
+                          }}
+                          disabled={stage.id === displayStage}
+                          className="flex items-center justify-between gap-2"
+                        >
+                          <span>{stage.name}</span>
+                          {stage.id === displayStage && (
+                            <CheckCircle
+                              size={16}
+                              weight="fill"
+                              className="text-[var(--foreground-success)]"
+                            />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-            {/* Panel toggles */}
-            {seeker && (
-              <>
-                <SimpleTooltip content="Comments">
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => togglePanel("comments")}
-                    aria-label="Toggle comments"
-                    data-selected={panelType === "comments" ? "true" : undefined}
-                  >
-                    <ChatCircleDots size={20} weight="bold" />
-                  </Button>
-                </SimpleTooltip>
-                <SimpleTooltip content="History">
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => togglePanel("history")}
-                    aria-label="Toggle history"
-                    data-selected={panelType === "history" ? "true" : undefined}
-                  >
-                    <ClockCounterClockwise size={20} weight="bold" />
-                  </Button>
-                </SimpleTooltip>
-                <SimpleTooltip content="Todo">
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => togglePanel("todo")}
-                    aria-label="Toggle todo"
-                    data-selected={panelType === "todo" ? "true" : undefined}
-                  >
-                    <ListChecks size={20} weight="bold" />
-                  </Button>
-                </SimpleTooltip>
-              </>
-            )}
+                  {/* Reject + Overflow SplitButton */}
+                  <DropdownMenu open={overflowOpen} onOpenChange={setOverflowOpen}>
+                    <DropdownMenuTrigger asChild>
+                      <div className="inline-flex">
+                        <SplitButton
+                          variant="outline"
+                          leftIcon={
+                            <Prohibit
+                              size={20}
+                              weight="bold"
+                              className="text-[var(--primitive-red-500)]"
+                            />
+                          }
+                          rightIcon={<DotsThreeVertical size={20} weight="bold" />}
+                          onPrimaryClick={(e) => {
+                            e.stopPropagation();
+                            handleReject();
+                          }}
+                          onSecondaryClick={(e) => {
+                            e.stopPropagation();
+                            setOverflowOpen((prev) => !prev);
+                          }}
+                          disabled={isActionLoading}
+                          secondarySelected={overflowOpen}
+                          className="[&_button]:p-2"
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-[200px]">
+                      {seeker && (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            const jobTitle = activeApp?.job.title ?? "this role";
+                            const name = candidateName;
+                            const email = seeker.account.email;
+                            const subject = encodeURIComponent(
+                              `Re: Your application for ${jobTitle}`
+                            );
+                            const body = encodeURIComponent(
+                              `Hi ${name},\n\nThank you for your interest in the ${jobTitle} position.\n\n`
+                            );
+                            window.open(
+                              `mailto:${email}?subject=${subject}&body=${body}`,
+                              "_blank"
+                            );
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <EnvelopeSimple size={16} />
+                          <span>Email Candidate</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setOverflowOpen(false);
+                          setInterviewModalOpen(true);
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <CalendarPlus size={16} />
+                        <span>
+                          {activeApp?.interviews?.some((i) => i.status === "SCHEDULED")
+                            ? "Schedule Another Interview"
+                            : "Schedule Interview"}
+                        </span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={handleSaveToTalentPool}
+                        className="flex items-center gap-2"
+                      >
+                        <UserCirclePlus size={16} />
+                        <span>Save to Talent Pool</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              )}
 
-            {/* Stage actions */}
-            {activeApp && !isTerminalStage && (
-              <>
-                {/* Move to stage */}
+              {/* Terminal stage: standalone overflow dropdown (no reject/move actions) */}
+              {activeApp && isTerminalStage && (
                 <DropdownMenu>
-                  <SimpleTooltip content="Move to stage">
+                  <SimpleTooltip content="More actions">
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         size="icon-sm"
-                        aria-label="Move to stage"
+                        aria-label="More actions"
                         disabled={isActionLoading}
                       >
-                        <ArrowCircleRight size={20} weight="bold" />
+                        <DotsThreeVertical size={20} weight="bold" />
                       </Button>
                     </DropdownMenuTrigger>
                   </SimpleTooltip>
-                  <DropdownMenuContent align="end" className="min-w-[180px]">
+                  <DropdownMenuContent align="end" className="min-w-[200px]">
+                    {seeker && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          const jobTitle = activeApp.job.title ?? "this role";
+                          const name = candidateName;
+                          const email = seeker.account.email;
+                          const subject = encodeURIComponent(
+                            `Re: Your application for ${jobTitle}`
+                          );
+                          const body = encodeURIComponent(
+                            `Hi ${name},\n\nThank you for your interest in the ${jobTitle} position.\n\n`
+                          );
+                          window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                        <EnvelopeSimple size={16} />
+                        <span>Email Candidate</span>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      onClick={() => setInterviewModalOpen(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <CalendarPlus size={16} />
+                      <span>Schedule Interview</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {/* Move to stage — allow moving out of terminal */}
                     {jobStages.map((stage) => (
                       <DropdownMenuItem
                         key={stage.id}
@@ -585,7 +763,10 @@ export function CandidatePreviewSheet({
                         disabled={stage.id === displayStage}
                         className="flex items-center justify-between gap-2"
                       >
-                        <span>{stage.name}</span>
+                        <span className="flex items-center gap-2">
+                          <ArrowCircleRight size={16} className="text-[var(--foreground-subtle)]" />
+                          <span>{stage.name}</span>
+                        </span>
                         {stage.id === displayStage && (
                           <CheckCircle
                             size={16}
@@ -595,233 +776,213 @@ export function CandidatePreviewSheet({
                         )}
                       </DropdownMenuItem>
                     ))}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleSaveToTalentPool}
-                      className="flex items-center gap-2"
-                    >
-                      <UserCirclePlus size={16} />
-                      <span>Save to Talent Pool</span>
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              )}
+            </div>
+          </div>
 
-                {/* Send Email (Story 5.4) */}
-                {seeker && (
-                  <SimpleTooltip content="Email candidate">
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => {
-                        const jobTitle = activeApp?.job.title ?? "this role";
-                        const name = candidateName;
-                        const email = seeker.account.email;
-                        const subject = encodeURIComponent(`Re: Your application for ${jobTitle}`);
-                        const body = encodeURIComponent(
-                          `Hi ${name},\n\nThank you for your interest in the ${jobTitle} position.\n\n`
-                        );
-                        window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
+          {/* ── Action feedback ── */}
+          {actionFeedback && (
+            <Banner
+              type={
+                actionFeedback.type === "error"
+                  ? "critical"
+                  : actionFeedback.type === "warning"
+                    ? "warning"
+                    : "success"
+              }
+              subtle
+              title={actionFeedback.message}
+              dismissible
+              onDismiss={() => setActionFeedback(null)}
+            />
+          )}
+
+          {/* ── Body ── */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Main scrollable content */}
+            <main className="flex-1 overflow-y-auto">
+              {/* Loading skeleton */}
+              {loading && (
+                <div className="flex flex-col gap-10 p-8">
+                  <div className="flex items-center gap-4">
+                    <Skeleton variant="circular" className="h-16 w-16" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-48" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Skeleton className="h-5 w-24" />
+                    <div className="flex gap-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} className="h-10 w-24 rounded-full" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-20 w-full rounded-[var(--radius-card)]" />
+                  </div>
+                  <div className="space-y-3">
+                    <Skeleton className="h-5 w-28" />
+                    <Skeleton className="h-16 w-full rounded-[var(--radius-card)]" />
+                  </div>
+                </div>
+              )}
+
+              {/* Error */}
+              {!loading && error && (
+                <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
+                  <p className="text-body text-[var(--foreground-error)]">{error}</p>
+                  <Button variant="tertiary" onClick={onClose}>
+                    Close
+                  </Button>
+                </div>
+              )}
+
+              {/* Content */}
+              {!loading && !error && seeker && activeApp && (
+                <div className="flex flex-col gap-10 p-8">
+                  {/* Profile header */}
+                  <CandidateProfileHeader
+                    name={candidateName}
+                    email={seeker.account.email}
+                    avatar={seeker.account.avatar}
+                    jobTitle={activeApp.job.title}
+                    appliedAt={activeApp.createdAt}
+                    pronouns={seeker.account.pronouns}
+                  />
+
+                  {/* Hiring stages */}
+                  <HiringStagesSection
+                    stages={jobStages}
+                    currentStage={displayStage}
+                    scores={activeApp.scores}
+                    averageScore={averageScore}
+                    selectedStageId={reviewStageId}
+                    onOpenReview={handleOpenReview}
+                    appliedAt={activeApp.createdAt}
+                  />
+
+                  {/* Offer management (when offer exists) */}
+                  {activeApp.offer && (
+                    <OfferManagementSection
+                      offer={
+                        activeApp.offer as Parameters<typeof OfferManagementSection>[0]["offer"]
+                      }
+                      candidateName={candidateName}
+                      onOfferSent={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: queryKeys.canopy.candidates.all,
+                        });
+                        onStageChanged?.();
                       }}
-                      aria-label="Email candidate"
-                    >
-                      <EnvelopeSimple size={20} weight="bold" />
-                    </Button>
-                  </SimpleTooltip>
+                      onOfferWithdrawn={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: queryKeys.canopy.candidates.all,
+                        });
+                        onStageChanged?.();
+                      }}
+                    />
+                  )}
+
+                  {/* Interviews */}
+                  {activeApp.interviews && activeApp.interviews.length > 0 && (
+                    <InterviewsSection
+                      interviews={activeApp.interviews}
+                      applicationId={activeApp.id}
+                      onInterviewUpdated={() => {
+                        queryClient.invalidateQueries({
+                          queryKey: queryKeys.canopy.candidates.all,
+                        });
+                      }}
+                    />
+                  )}
+
+                  {/* AI Summary */}
+                  <AISummarySection summary={seeker.aiSummary} />
+
+                  {/* Skills & Certifications */}
+                  <SkillsCertificationsSection
+                    skills={seeker.skills}
+                    greenSkills={seeker.greenSkills}
+                    certifications={seeker.certifications}
+                    yearsExperience={seeker.yearsExperience}
+                  />
+
+                  {/* Documents */}
+                  {documentFiles.length > 0 && <DocumentsSection files={documentFiles} />}
+
+                  {/* Contact info */}
+                  <ContactInfoSection
+                    name={seeker.account.name}
+                    email={seeker.account.email}
+                    phone={seeker.account.phone}
+                    pronouns={seeker.account.pronouns}
+                    location={seeker.account.location}
+                    linkedinUrl={seeker.account.linkedinUrl}
+                  />
+
+                  {/* About */}
+                  <AboutSection
+                    createdAt={activeApp.createdAt}
+                    source={activeApp.source}
+                    jobCategory={activeApp.job.climateCategory}
+                  />
+                </div>
+              )}
+            </main>
+
+            {/* Side panel (conditional — widens the sheet) */}
+            {panelType && seeker && (
+              <aside
+                className={cn(
+                  "flex shrink-0 flex-col border-l border-[var(--border-muted)] bg-[var(--background-default)] transition-[width] duration-300 ease-in-out",
+                  isExpanded ? "w-[480px]" : "w-[380px]"
                 )}
-
-                {/* Schedule Interview */}
-                <SimpleTooltip content="Schedule Interview">
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => setInterviewModalOpen(true)}
-                    disabled={isActionLoading}
-                    aria-label="Schedule interview"
-                  >
-                    <CalendarPlus size={20} weight="bold" />
-                  </Button>
-                </SimpleTooltip>
-
-                {/* Reject */}
-                <SimpleTooltip content="Reject">
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={handleReject}
-                    disabled={isActionLoading}
-                    aria-label="Reject candidate"
-                  >
-                    <Prohibit size={20} weight="bold" />
-                  </Button>
-                </SimpleTooltip>
-              </>
+              >
+                {panelType === "review" && activeApp && orgMemberId && (
+                  <ApplicationReviewPanel
+                    applicationId={activeApp.id}
+                    seekerId={seeker.id}
+                    scores={activeApp.scores}
+                    averageScore={averageScore}
+                    orgMemberId={orgMemberId}
+                    candidateName={candidateName}
+                    currentStage={displayStage}
+                    jobId={activeApp.job.id}
+                    isActionLoading={isActionLoading}
+                    onQualify={handleQualify}
+                    onDisqualify={handleReject}
+                    onClose={handleClosePanel}
+                  />
+                )}
+                {panelType === "comments" && (
+                  <CommentsPanel
+                    seekerId={seeker.id}
+                    notes={seeker.notes}
+                    onClose={handleClosePanel}
+                  />
+                )}
+                {panelType === "todo" && (
+                  <TodoPanel
+                    stages={jobStages}
+                    applicationId={activeApp?.id}
+                    onClose={handleClosePanel}
+                  />
+                )}
+                {panelType === "history" && (
+                  <HistoryPanel seekerId={seeker.id} onClose={handleClosePanel} />
+                )}
+              </aside>
             )}
           </div>
-        </div>
+        </SheetContent>
+      </Sheet>
 
-        {/* ── Action feedback ── */}
-        {actionFeedback && (
-          <Banner
-            type={
-              actionFeedback.type === "error"
-                ? "critical"
-                : actionFeedback.type === "warning"
-                  ? "warning"
-                  : "success"
-            }
-            subtle
-            title={actionFeedback.message}
-            dismissible
-            onDismiss={() => setActionFeedback(null)}
-          />
-        )}
-
-        {/* ── Body ── */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Main scrollable content */}
-          <main className="flex-1 overflow-y-auto">
-            {/* Loading skeleton */}
-            {loading && (
-              <div className="flex flex-col gap-10 p-8">
-                <div className="flex items-center gap-4">
-                  <Skeleton variant="circular" className="h-16 w-16" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <Skeleton className="h-5 w-24" />
-                  <div className="flex gap-2">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Skeleton key={i} className="h-10 w-24 rounded-full" />
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <Skeleton className="h-5 w-32" />
-                  <Skeleton className="h-20 w-full rounded-[var(--radius-card)]" />
-                </div>
-                <div className="space-y-3">
-                  <Skeleton className="h-5 w-28" />
-                  <Skeleton className="h-16 w-full rounded-[var(--radius-card)]" />
-                </div>
-              </div>
-            )}
-
-            {/* Error */}
-            {!loading && error && (
-              <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
-                <p className="text-body text-[var(--foreground-error)]">{error}</p>
-                <Button variant="tertiary" onClick={onClose}>
-                  Close
-                </Button>
-              </div>
-            )}
-
-            {/* Content */}
-            {!loading && !error && seeker && activeApp && (
-              <div className="flex flex-col gap-10 p-8">
-                {/* Profile header */}
-                <CandidateProfileHeader
-                  name={candidateName}
-                  email={seeker.account.email}
-                  avatar={seeker.account.avatar}
-                  jobTitle={activeApp.job.title}
-                  appliedAt={activeApp.createdAt}
-                  pronouns={seeker.account.pronouns}
-                />
-
-                {/* Hiring stages */}
-                <HiringStagesSection
-                  stages={jobStages}
-                  currentStage={displayStage}
-                  scores={activeApp.scores}
-                  averageScore={averageScore}
-                  selectedStageId={reviewStageId}
-                  onOpenReview={handleOpenReview}
-                  appliedAt={activeApp.createdAt}
-                />
-
-                {/* AI Summary */}
-                <AISummarySection summary={seeker.aiSummary} />
-
-                {/* Skills & Certifications */}
-                <SkillsCertificationsSection
-                  skills={seeker.skills}
-                  greenSkills={seeker.greenSkills}
-                  certifications={seeker.certifications}
-                  yearsExperience={seeker.yearsExperience}
-                />
-
-                {/* Documents */}
-                {documentFiles.length > 0 && <DocumentsSection files={documentFiles} />}
-
-                {/* Contact info */}
-                <ContactInfoSection
-                  name={seeker.account.name}
-                  email={seeker.account.email}
-                  phone={seeker.account.phone}
-                  pronouns={seeker.account.pronouns}
-                  location={seeker.account.location}
-                  linkedinUrl={seeker.account.linkedinUrl}
-                />
-
-                {/* About */}
-                <AboutSection
-                  createdAt={activeApp.createdAt}
-                  source={activeApp.source}
-                  jobCategory={activeApp.job.climateCategory}
-                />
-              </div>
-            )}
-          </main>
-
-          {/* Side panel (conditional — widens the sheet) */}
-          {panelType && seeker && (
-            <aside
-              className={cn(
-                "flex shrink-0 flex-col border-l border-[var(--border-muted)] bg-[var(--background-default)] transition-[width] duration-300 ease-in-out",
-                isExpanded ? "w-[480px]" : "w-[380px]"
-              )}
-            >
-              {panelType === "review" && activeApp && orgMemberId && (
-                <ApplicationReviewPanel
-                  applicationId={activeApp.id}
-                  seekerId={seeker.id}
-                  scores={activeApp.scores}
-                  averageScore={averageScore}
-                  orgMemberId={orgMemberId}
-                  candidateName={candidateName}
-                  currentStage={displayStage}
-                  jobId={activeApp.job.id}
-                  isActionLoading={isActionLoading}
-                  onQualify={handleQualify}
-                  onDisqualify={handleReject}
-                  onClose={handleClosePanel}
-                />
-              )}
-              {panelType === "comments" && (
-                <CommentsPanel
-                  seekerId={seeker.id}
-                  notes={seeker.notes}
-                  onClose={handleClosePanel}
-                />
-              )}
-              {panelType === "todo" && (
-                <TodoPanel
-                  stages={jobStages}
-                  applicationId={activeApp?.id}
-                  onClose={handleClosePanel}
-                />
-              )}
-              {panelType === "history" && (
-                <HistoryPanel seekerId={seeker.id} onClose={handleClosePanel} />
-              )}
-            </aside>
-          )}
-        </div>
-      </SheetContent>
+      {/* Modals rendered outside Sheet to avoid Radix portal z-index / pointer-events blocking */}
 
       {/* Interview Scheduling Modal */}
       {seeker && activeApp && (
@@ -840,17 +1001,24 @@ export function CandidatePreviewSheet({
           }}
           onSchedule={async (data) => {
             try {
+              const firstSlot = data.timeSlots[0];
+              if (!firstSlot?.start) throw new Error("No time slot selected");
+              const scheduledAt =
+                firstSlot.start instanceof Date
+                  ? firstSlot.start.toISOString()
+                  : new Date(firstSlot.start).toISOString();
+
               const res = await fetch("/api/canopy/interviews", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   applicationId: activeApp.id,
-                  title: data.title,
+                  interviewerId: orgMemberId,
+                  scheduledAt,
                   duration: data.duration,
-                  videoProvider: data.videoProvider,
-                  instructions: data.instructions,
-                  internalNotes: data.internalNotes,
-                  scheduledAt: data.timeSlots[0]?.start,
+                  type: data.videoProvider === "none" ? "PHONE" : "VIDEO",
+                  meetingLink: data.videoProvider !== "none" ? undefined : undefined,
+                  notes: data.instructions || data.internalNotes || undefined,
                 }),
               });
               if (!res.ok) throw new Error("Failed to schedule interview");
@@ -957,6 +1125,6 @@ export function CandidatePreviewSheet({
           }}
         />
       )}
-    </Sheet>
+    </>
   );
 }

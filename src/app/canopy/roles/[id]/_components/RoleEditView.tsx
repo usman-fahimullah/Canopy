@@ -115,23 +115,9 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
       />
 
       {/* Main Content */}
-      <main className="min-w-0 bg-[var(--primitive-neutral-100)] px-4 py-6 md:px-8 lg:px-12">
-        {/* Job Post Tab */}
-        {activeTab === "job-post" && <JobPostTab jobPostState={jobPostState} />}
-
-        {/* Apply Form Tab */}
-        {activeTab === "apply-form" && (
-          <ApplyFormTab
-            roleId={roleId}
-            applyFormState={applyFormState}
-            jobStatus={jobData?.status ?? "DRAFT"}
-            saving={saving}
-            onSave={handleSaveRole}
-          />
-        )}
-
-        {/* Candidates Tab */}
-        {activeTab === "candidates" && (
+      {activeTab === "candidates" ? (
+        /* Candidates tab: full-bleed — no padding so kanban goes edge-to-edge */
+        <main className="min-w-0 bg-[var(--primitive-neutral-100)]">
           <CandidatesTab
             roleId={roleId}
             jobData={jobData}
@@ -139,16 +125,34 @@ export function RoleEditView({ roleId }: RoleEditViewProps) {
             setApplications={setApplications}
             onCandidateAdded={handleCandidateAdded}
           />
-        )}
-
-        {/* Footer */}
-        <div className="mt-12 text-center">
-          <p className="text-caption">
-            <span className="text-foreground-brand">Make an </span>
-            <span className="font-semibold text-foreground-brand">Impact.</span>
-          </p>
-        </div>
-      </main>
+          <div className="py-4 text-center">
+            <p className="text-caption">
+              <span className="text-foreground-brand">Make an </span>
+              <span className="font-semibold text-foreground-brand">Impact.</span>
+            </p>
+          </div>
+        </main>
+      ) : (
+        /* Other tabs: padded content area */
+        <main className="min-w-0 bg-[var(--primitive-neutral-100)] px-4 py-6 md:px-8 lg:px-12">
+          {activeTab === "job-post" && <JobPostTab jobPostState={jobPostState} />}
+          {activeTab === "apply-form" && (
+            <ApplyFormTab
+              roleId={roleId}
+              applyFormState={applyFormState}
+              jobStatus={jobData?.status ?? "DRAFT"}
+              saving={saving}
+              onSave={handleSaveRole}
+            />
+          )}
+          <div className="mt-12 text-center">
+            <p className="text-caption">
+              <span className="text-foreground-brand">Make an </span>
+              <span className="font-semibold text-foreground-brand">Impact.</span>
+            </p>
+          </div>
+        </main>
+      )}
 
       {/* Job Settings Modal */}
       {jobData && (

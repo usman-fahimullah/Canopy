@@ -30,7 +30,7 @@
 | Auth                | Clerk                    | Multi-tenant, team invites     |
 | Career Page Builder | Craft.js                 | Custom blocks, JSON storage    |
 | Kanban/Drag-Drop    | dnd-kit                  | Pipeline management            |
-| File Storage        | Uploadthing or S3        | Resume, media uploads          |
+| File Storage        | Supabase Storage         | Resume, media uploads          |
 | Email               | Resend                   | Transactional + templates      |
 | Calendar            | Cal.com or Nylas         | Google + Outlook sync          |
 | AI                  | Claude API / OpenAI      | Sourcing, matching, generation |
@@ -780,10 +780,6 @@ DATABASE_URL="postgresql://..."
 # Clerk Auth
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_..."
 CLERK_SECRET_KEY="sk_..."
-
-# File Storage
-UPLOADTHING_SECRET="..."
-UPLOADTHING_APP_ID="..."
 
 # Email
 RESEND_API_KEY="..."
