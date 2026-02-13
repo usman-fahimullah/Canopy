@@ -28,23 +28,23 @@ The Trails Design System exists to prevent visual drift and one-off implementati
 
 Every UI element MUST use design system components when they exist.
 
-| Pattern | Use This | Never Use |
-| ------- | -------- | --------- |
-| Buttons | `<Button variant="...">` | Raw `<button>` with classes |
-| Inputs | `<Input>`, `<SearchInput>` | Raw `<input>` |
-| Selects | `<Dropdown>`, `<Select>` | Raw `<select>` or custom div |
-| Checkboxes | `<Checkbox>`, `<CheckboxWithLabel>` | Raw `<input type="checkbox">` |
-| Switches | `<Switch>`, `<SwitchWithLabel>` | Custom toggle div |
-| Cards | `<Card>`, `<CardContent>` | `<div className="rounded-... border-...">` |
-| Badges | `<Badge>`, `<StageBadge>` | Colored span with inline styles |
-| Tables | `<DataTable>`, `<EnhancedDataTable>` | Raw `<table>` or mapped divs |
-| Modals | `<Modal>`, `<Dialog>` | Custom overlay div |
-| Tooltips | `<SimpleTooltip>`, `<Tooltip>` | Title attribute or custom hover |
-| Tabs | `<Tabs>`, `<SegmentedController>` | Row of styled buttons |
-| Avatars | `<Avatar>`, `<AvatarGroup>` | Custom rounded image div |
-| Tags | `<Chip>`, `<CategoryTag>`, `<PathwayTag>` | Custom styled span |
-| Loading | `<Spinner>`, `<Skeleton>` | Custom animation |
-| Empty states | `<EmptyState>` variants | Custom "no data" div |
+| Pattern      | Use This                                  | Never Use                                  |
+| ------------ | ----------------------------------------- | ------------------------------------------ |
+| Buttons      | `<Button variant="...">`                  | Raw `<button>` with classes                |
+| Inputs       | `<Input>`, `<SearchInput>`                | Raw `<input>`                              |
+| Selects      | `<Dropdown>`, `<Select>`                  | Raw `<select>` or custom div               |
+| Checkboxes   | `<Checkbox>`, `<CheckboxWithLabel>`       | Raw `<input type="checkbox">`              |
+| Switches     | `<Switch>`, `<SwitchWithLabel>`           | Custom toggle div                          |
+| Cards        | `<Card>`, `<CardContent>`                 | `<div className="rounded-... border-...">` |
+| Badges       | `<Badge>`, `<StageBadge>`                 | Colored span with inline styles            |
+| Tables       | `<DataTable>`, `<EnhancedDataTable>`      | Raw `<table>` or mapped divs               |
+| Modals       | `<Modal>`, `<Dialog>`                     | Custom overlay div                         |
+| Tooltips     | `<SimpleTooltip>`, `<Tooltip>`            | Title attribute or custom hover            |
+| Tabs         | `<Tabs>`, `<SegmentedController>`         | Row of styled buttons                      |
+| Avatars      | `<Avatar>`, `<AvatarGroup>`               | Custom rounded image div                   |
+| Tags         | `<Chip>`, `<CategoryTag>`, `<PathwayTag>` | Custom styled span                         |
+| Loading      | `<Spinner>`, `<Skeleton>`                 | Custom animation                           |
+| Empty states | `<EmptyState>` variants                   | Custom "no data" div                       |
 
 ```tsx
 // ❌ WRONG - bypassing design system
@@ -70,28 +70,28 @@ TIER 1: Primitive tokens   →  --primitive-green-600 (LAST RESORT)
 
 **Token Selection Rules:**
 
-| Context | Use This Tier | Example |
-| ------- | ------------- | ------- |
-| Button styling | Component | `--button-primary-background` |
-| Card backgrounds | Component | `--card-background` |
-| Input borders | Component | `--input-border-focus` |
-| General text | Semantic | `--foreground-default` |
-| Status colors | Semantic | `--foreground-error` |
-| Backgrounds | Semantic | `--background-subtle` |
-| One-offs (documented) | Primitive | `--primitive-green-600` |
+| Context               | Use This Tier | Example                       |
+| --------------------- | ------------- | ----------------------------- |
+| Button styling        | Component     | `--button-primary-background` |
+| Card backgrounds      | Component     | `--card-background`           |
+| Input borders         | Component     | `--input-border-focus`        |
+| General text          | Semantic      | `--foreground-default`        |
+| Status colors         | Semantic      | `--foreground-error`          |
+| Backgrounds           | Semantic      | `--background-subtle`         |
+| One-offs (documented) | Primitive     | `--primitive-green-600`       |
 
 ```tsx
 // ❌ WRONG - primitive when component token exists
-className="bg-[var(--primitive-green-800)]"
+className = "bg-[var(--primitive-green-800)]";
 
 // ✅ CORRECT - component token
-className="bg-[var(--button-primary-background)]"
+className = "bg-[var(--button-primary-background)]";
 
 // ❌ WRONG - hardcoded hex
-className="text-[#DC2626]"
+className = "text-[#DC2626]";
 
 // ✅ CORRECT - semantic token
-className="text-[var(--foreground-error)]"
+className = "text-[var(--foreground-error)]";
 ```
 
 ---
@@ -100,13 +100,13 @@ className="text-[var(--foreground-error)]"
 
 All colors, spacing, radius, and shadows must use tokens or Tailwind scale.
 
-| Property | Banned Pattern | Correct Pattern |
-| -------- | -------------- | --------------- |
-| Colors | `#0A3D2C`, `rgb(...)` | `var(--token-name)` |
-| Spacing | `p-[24px]`, `gap-[16px]` | `p-6`, `gap-4` (Tailwind scale) |
-| Border radius | `rounded-[16px]` | `rounded-[var(--radius-card)]` |
-| Shadows | `shadow-[0_4px_...]` | `shadow-[var(--shadow-card)]` |
-| Font sizes | `text-[18px]` | `text-body`, `text-caption` |
+| Property      | Banned Pattern           | Correct Pattern                 |
+| ------------- | ------------------------ | ------------------------------- |
+| Colors        | `#0A3D2C`, `rgb(...)`    | `var(--token-name)`             |
+| Spacing       | `p-[24px]`, `gap-[16px]` | `p-6`, `gap-4` (Tailwind scale) |
+| Border radius | `rounded-[16px]`         | `rounded-[var(--radius-card)]`  |
+| Shadows       | `shadow-[0_4px_...]`     | `shadow-[var(--shadow-card)]`   |
+| Font sizes    | `text-[18px]`            | `text-body`, `text-caption`     |
 
 ```tsx
 // ❌ WRONG - hardcoded values
@@ -115,6 +115,33 @@ All colors, spacing, radius, and shadows must use tokens or Tailwind scale.
 // ✅ CORRECT - tokens and Tailwind scale
 <div className="rounded-[var(--radius-card)] p-6 shadow-[var(--shadow-card)]">
 ```
+
+---
+
+### 3a. Shadow and Border Are Mutually Exclusive
+
+An element uses **either** a shadow **or** a border for its container treatment — never both together. Combining them creates visual noise and breaks the design language.
+
+| Treatment       | When to Use                                         | Example                                 |
+| --------------- | --------------------------------------------------- | --------------------------------------- |
+| **Shadow only** | Elevated cards, floating elements, candidate cards  | `shadow-card`                           |
+| **Border only** | Inline sections, form fields, dividers, table cells | `border border-[var(--border-default)]` |
+
+```tsx
+// ❌ WRONG — shadow + border on the same element
+<div className="border border-[var(--border-default)] shadow-card">
+
+// ❌ WRONG — border added to a card with shadow
+<Card className="border border-[var(--border-muted)]">
+
+// ✅ CORRECT — shadow only for elevated surfaces
+<div className="shadow-card rounded-xl bg-[var(--card-background)]">
+
+// ✅ CORRECT — border only for inline containers
+<div className="border border-[var(--border-default)] rounded-lg bg-[var(--background-subtle)]">
+```
+
+**The rule:** If it has `shadow-*`, it must NOT have `border`. If it has `border`, it must NOT have `shadow-*`. The only exception is `shadow-focus` (focus rings), which may appear on any element via `:focus-visible`.
 
 ---
 
@@ -132,6 +159,7 @@ import { MagnifyingGlass } from "@phosphor-icons/react";
 ```
 
 **Import Pattern:**
+
 ```tsx
 // Import from @phosphor-icons/react
 import { IconName, AnotherIcon } from "@phosphor-icons/react";
@@ -148,18 +176,18 @@ import { IconName, AnotherIcon } from "@phosphor-icons/react";
 
 All text must use the defined typography scale classes.
 
-| Use Case | Class | Size |
-| -------- | ----- | ---- |
-| Hero headlines | `text-display` | 72px |
-| Page titles | `text-heading-lg` | 48px |
-| Section headers | `text-heading-md` | 36px |
-| Card headers | `text-heading-sm` | 24px |
-| Emphasized body | `text-body-strong` | 18px bold |
-| Default body | `text-body` | 18px |
-| Secondary body | `text-body-sm` | 16px |
-| Labels | `text-caption-strong` | 14px bold |
-| Captions | `text-caption` | 14px |
-| Fine print | `text-caption-sm` | 12px |
+| Use Case        | Class                 | Size      |
+| --------------- | --------------------- | --------- |
+| Hero headlines  | `text-display`        | 72px      |
+| Page titles     | `text-heading-lg`     | 48px      |
+| Section headers | `text-heading-md`     | 36px      |
+| Card headers    | `text-heading-sm`     | 24px      |
+| Emphasized body | `text-body-strong`    | 18px bold |
+| Default body    | `text-body`           | 18px      |
+| Secondary body  | `text-body-sm`        | 16px      |
+| Labels          | `text-caption-strong` | 14px bold |
+| Captions        | `text-caption`        | 14px      |
+| Fine print      | `text-caption-sm`     | 12px      |
 
 ```tsx
 // ❌ WRONG - custom font sizes
@@ -178,6 +206,7 @@ All text must use the defined typography scale classes.
 All implementations must work in dark mode automatically via token usage.
 
 **Verification Required:**
+
 - [ ] No hardcoded colors (use tokens)
 - [ ] No hardcoded backgrounds (use semantic tokens)
 - [ ] Borders use token-based colors
@@ -198,15 +227,15 @@ All implementations must work in dark mode automatically via token usage.
 
 All interactive components must handle all visual states:
 
-| State | Required | Tokens Available |
-| ----- | -------- | ---------------- |
-| Default | ✅ | `--*-background`, `--*-foreground` |
-| Hover | ✅ | `--*-background-hover` |
-| Focus | ✅ | `--*-border-focus`, `--shadow-focus` |
-| Active | ✅ | `--*-background-active` |
-| Disabled | ✅ | `--*-disabled-*` |
-| Loading | For async | `<Spinner>`, `<Skeleton>` |
-| Error | For forms | `--*-error` tokens |
+| State    | Required  | Tokens Available                     |
+| -------- | --------- | ------------------------------------ |
+| Default  | ✅        | `--*-background`, `--*-foreground`   |
+| Hover    | ✅        | `--*-background-hover`               |
+| Focus    | ✅        | `--*-border-focus`, `--shadow-focus` |
+| Active   | ✅        | `--*-background-active`              |
+| Disabled | ✅        | `--*-disabled-*`                     |
+| Loading  | For async | `<Spinner>`, `<Skeleton>`            |
+| Error    | For forms | `--*-error` tokens                   |
 
 ---
 
@@ -221,6 +250,7 @@ All layouts must be responsive using Tailwind breakpoints:
 ```
 
 **Breakpoint Scale:**
+
 - `sm`: 640px
 - `md`: 768px
 - `lg`: 1024px
@@ -233,17 +263,18 @@ All layouts must be responsive using Tailwind breakpoints:
 
 ### Never Commit These
 
-| Pattern | Why Blocked | Fix |
-| ------- | ----------- | --- |
-| Raw `<button>` with styling | Bypasses Button component | Use `<Button>` |
-| Raw `<input>` with styling | Bypasses Input component | Use `<Input>` |
-| `className` > 150 chars | Re-implementing component | Extract to component |
-| Hardcoded hex `#XXXXXX` | Breaks dark mode | Use CSS variable token |
-| `rounded-[16px]` | Inconsistent radius | Use `--radius-card` |
-| `p-[24px]`, `gap-[16px]` | Inconsistent spacing | Use Tailwind scale |
-| Lucide/Heroicons imports | Wrong icon library | Use Phosphor |
-| Custom card div | Bypasses Card component | Use `<Card>` |
-| `text-[15px]` | Off-scale typography | Use typography class |
+| Pattern                               | Why Blocked                              | Fix                    |
+| ------------------------------------- | ---------------------------------------- | ---------------------- |
+| Raw `<button>` with styling           | Bypasses Button component                | Use `<Button>`         |
+| Raw `<input>` with styling            | Bypasses Input component                 | Use `<Input>`          |
+| `className` > 150 chars               | Re-implementing component                | Extract to component   |
+| Hardcoded hex `#XXXXXX`               | Breaks dark mode                         | Use CSS variable token |
+| `rounded-[16px]`                      | Inconsistent radius                      | Use `--radius-card`    |
+| `p-[24px]`, `gap-[16px]`              | Inconsistent spacing                     | Use Tailwind scale     |
+| Lucide/Heroicons imports              | Wrong icon library                       | Use Phosphor           |
+| Custom card div                       | Bypasses Card component                  | Use `<Card>`           |
+| `text-[15px]`                         | Off-scale typography                     | Use typography class   |
+| `border ... shadow-*` on same element | Shadow and border are mutually exclusive | Use one or the other   |
 
 ---
 
@@ -262,6 +293,7 @@ All layouts must be responsive using Tailwind breakpoints:
 ```
 
 **Action when this happens:**
+
 1. Stop and check `/src/components/ui/index.ts` for existing component
 2. If exists, use it
 3. If not, consider creating a new design system component
@@ -273,24 +305,26 @@ All layouts must be responsive using Tailwind breakpoints:
 If a one-off is truly necessary (rare), document it:
 
 ```tsx
-{/* One-off: Promotional gradient banner - no design system component exists
-    TODO: Extract to <PromoBanner> if pattern is reused */}
+{
+  /* One-off: Promotional gradient banner - no design system component exists
+    TODO: Extract to <PromoBanner> if pattern is reused */
+}
 <div className="bg-gradient-to-r from-[var(--primitive-green-700)] to-[var(--primitive-blue-600)]">
   {children}
-</div>
+</div>;
 ```
 
 ---
 
 ## Design System File Locations
 
-| File | Purpose |
-| ---- | ------- |
-| `/src/components/ui/index.ts` | Component exports (check before building) |
-| `/src/app/globals.css` | CSS custom properties (token definitions) |
-| `/src/lib/tokens.ts` | TypeScript token access |
-| `/src/lib/design-system-nav.ts` | Design system documentation navigation |
-| `/src/app/design-system/` | Component documentation pages |
+| File                            | Purpose                                   |
+| ------------------------------- | ----------------------------------------- |
+| `/src/components/ui/index.ts`   | Component exports (check before building) |
+| `/src/app/globals.css`          | CSS custom properties (token definitions) |
+| `/src/lib/tokens.ts`            | TypeScript token access                   |
+| `/src/lib/design-system-nav.ts` | Design system documentation navigation    |
+| `/src/app/design-system/`       | Component documentation pages             |
 
 ---
 
@@ -299,6 +333,7 @@ If a one-off is truly necessary (rare), document it:
 Before marking any UI task complete:
 
 ### Component Usage
+
 - [ ] All buttons use `<Button>` component
 - [ ] All inputs use design system input components
 - [ ] All selects use `<Dropdown>` or `<Select>`
@@ -307,28 +342,34 @@ Before marking any UI task complete:
 - [ ] All modals use `<Modal>` or `<Dialog>`
 
 ### Token Compliance
+
 - [ ] No hardcoded hex colors
 - [ ] Component tokens used when available
 - [ ] Semantic tokens for general styling
 - [ ] Primitives only with documentation comment
 
 ### Styling
+
 - [ ] No className > 150 characters
 - [ ] Tailwind spacing scale used (not custom px)
 - [ ] Typography classes used (not custom sizes)
 - [ ] Border radius uses tokens
+- [ ] Shadow and border not combined on same element
 
 ### Icons
+
 - [ ] Only Phosphor icons used
 - [ ] No Lucide, Heroicons, or other libraries
 - [ ] Icons properly sized with `size` prop
 
 ### States & Responsiveness
+
 - [ ] All interactive states implemented
 - [ ] Dark mode verified
 - [ ] Responsive breakpoints applied
 - [ ] Loading/empty/error states exist
 
 ### Documentation
+
 - [ ] Design system docs updated if component modified
 - [ ] One-offs documented with TODO comment

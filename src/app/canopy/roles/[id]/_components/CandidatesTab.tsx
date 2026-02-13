@@ -503,19 +503,19 @@ export function CandidatesTab({
                 matchScore={app.matchScore ?? undefined}
                 appliedDate={app.createdAt}
               />
-              {/* Activity row */}
-              {(lastComment || scheduledInterview) && (
-                <CandidateActivity
-                  lastComment={lastComment}
-                  scheduledInterview={scheduledInterview}
-                  className="mt-2"
-                />
-              )}
-              {/* Days in stage (Story 5.6) */}
-              <DaysInStage days={daysInStage} compact className="mt-2" />
+              {/* Activity + Days in stage row */}
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                {(lastComment || scheduledInterview) && (
+                  <CandidateActivity
+                    lastComment={lastComment}
+                    scheduledInterview={scheduledInterview}
+                  />
+                )}
+                <DaysInStage days={daysInStage} compact />
+              </div>
               {/* Scoring indicator (Story 5.8) */}
               {!hasScores && (
-                <span className="mt-1 inline-flex items-center gap-1 text-caption text-[var(--foreground-warning)]">
+                <span className="mt-1.5 inline-flex items-center gap-1 text-caption text-[var(--foreground-warning)]">
                   <Eye size={12} weight="bold" />
                   Needs scoring
                 </span>
@@ -796,7 +796,7 @@ export function CandidatesTab({
                   title={stage.name}
                   count={0}
                   stage={mapStageToKanbanType(stage.id)}
-                  className="min-h-0 w-auto flex-1 [&>div:last-child]:hidden"
+                  className="min-h-0 min-w-[300px] [&>div:last-child]:hidden"
                 >
                   <></>
                 </KanbanColumn>
@@ -839,8 +839,8 @@ export function CandidatesTab({
             onItemsChange={handleKanbanItemsChange}
             onDragEnd={handleKanbanDragEnd}
             emptyMessage="No candidates"
-            className="flex-1 rounded-none pb-0"
-            columnClassName="w-auto flex-1"
+            className="h-[calc(100vh-180px)] flex-1 rounded-none"
+            columnClassName="min-w-[300px]"
           />
         )}
 

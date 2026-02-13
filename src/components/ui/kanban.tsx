@@ -34,11 +34,11 @@ const KanbanBoard = React.forwardRef<HTMLDivElement, KanbanBoardProps>(
     <div
       ref={ref}
       className={cn(
-        // Flush columns with no gap - columns handle their own dividers
-        "flex overflow-x-auto pb-4",
+        // Horizontal scroll container — columns set their own min-width
+        "flex overflow-x-auto",
         // Rounded corners on the board container, not individual columns
         "overflow-hidden rounded-xl",
-        // No outer border - columns handle dividers internally
+        // Custom scrollbar styling
         "scrollbar-thin scrollbar-track-background-muted scrollbar-thumb-border-emphasis",
         className
       )}
@@ -64,7 +64,7 @@ interface KanbanColumnSkeletonProps {
 const KanbanColumnSkeleton = ({ index = 0 }: KanbanColumnSkeletonProps) => (
   <div
     className={cn(
-      "flex w-72 flex-shrink-0 animate-fade-in flex-col",
+      "flex min-w-[280px] flex-1 animate-fade-in flex-col",
       "bg-kanban-column-bg dark:bg-surface-sunken",
       // Vertical divider between columns (not on last) - uses neutral-100
       "border-r border-[var(--primitive-neutral-100)] last:border-r-0 dark:border-[var(--primitive-neutral-800)]"
@@ -237,9 +237,8 @@ const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
       <div
         ref={ref}
         className={cn(
-          "flex w-72 flex-shrink-0 flex-col",
+          "flex min-w-[280px] flex-1 flex-shrink-0 flex-col",
           "bg-kanban-column-bg dark:bg-surface-sunken",
-          // No rounded corners - board container handles rounding
           // Vertical divider between columns - uses neutral-100 (lighter)
           "border-r border-[var(--primitive-neutral-100)] last:border-r-0 dark:border-[var(--primitive-neutral-800)]",
           "transition-colors duration-fast",
@@ -248,7 +247,7 @@ const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
         {...props}
       >
         {/* Header - no bottom border, flows into cards area */}
-        <div className="flex items-center justify-between p-3">
+        <div className="flex items-center justify-between px-3 py-2.5">
           <div className="flex items-center gap-2">
             {displayIcon ? (
               <span className={colorClass}>{displayIcon}</span>
@@ -267,9 +266,7 @@ const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
           </div>
           {headerActions}
         </div>
-        <div className="max-h-[calc(100vh-200px)] min-h-[200px] flex-1 space-y-2 overflow-y-auto p-2">
-          {children}
-        </div>
+        <div className="min-h-[120px] flex-1 space-y-2.5 overflow-y-auto p-2.5">{children}</div>
       </div>
     );
   }

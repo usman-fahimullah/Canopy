@@ -381,20 +381,20 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
         className={cn(
           // Base
           "group relative rounded-xl bg-[var(--card-background)] text-[var(--card-foreground)]",
-          // Shadow instead of border
+          // Shadow only — no border
           "shadow-card",
           // Transitions
-          "transition-all duration-200 ease-[var(--ease-default)]",
+          "ease-[var(--ease-default)] transition-all duration-200",
           // Hover — subtle lift + stronger shadow
-          "hover:-translate-y-px hover:shadow-card-hover",
+          "hover:-translate-y-0.5 hover:shadow-card-hover",
           // Focus
           "focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none",
           // Active
           "active:scale-[0.995] active:shadow-card",
           // Cursor
           "cursor-pointer",
-          // Variant sizing
-          variant === "compact" ? "p-4" : "p-5",
+          // Variant sizing — more generous padding
+          variant === "compact" ? "px-4 py-3.5" : "p-5",
           // Selected state — use ring for selection indicator (no border)
           selected && "bg-[var(--card-background-selected)] ring-2 ring-[var(--border-brand)]",
           className
@@ -421,7 +421,7 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
         {showDragHandle && (
           <div
             aria-hidden="true"
-            className="absolute right-3 top-3 text-[var(--foreground-subtle)] opacity-0 transition-opacity duration-[var(--duration-fast)] group-hover:opacity-100"
+            className="duration-[var(--duration-fast)] absolute right-3 top-3 text-[var(--foreground-subtle)] opacity-0 transition-opacity group-hover:opacity-100"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
               <circle cx="3" cy="3" r="1.5" />
@@ -893,35 +893,44 @@ const CandidateKanbanHeader = React.forwardRef<HTMLDivElement, CandidateKanbanHe
     const hasMetaInfo = rating !== undefined || matchScore !== undefined || appliedDate;
 
     return (
-      <div ref={ref} className={cn("flex items-center gap-3", className)} {...props}>
+      <div ref={ref} className={cn("flex items-start gap-3", className)} {...props}>
         <Avatar size="default" src={avatarUrl} name={name} alt={name} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-body-sm font-semibold text-foreground">{name}</p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="truncate text-body-sm font-semibold text-foreground">{name}</p>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>{name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           {hasMetaInfo && (
-            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-              {rating !== undefined && (
-                <div className="flex items-center gap-1">
-                  <Star size={13} weight="fill" className="text-rating-filled" />
-                  <span className="text-caption text-foreground-muted">{rating.toFixed(1)}</span>
-                </div>
-              )}
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
               {matchScore !== undefined && (
+                <span
+                  className={cn(
+                    "text-caption font-medium",
+                    matchScore >= 75
+                      ? "text-[var(--match-high-foreground)]"
+                      : matchScore >= 50
+                        ? "text-[var(--match-medium-foreground)]"
+                        : "text-[var(--match-low-foreground)]"
+                  )}
+                >
+                  {matchScore}% match
+                </span>
+              )}
+              {rating !== undefined && (
                 <>
-                  {rating !== undefined && (
+                  {matchScore !== undefined && (
                     <span className="text-xs text-foreground-subtle">·</span>
                   )}
-                  <span
-                    className={cn(
-                      "text-caption font-medium",
-                      matchScore >= 75
-                        ? "text-[var(--match-high-foreground)]"
-                        : matchScore >= 50
-                          ? "text-[var(--match-medium-foreground)]"
-                          : "text-[var(--match-low-foreground)]"
-                    )}
-                  >
-                    {matchScore}% match
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <Star size={13} weight="fill" className="text-rating-filled" />
+                    <span className="text-caption text-foreground-muted">{rating.toFixed(1)}</span>
+                  </div>
                 </>
               )}
               {appliedDate && (
@@ -990,7 +999,7 @@ const CandidateReviewers = React.forwardRef<HTMLDivElement, CandidateReviewersPr
     return (
       <div
         ref={ref}
-        className={cn("mt-3 border-t border-[var(--border-muted)] pt-3", className)}
+        className={cn("mt-3 border-t border-[var(--border-default)] pt-2.5", className)}
         {...props}
       >
         {/* Collapsed summary */}
