@@ -4,16 +4,21 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { StarRating } from "@/components/ui/scorecard";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
-import { Star, CheckCircle, XCircle, X } from "@phosphor-icons/react";
+import { Badge } from "@/components/ui/badge";
+import { Star, CheckCircle, XCircle, X, ClipboardText } from "@phosphor-icons/react";
 import { ReviewCard } from "./ReviewCard";
+import { StructuredScorecardForm } from "./StructuredScorecardForm";
 import type { Recommendation } from "@prisma/client";
 
 /**
- * ApplicationReviewPanel — Figma-aligned right panel for reviewing applications.
- * Triggered by clicking CaretRight on a stage row.
+ * ApplicationReviewPanel — Right panel for reviewing applications.
+ * Now supports structured scorecards with criteria-based evaluation.
+ *
+ * Flow:
+ * 1. If no reviews exist → show the structured scorecard form
+ * 2. If reviews exist → show the review cards with "Add Review" button
+ * 3. Editing a review → show the structured scorecard form pre-filled
  *
  * @figma https://figma.com/design/niUFJMIpfrizs1Kjsu1O4S/Candid?node-id=890-1245
  */
@@ -23,6 +28,7 @@ interface ScoreData {
   overallRating: number;
   recommendation: Recommendation;
   comments: string | null;
+  responses?: string;
   createdAt: Date;
   scorer: {
     id: string;
@@ -51,24 +57,6 @@ interface ApplicationReviewPanelProps {
   onClose: () => void;
 }
 
-/** Map star rating to recommendation enum */
-function ratingToRecommendation(rating: number): Recommendation {
-  switch (rating) {
-    case 1:
-      return "STRONG_NO";
-    case 2:
-      return "NO";
-    case 3:
-      return "NEUTRAL";
-    case 4:
-      return "YES";
-    case 5:
-      return "STRONG_YES";
-    default:
-      return "NEUTRAL";
-  }
-}
-
 export function ApplicationReviewPanel({
   applicationId,
   seekerId,
@@ -84,62 +72,22 @@ export function ApplicationReviewPanel({
   onClose,
 }: ApplicationReviewPanelProps) {
   const router = useRouter();
-  const [rating, setRating] = React.useState(0);
-  const [note, setNote] = React.useState("");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [showForm, setShowForm] = React.useState(false);
+  const [editingScore, setEditingScore] = React.useState<ScoreData | null>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const [editingScoreId, setEditingScoreId] = React.useState<string | null>(null);
 
   const hasScores = scores.length > 0;
   const isTerminalStage =
     currentStage === "rejected" || currentStage === "talent-pool" || currentStage === "hired";
 
-  const handleSubmit = async () => {
-    if (rating === 0) return;
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      const res = await fetch(`/api/canopy/candidates/${seekerId}/scores`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          applicationId,
-          overallRating: rating,
-          recommendation: ratingToRecommendation(rating),
-          comments: note || null,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Failed to submit review");
-      }
-
-      // Clear form and refresh data
-      setRating(0);
-      setNote("");
-      router.refresh();
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to submit review");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSkip = () => {
-    setRating(0);
-    setNote("");
-    setEditingScoreId(null);
-    onClose();
-  };
+  // Check if current user already submitted a review
+  const myScore = scores.find((s) => s.scorer.id === orgMemberId);
 
   const handleEditScore = (scoreId: string) => {
     const score = scores.find((s) => s.id === scoreId);
     if (!score) return;
-    setEditingScoreId(scoreId);
-    setRating(score.overallRating);
-    setNote(score.comments ?? "");
+    setEditingScore(score);
+    setShowForm(true);
   };
 
   const handleDeleteScore = async (scoreId: string) => {
@@ -158,45 +106,42 @@ export function ApplicationReviewPanel({
     }
   };
 
-  const handleUpdateScore = async () => {
-    if (rating === 0 || !editingScoreId) return;
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    try {
-      const res = await fetch(`/api/canopy/candidates/${seekerId}/scores/${editingScoreId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          overallRating: rating,
-          recommendation: ratingToRecommendation(rating),
-          comments: note || null,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Failed to update review");
-      }
-
-      setRating(0);
-      setNote("");
-      setEditingScoreId(null);
-      router.refresh();
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to update review");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleFormSubmitted = () => {
+    setShowForm(false);
+    setEditingScore(null);
+    router.refresh();
   };
+
+  const handleFormCancel = () => {
+    setShowForm(false);
+    setEditingScore(null);
+  };
+
+  // Determine recommendation distribution
+  const recCounts = React.useMemo(() => {
+    const counts = { yes: 0, no: 0, neutral: 0 };
+    for (const score of scores) {
+      if (score.recommendation === "STRONG_YES" || score.recommendation === "YES") {
+        counts.yes++;
+      } else if (score.recommendation === "STRONG_NO" || score.recommendation === "NO") {
+        counts.no++;
+      } else {
+        counts.neutral++;
+      }
+    }
+    return counts;
+  }, [scores]);
 
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[var(--border-muted)] px-4 py-3">
-        <h2 className="text-heading-sm font-medium text-[var(--foreground-default)]">
-          Application Review
-        </h2>
+        <div className="flex items-center gap-2">
+          <ClipboardText size={20} weight="bold" className="text-[var(--foreground-brand)]" />
+          <h2 className="text-body-strong font-semibold text-[var(--foreground-default)]">
+            Application Review
+          </h2>
+        </div>
         <Button variant="outline" size="icon-sm" onClick={onClose} aria-label="Close panel">
           <X size={18} />
         </Button>
@@ -213,7 +158,7 @@ export function ApplicationReviewPanel({
 
         {/* Score summary (if reviews exist) */}
         {hasScores && averageScore !== null && (
-          <div className="mb-6">
+          <div className="mb-6 space-y-3">
             <div className="flex items-center gap-3">
               <Star size={28} weight="fill" className="text-[var(--primitive-yellow-500)]" />
               <span className="text-heading-md font-bold text-[var(--foreground-default)]">
@@ -223,11 +168,30 @@ export function ApplicationReviewPanel({
                 ({scores.length} {scores.length === 1 ? "review" : "reviews"})
               </span>
             </div>
+
+            {/* Recommendation distribution */}
+            <div className="flex items-center gap-2">
+              {recCounts.yes > 0 && (
+                <Badge variant="success" size="sm">
+                  {recCounts.yes} Yes
+                </Badge>
+              )}
+              {recCounts.neutral > 0 && (
+                <Badge variant="neutral" size="sm">
+                  {recCounts.neutral} Neutral
+                </Badge>
+              )}
+              {recCounts.no > 0 && (
+                <Badge variant="error" size="sm">
+                  {recCounts.no} No
+                </Badge>
+              )}
+            </div>
           </div>
         )}
 
         {/* Existing reviews */}
-        {hasScores && (
+        {hasScores && !showForm && (
           <div className="space-y-4">
             {scores.map((score) => (
               <ReviewCard
@@ -241,63 +205,42 @@ export function ApplicationReviewPanel({
                 onDelete={() => handleDeleteScore(score.id)}
               />
             ))}
+
+            {/* Add Review button (if current user hasn't reviewed yet) */}
+            {!myScore && (
+              <Button variant="secondary" className="w-full" onClick={() => setShowForm(true)}>
+                <ClipboardText size={16} weight="bold" className="mr-2" />
+                Add Your Review
+              </Button>
+            )}
           </div>
         )}
 
-        {/* Review input form (when no review submitted yet OR editing) */}
-        {(!hasScores || editingScoreId) && (
-          <div className="space-y-6">
-            {editingScoreId && (
-              <p className="text-caption font-medium text-[var(--foreground-brand)]">
-                Editing review
-              </p>
-            )}
-
-            {/* Star rating input */}
-            <div className="flex justify-center">
-              <StarRating value={rating} onChange={setRating} size="lg" />
-            </div>
-
-            {/* Note textarea */}
-            <Textarea
-              placeholder={`Leave a review for ${candidateName}`}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={4}
-            />
-
-            {/* Actions */}
-            <div className="flex gap-3">
-              <Button
-                variant="primary"
-                className="flex-1"
-                onClick={editingScoreId ? handleUpdateScore : handleSubmit}
-                disabled={rating === 0}
-                loading={isSubmitting}
-              >
-                {editingScoreId ? "Update Review" : "Submit Review"}
-              </Button>
-              <Button
-                variant="tertiary"
-                className="flex-1"
-                onClick={
-                  editingScoreId
-                    ? () => {
-                        setEditingScoreId(null);
-                        setRating(0);
-                        setNote("");
-                      }
-                    : handleSkip
-                }
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
+        {/* Structured scorecard form (new review or editing) */}
+        {(showForm || !hasScores) && (
+          <StructuredScorecardForm
+            applicationId={applicationId}
+            seekerId={seekerId}
+            currentStage={currentStage ?? "applied"}
+            candidateName={candidateName}
+            editingScore={
+              editingScore
+                ? {
+                    id: editingScore.id,
+                    responses: editingScore.responses ?? "{}",
+                    overallRating: editingScore.overallRating,
+                    recommendation: editingScore.recommendation,
+                    comments: editingScore.comments,
+                  }
+                : null
+            }
+            onSubmitted={handleFormSubmitted}
+            onCancel={hasScores ? handleFormCancel : onClose}
+          />
         )}
 
         {/* Decision actions — only show when reviews exist and not in terminal stage */}
-        {hasScores && !isTerminalStage && (
+        {hasScores && !showForm && !isTerminalStage && (
           <>
             <Separator className="my-6" />
             <div className="space-y-3">

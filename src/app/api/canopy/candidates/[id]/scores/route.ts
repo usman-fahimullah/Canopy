@@ -14,6 +14,8 @@ const CreateScoreSchema = z.object({
   overallRating: z.number().int().min(1).max(5),
   recommendation: z.enum(["STRONG_YES", "YES", "NEUTRAL", "NO", "STRONG_NO"]),
   comments: z.string().optional(),
+  /** Structured scorecard responses (JSON string with { ratings, averageRating }) */
+  responses: z.string().optional(),
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
-    const { applicationId, overallRating, recommendation, comments } = parsed.data;
+    const { applicationId, overallRating, recommendation, comments, responses } = parsed.data;
 
     // --- Verify application belongs to this seeker + accessible job ---
     const application = await prisma.application.findFirst({
@@ -69,13 +71,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         overallRating,
         recommendation,
         comments: comments ?? null,
-        responses: "{}",
+        responses: responses ?? "{}",
       },
       select: {
         id: true,
         overallRating: true,
         recommendation: true,
         comments: true,
+        responses: true,
         createdAt: true,
         scorer: {
           select: {

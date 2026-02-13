@@ -45,6 +45,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
+import { OfferDetailsModal } from "@/components/offers/offer-details-modal";
+import { TransitionPromptModal } from "@/components/candidates/TransitionPromptModal";
 import { getDeterministicAvatarSrc } from "@/lib/profile/avatar-presets";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { usePipelineToast } from "@/hooks/use-pipeline-toast";
@@ -195,6 +197,21 @@ export function CandidatesTab({
 
   // -- Scheduled email queue (Story 6.6) --
   const [scheduledQueueOpen, setScheduledQueueOpen] = React.useState(false);
+
+  // -- Offer modal state (triggered by Kanban drag to "offer" stage) --
+  const [offerModalOpen, setOfferModalOpen] = React.useState(false);
+  const [offerTargetAppId, setOfferTargetAppId] = React.useState<string | null>(null);
+  const [offerTargetName, setOfferTargetName] = React.useState("");
+
+  // -- Transition prompt modal state (triggered by Kanban drag to stages with side effects) --
+  const [transitionModalOpen, setTransitionModalOpen] = React.useState(false);
+  const [transitionTarget, setTransitionTarget] = React.useState<{
+    appId: string;
+    toStage: string;
+    toStageName: string;
+    candidateName: string;
+    fromStage: string;
+  } | null>(null);
 
   // -- Toast --
   const { toast, showToast, dismissToast, handleUndo } = usePipelineToast();
@@ -454,6 +471,77 @@ export function CandidatesTab({
   );
 
   // ============================================
+  // TRANSITION PROMPT CONFIRM HANDLER
+  // ============================================
+
+  const handleTransitionConfirm = React.useCallback(
+    async (selectedActions: string[]) => {
+      if (!transitionTarget) return;
+      const { appId, toStage, toStageName, candidateName, fromStage } = transitionTarget;
+      const fromStageName = pipelineStages.find((s) => s.id === fromStage)?.name ?? fromStage;
+
+      try {
+        const res = await fetch(`/api/canopy/roles/${roleId}/applications/${appId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ stage: toStage, stageOrder: 0 }),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => null);
+          throw new Error(errorData?.error || "Failed to move candidate");
+        }
+
+        // Update local state
+        setApplications((prev) => prev.map((a) => (a.id === appId ? { ...a, stage: toStage } : a)));
+
+        showToast({
+          message: `${candidateName} moved to ${toStageName}`,
+          variant: "success",
+          duration: 5000,
+          onUndo: async () => {
+            try {
+              const undoRes = await fetch(`/api/canopy/roles/${roleId}/applications/${appId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stage: fromStage, stageOrder: 0 }),
+              });
+              if (!undoRes.ok) throw new Error("Failed to undo");
+
+              setApplications((prev) =>
+                prev.map((a) => (a.id === appId ? { ...a, stage: fromStage } : a))
+              );
+              showToast({
+                message: `${candidateName} moved back to ${fromStageName}`,
+                variant: "info",
+                duration: 3000,
+              });
+            } catch {
+              showToast({
+                message: "Failed to undo move",
+                variant: "critical",
+                duration: 3000,
+              });
+            }
+          },
+        });
+      } catch (err) {
+        showToast({
+          message: err instanceof Error ? err.message : "Failed to move candidate",
+          variant: "critical",
+        });
+      } finally {
+        setTransitionTarget(null);
+      }
+    },
+    [transitionTarget, pipelineStages, roleId, setApplications, showToast]
+  );
+
+  const handleTransitionCancel = React.useCallback(() => {
+    setTransitionTarget(null);
+  }, []);
+
+  // ============================================
   // KANBAN ITEMS + DnD (Stories 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.8)
   // ============================================
 
@@ -579,13 +667,42 @@ export function CandidatesTab({
       const app = applications.find((a) => a.id === itemId);
       const candidateName = app?.seeker.account.name || "Candidate";
 
+      // Stages that trigger the transition prompt modal (interview, hired)
+      // Offer stage has its own dedicated modal, rejected has a dedicated flow too
+      const PROMPT_STAGES = ["interview", "hired"];
+      if (PROMPT_STAGES.includes(String(toColumnId))) {
+        setTransitionTarget({
+          appId: String(itemId),
+          toStage: String(toColumnId),
+          toStageName,
+          candidateName,
+          fromStage: previousStage,
+        });
+        setTransitionModalOpen(true);
+        // Throw to trigger Kanban rollback — the modal will handle the actual move
+        throw new Error("__transition_prompt__");
+      }
+
       const res = await fetch(`/api/canopy/roles/${roleId}/applications/${itemId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage: toColumnId, stageOrder: 0 }),
       });
+
       if (!res.ok) {
-        throw new Error("Failed to move candidate");
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to move candidate");
+      }
+
+      const data = await res.json();
+
+      // Offer stage: API didn't update the DB — open the offer modal instead
+      if (data.requiresOfferModal) {
+        setOfferTargetAppId(String(itemId));
+        setOfferTargetName(candidateName);
+        setOfferModalOpen(true);
+        // Throw to trigger Kanban rollback (card should stay in its original column)
+        throw new Error("__offer_modal__");
       }
 
       // Update local applications state to stay in sync
@@ -1022,6 +1139,57 @@ export function CandidatesTab({
 
       {/* Scheduled Email Queue (Story 6.6) */}
       <ScheduledEmailQueue open={scheduledQueueOpen} onOpenChange={setScheduledQueueOpen} />
+
+      {/* Offer Details Modal (triggered by Kanban drag to "offer" stage) */}
+      {offerTargetAppId && (
+        <OfferDetailsModal
+          open={offerModalOpen}
+          onOpenChange={(open) => {
+            setOfferModalOpen(open);
+            if (!open) {
+              setOfferTargetAppId(null);
+              setOfferTargetName("");
+            }
+          }}
+          applicationId={offerTargetAppId}
+          jobTitle={jobData?.title ?? ""}
+          candidateName={offerTargetName}
+          salaryMin={jobData?.salaryMin}
+          salaryMax={jobData?.salaryMax}
+          onOfferCreated={() => {
+            setOfferModalOpen(false);
+            // The offer was created — now move the candidate to the offer stage
+            setApplications((prev) =>
+              prev.map((a) => (a.id === offerTargetAppId ? { ...a, stage: "offer" } : a))
+            );
+            setOfferTargetAppId(null);
+            setOfferTargetName("");
+            showToast({
+              message: `Offer created for ${offerTargetName}`,
+              variant: "success",
+              duration: 3000,
+            });
+          }}
+        />
+      )}
+
+      {/* Transition Prompt Modal (triggered by Kanban drag to interview/hired stages) */}
+      {transitionTarget && (
+        <TransitionPromptModal
+          open={transitionModalOpen}
+          onOpenChange={(open) => {
+            setTransitionModalOpen(open);
+            if (!open) setTransitionTarget(null);
+          }}
+          roleId={roleId}
+          applicationId={transitionTarget.appId}
+          toStage={transitionTarget.toStage}
+          toStageName={transitionTarget.toStageName}
+          candidateName={transitionTarget.candidateName}
+          onConfirm={handleTransitionConfirm}
+          onCancel={handleTransitionCancel}
+        />
+      )}
     </>
   );
 }

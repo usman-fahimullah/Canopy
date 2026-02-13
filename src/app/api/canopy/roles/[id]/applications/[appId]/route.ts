@@ -8,6 +8,8 @@ import {
   createApplicationRejectedNotification,
 } from "@/lib/notifications/hiring";
 import { getAuthContext, canAccessJob, canManagePipeline } from "@/lib/access-control";
+import { createAuditLog } from "@/lib/audit";
+import { sendStageChangeAutoEmail } from "@/lib/email/stage-automation";
 
 /**
  * PATCH /api/canopy/roles/[id]/applications/[appId]
@@ -140,22 +142,12 @@ export async function PATCH(
       });
     }
 
-    // --- Hired stage: verify offer is SIGNED before allowing ---
-    if (stage === "hired") {
-      const offer = await prisma.offerRecord.findUnique({
-        where: { applicationId: appId },
-        select: { id: true, status: true },
-      });
-
-      if (offer && offer.status !== "SIGNED") {
-        return NextResponse.json(
-          {
-            error: `Cannot move to hired: offer is in ${offer.status} status. Offer must be signed first.`,
-          },
-          { status: 400 }
-        );
-      }
-    }
+    // Capture current stage for audit log + activity feed
+    const currentApp = await prisma.application.findFirst({
+      where: { id: appId, jobId },
+      select: { stage: true },
+    });
+    const previousStage = currentApp?.stage ?? "unknown";
 
     // Update the application — scoped to the correct job
     const updated = await prisma.application.updateMany({
@@ -190,10 +182,47 @@ export async function PATCH(
       endpoint: "/api/canopy/roles/[id]/applications/[appId]",
     });
 
-    // --- Fire-and-forget: notify the candidate of the stage change ---
+    // --- Fire-and-forget: audit log, notifications, email automation ---
     (async () => {
       try {
-        // Fetch candidate and job info for the notification
+        // 1. Audit log — powers the activity timeline
+        await createAuditLog({
+          action: "UPDATE",
+          entityType: "Application",
+          entityId: appId,
+          userId: ctx.accountId,
+          changes: { stage: { from: previousStage, to: stage } },
+          metadata: {
+            oldStage: previousStage,
+            newStage: stage,
+            jobId,
+            ...(rejectionReason ? { rejectionReason } : {}),
+          },
+        });
+      } catch (auditErr) {
+        logger.error("Failed to write audit log (non-blocking)", {
+          error: formatError(auditErr),
+          applicationId: appId,
+        });
+      }
+
+      try {
+        // 2. Send email automation (checks job's automation config)
+        await sendStageChangeAutoEmail({
+          applicationId: appId,
+          newStage: stage,
+          jobId,
+        });
+      } catch (autoEmailErr) {
+        logger.error("Failed to send stage automation email (non-blocking)", {
+          error: formatError(autoEmailErr),
+          applicationId: appId,
+          newStage: stage,
+        });
+      }
+
+      try {
+        // 3. In-app + email notification to candidate
         const appData = await prisma.application.findUnique({
           where: { id: appId },
           select: {
@@ -228,16 +257,17 @@ export async function PATCH(
             companyName,
           });
         } else {
-          // Notify for all forward-moving stages (screening, interview, offer, hired)
-          const stageName = validStages.find((s) => s.id === stage)?.name ?? stage;
+          const previousStageName =
+            validStages.find((s) => s.id === previousStage)?.name ?? previousStage;
+          const newStageName = validStages.find((s) => s.id === stage)?.name ?? stage;
           await createStageChangedNotification({
             applicationId: appId,
             candidateEmail,
             candidateName,
             jobTitle,
             companyName,
-            previousStage: "previous", // We don't track the old stage in this endpoint
-            newStage: stageName,
+            previousStage: previousStageName,
+            newStage: newStageName,
           });
         }
       } catch (notifErr) {

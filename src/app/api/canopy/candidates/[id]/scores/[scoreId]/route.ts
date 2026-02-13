@@ -13,6 +13,8 @@ const UpdateScoreSchema = z.object({
   overallRating: z.number().int().min(1).max(5),
   recommendation: z.enum(["STRONG_YES", "YES", "NEUTRAL", "NO", "STRONG_NO"]),
   comments: z.string().nullable().optional(),
+  /** Structured scorecard responses (JSON string with { ratings, averageRating }) */
+  responses: z.string().optional(),
 });
 
 export async function PATCH(
@@ -71,12 +73,14 @@ export async function PATCH(
         overallRating: parsed.data.overallRating,
         recommendation: parsed.data.recommendation,
         comments: parsed.data.comments ?? null,
+        ...(parsed.data.responses ? { responses: parsed.data.responses } : {}),
       },
       select: {
         id: true,
         overallRating: true,
         recommendation: true,
         comments: true,
+        responses: true,
         createdAt: true,
         scorer: {
           select: {

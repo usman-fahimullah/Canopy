@@ -86,6 +86,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 overallRating: true,
                 recommendation: true,
                 comments: true,
+                responses: true,
                 createdAt: true,
                 scorer: {
                   select: {
@@ -97,6 +98,43 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 },
               },
               orderBy: { createdAt: "desc" },
+            },
+            offer: {
+              select: {
+                id: true,
+                status: true,
+                salary: true,
+                salaryCurrency: true,
+                startDate: true,
+                department: true,
+                signingMethod: true,
+                sentAt: true,
+                viewedAt: true,
+                signedAt: true,
+                withdrawnAt: true,
+                createdAt: true,
+              },
+            },
+            interviews: {
+              select: {
+                id: true,
+                scheduledAt: true,
+                duration: true,
+                type: true,
+                location: true,
+                meetingLink: true,
+                status: true,
+                notes: true,
+                completedAt: true,
+                cancelledAt: true,
+                createdAt: true,
+                interviewer: {
+                  select: {
+                    account: { select: { name: true, avatar: true } },
+                  },
+                },
+              },
+              orderBy: { scheduledAt: "desc" },
             },
           },
           orderBy: { createdAt: "desc" },

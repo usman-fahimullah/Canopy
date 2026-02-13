@@ -1,0 +1,201 @@
+/**
+ * Pipeline Service — Stage transition orchestration.
+ *
+ * When a candidate moves to a new stage, this service determines
+ * what side effects should happen (prompts, automatic actions,
+ * validations). Used by the frontend to show contextual prompts
+ * before/after stage transitions.
+ *
+ * Philosophy: "Human-first, AI-enabled" — suggest actions,
+ * never force them. The employer always has the final say.
+ */
+
+import { prisma } from "@/lib/db";
+import { logger, formatError } from "@/lib/logger";
+
+/* -------------------------------------------------------------------
+   Types
+   ------------------------------------------------------------------- */
+
+export type TransitionAction =
+  | "prompt_schedule_interview"
+  | "prompt_create_offer"
+  | "prompt_send_rejection_email"
+  | "auto_log_milestone"
+  | "suggest_reject_others"
+  | "none";
+
+export interface TransitionSideEffect {
+  /** The action type */
+  action: TransitionAction;
+  /** Human-readable prompt for the employer */
+  message: string;
+  /** Whether the action is required (blocks transition) or optional */
+  required: boolean;
+  /** Additional data needed for the action */
+  metadata?: Record<string, unknown>;
+}
+
+export interface TransitionPlan {
+  /** Whether the transition is allowed */
+  allowed: boolean;
+  /** Reason if not allowed */
+  blockedReason?: string;
+  /** Side effects to handle (in order) */
+  sideEffects: TransitionSideEffect[];
+}
+
+/* -------------------------------------------------------------------
+   Main Function
+   ------------------------------------------------------------------- */
+
+/**
+ * Determine what should happen when moving a candidate from one stage to another.
+ *
+ * Call this BEFORE executing the stage transition to get prompts for the user.
+ * The frontend uses this to show contextual modals/confirmations.
+ */
+export async function getTransitionPlan(params: {
+  applicationId: string;
+  jobId: string;
+  fromStage: string;
+  toStage: string;
+  organizationId: string;
+}): Promise<TransitionPlan> {
+  const { applicationId, jobId, fromStage, toStage, organizationId } = params;
+  const sideEffects: TransitionSideEffect[] = [];
+
+  try {
+    // --- Moving to Interview stage ---
+    if (toStage === "interview") {
+      // Check if any interviews are already scheduled
+      const existingInterviews = await prisma.interview.count({
+        where: {
+          applicationId,
+          status: { in: ["SCHEDULED", "IN_PROGRESS"] },
+        },
+      });
+
+      if (existingInterviews === 0) {
+        sideEffects.push({
+          action: "prompt_schedule_interview",
+          message: "Would you like to schedule an interview with this candidate?",
+          required: false,
+          metadata: { applicationId, jobId },
+        });
+      }
+    }
+
+    // --- Moving to Offer stage ---
+    if (toStage === "offer") {
+      // Check if an offer already exists
+      const existingOffer = await prisma.offerRecord.findUnique({
+        where: { applicationId },
+        select: { id: true, status: true },
+      });
+
+      if (!existingOffer) {
+        sideEffects.push({
+          action: "prompt_create_offer",
+          message: "Create an offer for this candidate to continue.",
+          required: true,
+          metadata: { applicationId, jobId },
+        });
+      }
+    }
+
+    // --- Moving to Hired stage ---
+    if (toStage === "hired") {
+      // Count other active candidates for this job
+      const otherActiveCandidates = await prisma.application.count({
+        where: {
+          jobId,
+          id: { not: applicationId },
+          stage: { notIn: ["rejected", "talent-pool", "hired"] },
+        },
+      });
+
+      if (otherActiveCandidates > 0) {
+        sideEffects.push({
+          action: "suggest_reject_others",
+          message: `${otherActiveCandidates} other candidate${otherActiveCandidates === 1 ? " is" : "s are"} still active for this role. Would you like to reject them?`,
+          required: false,
+          metadata: {
+            jobId,
+            otherCount: otherActiveCandidates,
+          },
+        });
+      }
+
+      sideEffects.push({
+        action: "auto_log_milestone",
+        message: "Hired milestone will be recorded.",
+        required: false,
+      });
+    }
+
+    // --- Moving to Rejected stage ---
+    if (toStage === "rejected") {
+      sideEffects.push({
+        action: "prompt_send_rejection_email",
+        message: "Would you like to send a rejection email to the candidate?",
+        required: false,
+        metadata: { applicationId },
+      });
+    }
+
+    return { allowed: true, sideEffects };
+  } catch (error) {
+    logger.error("Failed to compute transition plan", {
+      error: formatError(error),
+      applicationId,
+      fromStage,
+      toStage,
+    });
+
+    // Don't block the transition if side effect computation fails
+    return { allowed: true, sideEffects: [] };
+  }
+}
+
+/**
+ * Bulk reject all other active candidates for a job.
+ * Used after hiring a candidate ("suggest_reject_others" action).
+ */
+export async function bulkRejectOtherCandidates(params: {
+  jobId: string;
+  exceptApplicationId: string;
+  rejectionReason?: string;
+  sendEmails?: boolean;
+}): Promise<{ rejectedCount: number }> {
+  const { jobId, exceptApplicationId, rejectionReason, sendEmails } = params;
+
+  try {
+    const result = await prisma.application.updateMany({
+      where: {
+        jobId,
+        id: { not: exceptApplicationId },
+        stage: { notIn: ["rejected", "talent-pool", "hired"] },
+      },
+      data: {
+        stage: "rejected",
+        rejectedAt: new Date(),
+        rejectionReason: rejectionReason ?? "position_filled",
+      },
+    });
+
+    logger.info("Bulk rejected candidates", {
+      jobId,
+      exceptApplicationId,
+      rejectedCount: result.count,
+    });
+
+    return { rejectedCount: result.count };
+  } catch (error) {
+    logger.error("Failed to bulk reject candidates", {
+      error: formatError(error),
+      jobId,
+    });
+    throw error;
+  }
+}
