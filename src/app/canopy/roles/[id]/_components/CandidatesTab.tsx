@@ -49,6 +49,7 @@ import { OfferDetailsModal } from "@/components/offers/offer-details-modal";
 import { TransitionPromptModal } from "@/components/candidates/TransitionPromptModal";
 import { getDeterministicAvatarSrc } from "@/lib/profile/avatar-presets";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { NotificationBadge } from "@/components/ui/notification-badge";
 import { usePipelineToast } from "@/hooks/use-pipeline-toast";
 import {
   Plus,
@@ -965,19 +966,17 @@ export function CandidatesTab({
         {(rejectedCount > 0 || talentPoolCount > 0) && (
           <div className="flex items-center gap-4 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] px-4 py-2">
             {rejectedCount > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Prohibit size={14} className="text-[var(--foreground-error)]" />
-                <span className="text-caption text-[var(--foreground-muted)]">
-                  {rejectedCount} rejected
-                </span>
+                <NotificationBadge count={rejectedCount} variant="count" size="sm" />
+                <span className="text-caption text-[var(--foreground-muted)]">rejected</span>
               </div>
             )}
             {talentPoolCount > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <UserCirclePlus size={14} className="text-[var(--primitive-yellow-600)]" />
-                <span className="text-caption text-[var(--foreground-muted)]">
-                  {talentPoolCount} in talent pool
-                </span>
+                <NotificationBadge count={talentPoolCount} variant="count" size="sm" />
+                <span className="text-caption text-[var(--foreground-muted)]">in talent pool</span>
               </div>
             )}
             <span className="text-caption text-[var(--foreground-disabled)]">

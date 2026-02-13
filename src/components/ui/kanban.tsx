@@ -12,6 +12,7 @@ import {
   UsersThree,
   Plus,
 } from "@phosphor-icons/react";
+import { NotificationBadge } from "@/components/ui/notification-badge";
 import type { PhaseGroup } from "@/lib/pipeline/stage-registry";
 
 /**
@@ -259,9 +260,7 @@ const KanbanColumn = React.forwardRef<HTMLDivElement, KanbanColumnProps>(
             ) : null}
             <h3 className="text-body-sm font-semibold text-foreground">{title}</h3>
             {count !== undefined && (
-              <span className="rounded-full bg-background-emphasized px-1.5 py-0.5 text-caption tabular-nums text-foreground-subtle transition-all duration-fast">
-                {count}
-              </span>
+              <NotificationBadge count={count} variant="count" size="sm" showZero />
             )}
           </div>
           {headerActions}

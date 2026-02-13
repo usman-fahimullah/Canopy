@@ -255,7 +255,8 @@ export function ShellSidebar({ config }: ShellSidebarProps) {
                               <NotificationBadge count={unreadCount} variant="alert" size="sm" />
                             )}
 
-                            {/* Badge — collapsed: red dot */}
+                            {/* Badge — collapsed: presence dot (intentionally not NotificationBadge —
+                               at 6px this is a dot indicator, not a count display) */}
                             {collapsed && hasBadge && (
                               <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--primitive-red-500)]" />
                             )}

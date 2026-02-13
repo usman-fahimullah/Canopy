@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { NotificationBadge } from "@/components/ui/notification-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CategoryTag } from "@/components/ui/category-tag";
@@ -51,8 +52,8 @@ import type { RoleListItem, TemplateItem } from "@/hooks/queries";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { logger, formatError } from "@/lib/logger";
-import { CLIMATE_TEMPLATES } from "@/lib/templates/climate-templates";
-import { Leaf } from "@phosphor-icons/react";
+import { BulkRoleImportModal } from "@/components/canopy/BulkRoleImportModal";
+import { UploadSimple } from "@phosphor-icons/react";
 
 /* -------------------------------------------------------------------
    Helpers
@@ -252,74 +253,6 @@ function TemplatesSection({
   );
 }
 
-/** Pre-built climate template card */
-function PrebuiltTemplateCard({
-  template,
-  onUse,
-  isCreating,
-}: {
-  template: (typeof CLIMATE_TEMPLATES)[number];
-  onUse: (templateId: string) => void;
-  isCreating: boolean;
-}) {
-  return (
-    <Card variant="outlined" className="flex min-h-[180px] flex-col justify-between p-5">
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <CategoryTag icon={<Leaf size={18} weight="fill" />}>Climate Template</CategoryTag>
-        </div>
-        <h4 className="text-body-strong text-[var(--foreground-default)]">{template.name}</h4>
-        <p className="line-clamp-2 text-caption text-[var(--foreground-muted)]">
-          {template.greenSkills.length} green skills &middot;{" "}
-          {template.requiredCerts.length > 0
-            ? template.requiredCerts.join(", ")
-            : "No required certs"}
-        </p>
-      </div>
-      <div className="flex items-center gap-2 pt-4">
-        <Button
-          variant="tertiary"
-          size="sm"
-          onClick={() => onUse(template.id)}
-          disabled={isCreating}
-        >
-          {isCreating ? <Spinner size="sm" /> : null}
-          Use Template
-        </Button>
-      </div>
-    </Card>
-  );
-}
-
-/** Pre-built climate templates section */
-function ClimateTemplatesSection({
-  onUseTemplate,
-  creatingTemplateId,
-}: {
-  onUseTemplate: (templateId: string) => void;
-  creatingTemplateId: string | null;
-}) {
-  return (
-    <section className="space-y-4">
-      <h2 className="text-heading-sm text-[var(--foreground-default)]">Climate Job Templates</h2>
-      <p className="text-body text-[var(--foreground-muted)]">
-        Start with a pre-built template for common climate roles. Each includes green skills,
-        certifications, and suggested pipeline stages.
-      </p>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {CLIMATE_TEMPLATES.map((template) => (
-          <PrebuiltTemplateCard
-            key={template.id}
-            template={template}
-            onUse={onUseTemplate}
-            isCreating={creatingTemplateId === template.id}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
 /** Open Roles table section */
 function OpenRolesSection({ jobs }: { jobs: RoleListItem[] }) {
   const openJobs = jobs.filter((j) => j.status === "PUBLISHED" || j.status === "DRAFT");
@@ -328,9 +261,7 @@ function OpenRolesSection({ jobs }: { jobs: RoleListItem[] }) {
     <section className="space-y-6">
       <div className="flex items-center gap-2">
         <h2 className="text-heading-sm text-[var(--foreground-default)]">Open Roles</h2>
-        <Badge variant="neutral" size="sm">
-          {openJobs.length}
-        </Badge>
+        <NotificationBadge count={openJobs.length} variant="count" showZero />
       </div>
 
       <Table hoverable>
@@ -436,7 +367,10 @@ function OpenRolesSection({ jobs }: { jobs: RoleListItem[] }) {
                     )}
                   </TableCell>
                   <TableCell>
-                    <span className="text-[var(--foreground-default)]">{appCount} Applied</span>
+                    <div className="flex items-center gap-1.5">
+                      <NotificationBadge count={appCount} variant="count" showZero />
+                      <span className="text-caption text-[var(--foreground-muted)]">Applied</span>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
@@ -610,32 +544,7 @@ export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
-  const [creatingFromTemplate, setCreatingFromTemplate] = useState<string | null>(null);
-
-  const handleUsePrebuiltTemplate = async (templateId: string) => {
-    setCreatingFromTemplate(templateId);
-    try {
-      const res = await fetch("/api/canopy/templates/prebuilt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ templateId }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to create role from template");
-      }
-      const { job } = await res.json();
-      toast.success("Role created from template");
-      router.push(`/canopy/roles/${job.id}`);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to create role";
-      logger.error("Error creating from prebuilt template", { error: formatError(err) });
-      toast.error(message);
-    } finally {
-      setCreatingFromTemplate(null);
-    }
-  };
-
+  const [importModalOpen, setImportModalOpen] = useState(false);
   // React Query with initialData — renders instantly from SSR, refetches in background
   const {
     data: jobs = [],
@@ -670,6 +579,12 @@ export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
               Create a role
             </Button>
 
+            {/* Import CSV — always visible (especially useful for new users) */}
+            <Button variant="tertiary" onClick={() => setImportModalOpen(true)}>
+              <UploadSimple size={18} weight="bold" />
+              Import CSV
+            </Button>
+
             {/* Secondary actions only when content exists */}
             {hasJobs && (
               <>
@@ -701,31 +616,15 @@ export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
 
         {/* State 1: First-time UX — no jobs, no templates */}
         {!isFirstLoad && !error && isEmpty && (
-          <div className="space-y-8">
-            <div className="px-12 py-6">
-              <RolesEmptyState onCreateRole={() => setCreateModalOpen(true)} creating={false} />
-            </div>
-            <div className="px-12 pb-6">
-              <ClimateTemplatesSection
-                onUseTemplate={handleUsePrebuiltTemplate}
-                creatingTemplateId={creatingFromTemplate}
-              />
-            </div>
+          <div className="px-12 py-6">
+            <RolesEmptyState onCreateRole={() => setCreateModalOpen(true)} creating={false} />
           </div>
         )}
 
         {/* State 2 & 3: Has content — shows instantly from cache on return visits */}
         {!isFirstLoad && !error && !isEmpty && (
           <>
-            {/* Climate Templates section — always visible */}
-            <div className="px-12 py-6">
-              <ClimateTemplatesSection
-                onUseTemplate={handleUsePrebuiltTemplate}
-                creatingTemplateId={creatingFromTemplate}
-              />
-            </div>
-
-            {/* Custom Role Templates section — white background */}
+            {/* Role Templates section */}
             <div className="px-12 py-6">
               {hasTemplates ? (
                 <TemplatesSection
@@ -767,6 +666,15 @@ export function RolesView({ initialJobs, initialTemplates }: RolesViewProps) {
 
       {/* Copy Role Modal */}
       <CopyRoleModal open={copyModalOpen} onOpenChange={setCopyModalOpen} jobs={jobs} />
+
+      {/* Import CSV Modal */}
+      <BulkRoleImportModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onImportComplete={() => {
+          refetchRoles();
+        }}
+      />
     </div>
   );
 }
