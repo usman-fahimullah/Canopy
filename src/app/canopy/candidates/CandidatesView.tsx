@@ -11,7 +11,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { SimplePagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/search-input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from "@/components/ui/dropdown";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import {
   EmptyStateNoCandidates,
   EmptyStateNoResults,
@@ -428,86 +433,77 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
                 onValueChange={handleSearchChange}
               />
             </div>
-            <Dropdown>
-              <DropdownTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="outline">{stage ? `Stage: ${stage}` : "Stage"}</Button>
-              </DropdownTrigger>
-              <DropdownContent>
-                <DropdownItem value="all" onClick={() => updateParams({ stage: undefined })}>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => updateParams({ stage: undefined })}>
                   All Stages
-                </DropdownItem>
+                </DropdownMenuItem>
                 {["Applied", "Screening", "Interview", "Offer", "Hired"].map((s) => (
-                  <DropdownItem key={s} value={s} onClick={() => updateParams({ stage: s })}>
+                  <DropdownMenuItem key={s} onSelect={() => updateParams({ stage: s })}>
                     {s}
-                  </DropdownItem>
+                  </DropdownMenuItem>
                 ))}
-              </DropdownContent>
-            </Dropdown>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Source Filter */}
-            <Dropdown>
-              <DropdownTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="outline">{source ? `Source: ${source}` : "Source"}</Button>
-              </DropdownTrigger>
-              <DropdownContent>
-                <DropdownItem value="all" onClick={() => updateParams({ source: undefined })}>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => updateParams({ source: undefined })}>
                   All Sources
-                </DropdownItem>
+                </DropdownMenuItem>
                 {SOURCE_OPTIONS.map((s) => (
-                  <DropdownItem key={s} value={s} onClick={() => updateParams({ source: s })}>
+                  <DropdownMenuItem key={s} onSelect={() => updateParams({ source: s })}>
                     {s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                  </DropdownItem>
+                  </DropdownMenuItem>
                 ))}
-              </DropdownContent>
-            </Dropdown>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Match Score Filter */}
-            <Dropdown>
-              <DropdownTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="outline">
                   {matchScoreMin !== undefined || matchScoreMax !== undefined
                     ? `Score: ${matchScoreMin ?? 0}–${matchScoreMax ?? 100}%`
                     : "Score"}
                 </Button>
-              </DropdownTrigger>
-              <DropdownContent className="w-56 p-3">
-                <p className="mb-2 text-caption-strong text-[var(--foreground-default)]">
-                  Match Score Range
-                </p>
-                <div className="space-y-3">
-                  <button
-                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
-                    onClick={() =>
-                      updateParams({ matchScoreMin: undefined, matchScoreMax: undefined })
-                    }
-                  >
-                    Any score
-                  </button>
-                  <button
-                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
-                    onClick={() => updateParams({ matchScoreMin: "80", matchScoreMax: undefined })}
-                  >
-                    High (80%+)
-                  </button>
-                  <button
-                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
-                    onClick={() => updateParams({ matchScoreMin: "50", matchScoreMax: "79" })}
-                  >
-                    Medium (50–79%)
-                  </button>
-                  <button
-                    className="w-full rounded-[var(--radius-md)] px-2 py-1.5 text-left text-caption text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
-                    onClick={() => updateParams({ matchScoreMin: "0", matchScoreMax: "49" })}
-                  >
-                    Low (&lt;50%)
-                  </button>
-                </div>
-              </DropdownContent>
-            </Dropdown>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                <DropdownMenuItem
+                  onSelect={() =>
+                    updateParams({ matchScoreMin: undefined, matchScoreMax: undefined })
+                  }
+                >
+                  Any score
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => updateParams({ matchScoreMin: "80", matchScoreMax: undefined })}
+                >
+                  High (80%+)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => updateParams({ matchScoreMin: "50", matchScoreMax: "79" })}
+                >
+                  Medium (50–79%)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => updateParams({ matchScoreMin: "0", matchScoreMax: "49" })}
+                >
+                  Low (&lt;50%)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Sort */}
-            <Dropdown>
-              <DropdownTrigger asChild>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   {(sortDirection || "desc") === "desc" ? (
                     <SortDescending size={16} className="mr-1.5" />
@@ -516,14 +512,10 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
                   )}
                   {SORT_OPTIONS.find((o) => o.value === (sortBy || "createdAt"))?.label || "Sort"}
                 </Button>
-              </DropdownTrigger>
-              <DropdownContent>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
                 {SORT_OPTIONS.map((opt) => (
-                  <DropdownItem
-                    key={opt.value}
-                    value={opt.value}
-                    onClick={() => handleSort(opt.value)}
-                  >
+                  <DropdownMenuItem key={opt.value} onSelect={() => handleSort(opt.value)}>
                     <span className="flex items-center justify-between gap-4">
                       {opt.label}
                       {(sortBy || "createdAt") === opt.value && (
@@ -532,10 +524,10 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
                         </span>
                       )}
                     </span>
-                  </DropdownItem>
+                  </DropdownMenuItem>
                 ))}
-              </DropdownContent>
-            </Dropdown>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {hasActiveFilters && (
               <Button
@@ -802,20 +794,20 @@ export function CandidatesView({ initialData }: CandidatesViewProps) {
                       </p>
                     </div>
 
-                    <Dropdown>
-                      <DropdownTrigger asChild>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
                         <Button variant="outline" disabled={bulkLoading}>
                           Move Stage
                         </Button>
-                      </DropdownTrigger>
-                      <DropdownContent>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
                         {["Applied", "Screening", "Interview", "Offer", "Hired"].map((s) => (
-                          <DropdownItem key={s} value={s} onClick={() => handleBulkStageMove(s)}>
+                          <DropdownMenuItem key={s} onSelect={() => handleBulkStageMove(s)}>
                             {s}
-                          </DropdownItem>
+                          </DropdownMenuItem>
                         ))}
-                      </DropdownContent>
-                    </Dropdown>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
                     {/* Compare button — enabled when 2-3 candidates selected */}
                     <SimpleTooltip

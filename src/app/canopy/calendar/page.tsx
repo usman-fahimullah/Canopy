@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { Dropdown, DropdownTrigger, DropdownContent, DropdownItem } from "@/components/ui/dropdown";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { TruncateText } from "@/components/ui/truncate-text";
 import { logger } from "@/lib/logger";
@@ -202,13 +207,9 @@ export default function CalendarPage() {
         {/* Week Navigation */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={previousWeek}
-              className="inline-flex items-center justify-center rounded-lg border border-[var(--border-muted)] p-2 hover:bg-[var(--background-interactive-hover)]"
-              aria-label="Previous week"
-            >
+            <Button variant="outline" size="icon" onClick={previousWeek} aria-label="Previous week">
               <CaretLeft size={20} />
-            </button>
+            </Button>
 
             <div className="min-w-[200px] text-center">
               <p className="text-body font-medium text-[var(--foreground-default)]">
@@ -216,38 +217,33 @@ export default function CalendarPage() {
               </p>
             </div>
 
-            <button
-              onClick={nextWeek}
-              className="inline-flex items-center justify-center rounded-lg border border-[var(--border-muted)] p-2 hover:bg-[var(--background-interactive-hover)]"
-              aria-label="Next week"
-            >
+            <Button variant="outline" size="icon" onClick={nextWeek} aria-label="Next week">
               <CaretRight size={20} />
-            </button>
+            </Button>
           </div>
 
           {/* Interviewer Filter */}
-          <Dropdown>
-            <DropdownTrigger asChild>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button variant="tertiary" size="sm">
                 <FunnelSimple size={16} weight="bold" />
                 {selectedInterviewerId ? "Filtered" : "Filter"}
               </Button>
-            </DropdownTrigger>
-            <DropdownContent align="end">
-              <DropdownItem value="all" onSelect={() => setSelectedInterviewerId(null)}>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setSelectedInterviewerId(null)}>
                 All Interviewers
-              </DropdownItem>
+              </DropdownMenuItem>
               {interviewers.map((interviewer) => (
-                <DropdownItem
+                <DropdownMenuItem
                   key={interviewer.id}
-                  value={interviewer.id}
                   onSelect={() => setSelectedInterviewerId(interviewer.id)}
                 >
                   {interviewer.name}
-                </DropdownItem>
+                </DropdownMenuItem>
               ))}
-            </DropdownContent>
-          </Dropdown>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Loading State */}
