@@ -88,6 +88,17 @@ export function useSelection<T extends { id: string }>(
 } {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
 
+  // Clean up stale selections when the items array changes
+  // (e.g. when a selected item is removed via filter or stage change)
+  const itemIdSet = React.useMemo(() => new Set(items.map((i) => i.id)), [items]);
+  React.useEffect(() => {
+    setSelectedIds((prev) => {
+      const cleaned = new Set(Array.from(prev).filter((id) => itemIdSet.has(id)));
+      if (cleaned.size !== prev.size) return cleaned;
+      return prev; // referential stability — don't update if nothing changed
+    });
+  }, [itemIdSet]);
+
   const isAllSelected = items.length > 0 && selectedIds.size === items.length;
   const isPartiallySelected = selectedIds.size > 0 && selectedIds.size < items.length;
 
@@ -111,10 +122,7 @@ export function useSelection<T extends { id: string }>(
     setSelectedIds(new Set());
   }, []);
 
-  const isSelected = React.useCallback(
-    (id: string) => selectedIds.has(id),
-    [selectedIds]
-  );
+  const isSelected = React.useCallback((id: string) => selectedIds.has(id), [selectedIds]);
 
   const selectedItems = React.useMemo(
     () => items.filter((item) => selectedIds.has(item.id)),
@@ -193,9 +201,15 @@ const BulkActionsToolbar = React.forwardRef<HTMLDivElement, BulkActionsToolbarPr
             className="transition-all duration-fast hover:scale-110 active:scale-95"
           >
             {isAllSelected ? (
-              <CheckSquare className="h-5 w-5 text-foreground-brand transition-transform duration-fast" weight="fill" />
+              <CheckSquare
+                className="h-5 w-5 text-foreground-brand transition-transform duration-fast"
+                weight="fill"
+              />
             ) : isPartiallySelected ? (
-              <MinusSquare className="h-5 w-5 text-foreground-brand transition-transform duration-fast" weight="fill" />
+              <MinusSquare
+                className="h-5 w-5 text-foreground-brand transition-transform duration-fast"
+                weight="fill"
+              />
             ) : (
               <Square className="h-5 w-5 text-foreground-muted transition-colors duration-fast" />
             )}
@@ -211,18 +225,16 @@ const BulkActionsToolbar = React.forwardRef<HTMLDivElement, BulkActionsToolbarPr
               variant="ghost"
               size="sm"
               onClick={onDeselectAll}
-              className="text-foreground-muted transition-all duration-fast hover:text-foreground-error hover:scale-105 active:scale-95"
+              className="text-foreground-muted transition-all duration-fast hover:scale-105 hover:text-foreground-error active:scale-95"
             >
-              <X className="h-4 w-4 mr-1" />
+              <X className="mr-1 h-4 w-4" />
               Clear
             </Button>
           )}
         </div>
 
         {/* Separator */}
-        {selectedCount > 0 && (
-          <div className="h-6 w-px bg-border-default mx-2" />
-        )}
+        {selectedCount > 0 && <div className="bg-border-default mx-2 h-6 w-px" />}
 
         {/* Actions */}
         {selectedCount > 0 && (
@@ -287,15 +299,11 @@ const BulkActionsToolbar = React.forwardRef<HTMLDivElement, BulkActionsToolbarPr
                 <DropdownMenuContent align="end">
                   {overflowActions.map((action, index) => (
                     <React.Fragment key={action.id}>
-                      {action.variant === "destructive" && index > 0 && (
-                        <DropdownMenuSeparator />
-                      )}
+                      {action.variant === "destructive" && index > 0 && <DropdownMenuSeparator />}
                       <DropdownMenuItem
                         onClick={() => handleAction(action)}
                         disabled={action.disabled}
-                        className={cn(
-                          action.variant === "destructive" && "text-foreground-error"
-                        )}
+                        className={cn(action.variant === "destructive" && "text-foreground-error")}
                       >
                         {action.icon}
                         {action.label}
@@ -315,19 +323,17 @@ const BulkActionsToolbar = React.forwardRef<HTMLDivElement, BulkActionsToolbarPr
 
         {/* Confirmation dialog */}
         {confirmAction && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+          <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center">
             <div
-              className="absolute inset-0 bg-overlay-default/80"
+              className="bg-overlay-default/80 absolute inset-0"
               onClick={() => setConfirmAction(null)}
             />
-            <div className="relative bg-surface-default rounded-xl shadow-modal p-6 max-w-md mx-4 animate-scale-in">
-              <h3 className="text-lg font-medium mb-2">Confirm action</h3>
-              <p className="text-foreground-muted mb-4">
-                {confirmAction.confirmMessage}
-              </p>
-              <p className="text-sm text-foreground-muted mb-4">
+            <div className="bg-surface-default relative mx-4 max-w-md animate-scale-in rounded-xl p-6 shadow-modal">
+              <h3 className="mb-2 text-lg font-medium">Confirm action</h3>
+              <p className="mb-4 text-foreground-muted">{confirmAction.confirmMessage}</p>
+              <p className="mb-4 text-sm text-foreground-muted">
                 This will affect{" "}
-                <span className="font-medium text-foreground-default">
+                <span className="text-foreground-default font-medium">
                   {selectedCount} {selectedCount === 1 ? "item" : "items"}
                 </span>
                 .
@@ -359,9 +365,9 @@ const BulkActionsToolbar = React.forwardRef<HTMLDivElement, BulkActionsToolbarPr
         <div
           ref={ref}
           className={cn(
-            "fixed bottom-4 left-1/2 -translate-x-1/2 z-40",
+            "fixed bottom-4 left-1/2 z-40 -translate-x-1/2",
             "flex items-center gap-2 px-4 py-3",
-            "bg-surface-default rounded-2xl shadow-elevated border border-border-muted",
+            "bg-surface-default rounded-2xl border border-border-muted shadow-elevated",
             "animate-slide-up",
             className
           )}
@@ -376,8 +382,8 @@ const BulkActionsToolbar = React.forwardRef<HTMLDivElement, BulkActionsToolbarPr
         ref={ref}
         className={cn(
           "flex items-center gap-2 px-4 py-2",
-          "bg-background-subtle rounded-lg border border-border-muted",
-          "transition-all duration-fast animate-fade-in",
+          "rounded-lg border border-border-muted bg-background-subtle",
+          "animate-fade-in transition-all duration-fast",
           className
         )}
       >
@@ -407,7 +413,8 @@ const SelectableItem = React.forwardRef<HTMLDivElement, SelectableItemProps>(
         ref={ref}
         className={cn(
           "group relative transition-all duration-fast",
-          selected && "ring-2 ring-ring-color ring-offset-1 rounded-lg bg-background-brand-subtle/30",
+          selected &&
+            "ring-ring-color bg-background-brand-subtle/30 rounded-lg ring-2 ring-offset-1",
           className
         )}
       >
@@ -415,9 +422,9 @@ const SelectableItem = React.forwardRef<HTMLDivElement, SelectableItemProps>(
         <div
           className={cn(
             "absolute left-2 top-2 z-10",
-            "opacity-0 group-hover:opacity-100 transition-all duration-fast",
+            "opacity-0 transition-all duration-fast group-hover:opacity-100",
             "scale-90 group-hover:scale-100",
-            selected && "opacity-100 scale-100"
+            selected && "scale-100 opacity-100"
           )}
         >
           <Checkbox
@@ -516,8 +523,4 @@ const atsBulkActions = {
 /* ============================================
    Exports
    ============================================ */
-export {
-  BulkActionsToolbar,
-  SelectableItem,
-  atsBulkActions,
-};
+export { BulkActionsToolbar, SelectableItem, atsBulkActions };

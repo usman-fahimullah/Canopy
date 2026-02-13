@@ -359,7 +359,17 @@ export function BulkEmailComposer({
 
   return (
     <Modal open={open} onOpenChange={step === "sending" ? undefined : onOpenChange}>
-      <ModalContent size="lg">
+      <ModalContent
+        size="lg"
+        onInteractOutside={(e) => {
+          // Prevent modal from closing when interacting with portaled elements
+          // (DropdownMenu, Popover/DateTimePicker, etc.) that render outside the modal DOM
+          const target = e.target as HTMLElement | null;
+          if (target?.closest("[data-radix-popper-content-wrapper]")) {
+            e.preventDefault();
+          }
+        }}
+      >
         {/* ============================================
             HEADER
             ============================================ */}

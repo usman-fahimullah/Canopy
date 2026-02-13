@@ -43,6 +43,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
 import { OfferDetailsModal } from "@/components/offers/offer-details-modal";
@@ -70,7 +72,7 @@ import { BulkEmailComposer } from "@/components/canopy/BulkEmailComposer";
 import { ScheduledEmailQueue } from "@/components/canopy/ScheduledEmailQueue";
 import type { JobData, ApplicationData, ApplicationScoreData } from "../_lib/types";
 import { defaultStages } from "../_lib/constants";
-import { mapStageToKanbanType } from "../_lib/helpers";
+import { mapStageToKanbanType, formatRelativeTime, getStageBadgeVariant } from "../_lib/helpers";
 import { logger } from "@/lib/logger";
 
 // ============================================
@@ -189,9 +191,8 @@ export function CandidatesTab({
   const [sendRejectionEmail, setSendRejectionEmail] = React.useState(false);
   const [isRejecting, setIsRejecting] = React.useState(false);
 
-  // -- Bulk selection --
+  // -- Bulk selection (initialized after kanbanApplications — see below) --
   const [bulkMode, setBulkMode] = React.useState(false);
-  const selection = useSelection(applications);
 
   // -- Bulk email modal --
   const [bulkEmailOpen, setBulkEmailOpen] = React.useState(false);
@@ -263,6 +264,10 @@ export function CandidatesTab({
   const kanbanApplications = sortedApplications.filter(
     (app) => !SPECIAL_ACTION_STAGES.includes(app.stage)
   );
+
+  // Bulk selection — scoped to kanban-visible applications so "Select All"
+  // and counts only include candidates visible on the board (not rejected/talent-pool)
+  const selection = useSelection(kanbanApplications);
 
   // Counts for special stages
   const rejectedCount = applications.filter((a) => a.stage === "rejected").length;
@@ -903,7 +908,7 @@ export function CandidatesTab({
           />
         )}
 
-        {/* Pipeline Kanban Board */}
+        {/* Pipeline View (Grid/Kanban or List) */}
         {applications.length === 0 ? (
           /* Empty state — column headers + illustration */
           <>
@@ -949,40 +954,212 @@ export function CandidatesTab({
               </div>
             </div>
           </>
-        ) : (
-          /* Populated kanban view — drag-and-drop enabled */
-          <DndKanbanBoard
-            columns={kanbanColumns}
-            items={kanbanStateItems}
-            onItemsChange={handleKanbanItemsChange}
-            onDragEnd={handleKanbanDragEnd}
-            emptyMessage="No candidates"
-            className="h-[calc(100vh-180px)] flex-1 rounded-none"
-            columnClassName="min-w-[300px]"
-          />
-        )}
+        ) : candidatesViewMode === "list" ? (
+          /* List view — table of all candidates including rejected/talent-pool */
+          <div className="flex-1 overflow-auto">
+            <table className="w-full">
+              <thead className="sticky top-0 z-10 bg-[var(--background-default)]">
+                <tr className="border-b border-[var(--border-default)]">
+                  {bulkMode && (
+                    <th className="w-10 px-3 py-3 text-left">
+                      <Checkbox
+                        checked={selection.isAllSelected}
+                        onCheckedChange={() =>
+                          selection.isAllSelected ? selection.deselectAll() : selection.selectAll()
+                        }
+                        aria-label="Select all candidates"
+                      />
+                    </th>
+                  )}
+                  <th className="px-4 py-3 text-left text-caption-strong text-[var(--foreground-muted)]">
+                    Candidate
+                  </th>
+                  <th className="px-4 py-3 text-left text-caption-strong text-[var(--foreground-muted)]">
+                    Stage
+                  </th>
+                  <th className="px-4 py-3 text-center text-caption-strong text-[var(--foreground-muted)]">
+                    Match
+                  </th>
+                  <th className="px-4 py-3 text-left text-caption-strong text-[var(--foreground-muted)]">
+                    Source
+                  </th>
+                  <th className="px-4 py-3 text-right text-caption-strong text-[var(--foreground-muted)]">
+                    Applied
+                  </th>
+                  <th className="px-4 py-3 text-right text-caption-strong text-[var(--foreground-muted)]">
+                    Days in Stage
+                  </th>
+                  <th className="w-20 px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {sortedApplications.map((app) => {
+                  const daysInStage = getDaysInStage(app.updatedAt);
+                  const stageName =
+                    pipelineStages.find((s) => s.id === app.stage)?.name ??
+                    (app.stage === "rejected"
+                      ? "Rejected"
+                      : app.stage === "talent-pool"
+                        ? "Talent Pool"
+                        : app.stage);
+                  const stageBadgeVariant = getStageBadgeVariant(app.stage);
 
-        {/* Status bar for non-pipeline candidates */}
-        {(rejectedCount > 0 || talentPoolCount > 0) && (
-          <div className="flex items-center gap-4 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] px-4 py-2">
-            {rejectedCount > 0 && (
-              <div className="flex items-center gap-1.5">
-                <Prohibit size={14} className="text-[var(--foreground-error)]" />
-                <NotificationBadge count={rejectedCount} variant="count" size="sm" />
-                <span className="text-caption text-[var(--foreground-muted)]">rejected</span>
-              </div>
-            )}
-            {talentPoolCount > 0 && (
-              <div className="flex items-center gap-1.5">
-                <UserCirclePlus size={14} className="text-[var(--primitive-yellow-600)]" />
-                <NotificationBadge count={talentPoolCount} variant="count" size="sm" />
-                <span className="text-caption text-[var(--foreground-muted)]">in talent pool</span>
-              </div>
-            )}
-            <span className="text-caption text-[var(--foreground-disabled)]">
-              · Visible in list view
-            </span>
+                  return (
+                    <tr
+                      key={app.id}
+                      className="group cursor-pointer border-b border-[var(--border-muted)] transition-colors hover:bg-[var(--background-subtle)]"
+                      onClick={() => openCandidatePreview(app.seeker.id)}
+                    >
+                      {bulkMode && (
+                        <td className="px-3 py-3">
+                          <Checkbox
+                            checked={selection.isSelected(app.id)}
+                            onCheckedChange={() => selection.toggleSelection(app.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={`Select ${app.seeker.account.name || "candidate"}`}
+                          />
+                        </td>
+                      )}
+                      <td className="px-4 py-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <Avatar className="h-8 w-8 shrink-0">
+                            <AvatarImage
+                              src={
+                                app.seeker.account.avatar ||
+                                getDeterministicAvatarSrc(
+                                  app.seeker.account.email || app.seeker.account.name || ""
+                                )
+                              }
+                              alt={app.seeker.account.name || "Candidate"}
+                            />
+                            <AvatarFallback>
+                              {(app.seeker.account.name || "?").charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <p className="truncate text-body-sm font-medium text-[var(--foreground-default)]">
+                              {app.seeker.account.name || "Unknown"}
+                            </p>
+                            <p className="truncate text-caption text-[var(--foreground-muted)]">
+                              {app.seeker.account.email}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant={stageBadgeVariant} size="sm">
+                          {stageName}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {app.matchScore != null ? (
+                          <span
+                            className={`text-caption-strong ${
+                              app.matchScore >= 80
+                                ? "text-[var(--foreground-success)]"
+                                : app.matchScore >= 50
+                                  ? "text-[var(--foreground-warning)]"
+                                  : "text-[var(--foreground-muted)]"
+                            }`}
+                          >
+                            {Math.round(app.matchScore)}%
+                          </span>
+                        ) : (
+                          <span className="text-caption text-[var(--foreground-disabled)]">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-caption text-[var(--foreground-muted)]">
+                          {app.source || "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="text-caption text-[var(--foreground-muted)]">
+                          {formatRelativeTime(app.createdAt)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <DaysInStage days={daysInStage} compact />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                          <SimpleTooltip content="Email candidate">
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEmailComposer(
+                                  app.seeker.account.email,
+                                  app.seeker.account.name || "Candidate"
+                                );
+                              }}
+                              aria-label="Email candidate"
+                            >
+                              <EnvelopeSimple size={14} />
+                            </Button>
+                          </SimpleTooltip>
+                          {app.stage !== "rejected" && (
+                            <SimpleTooltip content="Reject candidate">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openRejectModal(app.id, app.seeker.account.name || "Unknown");
+                                }}
+                                aria-label="Reject candidate"
+                              >
+                                <Prohibit size={14} />
+                              </Button>
+                            </SimpleTooltip>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
+        ) : (
+          /* Grid/Kanban view — drag-and-drop enabled */
+          <>
+            <DndKanbanBoard
+              columns={kanbanColumns}
+              items={kanbanStateItems}
+              onItemsChange={handleKanbanItemsChange}
+              onDragEnd={handleKanbanDragEnd}
+              emptyMessage="No candidates"
+              className="h-[calc(100vh-180px)] flex-1 rounded-none"
+              columnClassName="min-w-[300px]"
+            />
+
+            {/* Status bar for non-pipeline candidates (grid view only) */}
+            {(rejectedCount > 0 || talentPoolCount > 0) && (
+              <div className="flex items-center gap-4 border-t border-[var(--border-muted)] bg-[var(--background-subtle)] px-4 py-2">
+                {rejectedCount > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Prohibit size={14} className="text-[var(--foreground-error)]" />
+                    <NotificationBadge count={rejectedCount} variant="count" size="sm" />
+                    <span className="text-caption text-[var(--foreground-muted)]">rejected</span>
+                  </div>
+                )}
+                {talentPoolCount > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <UserCirclePlus size={14} className="text-[var(--primitive-yellow-600)]" />
+                    <NotificationBadge count={talentPoolCount} variant="count" size="sm" />
+                    <span className="text-caption text-[var(--foreground-muted)]">
+                      in talent pool
+                    </span>
+                  </div>
+                )}
+                <span className="text-caption text-[var(--foreground-disabled)]">
+                  · Visible in list view
+                </span>
+              </div>
+            )}
+          </>
         )}
       </div>
 
