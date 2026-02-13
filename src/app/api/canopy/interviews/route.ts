@@ -147,10 +147,11 @@ export async function GET(request: NextRequest) {
       endpoint: "/api/canopy/interviews",
     });
 
-    // Flatten candidateName for consumer convenience
+    // Flatten candidateName and jobTitle for consumer convenience
     const enriched = interviews.map((interview) => ({
       ...interview,
       candidateName: interview.application?.seeker?.account?.name ?? "Unknown Candidate",
+      jobTitle: interview.application?.job?.title ?? "Unknown Position",
     }));
 
     return NextResponse.json({

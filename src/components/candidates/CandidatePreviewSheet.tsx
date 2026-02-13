@@ -33,6 +33,7 @@ import {
   ClockCounterClockwise,
   ListChecks,
   CalendarPlus,
+  EnvelopeSimple,
 } from "@phosphor-icons/react";
 
 // Sub-components
@@ -58,6 +59,15 @@ import {
   ModalFooter,
 } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+  DropdownValue,
+} from "@/components/ui/dropdown";
 
 // Shell
 import { useSidebar } from "@/components/shell/sidebar-context";
@@ -66,6 +76,20 @@ import { useSidebar } from "@/components/shell/sidebar-context";
 import { useCandidateDetailQuery, queryKeys } from "@/hooks/queries";
 import { logger, formatError } from "@/lib/logger";
 import { cn } from "@/lib/utils";
+
+/* -------------------------------------------------------------------
+   Rejection Reasons
+   ------------------------------------------------------------------- */
+
+const REJECTION_REASONS = [
+  { value: "not_qualified", label: "Not Qualified" },
+  { value: "culture_fit", label: "Culture Fit" },
+  { value: "withdrew", label: "Candidate Withdrew" },
+  { value: "position_filled", label: "Position Filled" },
+  { value: "other", label: "Other" },
+] as const;
+
+type RejectionReasonValue = (typeof REJECTION_REASONS)[number]["value"];
 
 /* -------------------------------------------------------------------
    Types (mirrors the API response shape)
@@ -201,7 +225,9 @@ export function CandidatePreviewSheet({
   // --- Modals ---
   const [interviewModalOpen, setInterviewModalOpen] = React.useState(false);
   const [rejectModalOpen, setRejectModalOpen] = React.useState(false);
-  const [rejectReason, setRejectReason] = React.useState("");
+  const [rejectReason, setRejectReason] = React.useState<RejectionReasonValue | "">("");
+  const [rejectNote, setRejectNote] = React.useState("");
+  const [sendRejectEmail, setSendRejectEmail] = React.useState(false);
   const [offerModalOpen, setOfferModalOpen] = React.useState(false);
 
   // --- Panels ---
@@ -219,6 +245,8 @@ export function CandidatePreviewSheet({
     setInterviewModalOpen(false);
     setRejectModalOpen(false);
     setRejectReason("");
+    setRejectNote("");
+    setSendRejectEmail(false);
     setOfferModalOpen(false);
   }, [seekerId]);
 
@@ -349,14 +377,54 @@ export function CandidatePreviewSheet({
 
   const handleReject = React.useCallback(() => {
     setRejectReason("");
+    setRejectNote("");
+    setSendRejectEmail(false);
     setRejectModalOpen(true);
   }, []);
 
   const handleConfirmReject = React.useCallback(async () => {
+    if (!activeApp || !rejectReason) return;
     setRejectModalOpen(false);
-    await moveToStage("rejected", "Rejected");
-    // TODO: persist rejectReason to API once rejection reasons are modeled
-  }, [moveToStage]);
+    setIsActionLoading(true);
+    setOptimisticStage("rejected");
+    setActionFeedback(null);
+
+    try {
+      const res = await fetch(
+        `/api/canopy/roles/${activeApp.job.id}/applications/${activeApp.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            stage: "rejected",
+            stageOrder: 0,
+            rejectionReason: rejectReason,
+            rejectionNote: rejectNote || undefined,
+            sendRejectionEmail: sendRejectEmail,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to reject candidate");
+      }
+
+      setActionFeedback({ type: "warning", message: "Candidate rejected" });
+      queryClient.invalidateQueries({ queryKey: queryKeys.canopy.candidates.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.canopy.dashboard.all });
+      onStageChanged?.();
+    } catch (err) {
+      setOptimisticStage(null);
+      setActionFeedback({
+        type: "error",
+        message: err instanceof Error ? err.message : "Failed to reject candidate",
+      });
+      logger.error("Failed to reject candidate", { error: formatError(err) });
+    } finally {
+      setIsActionLoading(false);
+    }
+  }, [activeApp, rejectReason, rejectNote, sendRejectEmail, queryClient, onStageChanged]);
   const handleSaveToTalentPool = React.useCallback(
     () => moveToStage("talent-pool", "Talent Pool"),
     [moveToStage]
@@ -537,6 +605,29 @@ export function CandidatePreviewSheet({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                {/* Send Email (Story 5.4) */}
+                {seeker && (
+                  <SimpleTooltip content="Email candidate">
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() => {
+                        const jobTitle = activeApp?.job.title ?? "this role";
+                        const name = candidateName;
+                        const email = seeker.account.email;
+                        const subject = encodeURIComponent(`Re: Your application for ${jobTitle}`);
+                        const body = encodeURIComponent(
+                          `Hi ${name},\n\nThank you for your interest in the ${jobTitle} position.\n\n`
+                        );
+                        window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
+                      }}
+                      aria-label="Email candidate"
+                    >
+                      <EnvelopeSimple size={20} weight="bold" />
+                    </Button>
+                  </SimpleTooltip>
+                )}
 
                 {/* Schedule Interview */}
                 <SimpleTooltip content="Schedule Interview">
@@ -786,23 +877,66 @@ export function CandidatePreviewSheet({
               <strong className="text-[var(--foreground-default)]">{candidateName}</strong>? This
               will move them to the rejected stage.
             </p>
-            <div className="space-y-2">
-              <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
-                Reason (optional)
-              </label>
-              <Textarea
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Add a note about why this candidate was rejected..."
-                rows={3}
-              />
+            <div className="space-y-4">
+              {/* Rejection reason dropdown (required) */}
+              <div className="space-y-2">
+                <Label className="text-caption-strong">
+                  Reason <span className="text-[var(--foreground-error)]">*</span>
+                </Label>
+                <Dropdown
+                  value={rejectReason}
+                  onValueChange={(v) => setRejectReason(v as RejectionReasonValue)}
+                >
+                  <DropdownTrigger className="w-full">
+                    <DropdownValue placeholder="Select a reason..." />
+                  </DropdownTrigger>
+                  <DropdownContent>
+                    {REJECTION_REASONS.map((reason) => (
+                      <DropdownItem key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </DropdownItem>
+                    ))}
+                  </DropdownContent>
+                </Dropdown>
+              </div>
+
+              {/* Optional note */}
+              <div className="space-y-2">
+                <Label className="text-caption-strong">Additional notes (optional)</Label>
+                <Textarea
+                  value={rejectNote}
+                  onChange={(e) => setRejectNote(e.target.value)}
+                  placeholder="Add a note about why this candidate was rejected..."
+                  rows={3}
+                />
+              </div>
+
+              {/* Send rejection email toggle */}
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id="preview-send-rejection-email"
+                  checked={sendRejectEmail}
+                  onCheckedChange={(checked) => setSendRejectEmail(Boolean(checked))}
+                />
+                <Label
+                  htmlFor="preview-send-rejection-email"
+                  className="cursor-pointer text-body-sm"
+                >
+                  Send rejection email to candidate
+                </Label>
+              </div>
             </div>
           </ModalBody>
           <ModalFooter>
             <Button variant="tertiary" onClick={() => setRejectModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleConfirmReject}>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmReject}
+              disabled={!rejectReason || isActionLoading}
+              loading={isActionLoading}
+            >
               Reject Candidate
             </Button>
           </ModalFooter>

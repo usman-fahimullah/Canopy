@@ -251,7 +251,6 @@ export const employerNavConfig: ShellNavConfig = {
           label: "Calendar",
           icon: CalendarDots,
           iconWeight: "fill",
-          requiredRoles: ["ADMIN", "RECRUITER"],
         },
         {
           id: "team",

@@ -14,6 +14,7 @@ import { z } from "zod";
  * - Stage changes (from audit logs)
  * - Interviews scheduled
  * - Offers (sent/viewed/signed)
+ * - Email logs (sent emails)
  *
  * Query params:
  * - take: number of events to return (default: 50)
@@ -27,7 +28,7 @@ const activityQuerySchema = z.object({
 
 type ActivityEvent = {
   id: string;
-  type: "applied" | "note" | "score" | "stage_change" | "interview" | "offer";
+  type: "applied" | "note" | "score" | "stage_change" | "interview" | "offer" | "email_sent";
   title: string;
   description: string;
   timestamp: Date;
@@ -300,6 +301,51 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           },
         });
       }
+    });
+
+    // 7. Email logs (sent emails)
+    const emailLogs = await prisma.emailLog.findMany({
+      where: { applicationId: { in: applicationIds } },
+      select: {
+        id: true,
+        subject: true,
+        status: true,
+        sendType: true,
+        createdAt: true,
+        sentBy: {
+          select: {
+            account: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    emailLogs.forEach((log) => {
+      const senderName = log.sentBy.account.name || "Team member";
+      const typeLabel =
+        log.sendType === "AUTOMATED"
+          ? "Automated email"
+          : log.sendType === "BULK"
+            ? "Bulk email"
+            : log.sendType === "SCHEDULED"
+              ? "Scheduled email"
+              : "Email";
+
+      events.push({
+        id: `email-${log.id}`,
+        type: "email_sent",
+        title: `${typeLabel} sent`,
+        description: `${senderName} sent "${log.subject}"`,
+        timestamp: log.createdAt,
+        metadata: {
+          emailLogId: log.id,
+          subject: log.subject,
+          status: log.status,
+          sendType: log.sendType,
+          senderName,
+        },
+      });
     });
 
     // --- Sort by timestamp descending and apply pagination ---

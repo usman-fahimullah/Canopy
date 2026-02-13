@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { applicationIds, subject, body: emailBody } = result.data;
+    const { applicationIds, subject, body: emailBody, templateId } = result.data;
 
     // Fetch all applications + candidate data in one query (no N+1)
     const applications = await prisma.application.findMany({
@@ -126,19 +126,104 @@ export async function POST(request: NextRequest) {
               </div>
             `;
 
-            await sendEmail({
+            const emailResult = await sendEmail({
               to: candidateEmail,
               subject: personalizedSubject,
               html: htmlBody,
               text: personalizedBody.replace(/<[^>]*>/g, ""),
             });
 
-            sent++;
+            if (emailResult.success) {
+              sent++;
+
+              // Fire-and-forget: log successful send
+              prisma.emailLog
+                .create({
+                  data: {
+                    organizationId: ctx.organizationId,
+                    sentById: ctx.memberId,
+                    recipientEmail: candidateEmail,
+                    recipientName: candidateName,
+                    applicationId: app.id,
+                    subject: personalizedSubject,
+                    body: personalizedBody,
+                    templateId: templateId ?? null,
+                    status: "SENT",
+                    sendType: "BULK",
+                  },
+                })
+                .catch((logErr) => {
+                  logger.error("Failed to log bulk email send", {
+                    error: formatError(logErr),
+                    recipientEmail: candidateEmail,
+                  });
+                });
+            } else {
+              failed++;
+              errors.push(`${candidateEmail}: ${emailResult.error ?? "Unknown error"}`);
+
+              // Fire-and-forget: log failed send
+              prisma.emailLog
+                .create({
+                  data: {
+                    organizationId: ctx.organizationId,
+                    sentById: ctx.memberId,
+                    recipientEmail: candidateEmail,
+                    recipientName: candidateName,
+                    applicationId: app.id,
+                    subject: personalizedSubject,
+                    body: personalizedBody,
+                    templateId: templateId ?? null,
+                    status: "FAILED",
+                    error: emailResult.error ?? "Unknown error",
+                    sendType: "BULK",
+                  },
+                })
+                .catch((logErr) => {
+                  logger.error("Failed to log bulk email failure", {
+                    error: formatError(logErr),
+                    recipientEmail: candidateEmail,
+                  });
+                });
+            }
           } catch (err) {
             failed++;
-            errors.push(
-              `${app.seeker.account.email}: ${err instanceof Error ? err.message : "Unknown error"}`
-            );
+            const errCandidateEmail = app.seeker.account.email;
+            const errCandidateName = app.seeker.account.name || "Candidate";
+            const errorMessage = err instanceof Error ? err.message : "Unknown error";
+            errors.push(`${errCandidateEmail}: ${errorMessage}`);
+
+            // Fire-and-forget: log unexpected failure
+            prisma.emailLog
+              .create({
+                data: {
+                  organizationId: ctx.organizationId,
+                  sentById: ctx.memberId,
+                  recipientEmail: errCandidateEmail,
+                  recipientName: errCandidateName,
+                  applicationId: app.id,
+                  subject: renderTemplate(subject, {
+                    candidate_name: errCandidateName,
+                    job_title: app.job.title,
+                    company_name: app.job.organization.name,
+                  }),
+                  body: renderTemplate(emailBody, {
+                    candidate_name: errCandidateName,
+                    job_title: app.job.title,
+                    company_name: app.job.organization.name,
+                  }),
+                  templateId: templateId ?? null,
+                  status: "FAILED",
+                  error: errorMessage,
+                  sendType: "BULK",
+                },
+              })
+              .catch((logErr) => {
+                logger.error("Failed to log bulk email failure", {
+                  error: formatError(logErr),
+                  recipientEmail: errCandidateEmail,
+                });
+              });
           }
         })
       );

@@ -16,10 +16,38 @@ import {
   type ReviewerData,
   type DecisionType,
 } from "@/components/ui/candidate-card";
+import { Toast } from "@/components/ui/toast";
+import { BulkActionsToolbar, useSelection, atsBulkActions } from "@/components/ui/bulk-actions";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+  DropdownValue,
+} from "@/components/ui/dropdown";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/modal";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
 import { getDeterministicAvatarSrc } from "@/lib/profile/avatar-presets";
 import { SimpleTooltip } from "@/components/ui/tooltip";
+import { usePipelineToast } from "@/hooks/use-pipeline-toast";
 import {
   Plus,
   Funnel,
@@ -28,11 +56,35 @@ import {
   Prohibit,
   UserCirclePlus,
   GearSix,
+  EnvelopeSimple,
+  ArrowsDownUp,
+  Eye,
+  CaretDown,
+  Clock,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import { BulkEmailComposer } from "@/components/canopy/BulkEmailComposer";
+import { ScheduledEmailQueue } from "@/components/canopy/ScheduledEmailQueue";
 import type { JobData, ApplicationData, ApplicationScoreData } from "../_lib/types";
 import { defaultStages } from "../_lib/constants";
 import { mapStageToKanbanType } from "../_lib/helpers";
+import { logger } from "@/lib/logger";
+
+// ============================================
+// CONSTANTS
+// ============================================
+
+const REJECTION_REASONS = [
+  { value: "not_qualified", label: "Not Qualified" },
+  { value: "culture_fit", label: "Culture Fit" },
+  { value: "withdrew", label: "Candidate Withdrew" },
+  { value: "position_filled", label: "Position Filled" },
+  { value: "other", label: "Other" },
+] as const;
+
+type RejectionReasonValue = (typeof REJECTION_REASONS)[number]["value"];
+
+const SPECIAL_ACTION_STAGES = ["rejected", "talent-pool"];
 
 // ============================================
 // HELPERS
@@ -78,9 +130,22 @@ function formatInterviewDate(dateStr: string): string {
   return `${day}, ${time}`;
 }
 
+/** Calculate days in stage from updatedAt */
+function getDaysInStage(updatedAt: string): number {
+  return Math.floor((Date.now() - new Date(updatedAt).getTime()) / 86400000);
+}
+
+/** Check if an application has been scored */
+function isScored(app: ApplicationData): boolean {
+  return (app.scores?.length ?? 0) > 0;
+}
+
 // ============================================
 // TYPES
 // ============================================
+
+type SortMode = "default" | "days-in-stage-asc" | "days-in-stage-desc";
+type FilterMode = "all" | "needs-scoring" | "scored";
 
 interface CandidatesTabProps {
   roleId: string;
@@ -101,15 +166,40 @@ export function CandidatesTab({
   setApplications,
   onCandidateAdded,
 }: CandidatesTabProps) {
-  // Local state
+  // -- View state --
   const [candidatesViewMode, setCandidatesViewMode] = React.useState<"grid" | "list">("grid");
   const [candidateSearch, setCandidateSearch] = React.useState("");
   const [addCandidateModalOpen, setAddCandidateModalOpen] = React.useState(false);
+  const [sortMode, setSortMode] = React.useState<SortMode>("default");
+  const [filterMode, setFilterMode] = React.useState<FilterMode>("all");
+  const [filterMenuOpen, setFilterMenuOpen] = React.useState(false);
 
-  // Candidate preview sheet state
+  // -- Candidate preview sheet state --
   const [previewSeekerId, setPreviewSeekerId] = React.useState<string | null>(null);
 
-  // Pipeline stages
+  // -- Rejection modal state --
+  const [rejectModalOpen, setRejectModalOpen] = React.useState(false);
+  const [rejectTargetAppId, setRejectTargetAppId] = React.useState<string | null>(null);
+  const [rejectTargetName, setRejectTargetName] = React.useState("");
+  const [rejectionReason, setRejectionReason] = React.useState<RejectionReasonValue | "">("");
+  const [rejectionNote, setRejectionNote] = React.useState("");
+  const [sendRejectionEmail, setSendRejectionEmail] = React.useState(false);
+  const [isRejecting, setIsRejecting] = React.useState(false);
+
+  // -- Bulk selection --
+  const [bulkMode, setBulkMode] = React.useState(false);
+  const selection = useSelection(applications);
+
+  // -- Bulk email modal --
+  const [bulkEmailOpen, setBulkEmailOpen] = React.useState(false);
+
+  // -- Scheduled email queue (Story 6.6) --
+  const [scheduledQueueOpen, setScheduledQueueOpen] = React.useState(false);
+
+  // -- Toast --
+  const { toast, showToast, dismissToast, handleUndo } = usePipelineToast();
+
+  // -- Pipeline stages --
   const pipelineStages = jobData?.stages?.length ? jobData.stages : defaultStages;
 
   // Build DndKanbanBoard column definitions
@@ -119,11 +209,11 @@ export function CandidatesTab({
     stage: mapStageToKanbanType(stage.id),
   }));
 
-  // Stages that are action-based (non-linear) — these candidates
-  // don't appear on the Kanban board but are visible in list view
-  const SPECIAL_ACTION_STAGES = ["rejected", "talent-pool"];
+  // ============================================
+  // FILTERING & SORTING
+  // ============================================
 
-  // Filter applications by search
+  // Step 1: Search filter
   const searchFilteredApplications = candidateSearch
     ? applications.filter(
         (app) =>
@@ -132,34 +222,248 @@ export function CandidatesTab({
       )
     : applications;
 
+  // Step 2: Scoring filter (Story 5.8)
+  const scoringFilteredApplications = React.useMemo(() => {
+    if (filterMode === "all") return searchFilteredApplications;
+    if (filterMode === "needs-scoring")
+      return searchFilteredApplications.filter((app) => !isScored(app));
+    if (filterMode === "scored") return searchFilteredApplications.filter((app) => isScored(app));
+    return searchFilteredApplications;
+  }, [searchFilteredApplications, filterMode]);
+
+  // Step 3: Sort by days-in-stage (Story 5.6)
+  const sortedApplications = React.useMemo(() => {
+    if (sortMode === "default") return scoringFilteredApplications;
+    return [...scoringFilteredApplications].sort((a, b) => {
+      const daysA = getDaysInStage(a.updatedAt);
+      const daysB = getDaysInStage(b.updatedAt);
+      return sortMode === "days-in-stage-desc" ? daysB - daysA : daysA - daysB;
+    });
+  }, [scoringFilteredApplications, sortMode]);
+
   // For the Kanban board, exclude candidates in special action stages
-  const kanbanApplications = searchFilteredApplications.filter(
+  const kanbanApplications = sortedApplications.filter(
     (app) => !SPECIAL_ACTION_STAGES.includes(app.stage)
   );
-
-  // For list view, show all (including rejected & talent pool)
-  const filteredApplications = searchFilteredApplications;
 
   // Counts for special stages
   const rejectedCount = applications.filter((a) => a.stage === "rejected").length;
   const talentPoolCount = applications.filter((a) => a.stage === "talent-pool").length;
 
-  // Open the candidate preview sheet instead of navigating away
+  // ============================================
+  // CANDIDATE PREVIEW
+  // ============================================
+
   const openCandidatePreview = React.useCallback((seekerId: string) => {
     setPreviewSeekerId(seekerId);
   }, []);
 
-  // Convert pipeline applications to KanbanItem[] (excludes rejected/talent-pool)
+  // ============================================
+  // REJECTION FLOW (Story 5.5)
+  // ============================================
+
+  const openRejectModal = React.useCallback((appId: string, candidateName: string) => {
+    setRejectTargetAppId(appId);
+    setRejectTargetName(candidateName);
+    setRejectionReason("");
+    setRejectionNote("");
+    setSendRejectionEmail(false);
+    setRejectModalOpen(true);
+  }, []);
+
+  const handleConfirmReject = React.useCallback(async () => {
+    if (!rejectTargetAppId || !rejectionReason) return;
+
+    setIsRejecting(true);
+    try {
+      const res = await fetch(`/api/canopy/roles/${roleId}/applications/${rejectTargetAppId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stage: "rejected",
+          stageOrder: 0,
+          rejectionReason,
+          rejectionNote: rejectionNote || undefined,
+          sendRejectionEmail,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to reject candidate");
+      }
+
+      // Update local state
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === rejectTargetAppId
+            ? { ...app, stage: "rejected", rejectedAt: new Date().toISOString() }
+            : app
+        )
+      );
+
+      setRejectModalOpen(false);
+      showToast({
+        message: `${rejectTargetName} has been rejected`,
+        variant: "warning",
+      });
+    } catch (err) {
+      logger.error("Failed to reject candidate", { error: String(err) });
+      showToast({
+        message: err instanceof Error ? err.message : "Failed to reject candidate",
+        variant: "critical",
+      });
+    } finally {
+      setIsRejecting(false);
+    }
+  }, [
+    rejectTargetAppId,
+    rejectionReason,
+    rejectionNote,
+    sendRejectionEmail,
+    roleId,
+    setApplications,
+    rejectTargetName,
+    showToast,
+  ]);
+
+  // ============================================
+  // EMAIL ACTION (Story 5.4)
+  // ============================================
+
+  const openEmailComposer = React.useCallback(
+    (email: string, name: string) => {
+      const jobTitle = jobData?.title ?? "this role";
+      // Open default mail client with pre-populated fields
+      const subject = encodeURIComponent(`Re: Your application for ${jobTitle}`);
+      const body = encodeURIComponent(
+        `Hi ${name},\n\nThank you for your interest in the ${jobTitle} position.\n\n`
+      );
+      window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
+    },
+    [jobData?.title]
+  );
+
+  // ============================================
+  // BULK MOVE (Story 5.7)
+  // ============================================
+
+  const handleBulkAction = React.useCallback(
+    async (actionId: string) => {
+      const selectedIds = Array.from(selection.selectedIds);
+
+      // Handle "move-to-{stageId}" pattern
+      if (actionId.startsWith("move-to-")) {
+        const targetStage = actionId.replace("move-to-", "");
+        const targetStageName =
+          pipelineStages.find((s) => s.id === targetStage)?.name ?? targetStage;
+
+        try {
+          const res = await fetch("/api/canopy/applications/bulk", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ids: selectedIds,
+              action: "MOVE_STAGE",
+              stage: targetStage,
+            }),
+          });
+
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error ?? "Failed to move candidates");
+          }
+
+          const result = await res.json();
+
+          // Update local state
+          setApplications((prev) =>
+            prev.map((app) => (selectedIds.includes(app.id) ? { ...app, stage: targetStage } : app))
+          );
+
+          selection.deselectAll();
+          setBulkMode(false);
+          showToast({
+            message: `${result.updated} candidate${result.updated !== 1 ? "s" : ""} moved to ${targetStageName}`,
+            variant: "success",
+          });
+        } catch (err) {
+          showToast({
+            message: err instanceof Error ? err.message : "Failed to move candidates",
+            variant: "critical",
+          });
+        }
+        return;
+      }
+
+      // Handle reject
+      if (actionId === "reject") {
+        try {
+          const res = await fetch("/api/canopy/applications/bulk", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ids: selectedIds,
+              action: "REJECT",
+            }),
+          });
+
+          if (!res.ok) throw new Error("Failed to reject candidates");
+
+          const result = await res.json();
+
+          setApplications((prev) =>
+            prev.map((app) =>
+              selectedIds.includes(app.id)
+                ? { ...app, stage: "rejected", rejectedAt: new Date().toISOString() }
+                : app
+            )
+          );
+
+          selection.deselectAll();
+          setBulkMode(false);
+          showToast({
+            message: `${result.updated} candidate${result.updated !== 1 ? "s" : ""} rejected`,
+            variant: "warning",
+          });
+        } catch (err) {
+          showToast({
+            message: err instanceof Error ? err.message : "Failed to reject candidates",
+            variant: "critical",
+          });
+        }
+        return;
+      }
+
+      // Handle email — open bulk email composer modal
+      if (actionId === "email") {
+        setBulkEmailOpen(true);
+      }
+    },
+    [selection, pipelineStages, setApplications, showToast, applications, roleId]
+  );
+
+  // Build bulk action menu items
+  const bulkActions = React.useMemo(
+    () => [
+      atsBulkActions.email(),
+      atsBulkActions.moveToStage(pipelineStages.map((s) => ({ id: s.id, name: s.name }))),
+      atsBulkActions.reject(),
+    ],
+    [pipelineStages]
+  );
+
+  // ============================================
+  // KANBAN ITEMS + DnD (Stories 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.8)
+  // ============================================
+
   const kanbanItems: KanbanItem[] = React.useMemo(
     () =>
       kanbanApplications.map((app) => ({
         id: app.id,
         columnId: app.stage,
         content: (() => {
-          // Calculate days in current stage
-          const daysInStage = Math.floor(
-            (Date.now() - new Date(app.updatedAt).getTime()) / 86400000
-          );
+          const daysInStage = getDaysInStage(app.updatedAt);
 
           // Build reviewer data from scores
           const reviewers: ReviewerData[] = (app.scores ?? []).map((score) => ({
@@ -179,6 +483,9 @@ export function CandidatesTab({
             ? formatInterviewDate(nextInterview.scheduledAt)
             : undefined;
 
+          // Scoring status indicator (Story 5.8)
+          const hasScores = isScored(app);
+
           return (
             <CandidateCard
               variant="compact"
@@ -196,6 +503,7 @@ export function CandidatesTab({
                 matchScore={app.matchScore ?? undefined}
                 appliedDate={app.createdAt}
               />
+              {/* Activity row */}
               {(lastComment || scheduledInterview) && (
                 <CandidateActivity
                   lastComment={lastComment}
@@ -203,14 +511,55 @@ export function CandidatesTab({
                   className="mt-2"
                 />
               )}
+              {/* Days in stage (Story 5.6) */}
               <DaysInStage days={daysInStage} compact className="mt-2" />
+              {/* Scoring indicator (Story 5.8) */}
+              {!hasScores && (
+                <span className="mt-1 inline-flex items-center gap-1 text-caption text-[var(--foreground-warning)]">
+                  <Eye size={12} weight="bold" />
+                  Needs scoring
+                </span>
+              )}
+              {/* Reviewers */}
               {reviewers.length > 0 && <CandidateReviewers reviewers={reviewers} />}
+              {/* Quick actions on hover (Stories 5.4, 5.5) */}
+              <div className="duration-[var(--duration-fast)] mt-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <SimpleTooltip content="Email candidate">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEmailComposer(
+                        app.seeker.account.email,
+                        app.seeker.account.name || "Candidate"
+                      );
+                    }}
+                    aria-label="Email candidate"
+                  >
+                    <EnvelopeSimple size={14} />
+                  </Button>
+                </SimpleTooltip>
+                <SimpleTooltip content="Reject candidate">
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openRejectModal(app.id, app.seeker.account.name || "Unknown");
+                    }}
+                    aria-label="Reject candidate"
+                  >
+                    <Prohibit size={14} />
+                  </Button>
+                </SimpleTooltip>
+              </div>
             </CandidateCard>
           );
         })(),
         data: app,
       })),
-    [kanbanApplications, openCandidatePreview]
+    [kanbanApplications, openCandidatePreview, openEmailComposer, openRejectModal]
   );
 
   // useKanbanState manages optimistic updates + error rollback
@@ -220,7 +569,16 @@ export function CandidatesTab({
     handleDragEnd: handleKanbanDragEnd,
   } = useKanbanState({
     initialItems: kanbanItems,
-    onMoveItem: async (itemId, _fromColumnId, toColumnId) => {
+    onMoveItem: async (itemId, fromColumnId, toColumnId) => {
+      // Store previous state for undo
+      const previousStage = String(fromColumnId);
+      const fromStageName =
+        pipelineStages.find((s) => s.id === previousStage)?.name ?? previousStage;
+      const toStageName =
+        pipelineStages.find((s) => s.id === String(toColumnId))?.name ?? String(toColumnId);
+      const app = applications.find((a) => a.id === itemId);
+      const candidateName = app?.seeker.account.name || "Candidate";
+
       const res = await fetch(`/api/canopy/roles/${roleId}/applications/${itemId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -229,17 +587,52 @@ export function CandidatesTab({
       if (!res.ok) {
         throw new Error("Failed to move candidate");
       }
+
       // Update local applications state to stay in sync
       setApplications((prev) =>
-        prev.map((app) => (app.id === itemId ? { ...app, stage: String(toColumnId) } : app))
+        prev.map((a) => (a.id === itemId ? { ...a, stage: String(toColumnId) } : a))
       );
+
+      // Show undo toast (Story 5.2)
+      showToast({
+        message: `${candidateName} moved to ${toStageName}`,
+        variant: "success",
+        duration: 5000,
+        onUndo: async () => {
+          // Revert the move
+          try {
+            const undoRes = await fetch(`/api/canopy/roles/${roleId}/applications/${itemId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ stage: previousStage, stageOrder: 0 }),
+            });
+            if (!undoRes.ok) throw new Error("Failed to undo");
+
+            setApplications((prev) =>
+              prev.map((a) => (a.id === itemId ? { ...a, stage: previousStage } : a))
+            );
+
+            showToast({
+              message: `${candidateName} moved back to ${fromStageName}`,
+              variant: "info",
+              duration: 3000,
+            });
+          } catch {
+            showToast({
+              message: "Failed to undo move",
+              variant: "critical",
+              duration: 3000,
+            });
+          }
+        },
+      });
     },
   });
 
   return (
     <>
       <div className="flex flex-1 flex-col">
-        {/* Toolbar — Search + Filter + Add + View Toggle */}
+        {/* Toolbar — Search + Filter + Sort + Add + Bulk + View Toggle */}
         <div className="flex items-center justify-between border-b border-[var(--border-muted)] bg-[var(--background-default)] px-4 py-3">
           <div className="flex items-center gap-3">
             <SearchInput
@@ -248,10 +641,90 @@ export function CandidatesTab({
               onValueChange={setCandidateSearch}
               className="w-64"
             />
-            <Button variant="tertiary" size="default">
-              <Funnel weight="bold" className="mr-2 h-4 w-4" />
-              Filter
-            </Button>
+
+            {/* Filter dropdown (Story 5.8) */}
+            <DropdownMenu open={filterMenuOpen} onOpenChange={setFilterMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button variant={filterMode !== "all" ? "secondary" : "tertiary"} size="default">
+                  <Funnel weight="bold" className="mr-2 h-4 w-4" />
+                  {filterMode === "all"
+                    ? "Filter"
+                    : filterMode === "needs-scoring"
+                      ? "Needs Scoring"
+                      : "Scored"}
+                  <CaretDown size={14} className="ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[180px]">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setFilterMode("all");
+                    setFilterMenuOpen(false);
+                  }}
+                  className="flex items-center justify-between"
+                >
+                  All Candidates
+                  {filterMode === "all" && (
+                    <span className="text-[var(--foreground-success)]">✓</span>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    setFilterMode("needs-scoring");
+                    setFilterMenuOpen(false);
+                  }}
+                  className="flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <Eye size={14} className="text-[var(--foreground-warning)]" />
+                    Needs Scoring
+                  </span>
+                  {filterMode === "needs-scoring" && (
+                    <span className="text-[var(--foreground-success)]">✓</span>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setFilterMode("scored");
+                    setFilterMenuOpen(false);
+                  }}
+                  className="flex items-center justify-between"
+                >
+                  Scored
+                  {filterMode === "scored" && (
+                    <span className="text-[var(--foreground-success)]">✓</span>
+                  )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Sort dropdown (Story 5.6) */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant={sortMode !== "default" ? "secondary" : "tertiary"} size="default">
+                  <ArrowsDownUp weight="bold" className="mr-2 h-4 w-4" />
+                  {sortMode === "default"
+                    ? "Sort"
+                    : sortMode === "days-in-stage-desc"
+                      ? "Longest in stage"
+                      : "Newest in stage"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[200px]">
+                <DropdownMenuItem onClick={() => setSortMode("default")}>
+                  Default order
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setSortMode("days-in-stage-desc")}>
+                  Longest in stage first
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortMode("days-in-stage-asc")}>
+                  Newest in stage first
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button
               variant="tertiary"
               size="default"
@@ -260,6 +733,25 @@ export function CandidatesTab({
               <Plus weight="bold" className="mr-2 h-4 w-4" />
               Add Candidates
             </Button>
+
+            {/* Bulk select toggle (Story 5.7) */}
+            <Button
+              variant={bulkMode ? "secondary" : "tertiary"}
+              size="default"
+              onClick={() => {
+                setBulkMode((prev) => !prev);
+                if (bulkMode) selection.deselectAll();
+              }}
+            >
+              {bulkMode ? "Cancel Select" : "Select"}
+            </Button>
+
+            <SimpleTooltip content="Scheduled emails">
+              <Button variant="ghost" size="icon" onClick={() => setScheduledQueueOpen(true)}>
+                <Clock size={18} />
+              </Button>
+            </SimpleTooltip>
+
             <SimpleTooltip content="Pipeline settings">
               <Button variant="ghost" size="icon" asChild>
                 <Link href={`/canopy/roles/${roleId}/pipeline`}>
@@ -277,6 +769,21 @@ export function CandidatesTab({
             onValueChange={(v) => setCandidatesViewMode(v as "grid" | "list")}
           />
         </div>
+
+        {/* Bulk Actions Toolbar (Story 5.7) */}
+        {bulkMode && (
+          <BulkActionsToolbar
+            selectedCount={selection.selectedIds.size}
+            totalCount={kanbanApplications.length}
+            onSelectAll={selection.selectAll}
+            onDeselectAll={selection.deselectAll}
+            onAction={handleBulkAction}
+            actions={bulkActions}
+            selectedIds={Array.from(selection.selectedIds)}
+            position="inline"
+            showWhenEmpty
+          />
+        )}
 
         {/* Pipeline Kanban Board */}
         {applications.length === 0 ? (
@@ -363,12 +870,127 @@ export function CandidatesTab({
         )}
       </div>
 
+      {/* ============================================
+          UNDO TOAST (Story 5.2)
+          ============================================ */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+          <Toast
+            variant={toast.variant}
+            dismissible
+            onDismiss={dismissToast}
+            actionLabel={toast.onUndo ? "Undo" : undefined}
+            onAction={toast.onUndo ? handleUndo : undefined}
+          >
+            {toast.message}
+          </Toast>
+        </div>
+      )}
+
+      {/* ============================================
+          REJECTION MODAL (Story 5.5)
+          ============================================ */}
+      <Modal open={rejectModalOpen} onOpenChange={setRejectModalOpen}>
+        <ModalContent size="default">
+          <ModalHeader>
+            <ModalTitle>Reject Candidate</ModalTitle>
+          </ModalHeader>
+          <ModalBody>
+            <p className="mb-4 text-body-sm text-[var(--foreground-muted)]">
+              Are you sure you want to reject{" "}
+              <strong className="text-[var(--foreground-default)]">{rejectTargetName}</strong>? This
+              will move them to the rejected stage.
+            </p>
+            <div className="space-y-4">
+              {/* Rejection reason dropdown (required) */}
+              <div className="space-y-2">
+                <Label className="text-caption-strong">
+                  Reason <span className="text-[var(--foreground-error)]">*</span>
+                </Label>
+                <Dropdown
+                  value={rejectionReason}
+                  onValueChange={(v) => setRejectionReason(v as RejectionReasonValue)}
+                >
+                  <DropdownTrigger className="w-full">
+                    <DropdownValue placeholder="Select a reason..." />
+                  </DropdownTrigger>
+                  <DropdownContent>
+                    {REJECTION_REASONS.map((reason) => (
+                      <DropdownItem key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </DropdownItem>
+                    ))}
+                  </DropdownContent>
+                </Dropdown>
+              </div>
+
+              {/* Optional note */}
+              <div className="space-y-2">
+                <Label className="text-caption-strong">Additional notes (optional)</Label>
+                <Textarea
+                  value={rejectionNote}
+                  onChange={(e) => setRejectionNote(e.target.value)}
+                  placeholder="Add a note about why this candidate was rejected..."
+                  rows={3}
+                />
+              </div>
+
+              {/* Send rejection email toggle */}
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id="send-rejection-email"
+                  checked={sendRejectionEmail}
+                  onCheckedChange={(checked) => setSendRejectionEmail(Boolean(checked))}
+                />
+                <Label htmlFor="send-rejection-email" className="cursor-pointer text-body-sm">
+                  Send rejection email to candidate
+                </Label>
+              </div>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="tertiary" onClick={() => setRejectModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmReject}
+              disabled={!rejectionReason || isRejecting}
+              loading={isRejecting}
+            >
+              Reject Candidate
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
       {/* Add Candidate Modal */}
       <AddCandidateModal
         open={addCandidateModalOpen}
         onOpenChange={setAddCandidateModalOpen}
         roleId={roleId}
         onSuccess={onCandidateAdded}
+      />
+
+      {/* Bulk Email Composer (Story 6.4) */}
+      <BulkEmailComposer
+        open={bulkEmailOpen}
+        onOpenChange={setBulkEmailOpen}
+        applicationIds={Array.from(selection.selectedIds)}
+        candidates={applications
+          .filter((a) => selection.selectedIds.has(a.id))
+          .map((a) => ({
+            id: a.id,
+            name: a.seeker.account.name || "Candidate",
+            email: a.seeker.account.email,
+          }))}
+        jobTitle={jobData?.title || ""}
+        companyName=""
+        onSendComplete={() => {
+          selection.deselectAll();
+          setBulkMode(false);
+          setBulkEmailOpen(false);
+        }}
       />
 
       {/* Candidate Preview Sheet */}
@@ -397,6 +1019,9 @@ export function CandidatesTab({
           };
         })()}
       />
+
+      {/* Scheduled Email Queue (Story 6.6) */}
+      <ScheduledEmailQueue open={scheduledQueueOpen} onOpenChange={setScheduledQueueOpen} />
     </>
   );
 }

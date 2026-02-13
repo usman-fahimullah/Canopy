@@ -135,6 +135,12 @@ model Organization {
   // Email templates
   emailTemplates EmailTemplate[]
 
+  // Email logs (sent email history)
+  emailLogs EmailLog[]
+
+  // Scheduled emails
+  scheduledEmails ScheduledEmail[]
+
   // Approval requests
   approvalRequests ApprovalRequest[]
 
@@ -176,6 +182,10 @@ model OrganizationMember {
   recruitedJobs  Job[]             @relation("JobRecruiter")
   managedJobs    Job[]             @relation("JobHiringManager")
   jobAssignments JobAssignment[]
+
+  // Email tracking
+  emailLogs       EmailLog[]
+  scheduledEmails ScheduledEmail[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -980,6 +990,12 @@ model Application {
   // Interview tracking
   interviews Interview[]
 
+  // Email logs (sent emails for this application)
+  emailLogs EmailLog[]
+
+  rejectionReason String? // e.g., "not_qualified", "culture_fit", "withdrew", "position_filled", "other"
+  rejectionNote   String? @db.Text // Optional freetext note about the rejection
+
   rejectedAt DateTime?
   hiredAt    DateTime?
 
@@ -1504,6 +1520,111 @@ enum EmailTemplateType {
   STAGE_ADVANCE
   WELCOME
   CUSTOM
+}
+
+// =================================================================
+// EMAIL LOG — Tracks every email sent through Canopy.
+// Powers candidate email-history timeline (Story 6.5).
+// =================================================================
+
+model EmailLog {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Who sent the email (OrgMember who triggered the send)
+  sentById String
+  sentBy   OrganizationMember @relation(fields: [sentById], references: [id], onDelete: Cascade)
+
+  // Recipient
+  recipientEmail String
+  recipientName  String?
+
+  // Link to application (optional — not all emails map to an application)
+  applicationId String?
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  // Email content
+  subject String
+  body    String @db.Text // Rendered HTML body
+
+  // Template used (optional)
+  templateId String?
+
+  // Delivery status
+  status EmailLogStatus @default(SENT)
+  error  String?
+
+  // Type of send
+  sendType EmailSendType @default(MANUAL)
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([applicationId])
+  @@index([recipientEmail])
+  @@index([organizationId, createdAt])
+}
+
+enum EmailLogStatus {
+  SENT
+  FAILED
+  BOUNCED
+}
+
+enum EmailSendType {
+  MANUAL      // Recruiter composed and sent
+  BULK        // Bulk send operation
+  AUTOMATED   // Stage-change automation
+  SCHEDULED   // Scheduled email (delivered)
+}
+
+// =================================================================
+// SCHEDULED EMAIL — Emails queued for future delivery (Story 6.6).
+// A cron/background job picks up pending rows at scheduledFor time.
+// =================================================================
+
+model ScheduledEmail {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Who scheduled the email
+  createdById String
+  createdBy   OrganizationMember @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  // Recipients — stored as JSON array of { email, name, applicationId? }
+  recipients String @db.Text // JSON: Array<{ email: string; name?: string; applicationId?: string }>
+
+  // Email content
+  subject String
+  body    String @db.Text
+
+  // Template used (optional)
+  templateId String?
+
+  // Scheduling
+  scheduledFor DateTime
+  status       ScheduledEmailStatus @default(PENDING)
+  sentAt       DateTime?
+  cancelledAt  DateTime?
+  error        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([status, scheduledFor])
+  @@index([organizationId, status])
+}
+
+enum ScheduledEmailStatus {
+  PENDING
+  SENT
+  CANCELLED
+  FAILED
 }
 
 // =================================================================

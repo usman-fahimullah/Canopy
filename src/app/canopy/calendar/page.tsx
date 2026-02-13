@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format, addWeeks, subWeeks, startOfWeek, addDays, isToday } from "date-fns";
 import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
@@ -102,7 +102,7 @@ export default function CalendarPage() {
   const [selectedInterviewerId, setSelectedInterviewerId] = useState<string | null>(null);
   const [interviewers, setInterviewers] = useState<InterviewerOption[]>([]);
 
-  const weekEnd = addDays(currentWeekStart, 6);
+  const weekEnd = useMemo(() => addDays(currentWeekStart, 6), [currentWeekStart]);
 
   // Fetch interviewers when component mounts
   useEffect(() => {
@@ -178,7 +178,10 @@ export default function CalendarPage() {
 
   // Group interviews by day
   const interviewsByDay: Record<string, Interview[]> = {};
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i)),
+    [currentWeekStart]
+  );
 
   weekDays.forEach((day) => {
     const dayKey = format(day, "yyyy-MM-dd");

@@ -15,9 +15,20 @@ import { getAuthContext, canAccessJob, canManagePipeline } from "@/lib/access-co
  * Update an application's pipeline stage (used for drag-and-drop in Kanban).
  * Org-scoped: validates the job belongs to the authenticated user's org.
  */
+const REJECTION_REASONS = [
+  "not_qualified",
+  "culture_fit",
+  "withdrew",
+  "position_filled",
+  "other",
+] as const;
+
 const UpdateApplicationSchema = z.object({
   stage: z.string().min(1, "Stage is required"),
   stageOrder: z.number().int().min(0).optional().default(0),
+  rejectionReason: z.enum(REJECTION_REASONS).optional(),
+  rejectionNote: z.string().max(2000).optional(),
+  sendRejectionEmail: z.boolean().optional().default(false),
 });
 
 export async function PATCH(
@@ -76,7 +87,7 @@ export async function PATCH(
       );
     }
 
-    const { stage, stageOrder } = result.data;
+    const { stage, stageOrder, rejectionReason, rejectionNote, sendRejectionEmail } = result.data;
 
     // "rejected" and "talent-pool" are special action stages that can be
     // applied from any point in the pipeline (via the candidate detail page).
@@ -157,7 +168,13 @@ export async function PATCH(
         stageOrder,
         // Track milestones
         ...(stage === "hired" ? { hiredAt: new Date() } : {}),
-        ...(stage === "rejected" ? { rejectedAt: new Date() } : {}),
+        ...(stage === "rejected"
+          ? {
+              rejectedAt: new Date(),
+              rejectionReason: rejectionReason ?? null,
+              rejectionNote: rejectionNote ?? null,
+            }
+          : {}),
         ...(stage === "offer" ? { offeredAt: new Date() } : {}),
       },
     });
@@ -202,7 +219,7 @@ export async function PATCH(
         const jobTitle = appData.job.title;
         const companyName = appData.job.organization?.name ?? "the company";
 
-        if (stage === "rejected") {
+        if (stage === "rejected" && sendRejectionEmail) {
           await createApplicationRejectedNotification({
             applicationId: appId,
             candidateEmail,

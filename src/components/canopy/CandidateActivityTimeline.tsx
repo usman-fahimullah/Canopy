@@ -5,9 +5,24 @@ import { logger } from "@/lib/logger";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PaperPlaneTilt, Note, Star, CalendarCheck, Gift, ArrowRight } from "@phosphor-icons/react";
+import {
+  PaperPlaneTilt,
+  Note,
+  Star,
+  CalendarCheck,
+  Gift,
+  ArrowRight,
+  EnvelopeSimple,
+} from "@phosphor-icons/react";
 
-type ActivityEventType = "applied" | "note" | "score" | "stage_change" | "interview" | "offer";
+type ActivityEventType =
+  | "applied"
+  | "note"
+  | "score"
+  | "stage_change"
+  | "interview"
+  | "offer"
+  | "email_sent";
 
 interface ActivityEvent {
   id: string;
@@ -96,6 +111,8 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
         return <CalendarCheck {...iconProps} />;
       case "offer":
         return <Gift {...iconProps} />;
+      case "email_sent":
+        return <EnvelopeSimple {...iconProps} />;
       default:
         return null;
     }
@@ -115,6 +132,8 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
         return "border-l-[var(--primitive-orange-500)]";
       case "offer":
         return "border-l-[var(--primitive-red-500)]";
+      case "email_sent":
+        return "border-l-[var(--primitive-blue-400)]";
       default:
         return "border-l-[var(--primitive-neutral-400)]";
     }
@@ -136,6 +155,8 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
         return "feature";
       case "offer":
         return "error";
+      case "email_sent":
+        return "info";
       default:
         return "neutral";
     }

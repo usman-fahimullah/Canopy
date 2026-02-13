@@ -83,7 +83,8 @@ export async function PATCH(request: NextRequest) {
     if (action === "MOVE_STAGE") {
       updateData.stage = stage;
     } else if (action === "REJECT") {
-      updateData.stage = "REJECTED";
+      updateData.stage = "rejected";
+      updateData.rejectedAt = new Date();
     }
 
     const updated = await prisma.application.updateMany({

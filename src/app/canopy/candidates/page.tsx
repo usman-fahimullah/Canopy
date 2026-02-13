@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCachedAuthContext } from "@/lib/access-control";
 import { fetchCandidatesList } from "@/lib/services/candidates";
+import { logger, formatError } from "@/lib/logger";
 import { CandidatesView } from "./CandidatesView";
 
 interface CandidatesPageProps {
@@ -24,25 +25,43 @@ export default async function CandidatesPage({ searchParams }: CandidatesPagePro
     undefined;
   const sortDirection = (params.sortDirection as "asc" | "desc") || undefined;
 
-  const data = await fetchCandidatesList(ctx, {
-    skip,
-    take,
-    stage,
-    matchScoreMin,
-    matchScoreMax,
-    source,
-    search,
-    sortBy,
-    sortDirection,
-  });
+  try {
+    const data = await fetchCandidatesList(ctx, {
+      skip,
+      take,
+      stage,
+      matchScoreMin,
+      matchScoreMax,
+      source,
+      search,
+      sortBy,
+      sortDirection,
+    });
 
-  return (
-    <CandidatesView
-      initialData={{
-        applications: data.applications,
-        meta: { total: data.meta.total, skip: data.meta.skip, take: data.meta.take },
-        userRole: data.userRole,
-      }}
-    />
-  );
+    return (
+      <CandidatesView
+        initialData={{
+          applications: data.applications,
+          meta: { total: data.meta.total, skip: data.meta.skip, take: data.meta.take },
+          userRole: data.userRole,
+        }}
+      />
+    );
+  } catch (error) {
+    logger.error("Failed to load candidates page", {
+      error: formatError(error),
+      page: "/canopy/candidates",
+    });
+
+    // Fallback: render with empty data so the page doesn't crash
+    return (
+      <CandidatesView
+        initialData={{
+          applications: [],
+          meta: { total: 0, skip: 0, take: 20 },
+          userRole: ctx.role,
+        }}
+      />
+    );
+  }
 }

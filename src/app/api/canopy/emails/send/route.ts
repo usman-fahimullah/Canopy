@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { to, cc, bcc, subject, body, applicationId, variables } = result.data;
+    const { to, cc, bcc, subject, body, applicationId, templateId, variables } = result.data;
 
     // Get organization info for email branding
     const org = await prisma.organization.findUnique({
@@ -95,8 +95,53 @@ export async function POST(request: NextRequest) {
 
       if (emailResult.success) {
         sent++;
+        // Fire-and-forget: log successful send
+        prisma.emailLog
+          .create({
+            data: {
+              organizationId: ctx.organizationId,
+              sentById: ctx.memberId,
+              recipientEmail: recipient,
+              recipientName: variables?.candidate_name ?? null,
+              applicationId: applicationId ?? null,
+              subject: renderedSubject,
+              body: renderedBody,
+              templateId: templateId ?? null,
+              status: "SENT",
+              sendType: "MANUAL",
+            },
+          })
+          .catch((err) => {
+            logger.error("Failed to log email send", {
+              error: formatError(err),
+              recipientEmail: recipient,
+            });
+          });
       } else {
         errors.push(`${recipient}: ${emailResult.error}`);
+        // Fire-and-forget: log failed send
+        prisma.emailLog
+          .create({
+            data: {
+              organizationId: ctx.organizationId,
+              sentById: ctx.memberId,
+              recipientEmail: recipient,
+              recipientName: variables?.candidate_name ?? null,
+              applicationId: applicationId ?? null,
+              subject: renderedSubject,
+              body: renderedBody,
+              templateId: templateId ?? null,
+              status: "FAILED",
+              error: emailResult.error ?? "Unknown error",
+              sendType: "MANUAL",
+            },
+          })
+          .catch((err) => {
+            logger.error("Failed to log email failure", {
+              error: formatError(err),
+              recipientEmail: recipient,
+            });
+          });
       }
     }
 
