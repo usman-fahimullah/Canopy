@@ -12,13 +12,19 @@ Related rules: `pre-merge-checklist.md` for PR review process, `scale-first-engi
 
 ## Philosophy
 
-Clean, production-ready code is not an afterthought—it's built into every line we write. We prioritize:
+> **Foundational rule:** `engineering-excellence.md` — Build it right the first time.
 
-1. **Security First** - Authorization checks before business logic
-2. **Type Safety** - No `any` types, strict TypeScript enforcement
-3. **Testability** - Code written with testing in mind
-4. **Observability** - Structured logging, not console statements
-5. **User Experience** - Proper loading, empty, and error states
+Clean, production-ready code is not an afterthought — it's built into every line we write. There is no "rough draft" phase of code that ships. Every commit should be something you'd be proud to walk another engineer through, line by line.
+
+We don't write code that "works for now." We write code that works, period — under load, in error conditions, with malicious input, on slow networks, in dark mode, and six months from now when someone else has to maintain it.
+
+We prioritize:
+
+1. **Security First** — Authorization checks before business logic. No exceptions, no TODOs.
+2. **Type Safety** — No `any` types, strict TypeScript enforcement. The type system is a gift, not an obstacle.
+3. **Testability** — Code written with testing in mind. If it's hard to test, it's probably wrong.
+4. **Observability** — Structured logging, not console statements. Production debugging is a first-class concern.
+5. **User Experience** — Every state handled (loading, empty, error, success). Users notice the rough edges we skip.
 
 ---
 
@@ -45,7 +51,7 @@ export async function POST(request: Request) {
 
   // For admin routes, verify role
   const member = await prisma.organizationMember.findFirst({
-    where: { accountId: user.id, role: { in: ["OWNER", "ADMIN"] } }
+    where: { accountId: user.id, role: { in: ["OWNER", "ADMIN"] } },
   });
   if (!member) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
@@ -125,15 +131,15 @@ Every database query MUST include organization scoping to prevent data leakage.
 ```typescript
 // ❌ WRONG - Missing organization scope
 const jobs = await prisma.job.findMany({
-  where: { status: "ACTIVE" }
+  where: { status: "ACTIVE" },
 });
 
 // ✅ CORRECT - Organization-scoped query
 const jobs = await prisma.job.findMany({
   where: {
     organizationId: member.organizationId,
-    status: "ACTIVE"
-  }
+    status: "ACTIVE",
+  },
 });
 ```
 
@@ -145,12 +151,12 @@ const jobs = await prisma.job.findMany({
 
 Every data-fetching component MUST handle all states:
 
-| State | Required | Implementation |
-| ----- | -------- | -------------- |
-| Loading | Yes | Skeleton or spinner while fetching |
-| Empty | Yes | Helpful message with action CTA |
-| Error | Yes | User-friendly message + retry option |
-| Success | Yes | Render the data |
+| State   | Required | Implementation                       |
+| ------- | -------- | ------------------------------------ |
+| Loading | Yes      | Skeleton or spinner while fetching   |
+| Empty   | Yes      | Helpful message with action CTA      |
+| Error   | Yes      | User-friendly message + retry option |
+| Success | Yes      | Render the data                      |
 
 ```tsx
 // ❌ WRONG - Only handles success state
@@ -158,10 +164,12 @@ function JobsList() {
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
-    fetch("/api/jobs").then(r => r.json()).then(setJobs);
+    fetch("/api/jobs")
+      .then((r) => r.json())
+      .then(setJobs);
   }, []);
 
-  return jobs.map(job => <JobCard key={job.id} {...job} />);
+  return jobs.map((job) => <JobCard key={job.id} {...job} />);
 }
 
 // ✅ CORRECT - All states handled
@@ -172,12 +180,12 @@ function JobsList() {
 
   useEffect(() => {
     fetch("/api/jobs")
-      .then(r => {
+      .then((r) => {
         if (!r.ok) throw new Error("Failed to load jobs");
         return r.json();
       })
       .then(setJobs)
-      .catch(e => setError(e.message))
+      .catch((e) => setError(e.message))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -185,7 +193,7 @@ function JobsList() {
   if (error) return <ErrorState message={error} onRetry={() => window.location.reload()} />;
   if (jobs.length === 0) return <EmptyState title="No jobs yet" action={<CreateJobButton />} />;
 
-  return jobs.map(job => <JobCard key={job.id} {...job} />);
+  return jobs.map((job) => <JobCard key={job.id} {...job} />);
 }
 ```
 
@@ -198,7 +206,7 @@ Never bypass TypeScript safety:
 ```typescript
 // ❌ FORBIDDEN - Using 'any'
 const data: any = await response.json();
-function handleEvent(event: any) { }
+function handleEvent(event: any) {}
 
 // ❌ FORBIDDEN - Non-null assertion without validation
 const user = getUser()!;
@@ -225,12 +233,12 @@ const email = user.profile.email;
 
 All new code MUST include tests:
 
-| Code Type | Required Tests | Minimum Coverage |
-| --------- | -------------- | ---------------- |
-| API Routes | Integration tests | 100% of endpoints |
-| Utility Functions | Unit tests | 80% line coverage |
-| UI Components | Component tests | Critical paths |
-| User Flows | E2E tests | Happy path + error cases |
+| Code Type         | Required Tests    | Minimum Coverage         |
+| ----------------- | ----------------- | ------------------------ |
+| API Routes        | Integration tests | 100% of endpoints        |
+| Utility Functions | Unit tests        | 80% line coverage        |
+| UI Components     | Component tests   | Critical paths           |
+| User Flows        | E2E tests         | Happy path + error cases |
 
 ```typescript
 // Example: API route test
@@ -248,9 +256,7 @@ describe("POST /api/jobs", () => {
   });
 
   it("creates job for authorized user", async () => {
-    const res = await POST(
-      authenticatedRequest({ title: "Engineer", description: "..." })
-    );
+    const res = await POST(authenticatedRequest({ title: "Engineer", description: "..." }));
     expect(res.status).toBe(201);
     expect(await res.json()).toMatchObject({ title: "Engineer" });
   });
@@ -263,15 +269,17 @@ describe("POST /api/jobs", () => {
 
 ### Never Commit These
 
-| Anti-Pattern | Why It's Blocked |
-| ------------ | ---------------- |
-| `// TODO: add proper admin check` | Security vulnerability |
-| `console.log(...)` | Information leakage |
-| `: any` type annotation | Type safety bypass |
-| `catch (e) { }` empty catch | Silent failures |
-| Unvalidated request body | Injection vulnerability |
-| Missing organizationId in queries | Data leakage |
-| No loading state on async UI | Poor UX |
+These are not guidelines. These are non-negotiable. Every one of these patterns represents a decision to ship something you know is wrong. That's not speed — it's debt with interest.
+
+| Anti-Pattern                      | Why It's Blocked        | The Craftsman Fix                                                  |
+| --------------------------------- | ----------------------- | ------------------------------------------------------------------ |
+| `// TODO: add proper admin check` | Security vulnerability  | Write the auth check. It's 5 lines.                                |
+| `console.log(...)`                | Information leakage     | Use the structured logger. That's why it exists.                   |
+| `: any` type annotation           | Type safety bypass      | Define the interface. Future-you will be grateful.                 |
+| `catch (e) { }` empty catch       | Silent failures         | Handle the error or let it propagate. Silence is never the answer. |
+| Unvalidated request body          | Injection vulnerability | Add the Zod schema. Trusting input is not an option.               |
+| Missing organizationId in queries | Data leakage            | Scope the query. Multi-tenancy is not optional.                    |
+| No loading state on async UI      | Poor UX                 | Add the skeleton. Your users aren't on localhost.                  |
 
 ---
 
@@ -280,24 +288,28 @@ describe("POST /api/jobs", () => {
 Before marking any task complete, verify:
 
 ### Security
+
 - [ ] Authorization check at route level
 - [ ] Input validation with Zod schema
 - [ ] Organization scoping on all queries
 - [ ] No sensitive data in logs or responses
 
 ### Code Quality
+
 - [ ] No `any` types
 - [ ] No console.log statements
 - [ ] All TODO comments resolved
 - [ ] Error messages are user-friendly
 
 ### User Experience
+
 - [ ] Loading state implemented
 - [ ] Empty state with helpful CTA
 - [ ] Error state with retry option
 - [ ] Proper TypeScript types for all data
 
 ### Testing
+
 - [ ] Unit tests for utility functions
 - [ ] Integration tests for API routes
 - [ ] Component tests for UI logic
@@ -362,3 +374,5 @@ These standards are enforced through:
 5. **CI Pipeline** - Tests must pass before merge
 
 Violations should be caught at the earliest possible stage, ideally before code leaves the developer's machine.
+
+**The best time to fix a quality issue is when you're writing the code. The second best time is never — because it means you wrote it right the first time.**

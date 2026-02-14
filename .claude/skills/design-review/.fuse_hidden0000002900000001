@@ -1,0 +1,228 @@
+---
+name: design-review
+description: Comprehensive design and UX audit for any page, component, or screen. Use when reviewing implementations for design quality, UX completeness, visual hierarchy, interaction quality, and product sense. Covers everything from token compliance to whether the screen actually works for real users.
+---
+
+# Design Review Skill
+
+## Purpose
+
+Audit any page, component, or screen against the full standard of a Super IC Design Engineer — someone who holds both engineering rigor and design intuition simultaneously. This isn't just a compliance check. It's a holistic evaluation of whether the implementation is something we'd be proud to ship.
+
+## When to Use This Skill
+
+- Before merging any UI-facing PR
+- When reviewing a newly built page or component
+- When something "feels off" but you can't articulate why
+- After implementing from a Figma design
+- During periodic quality sweeps of existing screens
+- When onboarding to a part of the codebase you haven't touched
+
+---
+
+## The Review Process
+
+### Step 0: Set Context
+
+Before reviewing, answer:
+
+1. **What screen/component am I reviewing?** (path, purpose)
+2. **Who is the primary user?** (recruiter, hiring manager, admin, first-time user)
+3. **What is the primary task?** (scanning, reading, acting, monitoring)
+4. **What is the ONE question this screen answers?**
+
+If you can't answer #4, that's already a finding.
+
+---
+
+### Step 1: The Squint Test (Visual Hierarchy)
+
+Blur your vision or mentally squint at the screen. Score each:
+
+| Check | Pass | Fail |
+| ----- | ---- | ---- |
+| One dominant element is immediately visible | The user's eye has an anchor | Everything competes equally |
+| Clear secondary layer supports the dominant | Context is available without searching | Secondary content is invisible or competing |
+| Quiet tertiary layer stays out of the way | Metadata and actions are available but recessive | Fine print is as loud as headings |
+| Typography creates a clear heading → body → caption flow | Size and weight create natural reading order | Uniform text sizes throughout |
+| No more than one primary button per visible section | User knows the main action | Multiple primary buttons cause decision paralysis |
+
+**Severity if failing:** High — broken hierarchy means the screen doesn't communicate.
+
+---
+
+### Step 2: Information Architecture
+
+| Check | What to Look For |
+| ----- | ---------------- |
+| **Primary question answered immediately** | Can the user get what they came for without scrolling or clicking? |
+| **Density matches the task** | Scanning = high density, reading = generous space, acting = clear CTAs, monitoring = glanceable metrics |
+| **Progressive disclosure** | Is complexity revealed in layers? Or is everything dumped at once? |
+| **Cognitive load** | Are there more than 5-7 navigation items, filters, or actions visible at once? |
+| **Decision paralysis** | Are there more than 3 equal-weight buttons? Is one action clearly primary? |
+
+---
+
+### Step 3: Spatial Design
+
+| Check | What to Look For |
+| ----- | ---------------- |
+| **Grouping via proximity** | Related items are tight (gap-1 to gap-2), items in a group breathe (gap-3 to gap-4), groups are separated (gap-6 to gap-8) |
+| **Spacing rhythm** | Is there a predictable alternation between tight and generous spacing? Or is everything equidistant? |
+| **Breathing room** | Content has sufficient padding from container edges — not cramped to borders |
+| **Flex layout safety** | Truncated elements inside flex containers have `min-w-0` on the parent |
+
+---
+
+### Step 4: Interaction Quality
+
+| Check | What to Look For |
+| ----- | ---------------- |
+| **Hover feedback** | Every clickable element responds visually on hover |
+| **Click feedback** | Buttons show active state, actions trigger immediate visual response |
+| **Loading strategy** | Skeletons that match content shape, not generic spinners that block the whole page |
+| **Optimistic updates** | Toggle/move/favorite actions update UI immediately, sync in background |
+| **Transitions communicate** | Movement explains where things came from or where they went |
+| **Perceived performance** | Stale-while-revalidate over full-page loading gates |
+
+---
+
+### Step 5: UX Completeness (The Five States)
+
+Every data-driven view must handle ALL five states:
+
+| State | Present? | Quality |
+| ----- | -------- | ------- |
+| **Loading** | Does a skeleton or shimmer appear? | Does it match the content shape? |
+| **Empty** | Is there guidance and a CTA? | Does it teach the user what to do next? |
+| **Error** | Is there an explanation and recovery path? | Does it say what went wrong AND how to fix it? |
+| **Populated** | Does data render correctly? | With realistic data (long names, many items)? |
+| **Partial failure** | For bulk actions, is mixed success/failure handled? | "8 of 10 succeeded" with details? |
+
+---
+
+### Step 6: User Journey (Cross-Screen Thinking)
+
+| Check | What to Look For |
+| ----- | ---------------- |
+| **Where did the user come from?** | Is there a breadcrumb or clear back navigation? |
+| **Where do they go after the primary action?** | Is there a redirect + confirmation? Or silent success? |
+| **URL state** | Are filters, tabs, and pagination in the URL? (Back button works, links shareable) |
+| **Ripple effects** | If data changes here, do other screens reflect it? |
+| **Unsaved work** | If a form is dirty and the user navigates away, is there a warning? |
+| **Destructive actions** | Delete/reject/archive shows confirmation with consequences? |
+| **Reversible actions** | Archive/move/dismiss offers undo via toast? |
+
+---
+
+### Step 7: Design System Compliance
+
+| Check | What to Look For |
+| ----- | ---------------- |
+| **Component usage** | All buttons use `<Button>`, all inputs use `<Input>`, no raw HTML when a component exists |
+| **Token compliance** | No hardcoded hex colors, spacing uses Tailwind scale, radius uses tokens |
+| **Token tier** | Component tokens preferred over semantic, semantic over primitive |
+| **Icon library** | Only Phosphor Icons — no Lucide, Heroicons, or other libraries |
+| **Typography** | Uses scale classes (text-body, text-heading-sm) — no custom font sizes |
+| **Shadow/border rule** | Shadow OR border, never both on the same element |
+| **className length** | No className strings over ~150 characters (extract to component) |
+| **Dark mode** | Tokens auto-switch — verify visually in dark mode |
+
+---
+
+### Step 8: Scale Test (Mental Stress Test)
+
+Without running the code, mentally stress-test:
+
+| Scenario | What Breaks? |
+| -------- | ------------ |
+| **Long text** | Does "Senior Director of Renewable Energy Strategy and Climate Policy" (64 chars) break the layout? |
+| **Many items** | Does the list work with 200+ items? Is there pagination or virtual scroll? |
+| **Minimal data** | Does a candidate with no photo, no phone, and no LinkedIn still look intentional? |
+| **Maximum data** | Does 15 skills + 6 certifications overflow gracefully? |
+| **Empty state** | Is the first-time-user experience handled? |
+
+---
+
+### Step 9: The Taste Test
+
+These aren't checkboxes — they're judgment calls. Answer honestly:
+
+1. **What is the user's eye doing?** Trace the visual path. Does it flow naturally from most important to least? Or does it bounce randomly?
+2. **What would I remove?** Is every element earning its place? Could something be removed without losing function?
+3. **Does this feel intentional?** Are spacing, alignment, and color use deliberate? Or does something look accidental?
+4. **Is this consistent with how we do it elsewhere?** Does this screen follow the same patterns as similar screens?
+5. **Would I be proud to show this as an example of our product quality?** Not "does it work" — would I actively want to show it off?
+
+If any answer is no, the review fails.
+
+---
+
+## Reporting Format
+
+After completing all steps, produce a structured report:
+
+```markdown
+## Design Review: [Screen/Component Name]
+**Path:** `src/app/...`
+**Reviewer:** Claude (Design Review Skill)
+**Date:** [date]
+
+### Summary
+[1-2 sentences: overall quality assessment]
+
+### Critical Issues (Must Fix)
+1. [Issue] — [Which step caught it] — [Specific fix]
+
+### Improvements (Should Fix)
+1. [Issue] — [Which step caught it] — [Suggested approach]
+
+### Observations (Consider)
+1. [Observation] — [Why it matters]
+
+### What's Working Well
+1. [Strength] — [Why it's good]
+
+### Score: [A/B/C/D/F]
+- A: Ship-ready. Proud to show anyone.
+- B: Good with minor polish needed.
+- C: Functional but needs meaningful improvements.
+- D: Significant issues — not ready to ship.
+- F: Fundamental problems — needs redesign.
+```
+
+---
+
+## Quick Audit (Abbreviated Version)
+
+When time is short, run these 10 checks:
+
+1. Can you name the ONE thing this screen communicates? (hierarchy)
+2. Is there exactly one primary action? (decision clarity)
+3. Do all five states exist? (loading/empty/error/populated/partial)
+4. Does every action give visible feedback? (no silent success)
+5. Are destructive actions confirmed? (safety)
+6. Does the URL preserve view state? (navigation)
+7. Is every clickable thing responding to hover? (interactivity)
+8. Are there any hardcoded hex values? (tokens)
+9. Would it hold up with 100 items and long text? (scale)
+10. Would you be proud to demo this screen? (taste)
+
+If 2 or more fail, do the full review.
+
+---
+
+## Related Rules
+
+This skill synthesizes standards from:
+
+- `engineering-excellence.md` — The foundational "why"
+- `product-design-thinking.md` — Visual hierarchy, spatial design, cognitive load, interaction quality
+- `ux-thinking.md` — User journey, five questions, cross-screen thinking
+- `design-audit-standards.md` — Token compliance, component-first, dark mode
+- `design-first-implementation.md` — Component mapping, anti-patterns
+- `code-quality-standards.md` — State handling, error patterns
+
+---
+
+**Skill Status**: COMPLETE

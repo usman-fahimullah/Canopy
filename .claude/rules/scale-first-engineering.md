@@ -6,12 +6,20 @@
 
 ## Philosophy
 
+> **Foundational rule:** `engineering-excellence.md` — Build it right the first time.
+
 Canopy is a multi-tenant SaaS product. Every implementation decision
 should consider the 100-organization case, not the 1-organization case.
 Prefer the architecturally sound solution over the quick patch.
 
 **This rule overrides any default guidance to "avoid over-engineering"
 or "keep things minimal." Canopy is building for production scale.**
+
+A feature that works for one organization but collapses at ten is not
+a feature — it's a demo. We don't ship demos. We ship software that
+works under real-world pressure, because that's what our users are
+trusting us to build. The extra five minutes to add pagination, scope
+a query, or validate an input is not overhead — it's the job.
 
 ---
 
@@ -180,6 +188,8 @@ export default function JobsPage() {
 
 ## What This Does NOT Mean
 
+Craftsmanship is not over-engineering. Know the difference:
+
 - Don't add abstraction layers for things with one usage.
   Wait for the second or third use case, then extract.
 - Don't add caching infrastructure before there's a measured
@@ -190,11 +200,15 @@ export default function JobsPage() {
 - Don't add speculative features nobody asked for.
   But DO build requested features in a way that scales.
 
+**The line:** Build what's asked for, build it to last, and don't
+build what isn't asked for. Quality is doing the right things right —
+not doing unnecessary things.
+
 ---
 
 ## Review Checklist
 
-Before completing any feature:
+Before completing any feature, every item must pass. No exceptions, no "I'll fix it later":
 
 - [ ] Queries are scoped by `organizationId`
 - [ ] Lists are paginated (no unbounded result sets)
@@ -206,3 +220,5 @@ Before completing any feature:
 - [ ] Empty states exist (EmptyState component)
 - [ ] URL state used for filters/pagination
 - [ ] Would this work with 10x the current data volume?
+
+**If you can't check every box, the feature is not done.** A partially-complete feature with technical debt is worse than a well-built feature that took longer. We build it right or we don't ship it.

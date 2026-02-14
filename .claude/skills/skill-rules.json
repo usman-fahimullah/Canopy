@@ -172,6 +172,41 @@
         "pathPatterns": ["prisma/schema.prisma"]
       }
     },
+    "design-review": {
+      "type": "guardrail",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Comprehensive design and UX audit for pages, components, and screens",
+      "promptTriggers": {
+        "keywords": [
+          "design review",
+          "design audit",
+          "UX review",
+          "UX audit",
+          "visual review",
+          "review this page",
+          "review this component",
+          "quality check",
+          "feels off",
+          "something wrong",
+          "looks weird",
+          "polish",
+          "ship ready",
+          "ready to ship",
+          "design quality"
+        ],
+        "intentPatterns": [
+          "(review|audit|check).*?(design|UX|visual|page|component|screen)",
+          "(is|does).*?(ready|good enough|ship)",
+          "(something|feels).*?(off|wrong|weird|broken)",
+          "(improve|fix|polish).*?(design|visual|UX|layout)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": ["src/app/**/page.tsx", "src/components/**/*.tsx"],
+        "contentPatterns": ["className=", "return.*<"]
+      }
+    },
     "pre-merge": {
       "type": "guardrail",
       "enforcement": "suggest",

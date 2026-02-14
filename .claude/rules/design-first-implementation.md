@@ -6,15 +6,23 @@
 
 ## Philosophy
 
+> **Foundational rule:** `engineering-excellence.md` — Build it right the first time.
+
 Every screen in Canopy is built from the Trails Design System. The
 design system exists to prevent one-off implementations. When a
 Figma design arrives, the job is NOT to visually approximate it with
 raw HTML and Tailwind — the job is to decompose it into existing
 design system components and assemble them correctly.
 
+**"Close enough" is not close enough.** A button that looks like our
+button but isn't our `<Button>` component is a counterfeit. It won't
+get theme updates, it won't handle focus states, it won't work in dark
+mode, and it actively undermines the system everyone else is building on.
+
 Visual shortcuts that "look right" but bypass the design system
 create unmaintainable code, break dark mode, miss accessibility,
-and drift from the source of truth.
+and drift from the source of truth. They're the definition of taking
+a shortcut — saving two minutes now, creating two hours of work later.
 
 ---
 
@@ -94,7 +102,9 @@ identify which existing components match each element in the design.**
 
 If a design element has no matching component, **stop and ask the
 user** before implementing a one-off. It may warrant a new design
-system component.
+system component. The temptation to just "build it quick with a div"
+is exactly the moment where craft separates from assembly. Pause and
+do it properly.
 
 ### Phase 3: Token Reconciliation
 
@@ -282,7 +292,7 @@ If a Figma element genuinely has no design system equivalent:
 
 ## Pre-Commit Checklist
 
-Before considering any design implementation complete:
+**Every unchecked box is a shortcut. Every shortcut is a crack in the foundation.** Before considering any design implementation complete:
 
 - [ ] **No raw `<button>` tags** — all use `<Button>` or `buttonVariants()`
 - [ ] **No raw `<input>` tags** — all use `<Input>`, `<SearchInput>`, etc.

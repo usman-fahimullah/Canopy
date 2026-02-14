@@ -12,7 +12,11 @@ Related rules: `code-quality-standards.md` for detailed standards, `scale-first-
 
 ## Philosophy
 
-Every merge is a commitment to production quality. We treat code review as a collaborative quality assurance process, not a gatekeeping exercise. The goal is shipping code we're proud of.
+> **Foundational rule:** `engineering-excellence.md` — Build it right the first time.
+
+Every merge is a permanent commitment to production quality. Once code enters main, it becomes the standard — other code will be written to match it, for better or worse. This is why every merge must represent our best work, not our fastest work.
+
+We treat code review as a collaborative quality assurance process, not a gatekeeping exercise. The goal is shipping code we're proud of — code that raises the floor, not lowers it.
 
 ---
 
@@ -24,29 +28,34 @@ Copy this checklist into PR descriptions:
 ## Pre-Merge Checklist
 
 ### Security
+
 - [ ] Auth check on all new/modified API routes
 - [ ] Input validated with Zod schema
 - [ ] Organization scoping on database queries
 - [ ] No secrets or sensitive data exposed
 
 ### Code Quality
+
 - [ ] No `any` types or type assertions without validation
 - [ ] No console.log (use structured logger)
 - [ ] All TODO comments addressed or tracked in issues
 - [ ] Error handling with user-friendly messages
 
 ### Testing
+
 - [ ] Tests added for new functionality
 - [ ] Existing tests still pass
 - [ ] Edge cases covered (empty, error, boundary)
 
 ### User Experience
+
 - [ ] Loading states implemented
 - [ ] Empty states with helpful CTAs
 - [ ] Error states with recovery options
 - [ ] Responsive design verified
 
 ### Documentation
+
 - [ ] Code comments for complex logic
 - [ ] API changes documented
 - [ ] Design system docs updated (if component changes)
@@ -62,12 +71,12 @@ Copy this checklist into PR descriptions:
 
 For every API route touched, verify:
 
-| Check | Look For |
-| ----- | -------- |
-| Authentication | `getServerUser()` called and null-checked |
-| Authorization | Role/permission verified for protected routes |
-| Org Scoping | `organizationId` in all database queries |
-| Input Validation | Zod schema with `safeParse` |
+| Check            | Look For                                      |
+| ---------------- | --------------------------------------------- |
+| Authentication   | `getServerUser()` called and null-checked     |
+| Authorization    | Role/permission verified for protected routes |
+| Org Scoping      | `organizationId` in all database queries      |
+| Input Validation | Zod schema with `safeParse`                   |
 
 **Red Flags to Block:**
 
@@ -92,13 +101,13 @@ const allJobs = await prisma.job.findMany(); // Leaks all orgs' data
 
 **Forbidden Patterns:**
 
-| Pattern | Why Blocked | Fix |
-| ------- | ----------- | --- |
-| `any` | Bypasses type system | Define proper interface |
-| `as unknown as X` | Dangerous cast | Validate and narrow |
-| `!` non-null assertion | Runtime crash risk | Check for null |
-| `@ts-ignore` | Hides errors | Fix the type issue |
-| `@ts-expect-error` | Hides errors | Fix the type issue |
+| Pattern                | Why Blocked          | Fix                     |
+| ---------------------- | -------------------- | ----------------------- |
+| `any`                  | Bypasses type system | Define proper interface |
+| `as unknown as X`      | Dangerous cast       | Validate and narrow     |
+| `!` non-null assertion | Runtime crash risk   | Check for null          |
+| `@ts-ignore`           | Hides errors         | Fix the type issue      |
+| `@ts-expect-error`     | Hides errors         | Fix the type issue      |
 
 **Acceptable Exceptions:**
 
@@ -131,10 +140,7 @@ export async function POST(request: Request) {
       error: error instanceof Error ? error.message : "Unknown error",
       endpoint: "/api/resource",
     });
-    return Response.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 }
-    );
+    return Response.json({ error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }
 ```
@@ -160,12 +166,12 @@ catch (e) { return Response.json({ error: e.message }); }
 
 Every data-fetching component must handle:
 
-| State | Implementation | Verified |
-| ----- | -------------- | -------- |
-| Loading | Skeleton or spinner | [ ] |
-| Empty | Message + action CTA | [ ] |
-| Error | Message + retry button | [ ] |
-| Success | Render data properly | [ ] |
+| State   | Implementation         | Verified |
+| ------- | ---------------------- | -------- |
+| Loading | Skeleton or spinner    | [ ]      |
+| Empty   | Message + action CTA   | [ ]      |
+| Error   | Message + retry button | [ ]      |
+| Success | Render data properly   | [ ]      |
 
 **Accessibility Baseline:**
 
@@ -181,12 +187,12 @@ Every data-fetching component must handle:
 
 **Test Coverage Requirements:**
 
-| Change Type | Required Tests |
-| ----------- | -------------- |
-| New API route | Integration test covering auth, validation, success, error |
-| New utility function | Unit tests with edge cases |
-| New UI component | Component test for critical interactions |
-| Bug fix | Regression test proving the fix |
+| Change Type          | Required Tests                                             |
+| -------------------- | ---------------------------------------------------------- |
+| New API route        | Integration test covering auth, validation, success, error |
+| New utility function | Unit tests with edge cases                                 |
+| New UI component     | Component test for critical interactions                   |
+| Bug fix              | Regression test proving the fix                            |
 
 **Test Quality Checks:**
 
@@ -201,12 +207,12 @@ Every data-fetching component must handle:
 
 **Watch For:**
 
-| Issue | Check |
-| ----- | ----- |
-| N+1 queries | Use `include` in Prisma instead of separate queries |
-| Unbounded queries | Ensure `take` limit on all `findMany` |
-| Missing pagination | List endpoints must support page/limit |
-| Large payloads | Only return needed fields with `select` |
+| Issue              | Check                                               |
+| ------------------ | --------------------------------------------------- |
+| N+1 queries        | Use `include` in Prisma instead of separate queries |
+| Unbounded queries  | Ensure `take` limit on all `findMany`               |
+| Missing pagination | List endpoints must support page/limit              |
+| Large payloads     | Only return needed fields with `select`             |
 
 ```typescript
 // ❌ N+1 Problem
@@ -253,19 +259,24 @@ const jobs = await prisma.job.findMany({
 
 ```markdown
 ## Summary
+
 [1-2 sentence description of what this PR does]
 
 ## Changes
+
 - [Bullet points of specific changes]
 
 ## Testing
+
 - [How was this tested?]
 - [What scenarios were verified?]
 
 ## Screenshots (if UI changes)
+
 [Before/after screenshots]
 
 ## Pre-Merge Checklist
+
 [Copy checklist from above]
 ```
 
@@ -280,4 +291,4 @@ If you're unsure about approving:
 3. **Pair review** on security-sensitive code
 4. **Flag to tech lead** if architectural concerns
 
-Never approve if you have unresolved concerns. It's better to delay a merge than ship a bug.
+Never approve if you have unresolved concerns. It's better to delay a merge than ship a bug. **Urgency is not an excuse for poor quality.** The time we "save" by merging questionable code is always paid back with interest — in bug reports, in regressions, in lost user trust.

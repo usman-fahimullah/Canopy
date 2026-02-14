@@ -12,13 +12,17 @@ Related rules: `design-first-implementation.md` for workflow, `figma-implementat
 
 ## Philosophy
 
-The Trails Design System exists to prevent visual drift and one-off implementations. When code bypasses the design system—even if it "looks right"—it creates:
+> **Foundational rule:** `engineering-excellence.md` — Build it right the first time.
+
+The Trails Design System is the collective craftsmanship of this product — hundreds of decisions about color, spacing, interaction, and accessibility, encoded into reusable components. When code bypasses the design system — even if it "looks right" — it disrespects that work and creates:
 
 1. **Unmaintainable code** — Scattered inline styles instead of centralized tokens
 2. **Broken dark mode** — Hardcoded colors don't respond to theme changes
 3. **Accessibility gaps** — Custom implementations miss keyboard/screen reader support
 4. **Inconsistent UX** — Visual variations confuse users and dilute brand
 5. **Technical debt** — Every one-off is a component waiting to be extracted
+
+**A product's visual quality is the sum of every element on every screen.** One off-brand button, one wrong shade of green, one missing hover state — users feel these even if they can't name them. We don't allow them.
 
 ---
 
@@ -263,6 +267,8 @@ All layouts must be responsive using Tailwind breakpoints:
 
 ### Never Commit These
 
+These aren't suggestions — they're the line between craft and carelessness. If you find yourself reaching for any of these patterns, stop. There is always a proper way to do it.
+
 | Pattern                               | Why Blocked                              | Fix                    |
 | ------------------------------------- | ---------------------------------------- | ---------------------- |
 | Raw `<button>` with styling           | Bypasses Button component                | Use `<Button>`         |
@@ -330,7 +336,7 @@ If a one-off is truly necessary (rare), document it:
 
 ## Pre-Completion Checklist
 
-Before marking any UI task complete:
+**A task is not "done" until every box is checked.** Shipping with unchecked items is shipping with known defects — and we don't do that. Before marking any UI task complete:
 
 ### Component Usage
 
