@@ -29,8 +29,15 @@ import {
 // Hooks
 import { useAsyncData } from "@/hooks/use-async-data";
 
+// Avatar presets
+import {
+  AVATAR_PRESETS,
+  getRandomAvatarSrc,
+  getDeterministicAvatarSrc,
+} from "@/lib/profile/avatar-presets";
+
 // Icons
-import { User, Link as LinkIcon, Paperclip } from "@phosphor-icons/react";
+import { User, Link as LinkIcon, Paperclip, ArrowsClockwise } from "@phosphor-icons/react";
 
 // Logger
 import { logger, formatError } from "@/lib/logger";
@@ -121,6 +128,7 @@ export function AddCandidateModal({
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [resumeFile, setResumeFile] = React.useState<File | null>(null);
+  const [avatarSrc, setAvatarSrc] = React.useState(getRandomAvatarSrc);
 
   // Fetch published roles when no roleId is provided
   const { data: rolesData, isLoading: rolesLoading } = useAsyncData(
@@ -149,8 +157,18 @@ export function AddCandidateModal({
       setSelectedRoleId(roleId ?? "");
       setErrors({});
       setResumeFile(null);
+      setAvatarSrc(getRandomAvatarSrc());
     }
   }, [open, roleId]);
+
+  const shuffleAvatar = () => {
+    let newSrc = getRandomAvatarSrc();
+    // Ensure we get a different avatar
+    while (newSrc === avatarSrc && AVATAR_PRESETS.length > 1) {
+      newSrc = getRandomAvatarSrc();
+    }
+    setAvatarSrc(newSrc);
+  };
 
   // ============================================
   // HANDLERS
@@ -225,6 +243,7 @@ export function AddCandidateModal({
         body: JSON.stringify({
           ...form,
           ...(resumeUrl ? { resumeUrl } : {}),
+          avatarSrc,
         }),
       });
 
@@ -365,14 +384,24 @@ export function AddCandidateModal({
                 Profile Information
               </h3>
 
-              {/* Avatar preview — compact */}
+              {/* Avatar preview — shows animal avatar with shuffle button */}
               <div className="flex items-center gap-3">
-                <Avatar
-                  name={fullName || undefined}
-                  email={form.email || undefined}
-                  size="lg"
-                  color="green"
-                />
+                <div className="relative">
+                  <Avatar
+                    src={avatarSrc}
+                    name={fullName || "New Candidate"}
+                    size="lg"
+                    shape="circle"
+                  />
+                  <button
+                    type="button"
+                    onClick={shuffleAvatar}
+                    className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--background-default)] bg-[var(--background-brand)] text-[var(--foreground-inverse)] transition-transform hover:scale-110 active:scale-95"
+                    title="Shuffle avatar"
+                  >
+                    <ArrowsClockwise size={12} weight="bold" />
+                  </button>
+                </div>
                 <div className="flex flex-col">
                   <span className="text-body font-medium text-foreground">
                     {fullName || "New Candidate"}

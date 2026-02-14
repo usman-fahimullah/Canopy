@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger, formatError } from "@/lib/logger";
+import { getRandomAvatarSrc } from "@/lib/profile/avatar-presets";
 
 /**
  * POST /api/canopy/roles/[id]/applications
@@ -24,6 +25,8 @@ const CreateCandidateSchema = z.object({
   headline: z.string().optional().default(""),
   source: z.string().optional().default("employer_added"),
   resumeUrl: z.string().url().optional(),
+  /** Pre-selected animal avatar from the add candidate modal */
+  avatarSrc: z.string().optional(),
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -98,6 +101,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
       if (candidateAccount) {
         // Update existing account with any new info provided
+        // Also backfill avatar if missing (older accounts may not have one)
         candidateAccount = await tx.account.update({
           where: { id: candidateAccount.id },
           data: {
@@ -111,10 +115,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             ...(data.websiteUrl && !candidateAccount.websiteUrl
               ? { websiteUrl: data.websiteUrl }
               : {}),
+            ...(!candidateAccount.avatar ? { avatar: getRandomAvatarSrc() } : {}),
           },
         });
       } else {
         // Create placeholder account (candidate hasn't signed up yet)
+        // Assign a random animal avatar so they always have a visual identity
         candidateAccount = await tx.account.create({
           data: {
             supabaseId: `placeholder_${crypto.randomUUID()}`,
@@ -126,6 +132,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             linkedinUrl: data.linkedinUrl || undefined,
             websiteUrl: data.websiteUrl || undefined,
             entryIntent: "talent",
+            avatar: data.avatarSrc || getRandomAvatarSrc(),
           },
         });
       }
