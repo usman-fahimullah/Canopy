@@ -163,9 +163,9 @@ export default function KanbanPage() {
           A visual pipeline management system for tracking candidates across hiring stages. The
           Kanban board provides an intuitive drag-and-drop interface for moving candidates through
           the recruitment workflow. Cards use the{" "}
-          <code className="rounded bg-background-muted px-1">CandidateCard</code> component with{" "}
-          <code className="rounded bg-background-muted px-1">showDragHandle</code> for kanban
-          contexts.
+          <code className="rounded bg-background-muted px-1">CandidateCard</code> component with an{" "}
+          <code className="rounded bg-background-muted px-1">actions</code> slot for contextual
+          menus in kanban contexts.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-background-brand-subtle px-3 py-1 text-caption font-medium text-foreground-brand">
@@ -226,7 +226,7 @@ export default function KanbanPage() {
           },
           {
             name: "Card (CandidateCard)",
-            description: "Draggable candidate card with showDragHandle prop for kanban context",
+            description: "Draggable candidate card with prop for kanban context",
             required: true,
           },
           {
@@ -257,13 +257,13 @@ export default function KanbanPage() {
 
 <KanbanBoard>
   <KanbanColumn title="Applied" count={3} stage="applied">
-    <CandidateCard showDragHandle>
+    <CandidateCard>
       <p className="font-medium">Sarah Chen</p>
       <p className="text-sm text-foreground-muted">Solar Engineer</p>
     </CandidateCard>
   </KanbanColumn>
   <KanbanColumn title="Interview" count={1} stage="interview">
-    <CandidateCard showDragHandle>
+    <CandidateCard>
       <p className="font-medium">Michael Torres</p>
       <p className="text-sm text-foreground-muted">Project Manager</p>
     </CandidateCard>
@@ -273,17 +273,17 @@ export default function KanbanPage() {
           <div className="overflow-x-auto">
             <KanbanBoard>
               <KanbanColumn title="Applied" count={2} stage="applied">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="font-medium text-foreground">Sarah Chen</p>
                   <p className="text-caption text-foreground-muted">Solar Engineer</p>
                 </CandidateCard>
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="font-medium text-foreground">Emily Johnson</p>
                   <p className="text-caption text-foreground-muted">ESG Analyst</p>
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Interview" count={1} stage="interview">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="font-medium text-foreground">Michael Torres</p>
                   <p className="text-caption text-foreground-muted">Project Manager</p>
                 </CandidateCard>
@@ -308,32 +308,32 @@ export default function KanbanPage() {
           <div className="overflow-x-auto">
             <KanbanBoard>
               <KanbanColumn title="Applied" count={5} stage="applied">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="text-caption text-foreground-muted">New applications</p>
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Qualified" count={3} stage="qualified">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="text-caption text-foreground-muted">Passed initial screen</p>
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Interview" count={2} stage="interview">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="text-caption text-foreground-muted">In interview process</p>
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Offer" count={1} stage="offer">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="text-caption text-foreground-muted">Offer extended</p>
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Hired" count={1} stage="hired">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="text-caption text-foreground-muted">Accepted offer</p>
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Rejected" count={2} stage="rejected">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="text-caption text-foreground-muted">Not moving forward</p>
                 </CandidateCard>
               </KanbanColumn>
@@ -391,7 +391,7 @@ export default function KanbanPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <Label>Default (with drag handle)</Label>
-            <CandidateCard showDragHandle>
+            <CandidateCard>
               <p className="font-medium text-foreground">Sarah Chen</p>
               <p className="text-caption text-foreground-muted">Solar Engineer</p>
             </CandidateCard>
@@ -399,7 +399,7 @@ export default function KanbanPage() {
           </div>
           <div className="space-y-2">
             <Label>Selected</Label>
-            <CandidateCard showDragHandle selected>
+            <CandidateCard selected>
               <p className="font-medium text-foreground">Sarah Chen</p>
               <p className="text-caption text-foreground-muted">Solar Engineer</p>
             </CandidateCard>
@@ -407,7 +407,7 @@ export default function KanbanPage() {
           </div>
           <div className="space-y-2">
             <Label>With selection checkbox</Label>
-            <CandidateCard showDragHandle selectable selected>
+            <CandidateCard selected>
               <p className="font-medium text-foreground">Sarah Chen</p>
               <p className="text-caption text-foreground-muted">Solar Engineer</p>
             </CandidateCard>
@@ -476,12 +476,12 @@ export default function KanbanPage() {
 <KanbanDropPlaceholder height={80} />`}
         >
           <div className="max-w-xs space-y-2">
-            <CandidateCard showDragHandle>
+            <CandidateCard>
               <p className="font-medium text-foreground">Sarah Chen</p>
               <p className="text-caption text-foreground-muted">Solar Engineer</p>
             </CandidateCard>
             <KanbanDropPlaceholder height={72} />
-            <CandidateCard showDragHandle>
+            <CandidateCard>
               <p className="font-medium text-foreground">Michael Torres</p>
               <p className="text-caption text-foreground-muted">Project Manager</p>
             </CandidateCard>
@@ -509,7 +509,7 @@ export default function KanbanPage() {
           <div className="max-w-md overflow-x-auto">
             <KanbanBoard>
               <KanbanColumn title="Applied" count={1} stage="applied">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="font-medium text-foreground">Sarah Chen</p>
                   <p className="text-caption text-foreground-muted">Solar Engineer</p>
                 </CandidateCard>
@@ -564,11 +564,11 @@ export default function KanbanPage() {
                   </div>
                 }
               >
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="font-medium text-foreground">Sarah Chen</p>
                   <p className="text-caption text-foreground-muted">Solar Engineer</p>
                 </CandidateCard>
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <p className="font-medium text-foreground">Michael Torres</p>
                   <p className="text-caption text-foreground-muted">Project Manager</p>
                 </CandidateCard>
@@ -587,7 +587,7 @@ export default function KanbanPage() {
         description="Cards with avatar, skills, and match score"
       >
         <CodePreview
-          code={`<CandidateCard showDragHandle>
+          code={`<CandidateCard>
   <div className="flex items-center gap-3 mb-2">
     <Avatar name="Sarah Chen" size="sm" />
     <div>
@@ -609,7 +609,6 @@ export default function KanbanPage() {
             {sampleCandidates.map((candidate) => (
               <CandidateCard
                 key={candidate.id}
-                showDragHandle
                 selected={selectedCard === candidate.id}
                 onClick={() => setSelectedCard(candidate.id)}
               >
@@ -668,8 +667,8 @@ export default function KanbanPage() {
             >
               CandidateCard
             </a>{" "}
-            component with <code className="rounded bg-background-muted px-1">showDragHandle</code>{" "}
-            enabled. See the CandidateCard documentation for the full props reference.
+            component with an <code className="rounded bg-background-muted px-1">actions</code> slot
+            for contextual menus. See the CandidateCard documentation for the full props reference.
           </p>
         </ComponentCard>
 
@@ -696,7 +695,7 @@ export default function KanbanPage() {
             "Use consistent stage colors across all pipeline views",
             "Show candidate count in column headers",
             "Provide loading states during data fetch",
-            "Use showDragHandle on CandidateCard for drag affordance",
+            "Use on CandidateCard for drag affordance",
             "Allow keyboard navigation between cards",
             "Show empty state when columns have no cards",
             "Limit visible skills/tags to 2-3 with overflow indicator",
@@ -723,7 +722,7 @@ export default function KanbanPage() {
           items={[
             "**Keyboard**: CandidateCards are focusable with tabIndex for keyboard navigation",
             "**Navigation**: Use Tab to move between cards, Enter/Space to select",
-            "**Drag indicator**: Visual drag handle appears on hover when showDragHandle is true",
+            "**Drag indicator**: Visual drag handle appears on hover when is true",
             "**Focus ring**: Focus ring using --shadow-focus for clear visibility",
             "**ARIA**: Cards use role='article' (or role='option' when selectable)",
             "**Screen readers**: Column headers announce title and count",
@@ -786,7 +785,7 @@ export default function KanbanPage() {
           <div className="overflow-x-auto">
             <KanbanBoard>
               <KanbanColumn title="Applied" count={12} stage="applied">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Alex Rivera" size="xs" />
                     <div>
@@ -800,7 +799,7 @@ export default function KanbanPage() {
                     </Badge>
                   </div>
                 </CandidateCard>
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Jordan Kim" size="xs" />
                     <div>
@@ -817,7 +816,7 @@ export default function KanbanPage() {
                 <KanbanAddCard />
               </KanbanColumn>
               <KanbanColumn title="Qualified" count={5} stage="qualified">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Sarah Chen" size="xs" />
                     <div>
@@ -834,7 +833,7 @@ export default function KanbanPage() {
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Interview" count={2} stage="interview">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Michael Torres" size="xs" />
                     <div>
@@ -851,7 +850,7 @@ export default function KanbanPage() {
                 </CandidateCard>
               </KanbanColumn>
               <KanbanColumn title="Offer" count={1} stage="offer">
-                <CandidateCard showDragHandle>
+                <CandidateCard>
                   <div className="mb-2 flex items-center gap-2">
                     <Avatar name="Emily Johnson" size="xs" />
                     <div>
@@ -910,7 +909,7 @@ function PipelineBoard() {
             <KanbanColumn title={stage.name} stage={stage.id}>
               {candidatesInStage(stage.id).map(candidate => (
                 <SortableCard key={candidate.id} id={candidate.id}>
-                  <CandidateCard showDragHandle>
+                  <CandidateCard>
                     {/* candidate content */}
                   </CandidateCard>
                 </SortableCard>
@@ -922,7 +921,7 @@ function PipelineBoard() {
 
       <DragOverlay>
         {activeId ? (
-          <CandidateCard showDragHandle>
+          <CandidateCard>
             {/* drag preview content */}
           </CandidateCard>
         ) : null}

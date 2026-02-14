@@ -63,17 +63,6 @@ const candidateCardProps = [
     default: "false",
     description: "Visual selected state — highlights card with brand border and background",
   },
-  {
-    name: "selectable",
-    type: "boolean",
-    default: "false",
-    description: "Show selection checkbox overlay (visible on hover or when selected)",
-  },
-  {
-    name: "onSelectionChange",
-    type: "(selected: boolean) => void",
-    description: "Callback when selection state changes via checkbox",
-  },
 ];
 
 const candidateHeaderProps = [
@@ -914,9 +903,9 @@ export default function CandidateCardPage() {
           code={`const [selected, setSelected] = React.useState(false);
 
 <CandidateCard
-  selectable
+ 
   selected={selected}
-  onSelectionChange={setSelected}
+ 
 >
   {/* card content */}
 </CandidateCard>`}
@@ -927,12 +916,7 @@ export default function CandidateCardPage() {
             </p>
             <div className="grid max-w-lg grid-cols-2 gap-4">
               {["sarah", "michael"].map((id) => (
-                <CandidateCard
-                  key={id}
-                  selectable
-                  selected={selectedCards.has(id)}
-                  onSelectionChange={() => toggleSelection(id)}
-                >
+                <CandidateCard key={id} selected={selectedCards.has(id)}>
                   <div className="space-y-3">
                     <CandidateKanbanHeader
                       name={id === "sarah" ? "Sarah Chen" : "Michael Park"}
@@ -1451,7 +1435,7 @@ const reviewers: ReviewerData[] = [
       <AccessibilityInfo
         items={[
           "**Card Focus**: Cards are focusable with `tabIndex={0}` and visible double-ring focus indicator via `--shadow-focus`",
-          '**ARIA Roles**: Cards use `role="article"` by default, switching to `role="option"` with `aria-selected` when selectable',
+          '**ARIA Roles**: Cards use `role="article"` by default, switching to `role="option"` with `aria-selected` when',
           '**Star Rating**: Uses `role="img"` with `aria-label` announcing the exact rating (e.g., "Rating: 4.2 out of 5 stars")',
           '**Days in Stage**: Includes `aria-label` that communicates urgency level ("needs attention" for critical)',
           '**Decision Pill**: Uses `role="status"` so screen readers announce decision changes',

@@ -3,6 +3,60 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { getAuthContext, canSubmitScorecard, canAccessJob } from "@/lib/access-control";
+import { getScoresForApplication } from "@/lib/services/scoring-service";
+
+/**
+ * GET /api/canopy/candidates/[id]/scores?applicationId=xxx
+ *
+ * Fetch scores for an application with blind review enforcement.
+ */
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id: seekerId } = await params;
+
+    const ctx = await getAuthContext();
+    if (!ctx) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const applicationId = request.nextUrl.searchParams.get("applicationId");
+    if (!applicationId) {
+      return NextResponse.json({ error: "Missing applicationId query parameter" }, { status: 422 });
+    }
+
+    // Verify application belongs to this seeker + accessible job
+    const application = await prisma.application.findFirst({
+      where: {
+        id: applicationId,
+        seekerId,
+        job: { organizationId: ctx.organizationId },
+      },
+      select: { id: true, jobId: true },
+    });
+
+    if (!application) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+
+    if (!canAccessJob(ctx, application.jobId)) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+
+    const result = await getScoresForApplication({
+      applicationId,
+      jobId: application.jobId,
+      requesterId: ctx.memberId,
+      requesterRole: ctx.role,
+    });
+
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    logger.error("Failed to fetch scores", {
+      error: formatError(error),
+    });
+    return NextResponse.json({ error: "Failed to fetch scores" }, { status: 500 });
+  }
+}
 
 /**
  * POST /api/canopy/candidates/[id]/scores

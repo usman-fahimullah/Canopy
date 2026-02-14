@@ -4,7 +4,6 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarGroup, type AvatarData } from "./avatar";
 import { Badge } from "./badge";
-import { Checkbox } from "./checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 import {
   ChatCircle,
@@ -331,14 +330,10 @@ interface CandidateCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   variant?: "compact" | "expanded";
   loading?: boolean;
-  /** Visual selected state */
+  /** Visual selected state (ring indicator via ⌘-click) */
   selected?: boolean;
-  /** Show selection checkbox */
-  selectable?: boolean;
-  /** Selection callback */
-  onSelectionChange?: (selected: boolean) => void;
-  /** Show drag handle indicator (for kanban/sortable contexts) */
-  showDragHandle?: boolean;
+  /** Slot for a contextual ••• menu — the only hover-revealed element */
+  actions?: React.ReactNode;
 }
 
 const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
@@ -349,9 +344,7 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
       variant = "compact",
       loading = false,
       selected = false,
-      selectable = false,
-      onSelectionChange,
-      showDragHandle = false,
+      actions,
       ...props
     },
     ref
@@ -375,60 +368,38 @@ const CandidateCard = React.forwardRef<HTMLDivElement, CandidateCardProps>(
     return (
       <div
         ref={ref}
-        role={selectable ? "option" : "article"}
+        role="article"
         tabIndex={0}
-        aria-selected={selectable ? selected : undefined}
         className={cn(
           // Base
           "group relative rounded-xl bg-[var(--card-background)] text-[var(--card-foreground)]",
           // Shadow only — no border
           "shadow-card",
-          // Transitions
-          "ease-[var(--ease-default)] transition-all duration-200",
-          // Hover — subtle lift + stronger shadow
-          "hover:-translate-y-0.5 hover:shadow-card-hover",
+          // Hover — shadow-only elevation (single property, tactical feel)
+          "hover:shadow-card-hover",
+          // Transition — single property for responsive, intentional feedback
+          "ease-default transition-[shadow,transform] duration-normal",
           // Focus
           "focus-visible:shadow-[var(--shadow-focus)] focus-visible:outline-none",
-          // Active
+          // Active — press feedback
           "active:scale-[0.995] active:shadow-card",
           // Cursor
           "cursor-pointer",
-          // Variant sizing — more generous padding
+          // Variant sizing
           variant === "compact" ? "px-4 py-3.5" : "p-5",
-          // Selected state — use ring for selection indicator (no border)
+          // Selected state — ring indicator (⌘-click)
           selected && "bg-[var(--card-background-selected)] ring-2 ring-[var(--border-brand)]",
           className
         )}
         {...props}
       >
-        {/* Selection checkbox — overlays top-left, visible on hover or when selected */}
-        {selectable && (
+        {/* Context menu (•••) — the ONLY hover-revealed element (Asana pattern) */}
+        {actions && (
           <div
-            className={cn(
-              "absolute left-3 top-3 z-10 transition-opacity duration-150",
-              selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            )}
+            className="absolute right-2 top-2 z-10 opacity-0 transition-opacity duration-fast group-hover:opacity-100"
+            onClick={(e) => e.stopPropagation()}
           >
-            <Checkbox
-              checked={selected}
-              onCheckedChange={(checked) => onSelectionChange?.(Boolean(checked))}
-              aria-label="Select candidate"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        )}
-        {/* Drag handle indicator — visible on hover in kanban/sortable contexts */}
-        {showDragHandle && (
-          <div
-            aria-hidden="true"
-            className="duration-[var(--duration-fast)] absolute right-3 top-3 text-[var(--foreground-subtle)] opacity-0 transition-opacity group-hover:opacity-100"
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-              <circle cx="3" cy="3" r="1.5" />
-              <circle cx="9" cy="3" r="1.5" />
-              <circle cx="3" cy="9" r="1.5" />
-              <circle cx="9" cy="9" r="1.5" />
-            </svg>
+            {actions}
           </div>
         )}
         {children}

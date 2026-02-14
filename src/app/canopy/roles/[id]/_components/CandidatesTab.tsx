@@ -11,9 +11,7 @@ import {
   CandidateCard,
   CandidateKanbanHeader,
   CandidateActivity,
-  CandidateReviewers,
   DaysInStage,
-  type ReviewerData,
   type DecisionType,
 } from "@/components/ui/candidate-card";
 import { Toast } from "@/components/ui/toast";
@@ -66,6 +64,9 @@ import {
   Eye,
   CaretDown,
   Clock,
+  DotsThree,
+  CalendarBlank,
+  UserCircle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { BulkEmailComposer } from "@/components/canopy/BulkEmailComposer";
@@ -280,6 +281,32 @@ export function CandidatesTab({
   const openCandidatePreview = React.useCallback((seekerId: string) => {
     setPreviewSeekerId(seekerId);
   }, []);
+
+  // Keyboard navigation: ← → cycle candidates while preview sheet is open
+  React.useEffect(() => {
+    if (!previewSeekerId) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't capture if user is typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      const seekerIds = kanbanApplications.map((app) => app.seeker.id);
+      const currentIdx = seekerIds.indexOf(previewSeekerId);
+      if (currentIdx === -1) return;
+
+      if (e.key === "ArrowLeft" && currentIdx > 0) {
+        e.preventDefault();
+        setPreviewSeekerId(seekerIds[currentIdx - 1]);
+      } else if (e.key === "ArrowRight" && currentIdx < seekerIds.length - 1) {
+        e.preventDefault();
+        setPreviewSeekerId(seekerIds[currentIdx + 1]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [previewSeekerId, kanbanApplications]);
 
   // ============================================
   // REJECTION FLOW (Story 5.5)
@@ -559,14 +586,6 @@ export function CandidatesTab({
         content: (() => {
           const daysInStage = getDaysInStage(app.updatedAt);
 
-          // Build reviewer data from scores
-          const reviewers: ReviewerData[] = (app.scores ?? []).map((score) => ({
-            name: score.scorer.account.name || "Unknown",
-            avatarUrl: score.scorer.account.avatar || undefined,
-            status: mapRecommendation(score.recommendation),
-            rating: score.overallRating,
-          }));
-
           // Last note / comment time
           const lastNote = app.seeker.notes?.[0];
           const lastComment = lastNote ? formatNoteTime(lastNote.createdAt) : undefined;
@@ -577,14 +596,56 @@ export function CandidatesTab({
             ? formatInterviewDate(nextInterview.scheduledAt)
             : undefined;
 
-          // Scoring status indicator (Story 5.8)
-          const hasScores = isScored(app);
-
           return (
             <CandidateCard
               variant="compact"
-              showDragHandle
-              onClick={() => openCandidatePreview(app.seeker.id)}
+              selected={selection.isSelected(app.id)}
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey) {
+                  e.preventDefault();
+                  selection.toggleSelection(app.id);
+                } else {
+                  openCandidatePreview(app.seeker.id);
+                }
+              }}
+              actions={
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon-sm" aria-label="Candidate actions">
+                      <DotsThree size={16} weight="bold" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => openCandidatePreview(app.seeker.id)}>
+                      <UserCircle size={16} className="mr-2" />
+                      View profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() =>
+                        openEmailComposer(
+                          app.seeker.account.email,
+                          app.seeker.account.name || "Candidate"
+                        )
+                      }
+                    >
+                      <EnvelopeSimple size={16} className="mr-2" />
+                      Email candidate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <CalendarBlank size={16} className="mr-2" />
+                      Schedule interview
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-[var(--foreground-error)]"
+                      onSelect={() => openRejectModal(app.id, app.seeker.account.name || "Unknown")}
+                    >
+                      <Prohibit size={16} className="mr-2" />
+                      Reject
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              }
             >
               <CandidateKanbanHeader
                 name={app.seeker.account.name || "Unknown"}
@@ -595,7 +656,6 @@ export function CandidatesTab({
                   )
                 }
                 matchScore={app.matchScore ?? undefined}
-                appliedDate={app.createdAt}
               />
               {/* Activity + Days in stage row */}
               <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -607,53 +667,12 @@ export function CandidatesTab({
                 )}
                 <DaysInStage days={daysInStage} compact />
               </div>
-              {/* Scoring indicator (Story 5.8) */}
-              {!hasScores && (
-                <span className="mt-1.5 inline-flex items-center gap-1 text-caption text-[var(--foreground-warning)]">
-                  <Eye size={12} weight="bold" />
-                  Needs scoring
-                </span>
-              )}
-              {/* Reviewers */}
-              {reviewers.length > 0 && <CandidateReviewers reviewers={reviewers} />}
-              {/* Quick actions on hover (Stories 5.4, 5.5) */}
-              <div className="duration-[var(--duration-fast)] mt-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <SimpleTooltip content="Email candidate">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEmailComposer(
-                        app.seeker.account.email,
-                        app.seeker.account.name || "Candidate"
-                      );
-                    }}
-                    aria-label="Email candidate"
-                  >
-                    <EnvelopeSimple size={14} />
-                  </Button>
-                </SimpleTooltip>
-                <SimpleTooltip content="Reject candidate">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openRejectModal(app.id, app.seeker.account.name || "Unknown");
-                    }}
-                    aria-label="Reject candidate"
-                  >
-                    <Prohibit size={14} />
-                  </Button>
-                </SimpleTooltip>
-              </div>
             </CandidateCard>
           );
         })(),
         data: app,
       })),
-    [kanbanApplications, openCandidatePreview, openEmailComposer, openRejectModal]
+    [kanbanApplications, openCandidatePreview, openEmailComposer, openRejectModal, selection]
   );
 
   // useKanbanState manages optimistic updates + error rollback
@@ -1134,6 +1153,20 @@ export function CandidatesTab({
               className="h-[calc(100vh-180px)] flex-1 rounded-none"
               columnClassName="min-w-[300px]"
             />
+
+            {/* ⌘-click bulk actions toolbar (slides in from bottom when selections exist) */}
+            {selection.selectedIds.size > 0 && (
+              <BulkActionsToolbar
+                selectedCount={selection.selectedIds.size}
+                totalCount={kanbanApplications.length}
+                onSelectAll={selection.selectAll}
+                onDeselectAll={selection.deselectAll}
+                actions={bulkActions}
+                onAction={handleBulkAction}
+                selectedIds={Array.from(selection.selectedIds)}
+                position="fixed"
+              />
+            )}
 
             {/* Status bar for non-pipeline candidates (grid view only) */}
             {(rejectedCount > 0 || talentPoolCount > 0) && (

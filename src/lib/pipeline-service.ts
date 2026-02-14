@@ -12,6 +12,7 @@
 
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
+import { createAuditLog } from "@/lib/audit";
 
 /* -------------------------------------------------------------------
    Types
@@ -168,7 +169,7 @@ export async function bulkRejectOtherCandidates(params: {
   rejectionReason?: string;
   sendEmails?: boolean;
 }): Promise<{ rejectedCount: number }> {
-  const { jobId, exceptApplicationId, rejectionReason, sendEmails } = params;
+  const { jobId, exceptApplicationId, rejectionReason } = params;
 
   try {
     const result = await prisma.application.updateMany({
@@ -194,6 +195,187 @@ export async function bulkRejectOtherCandidates(params: {
   } catch (error) {
     logger.error("Failed to bulk reject candidates", {
       error: formatError(error),
+      jobId,
+    });
+    throw error;
+  }
+}
+
+/* -------------------------------------------------------------------
+   Terminal Outcome Functions
+   ------------------------------------------------------------------- */
+
+/**
+ * Withdraw an application (candidate-initiated or employer-initiated).
+ * Sets a terminal timestamp but preserves the last active stage for potential reopening.
+ */
+export async function withdrawApplication(params: {
+  applicationId: string;
+  jobId: string;
+  reason?: string;
+  actorId: string;
+}): Promise<{ success: boolean }> {
+  const { applicationId, jobId, reason, actorId } = params;
+
+  try {
+    // Get current stage before updating (for audit)
+    const current = await prisma.application.findFirst({
+      where: { id: applicationId, jobId },
+      select: { stage: true },
+    });
+
+    if (!current) {
+      throw new Error("Application not found");
+    }
+
+    await prisma.application.updateMany({
+      where: { id: applicationId, jobId },
+      data: {
+        stage: "withdrawn",
+        deletedAt: new Date(), // Using deletedAt as withdrawnAt
+      },
+    });
+
+    // Fire-and-forget audit log
+    createAuditLog({
+      action: "UPDATE",
+      entityType: "Application",
+      entityId: applicationId,
+      userId: actorId,
+      changes: { stage: { from: current.stage, to: "withdrawn" } },
+      metadata: { jobId, reason: reason ?? "voluntary_withdrawal" },
+    }).catch(() => {});
+
+    logger.info("Application withdrawn", { applicationId, jobId, reason });
+    return { success: true };
+  } catch (error) {
+    logger.error("Failed to withdraw application", {
+      error: formatError(error),
+      applicationId,
+      jobId,
+    });
+    throw error;
+  }
+}
+
+/**
+ * Reopen a terminal application (rejected, withdrawn, or talent-pool).
+ * Restores the candidate to a specified stage (defaults to "applied").
+ */
+export async function reopenApplication(params: {
+  applicationId: string;
+  jobId: string;
+  restoreToStage?: string;
+  actorId: string;
+}): Promise<{ success: boolean; stage: string }> {
+  const { applicationId, jobId, restoreToStage = "applied", actorId } = params;
+
+  try {
+    const current = await prisma.application.findFirst({
+      where: { id: applicationId, jobId },
+      select: { stage: true },
+    });
+
+    if (!current) {
+      throw new Error("Application not found");
+    }
+
+    const TERMINAL_STAGES = ["rejected", "withdrawn", "talent-pool"];
+    if (!TERMINAL_STAGES.includes(current.stage)) {
+      throw new Error(`Application is not in a terminal stage (current: ${current.stage})`);
+    }
+
+    await prisma.application.updateMany({
+      where: { id: applicationId, jobId },
+      data: {
+        stage: restoreToStage,
+        stageOrder: 0,
+        rejectedAt: null,
+        rejectionReason: null,
+        rejectionNote: null,
+        hiredAt: null,
+        deletedAt: null,
+      },
+    });
+
+    createAuditLog({
+      action: "UPDATE",
+      entityType: "Application",
+      entityId: applicationId,
+      userId: actorId,
+      changes: { stage: { from: current.stage, to: restoreToStage } },
+      metadata: { jobId, action: "reopen" },
+    }).catch(() => {});
+
+    logger.info("Application reopened", {
+      applicationId,
+      jobId,
+      fromStage: current.stage,
+      toStage: restoreToStage,
+    });
+
+    return { success: true, stage: restoreToStage };
+  } catch (error) {
+    logger.error("Failed to reopen application", {
+      error: formatError(error),
+      applicationId,
+      jobId,
+    });
+    throw error;
+  }
+}
+
+/**
+ * Mark a candidate as hired with optional bulk rejection of remaining candidates.
+ * This is an orchestration function that combines the stage update with side effects.
+ */
+export async function markHired(params: {
+  applicationId: string;
+  jobId: string;
+  actorId: string;
+  rejectRemaining?: boolean;
+  rejectionReason?: string;
+}): Promise<{ success: boolean; rejectedCount?: number }> {
+  const { applicationId, jobId, actorId, rejectRemaining, rejectionReason } = params;
+
+  try {
+    // Update the application to hired
+    await prisma.application.updateMany({
+      where: { id: applicationId, jobId },
+      data: {
+        stage: "hired",
+        hiredAt: new Date(),
+      },
+    });
+
+    createAuditLog({
+      action: "UPDATE",
+      entityType: "Application",
+      entityId: applicationId,
+      userId: actorId,
+      changes: { stage: { from: "offer", to: "hired" } },
+      metadata: { jobId, milestone: "hired" },
+    }).catch(() => {});
+
+    logger.info("Candidate marked as hired", { applicationId, jobId });
+
+    let rejectedCount: number | undefined;
+
+    // Optionally reject all other active candidates
+    if (rejectRemaining) {
+      const result = await bulkRejectOtherCandidates({
+        jobId,
+        exceptApplicationId: applicationId,
+        rejectionReason: rejectionReason ?? "position_filled",
+      });
+      rejectedCount = result.rejectedCount;
+    }
+
+    return { success: true, rejectedCount };
+  } catch (error) {
+    logger.error("Failed to mark hired", {
+      error: formatError(error),
+      applicationId,
       jobId,
     });
     throw error;

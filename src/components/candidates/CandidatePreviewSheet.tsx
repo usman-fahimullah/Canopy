@@ -75,6 +75,9 @@ import {
 // Split button
 import { SplitButton } from "@/components/ui/split-button";
 
+// Email dialog
+import { CandidateEmailDialog } from "@/app/canopy/roles/[id]/_components/CandidateEmailDialog";
+
 // Shell
 import { useSidebar } from "@/components/shell/sidebar-context";
 
@@ -265,6 +268,7 @@ export function CandidatePreviewSheet({
   // --- Modals & menus ---
   const [overflowOpen, setOverflowOpen] = React.useState(false);
   const [interviewModalOpen, setInterviewModalOpen] = React.useState(false);
+  const [emailDialogOpen, setEmailDialogOpen] = React.useState(false);
   const [rejectModalOpen, setRejectModalOpen] = React.useState(false);
   const [rejectReason, setRejectReason] = React.useState<RejectionReasonValue | "">("");
   const [rejectNote, setRejectNote] = React.useState("");
@@ -658,19 +662,8 @@ export function CandidatePreviewSheet({
                       {seeker && (
                         <DropdownMenuItem
                           onClick={() => {
-                            const jobTitle = activeApp?.job.title ?? "this role";
-                            const name = candidateName;
-                            const email = seeker.account.email;
-                            const subject = encodeURIComponent(
-                              `Re: Your application for ${jobTitle}`
-                            );
-                            const body = encodeURIComponent(
-                              `Hi ${name},\n\nThank you for your interest in the ${jobTitle} position.\n\n`
-                            );
-                            window.open(
-                              `mailto:${email}?subject=${subject}&body=${body}`,
-                              "_blank"
-                            );
+                            setOverflowOpen(false);
+                            setEmailDialogOpen(true);
                           }}
                           className="flex items-center gap-2"
                         >
@@ -723,18 +716,7 @@ export function CandidatePreviewSheet({
                   <DropdownMenuContent align="end" className="min-w-[200px]">
                     {seeker && (
                       <DropdownMenuItem
-                        onClick={() => {
-                          const jobTitle = activeApp.job.title ?? "this role";
-                          const name = candidateName;
-                          const email = seeker.account.email;
-                          const subject = encodeURIComponent(
-                            `Re: Your application for ${jobTitle}`
-                          );
-                          const body = encodeURIComponent(
-                            `Hi ${name},\n\nThank you for your interest in the ${jobTitle} position.\n\n`
-                          );
-                          window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
-                        }}
+                        onClick={() => setEmailDialogOpen(true)}
                         className="flex items-center gap-2"
                       >
                         <EnvelopeSimple size={16} />
@@ -853,6 +835,13 @@ export function CandidatePreviewSheet({
                     jobTitle={activeApp.job.title}
                     appliedAt={activeApp.createdAt}
                     pronouns={seeker.account.pronouns}
+                    seekerId={seeker.id}
+                    onAvatarChange={() => {
+                      // Invalidate the cached candidate data so the avatar refreshes
+                      queryClient.invalidateQueries({
+                        queryKey: queryKeys.canopy.candidates.detail(seeker.id),
+                      });
+                    }}
                   />
 
                   {/* Hiring stages */}
@@ -1123,6 +1112,21 @@ export function CandidatePreviewSheet({
             setOfferModalOpen(false);
             moveToStage("offer", "Offer");
           }}
+        />
+      )}
+
+      {/* Email Composer Dialog */}
+      {seeker && (
+        <CandidateEmailDialog
+          open={emailDialogOpen}
+          onOpenChange={setEmailDialogOpen}
+          candidate={{
+            name: candidateName,
+            email: seeker.account.email,
+            avatar: seeker.account.avatar ?? undefined,
+          }}
+          job={activeApp ? { id: activeApp.job.id, title: activeApp.job.title } : undefined}
+          applicationId={activeApp?.id}
         />
       )}
     </>

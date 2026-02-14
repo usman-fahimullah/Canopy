@@ -53,5 +53,46 @@ export const queryKeys = {
     notifications: {
       all: ["canopy", "notifications"] as const,
     },
+
+    interviews: {
+      all: ["canopy", "interviews"] as const,
+      list: (filters?: Record<string, unknown>) =>
+        filters
+          ? (["canopy", "interviews", "list", filters] as const)
+          : (["canopy", "interviews", "list"] as const),
+      detail: (interviewId: string) => ["canopy", "interviews", "detail", interviewId] as const,
+    },
+
+    offers: {
+      all: ["canopy", "offers"] as const,
+      list: (filters?: Record<string, unknown>) =>
+        filters
+          ? (["canopy", "offers", "list", filters] as const)
+          : (["canopy", "offers", "list"] as const),
+      detail: (offerId: string) => ["canopy", "offers", "detail", offerId] as const,
+    },
+
+    approvals: {
+      all: ["canopy", "approvals"] as const,
+      list: (filters?: Record<string, unknown>) =>
+        filters
+          ? (["canopy", "approvals", "list", filters] as const)
+          : (["canopy", "approvals", "list"] as const),
+    },
+
+    scores: {
+      all: ["canopy", "scores"] as const,
+      forApplication: (applicationId: string) =>
+        ["canopy", "scores", "application", applicationId] as const,
+      aggregate: (applicationId: string) =>
+        ["canopy", "scores", "aggregate", applicationId] as const,
+    },
+
+    activity: {
+      all: ["canopy", "activity"] as const,
+      forEntity: (entityType: string, entityId: string) =>
+        ["canopy", "activity", entityType, entityId] as const,
+      forSeeker: (seekerId: string) => ["canopy", "activity", "seeker", seekerId] as const,
+    },
   },
 } as const;
