@@ -2,7 +2,7 @@
 
 ---
 
-## trigger: always
+## trigger: api, route, endpoint, database, query, prisma, pagination, performance, scale, architecture, server component, suspense, caching
 
 ## Philosophy
 

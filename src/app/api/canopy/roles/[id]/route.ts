@@ -58,6 +58,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         formConfig: true,
         formQuestions: true,
         syndicationEnabled: true,
+        departmentId: true,
+        department: {
+          select: { id: true, name: true, color: true },
+        },
         recruiterId: true,
         hiringManagerId: true,
         recruiter: {
@@ -265,6 +269,9 @@ const UpdateJobSchema = z.object({
   // Syndication
   syndicationEnabled: z.boolean().optional(),
 
+  // Department
+  departmentId: z.string().optional().nullable(),
+
   // Team assignment — proper DB columns (not in formConfig)
   recruiterId: z.string().optional().nullable(),
   hiringManagerId: z.string().optional().nullable(),
@@ -462,6 +469,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         }
       }
       updateData.hiringManagerId = data.hiringManagerId;
+    }
+
+    // Department
+    if (data.departmentId !== undefined) {
+      if (data.departmentId) {
+        const dept = await prisma.department.findFirst({
+          where: { id: data.departmentId, organizationId: ctx.organizationId, isActive: true },
+          select: { id: true },
+        });
+        if (!dept) {
+          return NextResponse.json(
+            { error: "Department not found in organization" },
+            { status: 422 }
+          );
+        }
+      }
+      updateData.departmentId = data.departmentId;
     }
 
     // Application form config

@@ -13,6 +13,7 @@
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { createAuditLog } from "@/lib/audit";
+import { resolveJobStages } from "@/lib/pipeline/stage-registry";
 
 /* -------------------------------------------------------------------
    Types
@@ -24,6 +25,8 @@ export type TransitionAction =
   | "prompt_send_rejection_email"
   | "auto_log_milestone"
   | "suggest_reject_others"
+  | "gate_scorecards_required"
+  | "gate_interviews_required"
   | "none";
 
 export interface TransitionSideEffect {
@@ -67,6 +70,68 @@ export async function getTransitionPlan(params: {
   const sideEffects: TransitionSideEffect[] = [];
 
   try {
+    // --- Stage Gate Checking ---
+    // Read the fromStage's StageConfig and enforce any requirements
+    // before allowing the candidate to advance.
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+      select: { stages: true },
+    });
+
+    if (job) {
+      const resolvedStages = resolveJobStages(job.stages);
+      const fromStageDef = resolvedStages.find((s) => s.id === fromStage);
+      const gateConfig = fromStageDef?.config;
+
+      if (gateConfig) {
+        // Gate checks: run independent queries in parallel
+        const [scoreCount, interviewCount] = await Promise.all([
+          gateConfig.requiredScorecards && gateConfig.requiredScorecards > 0
+            ? prisma.score.count({ where: { applicationId, stageId: fromStage } })
+            : Promise.resolve(0),
+          gateConfig.requiredInterviews && gateConfig.requiredInterviews > 0
+            ? prisma.interview.count({
+                where: { applicationId, stageId: fromStage, status: "COMPLETED" },
+              })
+            : Promise.resolve(0),
+        ]);
+
+        // Gate: required scorecards
+        if (gateConfig.requiredScorecards && gateConfig.requiredScorecards > 0) {
+          if (scoreCount < gateConfig.requiredScorecards) {
+            sideEffects.push({
+              action: "gate_scorecards_required",
+              message: `${scoreCount} of ${gateConfig.requiredScorecards} required scorecards submitted for ${fromStageDef?.name ?? fromStage}.`,
+              required: true,
+              metadata: {
+                current: scoreCount,
+                required: gateConfig.requiredScorecards,
+                stageId: fromStage,
+                stageName: fromStageDef?.name ?? fromStage,
+              },
+            });
+          }
+        }
+
+        // Gate: required interviews
+        if (gateConfig.requiredInterviews && gateConfig.requiredInterviews > 0) {
+          if (interviewCount < gateConfig.requiredInterviews) {
+            sideEffects.push({
+              action: "gate_interviews_required",
+              message: `${interviewCount} of ${gateConfig.requiredInterviews} required interviews completed for ${fromStageDef?.name ?? fromStage}.`,
+              required: true,
+              metadata: {
+                current: interviewCount,
+                required: gateConfig.requiredInterviews,
+                stageId: fromStage,
+                stageName: fromStageDef?.name ?? fromStage,
+              },
+            });
+          }
+        }
+      }
+    }
+
     // --- Moving to Interview stage ---
     if (toStage === "interview") {
       // Check if any interviews are already scheduled
@@ -244,7 +309,7 @@ export async function withdrawApplication(params: {
       userId: actorId,
       changes: { stage: { from: current.stage, to: "withdrawn" } },
       metadata: { jobId, reason: reason ?? "voluntary_withdrawal" },
-    }).catch(() => {});
+    }).catch((err) => logger.warn("Audit log failed (non-blocking)", { error: formatError(err) }));
 
     logger.info("Application withdrawn", { applicationId, jobId, reason });
     return { success: true };
@@ -305,7 +370,7 @@ export async function reopenApplication(params: {
       userId: actorId,
       changes: { stage: { from: current.stage, to: restoreToStage } },
       metadata: { jobId, action: "reopen" },
-    }).catch(() => {});
+    }).catch((err) => logger.warn("Audit log failed (non-blocking)", { error: formatError(err) }));
 
     logger.info("Application reopened", {
       applicationId,
@@ -355,7 +420,7 @@ export async function markHired(params: {
       userId: actorId,
       changes: { stage: { from: "offer", to: "hired" } },
       metadata: { jobId, milestone: "hired" },
-    }).catch(() => {});
+    }).catch((err) => logger.warn("Audit log failed (non-blocking)", { error: formatError(err) }));
 
     logger.info("Candidate marked as hired", { applicationId, jobId });
 

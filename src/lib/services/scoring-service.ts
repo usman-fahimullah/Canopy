@@ -31,6 +31,8 @@ export interface ScorecardResult {
   recommendation: string;
   comments: string | null;
   responses: ScoreResponse[];
+  /** Pipeline stage this scorecard was submitted at */
+  stageId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -183,6 +185,7 @@ export async function getScoresForApplication(params: {
       recommendation: s.recommendation,
       comments: s.comments,
       responses: safeJsonParse<ScoreResponse[]>(s.responses, []),
+      stageId: s.stageId,
       createdAt: s.createdAt,
       updatedAt: s.updatedAt,
     }));

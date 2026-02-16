@@ -10,6 +10,7 @@ import {
 import { getAuthContext, canAccessJob, canManagePipeline } from "@/lib/access-control";
 import { createAuditLog } from "@/lib/audit";
 import { sendStageChangeAutoEmail } from "@/lib/email/stage-automation";
+import { getTransitionPlan } from "@/lib/pipeline-service";
 
 /**
  * PATCH /api/canopy/roles/[id]/applications/[appId]
@@ -142,37 +143,73 @@ export async function PATCH(
       });
     }
 
-    // Capture current stage for audit log + activity feed
+    // --- Stage Gate Enforcement + Update in transaction ---
+    // Read current stage → check gates → update atomically to prevent
+    // race conditions from concurrent pipeline moves.
     const currentApp = await prisma.application.findFirst({
       where: { id: appId, jobId },
       select: { stage: true },
     });
     const previousStage = currentApp?.stage ?? "unknown";
 
-    // Update the application — scoped to the correct job
-    const updated = await prisma.application.updateMany({
-      where: {
-        id: appId,
+    if (!isSpecialStage && previousStage !== "unknown") {
+      const transitionPlan = await getTransitionPlan({
+        applicationId: appId,
         jobId,
-      },
-      data: {
-        stage,
-        stageOrder,
-        // Track milestones
-        ...(stage === "hired" ? { hiredAt: new Date() } : {}),
-        ...(stage === "rejected"
-          ? {
-              rejectedAt: new Date(),
-              rejectionReason: rejectionReason ?? null,
-              rejectionNote: rejectionNote ?? null,
-            }
-          : {}),
-        ...(stage === "offer" ? { offeredAt: new Date() } : {}),
-      },
+        fromStage: previousStage,
+        toStage: stage,
+        organizationId: ctx.organizationId,
+      });
+
+      const blockers = transitionPlan.sideEffects.filter((se) => se.required);
+      if (blockers.length > 0) {
+        return NextResponse.json(
+          {
+            blocked: true,
+            blockers: blockers.map((b) => ({
+              action: b.action,
+              message: b.message,
+              metadata: b.metadata,
+            })),
+          },
+          { status: 422 }
+        );
+      }
+    }
+
+    // Update the application in a transaction — scoped to the correct job.
+    // Use optimistic check: only update if stage still matches what we read above.
+    const updated = await prisma.$transaction(async (tx) => {
+      const result = await tx.application.updateMany({
+        where: {
+          id: appId,
+          jobId,
+          // Optimistic concurrency: only update if stage hasn't changed
+          stage: previousStage,
+        },
+        data: {
+          stage,
+          stageOrder,
+          // Track milestones
+          ...(stage === "hired" ? { hiredAt: new Date() } : {}),
+          ...(stage === "rejected"
+            ? {
+                rejectedAt: new Date(),
+                rejectionReason: rejectionReason ?? null,
+                rejectionNote: rejectionNote ?? null,
+              }
+            : {}),
+          ...(stage === "offer" ? { offeredAt: new Date() } : {}),
+        },
+      });
+      return result;
     });
 
     if (updated.count === 0) {
-      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Application not found or stage changed concurrently" },
+        { status: 409 }
+      );
     }
 
     logger.info("Application stage updated", {
@@ -212,6 +249,8 @@ export async function PATCH(
           applicationId: appId,
           newStage: stage,
           jobId,
+          organizationId: ctx.organizationId,
+          triggeredById: ctx.memberId,
         });
       } catch (autoEmailErr) {
         logger.error("Failed to send stage automation email (non-blocking)", {

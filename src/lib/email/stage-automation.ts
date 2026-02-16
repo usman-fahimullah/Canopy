@@ -30,8 +30,12 @@ export async function sendStageChangeAutoEmail(params: {
   applicationId: string;
   newStage: string;
   jobId: string;
+  /** Required for EmailLog creation. Pass ctx.organizationId. */
+  organizationId?: string;
+  /** Required for EmailLog creation. Pass ctx.memberId. */
+  triggeredById?: string;
 }): Promise<void> {
-  const { applicationId, newStage, jobId } = params;
+  const { applicationId, newStage, jobId, organizationId, triggeredById } = params;
 
   try {
     // Fetch job automation config + candidate info in parallel
@@ -118,6 +122,32 @@ export async function sendStageChangeAutoEmail(params: {
     }
 
     await sendEmail(emailPayload);
+
+    // Log the automated email to EmailLog so it appears in the email thread
+    if (organizationId && triggeredById) {
+      prisma.emailLog
+        .create({
+          data: {
+            organizationId,
+            sentById: triggeredById,
+            recipientEmail: candidateEmail,
+            recipientName: candidateName,
+            applicationId,
+            subject: emailPayload.subject,
+            body: emailPayload.html,
+            status: "SENT",
+            sendType: "AUTOMATED",
+            stageId: newStage,
+          },
+        })
+        .catch((err) => {
+          logger.error("Failed to log automated email send", {
+            error: formatError(err),
+            applicationId,
+            newStage,
+          });
+        });
+    }
 
     logger.info("Stage automation email sent", {
       applicationId,

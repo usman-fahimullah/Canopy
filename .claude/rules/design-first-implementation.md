@@ -2,7 +2,7 @@
 
 ---
 
-## trigger: always
+## trigger: component, page, screen, layout, build, implement, design, frontend, view, figma, UI, jsx, tsx, style, tailwind
 
 ## Philosophy
 

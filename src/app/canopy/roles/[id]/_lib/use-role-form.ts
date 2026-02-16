@@ -99,6 +99,8 @@ export interface JobPostState {
   setShowHiringManager: (v: boolean) => void;
   hiringManagerId: string | null;
   setHiringManagerId: (v: string | null) => void;
+  departmentId: string | null;
+  setDepartmentId: (v: string | null) => void;
   orgMembers: OrgMemberOption[];
   reviewerIds: string[];
   setReviewerIds: (v: string[]) => void;
@@ -216,6 +218,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
   const [recruiterId, setRecruiterId] = React.useState<string | null>(null);
   const [showHiringManager, setShowHiringManager] = React.useState(false);
   const [hiringManagerId, setHiringManagerId] = React.useState<string | null>(null);
+  const [departmentId, setDepartmentId] = React.useState<string | null>(null);
   const [orgMembers, setOrgMembers] = React.useState<OrgMemberOption[]>([]);
   const [reviewerIds, setReviewerIds] = React.useState<string[]>([]);
   const [closingDate, setClosingDate] = React.useState<Date | undefined>();
@@ -430,6 +433,11 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       if (typeof fc.hiringManagerId === "string") setHiringManagerId(fc.hiringManagerId);
     }
 
+    // Department — top-level FK column
+    if (job.departmentId !== undefined) {
+      setDepartmentId(job.departmentId ?? null);
+    }
+
     // Load reviewer assignments from the assignments endpoint
     if (job.reviewerAssignments && Array.isArray(job.reviewerAssignments)) {
       setReviewerIds(job.reviewerAssignments.map((a: { member: { id: string } }) => a.member.id));
@@ -518,6 +526,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
         // Team assignment — top-level fields (proper FK columns)
         recruiterId: recruiterId || null,
         hiringManagerId: hiringManagerId || null,
+        departmentId: departmentId || null,
         formConfig: {
           personalDetails,
           careerDetails,
@@ -634,6 +643,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
     recruiterId,
     showHiringManager,
     hiringManagerId,
+    departmentId,
     reviewerIds,
     externalLink,
     requireResume,
@@ -717,6 +727,8 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       setShowHiringManager,
       hiringManagerId,
       setHiringManagerId,
+      departmentId,
+      setDepartmentId,
       orgMembers,
       reviewerIds,
       setReviewerIds,
@@ -766,6 +778,7 @@ export function useRoleForm(roleId: string): UseRoleFormReturn {
       recruiterId,
       showHiringManager,
       hiringManagerId,
+      departmentId,
       orgMembers,
       reviewerIds,
       closingDate,

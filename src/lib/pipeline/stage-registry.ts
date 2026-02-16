@@ -38,6 +38,21 @@ export type PhaseGroup =
 export type SeekerSection = "saved" | "applied" | "interview" | "offer" | "hired" | "ineligible";
 
 /**
+ * Configuration for stage-gating rules.
+ * Defines requirements that must be met before a candidate can advance past a stage.
+ */
+export interface StageConfig {
+  /** Minimum scorecards required before advancing. 0 or undefined = no gate. */
+  requiredScorecards?: number;
+  /** Minimum completed interviews required before advancing. 0 or undefined = no gate. */
+  requiredInterviews?: number;
+  /** Override scorecard template ID for this stage */
+  scorecardTemplateId?: string;
+  /** Whether an email must be sent before advancing */
+  requiresEmail?: boolean;
+}
+
+/**
  * Full definition for a single pipeline stage.
  */
 export interface StageDefinition {
@@ -49,6 +64,8 @@ export interface StageDefinition {
   phaseGroup: PhaseGroup;
   /** Whether this is a built-in (non-deletable) stage */
   isBuiltIn: boolean;
+  /** Optional gating configuration for this stage */
+  config?: StageConfig;
 }
 
 export type PhaseGroupColorKey =
@@ -210,6 +227,7 @@ export function resolveStage(stage: {
   id: string;
   name: string;
   phaseGroup?: string;
+  config?: StageConfig;
 }): StageDefinition {
   // Check if it's a built-in stage
   const builtIn = STAGE_MAP.get(stage.id);
@@ -217,6 +235,7 @@ export function resolveStage(stage: {
     return {
       ...builtIn,
       name: stage.name, // allow name override for built-in stages
+      ...(stage.config ? { config: stage.config } : {}),
     };
   }
 
@@ -230,6 +249,7 @@ export function resolveStage(stage: {
     name: stage.name,
     phaseGroup,
     isBuiltIn: false,
+    ...(stage.config ? { config: stage.config } : {}),
   };
 }
 
@@ -245,6 +265,7 @@ export function resolveJobStages(stagesJson: string | null | undefined): StageDe
       id: string;
       name: string;
       phaseGroup?: string;
+      config?: StageConfig;
     }>;
 
     if (!Array.isArray(parsed) || parsed.length === 0) {

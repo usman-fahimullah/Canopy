@@ -23,6 +23,7 @@ export interface TeamMember {
   avatar: string | null;
   role: OrgMemberRole;
   title: string | null;
+  department: { id: string; name: string; color: string | null } | null;
   lastActiveAt: string | null;
   joinedAt: string;
   assignedJobs?: AssignedJob[];

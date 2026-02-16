@@ -51,6 +51,8 @@ import { HistoryPanel } from "./HistoryPanel";
 import { ApplicationReviewPanel } from "./ApplicationReviewPanel";
 import { OfferManagementSection } from "./OfferManagementSection";
 import { InterviewsSection } from "./InterviewsSection";
+import { EmailThreadSection } from "./EmailThreadSection";
+import { StageGateModal } from "./StageGateModal";
 import { InterviewSchedulingModal } from "@/components/ui/interview-scheduling-modal";
 import { OfferDetailsModal } from "@/components/offers/offer-details-modal";
 import {
@@ -275,6 +277,13 @@ export function CandidatePreviewSheet({
   const [sendRejectEmail, setSendRejectEmail] = React.useState(false);
   const [offerModalOpen, setOfferModalOpen] = React.useState(false);
 
+  // --- Stage gate modal ---
+  const [gateModalOpen, setGateModalOpen] = React.useState(false);
+  const [gateBlockers, setGateBlockers] = React.useState<
+    Array<{ action: string; message: string; metadata?: Record<string, unknown> }>
+  >([]);
+  const [gateBlockedStageName, setGateBlockedStageName] = React.useState("");
+
   // --- Panels ---
   const [panelType, setPanelType] = React.useState<PanelType>(null);
   const [reviewStageId, setReviewStageId] = React.useState<string | null>(null);
@@ -314,13 +323,28 @@ export function CandidatePreviewSheet({
   const jobStages = React.useMemo(() => {
     if (!activeApp) return [];
     try {
-      return JSON.parse(activeApp.job.stages) as Array<{ id: string; name: string }>;
+      return JSON.parse(activeApp.job.stages) as Array<{
+        id: string;
+        name: string;
+        config?: {
+          requiredScorecards?: number;
+          requiredInterviews?: number;
+          scorecardTemplateId?: string;
+          requiresEmail?: boolean;
+        };
+      }>;
     } catch {
       return [{ id: "applied", name: "Applied" }];
     }
   }, [activeApp]);
 
   const displayStage = optimisticStage ?? activeApp?.stage ?? "applied";
+
+  // Derive scorecard template override from stage config (if configured)
+  const currentStageScorecardTemplate = React.useMemo(() => {
+    const stageDef = jobStages.find((s) => s.id === displayStage);
+    return stageDef?.config?.scorecardTemplateId;
+  }, [jobStages, displayStage]);
 
   const averageScore = React.useMemo(() => {
     if (!activeApp || activeApp.scores.length === 0) return null;
@@ -394,6 +418,16 @@ export function CandidatePreviewSheet({
 
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
+
+          // Stage gate blocked — show the gate modal
+          if (data?.blocked && data?.blockers) {
+            setOptimisticStage(null);
+            setGateBlockers(data.blockers);
+            setGateBlockedStageName(displayStage);
+            setGateModalOpen(true);
+            return;
+          }
+
           throw new Error(data.error ?? `Failed to move candidate to ${label}`);
         }
 
@@ -417,7 +451,7 @@ export function CandidatePreviewSheet({
         setIsActionLoading(false);
       }
     },
-    [activeApp, onStageChanged, queryClient]
+    [activeApp, onStageChanged, queryClient, displayStage]
   );
 
   const handleReject = React.useCallback(() => {
@@ -890,6 +924,16 @@ export function CandidatePreviewSheet({
                     />
                   )}
 
+                  {/* Email Thread */}
+                  {activeApp && (
+                    <EmailThreadSection
+                      seekerId={seeker.id}
+                      applicationId={activeApp.id}
+                      jobStages={jobStages}
+                      onCompose={() => setEmailDialogOpen(true)}
+                    />
+                  )}
+
                   {/* AI Summary */}
                   <AISummarySection summary={seeker.aiSummary} />
 
@@ -946,6 +990,7 @@ export function CandidatePreviewSheet({
                     onQualify={handleQualify}
                     onDisqualify={handleReject}
                     onClose={handleClosePanel}
+                    scorecardTemplateId={currentStageScorecardTemplate}
                   />
                 )}
                 {panelType === "comments" && (
@@ -1008,6 +1053,7 @@ export function CandidatePreviewSheet({
                   type: data.videoProvider === "none" ? "PHONE" : "VIDEO",
                   meetingLink: data.videoProvider !== "none" ? undefined : undefined,
                   notes: data.instructions || data.internalNotes || undefined,
+                  stageId: displayStage || undefined,
                 }),
               });
               if (!res.ok) throw new Error("Failed to schedule interview");
@@ -1127,8 +1173,17 @@ export function CandidatePreviewSheet({
           }}
           job={activeApp ? { id: activeApp.job.id, title: activeApp.job.title } : undefined}
           applicationId={activeApp?.id}
+          stageId={displayStage || undefined}
         />
       )}
+
+      {/* Stage Gate Modal */}
+      <StageGateModal
+        open={gateModalOpen}
+        onOpenChange={setGateModalOpen}
+        stageName={gateBlockedStageName}
+        blockers={gateBlockers}
+      />
     </>
   );
 }

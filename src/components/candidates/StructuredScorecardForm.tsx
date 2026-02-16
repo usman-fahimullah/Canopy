@@ -15,6 +15,7 @@ import {
   computeOverallRating,
   ratingToRecommendation,
   areRequiredCriteriaRated,
+  DEFAULT_SCORECARD_TEMPLATES,
   type ScorecardTemplate,
   type ScorecardResponses,
 } from "@/lib/scorecard-templates";
@@ -44,6 +45,8 @@ interface StructuredScorecardFormProps {
   onSubmitted: () => void;
   /** Called when form is cancelled */
   onCancel: () => void;
+  /** Optional scorecard template override from stage config */
+  scorecardTemplateId?: string;
 }
 
 /* -------------------------------------------------------------------
@@ -103,8 +106,13 @@ export function StructuredScorecardForm({
   editingScore,
   onSubmitted,
   onCancel,
+  scorecardTemplateId,
 }: StructuredScorecardFormProps) {
-  const template = getTemplateForStage(currentStage);
+  // Use stage config template override if provided, else auto-detect by stage
+  const template = scorecardTemplateId
+    ? (DEFAULT_SCORECARD_TEMPLATES.find((t) => t.id === scorecardTemplateId) ??
+      getTemplateForStage(currentStage))
+    : getTemplateForStage(currentStage);
 
   // Initialize from existing score if editing
   const [ratings, setRatings] = React.useState<Record<string, number>>(() =>
@@ -167,6 +175,7 @@ export function StructuredScorecardForm({
           recommendation: recToEnum(recommendation!),
           comments: comments || null,
           responses: JSON.stringify(responses),
+          stageId: currentStage || undefined,
         }),
       });
 

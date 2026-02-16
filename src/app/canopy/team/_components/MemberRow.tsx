@@ -29,6 +29,16 @@ import { formatRelativeTime } from "@/lib/format-relative-time";
 import { formatRoleName, roleBadgeVariant, ASSIGNABLE_ROLES, canManageTeam } from "../_lib/helpers";
 import type { TeamMember } from "../_lib/types";
 
+const DEPT_COLOR_DOT: Record<string, string> = {
+  green: "bg-[var(--primitive-green-500)]",
+  blue: "bg-[var(--primitive-blue-500)]",
+  purple: "bg-[var(--primitive-purple-500)]",
+  orange: "bg-[var(--primitive-orange-500)]",
+  red: "bg-[var(--primitive-red-500)]",
+  yellow: "bg-[var(--primitive-yellow-500)]",
+  neutral: "bg-[var(--primitive-neutral-500)]",
+};
+
 interface MemberRowProps {
   member: TeamMember;
   currentUserRole: OrgMemberRole;
@@ -61,6 +71,24 @@ export function MemberRow({ member, currentUserRole, onRoleChange, onRemove }: M
         <Badge variant={roleBadgeVariant(member.role)} size="sm">
           {formatRoleName(member.role)}
         </Badge>
+      </td>
+
+      {/* Department */}
+      <td className="hidden px-3 py-4 sm:table-cell">
+        {member.department ? (
+          <span className="flex items-center gap-2">
+            <span
+              className={`h-2 w-2 shrink-0 rounded-full ${
+                DEPT_COLOR_DOT[member.department.color ?? ""] ?? "bg-[var(--primitive-neutral-400)]"
+              }`}
+            />
+            <TruncateText className="text-caption text-[var(--foreground-default)]">
+              {member.department.name}
+            </TruncateText>
+          </span>
+        ) : (
+          <span className="text-caption text-[var(--foreground-subtle)]">--</span>
+        )}
       </td>
 
       {/* Assigned Jobs */}

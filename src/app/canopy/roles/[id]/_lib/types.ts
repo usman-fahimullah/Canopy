@@ -113,6 +113,9 @@ export interface JobData {
   syndicationEnabled: boolean;
   createdAt: string;
   updatedAt: string;
+  // Department
+  departmentId?: string | null;
+  department?: { id: string; name: string; color: string | null } | null;
   // Assignment fields (from proper FK columns)
   recruiterId?: string | null;
   hiringManagerId?: string | null;

@@ -8,9 +8,9 @@ import {
   Buildings,
   Palette,
   UsersThree,
+  TreeStructure,
   Bell,
   ShieldCheck,
-  Globe,
   EnvelopeSimple,
   Plugs,
   SignOut,
@@ -38,6 +38,7 @@ const SETTINGS_NAV: NavCategory[] = [
     items: [
       { href: "/canopy/settings/company", label: "Company Profile", icon: Buildings },
       { href: "/canopy/settings/branding", label: "Logo & Branding", icon: Palette },
+      { href: "/canopy/settings/departments", label: "Departments", icon: TreeStructure },
       { href: "/canopy/settings/team", label: "Team Permissions", icon: UsersThree },
     ],
   },
@@ -51,7 +52,6 @@ const SETTINGS_NAV: NavCategory[] = [
   {
     category: "Publishing",
     items: [
-      { href: "/canopy/settings/career-page", label: "Career Page", icon: Globe },
       { href: "/canopy/settings/email-templates", label: "Email Templates", icon: EnvelopeSimple },
     ],
   },

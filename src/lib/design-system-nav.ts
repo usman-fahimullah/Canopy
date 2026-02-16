@@ -259,6 +259,8 @@ export const componentsNav: NavItem[] = [
     href: "/design-system/components/layout",
     description: "Separators, scroll areas, and structural elements",
     children: [
+      { id: "section", label: "Section", href: "/design-system/components/section" },
+      { id: "container", label: "Container", href: "/design-system/components/container" },
       { id: "separator", label: "Separator", href: "/design-system/components/separator" },
       { id: "scroll-area", label: "Scroll Area", href: "/design-system/components/scroll-area" },
       { id: "spinner", label: "Spinner", href: "/design-system/components/spinner" },
@@ -735,7 +737,16 @@ export const searchIndex: SearchItem[] = [
     title: "Card",
     category: "Data Display",
     href: "/design-system/components/card",
-    keywords: ["container", "box", "panel"],
+    keywords: [
+      "container",
+      "box",
+      "panel",
+      "interactive",
+      "feature",
+      "size",
+      "elevated",
+      "outlined",
+    ],
   },
   {
     id: "toast",
@@ -978,6 +989,20 @@ export const searchIndex: SearchItem[] = [
     category: "Components",
     href: "/design-system/components/layout",
     keywords: ["structure", "utility"],
+  },
+  {
+    id: "section",
+    title: "Section",
+    category: "Layout",
+    href: "/design-system/components/section",
+    keywords: ["section", "group", "header", "title", "actions", "page"],
+  },
+  {
+    id: "container",
+    title: "Container",
+    category: "Layout",
+    href: "/design-system/components/container",
+    keywords: ["container", "wrapper", "padding", "max-width", "background", "page"],
   },
   {
     id: "separator",

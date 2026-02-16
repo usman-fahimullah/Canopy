@@ -53,6 +53,20 @@ const ROLE_FILTER_OPTIONS: Array<{ value: string; label: string }> = [
 ];
 
 /* -------------------------------------------------------------------
+   Department color dots (same mapping as DepartmentPicker)
+   ------------------------------------------------------------------- */
+
+const DEPT_COLOR_DOT: Record<string, string> = {
+  green: "bg-[var(--primitive-green-500)]",
+  blue: "bg-[var(--primitive-blue-500)]",
+  purple: "bg-[var(--primitive-purple-500)]",
+  orange: "bg-[var(--primitive-orange-500)]",
+  red: "bg-[var(--primitive-red-500)]",
+  yellow: "bg-[var(--primitive-yellow-500)]",
+  neutral: "bg-[var(--primitive-neutral-500)]",
+};
+
+/* -------------------------------------------------------------------
    Loading Skeleton
    ------------------------------------------------------------------- */
 
@@ -67,6 +81,8 @@ function TeamTableSkeleton() {
             <Skeleton className="h-3 w-56" />
           </div>
           <Skeleton className="h-6 w-20 rounded-full" />
+          {/* Department column */}
+          <Skeleton className="hidden h-6 w-28 rounded-full sm:block" />
           {/* Assigned Jobs column */}
           <div className="hidden gap-1.5 lg:flex">
             <Skeleton className="h-6 w-24 rounded-full" />
@@ -112,6 +128,7 @@ export function TeamPageClient() {
   // Filter state from URL
   const search = searchParams.get("search") || "";
   const roleFilter = searchParams.get("role") || "ALL";
+  const departmentFilter = searchParams.get("department") || "ALL";
 
   const updateParams = useCallback(
     (newParams: Record<string, string | undefined>) => {
@@ -140,8 +157,28 @@ export function TeamPageClient() {
     if (roleFilter && roleFilter !== "ALL") {
       result = result.filter((m) => m.role === roleFilter);
     }
+    if (departmentFilter && departmentFilter !== "ALL") {
+      if (departmentFilter === "__none__") {
+        result = result.filter((m) => !m.department);
+      } else {
+        result = result.filter((m) => m.department?.id === departmentFilter);
+      }
+    }
     return result;
-  }, [members, search, roleFilter]);
+  }, [members, search, roleFilter, departmentFilter]);
+
+  // Derive unique departments from members for filter
+  const departmentOptions = useMemo(() => {
+    const deptMap = new Map<string, { id: string; name: string; color: string | null }>();
+    for (const m of members) {
+      if (m.department) {
+        deptMap.set(m.department.id, m.department);
+      }
+    }
+    return Array.from(deptMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [members]);
+
+  const hasAnyDepartments = departmentOptions.length > 0;
 
   // Actions
   const handleRoleChange = useCallback(
@@ -269,6 +306,35 @@ export function TeamPageClient() {
                   ))}
                 </DropdownContent>
               </Dropdown>
+              {hasAnyDepartments && (
+                <Dropdown
+                  value={departmentFilter}
+                  onValueChange={(v) => updateParams({ department: v })}
+                >
+                  <DropdownTrigger className="w-[200px]">
+                    <DropdownValue placeholder="All departments" />
+                  </DropdownTrigger>
+                  <DropdownContent>
+                    <DropdownItem value="ALL">All departments</DropdownItem>
+                    <DropdownItem value="__none__">
+                      <span className="text-[var(--foreground-muted)]">No department</span>
+                    </DropdownItem>
+                    {departmentOptions.map((dept) => (
+                      <DropdownItem key={dept.id} value={dept.id}>
+                        <span className="flex items-center gap-2">
+                          <span
+                            className={`h-2 w-2 shrink-0 rounded-full ${
+                              DEPT_COLOR_DOT[dept.color ?? ""] ??
+                              "bg-[var(--primitive-neutral-400)]"
+                            }`}
+                          />
+                          {dept.name}
+                        </span>
+                      </DropdownItem>
+                    ))}
+                  </DropdownContent>
+                </Dropdown>
+              )}
             </div>
 
             {/* Tabs */}
@@ -290,19 +356,23 @@ export function TeamPageClient() {
                 {filteredMembers.length === 0 ? (
                   <div className="py-12">
                     <EmptyState
-                      preset={search || roleFilter !== "ALL" ? "search" : "users"}
+                      preset={
+                        search || roleFilter !== "ALL" || departmentFilter !== "ALL"
+                          ? "search"
+                          : "users"
+                      }
                       title={
-                        search || roleFilter !== "ALL"
+                        search || roleFilter !== "ALL" || departmentFilter !== "ALL"
                           ? "No members match your filters"
                           : "No team members yet"
                       }
                       description={
-                        search || roleFilter !== "ALL"
+                        search || roleFilter !== "ALL" || departmentFilter !== "ALL"
                           ? "Try adjusting your search or filter criteria."
                           : "Invite your first team member to start collaborating."
                       }
                       action={
-                        isAdmin && !search && roleFilter === "ALL"
+                        isAdmin && !search && roleFilter === "ALL" && departmentFilter === "ALL"
                           ? {
                               label: "Invite Member",
                               onClick: () => setInviteModalOpen(true),
@@ -322,6 +392,9 @@ export function TeamPageClient() {
                           </th>
                           <th className="px-3 py-3 text-left text-caption-strong text-[var(--foreground-muted)]">
                             Role
+                          </th>
+                          <th className="hidden px-3 py-3 text-left text-caption-strong text-[var(--foreground-muted)] sm:table-cell">
+                            Department
                           </th>
                           <th className="hidden px-3 py-3 text-left text-caption-strong text-[var(--foreground-muted)] lg:table-cell">
                             Assigned Jobs

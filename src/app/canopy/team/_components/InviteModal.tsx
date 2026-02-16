@@ -25,6 +25,7 @@ import { UserPlus, X } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { logger, formatError } from "@/lib/logger";
 import { formatRoleName, ASSIGNABLE_ROLES } from "../_lib/helpers";
+import { DepartmentPicker } from "@/components/departments/DepartmentPicker";
 import type { OrgMemberRole } from "@prisma/client";
 
 interface InviteModalProps {
@@ -41,6 +42,7 @@ export function InviteModal({ open, onOpenChange, onInvitesSent }: InviteModalPr
   const [emails, setEmails] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState("");
   const [role, setRole] = useState<OrgMemberRole>("RECRUITER");
+  const [departmentId, setDepartmentId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
@@ -110,6 +112,7 @@ export function InviteModal({ open, onOpenChange, onInvitesSent }: InviteModalPr
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           invites: emails.map((email) => ({ email, role })),
+          departmentId: departmentId || undefined,
         }),
       });
 
@@ -126,6 +129,7 @@ export function InviteModal({ open, onOpenChange, onInvitesSent }: InviteModalPr
       setEmails([]);
       setEmailInput("");
       setRole("RECRUITER");
+      setDepartmentId(null);
       setError(null);
       onOpenChange(false);
       onInvitesSent();
@@ -135,7 +139,7 @@ export function InviteModal({ open, onOpenChange, onInvitesSent }: InviteModalPr
     } finally {
       setIsSending(false);
     }
-  }, [emails, role, onOpenChange, onInvitesSent]);
+  }, [emails, role, departmentId, onOpenChange, onInvitesSent]);
 
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
@@ -200,21 +204,33 @@ export function InviteModal({ open, onOpenChange, onInvitesSent }: InviteModalPr
               </p>
             </div>
 
-            {/* Role picker */}
-            <div>
-              <Label className="mb-1.5">Role</Label>
-              <Dropdown value={role} onValueChange={(v) => setRole(v as OrgMemberRole)}>
-                <DropdownTrigger className="w-full">
-                  <DropdownValue placeholder="Select role" />
-                </DropdownTrigger>
-                <DropdownContent>
-                  {ASSIGNABLE_ROLES.map((r) => (
-                    <DropdownItem key={r} value={r}>
-                      {formatRoleName(r)}
-                    </DropdownItem>
-                  ))}
-                </DropdownContent>
-              </Dropdown>
+            {/* Role + Department row */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Label className="mb-1.5">Role</Label>
+                <Dropdown value={role} onValueChange={(v) => setRole(v as OrgMemberRole)}>
+                  <DropdownTrigger className="w-full">
+                    <DropdownValue placeholder="Select role" />
+                  </DropdownTrigger>
+                  <DropdownContent>
+                    {ASSIGNABLE_ROLES.map((r) => (
+                      <DropdownItem key={r} value={r}>
+                        {formatRoleName(r)}
+                      </DropdownItem>
+                    ))}
+                  </DropdownContent>
+                </Dropdown>
+              </div>
+
+              <div>
+                <Label className="mb-1.5">Department</Label>
+                <DepartmentPicker
+                  value={departmentId}
+                  onChange={setDepartmentId}
+                  placeholder="Select department"
+                  noneLabel="No department"
+                />
+              </div>
             </div>
 
             {/* Error */}

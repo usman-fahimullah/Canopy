@@ -142,12 +142,12 @@ export default function BreadcrumbsPage() {
             />
           </div>
           <div>
-            <p className="mb-2 text-caption-strong text-foreground-muted">Career Page Editor</p>
+            <p className="mb-2 text-caption-strong text-foreground-muted">Role Settings</p>
             <Breadcrumbs
               items={[
-                { label: "Career Page", href: "/career-page" },
-                { label: "Edit", href: "/career-page/edit" },
-                { label: "Hero Section" },
+                { label: "Roles", href: "/canopy/roles" },
+                { label: "Solar Engineer", href: "/canopy/roles/123" },
+                { label: "Settings" },
               ]}
             />
           </div>

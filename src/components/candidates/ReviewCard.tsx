@@ -13,6 +13,7 @@ interface ReviewCardProps {
   createdAt: Date;
   onEdit?: () => void;
   onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
 export function ReviewCard({
@@ -23,6 +24,7 @@ export function ReviewCard({
   createdAt,
   onEdit,
   onDelete,
+  isDeleting,
 }: ReviewCardProps) {
   const formattedDate = format(new Date(createdAt), "'today at' h:mm a");
 
@@ -41,14 +43,20 @@ export function ReviewCard({
       <div className="flex items-center gap-3 text-caption text-[var(--foreground-muted)]">
         <span>{formattedDate}</span>
         {onEdit && (
-          <button onClick={onEdit} className="text-[var(--foreground-link)] hover:underline">
+          <Button variant="link" size="sm" onClick={onEdit} className="h-auto p-0 text-caption">
             Edit
-          </button>
+          </Button>
         )}
         {onDelete && (
-          <button onClick={onDelete} className="text-[var(--foreground-link)] hover:underline">
+          <Button
+            variant="link"
+            size="sm"
+            onClick={onDelete}
+            loading={isDeleting}
+            className="h-auto p-0 text-caption"
+          >
             Delete
-          </button>
+          </Button>
         )}
       </div>
     </div>

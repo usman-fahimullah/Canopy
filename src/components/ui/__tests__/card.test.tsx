@@ -28,7 +28,7 @@ describe("Card", () => {
   it("applies elevated variant with larger shadow", () => {
     const { container } = render(<Card variant="elevated">Content</Card>);
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain("shadow-md");
+    expect(card.className).toContain("shadow-elevated");
   });
 
   it("applies flat variant without shadow or border", () => {
@@ -58,7 +58,7 @@ describe("CardHeader", () => {
 
   it("has padding", () => {
     const { container } = render(<CardHeader>H</CardHeader>);
-    expect((container.firstChild as HTMLElement).className).toContain("p-6");
+    expect((container.firstChild as HTMLElement).className).toContain("p-[var(--card-padding");
   });
 });
 

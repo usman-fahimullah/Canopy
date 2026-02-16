@@ -15,6 +15,8 @@ import {
   canLeaveNotes,
   canSubmitScorecard,
   canManageAssignments,
+  canManageDepartments,
+  canManageDepartmentMembers,
   type AuthContext,
 } from "../access-control";
 
@@ -28,6 +30,9 @@ function makeCtx(overrides: Partial<AuthContext> = {}): AuthContext {
     role: "ADMIN",
     hasFullAccess: true,
     assignedJobIds: [],
+    departmentId: null,
+    isDepartmentHead: false,
+    departmentTreeIds: [],
     ...overrides,
   };
 }
@@ -181,5 +186,60 @@ describe("canManageAssignments", () => {
     it(`denies ${role}`, () => {
       expect(canManageAssignments(makeCtx({ role }))).toBe(false);
     });
+  });
+});
+
+// ── canManageDepartments ───────────────────────────────────
+
+describe("canManageDepartments", () => {
+  it("allows ADMIN", () => {
+    expect(canManageDepartments(makeCtx({ role: "ADMIN" }))).toBe(true);
+  });
+
+  const denied: OrgMemberRole[] = ["RECRUITER", "HIRING_MANAGER", "MEMBER", "VIEWER"];
+  denied.forEach((role) => {
+    it(`denies ${role}`, () => {
+      expect(canManageDepartments(makeCtx({ role }))).toBe(false);
+    });
+  });
+});
+
+// ── canManageDepartmentMembers ─────────────────────────────
+
+describe("canManageDepartmentMembers", () => {
+  it("allows ADMIN for any department", () => {
+    const ctx = makeCtx({ role: "ADMIN" });
+    expect(canManageDepartmentMembers(ctx, "dept_any")).toBe(true);
+  });
+
+  it("allows department head for their own department tree", () => {
+    const ctx = makeCtx({
+      role: "HIRING_MANAGER" as OrgMemberRole,
+      hasFullAccess: false,
+      isDepartmentHead: true,
+      departmentTreeIds: ["dept_eng", "dept_frontend", "dept_backend"],
+    });
+    expect(canManageDepartmentMembers(ctx, "dept_eng")).toBe(true);
+    expect(canManageDepartmentMembers(ctx, "dept_frontend")).toBe(true);
+  });
+
+  it("denies department head for departments outside their tree", () => {
+    const ctx = makeCtx({
+      role: "HIRING_MANAGER" as OrgMemberRole,
+      hasFullAccess: false,
+      isDepartmentHead: true,
+      departmentTreeIds: ["dept_eng"],
+    });
+    expect(canManageDepartmentMembers(ctx, "dept_marketing")).toBe(false);
+  });
+
+  it("denies non-head, non-admin member", () => {
+    const ctx = makeCtx({
+      role: "MEMBER" as OrgMemberRole,
+      hasFullAccess: false,
+      isDepartmentHead: false,
+      departmentTreeIds: [],
+    });
+    expect(canManageDepartmentMembers(ctx, "dept_eng")).toBe(false);
   });
 });

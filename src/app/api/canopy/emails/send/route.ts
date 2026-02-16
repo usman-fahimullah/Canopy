@@ -23,6 +23,8 @@ const SendEmailSchema = z.object({
   body: z.string().min(1),
   applicationId: z.string().optional(),
   templateId: z.string().optional(),
+  /** Pipeline stage this email is being sent at */
+  stageId: z.string().optional(),
   // Variables for template interpolation
   variables: z.record(z.string(), z.string()).optional(),
 });
@@ -50,7 +52,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { to, cc, bcc, subject, body, applicationId, templateId, variables } = result.data;
+    const { to, cc, bcc, subject, body, applicationId, templateId, stageId, variables } =
+      result.data;
 
     // Get organization info for email branding
     const org = await prisma.organization.findUnique({
@@ -109,6 +112,7 @@ export async function POST(request: NextRequest) {
               templateId: templateId ?? null,
               status: "SENT",
               sendType: "MANUAL",
+              stageId: stageId ?? null,
             },
           })
           .catch((err) => {
@@ -134,6 +138,7 @@ export async function POST(request: NextRequest) {
               status: "FAILED",
               error: emailResult.error ?? "Unknown error",
               sendType: "MANUAL",
+              stageId: stageId ?? null,
             },
           })
           .catch((err) => {
@@ -148,12 +153,22 @@ export async function POST(request: NextRequest) {
     // Send CC/BCC (informational, not tracked)
     if (cc?.length) {
       for (const recipient of cc) {
-        await sendEmail({ to: recipient, subject: renderedSubject, html, text }).catch(() => {});
+        await sendEmail({ to: recipient, subject: renderedSubject, html, text }).catch((err) => {
+          logger.warn("Failed to send CC email (non-blocking)", {
+            error: formatError(err),
+            recipient,
+          });
+        });
       }
     }
     if (bcc?.length) {
       for (const recipient of bcc) {
-        await sendEmail({ to: recipient, subject: renderedSubject, html, text }).catch(() => {});
+        await sendEmail({ to: recipient, subject: renderedSubject, html, text }).catch((err) => {
+          logger.warn("Failed to send BCC email (non-blocking)", {
+            error: formatError(err),
+            recipient,
+          });
+        });
       }
     }
 

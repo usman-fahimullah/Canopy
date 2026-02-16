@@ -10,6 +10,7 @@ import { Toast } from "@/components/ui/toast";
 import { logger, formatError } from "@/lib/logger";
 import {
   PROVIDER_CONFIGS,
+  getProviderConfig,
   getProvidersByCategory,
   type IntegrationProvider,
   type IntegrationCategory,
@@ -200,6 +201,22 @@ export default function IntegrationsSection({
     fetchConnections();
   }, [fetchConnections]);
 
+  // Sync a connection directly with Nango (fallback when webhook is delayed)
+  const syncConnection = useCallback(async (provider: IntegrationProvider): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/canopy/integrations/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider }),
+      });
+      if (!res.ok) return false;
+      const json = await res.json();
+      return json.data?.status === "active";
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Connect flow
   const handleConnect = useCallback(
     async (provider: IntegrationProvider) => {
@@ -220,23 +237,34 @@ export default function IntegrationsSection({
 
         const { sessionToken } = await res.json();
 
-        // 2. Open Nango connect UI (dynamic import to avoid SSR issues)
+        // 2. Open Nango connect UI with event callback
         const NangoFrontend = (await import("@nangohq/frontend")).default;
         const nango = new NangoFrontend({ connectSessionToken: sessionToken });
-        nango.openConnectUI({});
 
-        // 3. Poll for connection after a delay (Nango webhook will update DB)
-        // Give the OAuth flow time to complete, then refetch
-        setTimeout(() => {
-          fetchConnections();
-        }, 3000);
-
-        // Also refetch after a longer delay in case the flow takes time
-        setTimeout(() => {
-          fetchConnections();
-        }, 8000);
-
-        showToast(`${provider} connection flow started`);
+        nango.openConnectUI({
+          onEvent: async (event) => {
+            if (event.type === "connect") {
+              // OAuth succeeded — sync the connection to our DB directly
+              const synced = await syncConnection(provider);
+              if (synced) {
+                showToast(`${getProviderConfig(provider)?.label ?? provider} connected`, "success");
+              } else {
+                // Sync call failed but Nango has the connection;
+                // webhook may still arrive so refetch after a delay
+                setTimeout(() => fetchConnections(), 3000);
+              }
+              await fetchConnections();
+            } else if (event.type === "error") {
+              showToast(
+                event.payload.errorMessage || "Connection failed. Please try again.",
+                "critical"
+              );
+            } else if (event.type === "close") {
+              // User closed the modal — refetch in case connection was made
+              await fetchConnections();
+            }
+          },
+        });
       } catch (err) {
         logger.error("Connect flow failed", { error: formatError(err), provider });
         showToast("Failed to connect. Please try again.", "critical");
@@ -244,7 +272,7 @@ export default function IntegrationsSection({
         setConnectingProvider(null);
       }
     },
-    [showToast, fetchConnections]
+    [showToast, fetchConnections, syncConnection]
   );
 
   // Disconnect flow

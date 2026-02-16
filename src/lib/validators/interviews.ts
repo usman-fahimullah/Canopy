@@ -9,6 +9,8 @@ export const CreateInterviewSchema = z.object({
   location: z.string().max(500).optional(), // Physical address for ONSITE
   meetingLink: z.string().url().optional(), // Video call URL
   notes: z.string().max(5000).optional(),
+  /** Pipeline stage this interview is being scheduled at */
+  stageId: z.string().optional(),
 });
 
 export const UpdateInterviewSchema = z.object({

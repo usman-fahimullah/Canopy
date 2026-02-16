@@ -2,7 +2,7 @@
 
 ---
 
-## trigger: always
+## trigger: component, page, screen, build, implement, design, frontend, audit, review, compliance, tokens, dark mode, accessibility
 
 This rule establishes the design system compliance standards for the Canopy codebase. Every UI implementation must adhere to the Trails Design System to ensure consistency, maintainability, dark mode support, and accessibility.
 

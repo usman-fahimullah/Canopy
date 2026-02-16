@@ -2,7 +2,7 @@
 
 ---
 
-## trigger: always
+## trigger: component, page, screen, layout, build, implement, design, frontend, view, dashboard, list, detail, card, table, modal, form, hierarchy, spacing, interaction
 
 This rule turns design judgment into verifiable checks. It's the bridge between "follow the design system" and "build something users actually want to use." Non-negotiable enforcement items are in `critical-standards.md` — this rule explains the design reasoning behind them and adds the checks that require judgment.
 

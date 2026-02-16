@@ -2,7 +2,7 @@
 
 ---
 
-## trigger: always
+## trigger: feature, page, screen, flow, journey, user, build, implement, form, empty state, error, loading, navigation, create, delete, action, confirmation
 
 Every feature is built with the full user journey in mind — not just the screen in front of us. A screen that works in isolation but confuses users in context is a failed screen. Non-negotiable enforcement items are in `critical-standards.md` — this rule explains the user journey reasoning and adds the journey-level checks.
 

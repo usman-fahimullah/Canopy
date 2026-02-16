@@ -22,6 +22,10 @@ export const NangoWebhookPayloadSchema = z.object({
     .optional(),
 });
 
+export const SyncConnectionSchema = z.object({
+  provider: z.enum(INTEGRATION_PROVIDERS),
+});
+
 export const SlackConfigSchema = z.object({
   channelId: z.string().min(1),
 });

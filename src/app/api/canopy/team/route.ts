@@ -62,6 +62,13 @@ export async function GET() {
               lastActiveAt: true,
             },
           },
+          department: {
+            select: {
+              id: true,
+              name: true,
+              color: true,
+            },
+          },
           recruitedJobs: {
             select: { id: true, title: true },
             take: 5,
@@ -120,6 +127,9 @@ export async function GET() {
         avatar: m.account.avatar,
         role: m.role,
         title: m.title,
+        department: m.department
+          ? { id: m.department.id, name: m.department.name, color: m.department.color }
+          : null,
         lastActiveAt: m.account.lastActiveAt?.toISOString() ?? null,
         joinedAt: m.createdAt.toISOString(),
         assignedJobs,

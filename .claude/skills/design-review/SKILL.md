@@ -172,6 +172,54 @@ Mentally (or actually) stress-test with extreme data:
 
 ---
 
+## Step 10: Design Taste — Precedent Comparison (6 Checks)
+
+This step brings back design judgment — but grounded in codebase comparison, not subjective opinion. Instead of "does this feel right?", the question is "does this match how we've built similar screens?"
+
+**Before running this step:** Identify the closest existing precedent screen (see `design-intelligence.md` for the page type reference library). Then compare.
+
+| #    | Check                                    | How to Verify                                                                                                                                        | Fail Criteria                                                                                                  | Tier |
+| ---- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ---- |
+| 10.1 | **Follows page type composition**        | Identify page type (list/dashboard/detail/settings/form). Compare structure to the precedent for that type.                                          | Structure doesn't match the established pattern for this page type — different component order, wrong layout   | ⚠️   |
+| 10.2 | **Spacing rhythm matches**               | Compare spacing to precedent: label→input (gap-1/2), fields in section (space-y-4), sections (space-y-6 + Divider), page sections (space-y-8/12)     | Uniform spacing everywhere (space-y-4 on everything), or erratic spacing that doesn't match precedent          | ⚠️   |
+| 10.3 | **Typography rhythm matches**            | Compare text hierarchy to precedent: heading→body→caption with font weight and color differentiation. Minimum 3 levels.                              | All text same size/weight/color, OR heading levels don't match the precedent pattern                           | ⚠️   |
+| 10.4 | **Same designer test**                   | Put this screen side-by-side with the precedent. Could they be siblings? Same card treatment, same header pattern, same action placement.            | The two screens look like they were designed by different people — different card styles, header layouts, etc. | 🛑   |
+| 10.5 | **Component composition matches**        | Check component choices against precedent: same filter bar pattern? Same action bar? Same detail view approach (sheet vs page)?                      | Uses a different UI pattern for the same problem (e.g., full page for detail when precedent uses Sheet)        | ⚠️   |
+| 10.6 | **Nothing unnecessary, nothing missing** | Every element earns its place. Remove anything that doesn't serve the primary question. Add anything the user would expect based on similar screens. | Decorative elements that don't serve function, OR expected elements missing that the precedent includes        | 💡   |
+
+### How to Run the Precedent Comparison
+
+```
+1. IDENTIFY this screen's page type:
+   □ List page    → compare to: candidates/page.tsx
+   □ Dashboard    → compare to: dashboard/page.tsx
+   □ Detail view  → compare to: CandidatePreviewSheet.tsx
+   □ Settings     → compare to: settings/ pages
+   □ Form/create  → compare to: closest form page
+
+2. READ the precedent file (not skim — read the JSX structure)
+
+3. COMPARE these specific elements:
+   □ Page header pattern (title placement, action button position)
+   □ Content organization (card-wrapped? sections with dividers?)
+   □ Filter/search pattern (horizontal bar? dropdown filters?)
+   □ Action pattern (primary + secondary + overflow dropdown?)
+   □ Spacing rhythm (tight/medium/loose alternation)
+   □ Typography levels (how many, which classes, which colors)
+
+4. DOCUMENT any deviations:
+   □ Intentional (new requirement) → OK, note in report
+   □ Unintentional (didn't study precedent) → 🛑 or ⚠️ finding
+
+5. CHECK against industry principles (design-intelligence.md):
+   □ Foundational (1-8): touch targets, focus, state layers, button hierarchy
+   □ Platform (9-16): type scale, reading width, density, progressive disclosure
+   □ Feature-specific (17-24): kanban, card elevation, profile tabs, empty states
+   □ Flag any principle violations as ⚠️ findings
+```
+
+---
+
 ## Grading
 
 ### How to Score
@@ -258,18 +306,19 @@ When time is short, run these 10 checks. Each maps to the full step it abbreviat
 
 This skill is the operational execution of the standards defined in:
 
-| Rule                             | What This Skill Checks From It                                                      |
-| -------------------------------- | ----------------------------------------------------------------------------------- |
-| `critical-standards.md`          | The master enforcement checklist — Steps 5, 6, 7 directly mirror its 🛑 items       |
-| `engineering-excellence.md`      | The "why" — every check traces back to a principle                                  |
-| `product-design-thinking.md`     | Steps 1-3 (hierarchy, IA, spatial design) — verifiable checks, not subjective       |
-| `ux-thinking.md`                 | Steps 5-6 (all states, user journey) — the Five Questions and cross-screen thinking |
-| `design-audit-standards.md`      | Step 7 (design system compliance) — token tiers, component usage, dark mode         |
-| `design-first-implementation.md` | Step 7 (component mapping) — mandatory component usage table                        |
-| `input-component-standards.md`   | Step 4 (interaction quality) — focus, hover, error patterns                         |
-| `truncation-standards.md`        | Step 8 (scale test) — text overflow handling                                        |
-| `code-quality-standards.md`      | Step 5 (state handling) — loading, empty, error requirements                        |
+| Rule                             | What This Skill Checks From It                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------- |
+| `critical-standards.md`          | The master enforcement checklist — Steps 5, 6, 7 directly mirror its 🛑 items         |
+| `engineering-excellence.md`      | The "why" — every check traces back to a principle                                    |
+| `design-intelligence.md`         | Step 10 (precedent comparison) — page type patterns, spacing/typography rhythm, taste |
+| `product-design-thinking.md`     | Steps 1-3 (hierarchy, IA, spatial design) — verifiable checks, not subjective         |
+| `ux-thinking.md`                 | Steps 5-6 (all states, user journey) — the Five Questions and cross-screen thinking   |
+| `design-audit-standards.md`      | Step 7 (design system compliance) — token tiers, component usage, dark mode           |
+| `design-first-implementation.md` | Step 7 (component mapping) — mandatory component usage table                          |
+| `input-component-standards.md`   | Step 4 (interaction quality) — focus, hover, error patterns                           |
+| `truncation-standards.md`        | Step 8 (scale test) — text overflow handling                                          |
+| `code-quality-standards.md`      | Step 5 (state handling) — loading, empty, error requirements                          |
 
 ---
 
-**This skill produces findings, not opinions. Every check is binary. Every finding has a severity. Every severity has an action.**
+**Steps 1-9 produce binary findings. Step 10 produces precedent-grounded findings. Every finding has a severity. Every severity has an action.**

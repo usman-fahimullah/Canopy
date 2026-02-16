@@ -37,6 +37,7 @@ import {
 } from "@/components/jobs";
 import { ArrowLeft, FloppyDisk } from "@phosphor-icons/react";
 import { logger, formatError } from "@/lib/logger";
+import { DepartmentPicker } from "@/components/departments/DepartmentPicker";
 
 /* -------------------------------------------------------------------
    Constants
@@ -80,6 +81,7 @@ export default function CreateRolePage() {
   const [jobCategory, setJobCategory] = React.useState("");
   const [positionType, setPositionType] = React.useState("FULL_TIME");
   const [experienceLevel, setExperienceLevel] = React.useState("");
+  const [departmentId, setDepartmentId] = React.useState<string | null>(null);
 
   // Role information (rich text)
   const [roleDescription, setRoleDescription] = React.useState("");
@@ -176,6 +178,7 @@ export default function CreateRolePage() {
         salaryCurrency: "USD",
         climateCategory: jobCategory || null,
         experienceLevel: experienceLevel || null,
+        departmentId: departmentId || null,
         closesAt: closingDate ? closingDate.toISOString() : null,
       };
 
@@ -299,6 +302,16 @@ export default function CreateRolePage() {
                   </Select>
                 </FormField>
 
+                <FormField label="Department">
+                  <DepartmentPicker
+                    value={departmentId}
+                    onChange={setDepartmentId}
+                    placeholder="Select department"
+                  />
+                </FormField>
+              </FormRow>
+
+              <FormRow columns={2}>
                 <FormField label="Closing Date">
                   <DatePicker
                     value={closingDate}

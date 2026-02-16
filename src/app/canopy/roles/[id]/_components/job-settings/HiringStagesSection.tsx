@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/dropdown";
-import { Plus, Trash, DotsSixVertical, ArrowLeft } from "@phosphor-icons/react";
+import { Plus, Trash, DotsSixVertical, ArrowLeft, ShieldCheck } from "@phosphor-icons/react";
 import {
   DndContext,
   closestCenter,
@@ -39,11 +39,19 @@ import { logger, formatError } from "@/lib/logger";
 // TYPES
 // ============================================
 
+interface StageConfig {
+  requiredScorecards?: number;
+  requiredInterviews?: number;
+  scorecardTemplateId?: string;
+  requiresEmail?: boolean;
+}
+
 interface StageDefinition {
   id: string;
   name: string;
   phaseGroup: string;
   isBuiltIn?: boolean;
+  config?: StageConfig;
 }
 
 interface HiringStagesSectionProps {
@@ -123,20 +131,27 @@ function SortableStageRow({
         {stage.name}
       </span>
 
-      {/* Col 3: Phase badge */}
-      <Badge
-        variant={
-          (phaseGroupColors[stage.phaseGroup] as
-            | "info"
-            | "neutral"
-            | "feature"
-            | "warning"
-            | "success") ?? "neutral"
-        }
-        className="mr-2"
-      >
-        {stage.phaseGroup}
-      </Badge>
+      {/* Col 3: Phase badge + gate indicator */}
+      <div className="mr-2 flex items-center gap-1.5">
+        <Badge
+          variant={
+            (phaseGroupColors[stage.phaseGroup] as
+              | "info"
+              | "neutral"
+              | "feature"
+              | "warning"
+              | "success") ?? "neutral"
+          }
+        >
+          {stage.phaseGroup}
+        </Badge>
+        {stage.config && (stage.config.requiredScorecards || stage.config.requiredInterviews) ? (
+          <Badge variant="outline" className="text-caption-sm">
+            <ShieldCheck size={12} weight="bold" className="mr-0.5" />
+            Gated
+          </Badge>
+        ) : null}
+      </div>
 
       {/* Col 4: Actions */}
       <div className="flex items-center gap-1">
@@ -166,6 +181,13 @@ function SortableStageRow({
 // STAGE SETTINGS PANEL
 // ============================================
 
+const scorecardTemplateOptions = [
+  { value: "auto", label: "Auto-detect (default)" },
+  { value: "screening", label: "Screening Evaluation" },
+  { value: "interview", label: "Interview Evaluation" },
+  { value: "final", label: "Final Review" },
+];
+
 function StageSettingsPanel({
   stage,
   onBack,
@@ -177,6 +199,32 @@ function StageSettingsPanel({
 }) {
   const [name, setName] = React.useState(stage.name);
   const [phaseGroup, setPhaseGroup] = React.useState(stage.phaseGroup);
+  const [requiredScorecards, setRequiredScorecards] = React.useState(
+    stage.config?.requiredScorecards ?? 0
+  );
+  const [requiredInterviews, setRequiredInterviews] = React.useState(
+    stage.config?.requiredInterviews ?? 0
+  );
+  const [scorecardTemplateId, setScorecardTemplateId] = React.useState(
+    stage.config?.scorecardTemplateId ?? "auto"
+  );
+
+  const handleSave = () => {
+    // Only include non-zero/non-empty config values to keep JSON clean
+    const config: StageConfig = {};
+    if (requiredScorecards > 0) config.requiredScorecards = requiredScorecards;
+    if (requiredInterviews > 0) config.requiredInterviews = requiredInterviews;
+    if (scorecardTemplateId && scorecardTemplateId !== "auto")
+      config.scorecardTemplateId = scorecardTemplateId;
+
+    onUpdate({
+      ...stage,
+      name,
+      phaseGroup,
+      ...(Object.keys(config).length > 0 ? { config } : { config: undefined }),
+    });
+    onBack();
+  };
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -192,6 +240,7 @@ function StageSettingsPanel({
         </div>
       </div>
 
+      {/* Stage Name */}
       <div className="flex flex-col gap-2">
         <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
           Stage Name
@@ -204,6 +253,7 @@ function StageSettingsPanel({
         />
       </div>
 
+      {/* Phase Group */}
       <div className="flex flex-col gap-2">
         <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
           Phase Group
@@ -225,14 +275,82 @@ function StageSettingsPanel({
         </p>
       </div>
 
+      {/* Stage Requirements */}
+      <div className="border-t border-[var(--border-default)] pt-5">
+        <h4 className="text-body-sm font-medium text-[var(--foreground-default)]">
+          Stage Requirements
+        </h4>
+        <p className="mt-1 text-caption text-[var(--foreground-muted)]">
+          Set requirements that must be met before candidates can advance past this stage.
+        </p>
+
+        <div className="mt-4 flex flex-col gap-4">
+          {/* Required Scorecards */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+              Minimum scorecards
+            </label>
+            <Input
+              type="number"
+              min={0}
+              max={10}
+              value={requiredScorecards}
+              onChange={(e) =>
+                setRequiredScorecards(Math.max(0, Math.min(10, parseInt(e.target.value) || 0)))
+              }
+              className="w-24"
+            />
+            <p className="text-caption-sm text-[var(--foreground-subtle)]">
+              Set to 0 for no requirement.
+            </p>
+          </div>
+
+          {/* Required Interviews */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+              Minimum completed interviews
+            </label>
+            <Input
+              type="number"
+              min={0}
+              max={10}
+              value={requiredInterviews}
+              onChange={(e) =>
+                setRequiredInterviews(Math.max(0, Math.min(10, parseInt(e.target.value) || 0)))
+              }
+              className="w-24"
+            />
+            <p className="text-caption-sm text-[var(--foreground-subtle)]">
+              Set to 0 for no requirement.
+            </p>
+          </div>
+
+          {/* Scorecard Template Override */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
+              Scorecard template
+            </label>
+            <Select value={scorecardTemplateId} onValueChange={setScorecardTemplateId}>
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder="Auto-detect (default)" />
+              </SelectTrigger>
+              <SelectContent>
+                {scorecardTemplateOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-caption-sm text-[var(--foreground-subtle)]">
+              Override which scorecard template is used when evaluating candidates at this stage.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex justify-end border-t border-[var(--border-default)] pt-4">
-        <Button
-          variant="primary"
-          onClick={() => {
-            onUpdate({ ...stage, name, phaseGroup });
-            onBack();
-          }}
-        >
+        <Button variant="primary" onClick={handleSave}>
           Update Stage
         </Button>
       </div>
@@ -309,7 +427,12 @@ export function HiringStagesSection({ roleId }: HiringStagesSectionProps) {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          stages: stages.map(({ id, name, phaseGroup }) => ({ id, name, phaseGroup })),
+          stages: stages.map(({ id, name, phaseGroup, config }) => ({
+            id,
+            name,
+            phaseGroup,
+            ...(config && Object.keys(config).length > 0 ? { config } : {}),
+          })),
         }),
       });
 

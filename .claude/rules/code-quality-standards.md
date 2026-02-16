@@ -2,7 +2,7 @@
 
 ---
 
-## trigger: always
+## trigger: api, route, endpoint, handler, validation, auth, authorization, database, query, prisma, security, typescript, type, logging, error handling
 
 This rule establishes the production-readiness standards for the Canopy codebase. Every piece of code written must meet these quality gates before being considered complete.
 

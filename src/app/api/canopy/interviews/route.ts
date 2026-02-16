@@ -267,6 +267,7 @@ export async function POST(request: NextRequest) {
         meetingLink: data.meetingLink,
         notes: data.notes,
         status: "SCHEDULED",
+        stageId: data.stageId ?? null,
       },
       include: {
         application: {

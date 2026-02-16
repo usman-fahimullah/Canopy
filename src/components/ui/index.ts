@@ -118,7 +118,30 @@ export {
 export { PathwayCard, type PathwayCardProps } from "./pathway-card";
 
 // Layout & Display
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  cardVariants,
+  type CardProps,
+} from "./card";
+
+// Layout Primitives
+export { Container, containerVariants, type ContainerProps } from "./container";
+export {
+  Section,
+  SectionHeader,
+  SectionTitle,
+  SectionActions,
+  SectionContent,
+  SectionFooter,
+  sectionVariants,
+  type SectionProps,
+  type SectionTitleProps,
+} from "./section";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export {
   Avatar,

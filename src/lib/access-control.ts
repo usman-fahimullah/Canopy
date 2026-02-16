@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import type { OrgMemberRole, Prisma } from "@prisma/client";
 
 // Roles with unrestricted access to all jobs/candidates
@@ -14,6 +15,12 @@ export interface AuthContext {
   hasFullAccess: boolean;
   /** Populated for scoped roles (HIRING_MANAGER, MEMBER); empty for full-access roles */
   assignedJobIds: string[];
+  /** Member's own department ID (null if cross-functional / unassigned) */
+  departmentId: string | null;
+  /** Whether this member is head of any department */
+  isDepartmentHead: boolean;
+  /** All department IDs in the member's subtree (for dept heads); empty otherwise */
+  departmentTreeIds: string[];
 }
 
 /**
@@ -30,13 +37,61 @@ export interface CachedAuthContext extends AuthContext {
 }
 
 /**
+ * Fetch all descendant department IDs for a given set of root department IDs.
+ * Uses iterative breadth-first traversal (safe for practical 3-level depth).
+ */
+async function fetchDepartmentTree(
+  rootDepartmentIds: string[],
+  organizationId: string
+): Promise<string[]> {
+  if (rootDepartmentIds.length === 0) return [];
+
+  const allIds = new Set<string>(rootDepartmentIds);
+  let frontier = [...rootDepartmentIds];
+
+  // BFS: max 5 iterations as a safety limit (practical depth is 3)
+  const MAX_DEPT_DEPTH = 5;
+  for (let depth = 0; depth < MAX_DEPT_DEPTH && frontier.length > 0; depth++) {
+    const children: Array<{ id: string }> = await prisma.department.findMany({
+      where: {
+        parentId: { in: frontier },
+        organizationId,
+        isActive: true,
+      },
+      select: { id: true },
+    });
+
+    frontier = [];
+    for (const child of children) {
+      if (!allIds.has(child.id)) {
+        allIds.add(child.id);
+        frontier.push(child.id);
+      }
+    }
+
+    if (depth === MAX_DEPT_DEPTH - 1 && frontier.length > 0) {
+      logger.warn("Department tree BFS hit depth limit — possible cycle or deep nesting", {
+        organizationId,
+        rootDepartmentIds,
+        depth: MAX_DEPT_DEPTH,
+        remainingFrontier: frontier.length,
+      });
+    }
+  }
+
+  return Array.from(allIds);
+}
+
+/**
  * Shared helper: fetch assigned job IDs for scoped roles.
+ * Combines 4 sources: recruiter, hiring manager, reviewer assignments, and department.
  */
 async function fetchAssignedJobIds(
   memberId: string,
-  organizationId: string
+  organizationId: string,
+  departmentTreeIds: string[]
 ): Promise<string[]> {
-  const [recruiterJobs, hmJobs, reviewerAssignments] = await Promise.all([
+  const queries: Promise<Array<{ id?: string; jobId?: string }>>[] = [
     prisma.job.findMany({
       where: { recruiterId: memberId, organizationId },
       select: { id: true },
@@ -49,13 +104,73 @@ async function fetchAssignedJobIds(
       where: { memberId, job: { organizationId } },
       select: { jobId: true },
     }),
-  ]);
+  ];
+
+  // 4th source: department-scoped jobs
+  if (departmentTreeIds.length > 0) {
+    queries.push(
+      prisma.job.findMany({
+        where: {
+          organizationId,
+          departmentId: { in: departmentTreeIds },
+        },
+        select: { id: true },
+      })
+    );
+  }
+
+  const results = await Promise.all(queries);
+  const [recruiterJobs, hmJobs, reviewerAssignments, deptJobs = []] = results;
 
   const jobIdSet = new Set<string>();
-  recruiterJobs.forEach((j) => jobIdSet.add(j.id));
-  hmJobs.forEach((j) => jobIdSet.add(j.id));
-  reviewerAssignments.forEach((a) => jobIdSet.add(a.jobId));
+  for (const j of recruiterJobs) if (j.id) jobIdSet.add(j.id);
+  for (const j of hmJobs) if (j.id) jobIdSet.add(j.id);
+  for (const a of reviewerAssignments) if (a.jobId) jobIdSet.add(a.jobId);
+  for (const j of deptJobs) if (j.id) jobIdSet.add(j.id);
   return Array.from(jobIdSet);
+}
+
+/**
+ * Fetch department context for a member: their department, whether they
+ * head any departments, and the full subtree of departments they lead.
+ */
+async function fetchDepartmentContext(
+  memberId: string,
+  departmentId: string | null,
+  organizationId: string
+): Promise<{
+  isDepartmentHead: boolean;
+  departmentTreeIds: string[];
+}> {
+  // Check if this member heads any departments
+  const ledDepartments = await prisma.department.findMany({
+    where: {
+      headId: memberId,
+      organizationId,
+      isActive: true,
+    },
+    select: { id: true },
+  });
+
+  const isDepartmentHead = ledDepartments.length > 0;
+
+  if (!isDepartmentHead) {
+    // Not a dept head: tree is just their own department (if any)
+    return {
+      isDepartmentHead: false,
+      departmentTreeIds: departmentId ? [departmentId] : [],
+    };
+  }
+
+  // Dept head: tree includes all departments they lead + descendants
+  const rootIds = ledDepartments.map((d) => d.id);
+  // Also include their own department if it's not already a led department
+  if (departmentId && !rootIds.includes(departmentId)) {
+    rootIds.push(departmentId);
+  }
+  const departmentTreeIds = await fetchDepartmentTree(rootIds, organizationId);
+
+  return { isDepartmentHead, departmentTreeIds };
 }
 
 /**
@@ -68,74 +183,94 @@ async function fetchAssignedJobIds(
  * Do NOT use in API route handlers — they run in separate request contexts.
  * Use getAuthContext() for API routes instead.
  */
-export const getCachedAuthContext = cache(
-  async (): Promise<CachedAuthContext | null> => {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return null;
+export const getCachedAuthContext = cache(async (): Promise<CachedAuthContext | null> => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
 
-    // Single query that fetches everything both authorizeShell and pages need
-    const account = await prisma.account.findUnique({
-      where: { supabaseId: user.id },
-      select: {
-        id: true,
-        activeRoles: true,
-        seekerProfile: { select: { id: true } },
-        coachProfile: { select: { id: true } },
-        orgMemberships: {
-          select: { id: true, organizationId: true, role: true },
-          take: 1,
+  // Single query that fetches everything both authorizeShell and pages need
+  const account = await prisma.account.findUnique({
+    where: { supabaseId: user.id },
+    select: {
+      id: true,
+      activeRoles: true,
+      seekerProfile: { select: { id: true } },
+      coachProfile: { select: { id: true } },
+      orgMemberships: {
+        select: {
+          id: true,
+          organizationId: true,
+          role: true,
+          departmentId: true,
         },
+        take: 1,
       },
-    });
-    if (!account) return null;
+    },
+  });
+  if (!account) return null;
 
-    const activeRoles = account.activeRoles || [];
-    const membership = account.orgMemberships[0] ?? null;
+  const activeRoles = account.activeRoles || [];
+  const membership = account.orgMemberships[0] ?? null;
 
-    // Shell authorization flags
-    const hasTalentRole =
-      !!account.seekerProfile || activeRoles.includes("talent");
-    const hasCoachRole =
-      !!account.coachProfile || activeRoles.includes("coach");
-    const hasEmployerRole =
-      account.orgMemberships.length > 0 || activeRoles.includes("employer");
+  // Shell authorization flags
+  const hasTalentRole = !!account.seekerProfile || activeRoles.includes("talent");
+  const hasCoachRole = !!account.coachProfile || activeRoles.includes("coach");
+  const hasEmployerRole = account.orgMemberships.length > 0 || activeRoles.includes("employer");
 
-    // If no org membership, return context with shell flags but no org data
-    if (!membership) {
-      return {
-        accountId: account.id,
-        memberId: "",
-        organizationId: "",
-        role: "MEMBER" as OrgMemberRole,
-        hasFullAccess: false,
-        assignedJobIds: [],
-        hasTalentRole,
-        hasCoachRole,
-        hasEmployerRole,
-      };
-    }
-
-    const hasFullAccess = FULL_ACCESS_ROLES.includes(membership.role);
-    const assignedJobIds = hasFullAccess
-      ? []
-      : await fetchAssignedJobIds(membership.id, membership.organizationId);
-
+  // If no org membership, return context with shell flags but no org data
+  if (!membership) {
     return {
       accountId: account.id,
-      memberId: membership.id,
-      organizationId: membership.organizationId,
-      role: membership.role,
-      hasFullAccess,
-      assignedJobIds,
+      memberId: "",
+      organizationId: "",
+      role: "MEMBER" as OrgMemberRole,
+      hasFullAccess: false,
+      assignedJobIds: [],
+      departmentId: null,
+      isDepartmentHead: false,
+      departmentTreeIds: [],
       hasTalentRole,
       hasCoachRole,
       hasEmployerRole,
     };
   }
-);
+
+  const hasFullAccess = FULL_ACCESS_ROLES.includes(membership.role);
+
+  // Fetch department context for scoped roles
+  const deptCtx = hasFullAccess
+    ? { isDepartmentHead: false, departmentTreeIds: [] as string[] }
+    : await fetchDepartmentContext(
+        membership.id,
+        membership.departmentId,
+        membership.organizationId
+      );
+
+  const assignedJobIds = hasFullAccess
+    ? []
+    : await fetchAssignedJobIds(
+        membership.id,
+        membership.organizationId,
+        deptCtx.departmentTreeIds
+      );
+
+  return {
+    accountId: account.id,
+    memberId: membership.id,
+    organizationId: membership.organizationId,
+    role: membership.role,
+    hasFullAccess,
+    assignedJobIds,
+    departmentId: membership.departmentId,
+    isDepartmentHead: deptCtx.isDepartmentHead,
+    departmentTreeIds: deptCtx.departmentTreeIds,
+    hasTalentRole,
+    hasCoachRole,
+    hasEmployerRole,
+  };
+});
 
 /**
  * Authenticate the current user and return their org context + access scope.
@@ -157,7 +292,12 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     select: {
       id: true,
       orgMemberships: {
-        select: { id: true, organizationId: true, role: true },
+        select: {
+          id: true,
+          organizationId: true,
+          role: true,
+          departmentId: true,
+        },
         take: 1,
       },
     },
@@ -168,9 +308,23 @@ export async function getAuthContext(): Promise<AuthContext | null> {
   if (!membership) return null;
 
   const hasFullAccess = FULL_ACCESS_ROLES.includes(membership.role);
+
+  // Fetch department context for scoped roles
+  const deptCtx = hasFullAccess
+    ? { isDepartmentHead: false, departmentTreeIds: [] as string[] }
+    : await fetchDepartmentContext(
+        membership.id,
+        membership.departmentId,
+        membership.organizationId
+      );
+
   const assignedJobIds = hasFullAccess
     ? []
-    : await fetchAssignedJobIds(membership.id, membership.organizationId);
+    : await fetchAssignedJobIds(
+        membership.id,
+        membership.organizationId,
+        deptCtx.departmentTreeIds
+      );
 
   return {
     accountId: account.id,
@@ -179,6 +333,9 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     role: membership.role,
     hasFullAccess,
     assignedJobIds,
+    departmentId: membership.departmentId,
+    isDepartmentHead: deptCtx.isDepartmentHead,
+    departmentTreeIds: deptCtx.departmentTreeIds,
   };
 }
 
@@ -230,4 +387,21 @@ export function canSubmitScorecard(ctx: AuthContext): boolean {
 /** Only ADMIN/RECRUITER can modify job assignments. */
 export function canManageAssignments(ctx: AuthContext): boolean {
   return (["ADMIN", "RECRUITER"] as OrgMemberRole[]).includes(ctx.role);
+}
+
+/** Only ADMIN can create/delete departments or modify the hierarchy. */
+export function canManageDepartments(ctx: AuthContext): boolean {
+  return ctx.role === "ADMIN";
+}
+
+/**
+ * ADMIN can manage members in any department.
+ * Department heads can manage members in their own department.
+ */
+export function canManageDepartmentMembers(ctx: AuthContext, departmentId: string): boolean {
+  if (ctx.role === "ADMIN") return true;
+  if (ctx.isDepartmentHead && ctx.departmentTreeIds.includes(departmentId)) {
+    return true;
+  }
+  return false;
 }

@@ -16,6 +16,7 @@ import {
 import { Link as LinkIcon, Folder, Globe, MapPin } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { logger, formatError } from "@/lib/logger";
+import { DepartmentPicker } from "@/components/departments/DepartmentPicker";
 import type { JobData } from "../../_lib/types";
 import type { JobPostState } from "../../_lib/use-role-form";
 
@@ -41,18 +42,6 @@ const employmentTypes = [
   { value: "internship", label: "Internship" },
 ];
 
-const departmentOptions = [
-  { value: "engineering", label: "Engineering" },
-  { value: "design", label: "Design" },
-  { value: "marketing", label: "Marketing" },
-  { value: "sales", label: "Sales" },
-  { value: "operations", label: "Operations" },
-  { value: "hr", label: "Human Resources" },
-  { value: "finance", label: "Finance" },
-  { value: "sustainability", label: "Sustainability" },
-  { value: "other", label: "Other" },
-];
-
 // ============================================
 // COMPONENT
 // ============================================
@@ -64,11 +53,6 @@ export function GeneralSection({
   onJobDataChange,
 }: GeneralSectionProps) {
   const [saving, setSaving] = React.useState(false);
-
-  // Local state for fields that don't exist on jobPostState
-  const [department, setDepartment] = React.useState<string>(
-    ((jobData.formConfig as Record<string, unknown>)?.department as string) ?? ""
-  );
 
   const handleSave = async () => {
     setSaving(true);
@@ -86,9 +70,9 @@ export function GeneralSection({
               .filter(Boolean)
               .join(", ") || null,
           closesAt: jobPostState.closingDate ? jobPostState.closingDate.toISOString() : null,
+          departmentId: jobPostState.departmentId || null,
           formConfig: {
             ...(jobData.formConfig as Record<string, unknown>),
-            department,
             externalLink: jobPostState.externalLink,
             requiredFiles: {
               resume: jobPostState.requireResume,
@@ -165,18 +149,11 @@ export function GeneralSection({
           <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
             Department
           </label>
-          <Select value={department} onValueChange={setDepartment}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select department" />
-            </SelectTrigger>
-            <SelectContent>
-              {departmentOptions.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <DepartmentPicker
+            value={jobPostState.departmentId}
+            onChange={jobPostState.setDepartmentId}
+            placeholder="Select department"
+          />
         </div>
       </div>
 

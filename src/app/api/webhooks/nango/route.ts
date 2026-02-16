@@ -16,30 +16,43 @@ import { parseNangoConnectionId } from "@/lib/integrations/types";
  */
 export async function POST(request: Request) {
   try {
-    // Verify webhook secret
+    // Parse body first — both paths need it
+    let body: NangoWebhookEvent;
+    try {
+      body = await request.json();
+    } catch {
+      logger.warn("Nango webhook: invalid JSON body");
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    // Verify webhook secret via constant-time comparison
     const webhookSecret = process.env.NANGO_WEBHOOK_SECRET;
     if (webhookSecret) {
-      const authHeader = request.headers.get("x-nango-signature") || "";
-      // Nango sends the secret as a signature header
-      // For simple webhook verification, compare the secret
-      const bodyText = await request.text();
-      const body = JSON.parse(bodyText);
-
-      // Basic verification — in production, use HMAC verification
-      // For now, check the x-nango-signature or a shared secret header
       const incomingSecret =
         request.headers.get("x-webhook-secret") || request.headers.get("x-nango-signature");
-      if (incomingSecret && incomingSecret !== webhookSecret) {
+
+      if (!incomingSecret) {
+        logger.warn("Nango webhook rejected: missing signature header");
+        return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+      }
+
+      // Constant-time comparison to prevent timing attacks
+      const encoder = new TextEncoder();
+      const a = encoder.encode(incomingSecret);
+      const b = encoder.encode(webhookSecret);
+
+      let diff = a.byteLength ^ b.byteLength;
+      for (let i = 0; i < Math.max(a.byteLength, b.byteLength); i++) {
+        diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
+      }
+
+      if (diff !== 0) {
         logger.warn("Nango webhook signature mismatch");
         return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
       }
-
-      await handleWebhookEvent(body);
-    } else {
-      const body = await request.json();
-      await handleWebhookEvent(body);
     }
 
+    await handleWebhookEvent(body);
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error("Nango webhook processing error", {
@@ -69,8 +82,10 @@ async function handleWebhookEvent(event: NangoWebhookEvent) {
   const eventType = event.type || event.operation;
 
   if (!connectionId || !providerConfigKey) {
-    logger.warn("Nango webhook missing connectionId or providerConfigKey", {
+    logger.error("Nango webhook DROPPED: missing connectionId or providerConfigKey", {
       event: JSON.stringify(event).slice(0, 500),
+      connectionId: connectionId ?? "MISSING",
+      providerConfigKey: providerConfigKey ?? "MISSING",
     });
     return;
   }
@@ -84,7 +99,11 @@ async function handleWebhookEvent(event: NangoWebhookEvent) {
   // Parse the connection ID to find the organization
   const parsed = parseNangoConnectionId(connectionId);
   if (!parsed) {
-    logger.warn("Nango webhook: unrecognized connectionId format", { connectionId });
+    logger.error("Nango webhook DROPPED: unrecognized connectionId format", {
+      connectionId,
+      providerConfigKey,
+      eventType,
+    });
     return;
   }
 
@@ -100,12 +119,24 @@ async function handleWebhookEvent(event: NangoWebhookEvent) {
       select: { organizationId: true },
     });
     organizationId = member?.organizationId ?? null;
+
+    if (!member) {
+      logger.error("Nango webhook DROPPED: member not found in database", {
+        connectionId,
+        memberId: parsed.entityId,
+        providerConfigKey,
+        eventType,
+      });
+    }
   }
 
   if (!organizationId) {
-    logger.warn("Nango webhook: could not resolve organizationId", {
+    logger.error("Nango webhook DROPPED: could not resolve organizationId", {
       connectionId,
-      parsed,
+      scope: parsed.scope,
+      entityId: parsed.entityId,
+      providerConfigKey,
+      eventType,
     });
     return;
   }

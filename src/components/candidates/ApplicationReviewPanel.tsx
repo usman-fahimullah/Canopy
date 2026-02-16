@@ -55,6 +55,8 @@ interface ApplicationReviewPanelProps {
   onDisqualify?: () => void;
   /** Close panel */
   onClose: () => void;
+  /** Optional scorecard template override from stage config */
+  scorecardTemplateId?: string;
 }
 
 export function ApplicationReviewPanel({
@@ -70,11 +72,13 @@ export function ApplicationReviewPanel({
   onQualify,
   onDisqualify,
   onClose,
+  scorecardTemplateId,
 }: ApplicationReviewPanelProps) {
   const router = useRouter();
   const [showForm, setShowForm] = React.useState(false);
   const [editingScore, setEditingScore] = React.useState<ScoreData | null>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [deletingScoreId, setDeletingScoreId] = React.useState<string | null>(null);
 
   const hasScores = scores.length > 0;
   const isTerminalStage =
@@ -92,6 +96,7 @@ export function ApplicationReviewPanel({
 
   const handleDeleteScore = async (scoreId: string) => {
     setSubmitError(null);
+    setDeletingScoreId(scoreId);
     try {
       const res = await fetch(`/api/canopy/candidates/${seekerId}/scores/${scoreId}`, {
         method: "DELETE",
@@ -103,6 +108,8 @@ export function ApplicationReviewPanel({
       router.refresh();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Failed to delete review");
+    } finally {
+      setDeletingScoreId(null);
     }
   };
 
@@ -203,6 +210,7 @@ export function ApplicationReviewPanel({
                 createdAt={score.createdAt}
                 onEdit={() => handleEditScore(score.id)}
                 onDelete={() => handleDeleteScore(score.id)}
+                isDeleting={deletingScoreId === score.id}
               />
             ))}
 
@@ -236,6 +244,7 @@ export function ApplicationReviewPanel({
             }
             onSubmitted={handleFormSubmitted}
             onCancel={hasScores ? handleFormCancel : onClose}
+            scorecardTemplateId={scorecardTemplateId}
           />
         )}
 

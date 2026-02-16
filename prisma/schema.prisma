@@ -147,6 +147,9 @@ model Organization {
   // External integrations (Nango)
   integrationConnections IntegrationConnection[]
 
+  // Departments & teams
+  departments Department[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -178,6 +181,11 @@ model OrganizationMember {
   approvalRequests    ApprovalRequest[] @relation("ApprovalRequester")
   approvalAssignments ApprovalRequest[] @relation("ApprovalApprover")
 
+  // Department membership
+  departmentId   String?
+  department     Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  ledDepartments Department[] @relation("DepartmentHead")
+
   // Job assignments (Phase B: scoped access)
   recruitedJobs  Job[]             @relation("JobRecruiter")
   managedJobs    Job[]             @relation("JobHiringManager")
@@ -193,6 +201,7 @@ model OrganizationMember {
   @@unique([accountId, organizationId])
   @@index([accountId])
   @@index([organizationId])
+  @@index([departmentId])
 }
 
 enum OrgMemberRole {
@@ -220,6 +229,7 @@ model TeamInvite {
   email          String
   role           OrgMemberRole @default(RECRUITER)
   assignedJobIds String[]
+  departmentId   String?
   token          String        @unique
   expiresAt      DateTime
   status         InviteStatus  @default(PENDING)
@@ -839,6 +849,10 @@ model Job {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
+  // Department
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
   // Team assignment — who's responsible for this role
   recruiterId     String?
   recruiter       OrganizationMember? @relation("JobRecruiter", fields: [recruiterId], references: [id], onDelete: SetNull)
@@ -865,6 +879,7 @@ model Job {
   @@index([publishedAt])
   @@index([recruiterId])
   @@index([hiringManagerId])
+  @@index([departmentId])
 }
 
 // =================================================================
@@ -1061,10 +1076,14 @@ model Score {
   recommendation Recommendation
   comments       String?        @db.Text
 
+  // Pipeline stage this score was submitted at
+  stageId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([applicationId, scorerId])
+  @@unique([applicationId, scorerId, stageId])
+  @@index([applicationId, stageId])
 }
 
 enum Recommendation {
@@ -1464,10 +1483,14 @@ model Interview {
   calendarEventId  String? // External calendar event ID
   calendarProvider String? // "google-calendar" | "outlook-calendar"
 
+  // Pipeline stage this interview belongs to
+  stageId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([applicationId])
+  @@index([applicationId, stageId])
   @@index([interviewerId])
   @@index([organizationId])
   @@index([scheduledAt])
@@ -1559,10 +1582,14 @@ model EmailLog {
   // Type of send
   sendType EmailSendType @default(MANUAL)
 
+  // Pipeline stage this email was sent at
+  stageId String?
+
   createdAt DateTime @default(now())
 
   @@index([organizationId])
   @@index([applicationId])
+  @@index([applicationId, stageId])
   @@index([recipientEmail])
   @@index([organizationId, createdAt])
 }
@@ -1711,4 +1738,44 @@ model IntegrationConnection {
   @@index([organizationId])
   @@index([provider])
   @@index([status])
+}
+
+// =================================================================
+// DEPARTMENT — Organizational hierarchy for teams and departments.
+// Self-referential: Org → Department → Team → Sub-team (via parentId).
+// Used for department-scoped access control on jobs.
+// =================================================================
+
+model Department {
+  id           String  @id @default(cuid())
+  name         String
+  slug         String
+  description  String? @db.Text
+  color        String? // UI accent key: "green" | "blue" | "purple" | "orange" | "red" | "yellow" | "neutral"
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Self-referential hierarchy (Dept → Team → Sub-team)
+  parentId String?
+  parent   Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Department[] @relation("DepartmentHierarchy")
+
+  // Department head — sees all roles in their dept + children
+  headId String?
+  head   OrganizationMember? @relation("DepartmentHead", fields: [headId], references: [id], onDelete: SetNull)
+
+  // Relations
+  jobs    Job[]
+  members OrganizationMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, isActive])
+  @@index([parentId])
+  @@index([headId])
 }

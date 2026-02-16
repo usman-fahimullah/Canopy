@@ -160,6 +160,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
           accountId: account.id,
           organizationId: invite.organizationId,
           role: invite.role,
+          departmentId: invite.departmentId ?? undefined,
         },
       }),
       prisma.teamInvite.update({

@@ -47,6 +47,7 @@ import { AddCandidateModal } from "@/components/candidates/AddCandidateModal";
 import { CandidatePreviewSheet } from "@/components/candidates/CandidatePreviewSheet";
 import { OfferDetailsModal } from "@/components/offers/offer-details-modal";
 import { TransitionPromptModal } from "@/components/candidates/TransitionPromptModal";
+import { StageGateModal } from "@/components/candidates/StageGateModal";
 import { getDeterministicAvatarSrc } from "@/lib/profile/avatar-presets";
 import { SimpleTooltip } from "@/components/ui/tooltip";
 import { NotificationBadge } from "@/components/ui/notification-badge";
@@ -215,6 +216,13 @@ export function CandidatesTab({
     candidateName: string;
     fromStage: string;
   } | null>(null);
+
+  // -- Stage gate modal state (shown when stage requirements are not met) --
+  const [gateModalOpen, setGateModalOpen] = React.useState(false);
+  const [gateBlockers, setGateBlockers] = React.useState<
+    Array<{ action: string; message: string; metadata?: Record<string, unknown> }>
+  >([]);
+  const [gateBlockedStageName, setGateBlockedStageName] = React.useState("");
 
   // -- Toast --
   const { toast, showToast, dismissToast, handleUndo } = usePipelineToast();
@@ -716,6 +724,15 @@ export function CandidatesTab({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
+
+        // Stage gate blocked — show the gate modal
+        if (errorData?.blocked && errorData?.blockers) {
+          setGateBlockers(errorData.blockers);
+          setGateBlockedStageName(fromStageName);
+          setGateModalOpen(true);
+          throw new Error("__gate_blocked__");
+        }
+
         throw new Error(errorData?.error || "Failed to move candidate");
       }
 
@@ -1399,6 +1416,14 @@ export function CandidatesTab({
           onCancel={handleTransitionCancel}
         />
       )}
+
+      {/* Stage Gate Modal (shown when stage requirements are not met) */}
+      <StageGateModal
+        open={gateModalOpen}
+        onOpenChange={setGateModalOpen}
+        stageName={gateBlockedStageName}
+        blockers={gateBlockers}
+      />
     </>
   );
 }

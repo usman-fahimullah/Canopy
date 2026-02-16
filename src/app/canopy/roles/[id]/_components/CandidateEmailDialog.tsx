@@ -31,6 +31,8 @@ interface CandidateEmailDialogProps {
   job?: JobInfo;
   applicationId?: string;
   companyName?: string;
+  /** Current pipeline stage for email tracking */
+  stageId?: string;
 }
 
 /* -------------------------------------------------------------------
@@ -44,6 +46,7 @@ export function CandidateEmailDialog({
   job,
   applicationId,
   companyName = "Our Team",
+  stageId,
 }: CandidateEmailDialogProps) {
   const [templates, setTemplates] = React.useState<ComposerTemplate[]>([]);
   const [isSending, setIsSending] = React.useState(false);
@@ -114,6 +117,7 @@ export function CandidateEmailDialog({
           subject: email.subject,
           body: email.body,
           applicationId,
+          stageId: stageId || undefined,
           variables,
         }),
       });

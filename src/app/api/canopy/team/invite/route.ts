@@ -17,6 +17,7 @@ const inviteSchema = z.object({
     )
     .min(1, "At least one invite is required")
     .max(20, "Maximum 20 invites at once"),
+  departmentId: z.string().optional().nullable(),
 });
 
 // POST — Send team invitations
@@ -74,10 +75,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { invites } = result.data;
+    const { invites, departmentId } = result.data;
     const org = membership.organization;
     const inviterName = account.name || account.email;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+    // Validate departmentId if provided
+    let validDepartmentId: string | null = null;
+    if (departmentId) {
+      const dept = await prisma.department.findFirst({
+        where: { id: departmentId, organizationId: org.id, isActive: true },
+        select: { id: true },
+      });
+      if (!dept) {
+        return NextResponse.json(
+          { error: "Department not found in organization" },
+          { status: 422 }
+        );
+      }
+      validDepartmentId = dept.id;
+    }
 
     // Create invite records and send emails
     const created = [];
@@ -105,6 +122,7 @@ export async function POST(request: NextRequest) {
           invitedById: account.id,
           email: invite.email,
           role: invite.role,
+          departmentId: validDepartmentId,
           token,
           expiresAt,
           status: "PENDING",

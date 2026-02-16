@@ -88,6 +88,7 @@ Shortcuts compound. One hardcoded color becomes a dozen and dark mode breaks. On
 | Rule                             | What It Enforces                                                               |
 | -------------------------------- | ------------------------------------------------------------------------------ |
 | `critical-standards.md`          | **The enforcement layer** — non-negotiable checks with priority tiers (🛑⚠️💡) |
+| `design-intelligence.md`         | **Design taste** — codebase precedent study + industry design principles (24)  |
 | `product-design-thinking.md`     | Design judgment, visual hierarchy, interaction quality                         |
 | `ux-thinking.md`                 | Full user journey, cross-screen thinking, all states                           |
 | `scale-first-engineering.md`     | Multi-tenant architecture, pagination, query safety                            |

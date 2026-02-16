@@ -23,6 +23,7 @@ import {
 import { SegmentedController } from "@/components/ui/segmented-controller";
 import { BriefcaseMetal, MapPin } from "@phosphor-icons/react";
 import { useCreateRoleMutation } from "@/hooks/queries";
+import { DepartmentPicker } from "@/components/departments/DepartmentPicker";
 import { toast } from "sonner";
 
 // ============================================
@@ -34,18 +35,6 @@ const employmentTypes = [
   { value: "part-time", label: "Part-time" },
   { value: "contract", label: "Contract" },
   { value: "internship", label: "Internship" },
-];
-
-const departmentOptions = [
-  { value: "engineering", label: "Engineering" },
-  { value: "design", label: "Design" },
-  { value: "marketing", label: "Marketing" },
-  { value: "sales", label: "Sales" },
-  { value: "operations", label: "Operations" },
-  { value: "hr", label: "Human Resources" },
-  { value: "finance", label: "Finance" },
-  { value: "sustainability", label: "Sustainability" },
-  { value: "other", label: "Other" },
 ];
 
 // ============================================
@@ -67,7 +56,7 @@ export function CreateRoleModal({ open, onOpenChange }: CreateRoleModalProps) {
 
   const [title, setTitle] = React.useState("");
   const [employmentType, setEmploymentType] = React.useState("");
-  const [department, setDepartment] = React.useState("");
+  const [departmentId, setDepartmentId] = React.useState<string | null>(null);
   const [workplaceType, setWorkplaceType] = React.useState("onsite");
   const [city, setCity] = React.useState("");
 
@@ -92,7 +81,7 @@ export function CreateRoleModal({ open, onOpenChange }: CreateRoleModalProps) {
         employmentType: employmentTypeMap[employmentType] || undefined,
         locationType: locationTypeMap[workplaceType] || undefined,
         location: city || undefined,
-        formConfig: department ? { department } : undefined,
+        departmentId: departmentId || undefined,
       });
 
       onOpenChange(false);
@@ -107,7 +96,7 @@ export function CreateRoleModal({ open, onOpenChange }: CreateRoleModalProps) {
     if (open) {
       setTitle("");
       setEmploymentType("");
-      setDepartment("");
+      setDepartmentId(null);
       setWorkplaceType("onsite");
       setCity("");
     }
@@ -163,18 +152,11 @@ export function CreateRoleModal({ open, onOpenChange }: CreateRoleModalProps) {
                 <label className="text-caption-strong font-medium text-[var(--foreground-default)]">
                   Department
                 </label>
-                <Select value={department} onValueChange={setDepartment}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departmentOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <DepartmentPicker
+                  value={departmentId}
+                  onChange={setDepartmentId}
+                  placeholder="Select department"
+                />
               </div>
             </div>
 

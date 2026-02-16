@@ -70,6 +70,8 @@ const CreateScoreSchema = z.object({
   comments: z.string().optional(),
   /** Structured scorecard responses (JSON string with { ratings, averageRating }) */
   responses: z.string().optional(),
+  /** Pipeline stage this score is being submitted at */
+  stageId: z.string().optional(),
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -96,7 +98,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
-    const { applicationId, overallRating, recommendation, comments, responses } = parsed.data;
+    const { applicationId, overallRating, recommendation, comments, responses, stageId } =
+      parsed.data;
 
     // --- Verify application belongs to this seeker + accessible job ---
     const application = await prisma.application.findFirst({
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         seekerId,
         job: { organizationId: ctx.organizationId },
       },
-      select: { id: true, jobId: true },
+      select: { id: true, jobId: true, stage: true },
     });
 
     if (!application) {
@@ -117,6 +120,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
+    // Default stageId to the application's current stage when not provided.
+    // This ensures the @@unique([applicationId, scorerId, stageId]) constraint
+    // works correctly — PostgreSQL treats NULL != NULL, so without a value
+    // the constraint would allow unlimited duplicate scores.
+    const resolvedStageId = stageId ?? application.stage;
+
     // --- Create score ---
     const score = await prisma.score.create({
       data: {
@@ -126,6 +135,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         recommendation,
         comments: comments ?? null,
         responses: responses ?? "{}",
+        stageId: resolvedStageId,
       },
       select: {
         id: true,

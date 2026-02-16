@@ -49,6 +49,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
           name: s.name,
           phaseGroup: s.phaseGroup,
           isBuiltIn: s.isBuiltIn,
+          config: s.config ?? null,
         })),
         assignablePhaseGroups: ASSIGNABLE_PHASE_GROUPS,
       },
@@ -71,6 +72,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 const validPhaseGroups = ASSIGNABLE_PHASE_GROUPS.map((g) => g.value);
 
+const StageConfigSchema = z
+  .object({
+    requiredScorecards: z.number().int().min(0).max(10).optional(),
+    requiredInterviews: z.number().int().min(0).max(10).optional(),
+    scorecardTemplateId: z.string().max(50).optional(),
+    requiresEmail: z.boolean().optional(),
+  })
+  .optional();
+
 const StageSchema = z.object({
   id: z
     .string()
@@ -79,6 +89,7 @@ const StageSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Stage ID must be lowercase alphanumeric with hyphens"),
   name: z.string().min(1).max(100),
   phaseGroup: z.enum(validPhaseGroups as [string, ...string[]]) as z.ZodType<PhaseGroup>,
+  config: StageConfigSchema,
 });
 
 const UpdatePipelineSchema = z.object({
@@ -145,12 +156,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       );
     }
 
-    // Serialize stages to JSON
+    // Serialize stages to JSON (include config only when non-empty)
     const stagesJson = JSON.stringify(
       stages.map((s) => ({
         id: s.id,
         name: s.name,
         phaseGroup: s.phaseGroup,
+        ...(s.config && Object.keys(s.config).length > 0 ? { config: s.config } : {}),
       }))
     );
 
@@ -166,7 +178,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     return NextResponse.json({
-      data: { stages: stages.map((s) => ({ id: s.id, name: s.name, phaseGroup: s.phaseGroup })) },
+      data: {
+        stages: stages.map((s) => ({
+          id: s.id,
+          name: s.name,
+          phaseGroup: s.phaseGroup,
+          config: s.config ?? null,
+        })),
+      },
     });
   } catch (error) {
     logger.error("Error updating pipeline stages", {

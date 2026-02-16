@@ -5,6 +5,7 @@ import { logger, formatError } from "@/lib/logger";
 import { z } from "zod";
 import { getAuthContext } from "@/lib/access-control";
 import { fetchRolesList } from "@/lib/services/roles";
+import { standardLimiter } from "@/lib/rate-limit";
 
 /**
  * GET /api/canopy/roles
@@ -86,6 +87,7 @@ const CreateRoleSchema = z.object({
     .optional()
     .nullable(),
   closesAt: z.string().datetime().optional().nullable(),
+  departmentId: z.string().optional().nullable(),
 });
 
 function slugify(text: string): string {
@@ -98,6 +100,16 @@ function slugify(text: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 10 role creations per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const { success: withinLimit } = await standardLimiter.check(10, `create-role:${ip}`);
+    if (!withinLimit) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again shortly." },
+        { status: 429 }
+      );
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -170,6 +182,7 @@ export async function POST(request: NextRequest) {
         experienceLevel: data.experienceLevel,
         educationLevel: data.educationLevel,
         closesAt: data.closesAt ? new Date(data.closesAt) : null,
+        departmentId: data.departmentId ?? null,
         status: "DRAFT",
         organizationId,
       },
