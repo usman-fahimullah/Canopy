@@ -6,6 +6,7 @@ import { createAuditLog } from "@/lib/audit";
 import { CreateInterviewSchema } from "@/lib/validators/interviews";
 import { standardLimiter } from "@/lib/rate-limit";
 import { createCalendarEvent } from "@/lib/integrations/calendar";
+import { canScheduleInterviews } from "@/lib/billing/feature-gates";
 import { z } from "zod";
 
 /**
@@ -240,6 +241,25 @@ export async function POST(request: NextRequest) {
         { error: "Insufficient permissions. Must be ADMIN or RECRUITER." },
         { status: 403 }
       );
+    }
+
+    // Billing gate: interview scheduling requires ATS plan
+    const org = await prisma.organization.findUnique({
+      where: { id: application.job.organizationId },
+      select: { planTier: true },
+    });
+    if (org) {
+      const interviewGate = canScheduleInterviews(org.planTier);
+      if (!interviewGate.allowed) {
+        return NextResponse.json(
+          {
+            error: interviewGate.reason,
+            upgradeRequired: interviewGate.upgradeRequired,
+            requiredTier: interviewGate.upgradeRequired,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Verify interviewer exists in the org

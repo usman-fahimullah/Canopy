@@ -5,6 +5,7 @@ import { logger, formatError } from "@/lib/logger";
 import { createAuditLog } from "@/lib/audit";
 import { standardLimiter } from "@/lib/rate-limit";
 import { apiSuccess, apiError, apiValidationError, apiNotFound } from "@/lib/api-response";
+import { canCreateTemplate } from "@/lib/billing/feature-gates";
 import {
   CreateEmailTemplateSchema,
   EmailTemplateQuerySchema,
@@ -158,6 +159,30 @@ export async function POST(request: NextRequest) {
 
     if (!membership) {
       return apiError("Insufficient permissions", 403);
+    }
+
+    // Billing gate: check template limit based on plan tier
+    const [org, templateCount] = await Promise.all([
+      prisma.organization.findUnique({
+        where: { id: membership.organizationId },
+        select: { planTier: true },
+      }),
+      prisma.emailTemplate.count({
+        where: { organizationId: membership.organizationId },
+      }),
+    ]);
+    if (org) {
+      const templateGate = canCreateTemplate(org.planTier, templateCount);
+      if (!templateGate.allowed) {
+        return NextResponse.json(
+          {
+            error: templateGate.reason,
+            upgradeRequired: templateGate.upgradeRequired,
+            requiredTier: templateGate.upgradeRequired,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Create template

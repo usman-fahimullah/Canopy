@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { getAuthContext, canManagePipeline } from "@/lib/access-control";
+import { canMessageCandidates } from "@/lib/billing/feature-gates";
 
 /**
  * POST /api/canopy/emails/schedule
@@ -35,6 +36,19 @@ export async function POST(request: NextRequest) {
     if (!canManagePipeline(ctx)) {
       return NextResponse.json(
         { error: "You do not have permission to schedule emails" },
+        { status: 403 }
+      );
+    }
+
+    // Billing gate: messaging requires ATS plan
+    const messagingGate = canMessageCandidates(ctx.planTier);
+    if (!messagingGate.allowed) {
+      return NextResponse.json(
+        {
+          error: messagingGate.reason,
+          upgradeRequired: messagingGate.upgradeRequired,
+          requiredTier: messagingGate.upgradeRequired,
+        },
         { status: 403 }
       );
     }

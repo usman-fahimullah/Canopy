@@ -1,11 +1,45 @@
+/**
+ * Stripe webhook endpoint — unified dispatcher.
+ *
+ * Routes events by type + `metadata.product_type` to the appropriate handler:
+ *   - "candid"             → Candid coaching handlers
+ *   - "canopy_subscription" → Canopy ATS subscription lifecycle
+ *   - "listing_purchase"   → Canopy listing / pack / extension purchases
+ *
+ * Idempotency is handled per-event via BillingEvent table.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/db";
-import Stripe from "stripe";
-import { createSessionBookedNotifications } from "@/lib/notifications";
+import type Stripe from "stripe";
 import { logger, formatError } from "@/lib/logger";
-import { createAuditLog } from "@/lib/audit";
+import {
+  logBillingEvent,
+  updateBillingEventStatus,
+  resolveProductType,
+} from "@/lib/stripe/handlers/shared";
+import {
+  handleCandidCheckout,
+  handlePaymentSucceeded,
+  handlePaymentFailed,
+  handleCandidRefund,
+  handleAccountUpdated,
+} from "@/lib/stripe/handlers/candid";
+import {
+  handleSubscriptionCheckout,
+  handleSubscriptionChange,
+  handleSubscriptionDeleted,
+  handleSubscriptionInvoicePaid,
+  handleSubscriptionInvoiceFailed,
+} from "@/lib/stripe/handlers/canopy-subscription";
+import {
+  handleListingPurchaseCheckout,
+  handleListingRefund,
+} from "@/lib/stripe/handlers/listing-purchase";
+
+// =================================================================
+// Webhook Handler
+// =================================================================
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -28,315 +62,131 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // Idempotency: skip if already processed
+  const productType = resolveProductType(event) ?? undefined;
+  const isNew = await logBillingEvent(event.id, event.type, productType, {
+    objectId: (event.data.object as { id?: string }).id,
+  });
+  if (!isNew) {
+    return NextResponse.json({ received: true, deduplicated: true });
+  }
+
   try {
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const checkoutSession = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutCompleted(checkoutSession);
-        break;
-      }
+    await dispatchEvent(event, productType);
 
-      case "payment_intent.succeeded": {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        await handlePaymentSucceeded(paymentIntent);
-        break;
-      }
-
-      case "payment_intent.payment_failed": {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        await handlePaymentFailed(paymentIntent);
-        break;
-      }
-
-      case "charge.refunded": {
-        const charge = event.data.object as Stripe.Charge;
-        await handleRefund(charge);
-        break;
-      }
-
-      case "account.updated": {
-        const account = event.data.object as Stripe.Account;
-        await handleAccountUpdated(account);
-        break;
-      }
-
-      default:
-        logger.warn("Unhandled Stripe event type", {
-          endpoint: "/api/stripe/webhook",
-          eventType: event.type,
-        });
-    }
-
+    await updateBillingEventStatus(event.id, "COMPLETED");
     return NextResponse.json({ received: true });
   } catch (error) {
     logger.error("Webhook handler error", {
       error: formatError(error),
       endpoint: "/api/stripe/webhook",
+      eventType: event.type,
+      productType,
     });
-    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
+    await updateBillingEventStatus(event.id, "FAILED").catch(() => {});
+    // Return 200 to prevent Stripe retries for handler errors
+    // (signature was valid, we just failed internally)
+    return NextResponse.json({ received: true, error: "Handler failed" });
   }
 }
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const metadata = session.metadata;
+// =================================================================
+// Event Dispatcher
+// =================================================================
 
-  if (!metadata?.coachId || !metadata?.menteeId || !metadata?.sessionDate) {
-    logger.error("Missing metadata in checkout session", { endpoint: "/api/stripe/webhook" });
-    return;
-  }
+async function dispatchEvent(event: Stripe.Event, productType?: string): Promise<void> {
+  switch (event.type) {
+    // ----- Checkout completed -----
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const pt = productType ?? session.metadata?.product_type;
 
-  const coachId = metadata.coachId;
-  const menteeId = metadata.menteeId;
-  const sessionDate = new Date(metadata.sessionDate);
-  const sessionDuration = parseInt(metadata.sessionDuration || "60");
-  const sessionType = metadata.sessionType || "ONE_ON_ONE";
-  const sessionNotes = metadata.notes || null;
-  const coachPayout = parseInt(metadata.coachPayout || "0");
-  const platformFee = parseInt(metadata.platformFee || "0");
+      if (pt === "canopy_subscription") {
+        await handleSubscriptionCheckout(session);
+      } else if (pt === "listing_purchase") {
+        await handleListingPurchaseCheckout(session);
+      } else {
+        // Default: Candid coaching checkout (legacy events may lack product_type)
+        await handleCandidCheckout(session);
+      }
+      break;
+    }
 
-  // Verify both coach and mentee exist before creating any records
-  const [coach, mentee] = await Promise.all([
-    prisma.coachProfile.findUnique({
-      where: { id: coachId },
-      select: { id: true, videoLink: true, status: true },
-    }),
-    prisma.seekerProfile.findUnique({
-      where: { id: menteeId },
-      select: { id: true },
-    }),
-  ]);
+    // ----- Subscription lifecycle -----
+    case "customer.subscription.created":
+    case "customer.subscription.updated": {
+      const subscription = event.data.object as Stripe.Subscription;
+      await handleSubscriptionChange(subscription);
+      break;
+    }
 
-  if (!coach) {
-    logger.error("Webhook: coach not found for checkout", {
-      coachId,
-      checkoutSessionId: session.id,
-      endpoint: "/api/stripe/webhook",
-    });
-    return;
-  }
+    case "customer.subscription.deleted": {
+      const subscription = event.data.object as Stripe.Subscription;
+      await handleSubscriptionDeleted(subscription);
+      break;
+    }
 
-  if (!mentee) {
-    logger.error("Webhook: mentee not found for checkout", {
-      menteeId,
-      checkoutSessionId: session.id,
-      endpoint: "/api/stripe/webhook",
-    });
-    return;
-  }
+    // ----- Invoice events -----
+    case "invoice.paid": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const pt = productType ?? (invoice.metadata as Record<string, string>)?.product_type;
 
-  if (coach.status !== "ACTIVE" && coach.status !== "APPROVED") {
-    logger.error("Webhook: coach is not active", {
-      coachId,
-      coachStatus: coach.status,
-      checkoutSessionId: session.id,
-      endpoint: "/api/stripe/webhook",
-    });
-    return;
-  }
+      if (pt === "canopy_subscription" || invoice.subscription) {
+        await handleSubscriptionInvoicePaid(invoice);
+      }
+      // Candid doesn't use invoices — no else needed
+      break;
+    }
 
-  // Wrap all DB writes in a transaction for consistency
-  const coachingSession = await prisma.$transaction(async (tx) => {
-    const createdSession = await tx.session.create({
-      data: {
-        coachId,
-        menteeId,
-        scheduledAt: sessionDate,
-        duration: sessionDuration,
-        title: sessionType !== "ONE_ON_ONE" ? sessionType : null,
-        menteeMessage: sessionNotes,
-        status: "SCHEDULED",
-        videoLink: coach.videoLink,
-      },
-    });
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const pt = productType ?? (invoice.metadata as Record<string, string>)?.product_type;
 
-    await tx.booking.create({
-      data: {
-        sessionId: createdSession.id,
-        menteeId,
-        coachId,
-        amount: session.amount_total || 0,
-        platformFee,
-        coachPayout,
-        stripeCheckoutSessionId: session.id,
-        stripePaymentIntentId: session.payment_intent as string,
-        status: "PAID",
-        paidAt: new Date(),
-      },
-    });
+      if (pt === "canopy_subscription" || invoice.subscription) {
+        await handleSubscriptionInvoiceFailed(invoice);
+      }
+      break;
+    }
 
-    await tx.coachProfile.update({
-      where: { id: coachId },
-      data: {
-        totalSessions: { increment: 1 },
-        totalEarnings: { increment: coachPayout },
-      },
-    });
+    // ----- Payment intent events (Candid) -----
+    case "payment_intent.succeeded": {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      await handlePaymentSucceeded(paymentIntent);
+      break;
+    }
 
-    return createdSession;
-  });
+    case "payment_intent.payment_failed": {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      await handlePaymentFailed(paymentIntent);
+      break;
+    }
 
-  // Audit log: track payment completed
-  await createAuditLog({
-    action: "CREATE",
-    entityType: "Booking",
-    entityId: coachingSession.id,
-    changes: { status: { from: null, to: "PAID" } },
-    metadata: {
-      stripeCheckoutSessionId: session.id,
-      stripePaymentIntentId: session.payment_intent as string,
-      amount: session.amount_total,
-      webhookEvent: "checkout.session.completed",
-    },
-  });
+    // ----- Refunds -----
+    case "charge.refunded": {
+      const charge = event.data.object as Stripe.Charge;
+      const pt = productType ?? (charge.metadata as Record<string, string>)?.product_type;
 
-  // Send booking notifications to both parties
-  const fullSession = await prisma.session.findUnique({
-    where: { id: coachingSession.id },
-    include: {
-      coach: { include: { account: true } },
-      mentee: { include: { account: true } },
-    },
-  });
+      if (pt === "listing_purchase") {
+        await handleListingRefund(charge);
+      } else {
+        // Default: Candid refund
+        await handleCandidRefund(charge);
+      }
+      break;
+    }
 
-  if (fullSession) {
-    createSessionBookedNotifications({
-      id: fullSession.id,
-      scheduledAt: fullSession.scheduledAt,
-      duration: fullSession.duration,
-      videoLink: fullSession.videoLink,
-      coach: fullSession.coach,
-      mentee: fullSession.mentee,
-    }).catch((err) => {
-      logger.error("Failed to send booking notifications", { error: formatError(err) });
-    });
-  }
-}
+    // ----- Connect account updates -----
+    case "account.updated": {
+      const account = event.data.object as Stripe.Account;
+      await handleAccountUpdated(account);
+      break;
+    }
 
-async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  // Update booking status if exists
-  const booking = await prisma.booking.findUnique({
-    where: { stripePaymentIntentId: paymentIntent.id },
-  });
-
-  if (booking && booking.status !== "PAID") {
-    const previousStatus = booking.status;
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: {
-        status: "PAID",
-        paidAt: new Date(),
-      },
-    });
-
-    await createAuditLog({
-      action: "UPDATE",
-      entityType: "Booking",
-      entityId: booking.id,
-      changes: { status: { from: previousStatus, to: "PAID" } },
-      metadata: {
-        stripePaymentIntentId: paymentIntent.id,
-        webhookEvent: "payment_intent.succeeded",
-      },
-    });
-  }
-}
-
-async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-  const booking = await prisma.booking.findUnique({
-    where: { stripePaymentIntentId: paymentIntent.id },
-  });
-
-  if (booking) {
-    await prisma.$transaction(async (tx) => {
-      await tx.booking.update({
-        where: { id: booking.id },
-        data: { status: "FAILED" },
+    default:
+      logger.info("Unhandled Stripe event type", {
+        endpoint: "/api/stripe/webhook",
+        eventType: event.type,
+        productType,
       });
-
-      await tx.session.update({
-        where: { id: booking.sessionId },
-        data: {
-          status: "CANCELLED",
-          cancellationReason: "Payment failed",
-          cancelledAt: new Date(),
-        },
-      });
-    });
-
-    await createAuditLog({
-      action: "UPDATE",
-      entityType: "Booking",
-      entityId: booking.id,
-      changes: { status: { from: booking.status, to: "FAILED" } },
-      metadata: {
-        stripePaymentIntentId: paymentIntent.id,
-        webhookEvent: "payment_intent.payment_failed",
-      },
-    });
-  }
-}
-
-async function handleRefund(charge: Stripe.Charge) {
-  if (!charge.payment_intent) return;
-
-  const booking = await prisma.booking.findUnique({
-    where: { stripePaymentIntentId: charge.payment_intent as string },
-  });
-
-  if (booking) {
-    const refundAmount = charge.amount_refunded;
-    const isFullRefund = refundAmount >= booking.amount;
-
-    await prisma.$transaction(async (tx) => {
-      await tx.booking.update({
-        where: { id: booking.id },
-        data: {
-          status: isFullRefund ? "REFUNDED" : "PARTIALLY_REFUNDED",
-          refundAmount,
-          refundedAt: new Date(),
-        },
-      });
-
-      await tx.coachProfile.update({
-        where: { id: booking.coachId },
-        data: {
-          totalEarnings: { decrement: booking.coachPayout },
-          totalSessions: { decrement: 1 },
-        },
-      });
-    });
-
-    await createAuditLog({
-      action: "REFUND",
-      entityType: "Booking",
-      entityId: booking.id,
-      changes: {
-        status: { from: booking.status, to: isFullRefund ? "REFUNDED" : "PARTIALLY_REFUNDED" },
-        refundAmount: { from: booking.refundAmount || 0, to: refundAmount },
-      },
-      metadata: {
-        stripeChargeId: charge.id,
-        stripePaymentIntentId: charge.payment_intent,
-        webhookEvent: "charge.refunded",
-        isFullRefund,
-      },
-    });
-  }
-}
-
-async function handleAccountUpdated(account: Stripe.Account) {
-  // Update coach profile when Stripe Connect account is updated
-  const coach = await prisma.coachProfile.findFirst({
-    where: { stripeAccountId: account.id },
-  });
-
-  if (coach && account.details_submitted && account.charges_enabled) {
-    // Coach has completed onboarding
-    await prisma.coachProfile.update({
-      where: { id: coach.id },
-      data: {
-        status: coach.status === "PENDING" ? "APPROVED" : coach.status,
-      },
-    });
   }
 }

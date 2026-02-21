@@ -33,6 +33,8 @@ function makeCtx(overrides: Partial<AuthContext> = {}): AuthContext {
     departmentId: null,
     isDepartmentHead: false,
     departmentTreeIds: [],
+    planTier: "PAY_AS_YOU_GO",
+    isImpersonating: false,
     ...overrides,
   };
 }

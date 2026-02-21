@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { logger, formatError } from "@/lib/logger";
 import { getAuthContext, canSubmitScorecard, canAccessJob } from "@/lib/access-control";
+import { canScoreCandidates } from "@/lib/billing/feature-gates";
 import { getScoresForApplication } from "@/lib/services/scoring-service";
 
 /**
@@ -85,6 +86,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     if (!canSubmitScorecard(ctx)) {
       return NextResponse.json({ error: "Viewers cannot submit scores" }, { status: 403 });
+    }
+
+    // Billing gate: scoring requires ATS plan
+    const scoringGate = canScoreCandidates(ctx.planTier);
+    if (!scoringGate.allowed) {
+      return NextResponse.json(
+        {
+          error: scoringGate.reason,
+          upgradeRequired: scoringGate.upgradeRequired,
+          requiredTier: scoringGate.upgradeRequired,
+        },
+        { status: 403 }
+      );
     }
 
     // --- Validate body ---

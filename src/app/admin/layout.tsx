@@ -48,6 +48,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               >
                 Analytics
               </Link>
+              <span className="text-[var(--primitive-neutral-300)]">|</span>
+              <Link
+                href="/admin/organizations"
+                className="text-sm font-medium text-[var(--primitive-neutral-600)] hover:text-[var(--primitive-green-700)]"
+              >
+                Organizations
+              </Link>
+              <Link
+                href="/admin/billing"
+                className="text-sm font-medium text-[var(--primitive-neutral-600)] hover:text-[var(--primitive-green-700)]"
+              >
+                Billing
+              </Link>
               <Link
                 href="/jobs"
                 className="text-sm text-[var(--primitive-neutral-500)] hover:text-[var(--primitive-green-700)]"

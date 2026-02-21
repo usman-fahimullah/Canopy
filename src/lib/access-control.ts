@@ -2,7 +2,9 @@ import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
-import type { OrgMemberRole, Prisma } from "@prisma/client";
+import { getImpersonatedOrgId } from "@/lib/admin/impersonation";
+import { isAdminAccount } from "@/lib/auth-helpers";
+import type { OrgMemberRole, PlanTier, Prisma } from "@prisma/client";
 
 // Roles with unrestricted access to all jobs/candidates
 const FULL_ACCESS_ROLES: OrgMemberRole[] = ["ADMIN", "RECRUITER", "VIEWER"];
@@ -21,6 +23,10 @@ export interface AuthContext {
   isDepartmentHead: boolean;
   /** All department IDs in the member's subtree (for dept heads); empty otherwise */
   departmentTreeIds: string[];
+  /** Organization's billing plan tier — used by feature gates */
+  planTier: PlanTier;
+  /** True when a super-admin is impersonating this organization */
+  isImpersonating: boolean;
 }
 
 /**
@@ -195,6 +201,7 @@ export const getCachedAuthContext = cache(async (): Promise<CachedAuthContext | 
     where: { supabaseId: user.id },
     select: {
       id: true,
+      email: true,
       activeRoles: true,
       seekerProfile: { select: { id: true } },
       coachProfile: { select: { id: true } },
@@ -204,6 +211,7 @@ export const getCachedAuthContext = cache(async (): Promise<CachedAuthContext | 
           organizationId: true,
           role: true,
           departmentId: true,
+          organization: { select: { planTier: true } },
         },
         take: 1,
       },
@@ -212,12 +220,27 @@ export const getCachedAuthContext = cache(async (): Promise<CachedAuthContext | 
   if (!account) return null;
 
   const activeRoles = account.activeRoles || [];
-  const membership = account.orgMemberships[0] ?? null;
 
   // Shell authorization flags
   const hasTalentRole = !!account.seekerProfile || activeRoles.includes("talent");
   const hasCoachRole = !!account.coachProfile || activeRoles.includes("coach");
   const hasEmployerRole = account.orgMemberships.length > 0 || activeRoles.includes("employer");
+
+  // Check for impersonation: super-admin viewing another org
+  const impersonatedOrgId = await getImpersonatedOrgId();
+  if (impersonatedOrgId && isAdminAccount(account)) {
+    const impersonatedCtx = await buildImpersonatedContext(account.id, impersonatedOrgId);
+    if (impersonatedCtx) {
+      return {
+        ...impersonatedCtx,
+        hasTalentRole,
+        hasCoachRole,
+        hasEmployerRole,
+      };
+    }
+  }
+
+  const membership = account.orgMemberships[0] ?? null;
 
   // If no org membership, return context with shell flags but no org data
   if (!membership) {
@@ -231,6 +254,8 @@ export const getCachedAuthContext = cache(async (): Promise<CachedAuthContext | 
       departmentId: null,
       isDepartmentHead: false,
       departmentTreeIds: [],
+      planTier: "PAY_AS_YOU_GO" as PlanTier,
+      isImpersonating: false,
       hasTalentRole,
       hasCoachRole,
       hasEmployerRole,
@@ -266,6 +291,8 @@ export const getCachedAuthContext = cache(async (): Promise<CachedAuthContext | 
     departmentId: membership.departmentId,
     isDepartmentHead: deptCtx.isDepartmentHead,
     departmentTreeIds: deptCtx.departmentTreeIds,
+    planTier: membership.organization.planTier,
+    isImpersonating: false,
     hasTalentRole,
     hasCoachRole,
     hasEmployerRole,
@@ -273,11 +300,43 @@ export const getCachedAuthContext = cache(async (): Promise<CachedAuthContext | 
 });
 
 /**
+ * Build an impersonated AuthContext for a super-admin viewing a target org.
+ * The admin gets ADMIN role with full access in the target org.
+ */
+async function buildImpersonatedContext(
+  accountId: string,
+  targetOrgId: string
+): Promise<AuthContext | null> {
+  const org = await prisma.organization.findUnique({
+    where: { id: targetOrgId },
+    select: { id: true, planTier: true },
+  });
+  if (!org) return null;
+
+  return {
+    accountId,
+    memberId: "", // admin is not a real member
+    organizationId: org.id,
+    role: "ADMIN" as OrgMemberRole,
+    hasFullAccess: true,
+    assignedJobIds: [],
+    departmentId: null,
+    isDepartmentHead: false,
+    departmentTreeIds: [],
+    planTier: org.planTier,
+    isImpersonating: true,
+  };
+}
+
+/**
  * Authenticate the current user and return their org context + access scope.
  * Returns null if unauthenticated or not an org member.
  *
  * Used by API route handlers (which can't share React cache() with pages).
  * Optimized: combines account + membership into a single DB query.
+ *
+ * If a super-admin has an active impersonation cookie, the returned context
+ * will reflect the target organization (not the admin's own org).
  */
 export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = await createClient();
@@ -291,18 +350,26 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     where: { supabaseId: user.id },
     select: {
       id: true,
+      email: true,
       orgMemberships: {
         select: {
           id: true,
           organizationId: true,
           role: true,
           departmentId: true,
+          organization: { select: { planTier: true } },
         },
         take: 1,
       },
     },
   });
   if (!account) return null;
+
+  // Check for impersonation: super-admin viewing another org
+  const impersonatedOrgId = await getImpersonatedOrgId();
+  if (impersonatedOrgId && isAdminAccount(account)) {
+    return buildImpersonatedContext(account.id, impersonatedOrgId);
+  }
 
   const membership = account.orgMemberships[0];
   if (!membership) return null;
@@ -336,6 +403,8 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     departmentId: membership.departmentId,
     isDepartmentHead: deptCtx.isDepartmentHead,
     departmentTreeIds: deptCtx.departmentTreeIds,
+    planTier: membership.organization.planTier,
+    isImpersonating: false,
   };
 }
 
@@ -392,6 +461,11 @@ export function canManageAssignments(ctx: AuthContext): boolean {
 /** Only ADMIN can create/delete departments or modify the hierarchy. */
 export function canManageDepartments(ctx: AuthContext): boolean {
   return ctx.role === "ADMIN";
+}
+
+/** Only ADMIN/RECRUITER can manage billing (subscriptions, purchases). */
+export function canManageBilling(ctx: AuthContext): boolean {
+  return (["ADMIN", "RECRUITER"] as OrgMemberRole[]).includes(ctx.role);
 }
 
 /**

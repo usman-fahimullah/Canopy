@@ -5,6 +5,8 @@ import { logger, formatError } from "@/lib/logger";
 import { enqueueSyndication } from "@/lib/syndication/service";
 import { getAvailablePlatforms } from "@/lib/syndication/platforms";
 import { getAuthContext, canAccessJob } from "@/lib/access-control";
+import { canPublishJob } from "@/lib/billing/feature-gates";
+import { hasCredits, consumeCredit } from "@/lib/services/credits";
 
 /**
  * GET /api/canopy/roles/[id]
@@ -404,6 +406,33 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
             },
             { status: 422 }
           );
+        }
+
+        // --- Billing gate: check plan tier and credits ---
+        if (ctx.planTier === "PAY_AS_YOU_GO") {
+          // Tier 1 requires a listing credit to publish
+          const creditAvailable = await hasCredits(ctx.organizationId, "REGULAR");
+          const gate = canPublishJob(ctx.planTier, creditAvailable);
+          if (!gate.allowed) {
+            return NextResponse.json(
+              {
+                error: gate.reason,
+                upgradeRequired: gate.upgradeRequired,
+                requiredTier: gate.upgradeRequired,
+              },
+              { status: 403 }
+            );
+          }
+          // Consume one credit and set 30-day expiry
+          await consumeCredit(ctx.organizationId, "REGULAR");
+          updateData.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+          logger.info("Listing credit consumed for publish", {
+            organizationId: ctx.organizationId,
+            jobId: id,
+          });
+        } else {
+          // Tier 2/3: unlimited publishing, active while subscribed (no expiry)
+          updateData.expiresAt = null;
         }
 
         updateData.publishedAt = new Date();

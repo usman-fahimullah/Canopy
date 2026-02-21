@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   EnvelopeSimple,
   Plugs,
+  CreditCard,
   SignOut,
 } from "@phosphor-icons/react";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
@@ -54,6 +55,10 @@ const SETTINGS_NAV: NavCategory[] = [
     items: [
       { href: "/canopy/settings/email-templates", label: "Email Templates", icon: EnvelopeSimple },
     ],
+  },
+  {
+    category: "Billing",
+    items: [{ href: "/canopy/settings/billing", label: "Plan & Billing", icon: CreditCard }],
   },
   {
     category: "Connections",

@@ -8,6 +8,7 @@ import {
   createApplicationRejectedNotification,
 } from "@/lib/notifications/hiring";
 import { getAuthContext, canAccessJob, canManagePipeline } from "@/lib/access-control";
+import { canManagePipeline as canManagePipelineBilling } from "@/lib/billing/feature-gates";
 import { createAuditLog } from "@/lib/audit";
 import { sendStageChangeAutoEmail } from "@/lib/email/stage-automation";
 import { getTransitionPlan } from "@/lib/pipeline-service";
@@ -50,6 +51,19 @@ export async function PATCH(
     if (!canManagePipeline(ctx)) {
       return NextResponse.json(
         { error: "You do not have permission to move candidates" },
+        { status: 403 }
+      );
+    }
+
+    // Billing gate: pipeline management requires ATS plan
+    const pipelineGate = canManagePipelineBilling(ctx.planTier);
+    if (!pipelineGate.allowed) {
+      return NextResponse.json(
+        {
+          error: pipelineGate.reason,
+          upgradeRequired: pipelineGate.upgradeRequired,
+          requiredTier: pipelineGate.upgradeRequired,
+        },
         { status: 403 }
       );
     }
