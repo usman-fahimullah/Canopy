@@ -1,8 +1,10 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import {
   Buildings,
@@ -51,20 +53,28 @@ const SETTINGS_NAV: NavCategory[] = [
     ],
   },
   {
-    category: "Publishing",
+    category: "Account & Tools",
     items: [
       { href: "/canopy/settings/email-templates", label: "Email Templates", icon: EnvelopeSimple },
+      { href: "/canopy/settings/billing", label: "Plan & Billing", icon: CreditCard },
+      { href: "/canopy/settings/integrations", label: "Integrations", icon: Plugs },
     ],
   },
-  {
-    category: "Billing",
-    items: [{ href: "/canopy/settings/billing", label: "Plan & Billing", icon: CreditCard }],
-  },
-  {
-    category: "Connections",
-    items: [{ href: "/canopy/settings/integrations", label: "Integrations", icon: Plugs }],
-  },
 ];
+
+/* -------------------------------------------------------------------
+   Helpers
+   ------------------------------------------------------------------- */
+
+/** Returns the sidebar label for the given pathname (used by the layout breadcrumb). */
+export function getSettingsPageLabel(pathname: string): string | undefined {
+  for (const group of SETTINGS_NAV) {
+    for (const item of group.items) {
+      if (pathname === item.href) return item.label;
+    }
+  }
+  return undefined;
+}
 
 /* -------------------------------------------------------------------
    Component
@@ -119,38 +129,46 @@ export function SettingsSidebar() {
           <Separator spacing="md" />
 
           {/* Sign out */}
-          <button
+          <Button
+            variant="ghost"
             onClick={handleSignOut}
-            className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[var(--foreground-error)] transition-colors hover:bg-[var(--background-error)]"
+            className="w-full justify-start gap-3 rounded-xl px-4 py-2.5 text-[var(--foreground-error)] hover:bg-[var(--background-error)] hover:text-[var(--foreground-error)]"
           >
             <SignOut size={20} weight="regular" />
             <span className="text-body-sm font-medium">Sign out</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Mobile: horizontal scrollable strip */}
       <div className="flex gap-1 overflow-x-auto pb-2 lg:hidden">
-        {SETTINGS_NAV.flatMap((group) =>
-          group.items.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-caption font-medium transition-colors ${
-                  isActive
-                    ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-default)]"
-                    : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
-                }`}
-              >
-                <Icon size={16} weight={isActive ? "fill" : "regular"} />
-                <span className="whitespace-nowrap">{item.label}</span>
-              </Link>
-            );
-          })
-        )}
+        {SETTINGS_NAV.map((group, groupIdx) => (
+          <React.Fragment key={group.category}>
+            {groupIdx > 0 && (
+              <span className="flex flex-shrink-0 items-center px-1">
+                <span className="h-1 w-1 rounded-full bg-[var(--border-emphasis)]" />
+              </span>
+            )}
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-caption font-medium transition-colors ${
+                    isActive
+                      ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-default)]"
+                      : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
+                  }`}
+                >
+                  <Icon size={16} weight={isActive ? "fill" : "regular"} />
+                  <span className="whitespace-nowrap">{item.label}</span>
+                </Link>
+              );
+            })}
+          </React.Fragment>
+        ))}
       </div>
     </nav>
   );

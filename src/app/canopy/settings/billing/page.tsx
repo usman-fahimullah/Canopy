@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Sheet,
@@ -152,6 +153,7 @@ const PLAN_TIERS = [
       "View applicant list",
       "Unlimited email templates",
       "Jobs active while subscribed",
+      "Basic analytics dashboard",
     ],
   },
   {
@@ -197,30 +199,59 @@ function BillingSkeleton() {
     <div className="space-y-8">
       <Skeleton className="h-8 w-48" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-4 rounded-2xl border border-[var(--border-default)] p-6">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-5 w-5 rounded" />
-            <Skeleton className="h-4 w-28" />
-          </div>
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-4 w-56" />
-          <Skeleton className="h-9 w-32 rounded-lg" />
-        </div>
-        <div className="space-y-4 rounded-2xl border border-[var(--border-default)] p-6">
-          <div className="flex items-center gap-3">
-            <Skeleton className="h-5 w-5 rounded" />
-            <Skeleton className="h-4 w-36" />
-          </div>
-          <Skeleton className="h-3 w-full rounded-full" />
-          <Skeleton className="h-4 w-48" />
-          <Skeleton className="h-9 w-28 rounded-lg" />
-        </div>
+        <Card variant="outlined">
+          <CardContent className="space-y-4 p-6">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-56" />
+            <Skeleton className="h-9 w-32 rounded-lg" />
+          </CardContent>
+        </Card>
+        <Card variant="outlined">
+          <CardContent className="space-y-4 p-6">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-4 w-36" />
+            </div>
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-9 w-28 rounded-lg" />
+          </CardContent>
+        </Card>
       </div>
       <div className="space-y-4">
         <Skeleton className="h-6 w-40" />
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Skeleton className="h-64 w-full rounded-2xl" />
-          <Skeleton className="h-64 w-full rounded-2xl" />
+          <Card variant="outlined">
+            <CardContent className="space-y-4 p-6">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-8 w-24" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+              <Skeleton className="h-9 w-full rounded-lg" />
+            </CardContent>
+          </Card>
+          <Card variant="outlined">
+            <CardContent className="space-y-4 p-6">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-8 w-24" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+              <Skeleton className="h-9 w-full rounded-lg" />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
@@ -498,8 +529,8 @@ export default function BillingPage() {
         <div className="space-y-3">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Left card — Current Plan */}
-            <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--card-background)] p-6">
-              <div className="flex h-full flex-col">
+            <Card variant="outlined">
+              <CardContent className="flex h-full flex-col p-6">
                 <div className="flex items-center gap-2">
                   <CreditCard size={20} weight="fill" className="text-[var(--foreground-brand)]" />
                   <span className="text-caption font-medium text-[var(--foreground-muted)]">
@@ -530,8 +561,7 @@ export default function BillingPage() {
 
                 <div className="mt-auto pt-4">
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant="secondary"
                     onClick={handleManageSubscription}
                     disabled={actionLoading === "portal"}
                   >
@@ -543,12 +573,12 @@ export default function BillingPage() {
                     Billing Portal
                   </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Right card — Credits or Unlimited */}
-            <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--card-background)] p-6">
-              <div className="flex h-full flex-col">
+            <Card variant="outlined">
+              <CardContent className="flex h-full flex-col p-6">
                 {isPayAsYouGo ? (
                   <>
                     <div className="flex items-center gap-2">
@@ -558,28 +588,36 @@ export default function BillingPage() {
                       </span>
                     </div>
 
-                    <div className="mt-3">
-                      <Progress
-                        value={totalCredits > 0 ? Math.min(100, (totalCredits / 10) * 100) : 0}
-                        size="lg"
-                        variant="default"
-                      />
-                    </div>
+                    {totalCredits > 0 ? (
+                      <>
+                        <div className="mt-3">
+                          <Progress
+                            value={Math.min(100, (totalCredits / 10) * 100)}
+                            size="lg"
+                            variant="default"
+                          />
+                        </div>
 
-                    <p className="mt-2 text-body-sm text-[var(--foreground-default)]">
-                      <span className="font-semibold">{credits?.regular ?? 0}</span>
-                      <span className="text-[var(--foreground-muted)]"> regular</span>
-                      {(credits?.boosted ?? 0) > 0 && (
-                        <>
-                          <span className="text-[var(--foreground-subtle)]"> · </span>
-                          <span className="font-semibold">{credits?.boosted ?? 0}</span>
-                          <span className="text-[var(--foreground-muted)]"> boosted</span>
-                        </>
-                      )}
-                    </p>
+                        <p className="mt-2 text-body-sm text-[var(--foreground-default)]">
+                          <span className="font-semibold">{credits?.regular ?? 0}</span>
+                          <span className="text-[var(--foreground-muted)]"> regular</span>
+                          {(credits?.boosted ?? 0) > 0 && (
+                            <>
+                              <span className="text-[var(--foreground-subtle)]"> · </span>
+                              <span className="font-semibold">{credits?.boosted ?? 0}</span>
+                              <span className="text-[var(--foreground-muted)]"> boosted</span>
+                            </>
+                          )}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="mt-3 text-body-sm text-[var(--foreground-muted)]">
+                        No credits yet — purchase a pack to get started.
+                      </p>
+                    )}
 
                     <div className="mt-auto pt-4">
-                      <Button variant="primary" size="sm" onClick={() => setBuyCreditsOpen(true)}>
+                      <Button variant="primary" onClick={() => setBuyCreditsOpen(true)}>
                         <ShoppingCart size={16} />
                         Buy Credits
                       </Button>
@@ -621,8 +659,8 @@ export default function BillingPage() {
                     )}
                   </>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Loyalty points inline callout (below cards) */}
@@ -657,26 +695,19 @@ export default function BillingPage() {
                 if (planTier === "LISTINGS") return p.tier === "ATS";
                 return true;
               }).map((plan) => (
-                <div
+                <Card
                   key={plan.tier}
-                  className={
-                    "relative rounded-2xl border bg-[var(--card-background)] p-6 " +
-                    (plan.popular
-                      ? "border-[var(--border-brand)] shadow-[var(--shadow-card)]"
-                      : "border-[var(--border-default)]")
-                  }
+                  variant={plan.popular ? "default" : "outlined"}
+                  className={plan.popular ? "border-l-[3px] border-l-[var(--border-brand)]" : ""}
                 >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-6">
-                      <Badge variant="success">Most Popular</Badge>
-                    </div>
-                  )}
-
-                  <div className="flex h-full flex-col space-y-4">
+                  <CardContent className="flex h-full flex-col space-y-4 p-6">
                     <div>
-                      <h4 className="text-body-strong font-semibold text-[var(--foreground-default)]">
-                        {plan.name}
-                      </h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-body-strong font-semibold text-[var(--foreground-default)]">
+                          {plan.name}
+                        </h4>
+                        {plan.popular && <Badge variant="success">Most Popular</Badge>}
+                      </div>
                       <p className="mt-0.5 text-caption text-[var(--foreground-muted)]">
                         {plan.tagline}
                       </p>
@@ -714,7 +745,6 @@ export default function BillingPage() {
                     <div className="flex gap-2 pt-2">
                       <Button
                         variant="primary"
-                        size="sm"
                         className="flex-1"
                         onClick={() => handleUpgrade(plan.tier, "month")}
                         disabled={actionLoading?.startsWith("upgrade-")}
@@ -729,7 +759,6 @@ export default function BillingPage() {
                       {plan.annualPrice && (
                         <Button
                           variant="tertiary"
-                          size="sm"
                           onClick={() => handleUpgrade(plan.tier, "year")}
                           disabled={actionLoading?.startsWith("upgrade-")}
                         >
@@ -737,8 +766,8 @@ export default function BillingPage() {
                         </Button>
                       )}
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
