@@ -100,11 +100,7 @@ export default function CoachAvailabilityPage() {
     });
   }
 
-  function updateSlot(
-    day: DayKey,
-    field: keyof CoachTimeSlot,
-    value: string
-  ) {
+  function updateSlot(day: DayKey, field: keyof CoachTimeSlot, value: string) {
     const slot = schedule[day];
     if (!slot) return;
     setCoachData({
@@ -169,9 +165,7 @@ export default function CoachAvailabilityPage() {
                       <div className="flex flex-1 items-center gap-2">
                         <select
                           value={slot.start}
-                          onChange={(e) =>
-                            updateSlot(day.key, "start", e.target.value)
-                          }
+                          onChange={(e) => updateSlot(day.key, "start", e.target.value)}
                           className="rounded-md border border-[var(--border-muted)] bg-[var(--background-default)] px-2 py-1.5 text-caption text-[var(--foreground-default)]"
                         >
                           {TIME_OPTIONS.map((t) => (
@@ -180,14 +174,10 @@ export default function CoachAvailabilityPage() {
                             </option>
                           ))}
                         </select>
-                        <span className="text-caption text-[var(--foreground-subtle)]">
-                          to
-                        </span>
+                        <span className="text-caption text-[var(--foreground-subtle)]">to</span>
                         <select
                           value={slot.end}
-                          onChange={(e) =>
-                            updateSlot(day.key, "end", e.target.value)
-                          }
+                          onChange={(e) => updateSlot(day.key, "end", e.target.value)}
                           className="rounded-md border border-[var(--border-muted)] bg-[var(--background-default)] px-2 py-1.5 text-caption text-[var(--foreground-default)]"
                         >
                           {TIME_OPTIONS.map((t) => (
@@ -198,9 +188,7 @@ export default function CoachAvailabilityPage() {
                         </select>
                       </div>
                     ) : (
-                      <span className="text-caption text-[var(--foreground-disabled)]">
-                        Off
-                      </span>
+                      <span className="text-caption text-[var(--foreground-disabled)]">Off</span>
                     )}
                   </div>
                 );
@@ -223,9 +211,7 @@ export default function CoachAvailabilityPage() {
                 </option>
               ))}
               {!COMMON_TIMEZONES.includes(coachData.timezone) && (
-                <option value={coachData.timezone}>
-                  {getTimezoneLabel(coachData.timezone)}
-                </option>
+                <option value={coachData.timezone}>{getTimezoneLabel(coachData.timezone)}</option>
               )}
             </select>
           </FormField>
@@ -242,13 +228,11 @@ export default function CoachAvailabilityPage() {
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() =>
-                    setCoachData({ bufferMinutes: opt.value })
-                  }
+                  onClick={() => setCoachData({ bufferMinutes: opt.value })}
                   className={cn(
                     "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                     coachData.bufferMinutes === opt.value
-                      ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                      ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)] text-[var(--foreground-interactive-selected)]"
                       : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-[var(--foreground-muted)] hover:border-[var(--border-interactive-hover)]"
                   )}
                 >
@@ -265,9 +249,8 @@ export default function CoachAvailabilityPage() {
             Sync your calendar
           </p>
           <p className="text-caption text-[var(--foreground-muted)]">
-            Avoid double-bookings by connecting your Google or Outlook
-            calendar. You can set this up from your dashboard after
-            onboarding.
+            Avoid double-bookings by connecting your Google or Outlook calendar. You can set this up
+            from your dashboard after onboarding.
           </p>
         </div>
       </div>

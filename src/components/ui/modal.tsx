@@ -157,7 +157,7 @@ const ModalHeader = React.forwardRef<
                 "rounded-[16px]",
                 "text-foreground",
                 "transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                 "disabled:pointer-events-none"
               )}
               aria-label="Close"

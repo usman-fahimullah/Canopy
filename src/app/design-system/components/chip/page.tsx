@@ -240,12 +240,8 @@ const pathwayTagProps = [
 
 export default function ChipPage() {
   const [skills, setSkills] = React.useState(["React", "TypeScript", "Node.js"]);
-  const [selectedFilters, setSelectedFilters] = React.useState<string[]>([
-    "Remote",
-  ]);
-  const [selectedPathways, setSelectedPathways] = React.useState<string[]>([
-    "energy",
-  ]);
+  const [selectedFilters, setSelectedFilters] = React.useState<string[]>(["Remote"]);
+  const [selectedPathways, setSelectedPathways] = React.useState<string[]>(["energy"]);
 
   const addSkill = () => {
     const newSkill = `Skill ${skills.length + 1}`;
@@ -258,17 +254,13 @@ export default function ChipPage() {
 
   const toggleFilter = (filter: string) => {
     setSelectedFilters((prev) =>
-      prev.includes(filter)
-        ? prev.filter((f) => f !== filter)
-        : [...prev, filter]
+      prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]
     );
   };
 
   const togglePathway = (pathway: string) => {
     setSelectedPathways((prev) =>
-      prev.includes(pathway)
-        ? prev.filter((p) => p !== pathway)
-        : [...prev, pathway]
+      prev.includes(pathway) ? prev.filter((p) => p !== pathway) : [...prev, pathway]
     );
   };
 
@@ -278,38 +270,37 @@ export default function ChipPage() {
           OVERVIEW
           ============================================ */}
       <div>
-        <h1 id="overview" className="text-heading-lg text-foreground mb-2">
+        <h1 id="overview" className="mb-2 text-heading-lg text-foreground">
           Chip
         </h1>
-        <p className="text-body text-foreground-muted max-w-2xl mb-6">
-          Chips are compact elements that represent an input, attribute, or
-          action. They allow users to filter content, make selections, or
-          display tags. The chip system includes several specialized variants
-          for different use cases.
+        <p className="mb-6 max-w-2xl text-body text-foreground-muted">
+          Chips are compact elements that represent an input, attribute, or action. They allow users
+          to filter content, make selections, or display tags. The chip system includes several
+          specialized variants for different use cases.
         </p>
 
         {/* Component Family Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-[var(--background-subtle)] rounded-lg">
-            <h3 className="font-semibold text-foreground mb-2">Chip</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+            <h3 className="mb-2 font-semibold text-foreground">Chip</h3>
             <p className="text-sm text-foreground-muted">
               Interactive, removable chips for tags, filters, and selections.
             </p>
           </div>
-          <div className="p-4 bg-[var(--background-subtle)] rounded-lg">
-            <h3 className="font-semibold text-foreground mb-2">InfoTag</h3>
+          <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+            <h3 className="mb-2 font-semibold text-foreground">InfoTag</h3>
             <p className="text-sm text-foreground-muted">
               Simple tags with cream background for displaying metadata.
             </p>
           </div>
-          <div className="p-4 bg-[var(--background-subtle)] rounded-lg">
-            <h3 className="font-semibold text-foreground mb-2">CategoryTag</h3>
+          <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+            <h3 className="mb-2 font-semibold text-foreground">CategoryTag</h3>
             <p className="text-sm text-foreground-muted">
               Job category tags with icons for the ATS domain.
             </p>
           </div>
-          <div className="p-4 bg-[var(--background-subtle)] rounded-lg">
-            <h3 className="font-semibold text-foreground mb-2">PathwayTag</h3>
+          <div className="rounded-lg bg-[var(--background-subtle)] p-4">
+            <h3 className="mb-2 font-semibold text-foreground">PathwayTag</h3>
             <p className="text-sm text-foreground-muted">
               Colorful pathway tags for climate industry taxonomy.
             </p>
@@ -361,8 +352,8 @@ export default function ChipPage() {
             <Chip variant="purple">Purple</Chip>
           </div>
           <p className="text-caption text-foreground-muted">
-            Use semantic variants: primary for brand-related, blue for info, red
-            for errors/warnings, etc.
+            Use semantic variants: primary for brand-related, blue for info, red for
+            errors/warnings, etc.
           </p>
         </div>
       </ComponentCard>
@@ -370,11 +361,7 @@ export default function ChipPage() {
       {/* ============================================
           SIZES
           ============================================ */}
-      <ComponentCard
-        id="sizes"
-        title="Sizes"
-        description="Three size options"
-      >
+      <ComponentCard id="sizes" title="Sizes" description="Three size options">
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1">
             <Label className="text-caption">Small (28px)</Label>
@@ -557,19 +544,19 @@ const toggleFilter = (filter: string) => {
         <div className="space-y-4">
           <div className="flex flex-wrap gap-3">
             <div className="space-y-1">
-              <Label className="text-caption block">Default</Label>
+              <Label className="block text-caption">Default</Label>
               <Chip>Default</Chip>
             </div>
             <div className="space-y-1">
-              <Label className="text-caption block">Selected</Label>
+              <Label className="block text-caption">Selected</Label>
               <Chip selected>Selected</Chip>
             </div>
             <div className="space-y-1">
-              <Label className="text-caption block">Disabled</Label>
+              <Label className="block text-caption">Disabled</Label>
               <Chip disabled>Disabled</Chip>
             </div>
             <div className="space-y-1">
-              <Label className="text-caption block">Removable</Label>
+              <Label className="block text-caption">Removable</Label>
               <Chip removable onRemove={() => {}}>
                 Removable
               </Chip>
@@ -615,7 +602,7 @@ const toggleFilter = (filter: string) => {
                 Dismissible
               </InfoTag>
             </div>
-            <div className="relative p-4 rounded-lg bg-gradient-to-r from-[var(--primitive-green-600)] to-[var(--primitive-blue-600)]">
+            <div className="relative rounded-lg bg-gradient-to-r from-[var(--primitive-green-600)] to-[var(--primitive-blue-600)] p-4">
               <InfoTag transparent>Overlay on image</InfoTag>
             </div>
           </div>
@@ -752,7 +739,7 @@ import { Lightning, Tree, Drop } from "@phosphor-icons/react";
               </div>
             </div>
 
-            <Label className="block mt-6">Interactive pathway selection</Label>
+            <Label className="mt-6 block">Interactive pathway selection</Label>
             <div className="flex flex-wrap gap-2">
               {(
                 [
@@ -831,7 +818,7 @@ import { Lightning, Tree, Drop } from "@phosphor-icons/react";
       <AccessibilityInfo
         items={[
           "**Keyboard**: Focusable with Tab. Removable chips respond to Delete/Backspace. Clickable chips respond to Enter/Space.",
-          "**Focus indicator**: Visible focus ring using green-500",
+          "**Focus indicator**: Visible focus ring using blue-500",
           "**ARIA**: Uses `role='button'` for clickable chips, `role='listitem'` for static chips. `aria-selected` for filter chips.",
           "**Screen readers**: Remove button has `aria-label` describing which chip will be removed",
           "**Color contrast**: All chip variants meet WCAG AA contrast requirements",

@@ -944,7 +944,7 @@ export default function ToolbarPage() {
             "**Keyboard navigation**: Arrow keys move focus between buttons, Home/End jump to first/last",
             "**ARIA role**: Uses role='toolbar' with aria-orientation and aria-label",
             "**Toggle state**: aria-pressed indicates button state for screen readers",
-            "**Focus visible**: Clear focus ring using green-500 for keyboard users",
+            "**Focus visible**: Clear focus ring using blue-500 for keyboard users",
             "**Disabled state**: Uses aria-disabled to communicate state",
             "**Tooltip delay**: 400ms delay prevents tooltip spam during keyboard navigation",
             "**Group labels**: Toggle groups have aria-label for context",

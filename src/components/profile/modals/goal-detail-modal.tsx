@@ -675,7 +675,7 @@ export function GoalDetailModal({
                           cat.tint,
                           cat.text,
                           "text-caption font-medium",
-                          "focus:ring-[var(--primitive-green-500)]/20 hover:opacity-90 focus:outline-none focus:ring-2"
+                          "focus:ring-[var(--ring-color)]/20 hover:opacity-90 focus:outline-none focus:ring-2"
                         )}
                         aria-label={`Category: ${cat.label}. Click to change.`}
                       >
@@ -722,7 +722,7 @@ export function GoalDetailModal({
                             "flex items-center gap-1 rounded-full px-2 py-1 transition-colors",
                             PRIORITY_CONFIG[priority].bg,
                             "text-caption font-medium",
-                            "focus:ring-[var(--primitive-green-500)]/20 hover:opacity-90 focus:outline-none focus:ring-2"
+                            "focus:ring-[var(--ring-color)]/20 hover:opacity-90 focus:outline-none focus:ring-2"
                           )}
                           aria-label={`Priority: ${PRIORITY_CONFIG[priority].label}. Click to change.`}
                         >

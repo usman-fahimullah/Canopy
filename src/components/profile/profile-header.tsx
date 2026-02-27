@@ -135,7 +135,11 @@ export function ProfileHeader({
             {/* Hover overlay — sized to match the avatar (inside the border) */}
             {isOwner && (
               <div className="pointer-events-none absolute inset-1 flex items-center justify-center rounded-full opacity-0 transition-all duration-200 group-hover:bg-black/40 group-hover:opacity-100">
-                <Camera size={32} weight="fill" className="text-white drop-shadow-md" />
+                <Camera
+                  size={32}
+                  weight="fill"
+                  className="text-[var(--foreground-on-emphasis)] drop-shadow-md"
+                />
               </div>
             )}
           </div>

@@ -1097,7 +1097,7 @@ export default function AvatarPage() {
           "**Alt text**: Always provide `alt` or `name` for screen readers",
           "**Improved ARIA labels**: Includes initials and status in screen reader announcements",
           "**Interactive avatars**: Use `interactive` prop or `onClick` for proper button semantics",
-          "**Focus states**: Interactive avatars have visible focus rings (green-500)",
+          "**Focus states**: Interactive avatars have visible focus rings (blue-500)",
           "**Status indicators**: Use `role='status'` and `aria-label` for status dots",
           "**Loading state**: Uses `aria-busy='true'` and appropriate label",
           "**Avatar groups**: Uses `role='group'` with descriptive `aria-label`",

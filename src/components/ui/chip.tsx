@@ -20,7 +20,7 @@ import { X, DotsThree, Plus } from "@phosphor-icons/react";
  * Specs:
  * - Height: 28px (sm), 32px (md), 40px (lg)
  * - Border radius: full (pill shape)
- * - Focus ring: green-500
+ * - Focus ring: blue-500
  */
 
 /* ============================================

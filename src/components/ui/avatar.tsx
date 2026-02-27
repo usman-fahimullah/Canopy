@@ -607,7 +607,7 @@ const Avatar = React.forwardRef<React.ElementRef<typeof AvatarPrimitive.Root>, A
             aria-label={statusConfig[status].label}
             aria-live="polite"
             className={cn(
-              "absolute rounded-full border-white",
+              "absolute rounded-full border-[var(--background-default)]",
               statusSizeMap[size || "default"].size,
               statusSizeMap[size || "default"].border,
               statusSizeMap[size || "default"].position,
@@ -632,7 +632,7 @@ const Avatar = React.forwardRef<React.ElementRef<typeof AvatarPrimitive.Root>, A
             role="status"
             aria-label={badgeData.label}
             className={cn(
-              "absolute flex items-center justify-center rounded-full border-white",
+              "absolute flex items-center justify-center rounded-full border-[var(--background-default)]",
               badgeSize.border,
               badgeSize.offset,
               badgeSize.container,
@@ -775,9 +775,9 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
 
     const getBorderClass = () => {
       if (variant === "border") {
-        return "border-2 border-white";
+        return "border-2 border-[var(--background-default)]";
       }
-      return "ring-2 ring-white";
+      return "ring-2 ring-[var(--background-default)]";
     };
 
     const orderedAvatars = reverse ? [...visibleAvatars].reverse() : visibleAvatars;
@@ -866,7 +866,7 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
             <div
               className={cn(
                 "absolute bottom-full left-1/2 mb-2 -translate-x-1/2 px-3 py-2",
-                "bg-[var(--primitive-neutral-800)] text-white",
+                "bg-[var(--primitive-neutral-800)] text-[var(--foreground-on-emphasis)]",
                 "rounded-lg text-sm shadow-lg",
                 "invisible opacity-0 group-hover:visible group-hover:opacity-100",
                 "z-50 transition-all duration-200",
@@ -947,7 +947,7 @@ const AvatarStack = React.forwardRef<HTMLDivElement, AvatarStackProps>(
             <div
               key={avatar.id || index}
               className={cn(
-                "shrink-0 overflow-hidden rounded-full border-2 border-white",
+                "shrink-0 overflow-hidden rounded-full border-2 border-[var(--background-default)]",
                 shape === "square" && "rounded-xl",
                 index > 0 && overlapClass
               )}
@@ -969,7 +969,7 @@ const AvatarStack = React.forwardRef<HTMLDivElement, AvatarStackProps>(
           {showOverflow && (
             <div
               className={cn(
-                "shrink-0 overflow-hidden rounded-full border-2 border-white",
+                "shrink-0 overflow-hidden rounded-full border-2 border-[var(--background-default)]",
                 shape === "square" && "rounded-xl",
                 "bg-[var(--primitive-blue-200)]",
                 "flex items-center justify-center",
@@ -1042,7 +1042,7 @@ const AvatarStatusIndicator = ({
     aria-label={statusConfig[status].label}
     aria-live="polite"
     className={cn(
-      "absolute rounded-full border-white",
+      "absolute rounded-full border-[var(--background-default)]",
       statusSizeMap[size].size,
       statusSizeMap[size].border,
       statusSizeMap[size].position,
@@ -1083,7 +1083,7 @@ const AvatarBadgeIndicator = ({
       role="status"
       aria-label={badgeData.label}
       className={cn(
-        "absolute flex items-center justify-center rounded-full border-white",
+        "absolute flex items-center justify-center rounded-full border-[var(--background-default)]",
         badgeSize.border,
         badgeSize.offset,
         badgeSize.container,

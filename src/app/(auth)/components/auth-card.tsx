@@ -555,7 +555,7 @@ function SignupForm({
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--button-primary-background)] p-4 text-body font-bold text-[var(--button-primary-foreground)] transition-all hover:bg-[var(--button-primary-background-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:bg-[var(--button-primary-background-active)] disabled:pointer-events-none disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--button-primary-background)] p-4 text-body font-bold text-[var(--button-primary-foreground)] transition-all hover:bg-[var(--button-primary-background-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2 active:bg-[var(--button-primary-background-active)] disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? (
               <span className="inline-flex items-center gap-2">
@@ -672,7 +672,7 @@ function LoginForm({
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--button-primary-background)] p-4 text-body font-bold text-[var(--button-primary-foreground)] transition-all hover:bg-[var(--button-primary-background-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:bg-[var(--button-primary-background-active)] disabled:pointer-events-none disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--button-primary-background)] p-4 text-body font-bold text-[var(--button-primary-foreground)] transition-all hover:bg-[var(--button-primary-background-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2 active:bg-[var(--button-primary-background-active)] disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? (
               <span className="inline-flex items-center gap-2">
@@ -705,7 +705,7 @@ function OAuthButtons({
         type="button"
         onClick={() => onOAuth("google")}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--primitive-neutral-900)] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[var(--primitive-neutral-900)] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
       >
         <GoogleIcon size={24} />
         Sign in with Google
@@ -716,7 +716,7 @@ function OAuthButtons({
         type="button"
         onClick={() => onOAuth("linkedin_oidc")}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[#0a66c2] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-2xl)] bg-[#0a66c2] p-4 text-body font-bold text-[var(--primitive-neutral-0)] transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
       >
         <LinkedInIcon size={24} />
         Sign in with LinkedIn

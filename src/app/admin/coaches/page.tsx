@@ -143,7 +143,7 @@ function AdminCoachesContent() {
             onClick={() => setSelectedStatus(tab.value)}
             className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all ${
               selectedStatus === tab.value
-                ? "bg-[var(--primitive-green-600)] text-white"
+                ? "bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)]"
                 : "border border-[var(--primitive-neutral-200)] bg-[var(--background-interactive-default)] text-[var(--primitive-neutral-700)] hover:bg-[var(--background-interactive-hover)]"
             }`}
           >
@@ -164,7 +164,7 @@ function AdminCoachesContent() {
             placeholder="Search coaches..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-[var(--primitive-neutral-200)] py-2 pl-10 pr-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]"
+            className="w-full rounded-lg border border-[var(--primitive-neutral-200)] py-2 pl-10 pr-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]"
           />
         </div>
       </div>
@@ -192,7 +192,7 @@ function AdminCoachesContent() {
                   onClick={() => setSelectedCoach(coach)}
                   className={`w-full rounded-xl border bg-[var(--card-background)] p-4 text-left transition-all ${
                     selectedCoach?.id === coach.id
-                      ? "border-[var(--primitive-green-600)] ring-2 ring-[var(--primitive-green-100)]"
+                      ? "border-[var(--primitive-blue-500)] ring-2 ring-[var(--primitive-blue-100)]"
                       : "border-[var(--primitive-neutral-200)] hover:border-[var(--primitive-neutral-300)]"
                   }`}
                 >

@@ -8,10 +8,13 @@ import { Search } from "@/components/Icons";
 import { SearchModal, useSearchModal } from "./SearchModal";
 
 // Dynamically import ThemeToggle with no SSR to avoid hydration issues
-const ThemeToggle = dynamic(() => import("./ThemeToggle").then(mod => ({ default: mod.ThemeToggle })), {
-  ssr: false,
-  loading: () => <div className="h-9 w-[140px]" />,
-});
+const ThemeToggle = dynamic(
+  () => import("./ThemeToggle").then((mod) => ({ default: mod.ThemeToggle })),
+  {
+    ssr: false,
+    loading: () => <div className="h-9 w-[140px]" />,
+  }
+);
 
 interface HeaderProps {
   className?: string;
@@ -24,7 +27,7 @@ export function Header({ className }: HeaderProps) {
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80",
+          "bg-surface/95 supports-[backdrop-filter]:bg-surface/80 sticky top-0 z-50 w-full border-b border-border backdrop-blur",
           className
         )}
       >
@@ -32,14 +35,8 @@ export function Header({ className }: HeaderProps) {
           {/* Logo / Brand */}
           <div className="flex items-center gap-6">
             <a href="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="text-white"
-                >
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-white">
                   <path
                     d="M12 2L3 7V17L12 22L21 17V7L12 2Z"
                     stroke="currentColor"
@@ -47,12 +44,7 @@ export function Header({ className }: HeaderProps) {
                     strokeLinejoin="round"
                     fill="none"
                   />
-                  <path
-                    d="M12 22V12"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
+                  <path d="M12 22V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   <path
                     d="M12 12L3 7"
                     stroke="currentColor"
@@ -67,13 +59,11 @@ export function Header({ className }: HeaderProps) {
                   />
                 </svg>
               </div>
-              <span className="text-body-strong font-semibold text-foreground">
-                Trails
-              </span>
+              <span className="text-body-strong font-semibold text-foreground">Trails</span>
             </a>
 
             {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden items-center gap-1 md:flex">
               <NavLink href="#foundations">Foundations</NavLink>
               <NavLink href="#components">Components</NavLink>
             </nav>
@@ -85,16 +75,16 @@ export function Header({ className }: HeaderProps) {
             <button
               onClick={() => setOpen(true)}
               className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg",
+                "flex items-center gap-2 rounded-lg px-3 py-2",
                 "bg-background-muted hover:bg-background-emphasized",
-                "text-foreground-muted text-caption",
+                "text-caption text-foreground-muted",
                 "transition-colors duration-150",
                 "w-64"
               )}
             >
-              <Search className="w-4 h-4" />
+              <Search className="h-4 w-4" />
               <span className="flex-1 text-left">Search...</span>
-              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface border border-border text-caption-sm text-foreground-subtle">
+              <kbd className="hidden items-center gap-0.5 rounded border border-border bg-surface px-1.5 py-0.5 text-caption-sm text-foreground-subtle sm:inline-flex">
                 <span className="text-xs">⌘</span>K
               </kbd>
             </button>
@@ -107,7 +97,7 @@ export function Header({ className }: HeaderProps) {
               href="https://github.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-interactive-hover transition-colors"
+              className="rounded-lg p-2 text-foreground-muted transition-colors hover:bg-background-interactive-hover hover:text-foreground"
               aria-label="View on GitHub"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -164,10 +154,10 @@ function NavLink({ href, children }: NavLinkProps) {
       href={href}
       onClick={handleClick}
       className={cn(
-        "px-3 py-2 rounded-lg text-caption font-medium transition-colors",
+        "rounded-lg px-3 py-2 text-caption font-medium transition-colors",
         isActive
-          ? "bg-background-interactive-selected text-foreground-brand"
-          : "text-foreground-muted hover:text-foreground hover:bg-background-interactive-hover"
+          ? "bg-background-interactive-selected text-foreground-interactive-selected"
+          : "text-foreground-muted hover:bg-background-interactive-hover hover:text-foreground"
       )}
     >
       {children}

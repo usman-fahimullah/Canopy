@@ -90,7 +90,7 @@ function QuickStartCard({ goal, onSelect }: { goal: QuickStartGoal; onSelect: ()
         "flex flex-col items-start rounded-xl border p-4 text-left transition-all",
         "border-[var(--border-muted)] bg-[var(--background-default)]",
         "hover:border-[var(--border-brand)] hover:shadow-card",
-        "focus:ring-[var(--primitive-green-500)]/20 focus:border-[var(--border-brand)] focus:outline-none focus:ring-2"
+        "focus:ring-[var(--ring-color)]/20 focus:border-[var(--border-brand)] focus:outline-none focus:ring-2"
       )}
     >
       <div className={cn("mb-3 flex h-10 w-10 items-center justify-center rounded-full", cat.bg)}>

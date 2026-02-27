@@ -212,7 +212,7 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({
                 "relative flex h-7 w-7 items-center justify-center rounded text-xs transition-all",
                 "hover:bg-[var(--background-interactive-hover)]",
                 isSelected &&
-                  "bg-[var(--primitive-green-600)] text-white hover:bg-[var(--primitive-green-700)]",
+                  "bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)] hover:bg-[var(--primitive-green-700)]",
                 !isSelected && isTodayDate && "font-bold text-[var(--primitive-green-700)]",
                 !isCurrentMonth && "text-[var(--foreground-muted)]/50",
                 isCurrentMonth && !isSelected && !isTodayDate && "text-[var(--foreground-default)]"
@@ -473,7 +473,13 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                       backgroundColor: cal.visible ? cal.color : "transparent",
                     }}
                   >
-                    {cal.visible && <Check size={8} weight="bold" className="text-white" />}
+                    {cal.visible && (
+                      <Check
+                        size={8}
+                        weight="bold"
+                        className="text-[var(--foreground-on-emphasis)]"
+                      />
+                    )}
                   </span>
                   <span className="truncate text-sm text-[var(--foreground-default)]">
                     {cal.name}
@@ -510,7 +516,13 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                     backgroundColor: filter.enabled ? filter.color : "transparent",
                   }}
                 >
-                  {filter.enabled && <Check size={8} weight="bold" className="text-white" />}
+                  {filter.enabled && (
+                    <Check
+                      size={8}
+                      weight="bold"
+                      className="text-[var(--foreground-on-emphasis)]"
+                    />
+                  )}
                 </span>
                 <span className="text-sm text-[var(--foreground-default)]">{filter.label}</span>
               </label>
@@ -845,7 +857,7 @@ const CalendarWeekGrid: React.FC<CalendarWeekGridProps> = ({
                 className={cn(
                   "mt-0.5 text-lg font-semibold",
                   isTodayDate
-                    ? "mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
+                    ? "mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)]"
                     : "text-[var(--foreground-default)]"
                 )}
               >
@@ -1012,7 +1024,7 @@ const CalendarMonthGrid: React.FC<CalendarMonthGridProps> = ({
                   className={cn(
                     "flex h-6 w-6 items-center justify-center text-sm",
                     isTodayDate
-                      ? "rounded-full bg-[var(--primitive-green-600)] font-semibold text-white"
+                      ? "rounded-full bg-[var(--primitive-green-600)] font-semibold text-[var(--foreground-on-emphasis)]"
                       : "text-[var(--foreground-default)]"
                   )}
                 >

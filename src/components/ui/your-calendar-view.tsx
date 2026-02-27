@@ -286,7 +286,7 @@ export const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                     className={cn(
                       "text-sm font-semibold",
                       isCurrentDay
-                        ? "flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
+                        ? "flex h-6 w-6 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)]"
                         : "text-[var(--foreground-default)]"
                     )}
                   >
@@ -337,9 +337,11 @@ export const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                         className="pointer-events-none absolute left-1 right-1 overflow-hidden rounded-lg border-l-4 border-[var(--primitive-neutral-700)] bg-[var(--primitive-neutral-600)] px-2 py-1.5"
                         style={{ top, height: Math.max(height, 24) }}
                       >
-                        <p className="truncate text-[11px] font-medium text-white">{event.title}</p>
+                        <p className="truncate text-[11px] font-medium text-[var(--foreground-on-emphasis)]">
+                          {event.title}
+                        </p>
                         {height > 35 && (
-                          <p className="text-[10px] text-white/80">
+                          <p className="text-[var(--foreground-on-emphasis)]/80 text-[10px]">
                             {format(event.start, "h:mm")} – {format(event.end, "h:mm a")}
                           </p>
                         )}
@@ -396,15 +398,15 @@ export const YourCalendarView: React.FC<YourCalendarViewProps> = ({
                               }}
                             >
                               <div className="flex h-full flex-col overflow-hidden px-2 py-1.5">
-                                <p className="truncate text-[11px] font-semibold text-white">
+                                <p className="truncate text-[11px] font-semibold text-[var(--foreground-on-emphasis)]">
                                   Interview Slot
                                 </p>
-                                <p className="text-[10px] text-white/90">
+                                <p className="text-[10px] text-[var(--foreground-on-emphasis)]">
                                   {format(slot.start, "h:mm")} – {format(slot.end, "h:mm a")}
                                 </p>
                                 {/* Remove indicator on hover - only show if card is tall enough */}
                                 {height > 50 && (
-                                  <div className="mt-auto flex items-center gap-1 text-[10px] text-white/80 opacity-0 transition-opacity group-hover:opacity-100">
+                                  <div className="text-[var(--foreground-on-emphasis)]/80 mt-auto flex items-center gap-1 text-[10px] opacity-0 transition-opacity group-hover:opacity-100">
                                     <X size={10} />
                                     <span>Remove</span>
                                   </div>

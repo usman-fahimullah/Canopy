@@ -27,7 +27,7 @@ const splitButtonVariants = cva(
     "inline-flex items-center overflow-clip",
     "rounded-2xl",
     "transition-colors duration-150",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
   ],
   {
     variants: {

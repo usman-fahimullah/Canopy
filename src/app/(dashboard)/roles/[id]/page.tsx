@@ -736,7 +736,9 @@ export default function RoleEditPage() {
           <div className="flex h-full items-center px-8 py-4">
             <div className="flex items-center gap-2 rounded-2xl p-2">
               <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-[var(--primitive-neutral-200)] bg-[var(--primitive-blue-600)]">
-                <span className="text-caption-sm font-bold text-white">SA</span>
+                <span className="text-caption-sm font-bold text-[var(--foreground-on-emphasis)]">
+                  SA
+                </span>
               </div>
               <span className="text-caption text-foreground">Seattle Aquarium</span>
             </div>
@@ -1816,7 +1818,10 @@ export default function RoleEditPage() {
                               }`}
                             >
                               {tempMultipleChoice.allowMultiple && (
-                                <Check weight="bold" className="h-3 w-3 text-white" />
+                                <Check
+                                  weight="bold"
+                                  className="h-3 w-3 text-[var(--foreground-on-emphasis)]"
+                                />
                               )}
                             </div>
                             <span className="text-caption">Option A</span>
@@ -1836,7 +1841,10 @@ export default function RoleEditPage() {
                               }`}
                             >
                               {tempMultipleChoice.allowMultiple && (
-                                <Check weight="bold" className="h-3 w-3 text-white" />
+                                <Check
+                                  weight="bold"
+                                  className="h-3 w-3 text-[var(--foreground-on-emphasis)]"
+                                />
                               )}
                             </div>
                             <span className="text-caption">Option B</span>

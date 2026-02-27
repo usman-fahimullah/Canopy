@@ -152,7 +152,7 @@ const BenefitsSelector = React.forwardRef<HTMLDivElement, BenefitsSelectorProps>
         >
           {/* Icon */}
           <div className="shrink-0 rounded-xl border border-[var(--primitive-neutral-200)] bg-[var(--primitive-red-500)] p-1">
-            <ShieldPlus size={32} weight="fill" className="text-white" />
+            <ShieldPlus size={32} weight="fill" className="text-[var(--foreground-on-emphasis)]" />
           </div>
 
           {/* Label */}
@@ -213,7 +213,7 @@ const BenefitsSelector = React.forwardRef<HTMLDivElement, BenefitsSelectorProps>
                                 "text-body-sm text-[var(--foreground-default)]",
                                 "transition-colors duration-150",
                                 isSelected
-                                  ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand-emphasis)]"
+                                  ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-interactive-selected)]"
                                   : "hover:bg-[var(--background-interactive-hover)]"
                               )}
                             >
@@ -227,7 +227,10 @@ const BenefitsSelector = React.forwardRef<HTMLDivElement, BenefitsSelectorProps>
                                 )}
                               >
                                 {isSelected && (
-                                  <Check weight="bold" className="h-3 w-3 text-white" />
+                                  <Check
+                                    weight="bold"
+                                    className="h-3 w-3 text-[var(--foreground-on-emphasis)]"
+                                  />
                                 )}
                               </span>
                               {benefit.label}

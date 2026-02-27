@@ -823,7 +823,10 @@ export function ApplyFormModals({
                           }`}
                         >
                           {tempMultipleChoice.allowMultiple && (
-                            <Check weight="bold" className="h-3 w-3 text-white" />
+                            <Check
+                              weight="bold"
+                              className="h-3 w-3 text-[var(--foreground-on-emphasis)]"
+                            />
                           )}
                         </div>
                         <span className="text-caption">Option A</span>
@@ -843,7 +846,10 @@ export function ApplyFormModals({
                           }`}
                         >
                           {tempMultipleChoice.allowMultiple && (
-                            <Check weight="bold" className="h-3 w-3 text-white" />
+                            <Check
+                              weight="bold"
+                              className="h-3 w-3 text-[var(--foreground-on-emphasis)]"
+                            />
                           )}
                         </div>
                         <span className="text-caption">Option B</span>

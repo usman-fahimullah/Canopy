@@ -19,14 +19,14 @@ const TimeSlotChip: React.FC<TimeSlotChipProps> = ({ slot, onRemove, className }
         "inline-flex items-center gap-2 px-3 py-2",
         "rounded-lg bg-[var(--primitive-blue-400)]",
         "border-l-4 border-[var(--primitive-blue-500)]",
-        "text-[12px] font-medium text-white",
+        "text-[12px] font-medium text-[var(--foreground-on-emphasis)]",
         "shadow-sm",
         className
       )}
     >
       <div className="flex flex-col">
         <span className="text-[11px] font-semibold">{format(slot.start, "EEE, MMM d")}</span>
-        <span className="text-[10px] text-white/90">
+        <span className="text-[10px] text-[var(--foreground-on-emphasis)]">
           {format(slot.start, "h:mm")} – {format(slot.end, "h:mm a")}
         </span>
       </div>

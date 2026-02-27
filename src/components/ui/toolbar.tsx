@@ -258,7 +258,7 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
           "flex items-center justify-center",
           "rounded-lg",
           "transition-all duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-1",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-1",
           "disabled:pointer-events-none disabled:opacity-50",
           // Figma: grouped = px-2 py-1 (total 40x32), standalone = p-2 (total 40x40)
           grouped ? "px-2 py-1" : "p-2",

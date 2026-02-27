@@ -43,7 +43,7 @@ export function MessageBubble({
           className={cn(
             "rounded-2xl px-4 py-3 text-body-sm",
             isSent
-              ? "bg-[var(--primitive-green-600)] text-white"
+              ? "bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)]"
               : "bg-[var(--background-subtle)] text-[var(--foreground-default)]"
           )}
         >

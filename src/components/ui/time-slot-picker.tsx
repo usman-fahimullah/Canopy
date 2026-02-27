@@ -148,8 +148,8 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
         {/* Title Section */}
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-3">
-            <div className="dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100">
-              <CalendarIcon className="h-5 w-5 text-primary-600" weight="duotone" />
+            <div className="dark:bg-[var(--primitive-blue-800)]/30 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+              <CalendarIcon className="h-5 w-5 text-[var(--primitive-blue-500)]" weight="duotone" />
             </div>
             <div>
               <h3 className="text-foreground-default text-lg font-semibold">{title}</h3>
@@ -208,9 +208,9 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                   "relative h-10 w-full rounded-xl text-sm font-medium transition-all duration-150",
                   "focus:ring-ring-color focus:outline-none focus:ring-2 focus:ring-offset-1",
                   isSelected
-                    ? "bg-primary-600 text-white shadow-md"
+                    ? "bg-[var(--primitive-blue-500)] text-[var(--foreground-on-emphasis)] shadow-md"
                     : isCurrentDay
-                      ? "dark:bg-primary-900/40 bg-primary-100 font-semibold text-primary-700 dark:text-primary-300"
+                      ? "dark:bg-[var(--primitive-blue-800)]/40 bg-[var(--primitive-blue-100)] font-semibold text-[var(--primitive-blue-700)] dark:text-[var(--primitive-blue-300)]"
                       : isPastDay
                         ? "cursor-not-allowed text-foreground-disabled opacity-40"
                         : !isCurrentMonth
@@ -221,7 +221,7 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                 {format(day, "d")}
                 {/* Today indicator dot */}
                 {isCurrentDay && !isSelected && (
-                  <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary-600" />
+                  <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[var(--primitive-blue-500)]" />
                 )}
               </button>
             );
@@ -290,8 +290,8 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
                       "rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-150",
                       "focus:ring-ring-color border-2 focus:outline-none focus:ring-2 focus:ring-offset-1",
                       isSlotSelected
-                        ? "scale-[1.02] border-primary-600 bg-primary-600 text-white shadow-md"
-                        : "hover:bg-primary-50 dark:hover:bg-primary-900/30 border-border-muted bg-[var(--background-interactive-default)] hover:scale-[1.02] hover:border-primary-400 dark:bg-neutral-900"
+                        ? "scale-[1.02] border-[var(--primitive-blue-500)] bg-[var(--primitive-blue-500)] text-[var(--foreground-on-emphasis)] shadow-md"
+                        : "dark:hover:bg-[var(--primitive-blue-800)]/30 border-border-muted bg-[var(--background-interactive-default)] hover:scale-[1.02] hover:border-[var(--primitive-blue-300)] hover:bg-[var(--primitive-blue-100)] dark:bg-neutral-900"
                     )}
                   >
                     {format(slot.start, "h:mm a")}
@@ -305,16 +305,19 @@ export const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
         {/* Confirmation Panel - Enhanced */}
         {selectedSlot && (
           <div className="mt-auto border-t border-border-muted pt-5">
-            <div className="bg-primary-50 dark:bg-primary-900/20 flex items-center gap-4 rounded-xl border border-primary-200 p-4 dark:border-primary-800">
-              <div className="dark:bg-primary-800/50 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-100">
-                <CheckCircle className="h-6 w-6 text-primary-600" weight="duotone" />
+            <div className="dark:bg-[var(--primitive-blue-800)]/20 flex items-center gap-4 rounded-xl border border-[var(--primitive-blue-200)] bg-[var(--primitive-blue-100)] p-4 dark:border-[var(--primitive-blue-700)]">
+              <div className="dark:bg-[var(--primitive-blue-700)]/50 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--primitive-blue-200)]">
+                <CheckCircle
+                  className="h-6 w-6 text-[var(--primitive-blue-500)]"
+                  weight="duotone"
+                />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-primary-900 text-base font-semibold dark:text-primary-100">
+                <p className="text-base font-semibold text-[var(--primitive-blue-800)] dark:text-[var(--primitive-blue-100)]">
                   {format(selectedSlot, "h:mm a")} -{" "}
                   {format(addMinutes(selectedSlot, slotDuration), "h:mm a")}
                 </p>
-                <p className="text-sm text-primary-700 dark:text-primary-300">
+                <p className="text-sm text-[var(--primitive-blue-700)] dark:text-[var(--primitive-blue-300)]">
                   {format(selectedDate, "EEEE, MMMM d, yyyy")}
                 </p>
               </div>

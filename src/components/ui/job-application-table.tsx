@@ -536,7 +536,11 @@ function StagePill({ currentStage, onStageChange }: StagePillProps) {
                   )}
                 >
                   {itemState === "selected" ? (
-                    <Check size={16} weight="bold" className="text-white" />
+                    <Check
+                      size={16}
+                      weight="bold"
+                      className="text-[var(--foreground-on-emphasis)]"
+                    />
                   ) : itemState === "past" ? (
                     <Check
                       size={16}
@@ -833,7 +837,11 @@ function EmptyState({ section, onAction }: EmptyStateProps) {
   return (
     <div className="flex h-[204px] flex-col items-center justify-center gap-4 overflow-hidden p-6">
       <div className={cn("flex size-6 items-center justify-center rounded", config.emptyIconBg)}>
-        <Icon size={18} weight={config.iconWeight} className="text-white" />
+        <Icon
+          size={18}
+          weight={config.iconWeight}
+          className="text-[var(--foreground-on-emphasis)]"
+        />
       </div>
       <div className="flex w-full max-w-[492px] flex-col items-center justify-center">
         <span className="text-body-strong text-[var(--primitive-neutral-900)]">

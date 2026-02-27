@@ -52,6 +52,8 @@ const config: Config = {
           // Brand
           brand: "var(--foreground-brand)",
           "brand-emphasis": "var(--foreground-brand-emphasis)",
+          // Interactive selected
+          "interactive-selected": "var(--foreground-interactive-selected)",
           // Status
           success: "var(--foreground-success)",
           warning: "var(--foreground-warning)",
@@ -1016,6 +1018,43 @@ const config: Config = {
           "--surface-active": "var(--primitive-neutral-500)",
           "--background-interactive-hover": "var(--primitive-neutral-400)",
           "--background-interactive-active": "var(--primitive-neutral-500)",
+        },
+
+        /* Surface context utilities — set foreground tokens for emphasis surfaces.
+           These do NOT set background-color (the container already has its bg). */
+        ".surface-brand": {
+          "--surface-fg": "var(--primitive-neutral-0)",
+          "--surface-fg-muted": "var(--primitive-neutral-300)",
+          "--surface-fg-subtle": "var(--primitive-neutral-400)",
+          "--surface-border": "rgb(255 255 255 / 0.15)",
+          "--surface-icon": "var(--primitive-neutral-200)",
+        },
+        ".surface-inverse": {
+          "--surface-fg": "var(--primitive-neutral-0)",
+          "--surface-fg-muted": "var(--primitive-neutral-400)",
+          "--surface-fg-subtle": "var(--primitive-neutral-500)",
+          "--surface-border": "rgb(255 255 255 / 0.12)",
+          "--surface-icon": "var(--primitive-neutral-300)",
+        },
+        ".surface-error": {
+          "--surface-fg": "var(--primitive-neutral-0)",
+          "--surface-fg-muted": "var(--primitive-red-100)",
+          "--surface-border": "rgb(255 255 255 / 0.2)",
+        },
+        ".surface-success": {
+          "--surface-fg": "var(--primitive-neutral-0)",
+          "--surface-fg-muted": "var(--primitive-green-100)",
+          "--surface-border": "rgb(255 255 255 / 0.2)",
+        },
+        ".surface-info": {
+          "--surface-fg": "var(--primitive-neutral-0)",
+          "--surface-fg-muted": "var(--primitive-blue-100)",
+          "--surface-border": "rgb(255 255 255 / 0.2)",
+        },
+        ".surface-warning": {
+          "--surface-fg": "var(--primitive-neutral-0)",
+          "--surface-fg-muted": "var(--primitive-orange-100)",
+          "--surface-border": "rgb(255 255 255 / 0.2)",
         },
       });
     }),

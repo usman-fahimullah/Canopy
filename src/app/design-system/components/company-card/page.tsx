@@ -183,7 +183,7 @@ export default function CompanyCardPage() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primitive-neutral-200)] text-sm font-medium">
                     SP
                   </div>
-                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[var(--primitive-green-200)]">
+                  <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--background-default)] bg-[var(--primitive-green-200)]">
                     <span className="text-xs text-[var(--primitive-green-700)]">+</span>
                   </div>
                   <div className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-foreground-brand text-xs font-medium text-white">

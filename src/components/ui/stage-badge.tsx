@@ -237,7 +237,7 @@ const StageProgress = React.forwardRef<HTMLDivElement, StageProgressProps>(
                     "h-3 w-3 flex-shrink-0 rounded-full transition-colors",
                     isCompleted && "bg-[var(--primitive-green-500)]",
                     isCurrent &&
-                      "bg-[var(--primitive-green-600)] ring-2 ring-[var(--primitive-green-200)] dark:ring-[var(--primitive-green-700)]",
+                      "bg-[var(--primitive-green-600)] ring-2 ring-[var(--primitive-blue-200)] dark:ring-[var(--primitive-blue-700)]",
                     !isCompleted && !isCurrent && "bg-[var(--border-emphasis)]"
                   )}
                   style={

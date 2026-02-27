@@ -88,7 +88,7 @@ const AddAttendeePopover: React.FC<AddAttendeePopoverProps> = ({
               placeholder="Search team members..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border-0 bg-[var(--primitive-neutral-100)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-500)]"
+              className="w-full rounded-lg border-0 bg-[var(--primitive-neutral-100)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]"
             />
           </div>
 

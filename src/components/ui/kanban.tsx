@@ -308,7 +308,7 @@ const KanbanDropPlaceholder = React.forwardRef<HTMLDivElement, KanbanDropPlaceho
     <div
       ref={ref}
       className={cn(
-        "bg-primary-50/30 rounded-lg border border-dashed border-primary-400",
+        "bg-[var(--primitive-blue-100)]/30 rounded-lg border border-dashed border-[var(--primitive-blue-400)]",
         "transition-all duration-fast",
         className
       )}

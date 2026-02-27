@@ -714,7 +714,7 @@ const EnhancedSearch = React.memo(function EnhancedSearch({
             "border border-[var(--border-default)]",
             "rounded-xl shadow-xl",
             "z-50 overflow-hidden",
-            "animate-in fade-in-0 slide-in-from-top-2 duration-150"
+            "duration-150 animate-in fade-in-0 slide-in-from-top-2"
           )}
         >
           <div className="py-1">
@@ -878,7 +878,7 @@ function EnhancedTableHead<T>({
                         "flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm",
                         "transition-colors hover:bg-[var(--background-interactive-hover)]",
                         sortDirection === "asc" &&
-                          "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                          "bg-[var(--background-interactive-selected)] text-[var(--foreground-interactive-selected)]"
                       )}
                     >
                       <SortAscending
@@ -898,7 +898,7 @@ function EnhancedTableHead<T>({
                         "flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm",
                         "transition-colors hover:bg-[var(--background-interactive-hover)]",
                         sortDirection === "desc" &&
-                          "bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                          "bg-[var(--background-interactive-selected)] text-[var(--foreground-interactive-selected)]"
                       )}
                     >
                       <SortDescending
@@ -1169,7 +1169,7 @@ const ActiveFiltersDisplay = React.memo(function ActiveFiltersDisplay({
             "bg-[var(--background-brand-subtle)] text-[var(--foreground-brand)]",
             "border-[var(--border-brand)]/30 rounded-lg border",
             "text-sm",
-            "animate-in fade-in-0 slide-in-from-left-2 duration-200"
+            "duration-200 animate-in fade-in-0 slide-in-from-left-2"
           )}
           style={{ animationDelay: `${index * 50}ms` }}
         >
@@ -1248,7 +1248,7 @@ const BulkActionsToolbar = React.memo(function BulkActionsToolbar<T>({
         "flex items-center gap-4 px-5 py-3.5",
         "border border-[var(--border-default)] bg-[var(--background-subtle)]",
         "rounded-xl shadow-md",
-        "animate-in slide-in-from-top-2 fade-in-0 duration-300 ease-out"
+        "duration-300 ease-out animate-in fade-in-0 slide-in-from-top-2"
       )}
       role="toolbar"
       aria-label="Bulk actions"

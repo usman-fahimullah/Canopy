@@ -115,51 +115,45 @@ const Pagination = React.forwardRef<HTMLElement, PaginationProps>(
 
 Pagination.displayName = "Pagination";
 
-interface PaginationButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface PaginationButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;
 }
 
-const PaginationButton = React.forwardRef<
-  HTMLButtonElement,
-  PaginationButtonProps
->(({ className, active, disabled, children, ...props }, ref) => (
-  <button
-    ref={ref}
-    type="button"
-    disabled={disabled}
-    className={cn(
-      "inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-body-sm font-medium transition-colors",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
-      active
-        ? "bg-primary-600 text-white"
-        : "text-foreground hover:bg-background-muted",
-      disabled && "pointer-events-none opacity-50",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </button>
-));
+const PaginationButton = React.forwardRef<HTMLButtonElement, PaginationButtonProps>(
+  ({ className, active, disabled, children, ...props }, ref) => (
+    <button
+      ref={ref}
+      type="button"
+      disabled={disabled}
+      className={cn(
+        "inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-body-sm font-medium transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
+        active
+          ? "bg-[var(--primitive-blue-500)] text-[var(--foreground-on-emphasis)]"
+          : "text-foreground hover:bg-background-muted",
+        disabled && "pointer-events-none opacity-50",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+);
 PaginationButton.displayName = "PaginationButton";
 
-const PaginationEllipsis = React.forwardRef<
-  HTMLSpanElement,
-  React.HTMLAttributes<HTMLSpanElement>
->(({ className, ...props }, ref) => (
-  <span
-    ref={ref}
-    aria-hidden
-    className={cn(
-      "flex h-9 w-9 items-center justify-center text-foreground-subtle",
-      className
-    )}
-    {...props}
-  >
-    <MoreHorizontal className="h-4 w-4" />
-  </span>
-));
+const PaginationEllipsis = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
+  ({ className, ...props }, ref) => (
+    <span
+      ref={ref}
+      aria-hidden
+      className={cn("flex h-9 w-9 items-center justify-center text-foreground-subtle", className)}
+      {...props}
+    >
+      <MoreHorizontal className="h-4 w-4" />
+    </span>
+  )
+);
 PaginationEllipsis.displayName = "PaginationEllipsis";
 
 /**
@@ -175,29 +169,16 @@ interface SimplePaginationProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const SimplePagination = React.forwardRef<HTMLDivElement, SimplePaginationProps>(
   (
-    {
-      className,
-      currentPage,
-      totalPages,
-      totalItems,
-      itemsPerPage,
-      onPageChange,
-      ...props
-    },
+    { className, currentPage, totalPages, totalItems, itemsPerPage, onPageChange, ...props },
     ref
   ) => {
     const startItem = totalItems ? (currentPage - 1) * (itemsPerPage || 10) + 1 : null;
-    const endItem = totalItems
-      ? Math.min(currentPage * (itemsPerPage || 10), totalItems)
-      : null;
+    const endItem = totalItems ? Math.min(currentPage * (itemsPerPage || 10), totalItems) : null;
 
     return (
       <div
         ref={ref}
-        className={cn(
-          "flex items-center justify-between gap-4",
-          className
-        )}
+        className={cn("flex items-center justify-between gap-4", className)}
         {...props}
       >
         {totalItems && (
@@ -212,11 +193,11 @@ const SimplePagination = React.forwardRef<HTMLDivElement, SimplePaginationProps>
             disabled={currentPage <= 1}
             aria-label="Previous page"
           >
-            <ChevronLeft className="h-4 w-4 mr-1" />
+            <ChevronLeft className="mr-1 h-4 w-4" />
             Previous
           </PaginationButton>
 
-          <span className="text-caption text-foreground-muted px-2">
+          <span className="px-2 text-caption text-foreground-muted">
             Page {currentPage} of {totalPages}
           </span>
 
@@ -226,7 +207,7 @@ const SimplePagination = React.forwardRef<HTMLDivElement, SimplePaginationProps>
             aria-label="Next page"
           >
             Next
-            <ChevronRight className="h-4 w-4 ml-1" />
+            <ChevronRight className="ml-1 h-4 w-4" />
           </PaginationButton>
         </div>
       </div>
@@ -236,9 +217,4 @@ const SimplePagination = React.forwardRef<HTMLDivElement, SimplePaginationProps>
 
 SimplePagination.displayName = "SimplePagination";
 
-export {
-  Pagination,
-  PaginationButton,
-  PaginationEllipsis,
-  SimplePagination,
-};
+export { Pagination, PaginationButton, PaginationEllipsis, SimplePagination };

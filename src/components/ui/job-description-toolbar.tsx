@@ -341,7 +341,7 @@ export function JobDescriptionToolbar({
                 "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm",
                 "text-[var(--primitive-neutral-600)]",
                 "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--primitive-green-900)]",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]",
                 "transition-colors duration-150",
                 disabled && "pointer-events-none opacity-50"
               )}
@@ -452,7 +452,7 @@ export function JobDescriptionToolbar({
               "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium",
               "bg-[var(--primitive-green-50)] text-[var(--primitive-green-700)]",
               "hover:bg-[var(--primitive-green-100)]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]",
               "transition-colors duration-150",
               disabled && "pointer-events-none opacity-50"
             )}
@@ -486,7 +486,7 @@ export function JobDescriptionToolbar({
               "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm",
               "text-[var(--primitive-neutral-600)]",
               "hover:bg-[var(--background-interactive-hover)] hover:text-[var(--primitive-green-900)]",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)]",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]",
               "transition-colors duration-150",
               disabled && "pointer-events-none opacity-50"
             )}

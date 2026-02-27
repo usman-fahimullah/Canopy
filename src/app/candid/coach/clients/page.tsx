@@ -148,7 +148,7 @@ export default function CoachClientsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search clients..."
-            className="focus:ring-[var(--primitive-green-500)]/20 w-full rounded-[12px] border border-[var(--primitive-neutral-200)] bg-[var(--input-background)] py-3 pl-10 pr-4 text-body text-[var(--primitive-neutral-800)] outline-none transition-colors placeholder:text-[var(--primitive-neutral-500)] focus:border-[var(--primitive-green-500)] focus:ring-2"
+            className="focus:ring-[var(--ring-color)]/20 w-full rounded-[12px] border border-[var(--primitive-neutral-200)] bg-[var(--input-background)] py-3 pl-10 pr-4 text-body text-[var(--primitive-neutral-800)] outline-none transition-colors placeholder:text-[var(--primitive-neutral-500)] focus:border-[var(--input-border-focus)] focus:ring-2"
           />
         </div>
 

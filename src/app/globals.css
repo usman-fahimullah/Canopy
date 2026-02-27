@@ -449,7 +449,7 @@
     --foreground-subtle: var(--primitive-neutral-600);
     --foreground-disabled: var(--primitive-neutral-500);
     --foreground-inverse: var(--primitive-neutral-0);
-    --foreground-on-emphasis: #ffffff;
+    --foreground-on-emphasis: var(--primitive-neutral-0);
 
     /* Brand text */
     --foreground-brand: var(--primitive-green-700);
@@ -553,7 +553,7 @@
     --button-destructive-background: var(--primitive-red-500);
     --button-destructive-background-hover: var(--primitive-red-600);
     --button-destructive-background-active: var(--primitive-red-700);
-    --button-destructive-foreground: #ffffff;
+    --button-destructive-foreground: var(--primitive-neutral-0);
 
     --button-disabled-background: var(--primitive-neutral-200);
     --button-disabled-foreground: var(--primitive-neutral-500);
@@ -692,6 +692,14 @@
     --modal-header-background: var(--primitive-neutral-100);
     --modal-footer-background: var(--primitive-neutral-100);
 
+    /* --- SEPARATOR --- */
+    --separator-default: rgb(31 29 28 / 0.1);
+    --separator-muted: rgb(31 29 28 / 0.06);
+    --separator-emphasis: rgb(31 29 28 / 0.16);
+    --separator-strong: rgb(31 29 28 / 0.22);
+    --separator-inverse: rgb(250 249 247 / 0.16);
+    --separator-on-brand: rgb(255 255 255 / 0.2);
+
     /* --- ALERT --- */
     /* Feature alert - promotional/new features */
     --alert-feature-background: var(--primitive-blue-100);
@@ -726,23 +734,23 @@
     /* Alert action buttons — themed per variant */
     --alert-feature-action-background: var(--primitive-blue-500);
     --alert-feature-action-background-hover: var(--primitive-blue-600);
-    --alert-feature-action-foreground: #ffffff;
+    --alert-feature-action-foreground: var(--primitive-neutral-0);
 
     --alert-critical-action-background: var(--primitive-red-500);
     --alert-critical-action-background-hover: var(--primitive-red-600);
-    --alert-critical-action-foreground: #ffffff;
+    --alert-critical-action-foreground: var(--primitive-neutral-0);
 
     --alert-warning-action-background: var(--primitive-orange-500);
     --alert-warning-action-background-hover: var(--primitive-orange-600);
-    --alert-warning-action-foreground: #ffffff;
+    --alert-warning-action-foreground: var(--primitive-neutral-0);
 
     --alert-success-action-background: var(--primitive-green-600);
     --alert-success-action-background-hover: var(--primitive-green-700);
-    --alert-success-action-foreground: #ffffff;
+    --alert-success-action-foreground: var(--primitive-neutral-0);
 
     --alert-info-action-background: var(--primitive-neutral-700);
     --alert-info-action-background-hover: var(--primitive-neutral-800);
-    --alert-info-action-foreground: #ffffff;
+    --alert-info-action-foreground: var(--primitive-neutral-0);
 
     /* Alert dismiss button */
     --alert-dismiss-background: transparent;
@@ -753,27 +761,27 @@
     /* Banners use BOLD solid backgrounds with light text for high visibility */
     /* Feature banner - Blue solid */
     --banner-feature-background: var(--primitive-blue-600);
-    --banner-feature-foreground: #ffffff;
-    --banner-feature-icon: #ffffff;
+    --banner-feature-foreground: var(--primitive-neutral-0);
+    --banner-feature-icon: var(--primitive-neutral-0);
 
     /* Critical banner - Red solid */
     --banner-critical-background: var(--primitive-red-600);
-    --banner-critical-foreground: #ffffff;
-    --banner-critical-icon: #ffffff;
+    --banner-critical-foreground: var(--primitive-neutral-0);
+    --banner-critical-icon: var(--primitive-neutral-0);
 
     /* Warning banner - Orange solid */
     --banner-warning-background: var(--primitive-orange-500);
-    --banner-warning-foreground: #ffffff;
-    --banner-warning-icon: #ffffff;
+    --banner-warning-foreground: var(--primitive-neutral-0);
+    --banner-warning-icon: var(--primitive-neutral-0);
 
     /* Success banner - Green solid */
     --banner-success-background: var(--primitive-green-600);
-    --banner-success-foreground: #ffffff;
-    --banner-success-icon: #ffffff;
+    --banner-success-foreground: var(--primitive-neutral-0);
+    --banner-success-icon: var(--primitive-neutral-0);
 
     /* Info banner - Dark neutral solid */
     --banner-info-background: var(--primitive-neutral-700);
-    --banner-info-foreground: #ffffff;
+    --banner-info-foreground: var(--primitive-neutral-0);
     --banner-info-icon: var(--primitive-neutral-300);
 
     /* Banner dismiss button (for bold style) */
@@ -784,28 +792,28 @@
     /* Banner themed action buttons (for bold style) */
     /* Feature - white button with blue text */
     --banner-feature-action-background: rgba(255, 255, 255, 0.95);
-    --banner-feature-action-background-hover: #ffffff;
+    --banner-feature-action-background-hover: var(--primitive-neutral-0);
     --banner-feature-action-foreground: var(--primitive-blue-700);
 
     /* Critical - white button with red text */
     --banner-critical-action-background: rgba(255, 255, 255, 0.95);
-    --banner-critical-action-background-hover: #ffffff;
+    --banner-critical-action-background-hover: var(--primitive-neutral-0);
     --banner-critical-action-foreground: var(--primitive-red-700);
 
     /* Warning - dark button with white text (better contrast on orange) */
     --banner-warning-action-background: rgba(0, 0, 0, 0.15);
     --banner-warning-action-background-hover: rgba(0, 0, 0, 0.25);
-    --banner-warning-action-foreground: #ffffff;
+    --banner-warning-action-foreground: var(--primitive-neutral-0);
 
     /* Success - white button with green text */
     --banner-success-action-background: rgba(255, 255, 255, 0.95);
-    --banner-success-action-background-hover: #ffffff;
+    --banner-success-action-background-hover: var(--primitive-neutral-0);
     --banner-success-action-foreground: var(--primitive-green-700);
 
     /* Info - light button with dark text */
     --banner-info-action-background: rgba(255, 255, 255, 0.15);
     --banner-info-action-background-hover: rgba(255, 255, 255, 0.25);
-    --banner-info-action-foreground: #ffffff;
+    --banner-info-action-foreground: var(--primitive-neutral-0);
 
     /* --- BANNER SUBTLE --- */
     /* Subtle banners use tinted backgrounds with dark text for less visual intensity */
@@ -843,27 +851,27 @@
     /* Feature subtle - solid blue button for high contrast */
     --banner-subtle-feature-action-background: var(--primitive-blue-500);
     --banner-subtle-feature-action-background-hover: var(--primitive-blue-600);
-    --banner-subtle-feature-action-foreground: #ffffff;
+    --banner-subtle-feature-action-foreground: var(--primitive-neutral-0);
 
     /* Critical subtle - solid red button */
     --banner-subtle-critical-action-background: var(--primitive-red-500);
     --banner-subtle-critical-action-background-hover: var(--primitive-red-600);
-    --banner-subtle-critical-action-foreground: #ffffff;
+    --banner-subtle-critical-action-foreground: var(--primitive-neutral-0);
 
     /* Warning subtle - solid orange button */
     --banner-subtle-warning-action-background: var(--primitive-orange-500);
     --banner-subtle-warning-action-background-hover: var(--primitive-orange-600);
-    --banner-subtle-warning-action-foreground: #ffffff;
+    --banner-subtle-warning-action-foreground: var(--primitive-neutral-0);
 
     /* Success subtle - solid green button */
     --banner-subtle-success-action-background: var(--primitive-green-600);
     --banner-subtle-success-action-background-hover: var(--primitive-green-700);
-    --banner-subtle-success-action-foreground: #ffffff;
+    --banner-subtle-success-action-foreground: var(--primitive-neutral-0);
 
     /* Info subtle - neutral button with good contrast */
     --banner-subtle-info-action-background: var(--primitive-neutral-700);
     --banner-subtle-info-action-background-hover: var(--primitive-neutral-800);
-    --banner-subtle-info-action-foreground: #ffffff;
+    --banner-subtle-info-action-foreground: var(--primitive-neutral-0);
 
     /* --- TOAST --- */
     --toast-background: var(--primitive-neutral-800);
@@ -873,16 +881,16 @@
 
     /* Toast variants */
     --toast-success-background: var(--primitive-green-600);
-    --toast-success-foreground: #ffffff;
-    --toast-success-icon: #ffffff;
+    --toast-success-foreground: var(--primitive-neutral-0);
+    --toast-success-icon: var(--primitive-neutral-0);
 
     --toast-warning-background: var(--primitive-orange-500);
-    --toast-warning-foreground: #ffffff;
-    --toast-warning-icon: #ffffff;
+    --toast-warning-foreground: var(--primitive-neutral-0);
+    --toast-warning-icon: var(--primitive-neutral-0);
 
     --toast-critical-background: var(--primitive-red-600);
-    --toast-critical-foreground: #ffffff;
-    --toast-critical-icon: #ffffff;
+    --toast-critical-foreground: var(--primitive-neutral-0);
+    --toast-critical-icon: var(--primitive-neutral-0);
 
     --toast-info-background: var(--primitive-neutral-800);
     --toast-info-foreground: var(--primitive-neutral-0);
@@ -910,7 +918,7 @@
     --tabs-foreground: var(--primitive-neutral-700);
     --tabs-foreground-active: var(--primitive-neutral-800);
     --tabs-border: var(--border-alpha-3);
-    --tabs-indicator: var(--primitive-green-600);
+    --tabs-indicator: var(--primitive-blue-500);
     --tabs-item-background-hover: var(--primitive-neutral-200);
 
     /* --- SWITCH --- */
@@ -936,7 +944,7 @@
     --checkbox-border-hover: var(--border-alpha-5);
     --checkbox-border-checked: var(--primitive-blue-500);
     --checkbox-border-error: var(--primitive-red-500);
-    --checkbox-foreground: #ffffff;
+    --checkbox-foreground: var(--primitive-neutral-0);
     --checkbox-foreground-disabled: var(--primitive-neutral-500);
 
     /* --- RADIO --- */
@@ -950,7 +958,7 @@
     --radio-border-hover: var(--border-alpha-5);
     --radio-border-checked: var(--primitive-blue-500);
     --radio-border-error: var(--primitive-red-500);
-    --radio-dot: #ffffff;
+    --radio-dot: var(--primitive-neutral-0);
     --radio-dot-disabled: var(--primitive-neutral-500);
 
     /* --- CALENDAR / DATE PICKER --- */
@@ -1753,7 +1761,7 @@
     --shell-nav-item-hover: var(--primitive-neutral-200);
     --shell-nav-item-active-bg: var(--primitive-green-100);
     --shell-nav-item-active-text: var(--primitive-green-800);
-    --shell-nav-accent: var(--primitive-green-600);
+    --shell-nav-accent: var(--primitive-blue-500);
     --shell-nav-item-inactive-opacity: 0.74;
     --shell-nav-utility-opacity: 0.75;
     --shell-nav-signout-color: var(--foreground-error);
@@ -1769,7 +1777,7 @@
     --shell-nav-item-hover: var(--primitive-green-100);
     --shell-nav-item-active-bg: var(--primitive-green-200);
     --shell-nav-item-active-text: var(--primitive-green-800);
-    --shell-nav-accent: var(--primitive-green-600);
+    --shell-nav-accent: var(--primitive-blue-500);
   }
 
   /* ── Shell overrides: Candid (coach) ───────────────────── */
@@ -1785,7 +1793,7 @@
     --shell-nav-item-hover: var(--primitive-green-100);
     --shell-nav-item-active-bg: var(--primitive-green-100);
     --shell-nav-item-active-text: var(--primitive-green-800);
-    --shell-nav-accent: var(--primitive-green-700);
+    --shell-nav-accent: var(--primitive-blue-600);
 
     /* ============================================
        DENSITY
@@ -1925,7 +1933,7 @@
     --foreground-muted: var(--primitive-neutral-700);
     --foreground-subtle: var(--primitive-neutral-600);
     --foreground-disabled: var(--primitive-neutral-500);
-    --foreground-inverse: var(--primitive-neutral-0);
+    --foreground-inverse: #ffffff;
     --foreground-on-emphasis: #ffffff;
 
     --foreground-brand: var(--primitive-green-600);
@@ -1975,7 +1983,7 @@
     --button-primary-background: var(--primitive-green-500);
     --button-primary-background-hover: var(--primitive-green-600);
     --button-primary-background-active: var(--primitive-green-700);
-    --button-primary-foreground: var(--primitive-neutral-0);
+    --button-primary-foreground: #ffffff;
 
     --button-secondary-background: rgba(51, 105, 255, 0.15);
     --button-secondary-background-hover: rgba(51, 105, 255, 0.25);
@@ -1985,12 +1993,12 @@
     --button-tertiary-background: var(--primitive-neutral-300);
     --button-tertiary-background-hover: var(--primitive-neutral-400);
     --button-tertiary-background-active: var(--primitive-neutral-500);
-    --button-tertiary-foreground: var(--primitive-neutral-0);
+    --button-tertiary-foreground: #ffffff;
 
     --button-inverse-background: var(--primitive-neutral-800);
     --button-inverse-background-hover: var(--primitive-green-700);
     --button-inverse-background-active: var(--primitive-green-600);
-    --button-inverse-foreground: var(--primitive-neutral-0);
+    --button-inverse-foreground: #ffffff;
 
     --button-outline-background: transparent;
     --button-outline-background-hover: var(--primitive-neutral-300);
@@ -2139,6 +2147,14 @@
     --modal-header-background: var(--primitive-neutral-200);
     --modal-footer-background: var(--primitive-neutral-200);
 
+    /* Separator (Dark Mode) */
+    --separator-default: rgb(250 249 247 / 0.12);
+    --separator-muted: rgb(250 249 247 / 0.08);
+    --separator-emphasis: rgb(250 249 247 / 0.2);
+    --separator-strong: rgb(250 249 247 / 0.28);
+    --separator-inverse: rgb(31 29 28 / 0.18);
+    --separator-on-brand: rgb(255 255 255 / 0.22);
+
     /* Alert (Dark Mode) */
     --alert-feature-background: var(--primitive-blue-200);
     --alert-feature-foreground: var(--primitive-blue-700);
@@ -2258,7 +2274,7 @@
     --tabs-foreground: var(--primitive-neutral-700);
     --tabs-foreground-active: var(--primitive-neutral-800);
     --tabs-border: var(--border-alpha-3);
-    --tabs-indicator: var(--primitive-green-500);
+    --tabs-indicator: var(--primitive-blue-500);
     --tabs-item-background-hover: var(--primitive-neutral-300);
 
     /* Switch */
@@ -2267,7 +2283,7 @@
     --switch-background-checked: var(--primitive-blue-500);
     --switch-background-checked-hover: var(--primitive-blue-400);
     --switch-background-disabled: var(--primitive-neutral-300);
-    --switch-thumb: var(--primitive-neutral-0);
+    --switch-thumb: #ffffff;
     --switch-thumb-border: var(--primitive-neutral-500);
     --switch-thumb-border-checked: var(--primitive-blue-500);
     --switch-thumb-disabled: var(--primitive-neutral-600);
@@ -2308,7 +2324,7 @@
 
     /* Calendar / Date Picker */
     --calendar-selected-background: var(--primitive-blue-500);
-    --calendar-selected-foreground: var(--primitive-neutral-0);
+    --calendar-selected-foreground: #ffffff;
     --calendar-today-background: var(--primitive-neutral-300);
     --calendar-today-foreground: var(--foreground-default);
     --calendar-range-background: var(--primitive-blue-200);
@@ -2377,7 +2393,7 @@
     --calendar-slot-proposed-background: var(--primitive-blue-500);
     --calendar-slot-proposed-background-hover: var(--primitive-blue-600);
     --calendar-slot-proposed-border: var(--primitive-blue-600);
-    --calendar-slot-proposed-foreground: var(--primitive-neutral-0);
+    --calendar-slot-proposed-foreground: #ffffff;
 
     /* Calendar slot tokens — hover preview (Dark mode) */
     --calendar-slot-preview-background: var(--primitive-blue-200);
@@ -2387,7 +2403,7 @@
     /* Calendar event tokens — existing calendar events (Dark mode) */
     --calendar-event-background: var(--primitive-neutral-500);
     --calendar-event-border: var(--primitive-neutral-600);
-    --calendar-event-foreground: var(--primitive-neutral-0);
+    --calendar-event-foreground: #ffffff;
     --calendar-event-foreground-muted: rgba(255, 255, 255, 0.7);
 
     /* Calendar event type tokens (Dark mode) */
@@ -2481,7 +2497,7 @@
     --tag-info-background: var(--primitive-neutral-300);
     --tag-info-foreground: var(--primitive-neutral-800);
     --tag-info-dismiss-background: var(--primitive-neutral-500);
-    --tag-info-dismiss-foreground: var(--primitive-neutral-0);
+    --tag-info-dismiss-foreground: #ffffff;
     --tag-info-dismiss-background-hover: var(--primitive-neutral-600);
 
     /* Shadows (stronger in dark mode — ~2.5x light mode opacity) */
@@ -2605,6 +2621,130 @@
   --surface-active: var(--primitive-neutral-500);
   --background-interactive-hover: var(--primitive-neutral-400);
   --background-interactive-active: var(--primitive-neutral-500);
+}
+
+/* ============================================
+   SURFACE CONTEXT TOKENS
+
+   For emphasis/dark surfaces only. Neutral surfaces
+   inherit from :root and don't need these overrides.
+
+   Usage: Add .surface-brand to a green-800 container,
+   and children using text-[var(--surface-fg)] get white.
+   ============================================ */
+
+:root {
+  --surface-fg: var(--foreground-default);
+  --surface-fg-muted: var(--foreground-muted);
+  --surface-fg-subtle: var(--foreground-subtle);
+  --surface-border: var(--border-default);
+  --surface-icon: var(--foreground-muted);
+  --surface-separator: var(--separator-default);
+}
+
+/* Brand emphasis (green-800 bg in light, green-200 bg in dark) */
+.surface-brand {
+  --surface-fg: var(--primitive-neutral-0);
+  --surface-fg-muted: var(--primitive-neutral-300);
+  --surface-fg-subtle: var(--primitive-neutral-400);
+  --surface-border: rgb(255 255 255 / 0.15);
+  --surface-icon: var(--primitive-neutral-200);
+  --surface-separator: var(--separator-on-brand);
+}
+
+/* Inverse (neutral-800 bg) */
+.surface-inverse {
+  --surface-fg: var(--primitive-neutral-0);
+  --surface-fg-muted: var(--primitive-neutral-400);
+  --surface-fg-subtle: var(--primitive-neutral-500);
+  --surface-border: rgb(255 255 255 / 0.12);
+  --surface-icon: var(--primitive-neutral-300);
+  --surface-separator: var(--separator-inverse);
+}
+
+/* Status emphasis surfaces */
+.surface-error {
+  --surface-fg: var(--primitive-neutral-0);
+  --surface-fg-muted: var(--primitive-red-100);
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
+}
+
+.surface-success {
+  --surface-fg: var(--primitive-neutral-0);
+  --surface-fg-muted: var(--primitive-green-100);
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
+}
+
+.surface-info {
+  --surface-fg: var(--primitive-neutral-0);
+  --surface-fg-muted: var(--primitive-blue-100);
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
+}
+
+.surface-warning {
+  --surface-fg: var(--primitive-neutral-0);
+  --surface-fg-muted: var(--primitive-orange-100);
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
+}
+
+/* Emphasis surfaces are ALWAYS dark-backgrounded in both light and dark mode.
+   Primitives auto-invert in dark mode, but emphasis surfaces don't — so we
+   hardcode the dark mode values to keep text light (same approach as
+   --foreground-on-emphasis: #ffffff on line 1929). */
+.dark .surface-brand,
+[data-theme="dark"] .surface-brand {
+  --surface-fg: #ffffff;
+  --surface-fg-muted: #e5dfd8;
+  --surface-fg-subtle: #ccc6c0;
+  --surface-border: rgb(255 255 255 / 0.15);
+  --surface-icon: #f2ede9;
+  --surface-separator: var(--separator-on-brand);
+}
+
+.dark .surface-inverse,
+[data-theme="dark"] .surface-inverse {
+  --surface-fg: #ffffff;
+  --surface-fg-muted: #ccc6c0;
+  --surface-fg-subtle: #a39d96;
+  --surface-border: rgb(255 255 255 / 0.12);
+  --surface-icon: #e5dfd8;
+  --surface-separator: var(--separator-on-brand);
+}
+
+.dark .surface-error,
+[data-theme="dark"] .surface-error {
+  --surface-fg: #ffffff;
+  --surface-fg-muted: #ffebf4;
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
+}
+
+.dark .surface-success,
+[data-theme="dark"] .surface-success {
+  --surface-fg: #ffffff;
+  --surface-fg-muted: #eaffe0;
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
+}
+
+.dark .surface-info,
+[data-theme="dark"] .surface-info {
+  --surface-fg: #ffffff;
+  --surface-fg-muted: #e5f1ff;
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
+}
+
+.dark .surface-warning,
+[data-theme="dark"] .surface-warning {
+  --surface-fg: #ffffff;
+  --surface-fg-muted: #ffede0;
+  --surface-border: rgb(255 255 255 / 0.2);
+  --surface-separator: var(--separator-on-brand);
 }
 
 @layer base {

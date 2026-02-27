@@ -72,7 +72,7 @@ const DialogContent = React.forwardRef<
             "text-foreground-muted hover:text-foreground",
             "hover:bg-background-muted",
             "transition-colors duration-normal",
-            "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+            "focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:ring-offset-2",
             "disabled:pointer-events-none"
           )}
         >

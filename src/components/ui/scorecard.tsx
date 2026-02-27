@@ -18,10 +18,7 @@ const Scorecard = React.forwardRef<HTMLDivElement, ScorecardProps>(
   ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        "bg-surface rounded-xl border border-border p-6",
-        className
-      )}
+      className={cn("rounded-xl border border-border bg-surface p-6", className)}
       {...props}
     >
       {children}
@@ -40,18 +37,13 @@ const ScorecardHeader = React.forwardRef<HTMLDivElement, ScorecardHeaderProps>(
   ({ className, title, subtitle, avatar, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        "flex items-start gap-3 pb-4 border-b border-border",
-        className
-      )}
+      className={cn("flex items-start gap-3 border-b border-border pb-4", className)}
       {...props}
     >
       {avatar}
       <div>
         <h3 className="text-body font-semibold text-foreground">{title}</h3>
-        {subtitle && (
-          <p className="text-caption text-foreground-subtle mt-0.5">{subtitle}</p>
-        )}
+        {subtitle && <p className="mt-0.5 text-caption text-foreground-subtle">{subtitle}</p>}
       </div>
     </div>
   )
@@ -67,10 +59,10 @@ const ScorecardSection = React.forwardRef<HTMLDivElement, ScorecardSectionProps>
   ({ className, title, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("py-4 border-b border-border last:border-b-0", className)}
+      className={cn("border-b border-border py-4 last:border-b-0", className)}
       {...props}
     >
-      <h4 className="text-body-sm font-medium text-foreground-muted mb-3">{title}</h4>
+      <h4 className="mb-3 text-body-sm font-medium text-foreground-muted">{title}</h4>
       {children}
     </div>
   )
@@ -83,27 +75,21 @@ interface ScorecardCriterionProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
-const ScorecardCriterion = React.forwardRef<
-  HTMLDivElement,
-  ScorecardCriterionProps
->(({ className, label, description, children, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "flex items-start justify-between gap-4 py-2",
-      className
-    )}
-    {...props}
-  >
-    <div className="flex-1">
-      <p className="text-body-sm text-foreground">{label}</p>
-      {description && (
-        <p className="text-caption text-foreground-subtle mt-0.5">{description}</p>
-      )}
+const ScorecardCriterion = React.forwardRef<HTMLDivElement, ScorecardCriterionProps>(
+  ({ className, label, description, children, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex items-start justify-between gap-4 py-2", className)}
+      {...props}
+    >
+      <div className="flex-1">
+        <p className="text-body-sm text-foreground">{label}</p>
+        {description && <p className="mt-0.5 text-caption text-foreground-subtle">{description}</p>}
+      </div>
+      <div className="flex-shrink-0">{children}</div>
     </div>
-    <div className="flex-shrink-0">{children}</div>
-  </div>
-));
+  )
+);
 ScorecardCriterion.displayName = "ScorecardCriterion";
 
 /**
@@ -223,10 +209,14 @@ const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
           return (
             <button
               key={i}
-              ref={(el) => { buttonsRef.current[i] = el; }}
+              ref={(el) => {
+                buttonsRef.current[i] = el;
+              }}
               type="button"
               disabled={readOnly}
-              tabIndex={readOnly ? -1 : focusedIndex === i || (focusedIndex === null && i === 0) ? 0 : -1}
+              tabIndex={
+                readOnly ? -1 : focusedIndex === i || (focusedIndex === null && i === 0) ? 0 : -1
+              }
               onClick={(e) => {
                 if (allowHalf) {
                   // Calculate if click was on left or right half
@@ -251,20 +241,15 @@ const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
               onKeyDown={(e) => handleKeyDown(e, i)}
               className={cn(
                 "relative transition-transform",
-                readOnly
-                  ? "cursor-default"
-                  : "cursor-pointer hover:scale-110",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+                readOnly ? "cursor-default" : "cursor-pointer hover:scale-110",
+                "rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]"
               )}
               aria-label={`${starValue} star${starValue > 1 ? "s" : ""}`}
             >
               {/* Unselected star (neutral filled) */}
               <Star
                 weight="fill"
-                className={cn(
-                  sizeClasses[size],
-                  "text-gray-200 dark:text-gray-600"
-                )}
+                className={cn(sizeClasses[size], "text-gray-200 dark:text-gray-600")}
               />
               {/* Selected star (yellow filled overlay) */}
               {fill !== "empty" && (
@@ -272,20 +257,14 @@ const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
                   className="absolute inset-0 overflow-hidden"
                   style={{ width: fill === "half" ? "50%" : "100%" }}
                 >
-                  <Star
-                    weight="fill"
-                    className={cn(
-                      sizeClasses[size],
-                      "text-yellow-400"
-                    )}
-                  />
+                  <Star weight="fill" className={cn(sizeClasses[size], "text-yellow-400")} />
                 </div>
               )}
             </button>
           );
         })}
         {showValue && (
-          <span className="ml-2 text-body-sm text-foreground-muted tabular-nums">
+          <span className="ml-2 text-body-sm tabular-nums text-foreground-muted">
             {value.toFixed(allowHalf ? 1 : 0)}/{max}
           </span>
         )}
@@ -298,15 +277,9 @@ StarRating.displayName = "StarRating";
 /**
  * Recommendation selector component
  */
-type RecommendationType =
-  | "strong_yes"
-  | "yes"
-  | "neutral"
-  | "no"
-  | "strong_no";
+type RecommendationType = "strong_yes" | "yes" | "neutral" | "no" | "strong_no";
 
-interface RecommendationSelectProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
+interface RecommendationSelectProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   value?: RecommendationType;
   onChange?: (value: RecommendationType) => void;
 }
@@ -321,64 +294,68 @@ const recommendations: {
     value: "strong_yes",
     label: "Strong Yes",
     color: "text-[var(--primitive-green-700)] dark:text-[var(--primitive-green-400)]",
-    bgColor: "bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-500)]/20 hover:bg-[var(--primitive-green-200)] dark:hover:bg-[var(--primitive-green-500)]/30 data-[selected=true]:bg-[var(--primitive-green-600)] data-[selected=true]:text-white",
+    bgColor:
+      "bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-500)]/20 hover:bg-[var(--primitive-green-200)] dark:hover:bg-[var(--primitive-green-500)]/30 data-[selected=true]:bg-[var(--primitive-green-600)] data-[selected=true]:text-[var(--foreground-on-emphasis)]",
   },
   {
     value: "yes",
     label: "Yes",
     color: "text-[var(--primitive-green-600)] dark:text-[var(--primitive-green-400)]",
-    bgColor: "bg-[var(--primitive-green-100)]/50 dark:bg-[var(--primitive-green-500)]/15 hover:bg-[var(--primitive-green-100)] dark:hover:bg-[var(--primitive-green-500)]/25 data-[selected=true]:bg-[var(--primitive-green-500)] data-[selected=true]:text-white",
+    bgColor:
+      "bg-[var(--primitive-green-100)]/50 dark:bg-[var(--primitive-green-500)]/15 hover:bg-[var(--primitive-green-100)] dark:hover:bg-[var(--primitive-green-500)]/25 data-[selected=true]:bg-[var(--primitive-green-500)] data-[selected=true]:text-[var(--foreground-on-emphasis)]",
   },
   {
     value: "neutral",
     label: "Neutral",
     color: "text-foreground dark:text-foreground-muted",
-    bgColor: "bg-background-muted dark:bg-[var(--background-emphasized)] hover:bg-background-emphasized dark:hover:bg-[var(--primitive-neutral-700)] data-[selected=true]:bg-[var(--primitive-neutral-500)] data-[selected=true]:text-white",
+    bgColor:
+      "bg-background-muted dark:bg-[var(--background-emphasized)] hover:bg-background-emphasized dark:hover:bg-[var(--primitive-neutral-700)] data-[selected=true]:bg-[var(--primitive-neutral-500)] data-[selected=true]:text-[var(--foreground-on-emphasis)]",
   },
   {
     value: "no",
     label: "No",
     color: "text-[var(--primitive-red-600)] dark:text-[var(--primitive-red-300)]",
-    bgColor: "bg-[var(--primitive-red-100)] dark:bg-[var(--primitive-red-500)]/20 text-[var(--primitive-red-700)] dark:text-[var(--primitive-red-300)] hover:bg-[var(--primitive-red-200)] dark:hover:bg-[var(--primitive-red-500)]/30 data-[selected=true]:bg-[var(--primitive-red-500)] data-[selected=true]:text-white",
+    bgColor:
+      "bg-[var(--primitive-red-100)] dark:bg-[var(--primitive-red-500)]/20 text-[var(--primitive-red-700)] dark:text-[var(--primitive-red-300)] hover:bg-[var(--primitive-red-200)] dark:hover:bg-[var(--primitive-red-500)]/30 data-[selected=true]:bg-[var(--primitive-red-500)] data-[selected=true]:text-[var(--foreground-on-emphasis)]",
   },
   {
     value: "strong_no",
     label: "Strong No",
     color: "text-[var(--primitive-red-700)] dark:text-[var(--primitive-red-300)]",
-    bgColor: "bg-[var(--primitive-red-200)] dark:bg-[var(--primitive-red-500)]/30 text-[var(--primitive-red-800)] dark:text-[var(--primitive-red-300)] hover:bg-[var(--primitive-red-300)] dark:hover:bg-[var(--primitive-red-500)]/40 data-[selected=true]:bg-[var(--primitive-red-600)] data-[selected=true]:text-white",
+    bgColor:
+      "bg-[var(--primitive-red-200)] dark:bg-[var(--primitive-red-500)]/30 text-[var(--primitive-red-800)] dark:text-[var(--primitive-red-300)] hover:bg-[var(--primitive-red-300)] dark:hover:bg-[var(--primitive-red-500)]/40 data-[selected=true]:bg-[var(--primitive-red-600)] data-[selected=true]:text-[var(--foreground-on-emphasis)]",
   },
 ];
 
-const RecommendationSelect = React.forwardRef<
-  HTMLDivElement,
-  RecommendationSelectProps
->(({ className, value, onChange, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex gap-2 flex-wrap", className)}
-    role="radiogroup"
-    aria-label="Recommendation"
-    {...props}
-  >
-    {recommendations.map((rec) => (
-      <button
-        key={rec.value}
-        type="button"
-        role="radio"
-        aria-checked={value === rec.value}
-        data-selected={value === rec.value}
-        onClick={() => onChange?.(rec.value)}
-        className={cn(
-          "px-3 py-1.5 rounded-lg text-body-sm font-medium transition-colors",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
-          rec.bgColor
-        )}
-      >
-        {rec.label}
-      </button>
-    ))}
-  </div>
-));
+const RecommendationSelect = React.forwardRef<HTMLDivElement, RecommendationSelectProps>(
+  ({ className, value, onChange, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("flex flex-wrap gap-2", className)}
+      role="radiogroup"
+      aria-label="Recommendation"
+      {...props}
+    >
+      {recommendations.map((rec) => (
+        <button
+          key={rec.value}
+          type="button"
+          role="radio"
+          aria-checked={value === rec.value}
+          data-selected={value === rec.value}
+          onClick={() => onChange?.(rec.value)}
+          className={cn(
+            "rounded-lg px-3 py-1.5 text-body-sm font-medium transition-colors",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)]",
+            rec.bgColor
+          )}
+        >
+          {rec.label}
+        </button>
+      ))}
+    </div>
+  )
+);
 RecommendationSelect.displayName = "RecommendationSelect";
 
 interface ScorecardSummaryProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -389,17 +366,7 @@ interface ScorecardSummaryProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ScorecardSummary = React.forwardRef<HTMLDivElement, ScorecardSummaryProps>(
-  (
-    {
-      className,
-      overallRating,
-      recommendation,
-      reviewerName,
-      reviewDate,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, overallRating, recommendation, reviewerName, reviewDate, ...props }, ref) => {
     const recData = recommendations.find((r) => r.value === recommendation);
     const dateFormatted =
       reviewDate &&
@@ -413,28 +380,26 @@ const ScorecardSummary = React.forwardRef<HTMLDivElement, ScorecardSummaryProps>
       <div
         ref={ref}
         className={cn(
-          "flex items-center justify-between p-4 bg-background-subtle rounded-lg",
+          "flex items-center justify-between rounded-lg bg-background-subtle p-4",
           className
         )}
         {...props}
       >
         <div className="flex items-center gap-4">
           <div>
-            <p className="text-caption text-foreground-subtle mb-1">Overall Rating</p>
+            <p className="mb-1 text-caption text-foreground-subtle">Overall Rating</p>
             <StarRating value={overallRating} readOnly size="lg" />
           </div>
           {recData && (
             <div>
-              <p className="text-caption text-foreground-subtle mb-1">
-                Recommendation
-              </p>
+              <p className="mb-1 text-caption text-foreground-subtle">Recommendation</p>
               <span
                 className={cn(
-                  "inline-block px-2 py-1 rounded text-body-sm font-medium",
+                  "inline-block rounded px-2 py-1 text-body-sm font-medium",
                   recData.value.includes("yes")
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-[var(--background-success)] text-[var(--foreground-success)]"
                     : recData.value.includes("no")
-                      ? "bg-red-100 text-red-700"
+                      ? "bg-[var(--background-error)] text-[var(--foreground-error)]"
                       : "bg-background-emphasized text-foreground-muted"
                 )}
               >
@@ -446,9 +411,7 @@ const ScorecardSummary = React.forwardRef<HTMLDivElement, ScorecardSummaryProps>
         {(reviewerName || dateFormatted) && (
           <div className="text-right">
             {reviewerName && (
-              <p className="text-body-sm font-medium text-foreground">
-                {reviewerName}
-              </p>
+              <p className="text-body-sm font-medium text-foreground">{reviewerName}</p>
             )}
             {dateFormatted && (
               <p className="text-caption text-foreground-subtle">{dateFormatted}</p>

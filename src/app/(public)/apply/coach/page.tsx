@@ -335,7 +335,7 @@ export default function CoachApplicationPage() {
                   onClick={() => toggleArrayField("expertise", option)}
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                     formData.expertise.includes(option)
-                      ? "bg-[var(--primitive-green-600)] text-white"
+                      ? "bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)]"
                       : "bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
                   }`}
                 >
@@ -357,7 +357,7 @@ export default function CoachApplicationPage() {
                   onClick={() => toggleArrayField("sectors", option)}
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                     formData.sectors.includes(option)
-                      ? "bg-[var(--primitive-green-600)] text-white"
+                      ? "bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)]"
                       : "bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
                   }`}
                 >
@@ -373,7 +373,7 @@ export default function CoachApplicationPage() {
               value={formData.bio}
               onChange={(e) => updateField("bio", e.target.value)}
               placeholder="Tell us about your background and what makes you a great coach..."
-              className="w-full resize-none rounded-lg border border-[var(--primitive-neutral-300)] px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]"
+              className="w-full resize-none rounded-lg border border-[var(--primitive-neutral-300)] px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]"
               rows={4}
               maxLength={1000}
             />
@@ -438,7 +438,7 @@ export default function CoachApplicationPage() {
               value={formData.motivation}
               onChange={(e) => updateField("motivation", e.target.value)}
               placeholder="What motivates you to help others transition into climate careers?"
-              className="w-full resize-none rounded-lg border border-[var(--primitive-neutral-300)] px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-600)]"
+              className="w-full resize-none rounded-lg border border-[var(--primitive-neutral-300)] px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]"
               rows={4}
               maxLength={500}
             />

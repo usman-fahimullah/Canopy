@@ -57,7 +57,7 @@ export function MigrateToSection({ currentStage, onStageChange }: MigrateToSecti
                 )}
               >
                 {itemState === "selected" ? (
-                  <Check size={16} weight="bold" className="text-white" />
+                  <Check size={16} weight="bold" className="text-[var(--foreground-on-emphasis)]" />
                 ) : itemState === "past" ? (
                   <Check size={16} weight="bold" className="text-[var(--primitive-neutral-300)]" />
                 ) : null}

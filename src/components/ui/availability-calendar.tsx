@@ -119,13 +119,19 @@ export const DraggableSlot: React.FC<DraggableSlotProps> = ({
     >
       <div className="flex h-full flex-col overflow-hidden px-2 py-1.5">
         <div className="flex items-center justify-between">
-          <p className="flex-1 truncate text-[11px] font-semibold text-white">Interview Slot</p>
+          <p className="flex-1 truncate text-[11px] font-semibold text-[var(--foreground-on-emphasis)]">
+            Interview Slot
+          </p>
           <div className="flex items-center gap-0.5">
             {/* Drag handle indicator */}
-            <DotsSixVertical size={12} className="text-white/60" weight="bold" />
+            <DotsSixVertical
+              size={12}
+              className="text-[var(--foreground-on-emphasis)]/60"
+              weight="bold"
+            />
           </div>
         </div>
-        <p className="text-[10px] text-white/90">
+        <p className="text-[10px] text-[var(--foreground-on-emphasis)]">
           {format(slot.start, "h:mm")} – {format(slot.end, "h:mm a")}
         </p>
         {/* Remove button - only show if card is tall enough */}
@@ -136,7 +142,7 @@ export const DraggableSlot: React.FC<DraggableSlotProps> = ({
               e.stopPropagation();
               onRemove();
             }}
-            className="mt-auto flex items-center gap-1 text-[10px] text-white/80 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
+            className="text-[var(--foreground-on-emphasis)]/80 mt-auto flex items-center gap-1 text-[10px] opacity-0 transition-opacity hover:text-[var(--foreground-on-emphasis)] group-hover:opacity-100"
           >
             <X size={10} />
             <span>Remove</span>
@@ -605,7 +611,7 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
                         className={cn(
                           "mt-0.5 text-sm font-semibold",
                           isCurrentDay
-                            ? "flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-white"
+                            ? "flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primitive-green-600)] text-[var(--foreground-on-emphasis)]"
                             : "text-[var(--foreground-default)]"
                         )}
                       >
@@ -908,12 +914,16 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
           >
             <div className="flex h-full flex-col overflow-hidden px-2 py-1.5">
               <div className="flex items-center justify-between">
-                <p className="flex-1 truncate text-[11px] font-semibold text-white">
+                <p className="flex-1 truncate text-[11px] font-semibold text-[var(--foreground-on-emphasis)]">
                   Interview Slot
                 </p>
-                <DotsSixVertical size={12} className="text-white/60" weight="bold" />
+                <DotsSixVertical
+                  size={12}
+                  className="text-[var(--foreground-on-emphasis)]/60"
+                  weight="bold"
+                />
               </div>
-              <p className="text-[10px] text-white/90">
+              <p className="text-[10px] text-[var(--foreground-on-emphasis)]">
                 {format(activeDragSlot.start, "h:mm")} – {format(activeDragSlot.end, "h:mm a")}
               </p>
             </div>

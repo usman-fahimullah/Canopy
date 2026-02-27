@@ -39,14 +39,8 @@ const notificationBadgeVariants = cva(
   {
     variants: {
       variant: {
-        alert: [
-          "bg-[var(--primitive-red-500)]",
-          "text-white",
-        ],
-        count: [
-          "bg-[var(--primitive-neutral-200)]",
-          "text-[var(--primitive-neutral-800)]",
-        ],
+        alert: ["bg-[var(--primitive-red-500)]", "text-[var(--foreground-on-emphasis)]"],
+        count: ["bg-[var(--primitive-neutral-200)]", "text-[var(--primitive-neutral-800)]"],
       },
       size: {
         default: "h-5 text-sm", // 20px height, 14px font
@@ -62,8 +56,7 @@ const notificationBadgeVariants = cva(
 );
 
 export interface NotificationBadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof notificationBadgeVariants> {
+  extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof notificationBadgeVariants> {
   /** The count to display */
   count: number;
   /** Maximum count to display before showing "99+" format */
@@ -74,15 +67,7 @@ export interface NotificationBadgeProps
 
 const NotificationBadge = React.forwardRef<HTMLSpanElement, NotificationBadgeProps>(
   (
-    {
-      className,
-      variant = "alert",
-      size = "default",
-      count,
-      max = 99,
-      showZero = false,
-      ...props
-    },
+    { className, variant = "alert", size = "default", count, max = 99, showZero = false, ...props },
     ref
   ) => {
     // Hide badge when count is 0 and showZero is false

@@ -98,16 +98,11 @@ export default function CoachExpertisePage() {
       <div className="space-y-6">
         {/* Coaching Types */}
         <FormCard>
-          <FormField
-            label="What type of coaching do you offer?"
-            required
-            helpText="Select up to 3"
-          >
+          <FormField label="What type of coaching do you offer?" required helpText="Select up to 3">
             <div className="flex flex-wrap gap-2">
               {coachingTypeOptions.map((option) => {
                 const selected = coachData.coachingTypes.includes(option.value);
-                const disabled =
-                  !selected && coachData.coachingTypes.length >= 3;
+                const disabled = !selected && coachData.coachingTypes.length >= 3;
                 return (
                   <button
                     key={option.value}
@@ -117,7 +112,7 @@ export default function CoachExpertisePage() {
                     className={cn(
                       "rounded-lg border px-4 py-2 text-caption font-medium transition-all",
                       selected
-                        ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                        ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)] text-[var(--foreground-interactive-selected)]"
                         : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-[var(--foreground-muted)] hover:border-[var(--border-interactive-hover)]",
                       disabled && "cursor-not-allowed opacity-40"
                     )}
@@ -144,9 +139,7 @@ export default function CoachExpertisePage() {
           >
             <PathwaySelector
               selected={coachData.industryFocus}
-              onChange={(selected) =>
-                setCoachData({ industryFocus: selected })
-              }
+              onChange={(selected) => setCoachData({ industryFocus: selected })}
               max={5}
             />
           </FormField>
@@ -160,9 +153,7 @@ export default function CoachExpertisePage() {
           >
             <CategorySelector
               selected={coachData.careerFocus}
-              onChange={(selected) =>
-                setCoachData({ careerFocus: selected })
-              }
+              onChange={(selected) => setCoachData({ careerFocus: selected })}
               max={5}
             />
           </FormField>
@@ -178,9 +169,7 @@ export default function CoachExpertisePage() {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() =>
-                      setCoachData({ experienceLevel: option.value })
-                    }
+                    onClick={() => setCoachData({ experienceLevel: option.value })}
                     className={cn(
                       "rounded-xl border-2 p-3 text-left transition-all",
                       selected
@@ -203,10 +192,7 @@ export default function CoachExpertisePage() {
 
         {/* Certifications */}
         <FormCard>
-          <FormField
-            label="Certifications"
-            helpText="Add any coaching certifications you hold"
-          >
+          <FormField label="Certifications" helpText="Add any coaching certifications you hold">
             <div className="space-y-3">
               <div className="flex gap-2">
                 <Input

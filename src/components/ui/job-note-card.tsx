@@ -164,7 +164,7 @@ const JobNoteCard = React.forwardRef<HTMLDivElement, JobNoteCardProps>(
               config.tagBg
             )}
           >
-            <span className="text-sm font-bold leading-5 text-white">
+            <span className="text-sm font-bold leading-5 text-[var(--foreground-on-emphasis)]">
               {tagLabel || config.label}
             </span>
           </div>
@@ -214,7 +214,7 @@ const JobNoteCard = React.forwardRef<HTMLDivElement, JobNoteCardProps>(
                 "bg-[var(--primitive-neutral-200)]",
                 "transition-colors duration-150",
                 "hover:bg-[var(--background-interactive-hover)]",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
                 // Move to end if no author
                 !authorName && "ml-auto"
               )}

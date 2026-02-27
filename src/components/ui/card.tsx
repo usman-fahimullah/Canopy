@@ -32,7 +32,7 @@ const cardVariants = cva("bg-[var(--card-background)] text-[var(--card-foregroun
       ],
       // Feature — brand-colored card with dark background and light text.
       feature: [
-        "bg-[var(--card-background-feature)] text-[var(--foreground-on-emphasis)]",
+        "bg-[var(--card-background-feature)] text-[var(--foreground-on-emphasis)] surface-brand",
         "shadow-card",
         "transition-shadow duration-200",
         "hover:shadow-card-hover",

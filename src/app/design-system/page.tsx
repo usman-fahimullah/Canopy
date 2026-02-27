@@ -19,12 +19,7 @@ import {
 // Brand Logo Symbol
 function LogoSymbol({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 149 149"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
+    <svg viewBox="0 0 149 149" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <path
         d="M133 0C141.837 0 149 7.16344 149 16V133C149 141.837 141.837 149 133 149H16C7.16344 149 4.02687e-08 141.837 0 133V16C0 7.16344 7.16344 4.02661e-08 16 0H133ZM98.1553 32C76.2113 32.0002 58.4219 49.7894 58.4219 71.7334V118.089H84.9111V78.3555C84.9112 67.3836 93.8055 58.4895 104.777 58.4893H128.783V32H98.1553ZM22 32V58.4893H53.7197C57.047 47.3098 64.4778 37.8975 74.2656 32H22Z"
         fill="currentColor"
@@ -42,26 +37,22 @@ const values = [
   },
   {
     title: "Relentlessly Curious",
-    description:
-      "We dig deep to understand the \"why\" and seek new ways to solve problems.",
+    description: 'We dig deep to understand the "why" and seek new ways to solve problems.',
     icon: MagnifyingGlass,
   },
   {
     title: "Community Activators",
-    description:
-      "Bringing people together and making collective forward progress.",
+    description: "Bringing people together and making collective forward progress.",
     icon: Users,
   },
   {
     title: "Compassionate Leaders",
-    description:
-      "Leading with empathy, humility, and integrity to empower our community.",
+    description: "Leading with empathy, humility, and integrity to empower our community.",
     icon: Heart,
   },
   {
     title: "Knowledge Seekers",
-    description:
-      "Approaching every situation as an opportunity to learn and grow.",
+    description: "Approaching every situation as an opportunity to learn and grow.",
     icon: Book,
   },
 ];
@@ -78,38 +69,37 @@ export default function DesignSystemPage() {
   return (
     <div className="space-y-16">
       {/* Hero Section */}
-      <section className="text-center py-12">
-        <div className="flex justify-center mb-6">
-          <LogoSymbol className="w-16 h-16 text-[var(--primitive-green-700)]" />
+      <section className="py-12 text-center">
+        <div className="mb-6 flex justify-center">
+          <LogoSymbol className="h-16 w-16 text-[var(--primitive-green-700)]" />
         </div>
-        <h1 className="text-heading-lg lg:text-display font-bold text-foreground mb-4">
+        <h1 className="mb-4 text-heading-lg font-bold text-foreground lg:text-display">
           Trails Design System
         </h1>
-        <p className="text-body-lg text-foreground-muted max-w-2xl mx-auto">
-          Our design system uses cohesive interconnecting components that work
-          together to solve problems in a way that meets and exceeds our
-          customers&apos; goals and expectations.
+        <p className="text-body-lg mx-auto max-w-2xl text-foreground-muted">
+          Our design system uses cohesive interconnecting components that work together to solve
+          problems in a way that meets and exceeds our customers&apos; goals and expectations.
         </p>
       </section>
 
       {/* Quick Links - Foundations & Components */}
-      <section className="grid md:grid-cols-2 gap-6">
+      <section className="grid gap-6 md:grid-cols-2">
         <Link
           href="/design-system/foundations"
           className={cn(
-            "group p-8 rounded-2xl border border-border-muted bg-background-subtle",
-            "hover:border-[var(--primitive-green-400)] hover:shadow-lg transition-all duration-200"
+            "group rounded-2xl border border-border-muted bg-background-subtle p-8",
+            "transition-all duration-200 hover:border-[var(--primitive-green-400)] hover:shadow-lg"
           )}
         >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-800)] flex items-center justify-center">
+          <div className="mb-4 flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-800)]">
               <Palette
-                className="w-6 h-6 text-[var(--primitive-green-700)]"
+                className="h-6 w-6 text-[var(--primitive-green-700)] dark:text-[var(--primitive-green-300)]"
                 weight="duotone"
               />
             </div>
             <div>
-              <h2 className="text-heading-sm text-foreground group-hover:text-[var(--primitive-green-700)] transition-colors">
+              <h2 className="text-heading-sm text-foreground transition-colors group-hover:text-[var(--primitive-green-700)]">
                 Foundations
               </h2>
               <p className="text-body-sm text-foreground-muted">
@@ -121,7 +111,7 @@ export default function DesignSystemPage() {
             {foundationsNav.slice(0, 5).map((item) => (
               <span
                 key={item.id}
-                className="px-3 py-1 text-caption bg-background-muted rounded-full text-foreground-muted"
+                className="rounded-full bg-background-muted px-3 py-1 text-caption text-foreground-muted"
               >
                 {item.label}
               </span>
@@ -129,26 +119,26 @@ export default function DesignSystemPage() {
           </div>
           <div className="mt-4 flex items-center gap-2 text-caption font-medium text-[var(--primitive-green-600)] group-hover:text-[var(--primitive-green-700)]">
             Explore foundations
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
         </Link>
 
         <Link
           href="/design-system/components"
           className={cn(
-            "group p-8 rounded-2xl border border-border-muted bg-background-subtle",
-            "hover:border-[var(--primitive-blue-400)] hover:shadow-lg transition-all duration-200"
+            "group rounded-2xl border border-border-muted bg-background-subtle p-8",
+            "transition-all duration-200 hover:border-[var(--primitive-blue-400)] hover:shadow-lg"
           )}
         >
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-[var(--primitive-blue-100)] dark:bg-[var(--primitive-blue-900)] flex items-center justify-center">
+          <div className="mb-4 flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)] dark:bg-[var(--primitive-blue-900)]">
               <Stack
-                className="w-6 h-6 text-[var(--primitive-blue-600)]"
+                className="h-6 w-6 text-[var(--primitive-blue-600)] dark:text-[var(--primitive-blue-300)]"
                 weight="duotone"
               />
             </div>
             <div>
-              <h2 className="text-heading-sm text-foreground group-hover:text-[var(--primitive-blue-600)] transition-colors">
+              <h2 className="text-heading-sm text-foreground transition-colors group-hover:text-[var(--primitive-blue-600)]">
                 Components
               </h2>
               <p className="text-body-sm text-foreground-muted">
@@ -160,28 +150,26 @@ export default function DesignSystemPage() {
             {componentsNav.slice(0, 4).map((item) => (
               <span
                 key={item.id}
-                className="px-3 py-1 text-caption bg-background-muted rounded-full text-foreground-muted"
+                className="rounded-full bg-background-muted px-3 py-1 text-caption text-foreground-muted"
               >
                 {item.label}
               </span>
             ))}
-            <span className="px-3 py-1 text-caption bg-background-muted rounded-full text-foreground-muted">
+            <span className="rounded-full bg-background-muted px-3 py-1 text-caption text-foreground-muted">
               +{componentsNav.length - 4} more
             </span>
           </div>
           <div className="mt-4 flex items-center gap-2 text-caption font-medium text-[var(--primitive-blue-500)] group-hover:text-[var(--primitive-blue-600)]">
             Browse components
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
         </Link>
       </section>
 
       {/* Featured Components Grid */}
       <section>
-        <h2 className="text-heading-md text-foreground mb-6">
-          Featured Components
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="mb-6 text-heading-md text-foreground">Featured Components</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             {
               id: "buttons",
@@ -230,23 +218,21 @@ export default function DesignSystemPage() {
               key={item.id}
               href={item.href}
               className={cn(
-                "group p-6 rounded-xl border border-border-muted bg-background-subtle",
-                "hover:border-[var(--primitive-green-300)] hover:bg-background transition-all duration-200"
+                "group rounded-xl border border-border-muted bg-background-subtle p-6",
+                "transition-all duration-200 hover:border-[var(--primitive-green-300)] hover:bg-background"
               )}
             >
-              <div className="flex items-start justify-between mb-1">
-                <h3 className="text-body-strong font-medium text-foreground group-hover:text-[var(--primitive-green-700)] transition-colors">
+              <div className="mb-1 flex items-start justify-between">
+                <h3 className="text-body-strong font-medium text-foreground transition-colors group-hover:text-[var(--primitive-green-700)]">
                   {item.label}
                 </h3>
                 {item.isNew && (
-                  <span className="px-2 py-0.5 text-caption-sm font-medium bg-[var(--primitive-green-100)] text-[var(--primitive-green-700)] rounded-full">
+                  <span className="rounded-full bg-[var(--primitive-green-100)] px-2 py-0.5 text-caption-sm font-medium text-[var(--primitive-green-700)] dark:bg-[var(--primitive-green-800)] dark:text-[var(--primitive-green-300)]">
                     New
                   </span>
                 )}
               </div>
-              <p className="text-caption text-foreground-muted">
-                {item.description}
-              </p>
+              <p className="text-caption text-foreground-muted">{item.description}</p>
             </Link>
           ))}
         </div>
@@ -254,29 +240,23 @@ export default function DesignSystemPage() {
 
       {/* Our Values */}
       <section>
-        <h2 className="text-heading-md text-foreground mb-6">
-          Our Values
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h2 className="mb-6 text-heading-md text-foreground">Our Values</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {values.map((value) => {
             const Icon = value.icon;
             return (
               <div
                 key={value.title}
-                className="p-6 rounded-xl border border-border-muted bg-background-subtle"
+                className="rounded-xl border border-border-muted bg-background-subtle p-6"
               >
-                <div className="w-10 h-10 rounded-lg bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-800)] flex items-center justify-center mb-4">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--primitive-green-100)] dark:bg-[var(--primitive-green-800)]">
                   <Icon
-                    className="w-5 h-5 text-[var(--primitive-green-700)]"
+                    className="h-5 w-5 text-[var(--primitive-green-700)] dark:text-[var(--primitive-green-300)]"
                     weight="duotone"
                   />
                 </div>
-                <h3 className="text-body-strong font-medium text-foreground mb-2">
-                  {value.title}
-                </h3>
-                <p className="text-caption text-foreground-muted">
-                  {value.description}
-                </p>
+                <h3 className="mb-2 text-body-strong font-medium text-foreground">{value.title}</h3>
+                <p className="text-caption text-foreground-muted">{value.description}</p>
               </div>
             );
           })}
@@ -284,27 +264,23 @@ export default function DesignSystemPage() {
       </section>
 
       {/* Purpose */}
-      <section className="p-8 rounded-2xl bg-[var(--primitive-green-800)]">
-        <h2 className="text-heading-md text-[var(--primitive-blue-100)] mb-6">
-          Purpose
-        </h2>
+      <section className="rounded-2xl bg-[var(--primitive-green-800)] p-8">
+        <h2 className="mb-6 text-heading-md text-[var(--primitive-blue-100)]">Purpose</h2>
         <ul className="space-y-3">
           {purposes.map((purpose) => (
             <li key={purpose} className="flex items-start gap-3">
               <CheckCircle
-                className="w-5 h-5 text-[var(--primitive-green-400)] mt-0.5 shrink-0"
+                className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primitive-green-400)]"
                 weight="fill"
               />
-              <span className="text-body text-[var(--primitive-blue-100)]">
-                {purpose}
-              </span>
+              <span className="text-body text-[var(--primitive-blue-100)]">{purpose}</span>
             </li>
           ))}
         </ul>
       </section>
 
       {/* Stats Bar */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
           { label: "Components", value: `${componentsNav.length}+` },
           { label: "Foundations", value: foundationsNav.length.toString() },
@@ -313,14 +289,10 @@ export default function DesignSystemPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="p-4 rounded-xl bg-background-subtle border border-border-muted text-center"
+            className="rounded-xl border border-border-muted bg-background-subtle p-4 text-center"
           >
-            <div className="text-heading-sm text-foreground">
-              {stat.value}
-            </div>
-            <div className="text-caption text-foreground-muted">
-              {stat.label}
-            </div>
+            <div className="text-heading-sm text-foreground">{stat.value}</div>
+            <div className="text-caption text-foreground-muted">{stat.label}</div>
           </div>
         ))}
       </section>

@@ -154,7 +154,7 @@ const CompanyCard = React.forwardRef<HTMLDivElement, CompanyCardProps>(
                   "flex items-center justify-center",
                   "h-5 w-5 rounded-full",
                   "bg-[var(--primitive-green-200)]",
-                  "border-2 border-white"
+                  "border-2 border-[var(--background-default)]"
                 )}
                 title="BIPOC Owned"
               >

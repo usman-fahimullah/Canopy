@@ -273,7 +273,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
 
         {/* Hero Section */}
         <div
-          className="relative overflow-hidden rounded-2xl px-8 py-12 text-white"
+          className="relative overflow-hidden rounded-2xl px-8 py-12 text-[var(--foreground-on-emphasis)]"
           style={getGradientStyle(collection.gradientColors)}
         >
           {/* Background pattern overlay */}
@@ -282,7 +282,9 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
           <div className="relative z-10 max-w-2xl">
             <h1 className="text-heading-lg font-bold">{collection.title}</h1>
             {collection.description && (
-              <p className="mt-3 text-body text-white/90">{collection.description}</p>
+              <p className="mt-3 text-body text-[var(--foreground-on-emphasis)]">
+                {collection.description}
+              </p>
             )}
 
             {/* Pathway tags + job count */}
@@ -307,7 +309,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ slu
                     className="h-8 w-8 rounded-lg bg-white object-contain p-1"
                   />
                 )}
-                <span className="text-caption text-white/80">
+                <span className="text-[var(--foreground-on-emphasis)]/80 text-caption">
                   Sponsored by <span className="font-medium">{collection.sponsor.name}</span>
                 </span>
               </div>

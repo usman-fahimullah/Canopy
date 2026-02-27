@@ -29,7 +29,7 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-body-sm font-medium ring-offset-background transition-all",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       "text-foreground-subtle hover:text-foreground dark:text-foreground-muted",
       "data-[state=active]:bg-surface data-[state=active]:text-foreground data-[state=active]:shadow-sm",
@@ -48,7 +48,7 @@ const TabsContent = React.forwardRef<
     ref={ref}
     className={cn(
       "mt-2 ring-offset-white",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
       className
     )}
     {...props}
@@ -84,7 +84,7 @@ const TabsTriggerUnderline = React.forwardRef<
       "inline-flex items-center justify-center whitespace-nowrap px-1 pb-3 text-body-sm font-medium transition-all",
       "-mb-px border-b-2 border-transparent",
       "text-foreground-subtle hover:text-foreground dark:text-foreground-muted",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:border-[var(--primitive-blue-500)] data-[state=active]:text-[var(--primitive-blue-700)] dark:data-[state=active]:text-[var(--primitive-blue-400)]",
       className
@@ -155,7 +155,7 @@ const TabsTriggerAnimated = React.forwardRef<
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap px-3 pb-3 text-body-sm font-medium transition-colors",
       "text-foreground-subtle hover:text-foreground dark:text-foreground-muted",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       "data-[state=active]:text-[var(--primitive-blue-700)] dark:data-[state=active]:text-[var(--primitive-blue-400)]",
       className
@@ -185,7 +185,7 @@ const TabsTriggerVertical = React.forwardRef<
     className={cn(
       "flex items-center justify-start whitespace-nowrap rounded-lg px-3 py-2 text-body-sm font-medium transition-all",
       "text-foreground-subtle hover:bg-background-muted hover:text-foreground dark:text-foreground-muted",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       "dark:data-[state=active]:bg-[var(--primitive-blue-500)]/15 data-[state=active]:bg-[var(--primitive-blue-100)] data-[state=active]:text-[var(--primitive-blue-700)] dark:data-[state=active]:text-[var(--primitive-blue-400)]",
       className

@@ -117,7 +117,7 @@ export function OtpInput({
               "focus:outline-none focus:ring-2 focus:ring-offset-2",
               error
                 ? "border-[var(--primitive-red-500)] focus:border-[var(--primitive-red-500)] focus:ring-[var(--primitive-red-500)]"
-                : "border-[var(--primitive-neutral-300)] focus:border-[var(--primitive-green-600)] focus:ring-[var(--primitive-green-600)]",
+                : "border-[var(--primitive-neutral-300)] focus:border-[var(--input-border-focus)] focus:ring-[var(--ring-color)]",
               disabled && "cursor-not-allowed bg-[var(--primitive-neutral-100)] opacity-50"
             )}
           />
@@ -150,7 +150,7 @@ export function OtpInput({
               "focus:outline-none focus:ring-2 focus:ring-offset-2",
               error
                 ? "border-[var(--primitive-red-500)] focus:border-[var(--primitive-red-500)] focus:ring-[var(--primitive-red-500)]"
-                : "border-[var(--primitive-neutral-300)] focus:border-[var(--primitive-green-600)] focus:ring-[var(--primitive-green-600)]",
+                : "border-[var(--primitive-neutral-300)] focus:border-[var(--input-border-focus)] focus:ring-[var(--ring-color)]",
               disabled && "cursor-not-allowed bg-[var(--primitive-neutral-100)] opacity-50"
             )}
           />

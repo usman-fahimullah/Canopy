@@ -15,7 +15,7 @@ import { CheckCircle, Heart, Warning, Star, BookmarkSimple } from "@phosphor-ico
  *
  * Figma Specs:
  * - Size: 20px diameter (default)
- * - Border: white, scales proportionally (~10% of container size)
+ * - Border: matches parent surface bg (auto-switches in dark mode), scales proportionally (~10% of container size)
  * - Border radius: full (24px in Figma, but we use rounded-full)
  * - Icon: 14px (fits within 14px inner area after border)
  *
@@ -66,7 +66,7 @@ const listStatusConfig: Record<
 };
 
 const listStatusVariants = cva(
-  ["inline-flex items-center justify-center", "rounded-full", "border-white"],
+  ["inline-flex items-center justify-center", "rounded-full", "border-[var(--background-default)]"],
   {
     variants: {
       size: {

@@ -171,7 +171,7 @@ export function DesignSystemSearchModal({ open, onOpenChange }: DesignSystemSear
                     className={cn(
                       "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors",
                       index === selectedIndex
-                        ? "bg-background-interactive-selected text-foreground-brand"
+                        ? "bg-background-interactive-selected text-foreground-interactive-selected"
                         : "text-foreground hover:bg-background-interactive-hover"
                     )}
                   >

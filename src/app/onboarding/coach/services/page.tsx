@@ -3,10 +3,7 @@
 import { useRouter } from "next/navigation";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { StepNavigation } from "@/components/onboarding/step-navigation";
-import {
-  useOnboardingForm,
-  type CoachService,
-} from "@/components/onboarding/form-context";
+import { useOnboardingForm, type CoachService } from "@/components/onboarding/form-context";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormCard, FormField } from "@/components/ui/form-section";
@@ -33,15 +30,11 @@ export default function CoachServicesPage() {
   const step = COACH_STEPS[2]; // services
   const canContinue =
     coachData.services.length > 0 &&
-    coachData.services.every(
-      (s) => s.name.trim().length >= 3 && s.description.trim().length >= 10
-    );
+    coachData.services.every((s) => s.name.trim().length >= 3 && s.description.trim().length >= 10);
 
   function updateService(id: string, updates: Partial<CoachService>) {
     setCoachData({
-      services: coachData.services.map((s) =>
-        s.id === id ? { ...s, ...updates } : s
-      ),
+      services: coachData.services.map((s) => (s.id === id ? { ...s, ...updates } : s)),
     });
   }
 
@@ -101,9 +94,7 @@ export default function CoachServicesPage() {
               <Input
                 placeholder="e.g. Discovery Call, Coaching Session"
                 value={service.name}
-                onChange={(e) =>
-                  updateService(service.id, { name: e.target.value })
-                }
+                onChange={(e) => updateService(service.id, { name: e.target.value })}
               />
             </FormField>
 
@@ -113,13 +104,11 @@ export default function CoachServicesPage() {
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() =>
-                      updateService(service.id, { duration: opt.value })
-                    }
+                    onClick={() => updateService(service.id, { duration: opt.value })}
                     className={cn(
                       "rounded-lg border px-3 py-1.5 text-caption font-medium transition-all",
                       service.duration === opt.value
-                        ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)] text-[var(--foreground-brand)]"
+                        ? "border-[var(--border-interactive-focus)] bg-[var(--background-interactive-selected)] text-[var(--foreground-interactive-selected)]"
                         : "border-[var(--border-muted)] bg-[var(--background-interactive-default)] text-[var(--foreground-muted)] hover:border-[var(--border-interactive-hover)]"
                     )}
                   >
@@ -131,22 +120,14 @@ export default function CoachServicesPage() {
 
             <FormField
               label="Price"
-              helpText={
-                service.price === 0 ? "Free session" : "Per session in USD"
-              }
+              helpText={service.price === 0 ? "Free session" : "Per session in USD"}
             >
               <div className="flex items-center gap-3">
-                <span className="text-body-sm font-medium text-[var(--foreground-muted)]">
-                  $
-                </span>
+                <span className="text-body-sm font-medium text-[var(--foreground-muted)]">$</span>
                 <Input
                   type="number"
                   placeholder="0"
-                  value={
-                    service.price === 0
-                      ? "0"
-                      : Math.round(service.price / 100).toString()
-                  }
+                  value={service.price === 0 ? "0" : Math.round(service.price / 100).toString()}
                   onChange={(e) => {
                     const dollars = parseInt(e.target.value) || 0;
                     updateService(service.id, {
@@ -165,9 +146,7 @@ export default function CoachServicesPage() {
               <Textarea
                 placeholder="Describe what clients can expect from this session..."
                 value={service.description}
-                onChange={(e) =>
-                  updateService(service.id, { description: e.target.value })
-                }
+                onChange={(e) => updateService(service.id, { description: e.target.value })}
                 rows={3}
               />
             </FormField>

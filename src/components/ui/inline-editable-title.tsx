@@ -43,10 +43,7 @@ const sizeStyles = {
   lg: "text-heading-md",
 };
 
-const InlineEditableTitle = React.forwardRef<
-  HTMLDivElement,
-  InlineEditableTitleProps
->(
+const InlineEditableTitle = React.forwardRef<HTMLDivElement, InlineEditableTitleProps>(
   (
     {
       value,
@@ -126,7 +123,7 @@ const InlineEditableTitle = React.forwardRef<
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className={cn(
-              "bg-transparent border-b-2 border-primary-500 outline-none",
+              "border-b-2 border-[var(--input-border-focus)] bg-transparent outline-none",
               "font-semibold text-foreground",
               "transition-colors duration-150",
               sizeStyles[size]
@@ -150,12 +147,12 @@ const InlineEditableTitle = React.forwardRef<
           }
         }}
         className={cn(
-          "group inline-flex items-center gap-2 cursor-pointer",
-          "rounded-md px-1 -mx-1",
+          "group inline-flex cursor-pointer items-center gap-2",
+          "-mx-1 rounded-md px-1",
           "hover:bg-background-muted",
-          "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+          "focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)] focus:ring-offset-2",
           "transition-all duration-150",
-          disabled && "cursor-default hover:bg-transparent opacity-50",
+          disabled && "cursor-default opacity-50 hover:bg-transparent",
           className
         )}
       >

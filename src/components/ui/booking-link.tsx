@@ -65,8 +65,8 @@ export const BookingLink: React.FC<BookingLinkProps> = ({
       {/* Header */}
       <div className="from-background-subtle/50 flex items-center justify-between border-b border-border-muted bg-gradient-to-b to-transparent px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="dark:bg-primary-900/30 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100">
-            <LinkIcon className="h-5 w-5 text-primary-600" weight="duotone" />
+          <div className="dark:bg-[var(--primitive-blue-800)]/30 flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primitive-blue-100)]">
+            <LinkIcon className="h-5 w-5 text-[var(--primitive-blue-500)]" weight="duotone" />
           </div>
           <div>
             <h4 className="text-foreground-default font-semibold">{title}</h4>
@@ -85,7 +85,9 @@ export const BookingLink: React.FC<BookingLinkProps> = ({
               onClick={() => onToggleStatus(!isActive)}
               className={cn(
                 "relative h-6 w-11 rounded-full transition-colors duration-200",
-                isActive ? "bg-primary-600" : "bg-neutral-300 dark:bg-neutral-600"
+                isActive
+                  ? "bg-[var(--switch-background-checked)]"
+                  : "bg-neutral-300 dark:bg-neutral-600"
               )}
             >
               <span

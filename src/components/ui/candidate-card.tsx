@@ -78,7 +78,7 @@ const decisionConfig: Record<
 > = {
   strong_yes: {
     bg: "bg-[var(--primitive-green-500)]",
-    text: "text-white",
+    text: "text-[var(--foreground-on-emphasis)]",
     icon: Heart,
     label: "Strong yes",
   },

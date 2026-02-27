@@ -36,8 +36,8 @@ const ContextMenuSubTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-default select-none items-center rounded-md px-2 py-1.5 text-caption outline-none",
-      "focus:bg-background-interactive-selected focus:text-foreground-brand-emphasis",
-      "data-[state=open]:bg-background-interactive-selected data-[state=open]:text-foreground-brand-emphasis",
+      "focus:bg-background-interactive-selected focus:text-foreground-interactive-selected",
+      "data-[state=open]:bg-background-interactive-selected data-[state=open]:text-foreground-interactive-selected",
       inset && "pl-8",
       className
     )}
@@ -114,7 +114,7 @@ const ContextMenuItem = React.forwardRef<
     className={cn(
       "relative flex cursor-default select-none items-center rounded-md px-2 py-1.5 text-caption outline-none",
       "text-foreground-default transition-colors",
-      "focus:bg-background-interactive-selected focus:text-foreground-brand-emphasis",
+      "focus:bg-background-interactive-selected focus:text-foreground-interactive-selected",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
       className
@@ -134,7 +134,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
     className={cn(
       "relative flex cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-caption outline-none",
       "text-foreground-default transition-colors",
-      "focus:bg-background-interactive-selected focus:text-foreground-brand-emphasis",
+      "focus:bg-background-interactive-selected focus:text-foreground-interactive-selected",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
@@ -161,7 +161,7 @@ const ContextMenuRadioItem = React.forwardRef<
     className={cn(
       "relative flex cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-caption outline-none",
       "text-foreground-default transition-colors",
-      "focus:bg-background-interactive-selected focus:text-foreground-brand-emphasis",
+      "focus:bg-background-interactive-selected focus:text-foreground-interactive-selected",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}

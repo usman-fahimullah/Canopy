@@ -202,7 +202,7 @@ function SortableTask({ task, onRemove, isNew }: SortableTaskProps) {
         "group flex items-center gap-2 rounded-lg border border-transparent py-1.5 transition-all",
         isDragging &&
           "z-10 border-[var(--border-brand)] bg-[var(--background-default)] shadow-card",
-        isNew && "animate-in fade-in slide-in-from-top-2 duration-200"
+        isNew && "duration-200 animate-in fade-in slide-in-from-top-2"
       )}
     >
       <button
@@ -494,7 +494,7 @@ export function CreateGoalModal({
                         className={cn(
                           "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors",
                           "border-[var(--input-border)] bg-[var(--input-background)]",
-                          "focus:ring-[var(--primitive-green-500)]/20 hover:border-[var(--input-border-hover)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2"
+                          "focus:ring-[var(--ring-color)]/20 hover:border-[var(--input-border-hover)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2"
                         )}
                       >
                         <div className="flex items-center gap-2">
@@ -573,7 +573,7 @@ export function CreateGoalModal({
                           className={cn(
                             "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors",
                             "border-[var(--input-border)] bg-[var(--input-background)]",
-                            "focus:ring-[var(--primitive-green-500)]/20 hover:border-[var(--input-border-hover)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2"
+                            "focus:ring-[var(--ring-color)]/20 hover:border-[var(--input-border-hover)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2"
                           )}
                         >
                           <div className="flex items-center gap-2">
@@ -644,7 +644,7 @@ export function CreateGoalModal({
                           className={cn(
                             "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors",
                             "border-[var(--input-border)] bg-[var(--input-background)]",
-                            "focus:ring-[var(--primitive-green-500)]/20 hover:border-[var(--input-border-hover)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2"
+                            "focus:ring-[var(--ring-color)]/20 hover:border-[var(--input-border-hover)] focus:border-[var(--input-border-focus)] focus:outline-none focus:ring-2"
                           )}
                         >
                           <div className="flex items-center gap-2">
@@ -777,7 +777,7 @@ export function CreateGoalModal({
                             "flex items-start gap-2 rounded-lg border p-2.5 text-left transition-all",
                             "border-[var(--border-muted)] bg-[var(--background-default)]",
                             "hover:border-[var(--border-brand)] hover:shadow-[var(--shadow-xs)]",
-                            "focus:ring-[var(--primitive-green-500)]/20 focus:border-[var(--border-brand)] focus:outline-none focus:ring-2"
+                            "focus:ring-[var(--ring-color)]/20 focus:border-[var(--border-brand)] focus:outline-none focus:ring-2"
                           )}
                         >
                           <span

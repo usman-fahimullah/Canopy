@@ -30,7 +30,7 @@ const buttonVariants = cva(
     "whitespace-nowrap font-bold",
     "rounded-2xl", // 16px border-radius per Figma
     "transition-all duration-150",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
     "disabled:pointer-events-none disabled:opacity-50",
     "active:scale-[0.98]",
   ],

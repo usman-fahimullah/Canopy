@@ -130,7 +130,16 @@ const navSections: NavSection[] = [
 
 export function Sidebar() {
   const [activeSection, setActiveSection] = useState<string>("");
-  const [expandedItems, setExpandedItems] = useState<string[]>(["colors", "typography", "buttons", "form-controls", "data-display", "overlays", "navigation", "ats-components"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>([
+    "colors",
+    "typography",
+    "buttons",
+    "form-controls",
+    "data-display",
+    "overlays",
+    "navigation",
+    "ats-components",
+  ]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -179,17 +188,17 @@ export function Sidebar() {
           <button
             onClick={() => toggleExpand(item.id)}
             className={cn(
-              "w-full flex items-center justify-between px-3 py-2 rounded-lg text-body-sm transition-colors",
+              "flex w-full items-center justify-between rounded-lg px-3 py-2 text-body-sm transition-colors",
               "hover:bg-background-interactive-hover",
-              activeSection === item.id || item.children.some(c => c.id === activeSection)
-                ? "text-foreground-brand font-medium"
+              activeSection === item.id || item.children.some((c) => c.id === activeSection)
+                ? "font-medium text-foreground-brand"
                 : "text-foreground"
             )}
           >
             <span>{item.label}</span>
             <ChevronRight
               className={cn(
-                "w-4 h-4 transition-transform",
+                "h-4 w-4 transition-transform",
                 expandedItems.includes(item.id) && "rotate-90"
               )}
             />
@@ -201,10 +210,10 @@ export function Sidebar() {
                   <button
                     onClick={() => scrollToSection(child.id)}
                     className={cn(
-                      "w-full text-left px-3 py-1.5 rounded-lg text-caption transition-colors",
+                      "w-full rounded-lg px-3 py-1.5 text-left text-caption transition-colors",
                       "hover:bg-background-interactive-hover",
                       activeSection === child.id
-                        ? "text-foreground-brand font-medium bg-background-interactive-selected"
+                        ? "bg-background-interactive-selected font-medium text-foreground-interactive-selected"
                         : "text-foreground-muted"
                     )}
                   >
@@ -219,10 +228,10 @@ export function Sidebar() {
         <button
           onClick={() => scrollToSection(item.id)}
           className={cn(
-            "w-full text-left px-3 py-2 rounded-lg text-body-sm transition-colors",
+            "w-full rounded-lg px-3 py-2 text-left text-body-sm transition-colors",
             "hover:bg-background-interactive-hover",
             activeSection === item.id
-              ? "text-foreground-brand font-medium bg-background-interactive-selected"
+              ? "bg-background-interactive-selected font-medium text-foreground-interactive-selected"
               : "text-foreground"
           )}
         >
@@ -236,12 +245,10 @@ export function Sidebar() {
     <nav className="sticky top-6 h-fit max-h-[calc(100vh-3rem)] overflow-y-auto pr-4">
       {navSections.map((section) => (
         <div key={section.title} className="mb-6">
-          <h2 className="text-caption-strong text-foreground-muted uppercase tracking-wide mb-3 px-3">
+          <h2 className="mb-3 px-3 text-caption-strong uppercase tracking-wide text-foreground-muted">
             {section.title}
           </h2>
-          <ul className="space-y-1">
-            {section.items.map(renderNavItem)}
-          </ul>
+          <ul className="space-y-1">{section.items.map(renderNavItem)}</ul>
         </div>
       ))}
     </nav>

@@ -27,9 +27,7 @@ export function DesignSystemSidebar() {
 
   const renderNavItem = (item: NavItem) => {
     const isActive = isPathActive(item.href, pathname);
-    const hasActiveChild = item.children?.some((child) =>
-      isPathActive(child.href, pathname)
-    );
+    const hasActiveChild = item.children?.some((child) => isPathActive(child.href, pathname));
 
     return (
       <li key={item.id}>
@@ -39,10 +37,10 @@ export function DesignSystemSidebar() {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex-1 px-3 py-2 rounded-lg text-body-sm transition-colors",
+                  "flex-1 rounded-lg px-3 py-2 text-body-sm transition-colors",
                   "hover:bg-background-interactive-hover",
                   isActive || hasActiveChild
-                    ? "text-foreground-brand font-medium"
+                    ? "font-medium text-foreground-brand"
                     : "text-foreground"
                 )}
               >
@@ -50,12 +48,12 @@ export function DesignSystemSidebar() {
               </Link>
               <button
                 onClick={() => toggleExpand(item.id)}
-                className="p-2 rounded-lg hover:bg-background-interactive-hover transition-colors"
+                className="rounded-lg p-2 transition-colors hover:bg-background-interactive-hover"
                 aria-label={expandedItems.includes(item.id) ? "Collapse" : "Expand"}
               >
                 <ChevronRight
                   className={cn(
-                    "w-4 h-4 transition-transform text-foreground-muted",
+                    "h-4 w-4 text-foreground-muted transition-transform",
                     expandedItems.includes(item.id) && "rotate-90"
                   )}
                 />
@@ -70,10 +68,10 @@ export function DesignSystemSidebar() {
                       <Link
                         href={child.href}
                         className={cn(
-                          "block px-3 py-1.5 rounded-lg text-caption transition-colors",
+                          "block rounded-lg px-3 py-1.5 text-caption transition-colors",
                           "hover:bg-background-interactive-hover",
                           childActive
-                            ? "text-foreground-brand font-medium bg-background-interactive-selected"
+                            ? "bg-background-interactive-selected font-medium text-foreground-interactive-selected"
                             : "text-foreground-muted"
                         )}
                       >
@@ -89,10 +87,10 @@ export function DesignSystemSidebar() {
           <Link
             href={item.href}
             className={cn(
-              "block px-3 py-2 rounded-lg text-body-sm transition-colors",
+              "block rounded-lg px-3 py-2 text-body-sm transition-colors",
               "hover:bg-background-interactive-hover",
               isActive
-                ? "text-foreground-brand font-medium bg-background-interactive-selected"
+                ? "bg-background-interactive-selected font-medium text-foreground-interactive-selected"
                 : "text-foreground"
             )}
           >
@@ -107,7 +105,7 @@ export function DesignSystemSidebar() {
     <nav className="sticky top-24 h-fit max-h-[calc(100vh-6rem)] overflow-y-auto pr-4">
       {designSystemNav.map((section) => (
         <div key={section.title} className="mb-6">
-          <h2 className="text-caption-strong text-foreground-muted uppercase tracking-wide mb-3 px-3">
+          <h2 className="mb-3 px-3 text-caption-strong uppercase tracking-wide text-foreground-muted">
             {section.title}
           </h2>
           <ul className="space-y-1">{section.items.map(renderNavItem)}</ul>

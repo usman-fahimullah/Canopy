@@ -544,7 +544,7 @@ const SpinnerColumn = React.memo(
             "transition-all duration-200 ease-out",
             "hover:border-[var(--border-brand)] hover:shadow-md",
             "focus:border-[var(--border-brand)] focus:outline-none",
-            "focus:ring-[var(--primitive-green-500)]/20 focus:ring-4",
+            "focus:ring-[var(--ring-color)]/20 focus:ring-4",
             enableDrag && "cursor-ns-resize select-none",
             isDragging && "scale-105 border-[var(--border-brand)] shadow-lg",
             disabled && "cursor-not-allowed opacity-50"
@@ -1072,7 +1072,7 @@ const TimePicker = React.forwardRef<HTMLButtonElement, TimePickerProps>(
               "w-72 overflow-hidden p-0",
               "shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1),0_8px_32px_-8px_rgba(0,0,0,0.1)]",
               "border border-[var(--border-muted)]",
-              isClosing && "animate-out fade-out-0 zoom-out-95 duration-150"
+              isClosing && "duration-150 animate-out fade-out-0 zoom-out-95"
             )}
             align="start"
             role="listbox"

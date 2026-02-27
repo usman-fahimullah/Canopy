@@ -51,9 +51,14 @@ export default function SurfacesPage() {
           Surfaces
         </h1>
         <p className="mb-4 max-w-2xl text-body text-foreground-muted">
-          The surface level system provides context-aware hover colors. Containers declare their
-          surface level, and children automatically get the correct &ldquo;one step darker&rdquo;
-          hover color via CSS custom property cascade.
+          Canopy has two surface systems. <strong>Neutral Surface Levels</strong> provide
+          context-aware hover colors for nested containers. <strong>Emphasis Surfaces</strong>{" "}
+          provide foreground tokens for children on dark or colored backgrounds — eliminating the
+          need for hardcoded{" "}
+          <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono text-caption-sm">
+            text-white
+          </code>
+          .
         </p>
       </div>
 
@@ -504,59 +509,444 @@ export default function SurfacesPage() {
         </div>
       </ComponentCard>
 
+      {/* ============================================
+          EMPHASIS SURFACES
+          ============================================ */}
+
+      {/* Emphasis Surfaces Overview */}
+      <div className="border-t border-[var(--border-default)] pt-12">
+        <h2 id="emphasis-surfaces" className="mb-2 text-heading-md font-bold text-foreground">
+          Emphasis Surfaces
+        </h2>
+        <p className="mb-4 max-w-2xl text-body text-foreground-muted">
+          Emphasis surfaces solve a different problem than surface levels. When a container has a
+          dark or colored background (brand green-800, inverse neutral-800, status colors), its
+          children need <strong>inverted foreground colors</strong>. Add a{" "}
+          <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono text-caption-sm">
+            surface-brand
+          </code>{" "}
+          class to the container, and all children using{" "}
+          <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono text-caption-sm">
+            text-[var(--surface-fg)]
+          </code>{" "}
+          automatically get the correct light-on-dark text.
+        </p>
+      </div>
+
+      {/* Available Emphasis Classes */}
+      <ComponentCard
+        id="emphasis-classes"
+        title="Available Classes"
+        description="Each class sets foreground tokens for a specific emphasis background"
+      >
+        <div className="overflow-hidden rounded-lg border border-[var(--border-muted)]">
+          <table className="w-full text-caption">
+            <thead>
+              <tr className="border-b border-[var(--border-muted)] bg-[var(--background-subtle)]">
+                <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">Class</th>
+                <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">Used On</th>
+                <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                {
+                  cls: "surface-brand",
+                  usedOn: "Brand green-800 containers",
+                  example: "Card feature variant, hero sections",
+                },
+                {
+                  cls: "surface-inverse",
+                  usedOn: "Neutral-800 dark containers",
+                  example: "Footer, dark panels",
+                },
+                {
+                  cls: "surface-error",
+                  usedOn: "Error emphasis backgrounds",
+                  example: "Error banners, destructive alerts",
+                },
+                {
+                  cls: "surface-success",
+                  usedOn: "Success emphasis backgrounds",
+                  example: "Success banners, confirmation panels",
+                },
+                {
+                  cls: "surface-info",
+                  usedOn: "Info emphasis backgrounds",
+                  example: "Info banners, announcement panels",
+                },
+                {
+                  cls: "surface-warning",
+                  usedOn: "Warning emphasis backgrounds",
+                  example: "Warning banners, caution panels",
+                },
+              ].map(({ cls, usedOn, example }, i, arr) => (
+                <tr
+                  key={cls}
+                  className={i < arr.length - 1 ? "border-b border-[var(--border-muted)]" : ""}
+                >
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">.{cls}</td>
+                  <td className="px-4 py-2.5 text-foreground-muted">{usedOn}</td>
+                  <td className="px-4 py-2.5 text-foreground-muted">{example}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </ComponentCard>
+
+      {/* Emphasis Tokens */}
+      <ComponentCard
+        id="emphasis-tokens"
+        title="Tokens Set by Emphasis Surfaces"
+        description="Each emphasis class overrides these CSS variables for its children"
+      >
+        <div className="overflow-hidden rounded-lg border border-[var(--border-muted)]">
+          <table className="w-full text-caption">
+            <thead>
+              <tr className="border-b border-[var(--border-muted)] bg-[var(--background-subtle)]">
+                <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">Token</th>
+                <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">Purpose</th>
+                <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">
+                  Default (no emphasis)
+                </th>
+                <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">
+                  On .surface-brand
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                {
+                  token: "--surface-fg",
+                  purpose: "Primary text",
+                  defaultVal: "foreground-default",
+                  brandVal: "neutral-0 (white)",
+                },
+                {
+                  token: "--surface-fg-muted",
+                  purpose: "Secondary text",
+                  defaultVal: "foreground-muted",
+                  brandVal: "neutral-300",
+                },
+                {
+                  token: "--surface-fg-subtle",
+                  purpose: "Tertiary text",
+                  defaultVal: "foreground-subtle",
+                  brandVal: "neutral-400",
+                },
+                {
+                  token: "--surface-border",
+                  purpose: "Borders on surface",
+                  defaultVal: "border-default",
+                  brandVal: "white / 15%",
+                },
+                {
+                  token: "--surface-icon",
+                  purpose: "Icon color",
+                  defaultVal: "foreground-muted",
+                  brandVal: "neutral-200",
+                },
+              ].map(({ token, purpose, defaultVal, brandVal }, i, arr) => (
+                <tr
+                  key={token}
+                  className={i < arr.length - 1 ? "border-b border-[var(--border-muted)]" : ""}
+                >
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">{token}</td>
+                  <td className="px-4 py-2.5 text-foreground-muted">{purpose}</td>
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">{defaultVal}</td>
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">{brandVal}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </ComponentCard>
+
+      {/* Emphasis Surface Demo */}
+      <ComponentCard
+        id="emphasis-demo"
+        title="Live Demo"
+        description="See how text automatically adapts on emphasis surfaces"
+      >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              cls: "surface-brand",
+              label: ".surface-brand",
+              bg: "#0a3d2c",
+              full: true,
+            },
+            {
+              cls: "surface-inverse",
+              label: ".surface-inverse",
+              bg: "#1f1d1c",
+              full: true,
+            },
+            {
+              cls: "surface-error",
+              label: ".surface-error",
+              bg: "#e90000",
+            },
+            {
+              cls: "surface-success",
+              label: ".surface-success",
+              bg: "#3ba36f",
+            },
+            {
+              cls: "surface-info",
+              label: ".surface-info",
+              bg: "#0d3ec7",
+            },
+            {
+              cls: "surface-warning",
+              label: ".surface-warning",
+              bg: "#f5580a",
+            },
+          ].map(({ cls, label, bg, full }) => (
+            <div key={cls} className={`${cls} rounded-xl p-5`} style={{ backgroundColor: bg }}>
+              <p className="text-caption font-medium text-[var(--surface-fg)]">{label}</p>
+              <p className="mt-1 text-caption-sm text-[var(--surface-fg-muted)]">
+                Secondary text adapts
+              </p>
+              {full && (
+                <>
+                  <p className="mt-1 text-caption-sm text-[var(--surface-fg-subtle)]">
+                    Tertiary text too
+                  </p>
+                  <div className="mt-3 border-t border-[var(--surface-border)] pt-3">
+                    <p className="text-caption-sm text-[var(--surface-fg-muted)]">
+                      Border uses --surface-border
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </ComponentCard>
+
+      {/* Emphasis Usage */}
+      <ComponentCard
+        id="emphasis-usage"
+        title="Usage"
+        description="How to use emphasis surfaces in your code"
+      >
+        <div className="space-y-6">
+          <div>
+            <h3 className="mb-2 text-body-strong font-semibold">Basic Pattern</h3>
+            <CodePreview
+              code={`{/* Add the surface class to the dark container */}
+<div className="surface-brand bg-[var(--background-brand-emphasis)] p-6 rounded-xl">
+  {/* Children use --surface-fg tokens instead of text-white */}
+  <h3 className="text-[var(--surface-fg)]">Title</h3>
+  <p className="text-[var(--surface-fg-muted)]">Description</p>
+  <div className="border-t border-[var(--surface-border)] mt-4 pt-4">
+    <p className="text-[var(--surface-fg-subtle)]">Footer</p>
+  </div>
+</div>`}
+            >
+              <div className="rounded-xl bg-[var(--background-brand-emphasis)] p-6 surface-brand">
+                <h3 className="text-body-strong text-[var(--surface-fg)]">Title</h3>
+                <p className="mt-1 text-body-sm text-[var(--surface-fg-muted)]">Description</p>
+                <div className="mt-4 border-t border-[var(--surface-border)] pt-4">
+                  <p className="text-caption text-[var(--surface-fg-subtle)]">Footer</p>
+                </div>
+              </div>
+            </CodePreview>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-body-strong font-semibold">Card Feature Variant</h3>
+            <CodePreview
+              code={`{/* Card feature variant already has a dark bg.
+   Add surface-brand so children get light text. */}
+<Card variant="feature" className="surface-brand">
+  <CardContent>
+    <h3 className="text-[var(--surface-fg)]">Feature title</h3>
+    <p className="text-[var(--surface-fg-muted)]">Feature description</p>
+  </CardContent>
+</Card>`}
+            >
+              <div className="rounded-xl bg-[var(--card-background-feature)] p-6 shadow-card surface-brand">
+                <h3 className="text-body-strong text-[var(--surface-fg)]">Feature title</h3>
+                <p className="mt-1 text-body-sm text-[var(--surface-fg-muted)]">
+                  Feature description with auto-adapting text
+                </p>
+              </div>
+            </CodePreview>
+          </div>
+        </div>
+      </ComponentCard>
+
+      {/* Dark Mode Behavior */}
+      <ComponentCard
+        id="emphasis-dark-mode"
+        title="Dark Mode Behavior"
+        description="How emphasis surfaces adapt in dark mode"
+      >
+        <div className="space-y-4">
+          <p className="text-body text-foreground-muted">
+            Most emphasis surfaces stay the same in dark mode — white text on a dark background
+            works in both themes. The exception is{" "}
+            <code className="rounded bg-background-muted px-1.5 py-0.5 font-mono text-caption-sm">
+              .surface-brand
+            </code>
+            :
+          </p>
+          <div className="overflow-hidden rounded-lg border border-[var(--border-muted)]">
+            <table className="w-full text-caption">
+              <thead>
+                <tr className="border-b border-[var(--border-muted)] bg-[var(--background-subtle)]">
+                  <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">Mode</th>
+                  <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">
+                    Card Feature Background
+                  </th>
+                  <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">
+                    --surface-fg
+                  </th>
+                  <th className="px-4 py-2.5 text-left font-medium text-foreground-muted">Why</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-[var(--border-muted)]">
+                  <td className="px-4 py-2.5 font-medium">Light</td>
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">green-800 (dark)</td>
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">neutral-0 (white)</td>
+                  <td className="px-4 py-2.5 text-foreground-muted">Light text on dark bg</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-2.5 font-medium">Dark</td>
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">green-200 (light)</td>
+                  <td className="px-4 py-2.5 font-mono text-caption-sm">neutral-800 (dark)</td>
+                  <td className="px-4 py-2.5 text-foreground-muted">
+                    Dark text on light bg (inverts)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-caption text-foreground-subtle">
+            This inversion is handled automatically. Children using{" "}
+            <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+              text-[var(--surface-fg)]
+            </code>{" "}
+            get the correct contrast in both modes without any conditional logic.
+          </p>
+        </div>
+      </ComponentCard>
+
       {/* Best Practices */}
       <ComponentCard
         id="best-practices"
         title="Best Practices"
-        description="Guidelines for using the surface level system"
+        description="Guidelines for using both surface systems"
       >
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-lg border-2 border-[var(--border-success)] p-4">
-            <h3 className="mb-3 font-semibold text-[var(--foreground-success)]">Do</h3>
-            <ul className="space-y-2 text-caption text-foreground-muted">
-              <li>
-                Use{" "}
-                <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
-                  hover:bg-[var(--background-interactive-hover)]
-                </code>{" "}
-                for interactive hovers
-              </li>
-              <li>
-                Add{" "}
-                <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
-                  surface-level-1
-                </code>{" "}
-                to cards on white backgrounds
-              </li>
-              <li>Let the cascade handle nested hover colors</li>
-              <li>
-                Use{" "}
-                <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
-                  hover:bg-surface-hover
-                </code>{" "}
-                as shorthand
-              </li>
-            </ul>
+        <div className="space-y-8">
+          {/* Neutral Surface Levels */}
+          <div>
+            <h3 className="mb-4 text-body-strong font-semibold">Neutral Surface Levels</h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-lg border-2 border-[var(--border-success)] p-4">
+                <h4 className="mb-3 font-semibold text-[var(--foreground-success)]">Do</h4>
+                <ul className="space-y-2 text-caption text-foreground-muted">
+                  <li>
+                    Use{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      hover:bg-[var(--background-interactive-hover)]
+                    </code>{" "}
+                    for interactive hovers
+                  </li>
+                  <li>
+                    Add{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      surface-level-1
+                    </code>{" "}
+                    to cards on white backgrounds
+                  </li>
+                  <li>Let the cascade handle nested hover colors</li>
+                  <li>
+                    Use{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      hover:bg-surface-hover
+                    </code>{" "}
+                    as shorthand
+                  </li>
+                </ul>
+              </div>
+              <div className="rounded-lg border-2 border-[var(--border-error)] p-4">
+                <h4 className="mb-3 font-semibold text-[var(--foreground-error)]">Don&apos;t</h4>
+                <ul className="space-y-2 text-caption text-foreground-muted">
+                  <li>
+                    Don&apos;t hardcode{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      hover:bg-[var(--primitive-neutral-200)]
+                    </code>
+                  </li>
+                  <li>
+                    Don&apos;t use{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      hover:bg-[var(--background-subtle)]
+                    </code>{" "}
+                    for interactive hover
+                  </li>
+                  <li>Don&apos;t nest more than 3 levels deep</li>
+                  <li>Don&apos;t use surface levels for brand/status-colored hovers</li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div className="rounded-lg border-2 border-[var(--border-error)] p-4">
-            <h3 className="mb-3 font-semibold text-[var(--foreground-error)]">Don&apos;t</h3>
-            <ul className="space-y-2 text-caption text-foreground-muted">
-              <li>
-                Don&apos;t hardcode{" "}
-                <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
-                  hover:bg-[var(--primitive-neutral-200)]
-                </code>
-              </li>
-              <li>
-                Don&apos;t use{" "}
-                <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
-                  hover:bg-[var(--background-subtle)]
-                </code>{" "}
-                for interactive hover
-              </li>
-              <li>Don&apos;t nest more than 3 levels deep</li>
-              <li>Don&apos;t use surface levels for brand/status-colored hovers</li>
-            </ul>
+
+          {/* Emphasis Surfaces */}
+          <div>
+            <h3 className="mb-4 text-body-strong font-semibold">Emphasis Surfaces</h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-lg border-2 border-[var(--border-success)] p-4">
+                <h4 className="mb-3 font-semibold text-[var(--foreground-success)]">Do</h4>
+                <ul className="space-y-2 text-caption text-foreground-muted">
+                  <li>
+                    Use{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      text-[var(--surface-fg)]
+                    </code>{" "}
+                    instead of{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      text-white
+                    </code>
+                  </li>
+                  <li>Add the surface class to the container, not each child</li>
+                  <li>
+                    Use{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      --surface-border
+                    </code>{" "}
+                    for dividers inside emphasis surfaces
+                  </li>
+                  <li>Let CSS cascade handle child foreground colors</li>
+                </ul>
+              </div>
+              <div className="rounded-lg border-2 border-[var(--border-error)] p-4">
+                <h4 className="mb-3 font-semibold text-[var(--foreground-error)]">Don&apos;t</h4>
+                <ul className="space-y-2 text-caption text-foreground-muted">
+                  <li>
+                    Don&apos;t use{" "}
+                    <code className="rounded bg-background-muted px-1 py-0.5 font-mono">
+                      text-white
+                    </code>{" "}
+                    — it breaks dark mode for .surface-brand
+                  </li>
+                  <li>
+                    Don&apos;t use emphasis surfaces on neutral backgrounds — they&apos;re only for
+                    dark/colored containers
+                  </li>
+                  <li>
+                    Don&apos;t set background-color on the emphasis class — the container already
+                    has its bg
+                  </li>
+                  <li>Don&apos;t mix surface-level-N with emphasis surface classes</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </ComponentCard>

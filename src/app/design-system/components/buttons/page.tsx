@@ -475,10 +475,7 @@ export default function ButtonsPage() {
           </div>
           <div className="space-y-2">
             <Label>Focus</Label>
-            <Button
-              variant="primary"
-              className="ring-2 ring-[var(--primitive-green-500)] ring-offset-2"
-            >
+            <Button variant="primary" className="ring-2 ring-[var(--ring-color)] ring-offset-2">
               Focus
             </Button>
             <p className="text-caption text-foreground-muted">Keyboard focused state</p>
@@ -831,7 +828,7 @@ const handleClick = async () => {
               <Label className="mb-2 block">Job Title</Label>
               <input
                 type="text"
-                className="w-full rounded-lg border border-border-muted px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primitive-green-500)]"
+                className="w-full rounded-lg border border-border-muted px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--ring-color)]"
                 placeholder="e.g., Renewable Energy Engineer"
               />
             </div>

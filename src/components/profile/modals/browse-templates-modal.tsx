@@ -228,7 +228,7 @@ function CategoryFilter({
         className={cn(
           "rounded-full px-3 py-1.5 text-caption font-medium transition-colors",
           selected === null
-            ? "bg-[var(--background-brand)] text-white"
+            ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]"
             : "bg-[var(--background-muted)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
         )}
       >
@@ -244,7 +244,7 @@ function CategoryFilter({
             className={cn(
               "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-caption font-medium transition-colors",
               selected === key
-                ? "bg-[var(--background-brand)] text-white"
+                ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]"
                 : "bg-[var(--background-muted)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
             )}
           >
@@ -448,7 +448,7 @@ export function BrowseTemplatesModal({
                     className={cn(
                       "rounded-full px-2 py-0.5 text-caption transition-colors",
                       selectedExperience === level
-                        ? "bg-[var(--background-brand)] text-white"
+                        ? "bg-[var(--background-brand)] text-[var(--foreground-on-emphasis)]"
                         : "bg-[var(--background-subtle)] text-[var(--foreground-muted)] hover:bg-[var(--background-interactive-hover)]"
                     )}
                   >

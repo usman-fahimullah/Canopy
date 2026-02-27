@@ -322,7 +322,7 @@ const PathwayTag = React.forwardRef<HTMLDivElement, PathwayTagProps>(
           isClickable && "cursor-pointer",
           isClickable && "transition-opacity duration-150 hover:opacity-80",
           isClickable &&
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primitive-green-500)] focus-visible:ring-offset-2",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-color)] focus-visible:ring-offset-2",
           className
         )}
         {...props}
