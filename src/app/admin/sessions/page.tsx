@@ -247,7 +247,10 @@ export default function AdminSessionsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <Chip variant={STATUS_CHIP_VARIANT[session.status] || "neutral"} size="sm">
-                        {session.status.replace("_", " ")}
+                        {session.status
+                          .replace(/_/g, " ")
+                          .toLowerCase()
+                          .replace(/\b\w/g, (c) => c.toUpperCase())}
                       </Chip>
                     </td>
                     <td className="px-4 py-3 text-right">

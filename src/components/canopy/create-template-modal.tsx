@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalFooter } from "@/components/ui/modal";
+import { WizardModal, WizardStep } from "@/components/ui/wizard-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { CategoryTag } from "@/components/ui/category-tag";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { Stack, ArrowLeft } from "@phosphor-icons/react";
+import { Stack } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { logger, formatError } from "@/lib/logger";
 import type { RoleTemplate } from "@/types/canopy";
@@ -116,11 +116,17 @@ function getFieldValue(job: JobDetail, fieldKey: string): string | null {
       return job.pathway?.name || job.climateCategory || null;
     case "employmentType":
       return job.employmentType
-        ? job.employmentType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+        ? job.employmentType
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/\b\w/g, (c) => c.toUpperCase())
         : null;
     case "experienceLevel":
       return job.experienceLevel
-        ? job.experienceLevel.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+        ? job.experienceLevel
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/\b\w/g, (c) => c.toUpperCase())
         : null;
     case "description":
       return job.description || null;
@@ -288,24 +294,34 @@ function StepToggleFields({
   onToggle: (key: string, checked: boolean) => void;
 }) {
   return (
-    <ScrollArea className="flex-1">
-      <div className="flex flex-col gap-6 px-8 py-6">
-        <FieldToggleSection
-          title="Main Information"
-          fields={MAIN_INFO_FIELDS}
-          toggles={toggles}
-          onToggle={onToggle}
-          job={job}
-        />
-        <FieldToggleSection
-          title="Role Information"
-          fields={ROLE_INFO_FIELDS}
-          toggles={toggles}
-          onToggle={onToggle}
-          job={job}
-        />
+    <div className="flex flex-1 flex-col">
+      {/* Sub-header */}
+      <div className="border-b border-[var(--border-muted)] px-8 py-4">
+        <p className="text-heading-sm text-[var(--foreground-brand-emphasis)]">
+          Turn on/off which information you would like to keep from{" "}
+          <span className="text-[var(--foreground-link)]">{job.title}</span>
+        </p>
       </div>
-    </ScrollArea>
+
+      <ScrollArea className="flex-1">
+        <div className="flex flex-col gap-6 px-8 py-6">
+          <FieldToggleSection
+            title="Main Information"
+            fields={MAIN_INFO_FIELDS}
+            toggles={toggles}
+            onToggle={onToggle}
+            job={job}
+          />
+          <FieldToggleSection
+            title="Role Information"
+            fields={ROLE_INFO_FIELDS}
+            toggles={toggles}
+            onToggle={onToggle}
+            job={job}
+          />
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
 
@@ -342,6 +358,16 @@ function StepNameTemplate({
 }
 
 /* -------------------------------------------------------------------
+   Wizard Step Definitions
+   ------------------------------------------------------------------- */
+
+const WIZARD_STEPS = [
+  { id: "select", label: "Select Role" },
+  { id: "configure", label: "Configure Fields" },
+  { id: "name", label: "Name Template" },
+];
+
+/* -------------------------------------------------------------------
    Main Modal Component
    ------------------------------------------------------------------- */
 
@@ -353,7 +379,7 @@ interface CreateTemplateModalProps {
 }
 
 interface ModalState {
-  step: 1 | 2 | 3;
+  step: number;
   selectedJob: JobDetail | null;
   loadingJobId: string | null;
   fieldToggles: Record<string, boolean>;
@@ -363,7 +389,7 @@ interface ModalState {
 }
 
 const INITIAL_STATE: ModalState = {
-  step: 1,
+  step: 0,
   selectedJob: null,
   loadingJobId: null,
   fieldToggles: getDefaultToggles(),
@@ -380,12 +406,17 @@ export function CreateTemplateModal({
 }: CreateTemplateModalProps) {
   const [state, setState] = useState<ModalState>(INITIAL_STATE);
 
-  const resetAndClose = useCallback(() => {
-    setState(INITIAL_STATE);
-    onOpenChange(false);
-  }, [onOpenChange]);
+  const resetAndClose = useCallback(
+    (isOpen: boolean) => {
+      if (!isOpen) {
+        setState(INITIAL_STATE);
+      }
+      onOpenChange(isOpen);
+    },
+    [onOpenChange]
+  );
 
-  /** Step 1 → 2: fetch full job details, then advance */
+  /** Step 0 → 1: fetch full job details, then advance */
   const handleSelectRole = useCallback(async (jobId: string) => {
     setState((prev) => ({ ...prev, loadingJobId: jobId, error: null }));
 
@@ -399,7 +430,7 @@ export function CreateTemplateModal({
 
       setState((prev) => ({
         ...prev,
-        step: 2,
+        step: 1,
         selectedJob: job,
         loadingJobId: null,
         fieldToggles: getDefaultToggles(),
@@ -414,12 +445,7 @@ export function CreateTemplateModal({
     }
   }, []);
 
-  /** Step 2 → 3: advance to naming step */
-  const handleAdvanceToNaming = useCallback(() => {
-    setState((prev) => ({ ...prev, step: 3, error: null }));
-  }, []);
-
-  /** Step 3: save template */
+  /** Step 2 → save template */
   const handleSave = useCallback(async () => {
     if (!state.templateName.trim() || !state.selectedJob) return;
 
@@ -463,7 +489,7 @@ export function CreateTemplateModal({
   const handleGoBack = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      step: (prev.step - 1) as 1 | 2,
+      step: prev.step - 1,
       error: null,
     }));
   }, []);
@@ -479,97 +505,48 @@ export function CreateTemplateModal({
   const hasActiveFields = Object.values(state.fieldToggles).some(Boolean);
 
   return (
-    <Modal
+    <WizardModal
       open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          resetAndClose();
-        }
-      }}
+      onOpenChange={resetAndClose}
+      steps={WIZARD_STEPS}
+      step={state.step}
+      onStepChange={(step) => setState((prev) => ({ ...prev, step, error: null }))}
+      icon={<Stack size={24} weight="regular" />}
+      iconBg="bg-[var(--background-info)]"
+      title="Create Job Template"
+      size="md"
+      completeLabel="Save and Finish"
+      nextLabel="Create Template"
+      onComplete={handleSave}
+      isCompleting={state.isSaving}
+      nextDisabled={!hasActiveFields}
+      hideFooter={state.step === 0}
+      onBack={handleGoBack}
     >
-      <ModalContent size="md" className="max-h-[90vh]">
-        {/* Header — shared across all steps */}
-        <ModalHeader
-          icon={<Stack size={24} weight="regular" />}
-          iconBg="bg-[var(--background-info)]"
-        >
-          <ModalTitle>Create Job Template</ModalTitle>
-        </ModalHeader>
-
-        {/* Step 2 sub-header: fixed between header and scrollable content */}
-        {state.step === 2 && state.selectedJob && (
-          <div className="border-b border-[var(--border-muted)] px-8 py-4">
-            <p className="text-heading-sm text-[var(--foreground-brand-emphasis)]">
-              Turn on/off which information you would like to keep from{" "}
-              <span className="text-[var(--foreground-link)]">{state.selectedJob.title}</span>
-            </p>
-          </div>
+      <WizardStep stepId="select">
+        <StepSelectRole jobs={jobs} onSelect={handleSelectRole} loadingJobId={state.loadingJobId} />
+        {state.error && (
+          <p className="px-8 pb-4 text-caption text-[var(--foreground-error)]">{state.error}</p>
         )}
+      </WizardStep>
 
-        {/* Body — step-specific content */}
-        {state.step === 1 && (
-          <StepSelectRole
-            jobs={jobs}
-            onSelect={handleSelectRole}
-            loadingJobId={state.loadingJobId}
-          />
-        )}
-
-        {state.step === 2 && state.selectedJob && (
+      <WizardStep stepId="configure">
+        {state.selectedJob && (
           <StepToggleFields
             job={state.selectedJob}
             toggles={state.fieldToggles}
             onToggle={handleToggle}
           />
         )}
+      </WizardStep>
 
-        {state.step === 3 && (
-          <StepNameTemplate
-            name={state.templateName}
-            onNameChange={(name) => setState((prev) => ({ ...prev, templateName: name }))}
-            error={state.error}
-          />
-        )}
-
-        {/* Error display for steps 1 and 2 (step 3 shows error via StepNameTemplate) */}
-        {state.step < 3 && state.error && (
-          <p className="px-8 pb-4 text-caption text-[var(--foreground-error)]">{state.error}</p>
-        )}
-
-        {/* Footer — steps 2 & 3 only */}
-        {state.step > 1 && (
-          <ModalFooter>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-[var(--radius-2xl)] bg-[var(--background-info)] p-3 hover:bg-[var(--background-interactive-hover)]"
-              onClick={handleGoBack}
-              aria-label="Go back"
-            >
-              <ArrowLeft size={24} weight="bold" />
-            </Button>
-
-            {state.step === 2 && (
-              <Button onClick={handleAdvanceToNaming} disabled={!hasActiveFields}>
-                Create Template
-              </Button>
-            )}
-
-            {state.step === 3 && (
-              <Button onClick={handleSave} disabled={!state.templateName.trim() || state.isSaving}>
-                {state.isSaving ? (
-                  <>
-                    <Spinner size="sm" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save and Finish"
-                )}
-              </Button>
-            )}
-          </ModalFooter>
-        )}
-      </ModalContent>
-    </Modal>
+      <WizardStep stepId="name">
+        <StepNameTemplate
+          name={state.templateName}
+          onNameChange={(name) => setState((prev) => ({ ...prev, templateName: name }))}
+          error={state.error}
+        />
+      </WizardStep>
+    </WizardModal>
   );
 }

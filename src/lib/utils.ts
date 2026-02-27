@@ -145,6 +145,18 @@ export function getInitials(name: string, maxLength: number = 2): string {
 }
 
 /**
+ * Format a Prisma/database enum value for display.
+ * Replaces underscores with spaces and converts to Title Case.
+ * e.g. "FULL_TIME" → "Full Time", "ENTRY_LEVEL" → "Entry Level"
+ */
+export function formatEnumLabel(value: string): string {
+  return value
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
  * Slugify a string for URLs
  */
 export function slugify(str: string): string {

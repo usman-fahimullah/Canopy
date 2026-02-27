@@ -64,7 +64,7 @@ const ModalContent = React.forwardRef<
       className={cn(
         "fixed left-[50%] top-[50%] z-modal",
         "translate-x-[-50%] translate-y-[-50%]",
-        "flex flex-col items-start",
+        "flex flex-col",
         "bg-[var(--modal-background,var(--background-default))]",
         "border border-[var(--modal-border,var(--border-muted))]",
         "rounded-[var(--radius-modal)]",
@@ -251,7 +251,7 @@ const ModalBody = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivE
     <div
       ref={ref}
       className={cn(
-        "flex w-full flex-col items-start",
+        "flex w-full flex-col",
         "px-8 py-4",
         "gap-4",
         "min-h-0 flex-1 overflow-y-auto",

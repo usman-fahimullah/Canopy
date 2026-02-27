@@ -52,7 +52,10 @@ type ImportStep = "upload" | "review" | "results";
 /** Format location type enum for display. */
 function formatEnum(value: string | undefined): string {
   if (!value) return "\u2014";
-  return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return value
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /** Format a salary range for display. */

@@ -52,6 +52,7 @@ import type { RoleListItem, TemplateItem } from "@/hooks/queries";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import { logger, formatError } from "@/lib/logger";
+import { formatEnumLabel } from "@/lib/utils";
 import { BulkRoleImportModal } from "@/components/canopy/BulkRoleImportModal";
 import { UploadSimple } from "@phosphor-icons/react";
 
@@ -501,7 +502,7 @@ function CopyRoleModal({
                     {job.title}
                   </p>
                   <p className="text-caption text-[var(--foreground-muted)]">
-                    {job.status} · {job.locationType}
+                    {formatEnumLabel(job.status)} · {formatEnumLabel(job.locationType)}
                   </p>
                 </div>
                 {selectedJobId === job.id && (

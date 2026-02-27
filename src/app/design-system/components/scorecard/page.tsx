@@ -443,7 +443,10 @@ const [recommendation, setRecommendation] = useState<RecommendationType>("yes");
                 <div key={rec} className="text-center">
                   <RecommendationSelect value={rec} />
                   <p className="mt-2 text-caption capitalize text-foreground-muted">
-                    {rec.replace("_", " ")}
+                    {rec
+                      .replace(/_/g, " ")
+                      .toLowerCase()
+                      .replace(/\b\w/g, (c) => c.toUpperCase())}
                   </p>
                 </div>
               )

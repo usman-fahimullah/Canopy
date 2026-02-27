@@ -226,6 +226,11 @@ export const componentsNav: NavItem[] = [
     children: [
       { id: "dialog", label: "Dialog", href: "/design-system/components/dialog" },
       { id: "modal", label: "Modal", href: "/design-system/components/modal" },
+      {
+        id: "wizard-modal",
+        label: "Wizard Modal",
+        href: "/design-system/components/wizard-modal",
+      },
       { id: "tooltip", label: "Tooltip", href: "/design-system/components/tooltip" },
       { id: "coach-tip", label: "Coach Tip", href: "/design-system/components/coach-tip" },
       { id: "popover", label: "Popover", href: "/design-system/components/popover" },
@@ -880,6 +885,13 @@ export const searchIndex: SearchItem[] = [
     category: "Overlays",
     href: "/design-system/components/modal",
     keywords: ["popup", "overlay", "panel"],
+  },
+  {
+    id: "wizard-modal",
+    title: "Wizard Modal",
+    category: "Overlays",
+    href: "/design-system/components/wizard-modal",
+    keywords: ["wizard", "stepper", "multi-step", "steps", "progress", "flow"],
   },
   {
     id: "tooltip",

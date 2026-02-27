@@ -241,7 +241,10 @@ export function CandidateActivityTimeline({ candidateId }: CandidateActivityTime
                         {event.title}
                       </h3>
                       <Badge variant={getEventBadgeVariant(event.type)} className="text-xs">
-                        {event.type.replace("_", " ")}
+                        {event.type
+                          .replace(/_/g, " ")
+                          .toLowerCase()
+                          .replace(/\b\w/g, (c) => c.toUpperCase())}
                       </Badge>
                     </div>
                     <p className="line-clamp-2 text-caption text-foreground-muted">

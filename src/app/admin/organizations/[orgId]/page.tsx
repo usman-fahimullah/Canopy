@@ -94,7 +94,10 @@ function formatCurrency(cents: number): string {
 }
 
 function formatPurchaseType(type: string): string {
-  return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return type
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // =================================================================

@@ -80,7 +80,12 @@ export function getSettingsPageLabel(pathname: string): string | undefined {
    Component
    ------------------------------------------------------------------- */
 
-export function SettingsSidebar() {
+interface SettingsSidebarProps {
+  /** Which rendering mode — the layout controls responsive visibility. */
+  variant: "desktop" | "mobile";
+}
+
+export function SettingsSidebar({ variant }: SettingsSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -94,10 +99,10 @@ export function SettingsSidebar() {
     router.push("/login");
   };
 
-  return (
-    <nav className="flex-shrink-0">
-      {/* Desktop: vertical sidebar */}
-      <div className="hidden lg:sticky lg:top-6 lg:block lg:w-64 lg:self-start">
+  /* ---- Desktop: vertical sidebar ---- */
+  if (variant === "desktop") {
+    return (
+      <nav className="py-4">
         <div className="space-y-1">
           {SETTINGS_NAV.map((group, groupIdx) => (
             <div key={group.category}>
@@ -138,38 +143,40 @@ export function SettingsSidebar() {
             <span className="text-body-sm font-medium">Sign out</span>
           </Button>
         </div>
-      </div>
+      </nav>
+    );
+  }
 
-      {/* Mobile: horizontal scrollable strip */}
-      <div className="flex gap-1 overflow-x-auto pb-2 lg:hidden">
-        {SETTINGS_NAV.map((group, groupIdx) => (
-          <React.Fragment key={group.category}>
-            {groupIdx > 0 && (
-              <span className="flex flex-shrink-0 items-center px-1">
-                <span className="h-1 w-1 rounded-full bg-[var(--border-emphasis)]" />
-              </span>
-            )}
-            {group.items.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex flex-shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-caption font-medium transition-colors ${
-                    isActive
-                      ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-default)]"
-                      : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
-                  }`}
-                >
-                  <Icon size={16} weight={isActive ? "fill" : "regular"} />
-                  <span className="whitespace-nowrap">{item.label}</span>
-                </Link>
-              );
-            })}
-          </React.Fragment>
-        ))}
-      </div>
+  /* ---- Mobile: horizontal scrollable strip ---- */
+  return (
+    <nav className="flex gap-1 overflow-x-auto">
+      {SETTINGS_NAV.map((group, groupIdx) => (
+        <React.Fragment key={group.category}>
+          {groupIdx > 0 && (
+            <span className="flex flex-shrink-0 items-center px-1">
+              <span className="h-1 w-1 rounded-full bg-[var(--border-emphasis)]" />
+            </span>
+          )}
+          {group.items.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-caption font-medium transition-colors ${
+                  isActive
+                    ? "bg-[var(--background-interactive-selected)] text-[var(--foreground-default)]"
+                    : "text-foreground-muted hover:bg-[var(--background-interactive-hover)]"
+                }`}
+              >
+                <Icon size={16} weight={isActive ? "fill" : "regular"} />
+                <span className="whitespace-nowrap">{item.label}</span>
+              </Link>
+            );
+          })}
+        </React.Fragment>
+      ))}
     </nav>
   );
 }

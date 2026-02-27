@@ -189,6 +189,7 @@ export {
   ModalSidebarItem,
   ModalSidebarContent,
 } from "./modal";
+export { WizardModal, WizardStep, useWizardModal, type WizardStepDef } from "./wizard-modal";
 export {
   Tooltip,
   TooltipTrigger,
