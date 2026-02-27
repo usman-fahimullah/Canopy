@@ -202,7 +202,7 @@ function WizardStepIndicator({
  * Only the step matching the current wizard state is rendered.
  */
 export function WizardStep({ stepId: _stepId, children, className }: WizardStepProps) {
-  return <div className={cn("flex w-full flex-1 flex-col", className)}>{children}</div>;
+  return <div className={cn("flex min-h-0 w-full flex-1 flex-col", className)}>{children}</div>;
 }
 
 WizardStep.displayName = "WizardStep";
@@ -353,7 +353,7 @@ export function WizardModal({
           <ModalBody className="p-0">
             <div
               key={currentStep}
-              className="flex w-full flex-1 flex-col duration-150 animate-in fade-in"
+              className="flex min-h-0 w-full flex-1 flex-col duration-150 animate-in fade-in"
             >
               {activeChild}
             </div>

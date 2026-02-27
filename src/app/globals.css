@@ -428,7 +428,7 @@
     --background-interactive-default: var(--primitive-neutral-0);
     --background-interactive-hover: var(--surface-hover);
     --background-interactive-active: var(--surface-active);
-    --background-interactive-selected: var(--primitive-green-100);
+    --background-interactive-selected: var(--primitive-blue-100);
     --background-interactive-disabled: var(--primitive-neutral-200);
 
     /* Status backgrounds */
@@ -454,6 +454,9 @@
     /* Brand text */
     --foreground-brand: var(--primitive-green-700);
     --foreground-brand-emphasis: var(--primitive-green-800);
+
+    /* Interactive selected text (paired with --background-interactive-selected) */
+    --foreground-interactive-selected: var(--primitive-blue-700);
 
     /* Status text */
     --foreground-success: var(--primitive-green-700);
@@ -610,7 +613,7 @@
     --card-background: var(--primitive-neutral-0);
     --card-background-hover: var(--primitive-neutral-100);
     --card-background-active: var(--primitive-neutral-200);
-    --card-background-selected: var(--primitive-green-100);
+    --card-background-selected: var(--primitive-blue-100);
     --card-background-feature: var(--primitive-green-800);
     --card-foreground: var(--primitive-neutral-800);
     --card-foreground-muted: var(--primitive-neutral-700);
@@ -1905,7 +1908,7 @@
     --background-interactive-default: var(--primitive-neutral-100);
     --background-interactive-hover: var(--surface-hover);
     --background-interactive-active: var(--surface-active);
-    --background-interactive-selected: var(--primitive-green-200);
+    --background-interactive-selected: var(--primitive-blue-200);
     --background-interactive-disabled: var(--primitive-neutral-200);
 
     --background-success: var(--primitive-green-200);
@@ -1927,6 +1930,9 @@
 
     --foreground-brand: var(--primitive-green-600);
     --foreground-brand-emphasis: var(--primitive-green-700);
+
+    /* Interactive selected text (paired with --background-interactive-selected) */
+    --foreground-interactive-selected: var(--primitive-blue-400);
 
     --foreground-success: var(--primitive-green-600);
     --foreground-warning: var(--primitive-orange-600);
@@ -2054,7 +2060,7 @@
     --card-background: var(--primitive-neutral-100);
     --card-background-hover: var(--primitive-neutral-200);
     --card-background-active: var(--primitive-neutral-300);
-    --card-background-selected: var(--primitive-green-200);
+    --card-background-selected: var(--primitive-blue-200);
     --card-background-feature: var(--primitive-green-200);
     --card-foreground: var(--primitive-neutral-800);
     --card-foreground-muted: var(--primitive-neutral-700);

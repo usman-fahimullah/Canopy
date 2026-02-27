@@ -159,7 +159,7 @@ function StepSelectRole({
   loadingJobId: string | null;
 }) {
   return (
-    <div className="flex w-full flex-1 flex-col gap-6 px-8 py-4">
+    <div className="flex min-h-0 w-full flex-1 flex-col gap-6 px-8 py-4">
       <div className="flex flex-col gap-2">
         <h2 className="text-heading-sm text-[var(--foreground-default)]">
           Select a role to convert to a Job Template
@@ -294,7 +294,7 @@ function StepToggleFields({
   onToggle: (key: string, checked: boolean) => void;
 }) {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Sub-header */}
       <div className="border-b border-[var(--border-muted)] px-8 py-4">
         <p className="text-heading-sm text-[var(--foreground-brand-emphasis)]">

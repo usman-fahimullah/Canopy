@@ -31,7 +31,7 @@ const TabsTrigger = React.forwardRef<
       "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-body-sm font-medium ring-offset-background transition-all",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
-      "text-foreground-subtle dark:text-foreground-muted hover:text-foreground",
+      "text-foreground-subtle hover:text-foreground dark:text-foreground-muted",
       "data-[state=active]:bg-surface data-[state=active]:text-foreground data-[state=active]:shadow-sm",
       className
     )}
@@ -82,11 +82,11 @@ const TabsTriggerUnderline = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap px-1 pb-3 text-body-sm font-medium transition-all",
-      "border-b-2 border-transparent -mb-px",
-      "text-foreground-subtle dark:text-foreground-muted hover:text-foreground",
+      "-mb-px border-b-2 border-transparent",
+      "text-foreground-subtle hover:text-foreground dark:text-foreground-muted",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:border-primary-600 data-[state=active]:text-primary-700 dark:data-[state=active]:text-[var(--primitive-green-400)]",
+      "data-[state=active]:border-[var(--primitive-blue-500)] data-[state=active]:text-[var(--primitive-blue-700)] dark:data-[state=active]:text-[var(--primitive-blue-400)]",
       className
     )}
     {...props}
@@ -138,7 +138,7 @@ const TabsListAnimated = React.forwardRef<
       {children}
       {/* Animated indicator */}
       <span
-        className="absolute bottom-0 h-0.5 bg-primary-600 transition-all duration-300 ease-out"
+        className="absolute bottom-0 h-0.5 bg-[var(--primitive-blue-500)] transition-all duration-300 ease-out"
         style={indicatorStyle}
       />
     </TabsPrimitive.List>
@@ -154,10 +154,10 @@ const TabsTriggerAnimated = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap px-3 pb-3 text-body-sm font-medium transition-colors",
-      "text-foreground-subtle dark:text-foreground-muted hover:text-foreground",
+      "text-foreground-subtle hover:text-foreground dark:text-foreground-muted",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:text-primary-700 dark:data-[state=active]:text-[var(--primitive-green-400)]",
+      "data-[state=active]:text-[var(--primitive-blue-700)] dark:data-[state=active]:text-[var(--primitive-blue-400)]",
       className
     )}
     {...props}
@@ -172,14 +172,7 @@ const TabsListVertical = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "flex flex-col space-y-1",
-      className
-    )}
-    {...props}
-  />
+  <TabsPrimitive.List ref={ref} className={cn("flex flex-col space-y-1", className)} {...props} />
 ));
 TabsListVertical.displayName = "TabsListVertical";
 
@@ -191,10 +184,10 @@ const TabsTriggerVertical = React.forwardRef<
     ref={ref}
     className={cn(
       "flex items-center justify-start whitespace-nowrap rounded-lg px-3 py-2 text-body-sm font-medium transition-all",
-      "text-foreground-subtle dark:text-foreground-muted hover:bg-background-muted hover:text-foreground",
+      "text-foreground-subtle hover:bg-background-muted hover:text-foreground dark:text-foreground-muted",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
-      "data-[state=active]:bg-[var(--primitive-green-100)] dark:data-[state=active]:bg-[var(--primitive-green-500)]/15 data-[state=active]:text-[var(--primitive-green-800)] dark:data-[state=active]:text-[var(--primitive-green-400)]",
+      "dark:data-[state=active]:bg-[var(--primitive-blue-500)]/15 data-[state=active]:bg-[var(--primitive-blue-100)] data-[state=active]:text-[var(--primitive-blue-700)] dark:data-[state=active]:text-[var(--primitive-blue-400)]",
       className
     )}
     {...props}
